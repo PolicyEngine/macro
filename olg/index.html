@@ -80,11 +80,13 @@
         Eighty cohorts. <em>One</em> economy.
       </h1>
       <p class="lede reveal" style="--d:2">
-        OG-UK is a dynamic general-equilibrium model of the UK: 80 age cohorts
-        working, saving, and retiring, built on <strong>OG-Core</strong>,
-        calibrated to ONS and OBR data, with tax functions estimated from
-        PolicyEngine microdata. It solves the long-run steady state and the
-        year-by-year transition path of any reform.
+        OG-UK is an overlapping-generations model of the UK economy for dynamic
+        general-equilibrium analysis of fiscal policy. It builds on
+        <strong>OG-Core</strong> — which holds the theory and logic of a general
+        OG model — with a UK calibration sourced from ONS, OBR, Bank of England,
+        and GOV.UK data. The model outputs changes in macroeconomic aggregates
+        (GDP, investment, consumption), wages, interest rates, and tax revenues
+        over time.
       </p>
       <div class="hero-cta reveal" style="--d:3">
         <a class="btn btn-primary" href="#quickstart">Quickstart</a>
@@ -157,11 +159,15 @@ impact = map_to_real_world(baseline, reform_ss)
     <div class="prose">
       <p>
         A reform is a PolicyEngine <code>Policy</code> object — actual
-        parameters of the UK tax and benefit system. OG-UK runs the reform
-        through PolicyEngine's rules engine on representative microdata,
-        estimates tax functions under baseline and reform, and feeds those to
-        the macro model. So the model sees the reform's true shape across the
-        income and age distribution.
+        parameters of the UK tax and benefit system. OG-UK uses
+        <strong>PolicyEngine-UK</strong>, an open-source microsimulation model
+        built on the Family Resources Survey, HMRC's Survey of Personal Incomes,
+        the Living Costs and Food Survey, and the Wealth and Assets Survey. It
+        computes each filer's effective tax rate and marginal tax rates on
+        labor and capital income under the reform, then OG-UK fits parametric
+        tax functions to that microdata — so the model sees the reform's true
+        shape across the income and age distribution, not a single stylized
+        wedge.
       </p>
       <table>
         <thead><tr><th>parameter path</th><th>what it is</th></tr></thead>
@@ -178,6 +184,15 @@ impact = map_to_real_world(baseline, reform_ss)
         Stack several <code>ParameterValue</code>s in one <code>Policy</code>
         to score a package — a rate rise plus an allowance change scores as one
         combined reform.
+      </p>
+      <p>
+        Following the method of DeBacker et&nbsp;al. (2019), OG-UK fits tax
+        functions that are monotonically increasing in labor and capital
+        income — which keeps each household's budget set convex and the lifetime
+        optimization well-behaved — separately for the effective rate and the
+        two marginal rates, for each age and each of the first ten years. The
+        <code>age_specific</code> and <code>tax_func_type</code> options
+        (section 04) control how finely those functions are estimated.
       </p>
       <div class="callout">
         Corporation tax is <strong>not</strong> a PolicyEngine parameter — it's a
