@@ -43,10 +43,10 @@
       </h1>
       <p class="lede reveal" style="--d:2">
         <strong>macromod</strong> is a suite of macroeconomic simulation models
-        for scoring public policy — general-equilibrium dynamics for GDP,
-        investment, consumption, revenue, and debt, driven by the same
-        tax-and-benefit rules and microdata that power PolicyEngine, and
-        improved in the open.
+        for scoring public policy — tracing a reform's effect on GDP,
+        investment, consumption, revenue, and debt, from an overlapping-generations
+        model to an emulator of the OBR's own forecasting model, improved in
+        the open.
       </p>
       <div class="hero-cta reveal" style="--d:3">
         <a class="btn btn-primary" href="#idea">How it works</a>
@@ -73,12 +73,13 @@
       </p>
       <p>
         macromod makes the second act <strong>a model, not a fudge factor</strong>.
-        Each model in the suite is a structural, general-equilibrium engine that
-        takes a policy reform — expressed in PolicyEngine's rules engine, at full
-        statutory detail — and solves for the economy's response: changes in
+        Each model in the suite is a structural macroeconomic engine that takes a
+        policy change and solves for the economy's response — changes in
         macroeconomic aggregates (GDP, investment, consumption), wages, interest
-        rates, and tax revenues, from the first year of transition to the new
-        long-run steady state.
+        rates, and tax revenues over time. Different models bring different
+        machinery: a general-equilibrium overlapping-generations engine for the
+        long run, an emulator of the OBR's own equations for near-term fiscal
+        multipliers.
       </p>
     </div>
   </section>
@@ -116,9 +117,8 @@
         <p>
           A Python emulator of the OBR's own published forecasting model — 372
           structural equations solved simultaneously by Gauss–Seidel iteration.
-          Runs the fiscal-multiplier and tax-shock experiments the OBR uses to
-          score Budget measures, quarter by quarter, anchored to the official
-          Economic and Fiscal Outlook.
+          Runs fiscal-multiplier and tax-shock experiments quarter by quarter,
+          anchored to the official Economic and Fiscal Outlook.
         </p>
         <span class="strategy-paper-link mono">read the model →</span>
       </a>
@@ -146,20 +146,20 @@
     </div>
     <div class="prose">
       <p>
-        A reform enters as a <strong>PolicyEngine policy object</strong> — actual
-        parameters of the tax and benefit system, not a stylized wedge.
-        PolicyEngine's UK microsimulation — built on the Family Resources Survey,
-        HMRC income data, and household expenditure and wealth surveys — computes
-        effective and marginal tax rates across the population under baseline and
-        reform, and the macro model fits tax functions to that microdata. So it
-        sees the reform's true shape across the income and age distribution. The
-        calibration is anchored to ONS, OBR, and Bank of England data, then the
-        model solves for the general-equilibrium response.
+        A reform is a <strong>policy change, not a stylized wedge</strong>. How it
+        enters depends on the model. The overlapping-generations engine takes a
+        PolicyEngine policy object — actual tax-and-benefit parameters — runs it
+        through PolicyEngine's UK microsimulation, and fits tax functions to the
+        resulting effective and marginal rates, so it sees the reform's true shape
+        across the income and age distribution. The OBR emulator takes a shock to
+        one of its exogenous variables — a spending change, a rate change.
       </p>
       <p>
-        The same interface scores <strong>structural shocks</strong> too —
-        corporation tax, productivity, government spending — so fiscal packages
-        that mix statutory and structural changes score in one run.
+        Both then solve for the response and report the <strong>deviation from a
+        baseline</strong> anchored to official data — ONS, OBR, and Bank of
+        England national accounts for the OLG model; the OBR's Economic and Fiscal
+        Outlook for the emulator — so a result is always relative to current
+        forecast, never a raw level to misread.
       </p>
     </div>
   </section>
