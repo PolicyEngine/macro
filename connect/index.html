@@ -97,6 +97,8 @@
   background: var(--amber); margin-left: 7px; vertical-align: middle;
 }
 .steps.dimmed { opacity: 0.55; }
+.model-seg { margin: 6px 0 10px; flex-wrap: wrap; }
+.model-pane[hidden] { display: none; }
 
 /* ---------- code section ---------- */
 .moves {
@@ -315,8 +317,21 @@
     </div>
     <div class="prose">
       <p>
-        No connector, no CLI — just Python (3.11–3.13). Install straight from
-        GitHub, no clone needed. The whole scoring loop is four moves:
+        No connector, no CLI — just Python. Pick a model and score a reform in
+        a handful of lines. Each engine is different; both report the reform's
+        effect on real-world aggregates.
+      </p>
+
+      <div class="seg model-seg" role="tablist" aria-label="Model" id="model-seg">
+        <button role="tab" data-model="oguk" aria-selected="true">OG-UK · overlapping generations</button>
+        <button role="tab" data-model="obr" aria-selected="false">OBR · macroeconometric</button>
+      </div>
+
+      <!-- ===================== OG-UK ===================== -->
+      <div class="model-pane" data-model="oguk">
+      <p>
+        Install straight from GitHub, no clone needed (Python 3.11–3.13). The
+        whole scoring loop is four moves:
       </p>
 
       <div class="moves">
@@ -480,6 +495,93 @@ Debt:    <span class="out-val">−3.1bn</span></code></pre>
       <p class="research-link mono">
         <a href="/olg/">Full guide — parameter paths, every option, transition paths, and outputs → the OG-UK model page</a>
       </p>
+      </div><!-- /oguk pane -->
+
+      <!-- ===================== OBR ===================== -->
+      <div class="model-pane" data-model="obr" hidden>
+      <p>
+        The OBR emulator ships its equation listing and forecast data with the
+        code, so this one installs from a checkout, then a reform is a single
+        shock to an exogenous variable:
+      </p>
+
+      <div class="moves">
+        <div class="move"><span class="move-n">01 · pick</span><b>a lever</b><span class="d">an exogenous variable to shock</span></div>
+        <div class="move"><span class="move-n">02 · shock</span><b>the value</b><span class="d">a spend increase or a rate change</span></div>
+        <div class="move"><span class="move-n">03 · solve</span><b>the system</b><span class="d">Gauss–Seidel, shocked vs baseline</span></div>
+        <div class="move"><span class="move-n">04 · read</span><b>the deviation</b><span class="d">£bn impact, quarter by quarter</span></div>
+      </div>
+
+      <div class="code-window">
+        <div class="cw-bar">
+          <span class="cw-dots"><i></i><i></i><i></i></span>
+          <span class="cw-name">install</span>
+          <button class="cw-copy" data-copy>copy</button>
+        </div>
+        <pre><code>git clone https://github.com/PolicyEngine/obr-macroeconomic-model
+cd obr-macroeconomic-model &amp;&amp; uv sync</code></pre>
+      </div>
+
+      <div class="code-window">
+        <div class="cw-bar">
+          <span class="cw-dots"><i></i><i></i><i></i></span>
+          <span class="cw-name">run_reform.py</span>
+          <button class="cw-copy" data-copy>copy</button>
+        </div>
+        <pre><code><span class="kw">from</span> obr_macro <span class="kw">import</span> run_reform
+
+<span class="cm"># A £5bn government spending shock: £1.25bn per quarter over 4 quarters.</span>
+<span class="cm"># CGG is the OBR's exogenous government-consumption variable.</span>
+results = run_reform(
+    name=<span class="kw">"Fiscal Stimulus"</span>,
+    var=<span class="kw">"CGG"</span>,
+    shock=1250,
+    periods=4,
+)
+
+<span class="cm"># Deviation from baseline, quarter by quarter — the fiscal multiplier.</span>
+<span class="kw">print</span>(results[[<span class="kw">"period"</span>, <span class="kw">"delta_gdp_bn"</span>, <span class="kw">"pct_gdp"</span>]])</code></pre>
+      </div>
+
+      <div class="code-window cw-out">
+        <div class="cw-bar">
+          <span class="cw-dots"><i></i><i></i><i></i></span>
+          <span class="cw-name">output · illustrative</span>
+        </div>
+        <pre><code>period  delta_gdp_bn  pct_gdp
+     1  <span class="out-val">1.31          0.05</span>
+     2  <span class="out-val">1.72          0.06</span>
+     3  <span class="out-val">1.94          0.07</span>
+     4  <span class="out-val">2.05          0.07</span></code></pre>
+      </div>
+
+      <p>
+        Under the hood: the OBR's 372 published equations are transpiled to
+        Python and solved simultaneously by Gauss–Seidel each quarter. For a
+        shock the closure swaps — inventories absorb the residual and GDP
+        becomes endogenous — so output responds to the policy instead of being
+        held fixed.
+      </p>
+
+      <div class="dials">
+        <div class="dial">
+          <span class="dial-name">var</span>
+          <p>The exogenous lever to shock: <code>"CGG"</code> (gov. consumption), <code>"CGIPS"</code> (public investment), <code>"TCPRO"</code> (corporation tax rate).</p>
+        </div>
+        <div class="dial">
+          <span class="dial-name">periods</span>
+          <p>How many quarters to solve — the multiplier builds over the first few quarters and settles.</p>
+        </div>
+        <div class="dial">
+          <span class="dial-name">investment_closure</span>
+          <p>Set <code>True</code> to switch on the investment channel for tax-rate shocks like a corporation-tax change.</p>
+        </div>
+      </div>
+
+      <p class="research-link mono">
+        <a href="/obr/">Full guide — the solver, every lever, forecasting, and calibration → the OBR model page</a>
+      </p>
+      </div><!-- /obr pane -->
     </div>
   </section>
 </main>
@@ -532,6 +634,18 @@ Debt:    <span class="out-val">−3.1bn</span></code></pre>
     select(client, btn);
     applyClient();
   });
+
+  // model selector in the code section (OG-UK / OBR)
+  var modelSeg = document.getElementById("model-seg");
+  if (modelSeg) {
+    modelSeg.addEventListener("click", function (e) {
+      var btn = e.target.closest("button"); if (!btn) return;
+      select(modelSeg, btn);
+      document.querySelectorAll(".model-pane").forEach(function (p) {
+        p.hidden = p.dataset.model !== btn.dataset.model;
+      });
+    });
+  }
 
   document.addEventListener("click", function (e) {
     var btn = e.target.closest("[data-copy]"); if (!btn) return;
