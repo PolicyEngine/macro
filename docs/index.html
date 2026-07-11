@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>macromod — documentation</title>
+<meta name="description" content="Documentation for the MacroMod suite — what each macroeconomic model is, how the two model classes differ, when to use which, and the shared reform pipeline that drives them both." />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css" />
+<style>
+/* page-specific: hero sizing + the model-index cards */
+.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
+.doc-index { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 26px 0; }
+@media (min-width: 760px) { .doc-index { grid-template-columns: 1fr 1fr; } }
+.doc-index a {
+  display: block; border: 1px solid var(--line-soft); border-radius: 8px;
+  padding: 20px 22px; text-decoration: none; transition: border-color 0.25s, transform 0.25s;
+}
+.doc-index a:hover { border-color: var(--primary); transform: translateY(-2px); }
+.doc-index .di-id { font-family: var(--mono); font-size: 12px; color: var(--amber); }
+.doc-index h3 { font-family: var(--display); font-weight: 500; font-size: 1.2rem; margin: 8px 0 8px; color: var(--paper); }
+.doc-index p { font-size: 0.9rem; line-height: 1.55; color: var(--paper-dim); margin: 0; }
+.doc-index .di-go { display: block; margin-top: 12px; font-family: var(--mono); font-size: 12px; color: var(--amber-soft); }
+</style>
+</head>
+<body class="doc">
+<div class="grain" aria-hidden="true"></div>
+<canvas id="field" aria-hidden="true"></canvas>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <span class="brand-dot" aria-hidden="true"></span>macromod
+  </a>
+  <nav class="nav-links">
+    <a href="/#idea">idea</a>
+    <a href="/#models">models</a>
+    <a href="/#pipeline">pipeline</a>
+    <a href="/docs/">docs</a>
+    <a href="/connect/">use it</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/MacroMod" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <p class="eyebrow reveal" style="--d:0">documentation</p>
+      <h1 class="reveal" style="--d:1" style="font-size: clamp(34px, 5vw, 56px);">
+        Two models. <em>One</em> question, answered two ways.
+      </h1>
+      <p class="lede reveal" style="--d:2">
+        MacroMod scores a policy reform for its effect on the whole economy.
+        It does so with more than one model, because different questions call
+        for different machinery. This is the reference: what each model is, how
+        they differ, and when to reach for which.
+      </p>
+    </div>
+  </section>
+
+  <section id="models" class="band">
+    <div class="band-head">
+      <span class="kicker mono">01 — the models</span>
+      <h2>Each model has its own reference page.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Both models take the same kind of input — a policy change — and report
+        the same kind of output — its effect on macroeconomic aggregates. What
+        differs is the theory in between. Start with the model that matches your
+        question, or read on for the comparison.
+      </p>
+      <div class="doc-index">
+        <a href="/olg/">
+          <span class="di-id">olg · OG-UK</span>
+          <h3>Overlapping generations</h3>
+          <p>A structural general-equilibrium model of 80 age cohorts. Best for long-run, behaviour-driven questions: how a tax change reshapes work, saving, and the capital stock over decades.</p>
+          <span class="di-go">read the OG-UK reference →</span>
+        </a>
+        <a href="/obr/">
+          <span class="di-id">obr</span>
+          <h3>OBR macroeconometric model</h3>
+          <p>A Python emulator of the OBR's own 372-equation forecasting model. Best for near-term fiscal multipliers scored the way the official forecaster scores them, quarter by quarter.</p>
+          <span class="di-go">read the OBR reference →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare" class="band">
+    <div class="band-head">
+      <span class="kicker mono">02 — the comparison</span>
+      <h2>Two model classes, side by side.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        The two models are complementary, not competing. One derives behaviour
+        from first principles and answers where the economy settles in the long
+        run; the other reproduces the official forecaster's empirical system and
+        answers what happens over the next few years.
+      </p>
+      <table>
+        <thead><tr><th></th><th>Overlapping generations (OG-UK)</th><th>OBR macroeconometric</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Model class</strong></td><td>Dynamic general equilibrium (OLG)</td><td>Structural macroeconometric (simultaneous equations)</td></tr>
+          <tr><td><strong>Behaviour comes from</strong></td><td>Optimising households and firms</td><td>Estimated empirical relationships</td></tr>
+          <tr><td><strong>Solved by</strong></td><td>Steady-state root-find and transition-path iteration</td><td>Gauss–Seidel over ~370 equations per quarter</td></tr>
+          <tr><td><strong>Horizon</strong></td><td>Decades — long-run steady state + 60-year path</td><td>Quarters to a few years</td></tr>
+          <tr><td><strong>Best for</strong></td><td>Long-run incentives: labour supply, saving, the capital stock</td><td>Near-term fiscal multipliers and Budget-style scoring</td></tr>
+          <tr><td><strong>Reform enters as</strong></td><td>A PolicyEngine policy → estimated tax functions</td><td>A shock to an exogenous model variable</td></tr>
+          <tr><td><strong>Anchored to</strong></td><td>ONS, OBR, Bank of England national accounts</td><td>The OBR Economic and Fiscal Outlook</td></tr>
+          <tr><td><strong>Runtime</strong></td><td>~5–15 min (steady state); ~1–1.5 h (transition path)</td><td>Seconds to minutes per scenario</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="choose" class="band">
+    <div class="band-head">
+      <span class="kicker mono">03 — which to use</span>
+      <h2>Match the model to the question.</h2>
+    </div>
+    <div class="prose">
+      <ul>
+        <li><strong>"How does this tax change affect growth and the deficit over the next 3–5 years?"</strong> — the OBR model. It's built for near-term fiscal scoring and speaks the same language as the official forecast.</li>
+        <li><strong>"What does this reform do to work incentives, saving, and the long-run size of the economy?"</strong> — the OLG model. It captures how households of every age re-optimise over their lifetimes.</li>
+        <li><strong>"I want both the transition and the destination."</strong> — run both. They report comparable real-world aggregates, so you can read the near-term multiplier against the long-run equilibrium.</li>
+      </ul>
+      <div class="callout">
+        Running the same reform through both models is the point of a suite:
+        agreement raises confidence, and a divergence is informative — it usually
+        marks where long-run behavioural response departs from near-term
+        empirical dynamics.
+      </div>
+    </div>
+  </section>
+
+  <section id="pipeline" class="band">
+    <div class="band-head">
+      <span class="kicker mono">04 — the shared pipeline</span>
+      <h2>What both models have in common.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Whichever engine you pick, the shape of the work is the same:
+        <strong>build</strong> a reform, <strong>solve</strong> baseline and
+        reform, <strong>read</strong> the difference in real-world quantities —
+        GDP, consumption, investment, revenue. The OLG model expresses the reform
+        as PolicyEngine statute translated into tax functions; the OBR model
+        expresses it as a shock to an exogenous variable. Both report the
+        deviation from a baseline anchored to official data, so a result is
+        always "relative to current forecast", never a raw level to be
+        misread.
+      </p>
+      <p class="research-link mono">
+        <a href="/olg/">OG-UK reference</a> &nbsp;·&nbsp;
+        <a href="/obr/">OBR model reference</a> &nbsp;·&nbsp;
+        <a href="/connect/">Run a model →</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="band band-cta">
+    <h2>Pick a model and score a reform.</h2>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="/connect/">Use it</a>
+      <a class="btn btn-ghost" href="https://github.com/PolicyEngine/MacroMod">github.com/PolicyEngine/MacroMod</a>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="foot-row">
+    <span class="brand"><span class="brand-dot" aria-hidden="true"></span>macromod</span>
+    <a class="foot-pe" href="https://policyengine.org" aria-label="PolicyEngine"><img src="/assets/policyengine.svg" alt="PolicyEngine" /></a>
+  </div>
+  <p class="mono foot-fine">
+    Macroeconomic simulation models for public policy. Open source · a PolicyEngine project.
+  </p>
+</footer>
+
+<script src="/field.js" defer></script>
+<script src="/reveal.js" defer></script>
+</body>
+</html>

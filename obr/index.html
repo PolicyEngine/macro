@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>macromod — the OBR macroeconometric model</title>
+<meta name="description" content="A Python emulator of the OBR's published macroeconomic model — 372 structural equations solved by Gauss–Seidel iteration for fiscal-multiplier and tax-shock analysis, anchored to the official Economic and Fiscal Outlook." />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css" />
+<style>
+/* page-specific: hero sizing only — shared component styles live in style.css */
+.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
+</style>
+</head>
+<body class="doc">
+<div class="grain" aria-hidden="true"></div>
+<canvas id="field" aria-hidden="true"></canvas>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <span class="brand-dot" aria-hidden="true"></span>macromod
+  </a>
+  <nav class="nav-links">
+    <a href="/#idea">idea</a>
+    <a href="/#models">models</a>
+    <a href="/#pipeline">pipeline</a>
+    <a href="/docs/">docs</a>
+    <a href="/connect/">use it</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/MacroMod" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <p class="eyebrow reveal" style="--d:0">model 02 — OBR macroeconometric model</p>
+      <h1 class="reveal" style="--d:1" style="font-size: clamp(34px, 5vw, 56px);">
+        The OBR's <em>own</em> model, in Python.
+      </h1>
+      <p class="lede reveal" style="--d:2">
+        A faithful emulator of the Office for Budget Responsibility's published
+        macroeconomic model — 372 structural equations solved simultaneously,
+        the same engine the OBR uses to score Budget measures. Run fiscal
+        multipliers and tax shocks quarter by quarter, anchored to the official
+        Economic and Fiscal Outlook.
+      </p>
+      <div class="hero-cta reveal" style="--d:3">
+        <a class="btn btn-primary" href="#quickstart">Quickstart</a>
+        <a class="btn btn-ghost" href="https://github.com/PolicyEngine/obr-macroeconomic-model">Read the code</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="what" class="band">
+    <div class="band-head">
+      <span class="kicker mono">01 — what it is</span>
+      <h2>Not a stylized macro model — the actual one.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        The OBR publishes the full equation listing of the model behind its
+        forecasts, but as EViews source that few can run. This project
+        transpiles that listing into Python and solves it, so the model that
+        anchors UK Budget scoring becomes something you can open, shock, and
+        inspect. It runs the OBR's <strong>372 published equations</strong> from
+        the October 2025 model code, complete with the accounting identities
+        and behavioural relationships that tie the UK economy together.
+      </p>
+      <p>
+        This is a <strong>structural macroeconometric model</strong> — a large
+        simultaneous system of estimated equations — a different lens from the
+        overlapping-generations engine. Where the OLG model derives behaviour
+        from optimising households and firms, this one reproduces the
+        established empirical relationships the official forecaster relies on.
+      </p>
+    </div>
+  </section>
+
+  <section id="quickstart" class="band">
+    <div class="band-head">
+      <span class="kicker mono">02 — quickstart</span>
+      <h2>Shock a variable, read the multiplier.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Clone the repository and sync the environment — the model needs the
+        bundled OBR equation listing and forecast data, so this one installs
+        from a checkout rather than a bare wheel. Then a reform is one call:
+        pick an exogenous variable, apply a shock, read the deviation from
+        baseline.
+      </p>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/obr-macroeconomic-model
+cd obr-macroeconomic-model &amp;&amp; uv sync</code></pre></div>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> obr_macro <span class="kw">import</span> run_reform
+
+<span class="cm"># £5bn government spending shock (£1.25bn per quarter, 4 quarters)</span>
+results = run_reform(
+    name=<span class="kw">"Fiscal Stimulus"</span>,
+    var=<span class="kw">"CGG"</span>,        <span class="cm"># government consumption (exogenous)</span>
+    shock=1250,        <span class="cm"># £1.25bn per quarter</span>
+    periods=4,
+)
+<span class="kw">print</span>(results[[<span class="kw">"period"</span>, <span class="kw">"delta_gdp_bn"</span>, <span class="kw">"pct_gdp"</span>]])
+
+<span class="cm"># a 5pp corporation tax cut, with the investment channel switched on</span>
+results = run_reform(
+    name=<span class="kw">"Corp Tax Cut"</span>,
+    var=<span class="kw">"TCPRO"</span>,       <span class="cm"># corporation tax rate (exogenous)</span>
+    shock=-0.05,
+    periods=12,
+    investment_closure=<span class="kw">True</span>,
+)</code></pre></div>
+      <p class="opt-note">
+        run the five bundled scenarios with charts:
+        <code>uv run python -m obr_macro.reform_analysis</code> — a £5bn spending
+        rise, corporation-tax cut and rise, £10bn public investment, and a £10bn
+        austerity cut.
+      </p>
+    </div>
+  </section>
+
+  <section id="how" class="band">
+    <div class="band-head">
+      <span class="kicker mono">03 — how it works</span>
+      <h2>Transpile, solve, swap the closure.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        The engine has three moving parts, each a stage in turning a static
+        equation listing into a live policy tool.
+      </p>
+      <table>
+        <thead><tr><th>stage</th><th>what it does</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Transpiler</strong></td>
+            <td>Converts the OBR's EViews syntax into executable Python, equation by equation.</td>
+          </tr>
+          <tr>
+            <td><strong>Gauss–Seidel solver</strong></td>
+            <td>Iterates over the ~370 equations until the simultaneous system converges each quarter — the standard method for large structural macro models.</td>
+          </tr>
+          <tr>
+            <td><strong>Closure swap</strong></td>
+            <td>For a shock, inventories (<code>DINV</code>) become the residual and GDP becomes endogenous, so output responds to the policy instead of being fixed.</td>
+          </tr>
+          <tr>
+            <td><strong>Deviation mode</strong></td>
+            <td>Solves the shocked and baseline paths and reports the difference, isolating the policy effect from the underlying forecast.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        Of the 261 endogenous variables the published listing referenced but the
+        OBR's outlook did not print, <strong>199 had ONS series codes</strong> —
+        pulling those observed series gave the circular fiscal and financial
+        sub-blocks real balancing data and stopped them diverging.
+      </div>
+    </div>
+  </section>
+
+  <section id="variables" class="band">
+    <div class="band-head">
+      <span class="kicker mono">04 — the levers</span>
+      <h2>What you shock, what you read.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Reforms enter through the model's exogenous variables; the results come
+        out of its endogenous aggregates. A few of the most useful:
+      </p>
+      <table>
+        <thead><tr><th>code</th><th>variable</th><th>role</th></tr></thead>
+        <tbody>
+          <tr><td><code>CGG</code></td><td>Government consumption</td><td>exogenous — spending shocks</td></tr>
+          <tr><td><code>CGIPS</code></td><td>Central government investment (nominal)</td><td>exogenous — public investment</td></tr>
+          <tr><td><code>TCPRO</code></td><td>Corporation tax rate</td><td>exogenous — tax shocks</td></tr>
+          <tr><td><code>GDPM</code></td><td>GDP at market prices</td><td>endogenous — headline output</td></tr>
+          <tr><td><code>CONS</code></td><td>Private consumption</td><td>endogenous</td></tr>
+          <tr><td><code>IF</code></td><td>Total investment</td><td>endogenous</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="forecasting" class="band">
+    <div class="band-head">
+      <span class="kicker mono">05 — forecasting</span>
+      <h2>The OBR's own method: held add-factors.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Beyond one-off shocks, the emulator forecasts the way the OBR does:
+        compute the residuals (add-factors) that reconcile the equations to
+        recent data over a base window, <strong>hold them constant</strong>, and
+        project forward. The result is the model's structural dynamics anchored
+        by those held residuals — a genuine forecast, not a replay of the input.
+      </p>
+    </div>
+  </section>
+
+  <section id="calibration" class="band band-result">
+    <div class="band-head">
+      <span class="kicker mono">06 — calibration</span>
+      <h2>Held-add-factor forecast vs the OBR.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Scored against the OBR's published outlook over a projected window, the
+        core real block tracks closely; the financial and profit blocks are
+        harder and reported openly, not hidden.
+      </p>
+    </div>
+    <div class="metrics">
+      <div class="metric">
+        <span class="metric-label mono">real GDP</span>
+        <span class="metric-val">2.2<span class="metric-vs">% MAPE</span></span>
+        <span class="metric-note">within band</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label mono">consumption</span>
+        <span class="metric-val">3.6<span class="metric-vs">% MAPE</span></span>
+        <span class="metric-note">within band</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label mono">current account</span>
+        <span class="metric-val">0.9<span class="metric-vs">% of GDP</span></span>
+        <span class="metric-note">within band</span>
+      </div>
+    </div>
+    <p class="chart-note" style="max-width: 80ch;">
+      Held-add-factor forecast, base 2024Q1–2025Q4 projected to 2027Q4, versus
+      the OBR. "Within band" collapses per-metric thresholds — rates within
+      1.0pp, net balances within 1.5% of GDP, levels within 10% MAPE. Business
+      investment and company profits sit outside band and are documented in the
+      repository's calibration scorecard rather than smoothed over.
+    </p>
+  </section>
+
+  <section class="band band-cta">
+    <h2>Open the model the Budget is scored against.</h2>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="https://github.com/PolicyEngine/obr-macroeconomic-model">github.com/PolicyEngine/obr-macroeconomic-model</a>
+      <a class="btn btn-ghost" href="/docs/">Read the docs</a>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="foot-row">
+    <span class="brand"><span class="brand-dot" aria-hidden="true"></span>macromod</span>
+    <a class="foot-pe" href="https://policyengine.org" aria-label="PolicyEngine"><img src="/assets/policyengine.svg" alt="PolicyEngine" /></a>
+  </div>
+  <p class="mono foot-fine">
+    Macroeconomic simulation models for public policy. Open source · a PolicyEngine project.
+  </p>
+</footer>
+
+<script src="/field.js" defer></script>
+<script src="/reveal.js" defer></script>
+<script>
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest("[data-copy]"); if (!btn) return;
+  var code = btn.parentElement.querySelector("code");
+  navigator.clipboard.writeText(code.textContent).then(function () {
+    btn.textContent = "copied";
+    setTimeout(function () { btn.textContent = "copy"; }, 1400);
+  });
+});
+</script>
+</body>
+</html>

@@ -20,6 +20,7 @@ revenue, debt in £bn), so results are comparable across model classes.
 | model | status | repo |
 |-------|--------|------|
 | **Overlapping generations (OG-UK)** | shipped | [PSLmodels/OG-UK](https://github.com/PSLmodels/OG-UK) |
+| **OBR macroeconometric model** | shipped | [PolicyEngine/obr-macroeconomic-model](https://github.com/PolicyEngine/obr-macroeconomic-model) |
 | More model classes | planned | — |
 
 The models live in their own repositories. This repo hosts the **MacroMod
@@ -57,7 +58,10 @@ print(f"GDP change: {impact.gdp_change:+.1f}bn ({impact.gdp_pct:+.3f}%)")
 ```
 
 See the [OG-UK model page](https://macromod.vercel.app/olg/) for the full guide —
-parameter paths, solver options, structural shocks, and the transition path.
+parameter paths, solver options, structural shocks, and the transition path —
+the [OBR model page](https://macromod.vercel.app/obr/) for the macroeconometric
+emulator, and the [documentation](https://macromod.vercel.app/docs/) for how the
+two model classes differ and when to use which.
 
 ## Connecting to an AI
 
@@ -81,6 +85,8 @@ python3 -m http.server 8000   # then open http://localhost:8000/
 |------|------|
 | `index.html` | the suite — idea, models, pipeline, outputs |
 | `olg/` | the OG-UK model page — install, quickstart, options, shocks, outputs |
+| `obr/` | the OBR macroeconometric model — quickstart, solver, levers, forecasting |
+| `docs/` | documentation — the two model classes compared and when to use which |
 | `connect/` | connect it or code it — MCP / CLI setup and the Python API |
 
 Deployed on Vercel (PolicyEngine team). `vercel.json` enables clean URLs.
