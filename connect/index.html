@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>macromod — connect it or code it</title>
-<meta name="description" content="Connect MacroMod to your AI workflow — MCP server, CLI, or agent skill. Score macroeconomic policy reforms directly from your prompts." />
+<meta name="description" content="Connect MacroMod to your AI workflow via MCP or CLI, or drive the Python API directly. Score macroeconomic policy reforms from your prompts." />
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <meta name="theme-color" content="#FFFFFF" />
 
@@ -79,6 +79,24 @@
   font-family: var(--mono); font-size: 12px; color: var(--amber);
   letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 20px;
 }
+.status-note.soon {
+  display: inline-block;
+  color: var(--paper-faint);
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  padding: 4px 12px;
+  margin-bottom: 14px;
+}
+.soon-hint {
+  font-size: 13.5px; line-height: 1.6; color: var(--paper-faint);
+  max-width: 60ch; margin: 0 0 26px;
+}
+.soon-hint a { color: var(--text, #111); }
+.seg button .soon-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--amber); margin-left: 7px; vertical-align: middle;
+}
+.steps.dimmed { opacity: 0.55; }
 .codeblock {
   position: relative;
   border: 1px solid var(--line-soft);
@@ -140,9 +158,8 @@
     <div class="panel-card">
       <div class="panel-bars">
         <div class="seg" role="tablist" aria-label="Integration" id="seg-integration">
-          <button role="tab" data-pane="mcp" aria-selected="true">MCP</button>
-          <button role="tab" data-pane="cli" aria-selected="false">CLI</button>
-          <button role="tab" data-pane="skill" aria-selected="false">Skill</button>
+          <button role="tab" data-pane="mcp" aria-selected="true">MCP<span class="soon-dot" title="coming soon"></span></button>
+          <button role="tab" data-pane="cli" aria-selected="false">CLI<span class="soon-dot" title="coming soon"></span></button>
         </div>
         <div class="seg" role="tablist" aria-label="Client" id="seg-client">
           <button role="tab" data-client="claude" aria-selected="true">Claude</button>
@@ -152,7 +169,8 @@
 
       <!-- ================= MCP ================= -->
       <div class="pane" id="pane-mcp">
-        <p class="status-note">preview — server in development</p>
+        <p class="status-note soon">coming soon — not live yet</p>
+        <p class="soon-hint">The MCP server isn't running yet, so these steps are a preview of the flow. Want to score a reform today? <a href="#code">Use the Python API below</a>.</p>
 
         <div class="steps" data-for="claude">
           <div class="step">
@@ -195,7 +213,8 @@
 
       <!-- ================= CLI ================= -->
       <div class="pane" id="pane-cli" hidden>
-        <p class="status-note">preview — package in development</p>
+        <p class="status-note soon">coming soon — not on PyPI yet</p>
+        <p class="soon-hint">The <code class="mono">macromod</code> CLI isn't published yet, so these steps are a preview. Want to score a reform today? <a href="#code">Use the Python API below</a>.</p>
 
         <div class="steps" data-for="claude">
           <div class="step">
@@ -246,56 +265,9 @@
         </p>
       </div>
 
-      <!-- ================= Skill ================= -->
-      <div class="pane" id="pane-skill" hidden>
-        <p class="status-note">available now</p>
-
-        <div class="steps" data-for="claude">
-          <div class="step">
-            <span class="step-n mono">1</span>
-            <h3>Get the skill</h3>
-            <p>One command downloads it straight into Claude Code's skills directory — no cloning.</p>
-            <div class="copyblock"><code>mkdir -p ~/.claude/skills/macromod &amp;&amp; \
-  curl -fsSL -o ~/.claude/skills/macromod/SKILL.md \
-  https://raw.githubusercontent.com/PSLmodels/OG-UK/main/SKILL.md</code><button data-copy>copy</button></div>
-          </div>
-          <div class="step">
-            <span class="step-n mono">2</span>
-            <h3>What it teaches</h3>
-            <p>The full API — parameter paths, solver options, and the gotchas — so Claude uses the model correctly on the first try.</p>
-          </div>
-          <div class="step">
-            <span class="step-n mono">3</span>
-            <h3>Ask for a score</h3>
-            <p>Claude writes and runs the Python itself: <code class="mono">solve_steady_state</code>, <code class="mono">run_transition_path</code>, <code class="mono">map_to_real_world</code>.</p>
-          </div>
-        </div>
-
-        <div class="steps" data-for="chatgpt" hidden>
-          <div class="step">
-            <span class="step-n mono">1</span>
-            <h3>Get the skill</h3>
-            <p>One command appends it to your project's <code class="mono">AGENTS.md</code>, which Codex reads on every session — no cloning.</p>
-            <div class="copyblock"><code>curl -fsSL \
-  https://raw.githubusercontent.com/PSLmodels/OG-UK/main/SKILL.md \
-  >> AGENTS.md</code><button data-copy>copy</button></div>
-          </div>
-          <div class="step">
-            <span class="step-n mono">2</span>
-            <h3>What it teaches</h3>
-            <p>The full API — parameter paths, solver options, and the gotchas — so Codex uses the model correctly on the first try.</p>
-          </div>
-          <div class="step">
-            <span class="step-n mono">3</span>
-            <h3>Ask for a score</h3>
-            <p>Codex writes and runs the Python itself: <code class="mono">solve_steady_state</code>, <code class="mono">run_transition_path</code>, <code class="mono">map_to_real_world</code>.</p>
-          </div>
-        </div>
-      </div>
-
     </div>
     <p class="stack-note" style="text-align:center; margin-top: 26px;">
-      <span class="mono">using a coding agent with a terminal? the CLI or skill is the better fit.</span>
+      <span class="mono">using a coding agent with a terminal? the CLI or the code below is the better fit.</span>
     </p>
   </section>
 
