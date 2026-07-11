@@ -169,6 +169,15 @@
 }
 .dial p { font-size: 13px; line-height: 1.55; color: var(--paper-faint); margin: 0; }
 .dial p code { font-size: 0.9em; }
+.charts { display: grid; grid-template-columns: 1fr; gap: 20px; margin: 24px 0; }
+@media (min-width: 860px) { .charts { grid-template-columns: 1fr 1fr; } }
+.chart-card { border: 1px solid var(--line-soft); border-radius: 8px; padding: 18px 20px; }
+.chart-card h4 { font-size: 14.5px; margin: 0 0 3px; }
+.chart-card .chart-sub { font-family: var(--mono); font-size: 11.5px; color: var(--paper-faint); margin: 0 0 14px; }
+.legend { display: flex; gap: 18px; margin-top: 12px; font-family: var(--mono); font-size: 12px; color: var(--paper-faint); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+.chart-note { font-size: 12.5px; color: var(--paper-faint); margin: 4px 0 0; }
 </style>
 </head>
 <body>
@@ -395,6 +404,83 @@ Debt:    <span class="out-val">−3.1bn</span></code></pre>
         functions from that, and the OLG model solves for how 80 age cohorts and
         firms re-optimise — giving you the new equilibrium wages, interest rate,
         and aggregates.
+      </p>
+
+      <p>
+        Swap <code>solve_steady_state</code> for <code>run_transition_path</code>
+        and you get the whole profile, year by year — and every series the model
+        tracks. Here is the same basic-rate reform, actually solved:
+      </p>
+
+      <div class="charts">
+        <div class="chart-card">
+          <h4>Reform impact over the transition path</h4>
+          <p class="chart-sub">£bn change from baseline · fiscal years 2026–2055</p>
+          <svg viewBox="0 0 680 300" role="img" aria-label="Reform impact over the transition path" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+<line x1="54" y1="266.0" x2="664" y2="266.0" stroke="currentColor" stroke-opacity="0.07" stroke-width="1"/>
+<text x="46" y="269.0" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">-8</text>
+<line x1="54" y1="221.3" x2="664" y2="221.3" stroke="currentColor" stroke-opacity="0.07" stroke-width="1"/>
+<text x="46" y="224.3" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">-4</text>
+<line x1="54" y1="176.5" x2="664" y2="176.5" stroke="currentColor" stroke-opacity="0.18" stroke-width="1"/>
+<text x="46" y="179.5" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">+0</text>
+<line x1="54" y1="131.8" x2="664" y2="131.8" stroke="currentColor" stroke-opacity="0.07" stroke-width="1"/>
+<text x="46" y="134.8" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">+4</text>
+<line x1="54" y1="87.1" x2="664" y2="87.1" stroke="currentColor" stroke-opacity="0.07" stroke-width="1"/>
+<text x="46" y="90.1" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">+8</text>
+<line x1="54" y1="42.4" x2="664" y2="42.4" stroke="currentColor" stroke-opacity="0.07" stroke-width="1"/>
+<text x="46" y="45.4" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">+12</text>
+<text x="54.0" y="290" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">2026</text>
+<text x="243.3" y="290" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">2035</text>
+<text x="453.7" y="290" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">2045</text>
+<text x="664.0" y="290" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">2055</text>
+<path d="M54.0 167.6 L75.0 42.4 L96.1 83.7 L117.1 86.0 L138.1 89.3 L159.2 91.6 L180.2 93.8 L201.2 96.0 L222.3 98.3 L243.3 99.4 L264.3 100.5 L285.4 102.7 L306.4 103.9 L327.4 105.0 L348.5 105.0 L369.5 106.1 L390.6 107.2 L411.6 107.2 L432.6 108.3 L453.7 108.3 L474.7 108.3 L495.7 108.3 L516.8 109.5 L537.8 109.5 L558.8 109.5 L579.9 109.5 L600.9 109.5 L621.9 109.5 L643.0 109.5 L664.0 110.6" fill="none" stroke="#d69e2e" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M54.0 137.4 L75.0 154.2 L96.1 217.9 L117.1 220.2 L138.1 221.3 L159.2 223.5 L180.2 226.9 L201.2 229.1 L222.3 231.3 L243.3 233.6 L264.3 235.8 L285.4 236.9 L306.4 238.0 L327.4 239.2 L348.5 240.3 L369.5 241.4 L390.6 242.5 L411.6 243.6 L432.6 243.6 L453.7 244.8 L474.7 244.8 L495.7 245.9 L516.8 245.9 L537.8 245.9 L558.8 247.0 L579.9 247.0 L600.9 247.0 L621.9 247.0 L643.0 248.1 L664.0 248.1" fill="none" stroke="#319795" stroke-width="2.4" stroke-linejoin="round"/>
+<circle cx="664.0" cy="248.1" r="3" fill="#319795"/>
+<circle cx="664.0" cy="110.6" r="3" fill="#d69e2e"/>
+</svg>
+          <div class="legend">
+            <span><i style="background:#319795"></i>GDP</span>
+            <span><i style="background:#d69e2e"></i>Tax revenue</span>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h4>Sector output, long-run</h4>
+          <p class="chart-sub">% change vs baseline · 8-sector model, 2055</p>
+          <svg viewBox="0 0 680 300" role="img" aria-label="Sector output change at long run" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+<line x1="244.8" y1="14" x2="244.8" y2="274" stroke="currentColor" stroke-opacity="0.18"/>
+<rect x="254.2" y="20.2" width="305.0" height="20.1" rx="2" fill="#d69e2e" fill-opacity="0.85"/>
+<text x="130" y="33.2" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Energy</text>
+<text x="248.2" y="33.2" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">-0.58%</text>
+<rect x="207.6" y="52.7" width="351.6" height="20.1" rx="2" fill="#d69e2e" fill-opacity="0.85"/>
+<text x="130" y="65.8" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Manufacturing</text>
+<text x="201.6" y="65.8" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">-0.67%</text>
+<rect x="204.5" y="85.2" width="354.7" height="20.1" rx="2" fill="#d69e2e" fill-opacity="0.85"/>
+<text x="130" y="98.2" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Construction</text>
+<text x="198.5" y="98.2" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">-0.68%</text>
+<rect x="208.6" y="117.7" width="350.6" height="20.1" rx="2" fill="#d69e2e" fill-opacity="0.85"/>
+<text x="130" y="130.8" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Trade &amp; Transport</text>
+<text x="202.6" y="130.8" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">-0.67%</text>
+<rect x="201.3" y="150.2" width="357.9" height="20.1" rx="2" fill="#d69e2e" fill-opacity="0.85"/>
+<text x="130" y="163.2" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Info &amp; Finance</text>
+<text x="195.3" y="163.2" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">-0.68%</text>
+<rect x="191.9" y="182.7" width="367.3" height="20.1" rx="2" fill="#d69e2e" fill-opacity="0.85"/>
+<text x="130" y="195.8" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Real Estate</text>
+<text x="185.9" y="195.8" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">-0.70%</text>
+<rect x="207.1" y="215.2" width="352.1" height="20.1" rx="2" fill="#d69e2e" fill-opacity="0.85"/>
+<text x="130" y="228.2" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Business Services</text>
+<text x="201.1" y="228.2" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">-0.67%</text>
+<rect x="559.2" y="247.7" width="61.3" height="20.1" rx="2" fill="#319795" fill-opacity="0.85"/>
+<text x="130" y="260.8" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Public &amp; Other</text>
+<text x="626.5" y="260.8" text-anchor="start" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">+0.12%</text>
+</svg>
+          <p class="chart-note">Higher income tax pulls labor and capital out of the market sectors; the public &amp; other sector expands relative to them.</p>
+        </div>
+      </div>
+      <p class="chart-note" style="margin-bottom: 24px;">
+        Real output from OG-UK's transition-path solver for a +1p basic-rate
+        rise — the same charts the model exports to
+        <code>tpi_charts.html</code>. Revenue rises then settles; GDP dips as
+        higher labor taxes trim work and saving over the long run.
       </p>
 
       <div class="dials">
