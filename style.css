@@ -12,6 +12,10 @@
   --amber-soft: var(--chart-1); /* brighter teal for emphasis/hover */
   --line: var(--border);
   --line-soft: var(--border-light);
+  /* aliases so the content-page component CSS uses design-system colors
+     instead of hard-coded light-mode fallbacks (theme-safe). */
+  --text: var(--foreground);
+  --surface: color-mix(in srgb, var(--background) 72%, transparent);
   /* PE ships its font families in the Tailwind @theme layer (not :root), which a
      no-build static page can't read; the families below mirror ui-kit tokens.css
      and resolve to --font-sans/--font-mono if a build ever exposes them. */
@@ -767,3 +771,71 @@ h2 {
 .foot-links { margin-top: 8px; }
 .foot-links a { color: var(--paper-dim); text-decoration: none; }
 .foot-links a:hover { color: var(--amber-soft); }
+
+/* =====================================================================
+   Content pages (olg, connect) — one shared measure and rhythm.
+   `body.doc` widens the reading column so text uses the full line, and
+   lets code, tables, charts, and card grids span the whole band.
+   ===================================================================== */
+.doc .band { max-width: var(--max); }
+
+/* text fills the line; rich blocks go edge-to-edge inside the band */
+.doc .prose { max-width: none; }
+.doc .prose > p,
+.doc .prose > ul,
+.doc .prose > ol,
+.doc .prose > .research-link,
+.doc .prose > .soon-hint,
+.doc .prose > .chart-note,
+.doc .prose > .opt-note { max-width: 88ch; }
+
+/* consistent body copy across every content page */
+.doc .prose p { font-size: 1.02rem; line-height: 1.62; }
+.doc .prose ul { padding-left: 22px; }
+.doc .prose li { margin: 8px 0; line-height: 1.6; font-size: 1.02rem; }
+.doc .prose p code,
+.doc .prose li code,
+.doc .prose td code { font-family: var(--mono); font-size: 0.88em; color: var(--amber-soft); }
+
+/* section headings on content pages read a touch tighter than the band default */
+.doc .band-head { margin-bottom: 40px; }
+.doc h2 { max-width: 24ch; }
+
+/* --- code blocks: one look everywhere (was duplicated inline) --- */
+.codeblock {
+  position: relative;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  background: var(--surface);
+  backdrop-filter: blur(6px);
+  padding: 18px 22px;
+  margin: 22px 0 6px;
+  overflow-x: auto;
+}
+.codeblock pre { margin: 0; }
+.codeblock code,
+.code-window code { font-family: var(--mono); font-size: 13.5px; line-height: 1.7; white-space: pre; }
+.codeblock .cb-copy {
+  position: absolute; top: 10px; right: 12px;
+  border: 0; background: none; cursor: pointer;
+  font-family: var(--mono); font-size: 11px; color: var(--paper-faint);
+}
+.codeblock .cb-copy:hover { color: var(--text); }
+.cm { color: var(--paper-faint); }
+.kw { color: var(--amber); }
+
+/* --- reference tables --- */
+.prose table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 0.94rem; }
+.prose th {
+  text-align: left; font-family: var(--mono); font-size: 11.5px;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--paper-faint);
+}
+.prose th, .prose td {
+  padding: 11px 16px 11px 0; border-bottom: 1px solid var(--line-soft); vertical-align: top;
+}
+.opt-note { font-size: 0.9rem; line-height: 1.55; color: var(--paper-faint); }
+.callout {
+  border-left: 2px solid var(--amber);
+  padding: 6px 0 6px 20px; margin: 26px 0;
+  font-size: 0.95rem; line-height: 1.6; color: var(--paper-dim); max-width: 80ch;
+}
