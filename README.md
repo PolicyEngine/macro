@@ -1,44 +1,98 @@
 # MacroMod
 
-MacroMod is PolicyEngine's suite of open-source macroeconomic simulation
-models for scoring public policy — general-equilibrium dynamics for GDP,
-investment, consumption, revenue, and debt, driven by the same tax-and-benefit
-rules and microdata that power PolicyEngine.
+**MacroMod** is PolicyEngine's suite of open-source **macroeconomic simulation
+models** for scoring public policy. Where microsimulation tells you who pays
+what the morning after a reform, MacroMod traces the second act — how people
+work, save, and invest differently, how firms adjust capital, and how wages,
+interest rates, and the revenue estimate move with them — in a structural,
+general-equilibrium engine.
+
+🌐 **[macromod.vercel.app](https://macromod.vercel.app)** · a PolicyEngine project
+
+---
 
 ## The models
 
+Every model in the suite scores the same PolicyEngine reform objects and reports
+the same real-world quantities (GDP, consumption, investment, government,
+revenue, debt in £bn), so results are comparable across model classes.
+
 | model | status | repo |
 |-------|--------|------|
-| Overlapping generations (OG-UK) | shipped | [PSLmodels/OG-UK](https://github.com/PSLmodels/OG-UK) |
+| **Overlapping generations (OG-UK)** | shipped | [PSLmodels/OG-UK](https://github.com/PSLmodels/OG-UK) |
 | More model classes | planned | — |
 
-The models live in their own repositories; this repo hosts the MacroMod
-website and, over time, the integration layer (CLI, MCP server, agent skill).
+The models live in their own repositories. This repo hosts the **MacroMod
+website** and, over time, the **integration layer** (CLI, MCP server) that lets
+you drive them from any AI workflow.
 
-## The site
+## Quickstart — score a reform
 
-A static site in the populace.dev design language — no build step.
-
-```bash
-python3 -m http.server 8642   # then open http://localhost:8642/
-```
-
-- `index.html` — the suite: idea, models, pipeline, outputs
-- `olg/` — the OG-UK model page: install, quickstart, PolicyEngine connection, options, shocks, transition path, outputs
-- `connect/` — connect it or code it: MCP / CLI / Skill setup for Claude and ChatGPT, plus the Python API walkthrough
-
-## Quickstart (the model itself)
+The OLG model is a Python package; pip installs it straight from GitHub, no
+clone needed (Python 3.11–3.13).
 
 ```bash
-pip install git+https://github.com/PSLmodels/OG-UK   # Python 3.11–3.13
+pip install git+https://github.com/PSLmodels/OG-UK
 ```
 
 ```python
+from datetime import datetime
+from policyengine.core import ParameterValue, Policy
+from policyengine.tax_benefit_models.uk import uk_latest
 from oguk import solve_steady_state, map_to_real_world
 
-baseline = solve_steady_state(start_year=2026)
+# Build a reform from real PolicyEngine parameters (basic rate 20% → 21%)
+param = uk_latest.get_parameter("gov.hmrc.income_tax.rates.uk[0].rate")
+reform = Policy(name="Basic rate 21%", parameter_values=[
+    ParameterValue(parameter=param, value=0.21,
+                   start_date=datetime(2026, 1, 1))])
+
+# Solve baseline and reform steady states (~5–15 min each)
+baseline  = solve_steady_state(start_year=2026)
 reform_ss = solve_steady_state(start_year=2026, policy=reform)
+
+# Map model units → current-price £bn
 impact = map_to_real_world(baseline, reform_ss)
+print(f"GDP change: {impact.gdp_change:+.1f}bn ({impact.gdp_pct:+.3f}%)")
 ```
 
-A PolicyEngine project. Open source.
+See the [OG-UK model page](https://macromod.vercel.app/olg/) for the full guide —
+parameter paths, solver options, structural shocks, and the transition path.
+
+## Connecting to an AI
+
+The [connect page](https://macromod.vercel.app/connect/) covers three ways to use the
+models:
+
+- **Code** — drive the Python API yourself (works today).
+- **MCP** — a Model Context Protocol server for Claude and ChatGPT *(coming soon)*.
+- **CLI** — a `macromod score` command *(coming soon)*.
+
+## The site
+
+A static site in the [populace.dev](https://populace.dev) design language — no
+build step.
+
+```bash
+python3 -m http.server 8000   # then open http://localhost:8000/
+```
+
+| path | page |
+|------|------|
+| `index.html` | the suite — idea, models, pipeline, outputs |
+| `olg/` | the OG-UK model page — install, quickstart, options, shocks, outputs |
+| `connect/` | connect it or code it — MCP / CLI setup and the Python API |
+
+Deployed on Vercel (PolicyEngine team). `vercel.json` enables clean URLs.
+
+## Roadmap
+
+- [ ] `macromod` CLI + PyPI publish
+- [ ] Local MCP server (`uvx macromod-mcp`)
+- [ ] Hosted MCP server (`mcp.macromod.dev`)
+- [ ] Additional macroeconomic model classes
+- See [#1](https://github.com/PolicyEngine/MacroMod/issues/1) — Rust port of the solver core
+
+---
+
+Open source · a [PolicyEngine](https://policyengine.org) project.
