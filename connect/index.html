@@ -317,14 +317,15 @@
     </div>
     <div class="prose">
       <p>
-        No connector, no CLI — just Python. Pick a model and score a reform in
-        a handful of lines. Each engine is different; both report the reform's
-        effect on real-world aggregates.
+        No connector, no CLI — just Python. Pick a model: score a reform with
+        the OLG or OBR engine in a handful of lines, or read the economy's
+        current shocks and forecast it with the structural VAR.
       </p>
 
       <div class="seg model-seg" role="tablist" aria-label="Model" id="model-seg">
         <button role="tab" data-model="oguk" aria-selected="true">OG-UK · overlapping generations</button>
         <button role="tab" data-model="obr" aria-selected="false">OBR · macroeconometric</button>
+        <button role="tab" data-model="svar" aria-selected="false">SVAR · UK structural VAR</button>
       </div>
 
       <!-- ===================== OG-UK ===================== -->
@@ -582,6 +583,85 @@ results = run_reform(
         <a href="/obr/">Full guide — the solver, every lever, forecasting, and calibration → the OBR model page</a>
       </p>
       </div><!-- /obr pane -->
+
+      <!-- ===================== SVAR ===================== -->
+      <div class="model-pane" data-model="svar" hidden>
+      <p>
+        The structural VAR doesn't score reforms (yet) — it reads the economy.
+        Install the package from GitHub, grab a checkout for the runner
+        scripts, and the pipeline is four moves:
+      </p>
+
+      <div class="moves">
+        <div class="move"><span class="move-n">01 · assemble</span><b>the data</b><span class="d">8 quarterly series from ONS, BoE, FRED</span></div>
+        <div class="move"><span class="move-n">02 · estimate</span><b>the BVAR</b><span class="d">Minnesota/NIW prior, posterior draws</span></div>
+        <div class="move"><span class="move-n">03 · identify</span><b>the shocks</b><span class="d">zero + sign restrictions, six named shocks</span></div>
+        <div class="move"><span class="move-n">04 · read</span><b>the economy</b><span class="d">IRFs, decompositions, fan-chart forecasts</span></div>
+      </div>
+
+      <div class="code-window">
+        <div class="cw-bar">
+          <span class="cw-dots"><i></i><i></i><i></i></span>
+          <span class="cw-name">install</span>
+          <button class="cw-copy" data-copy>copy</button>
+        </div>
+        <pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model
+git clone https://github.com/PolicyEngine/boe-var-model &amp;&amp; cd boe-var-model</code></pre>
+      </div>
+
+      <div class="code-window">
+        <div class="cw-bar">
+          <span class="cw-dots"><i></i><i></i><i></i></span>
+          <span class="cw-name">run the pipeline</span>
+          <button class="cw-copy" data-copy>copy</button>
+        </div>
+        <pre><code><span class="cm"># assemble the public data (ONS, Bank of England database, FRED)</span>
+python scripts/download_data.py
+
+<span class="cm"># the paper's core outputs: IRFs, FEVDs, shocks, historical decompositions</span>
+python scripts/run_replication.py
+
+<span class="cm"># forecasting: fan charts, latest-quarter shock signs, forecast-revision decomposition</span>
+python scripts/run_forecast_revision.py</code></pre>
+      </div>
+
+      <div class="code-window cw-out">
+        <div class="cw-bar">
+          <span class="cw-dots"><i></i><i></i><i></i></span>
+          <span class="cw-name">output · from results/summary.md</span>
+        </div>
+        <pre><code>FEVD at 1-year horizon (median shares)
+UK GDP  identified global <span class="out-val">40.9%</span>  domestic <span class="out-val">38.0%</span>
+UK CPI  identified global <span class="out-val">50.1%</span>  domestic <span class="out-val">35.4%</span></code></pre>
+      </div>
+
+      <p>
+        Under the hood: an 8-variable Bayesian VAR (1992Q1–2023Q2, Covid
+        dummies) is sampled from its normal-inverse-Wishart posterior, and each
+        draw is rotated per Arias–Rubio-Ramírez–Waggoner (2018) until the zero
+        and sign restrictions name six structural shocks. Figures and summary
+        tables land in <code>results/</code>.
+      </p>
+
+      <div class="dials">
+        <div class="dial">
+          <span class="dial-name">run_replication.py</span>
+          <p>The paper's Figures 2–6: IRFs, variance decompositions, estimated shocks, and historical decompositions of UK GDP and inflation.</p>
+        </div>
+        <div class="dial">
+          <span class="dial-name">run_forecast_revision.py</span>
+          <p>The forecasting toolkit: fan charts, P(sign) of the latest quarter's shocks, composite IRFs, and the Section-5 forecast-revision split.</p>
+        </div>
+        <div class="dial">
+          <span class="dial-name">boe_var</span>
+          <p>The library underneath: <code>load_data()</code>, the <code>BVAR</code> class, <code>identify()</code>, and the IRF/FEVD/decomposition analysis functions.</p>
+        </div>
+      </div>
+
+      <p class="research-link mono">
+        <a href="/svar/">Full guide — the model, identification, validation against the paper → the SVAR model page</a>
+      </p>
+      </div><!-- /svar pane -->
     </div>
   </section>
 </main>

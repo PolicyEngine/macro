@@ -15,12 +15,17 @@ general-equilibrium engine.
 
 Every model in the suite scores the same PolicyEngine reform objects and reports
 the same real-world quantities (GDP, consumption, investment, government,
-revenue, debt in £bn), so results are comparable across model classes.
+revenue, debt in £bn), so results are comparable across model classes. The
+structural VAR is the empirical exception: a Python replication of the Bank of
+England's Bayesian SVAR for the UK, it reads the current state of the economy
+in structural-shock terms and forecasts it, but does not score PolicyEngine
+reform objects yet.
 
 | model | status | repo |
 |-------|--------|------|
 | **Overlapping generations (OG-UK)** | shipped | [PSLmodels/OG-UK](https://github.com/PSLmodels/OG-UK) |
 | **OBR macroeconometric model** | shipped | [PolicyEngine/obr-macroeconomic-model](https://github.com/PolicyEngine/obr-macroeconomic-model) |
+| **UK structural VAR (BoE replication)** | shipped (analysis & forecasting; reform scoring: planned) | [PolicyEngine/boe-var-model](https://github.com/PolicyEngine/boe-var-model) |
 | More model classes | planned | — |
 
 The models live in their own repositories. This repo hosts the **MacroMod
@@ -60,8 +65,9 @@ print(f"GDP change: {impact.gdp_change:+.1f}bn ({impact.gdp_pct:+.3f}%)")
 See the [OG-UK model page](https://macromod.vercel.app/olg/) for the full guide —
 parameter paths, solver options, structural shocks, and the transition path —
 the [OBR model page](https://macromod.vercel.app/obr/) for the macroeconometric
-emulator, and the [documentation](https://macromod.vercel.app/docs/) for how the
-two model classes differ and when to use which.
+emulator, the [SVAR model page](https://macromod.vercel.app/svar/) for the
+structural VAR, and the [documentation](https://macromod.vercel.app/docs/) for
+how the model classes differ and when to use which.
 
 ## Connecting to an AI
 
@@ -86,7 +92,8 @@ python3 -m http.server 8000   # then open http://localhost:8000/
 | `index.html` | the suite — idea, models, pipeline, outputs |
 | `olg/` | the OG-UK model page — install, quickstart, options, shocks, outputs |
 | `obr/` | the OBR macroeconometric model — quickstart, solver, levers, forecasting |
-| `docs/` | documentation — the two model classes compared and when to use which |
+| `svar/` | the UK structural VAR — the model, quickstart, outputs, validation |
+| `docs/` | documentation — the model classes compared and when to use which |
 | `connect/` | connect it or code it — MCP / CLI setup and the Python API |
 
 Deployed on Vercel (PolicyEngine team). `vercel.json` enables clean URLs.
