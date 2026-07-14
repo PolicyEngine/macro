@@ -1,0 +1,35 @@
+name: Deploy MCP server to Modal
+on:
+  push:
+    branches: [main]
+    paths: [integration/**]
+  repository_dispatch:
+    types: [model-updated]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-mcp
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install Modal
+        run: pip install modal
+      - name: Deploy
+        run: modal deploy integration/modal_app.py
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+          MACROMOD_IMAGE_SOURCE: github
+      - name: Smoke-test the deployed server
+        run: |
+          pip install "mcp[cli]" pytest
+          pytest integration/tests/test_remote_mcp.py -q
+        env:
+          MACROMOD_REMOTE_TESTS: "1"

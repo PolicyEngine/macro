@@ -55,9 +55,49 @@ Default `draws=500` keeps tool calls to tens of seconds; raise it (e.g. 2000+)
 for smoother bands. Repeated calls with the same parameters hit an in-process
 cache and return instantly.
 
-**Next step:** hosted remote deployment at `https://mcp.macromod.dev/mcp` —
-FastMCP supports the streamable-http transport
-(`mcp.run(transport="streamable-http")`) for exactly this.
+## Deployment (Modal)
+
+The MCP server is deployed on Modal (workspace `policyengine`) over
+streamable HTTP:
+
+```
+https://policyengine--macromod-mcp-serve.modal.run/mcp
+```
+
+Defined in `modal_app.py`: both model repos are baked into the image at the
+same absolute paths as on the laptop and installed with `pip install -e`, so
+all `Path(__file__)`-relative data/results lookups (obr `data/`, boe_var
+`data/boe_var_data.csv` and `results/*.md`) resolve unchanged.
+
+**Add it as a connector**
+
+- claude.ai: Settings → Connectors → Add custom connector → paste the URL
+  above (including the trailing `/mcp`).
+- Claude Code:
+
+  ```bash
+  claude mcp add --transport http macromod-remote \
+      https://policyengine--macromod-mcp-serve.modal.run/mcp
+  ```
+
+**Cost profile** — `min_containers=0` (scales to zero, $0 idle),
+`scaledown_window=300` (stays warm 5 min after the last call, so a chat
+session pays at most one cold start), `cpu=2` / `memory=2048`,
+`max_containers=3` (spend cap), `timeout=600` (high-draw forecasts). A
+default forecast call costs on the order of $0.001–0.003; instant tools are
+sub-cent. Cold start adds ~5–15 s.
+
+**Redeploy** after changing any model repo or `macromod`:
+
+```bash
+modal deploy /Users/janansadeqian/MacroMod/integration/modal_app.py
+```
+
+**Remote smoke test** (hits the live deployment; skipped without the env var):
+
+```bash
+MACROMOD_REMOTE_TESTS=1 python -m pytest tests/test_remote_mcp.py -v
+```
 
 ## Tests
 
