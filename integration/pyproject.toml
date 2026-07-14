@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "macromod"
+version = "0.1.0"
+description = "MacroMod integration layer: unified CLI and MCP server over the OBR macro emulator and the UK SVAR model"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8",
+    "numpy",
+    "pandas",
+    "mcp[cli]>=1.0",
+]
+
+[project.optional-dependencies]
+models = []  # obr-macro-model and boe_var are installed from local checkouts
+
+[project.scripts]
+macromod = "macromod.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+markers = ["slow: runs a model estimation/solve (seconds to a minute)"]

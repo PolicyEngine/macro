@@ -1,0 +1,133 @@
+"""MacroMod CLI. Human-readable tables by default; --json for machine output."""
+
+from __future__ import annotations
+
+import json
+
+import click
+
+from macromod import core
+
+
+def _emit_json(obj) -> None:
+    click.echo(json.dumps(obj, indent=2))
+
+
+def _table(rows: list[dict], columns: list[str]) -> str:
+    widths = {c: max(len(c), *(len(str(r.get(c, ""))) for r in rows)) for c in columns}
+    head = "  ".join(c.ljust(widths[c]) for c in columns)
+    sep = "  ".join("-" * widths[c] for c in columns)
+    body = "\n".join(
+        "  ".join(str(r.get(c, "")).ljust(widths[c]) for c in columns) for r in rows
+    )
+    return f"{head}\n{sep}\n{body}"
+
+
+@click.group()
+def main() -> None:
+    """MacroMod: unified CLI over the OBR emulator and the UK SVAR model."""
+
+
+@main.command()
+@click.option("--var", required=True, help="Policy variable to shock (see `macromod variables`).")
+@click.option("--shock", required=True, type=float,
+              help="Shock size; units depend on the variable (£m/quarter for CGG, decimal for TCPRO).")
+@click.option("--periods", default=12, show_default=True, help="Quarters the shock is applied.")
+@click.option("--name", default=None, help="Label for the reform.")
+@click.option("--investment-closure", is_flag=True,
+              help="Activate the cost-of-capital investment channel (needed for TCPRO shocks).")
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
+def score(var, shock, periods, name, investment_closure, as_json):
+    """Score a policy reform with the OBR model emulator."""
+    res = core.obr_score_reform(
+        var=var, shock=shock, periods=periods, name=name,
+        investment_closure=investment_closure,
+    )
+    if as_json:
+        _emit_json(res)
+        return
+    click.echo(f"Reform: {res['name']}  (var={res['var']}, shock={res['shock']:+g}, "
+               f"periods={res['periods']}, investment_closure={res['investment_closure']})")
+    click.echo(_table(res["results"],
+                      ["period", "delta_gdp_bn", "pct_gdp", "delta_cons_m", "delta_if_m"]))
+    click.echo(f"\nCumulative GDP effect over shocked periods: "
+               f"£{res['cumulative_delta_gdp_bn_over_shock_periods']}bn")
+    click.echo(f"Peak GDP effect: {res['peak_pct_gdp']}% in {res['peak_period']}")
+
+
+@main.command()
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
+def variables(as_json):
+    """List commonly shocked OBR policy variables."""
+    res = core.obr_list_variables()
+    if as_json:
+        _emit_json(res)
+        return
+    click.echo(_table(res, ["var", "description", "units", "investment_closure"]))
+
+
+@main.command()
+@click.option("--horizons", default=12, show_default=True, help="Forecast horizon in quarters.")
+@click.option("--draws", default=500, show_default=True, help="Posterior draws (more = slower, smoother).")
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
+def forecast(horizons, draws, as_json):
+    """UK SVAR forecast: YoY GDP growth and CPI inflation with bands."""
+    res = core.svar_forecast(horizons=horizons, draws=draws)
+    if as_json:
+        _emit_json(res)
+        return
+    click.echo(f"UK SVAR forecast from {res['forecast_origin']} "
+               f"({res['draws']} draws, {res['accepted_draws']} accepted, ESS {res['ess']})")
+    for key, label in [("gdp_growth_yoy", "YoY GDP growth (%)"),
+                       ("cpi_inflation_yoy", "YoY CPI inflation (%)")]:
+        click.echo(f"\n{label}")
+        click.echo(_table(res[key], ["quarter", "median", "lo68", "hi68", "lo90", "hi90"]))
+
+
+@main.command()
+@click.option("--draws", default=500, show_default=True, help="Posterior draws.")
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
+def shocks(draws, as_json):
+    """P(sign) of the identified structural shocks in the latest quarter."""
+    res = core.svar_latest_shocks(draws=draws)
+    if as_json:
+        _emit_json(res)
+        return
+    click.echo(f"Structural shocks in {res['quarter']} "
+               f"({res['draws']} draws, {res['accepted_draws']} accepted, ESS {res['ess']})\n")
+    click.echo(_table(res["shocks"], ["shock", "p_positive", "p_negative"]))
+    click.echo()
+    for s in res["shocks"]:
+        click.echo(f"- {s['reading']}")
+
+
+@main.command()
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
+def summary(as_json):
+    """Headline SVAR results parsed from the repo's committed summaries (instant)."""
+    res = core.svar_summary()
+    if as_json:
+        _emit_json(res)
+        return
+    rep = res.get("replication", {})
+    click.echo("Replication (results/summary.md)")
+    for ln in rep.get("metadata", []):
+        click.echo(f"  {ln}")
+    fevd = rep.get("fevd_1yr_headline", [])
+    if fevd:
+        click.echo("\nFEVD at 1-year horizon (median shares)")
+        click.echo(_table(fevd, list(fevd[0].keys())))
+    fr = res.get("forecast_revision", {})
+    click.echo("\nForecast-revision exercise (results/forecast_summary.md)")
+    for ln in fr.get("metadata", []):
+        click.echo(f"  {ln}")
+    signs = fr.get("latest_shock_signs", [])
+    if signs:
+        click.echo("\nP(sign) of the identified shocks at T")
+        click.echo(_table(signs, list(signs[0].keys())))
+    for ln in fr.get("composite_irf", []):
+        click.echo(f"  {ln}")
+
+
+if __name__ == "__main__":
+    main()
