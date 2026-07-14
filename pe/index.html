@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>macromod — PolicyEngine tax-benefit microsimulation</title>
+<meta name="description" content="PolicyEngine.py: the micro member of the MacroMod suite — a tax-benefit microsimulation package for the UK and US. Compute a household's taxes, benefits, and net income under current law or a reform." />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css" />
+<style>
+/* page-specific: hero sizing only — shared component styles live in style.css */
+.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
+</style>
+</head>
+<body class="doc">
+<div class="grain" aria-hidden="true"></div>
+<canvas id="field" aria-hidden="true"></canvas>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <span class="brand-dot" aria-hidden="true"></span>macromod
+  </a>
+  <nav class="nav-links">
+    <a href="/#idea">idea</a>
+    <a href="/#models">models</a>
+    <a href="/#pipeline">pipeline</a>
+    <a href="/docs/">docs</a>
+    <a href="/connect/">use it</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/MacroMod" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <p class="eyebrow reveal" style="--d:0">model 04 — tax-benefit microsimulation · PolicyEngine</p>
+      <h1 class="reveal" style="--d:1; font-size: clamp(34px, 5vw, 56px);">
+        The economy, one <em>household</em> at a time.
+      </h1>
+      <p class="lede reveal" style="--d:2">
+        PolicyEngine.py is the <strong>micro</strong> member of the suite:
+        a tax-benefit microsimulation package for the UK and US that computes
+        a specific family's taxes, benefits, and net income under current law
+        or a reform — the same engine that powers
+        <a href="https://policyengine.org">policyengine.org</a>. Where the
+        macro members trace a reform through the whole economy, this one
+        answers at person and household resolution.
+      </p>
+      <div class="hero-cta reveal" style="--d:3">
+        <a class="btn btn-primary" href="#quickstart">Quickstart</a>
+        <a class="btn btn-ghost" href="https://github.com/PolicyEngine/policyengine.py">Read the code</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="what" class="band">
+    <div class="band-head">
+      <span class="kicker mono">01 — what it is</span>
+      <h2>Statute as code, at household resolution.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        The package encodes the UK and US tax-and-benefit rules as
+        parameterised statute and computes every variable — income tax,
+        National Insurance, Universal Credit, SNAP, EITC, CTC, and the rest —
+        for a household you describe. A reform is a parameter path and a new
+        value, the same reform objects the rest of the suite scores; re-run
+        the same family under the new law and read the difference.
+      </p>
+      <p>
+        Within MacroMod it is the complement to the macro engines. The OLG
+        model already consumes PolicyEngine's effective and marginal rates to
+        build its tax functions; this page is the direct route to the engine
+        itself — for "what does this reform do to <em>this family</em>?"
+        rather than "what does it do to GDP?".
+      </p>
+    </div>
+  </section>
+
+  <section id="install" class="band">
+    <div class="band-head">
+      <span class="kicker mono">02 — install</span>
+      <h2>One package, two countries.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Published on PyPI. The default install pulls both country models;
+        use an extra to install just one.
+      </p>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install policyengine          <span class="cm"># UK + US</span>
+pip install policyengine[uk]      <span class="cm"># UK model only</span>
+pip install policyengine[us]      <span class="cm"># US model only</span></code></pre></div>
+    </div>
+  </section>
+
+  <section id="quickstart" class="band">
+    <div class="band-head">
+      <span class="kicker mono">03 — quickstart</span>
+      <h2>A household in one call.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Describe the people, pick a year, and read the results. Pass a
+        <code>reform</code> dict to run the same household under changed law.
+      </p>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
+
+<span class="cm"># UK: single adult earning £50,000 — current law</span>
+uk = pe.uk.calculate_household(
+    people=[{<span class="kw">"age"</span>: 35, <span class="kw">"employment_income"</span>: 50_000}],
+    year=2026,
+)
+<span class="kw">print</span>(uk.person[0].income_tax)                   <span class="cm"># income tax</span>
+<span class="kw">print</span>(uk.household.hbai_household_net_income)    <span class="cm"># net income</span>
+
+<span class="cm"># US: single filer in California, with a reform applied</span>
+us = pe.us.calculate_household(
+    people=[{<span class="kw">"age"</span>: 35, <span class="kw">"employment_income"</span>: 60_000}],
+    tax_unit={<span class="kw">"filing_status"</span>: <span class="kw">"SINGLE"</span>},
+    household={<span class="kw">"state_code"</span>: <span class="kw">"CA"</span>},
+    year=2026,
+    reform={<span class="kw">"gov.irs.credits.ctc.amount.adult_dependent"</span>: 1000},
+)
+<span class="kw">print</span>(us.tax_unit.income_tax, us.household.household_net_income)</code></pre></div>
+      <p class="opt-note">
+        run the same household with and without the <code>reform</code>
+        argument and difference the results — that is the household-level
+        reform impact.
+      </p>
+    </div>
+  </section>
+
+  <section id="population" class="band">
+    <div class="band-head">
+      <span class="kicker mono">04 — beyond one household</span>
+      <h2>Population analysis on representative microdata.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        The same package runs whole representative datasets — the UK Family
+        Resources Survey (enhanced), the US CPS — through the model, so you
+        can aggregate any variable by decile, entity, or demographic:
+      </p>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
+<span class="kw">from</span> policyengine.core <span class="kw">import</span> Simulation
+<span class="kw">from</span> policyengine.outputs.aggregate <span class="kw">import</span> Aggregate, AggregateType
+
+datasets = pe.uk.ensure_datasets(datasets=[<span class="kw">"enhanced_frs_2023_24"</span>],
+                                 years=[2026], data_folder=<span class="kw">"./data"</span>)
+simulation = Simulation(dataset=datasets[<span class="kw">"enhanced_frs_2023_24_2026"</span>],
+                        tax_benefit_model_version=pe.uk.model)
+simulation.run()
+
+agg = Aggregate(simulation=simulation, variable=<span class="kw">"universal_credit"</span>,
+                aggregate_type=AggregateType.SUM, entity=<span class="kw">"benunit"</span>)
+agg.run()
+<span class="kw">print</span>(f<span class="kw">"Total UC spending: £{agg.result / 1e9:.1f}bn"</span>)</code></pre></div>
+      <div class="callout">
+        UK population microdata lives in a private Hugging Face repository —
+        set <code>HUGGING_FACE_TOKEN</code> from an account with access before
+        running UK population examples. Household calculations need no data
+        access at all.
+      </div>
+    </div>
+  </section>
+
+  <section id="outputs" class="band band-result">
+    <div class="band-head">
+      <span class="kicker mono">05 — outputs & scope</span>
+      <h2>What it answers — and what it doesn't yet.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Outputs are per-entity variables: incomes, each tax, each benefit,
+        and net income at person, benefit-unit/tax-unit, and household level —
+        plus aggregates and distributional statistics over microdata.
+        Honest scope notes:
+      </p>
+      <ul>
+        <li>It is a <strong>static microsimulation</strong> — no behavioural response, no general equilibrium. That second act is exactly what the macro members of the suite add.</li>
+        <li>Population-level reform scoring through the MacroMod integration layer is <strong>planned</strong>; today the hosted MCP server exposes the household calculator and household-level reform impacts.</li>
+        <li>Two countries: UK and US.</li>
+      </ul>
+    </div>
+    <div class="metrics">
+      <div class="metric">
+        <span class="metric-label mono">countries</span>
+        <span class="metric-val">2</span>
+        <span class="metric-note">UK · US tax-benefit systems</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label mono">UK entities</span>
+        <span class="metric-val">3</span>
+        <span class="metric-note">person · benefit unit · household</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label mono">US entities</span>
+        <span class="metric-val">6</span>
+        <span class="metric-note">person · tax unit · SPM unit · family · marital unit · household</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-cta">
+    <h2>Open the engine behind policyengine.org.</h2>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="https://github.com/PolicyEngine/policyengine.py">github.com/PolicyEngine/policyengine.py</a>
+      <a class="btn btn-ghost" href="/connect/">Connect it to your AI</a>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="foot-row">
+    <span class="brand"><span class="brand-dot" aria-hidden="true"></span>macromod</span>
+    <a class="foot-pe" href="https://policyengine.org" aria-label="PolicyEngine"><img src="/assets/policyengine.svg" alt="PolicyEngine" /></a>
+  </div>
+  <p class="mono foot-fine">
+    Macroeconomic simulation models for public policy. Open source · a PolicyEngine project.
+  </p>
+</footer>
+
+<script src="/field.js" defer></script>
+<script src="/reveal.js" defer></script>
+<script>
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest("[data-copy]"); if (!btn) return;
+  var code = btn.parentElement.querySelector("code");
+  navigator.clipboard.writeText(code.textContent).then(function () {
+    btn.textContent = "copied";
+    setTimeout(function () { btn.textContent = "copy"; }, 1400);
+  });
+});
+</script>
+</body>
+</html>

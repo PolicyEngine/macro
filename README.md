@@ -26,11 +26,17 @@ reform objects yet.
 | **Overlapping generations (OG-UK)** | shipped | [PSLmodels/OG-UK](https://github.com/PSLmodels/OG-UK) |
 | **OBR macroeconometric model** | shipped | [PolicyEngine/obr-macroeconomic-model](https://github.com/PolicyEngine/obr-macroeconomic-model) |
 | **UK structural VAR (BoE replication)** | shipped (analysis & forecasting; reform scoring: planned) | [PolicyEngine/boe-var-model](https://github.com/PolicyEngine/boe-var-model) |
+| **PolicyEngine tax-benefit microsimulation** | shipped (household calculator & household reform impacts; population-level scoring: planned) | [PolicyEngine/policyengine.py](https://github.com/PolicyEngine/policyengine.py) |
 | More model classes | planned | — |
 
+PolicyEngine is the *micro* member: person/household-resolution taxes and
+benefits for the UK and US — the same engine that powers
+[policyengine.org](https://policyengine.org) — complementing the macro models.
+
 The models live in their own repositories. This repo hosts the **MacroMod
-website** and, over time, the **integration layer** (CLI, MCP server) that lets
-you drive them from any AI workflow.
+website** and the **integration layer** (`integration/`) — a `macromod` CLI
+and MCP server over the models, with CI auto-deploying the hosted MCP server
+to Modal — so you can drive them from any AI workflow.
 
 ## Quickstart — score a reform
 
@@ -74,9 +80,22 @@ how the model classes differ and when to use which.
 The [connect page](https://macromod.vercel.app/connect/) covers three ways to use the
 models:
 
-- **Code** — drive the Python API yourself (works today).
-- **MCP** — a Model Context Protocol server for Claude and ChatGPT *(coming soon)*.
-- **CLI** — a `macromod score` command *(coming soon)*.
+- **MCP** — the hosted Model Context Protocol server is **live** at
+  `https://policyengine--macromod-mcp-serve.modal.run/mcp`. Add it as a custom
+  connector in Claude or ChatGPT, or in Claude Code:
+
+  ```bash
+  claude mcp add --transport http macromod https://policyengine--macromod-mcp-serve.modal.run/mcp
+  ```
+
+  Tools: `score_reform`, `list_reform_variables`, `forecast_uk`,
+  `latest_shocks`, `model_summary`, plus PolicyEngine household tools
+  (`calculate_household`, `household_reform_impact`, `list_reform_parameters`).
+  It runs serverless and scales to zero — the first call after idle may take
+  ~10 s to wake.
+- **CLI** — the `macromod` CLI (`score`, `variables`, `forecast`, `shocks`,
+  `summary`) lives in [`integration/`](integration/); PyPI publish is planned.
+- **Code** — drive each model's Python API yourself.
 
 ## The site
 
@@ -93,6 +112,7 @@ python3 -m http.server 8000   # then open http://localhost:8000/
 | `olg/` | the OG-UK model page — install, quickstart, options, shocks, outputs |
 | `obr/` | the OBR macroeconometric model — quickstart, solver, levers, forecasting |
 | `svar/` | the UK structural VAR — the model, quickstart, outputs, validation |
+| `pe/` | PolicyEngine tax-benefit microsimulation — household calculator, reforms, population analysis |
 | `docs/` | documentation — the model classes compared and when to use which |
 | `connect/` | connect it or code it — MCP / CLI setup and the Python API |
 
@@ -123,9 +143,10 @@ non-real numbers as illustrative.
 
 ## Roadmap
 
-- [ ] `macromod` CLI + PyPI publish
-- [ ] Local MCP server (`uvx macromod-mcp`)
-- [ ] Hosted MCP server (`mcp.macromod.dev`)
+- [x] `macromod` CLI (in `integration/`; PyPI publish still to come)
+- [x] Local MCP server (`python -m macromod.mcp_server`)
+- [x] Hosted MCP server (`https://policyengine--macromod-mcp-serve.modal.run/mcp`, auto-deployed by CI)
+- [ ] Population-level PolicyEngine reform scoring
 - [ ] Additional macroeconomic model classes
 - See [#1](https://github.com/PolicyEngine/MacroMod/issues/1) — Rust port of the solver core
 

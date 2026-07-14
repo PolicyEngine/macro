@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>macromod — documentation</title>
-<meta name="description" content="Documentation for the MacroMod suite — what each macroeconomic model is, how the three model classes differ, when to use which, and the shared pipeline that ties them together." />
+<meta name="description" content="Documentation for the MacroMod suite — what each macroeconomic model is, how the four model classes differ, when to use which, and the shared pipeline that ties them together." />
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <meta name="theme-color" content="#FFFFFF" />
 
@@ -49,8 +49,8 @@
   <section class="hero model-hero">
     <div class="hero-inner">
       <p class="eyebrow reveal" style="--d:0">documentation</p>
-      <h1 class="reveal" style="--d:1" style="font-size: clamp(34px, 5vw, 56px);">
-        Three models. <em>One</em> economy, read three ways.
+      <h1 class="reveal" style="--d:1; font-size: clamp(34px, 5vw, 56px);">
+        Four models. <em>One</em> economy, read four ways.
       </h1>
       <p class="lede reveal" style="--d:2">
         MacroMod scores a policy reform for its effect on the whole economy.
@@ -72,8 +72,9 @@
         and report the same kind of output — its effect on macroeconomic
         aggregates. The structural VAR is the empirical member: it reads the
         current state of the economy and forecasts it, rather than scoring
-        reforms. Start with the model that matches your question, or read on
-        for the comparison.
+        reforms. PolicyEngine is the micro member: it answers at person and
+        household resolution rather than in aggregates. Start with the model
+        that matches your question, or read on for the comparison.
       </p>
       <div class="doc-index">
         <a href="/olg/">
@@ -94,6 +95,12 @@
           <p>A Python replication of the Bank of England's 8-variable Bayesian SVAR. Best for reading the current state of the economy in structural-shock terms, short-run fan-chart forecasts, and forecast-revision narratives.</p>
           <span class="di-go">read the SVAR reference →</span>
         </a>
+        <a href="/pe/">
+          <span class="di-id">pe · PolicyEngine</span>
+          <h3>Tax-benefit microsimulation</h3>
+          <p>PolicyEngine's UK &amp; US tax-benefit engine — the same one behind policyengine.org. Best for household-resolution questions: what a specific family pays and receives under current law or a reform.</p>
+          <span class="di-go">read the PolicyEngine reference →</span>
+        </a>
       </div>
     </div>
   </section>
@@ -101,7 +108,7 @@
   <section id="compare" class="band">
     <div class="band-head">
       <span class="kicker mono">02 — the comparison</span>
-      <h2>Three model classes, side by side.</h2>
+      <h2>Four model classes, side by side.</h2>
     </div>
     <div class="prose">
       <p>
@@ -109,19 +116,21 @@
         from first principles and answers where the economy settles in the long
         run; one reproduces the official forecaster's empirical system and
         answers what happens over the next few years; one imposes minimal
-        theory and answers what is driving the economy right now.
+        theory and answers what is driving the economy right now; and one
+        drops from aggregates to people, computing the actual statute for a
+        specific household.
       </p>
       <table>
-        <thead><tr><th></th><th>Overlapping generations (OG-UK)</th><th>OBR macroeconometric</th><th>UK structural VAR</th></tr></thead>
+        <thead><tr><th></th><th>Overlapping generations (OG-UK)</th><th>OBR macroeconometric</th><th>UK structural VAR</th><th>PolicyEngine micro</th></tr></thead>
         <tbody>
-          <tr><td><strong>Model class</strong></td><td>Dynamic general equilibrium (OLG)</td><td>Structural macroeconometric (simultaneous equations)</td><td>Bayesian structural VAR (time series)</td></tr>
-          <tr><td><strong>Behaviour comes from</strong></td><td>Optimising households and firms</td><td>Estimated empirical relationships</td><td>The data, with zero + sign restrictions naming the shocks</td></tr>
-          <tr><td><strong>Solved by</strong></td><td>Steady-state root-find and transition-path iteration</td><td>Gauss–Seidel over ~370 equations per quarter</td><td>Posterior sampling + Arias–Rubio-Ramírez–Waggoner identification</td></tr>
-          <tr><td><strong>Horizon</strong></td><td>Decades — long-run steady state + 60-year path</td><td>Quarters to a few years</td><td>The recent past and the next few years</td></tr>
-          <tr><td><strong>Best for</strong></td><td>Long-run incentives: labour supply, saving, the capital stock</td><td>Near-term fiscal multipliers and Budget-style scoring</td><td>What's happening now and why; short-run forecasts with credible bands</td></tr>
-          <tr><td><strong>Reform enters as</strong></td><td>A PolicyEngine policy → estimated tax functions</td><td>A shock to an exogenous model variable</td><td>— (no reform scoring yet; planned)</td></tr>
-          <tr><td><strong>Anchored to</strong></td><td>ONS, OBR, Bank of England national accounts</td><td>The OBR Economic and Fiscal Outlook</td><td>Public ONS, Bank of England, and FRED series, 1992Q1–2023Q2</td></tr>
-          <tr><td><strong>Runtime</strong></td><td>~5–15 min (steady state); ~1–1.5 h (transition path)</td><td>Seconds to minutes per scenario</td><td>Minutes per full estimation + identification run</td></tr>
+          <tr><td><strong>Model class</strong></td><td>Dynamic general equilibrium (OLG)</td><td>Structural macroeconometric (simultaneous equations)</td><td>Bayesian structural VAR (time series)</td><td>Static tax-benefit microsimulation</td></tr>
+          <tr><td><strong>Behaviour comes from</strong></td><td>Optimising households and firms</td><td>Estimated empirical relationships</td><td>The data, with zero + sign restrictions naming the shocks</td><td>The statute itself — rules as code, no behavioural response</td></tr>
+          <tr><td><strong>Solved by</strong></td><td>Steady-state root-find and transition-path iteration</td><td>Gauss–Seidel over ~370 equations per quarter</td><td>Posterior sampling + Arias–Rubio-Ramírez–Waggoner identification</td><td>Direct rule evaluation over a household or microdata</td></tr>
+          <tr><td><strong>Horizon</strong></td><td>Decades — long-run steady state + 60-year path</td><td>Quarters to a few years</td><td>The recent past and the next few years</td><td>A single policy year (morning-after)</td></tr>
+          <tr><td><strong>Best for</strong></td><td>Long-run incentives: labour supply, saving, the capital stock</td><td>Near-term fiscal multipliers and Budget-style scoring</td><td>What's happening now and why; short-run forecasts with credible bands</td><td>What a specific family pays and receives, UK or US</td></tr>
+          <tr><td><strong>Reform enters as</strong></td><td>A PolicyEngine policy → estimated tax functions</td><td>A shock to an exogenous model variable</td><td>— (no reform scoring yet; planned)</td><td>A PolicyEngine parameter + a new value, applied directly</td></tr>
+          <tr><td><strong>Anchored to</strong></td><td>ONS, OBR, Bank of England national accounts</td><td>The OBR Economic and Fiscal Outlook</td><td>Public ONS, Bank of England, and FRED series, 1992Q1–2023Q2</td><td>UK &amp; US statute; FRS/CPS microdata for population runs</td></tr>
+          <tr><td><strong>Runtime</strong></td><td>~5–15 min (steady state); ~1–1.5 h (transition path)</td><td>Seconds to minutes per scenario</td><td>Minutes per full estimation + identification run</td><td>Sub-second per household; minutes for population runs</td></tr>
         </tbody>
       </table>
     </div>
@@ -137,6 +146,7 @@
         <li><strong>"How does this tax change affect growth and the deficit over the next 3–5 years?"</strong> — the OBR model. It's built for near-term fiscal scoring and speaks the same language as the official forecast.</li>
         <li><strong>"What does this reform do to work incentives, saving, and the long-run size of the economy?"</strong> — the OLG model. It captures how households of every age re-optimise over their lifetimes.</li>
         <li><strong>"What's driving GDP and inflation right now — and why did the forecast change since last quarter?"</strong> — the structural VAR. It decomposes the current data into named structural shocks, forecasts with credible bands, and splits a forecast revision into news and reassessment.</li>
+        <li><strong>"What does this reform mean for a nurse on £35,000 with two kids?"</strong> — PolicyEngine. It runs the actual UK or US statute for that exact family and reads off taxes, benefits, and net income, before and after.</li>
         <li><strong>"I want both the transition and the destination."</strong> — run both scoring models. They report comparable real-world aggregates, so you can read the near-term multiplier against the long-run equilibrium.</li>
       </ul>
       <div class="callout">
@@ -165,12 +175,16 @@
         always "relative to current forecast", never a raw level to be
         misread. The structural VAR sits upstream of that loop: it establishes
         the empirical starting point — which shocks the economy is currently
-        absorbing — from the same public official data.
+        absorbing — from the same public official data. And PolicyEngine sits
+        underneath: it supplies the reform objects the suite scores and the
+        household-level answer to the same question the macro engines answer
+        in aggregates.
       </p>
       <p class="research-link mono">
         <a href="/olg/">OG-UK reference</a> &nbsp;·&nbsp;
         <a href="/obr/">OBR model reference</a> &nbsp;·&nbsp;
         <a href="/svar/">SVAR reference</a> &nbsp;·&nbsp;
+        <a href="/pe/">PolicyEngine reference</a> &nbsp;·&nbsp;
         <a href="/connect/">Run a model →</a>
       </p>
     </div>

@@ -182,7 +182,7 @@
   <section class="hero connect-hero">
     <div class="hero-inner" style="text-align:center;">
       <p class="eyebrow reveal" style="--d:0">macromod for any ai — and any coder</p>
-      <h1 class="reveal" style="--d:1" style="font-size: clamp(34px, 5vw, 56px);">
+      <h1 class="reveal" style="--d:1; font-size: clamp(34px, 5vw, 56px);">
         Connect it. Or <em>code</em> it.
       </h1>
       <p class="lede reveal" style="--d:2; margin-left:auto; margin-right:auto;">
@@ -197,8 +197,8 @@
     <div class="panel-card">
       <div class="panel-bars">
         <div class="seg" role="tablist" aria-label="Integration" id="seg-integration">
-          <button role="tab" data-pane="mcp" aria-selected="true">MCP<span class="soon-dot" title="coming soon"></span></button>
-          <button role="tab" data-pane="cli" aria-selected="false">CLI<span class="soon-dot" title="coming soon"></span></button>
+          <button role="tab" data-pane="mcp" aria-selected="true">MCP</button>
+          <button role="tab" data-pane="cli" aria-selected="false">CLI<span class="soon-dot" title="not on PyPI yet"></span></button>
         </div>
         <div class="seg" role="tablist" aria-label="Client" id="seg-client">
           <button role="tab" data-client="claude" aria-selected="true">Claude</button>
@@ -208,15 +208,15 @@
 
       <!-- ================= MCP ================= -->
       <div class="pane" id="pane-mcp">
-        <p class="status-note soon">coming soon — not live yet</p>
-        <p class="soon-hint">The MCP server isn't running yet, so these steps are a preview of the flow. Want to score a reform today? <a href="#code">Use the Python API below</a>.</p>
+        <p class="status-note">live</p>
+        <p class="soon-hint">The hosted MCP server is live. Its tools: <code class="mono">score_reform</code> and <code class="mono">list_reform_variables</code> (OBR emulator), <code class="mono">forecast_uk</code>, <code class="mono">latest_shocks</code>, and <code class="mono">model_summary</code> (UK SVAR), plus PolicyEngine household tools — <code class="mono">calculate_household</code>, <code class="mono">household_reform_impact</code>, <code class="mono">list_reform_parameters</code>. It runs serverless and scales to zero, so the first call after a quiet spell can take ~10 seconds to wake.</p>
 
         <div class="steps" data-for="claude">
           <div class="step">
             <span class="step-n mono">1</span>
             <h3>Copy the MacroMod URL</h3>
             <p>Click the copy button — you'll paste it in the next step.</p>
-            <div class="copyblock"><code>https://mcp.macromod.dev/mcp</code><button data-copy>copy</button></div>
+            <div class="copyblock"><code>https://policyengine--macromod-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
           </div>
           <div class="step">
             <span class="step-n mono">2</span>
@@ -226,7 +226,15 @@
           <div class="step">
             <span class="step-n mono">3</span>
             <h3>Connect and ask</h3>
-            <p>Click <strong>Add → Connect</strong>, then ask Claude to <em>score a 1p basic-rate rise</em>.</p>
+            <p>Click <strong>Add → Connect</strong>, then ask Claude to <em>score a £5bn government spending rise</em> or <em>forecast UK GDP and inflation</em>.</p>
+          </div>
+        </div>
+
+        <div class="steps" data-for="claude" style="margin-top: 26px;">
+          <div class="step" style="grid-column: 1 / -1;">
+            <h3>Using Claude Code?</h3>
+            <p>One command adds the same server to Claude Code:</p>
+            <div class="copyblock"><code>claude mcp add --transport http macromod https://policyengine--macromod-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
           </div>
         </div>
 
@@ -235,7 +243,7 @@
             <span class="step-n mono">1</span>
             <h3>Copy the MacroMod URL</h3>
             <p>Click the copy button — you'll paste it in the next step.</p>
-            <div class="copyblock"><code>https://mcp.macromod.dev/mcp</code><button data-copy>copy</button></div>
+            <div class="copyblock"><code>https://policyengine--macromod-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
           </div>
           <div class="step">
             <span class="step-n mono">2</span>
@@ -245,35 +253,33 @@
           <div class="step">
             <span class="step-n mono">3</span>
             <h3>Connect and ask</h3>
-            <p>Save it, then ask ChatGPT to <em>score a 1p basic-rate rise</em>.</p>
+            <p>Save it, then ask ChatGPT to <em>score a £5bn government spending rise</em> or <em>forecast UK GDP and inflation</em>.</p>
           </div>
         </div>
       </div>
 
       <!-- ================= CLI ================= -->
       <div class="pane" id="pane-cli" hidden>
-        <p class="status-note soon">coming soon — not on PyPI yet</p>
-        <p class="soon-hint">The <code class="mono">macromod</code> CLI isn't published yet, so these steps are a preview. Want to score a reform today? <a href="#code">Use the Python API below</a>.</p>
+        <p class="status-note soon">built — not on PyPI yet</p>
+        <p class="soon-hint">The <code class="mono">macromod</code> CLI lives in this repo's <a href="https://github.com/PolicyEngine/MacroMod/tree/main/integration"><code class="mono">integration/</code></a> directory but isn't published to PyPI yet, so these steps are a preview of the packaged flow. Want to score a reform today? Use the <strong>live MCP server</strong> (MCP tab) or <a href="#code">the Python API below</a>.</p>
 
         <div class="steps" data-for="claude">
           <div class="step">
             <span class="step-n mono">1</span>
             <h3>Install</h3>
-            <p>Python 3.11+. One package pulls the OLG engine and calibration data.</p>
+            <p>Python 3.11+. One package wraps the OBR emulator and the UK SVAR behind a single command.</p>
             <div class="copyblock"><code>pip install macromod</code><button data-copy>copy</button></div>
           </div>
           <div class="step">
             <span class="step-n mono">2</span>
             <h3>Ask Claude Code</h3>
             <p>Claude Code runs the CLI from its terminal — just describe the reform, or run it yourself:</p>
-            <div class="copyblock"><code>macromod score \
-  --param gov.hmrc.income_tax.rates.uk[0].rate=0.21 \
-  --from 2026 --mode ss</code><button data-copy>copy</button></div>
+            <div class="copyblock"><code>macromod score --var CGG --shock 1250 --periods 4</code><button data-copy>copy</button></div>
           </div>
           <div class="step">
             <span class="step-n mono">3</span>
             <h3>Read the results</h3>
-            <p>GDP, consumption, investment, revenue, and debt in £bn — printed as a table or exported with <code class="mono">--json</code>.</p>
+            <p>Per-quarter GDP deltas in £bn and the cumulative effect — printed as a table or exported with <code class="mono">--json</code>. Other commands: <code class="mono">variables</code>, <code class="mono">forecast</code>, <code class="mono">shocks</code>, <code class="mono">summary</code>.</p>
           </div>
         </div>
 
@@ -281,21 +287,19 @@
           <div class="step">
             <span class="step-n mono">1</span>
             <h3>Install</h3>
-            <p>Python 3.11+. One package pulls the OLG engine and calibration data.</p>
+            <p>Python 3.11+. One package wraps the OBR emulator and the UK SVAR behind a single command.</p>
             <div class="copyblock"><code>pip install macromod</code><button data-copy>copy</button></div>
           </div>
           <div class="step">
             <span class="step-n mono">2</span>
             <h3>Ask Codex</h3>
             <p>Codex runs the CLI from its terminal — just describe the reform, or run it yourself:</p>
-            <div class="copyblock"><code>macromod score \
-  --param gov.hmrc.income_tax.rates.uk[0].rate=0.21 \
-  --from 2026 --mode ss</code><button data-copy>copy</button></div>
+            <div class="copyblock"><code>macromod score --var CGG --shock 1250 --periods 4</code><button data-copy>copy</button></div>
           </div>
           <div class="step">
             <span class="step-n mono">3</span>
             <h3>Read the results</h3>
-            <p>GDP, consumption, investment, revenue, and debt in £bn — printed as a table or exported with <code class="mono">--json</code>.</p>
+            <p>Per-quarter GDP deltas in £bn and the cumulative effect — printed as a table or exported with <code class="mono">--json</code>. Other commands: <code class="mono">variables</code>, <code class="mono">forecast</code>, <code class="mono">shocks</code>, <code class="mono">summary</code>.</p>
           </div>
         </div>
 
@@ -318,14 +322,16 @@
     <div class="prose">
       <p>
         No connector, no CLI — just Python. Pick a model: score a reform with
-        the OLG or OBR engine in a handful of lines, or read the economy's
-        current shocks and forecast it with the structural VAR.
+        the OLG or OBR engine in a handful of lines, read the economy's
+        current shocks and forecast it with the structural VAR, or compute a
+        household's taxes and benefits with PolicyEngine.
       </p>
 
       <div class="seg model-seg" role="tablist" aria-label="Model" id="model-seg">
         <button role="tab" data-model="oguk" aria-selected="true">OG-UK · overlapping generations</button>
         <button role="tab" data-model="obr" aria-selected="false">OBR · macroeconometric</button>
         <button role="tab" data-model="svar" aria-selected="false">SVAR · UK structural VAR</button>
+        <button role="tab" data-model="pe" aria-selected="false">PE · tax-benefit micro</button>
       </div>
 
       <!-- ===================== OG-UK ===================== -->
@@ -662,6 +668,87 @@ UK CPI  identified global <span class="out-val">50.1%</span>  domestic <span cla
         <a href="/svar/">Full guide — the model, identification, validation against the paper → the SVAR model page</a>
       </p>
       </div><!-- /svar pane -->
+
+      <!-- ===================== PolicyEngine ===================== -->
+      <div class="model-pane" data-model="pe" hidden>
+      <p>
+        The micro member of the suite: PolicyEngine's tax-benefit
+        microsimulation runs the actual UK and US statute for a specific
+        family — the same engine behind policyengine.org. One pip install,
+        and a household calculation is one call:
+      </p>
+
+      <div class="moves">
+        <div class="move"><span class="move-n">01 · describe</span><b>the household</b><span class="d">ages, incomes, family structure</span></div>
+        <div class="move"><span class="move-n">02 · calculate</span><b>the statute</b><span class="d">every tax and benefit, current law</span></div>
+        <div class="move"><span class="move-n">03 · reform</span><b>a parameter</b><span class="d">re-run the same family under new law</span></div>
+        <div class="move"><span class="move-n">04 · read</span><b>the impact</b><span class="d">net income, person by person</span></div>
+      </div>
+
+      <div class="code-window">
+        <div class="cw-bar">
+          <span class="cw-dots"><i></i><i></i><i></i></span>
+          <span class="cw-name">install</span>
+          <button class="cw-copy" data-copy>copy</button>
+        </div>
+        <pre><code>pip install policyengine</code></pre>
+      </div>
+
+      <div class="code-window">
+        <div class="cw-bar">
+          <span class="cw-dots"><i></i><i></i><i></i></span>
+          <span class="cw-name">household.py</span>
+          <button class="cw-copy" data-copy>copy</button>
+        </div>
+        <pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
+
+<span class="cm"># UK: a single adult earning £50,000 — current law</span>
+uk = pe.uk.calculate_household(
+    people=[{<span class="kw">"age"</span>: 35, <span class="kw">"employment_income"</span>: 50_000}],
+    year=2026,
+)
+<span class="kw">print</span>(uk.person[0].income_tax)
+<span class="kw">print</span>(uk.household.hbai_household_net_income)
+
+<span class="cm"># US: same idea, with a reform applied</span>
+us = pe.us.calculate_household(
+    people=[{<span class="kw">"age"</span>: 35, <span class="kw">"employment_income"</span>: 60_000}],
+    tax_unit={<span class="kw">"filing_status"</span>: <span class="kw">"SINGLE"</span>},
+    household={<span class="kw">"state_code"</span>: <span class="kw">"CA"</span>},
+    year=2026,
+    reform={<span class="kw">"gov.irs.credits.ctc.amount.adult_dependent"</span>: 1000},
+)
+<span class="kw">print</span>(us.tax_unit.income_tax, us.household.household_net_income)</code></pre>
+      </div>
+
+      <p>
+        Under the hood: PolicyEngine encodes the UK and US tax-and-benefit
+        rules as parameterised statute and computes each variable — income
+        tax, National Insurance, Universal Credit, SNAP, EITC, and the rest —
+        for the household you describe. Population-level analysis over
+        representative microdata is in the same package; population-level
+        reform scoring through MacroMod is planned.
+      </p>
+
+      <div class="dials">
+        <div class="dial">
+          <span class="dial-name">calculate_household</span>
+          <p><code>pe.uk</code> and <code>pe.us</code> — taxes, benefits, and net income for one family, with an optional <code>reform</code> dict.</p>
+        </div>
+        <div class="dial">
+          <span class="dial-name">reform</span>
+          <p>A parameter path and a new value: <code>{"gov.hmrc.income_tax.rates.uk[0].rate": 0.21}</code> — the same paths the OLG model scores.</p>
+        </div>
+        <div class="dial">
+          <span class="dial-name">Simulation</span>
+          <p>Population analysis: run a dataset like <code>enhanced_frs_2023_24</code> through the model and aggregate any variable by decile or entity.</p>
+        </div>
+      </div>
+
+      <p class="research-link mono">
+        <a href="/pe/">Full guide — household calculator, reforms, population analysis → the PolicyEngine model page</a>
+      </p>
+      </div><!-- /pe pane -->
     </div>
   </section>
 </main>
