@@ -88,14 +88,22 @@ def obr_score_reform(
     shock: float,
     periods: int = 12,
     name: str | None = None,
-    investment_closure: bool = False,
+    investment_closure: bool | None = None,
 ) -> dict:
     """Score a policy reform with the OBR model emulator.
 
     Runs baseline vs shocked solves and returns per-period GDP deltas plus a
     headline cumulative GDP effect over the shocked periods.
+
+    ``investment_closure`` defaults per variable from the curated list
+    (e.g. True for TCPRO): a corporation-tax shock without the investment
+    closure solves to all-zero deltas, which would read as a misleading
+    "no effect" result rather than a mis-specified run.
     """
     run_reform = _import_obr()
+    if investment_closure is None:
+        known = {v["var"]: v["investment_closure"] for v in OBR_VARIABLES}
+        investment_closure = known.get(var, False)
     if name is None:
         name = f"{var} shock {shock:+g}"
     df = run_reform(
@@ -354,6 +362,27 @@ PE_PARAMETERS = [
         "path": "gov.hmrc.child_benefit.amount.eldest",
         "description": "Child Benefit weekly amount for the eldest child",
         "unit": "GBP per week",
+    },
+    {
+        "country": "uk",
+        "path": "gov.hmrc.cgt.basic_rate",
+        "description": "Capital gains tax rate for basic-rate taxpayers",
+        "unit": "decimal rate",
+        "note": "valid reform path, but calculate_household does not compute CGT: household results will not move. Use for population-level scoring (planned).",
+    },
+    {
+        "country": "uk",
+        "path": "gov.hmrc.cgt.higher_rate",
+        "description": "Capital gains tax rate for higher/additional-rate taxpayers",
+        "unit": "decimal rate",
+        "note": "valid reform path, but calculate_household does not compute CGT: household results will not move. Use for population-level scoring (planned).",
+    },
+    {
+        "country": "uk",
+        "path": "gov.hmrc.cgt.annual_exempt_amount",
+        "description": "Capital gains tax annual exempt amount",
+        "unit": "GBP per year",
+        "note": "valid reform path, but calculate_household does not compute CGT: household results will not move. Use for population-level scoring (planned).",
     },
     {
         "country": "us",
