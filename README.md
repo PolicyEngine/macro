@@ -36,7 +36,12 @@ benefits for the UK and US — the same engine that powers
 The models live in their own repositories. This repo hosts the **MacroMod
 website** and the **integration layer** (`integration/`) — a `macromod` CLI
 and MCP server over the models, with CI auto-deploying the hosted MCP server
-to Modal — so you can drive them from any AI workflow.
+to Modal on every merge — merges to the model repos
+(obr-macroeconomic-model, boe-var-model) trigger the same redeploy via
+`repository_dispatch` — so you can drive them from any AI workflow.
+
+The OBR emulator also runs as a live dashboard:
+[obr-macroeconomic-model.vercel.app](https://obr-macroeconomic-model.vercel.app/).
 
 ## Quickstart — score a reform
 
@@ -88,13 +93,22 @@ models:
   claude mcp add --transport http macromod https://policyengine--macromod-mcp-serve.modal.run/mcp
   ```
 
-  Tools: `score_reform`, `list_reform_variables`, `forecast_uk`,
-  `latest_shocks`, `model_summary`, plus PolicyEngine household tools
-  (`calculate_household`, `household_reform_impact`, `list_reform_parameters`).
-  It runs serverless and scales to zero — the first call after idle may take
-  ~10 s to wake.
+  Nine tools: `score_reform`, `list_reform_variables`, `forecast_uk`,
+  `latest_shocks`, `model_summary`, the PolicyEngine household tools
+  (`calculate_household`, `household_reform_impact`, `list_reform_parameters`),
+  and `og_score_reform_steady_state` — the last works locally only: OG-UK is
+  deliberately excluded from the hosted image (a score takes tens of minutes),
+  so the tool errors on the hosted server; use `macromod og-score` instead.
+  The server runs serverless and scales to zero — the first call after idle
+  may take ~10 s to wake.
 - **CLI** — the `macromod` CLI (`score`, `variables`, `forecast`, `shocks`,
-  `summary`) lives in [`integration/`](integration/); PyPI publish is planned.
+  `summary`, `household`, `household-impact`, `parameters`, `og-score`) lives
+  in [`integration/`](integration/); PyPI publish is planned. Install it —
+  with all three hosted-model packages and their data, no clone — via:
+
+  ```bash
+  pip install "macromod[models] @ git+https://github.com/PolicyEngine/MacroMod#subdirectory=integration"
+  ```
 - **Code** — drive each model's Python API yourself.
 
 ## The site
@@ -127,7 +141,7 @@ stays consistent (this is exactly the set the OBR model added):
    as the template: `<body class="doc">`, the shared nav, and the section
    rhythm (what it is → quickstart → how it works → levers → calibration).
 2. **`index.html`** — add a `.strategy-card` in the `#models` grid linking to
-   `/<slug>/`, and append the model to the `.stack-note` line.
+   `/<slug>/`.
 3. **`docs/index.html`** — add a `.doc-index` card, a column in the comparison
    table, and a when-to-use bullet in `#choose`.
 4. **`connect/index.html`** — add a `<div class="model-pane" data-model="<slug>">`
@@ -146,6 +160,7 @@ non-real numbers as illustrative.
 - [x] `macromod` CLI (in `integration/`; PyPI publish still to come)
 - [x] Local MCP server (`python -m macromod.mcp_server`)
 - [x] Hosted MCP server (`https://policyengine--macromod-mcp-serve.modal.run/mcp`, auto-deployed by CI)
+- [x] OG-UK steady-state scoring (`macromod og-score` / `og_score_reform_steady_state`, local only)
 - [ ] Population-level PolicyEngine reform scoring
 - [ ] Additional macroeconomic model classes
 - See [#1](https://github.com/PolicyEngine/MacroMod/issues/1) — Rust port of the solver core

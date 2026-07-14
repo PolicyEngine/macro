@@ -93,7 +93,7 @@
         dummies for 2020Q1–2021Q2. The global block uses UK-trade-weighted
         world aggregates over the euro area, US, Japan, and China.
       </p>
-      <table>
+      <div class="table-scroll"><table>
         <thead><tr><th>block</th><th>variables</th></tr></thead>
         <tbody>
           <tr>
@@ -105,7 +105,7 @@
             <td>Bank Rate · sterling exchange-rate index · CPI · CPI energy · real GDP</td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
       <p>
         Estimation is Bayesian with a Minnesota (normal-inverse-Wishart) prior
         plus sum-of-coefficients and dummy-initial-observation priors.
@@ -117,6 +117,16 @@
         importance weights and the Chan–Matthes–Yu (2025) permutation search
         making the draws efficient. Two unidentified shocks absorb residual
         volatility.
+      </p>
+      <p>
+        Honestly stated, this is accept/reject sampling: the replication run
+        behind the results below drew 10,000 posterior (Π,&nbsp;Σ) draws, of
+        which <strong>751 passed the sign restrictions</strong> (a 7.5%
+        acceptance rate), each carrying the Arias et al. volume-element
+        importance weight — an effective sample size of <strong>~350</strong>.
+        All medians and credible bands are weighted quantiles over those
+        draws, so they are correct but noisier than the paper's 10,000
+        accepted draws.
       </p>
     </div>
   </section>
@@ -131,7 +141,12 @@
         The package installs straight from GitHub — no clone needed. The
         prepared quarterly dataset ships inside the package, so
         <code>boe_var.data.load_data()</code> works immediately. Every input
-        series is public — ONS, the Bank of England database, and FRED.
+        series is public — UK CPI, CPI energy and real GDP from the ONS API;
+        Bank Rate and the sterling ERI from the Bank of England database;
+        Brent oil, exchange rates and the world-aggregate components from
+        FRED. The Bank's internal trade-weighted world GDP and CPI are not
+        published, so they are rebuilt as chain-weighted US + euro-area +
+        Japan + China aggregates with time-varying UK trade weights.
       </p>
       <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
       <p>
@@ -164,7 +179,7 @@ python scripts/run_forecast_revision.py</code></pre></div>
         The SVAR's outputs are diagnoses and forecasts, not reform scores.
         Four tools, all posterior distributions rather than point estimates:
       </p>
-      <table>
+      <div class="table-scroll"><table>
         <thead><tr><th>tool</th><th>what it tells you</th></tr></thead>
         <tbody>
           <tr>
@@ -184,7 +199,16 @@ python scripts/run_forecast_revision.py</code></pre></div>
             <td>The paper's Section 5 exercise: why did the forecast change since last quarter? Splits the revision into news (new shocks) and reassessment, via composite impulse responses — an adding-up identity verified to ~1e-12.</td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
+      <p>
+        In the shipped 2024Q2 forecast round (6,000 posterior draws, 487
+        accepted), the tool reads the latest quarter as most likely hit by a
+        positive world-demand shock (probability 0.81) and a negative
+        world-energy shock (0.80), with a composite effect peaking at
+        −0.22&nbsp;pp on year-on-year CPI inflation and +0.40&nbsp;pp on GDP
+        growth; the Figure-9 adding-up identity holds per draw to a maximum
+        absolute error of 5.3e-12.
+      </p>
       <div class="callout">
         Unlike the other two models, the SVAR does <strong>not yet score
         PolicyEngine reform objects</strong> — it has no policy levers to pull.
@@ -205,10 +229,17 @@ python scripts/run_forecast_revision.py</code></pre></div>
         With no official replication package, validation is against the
         paper's published figures and headline numbers. All of Figures 2–6
         replicate, and the headline variance decompositions land on the
-        paper's benchmarks. The replication was independently reviewed —
-        econometrics, data construction, and figures.
+        paper's benchmarks. The replication was independently reviewed three
+        ways: an econometrics review against reference toolboxes
+        (bsvarSIGNs, BEAR, VAR-Toolbox) that caught and fixed a genuine bias
+        — the missing Arias et al. importance weights for zero restrictions —
+        a data-construction review, and a panel-by-panel figure-fidelity
+        review against the paper. The figure review's verdicts: Figures 3 and
+        5 <strong>pass</strong>, Figures 2 and 4 <strong>pass with
+        caveats</strong>, Figure 6 carries a presentation caveat, and the
+        summary tables are internally consistent (rows sum to ~100%).
       </p>
-      <table>
+      <div class="table-scroll"><table>
         <thead><tr><th>check</th><th>this replication</th><th>the paper</th></tr></thead>
         <tbody>
           <tr>
@@ -228,11 +259,11 @@ python scripts/run_forecast_revision.py</code></pre></div>
           </tr>
           <tr>
             <td>Forecast-revision adding-up identity</td>
-            <td>exact to ~1e-12 per draw</td>
+            <td>exact per draw (max abs error 5.3e-12)</td>
             <td>holds by construction</td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
     </div>
     <div class="metrics">
       <div class="metric">
@@ -255,11 +286,51 @@ python scripts/run_forecast_revision.py</code></pre></div>
       Honest caveats, reported in the repository rather than smoothed over:
       the Bank's internal UK-trade-weighted world aggregates are not
       published, so they are proxied from public sources; the lag length is
-      not stated in the paper (p&nbsp;=&nbsp;4 assumed, as a parameter); and
-      one known discrepancy — the paper's ranking of UK monetary policy as
-      the largest domestic contributor to CPI variance — does not replicate,
-      most likely because of the proxy world aggregates.
+      not stated in the paper (p&nbsp;=&nbsp;4 assumed, as a parameter); the
+      pandemic prior is simplified to exogenous Covid dummies (algebraically
+      the Cascaldi-Garcia prior at its uninformative default); data are
+      current vintages rather than the paper's August-2024 ones; and one
+      known discrepancy — the paper's ranking of UK monetary policy as the
+      largest domestic contributor to CPI variance — does not replicate
+      (here UK supply, 15.6%, exceeds monetary policy, 7.4%), most likely
+      because of the proxy world aggregates and the smaller number of
+      accepted draws. Every deviation is enumerated in
+      <code>docs/methodology.md</code>.
     </p>
+  </section>
+
+  <section id="sources" class="band">
+    <div class="band-head">
+      <span class="kicker mono">06 — sources</span>
+      <h2>The paper, the code, the method.</h2>
+    </div>
+    <div class="prose">
+      <div class="table-scroll"><table>
+        <thead><tr><th>what</th><th>where</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>The paper</strong></td>
+            <td><a href="https://www.bankofengland.co.uk/macro-technical-paper/2025/a-structural-var-model-for-the-uk-economy">Macro Technical Paper No. 3</a> — Brignone &amp; Piffer, Bank of England, July 2025.</td>
+          </tr>
+          <tr>
+            <td><strong>Companion paper</strong></td>
+            <td><a href="https://michelepiffer.github.io/pdf_research/BrignonePiffer_StucturalForecastAnalysis.pdf">Brignone &amp; Piffer, structural forecast analysis</a> — the Section 5 forecast-revision method.</td>
+          </tr>
+          <tr>
+            <td><strong>This replication</strong></td>
+            <td><a href="https://github.com/PolicyEngine/boe-var-model">github.com/PolicyEngine/boe-var-model</a> — code, prepared data, figures, and the full annotated <code>RESOURCES.md</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>Method papers</strong></td>
+            <td><a href="https://doi.org/10.3982/ECTA14468">Arias, Rubio-Ramírez &amp; Waggoner (2018)</a> — the zero/sign identification algorithm · <a href="https://arxiv.org/abs/2503.20668">Chan, Matthes &amp; Yu (2025)</a> — the permutation-search speedup · <a href="https://doi.org/10.1162/REST_a_00483">Giannone, Lenza &amp; Primiceri (2015)</a> — the prior framework.</td>
+          </tr>
+          <tr>
+            <td><strong>Reference toolboxes</strong></td>
+            <td><a href="https://github.com/bsvars/bsvarSIGNs">bsvarSIGNs</a> (R, the exact Arias et al. machinery) · <a href="https://github.com/european-central-bank/BEAR-toolbox">ECB BEAR</a> · <a href="https://github.com/ambropo/VAR-Toolbox">Cesa-Bianchi VAR-Toolbox</a> — used in the independent econometrics review.</td>
+          </tr>
+        </tbody>
+      </table></div>
+    </div>
   </section>
 
   <section class="band band-cta">
