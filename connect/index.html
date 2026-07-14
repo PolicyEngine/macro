@@ -97,7 +97,11 @@
   background: var(--amber); margin-left: 7px; vertical-align: middle;
 }
 .steps.dimmed { opacity: 0.55; }
-.model-seg { margin: 6px 0 10px; flex-wrap: wrap; }
+.model-seg { margin: 6px 0 22px; flex-wrap: wrap; border: 0; padding: 0; gap: 8px; }
+.model-seg button { border: 1px solid var(--line-soft); border-radius: 999px; padding: 9px 18px; transition: all 0.15s ease; }
+.model-seg button:hover { color: var(--text, #111); border-color: var(--text, #111); }
+.model-seg button[aria-selected="true"] { background: var(--text, #111); color: var(--background, #fff); border-color: var(--text, #111); }
+.panel-divider { border: 0; border-top: 1px solid var(--line-soft); margin: 30px 0; }
 .model-pane[hidden] { display: none; }
 
 /* ---------- code section ---------- */
@@ -209,7 +213,6 @@
       <!-- ================= MCP ================= -->
       <div class="pane" id="pane-mcp">
         <p class="status-note">live</p>
-        <p class="soon-hint">The hosted MCP server is live, with nine tools: <code class="mono">score_reform</code> and <code class="mono">list_reform_variables</code> (OBR emulator); <code class="mono">forecast_uk</code>, <code class="mono">latest_shocks</code>, and <code class="mono">model_summary</code> (UK SVAR); the PolicyEngine household tools <code class="mono">calculate_household</code>, <code class="mono">household_reform_impact</code>, and <code class="mono">list_reform_parameters</code>; and <code class="mono">og_score_reform_steady_state</code> (OG-UK) — that last one only works locally: an OG-UK solve takes tens of minutes, so the hosted server excludes the solver and the tool errors there. Run it via the CLI (<code class="mono">macromod og-score</code>) or a local MCP server instead. The hosted server runs serverless and scales to zero, so the first call after a quiet spell can take ~10 seconds to wake.</p>
 
         <div class="steps" data-for="claude">
           <div class="step">
@@ -230,7 +233,8 @@
           </div>
         </div>
 
-        <div class="steps" data-for="claude" style="margin-top: 26px;">
+        <hr class="panel-divider" data-for="claude" />
+        <div class="steps" data-for="claude" style="margin-top: 0;">
           <div class="step" style="grid-column: 1 / -1;">
             <h3>Using Claude Code?</h3>
             <p>One command adds the same server to Claude Code:</p>
@@ -257,13 +261,18 @@
           </div>
         </div>
 
-        <div class="steps" data-for="chatgpt" hidden style="margin-top: 26px;">
+        <hr class="panel-divider" data-for="chatgpt" hidden />
+        <div class="steps" data-for="chatgpt" hidden style="margin-top: 0;">
           <div class="step" style="grid-column: 1 / -1;">
             <h3>Using Codex?</h3>
             <p>One command adds the same server to OpenAI's Codex CLI:</p>
             <div class="copyblock"><code>codex mcp add macromod --url https://policyengine--macromod-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
           </div>
         </div>
+
+        <hr class="panel-divider" />
+        <p class="mono foot-head" style="margin-bottom:10px;">on the server</p>
+        <p class="soon-hint">The hosted MCP server is live, with nine tools: <code class="mono">score_reform</code> and <code class="mono">list_reform_variables</code> (OBR emulator); <code class="mono">forecast_uk</code>, <code class="mono">latest_shocks</code>, and <code class="mono">model_summary</code> (UK SVAR); the PolicyEngine household tools <code class="mono">calculate_household</code>, <code class="mono">household_reform_impact</code>, and <code class="mono">list_reform_parameters</code>; and <code class="mono">og_score_reform_steady_state</code> (OG-UK) — that last one only works locally: an OG-UK solve takes tens of minutes, so the hosted server excludes the solver and the tool errors there. Run it via the CLI (<code class="mono">macromod og-score</code>) or a local MCP server instead. The hosted server runs serverless and scales to zero, so the first call after a quiet spell can take ~10 seconds to wake.</p>
       </div>
 
       <!-- ================= CLI ================= -->
@@ -807,7 +816,7 @@ us = pe.us.calculate_household(
   }
   function applyClient() {
     var c = currentClient();
-    document.querySelectorAll(".pane .steps[data-for]").forEach(function (s) {
+    document.querySelectorAll(".pane .steps[data-for], .pane hr[data-for]").forEach(function (s) {
       s.hidden = s.dataset.for !== c;
     });
   }
