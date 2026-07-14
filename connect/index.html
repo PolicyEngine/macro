@@ -515,8 +515,8 @@ Debt:    <span class="out-val">−3.1bn</span></code></pre>
       <!-- ===================== OBR ===================== -->
       <div class="model-pane" data-model="obr" hidden>
       <p>
-        The OBR emulator ships its equation listing and forecast data with the
-        code, so this one installs from a checkout, then a reform is a single
+        The OBR emulator ships its equation listing and forecast data inside
+        the package — one pip install, no clone — then a reform is a single
         shock to an exogenous variable:
       </p>
 
@@ -533,8 +533,7 @@ Debt:    <span class="out-val">−3.1bn</span></code></pre>
           <span class="cw-name">install</span>
           <button class="cw-copy" data-copy>copy</button>
         </div>
-        <pre><code>git clone https://github.com/PolicyEngine/obr-macroeconomic-model
-cd obr-macroeconomic-model &amp;&amp; uv sync</code></pre>
+        <pre><code>pip install git+https://github.com/PolicyEngine/obr-macroeconomic-model</code></pre>
       </div>
 
       <div class="code-window">
@@ -602,8 +601,8 @@ results = run_reform(
       <div class="model-pane" data-model="svar" hidden>
       <p>
         The structural VAR doesn't score reforms (yet) — it reads the economy.
-        Install the package from GitHub, grab a checkout for the runner
-        scripts, and the pipeline is four moves:
+        One pip install — the assembled dataset and latest results ship inside
+        the package — and the pipeline is four moves:
       </p>
 
       <div class="moves">
@@ -619,8 +618,7 @@ results = run_reform(
           <span class="cw-name">install</span>
           <button class="cw-copy" data-copy>copy</button>
         </div>
-        <pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model
-git clone https://github.com/PolicyEngine/boe-var-model &amp;&amp; cd boe-var-model</code></pre>
+        <pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre>
       </div>
 
       <div class="code-window">
@@ -629,14 +627,18 @@ git clone https://github.com/PolicyEngine/boe-var-model &amp;&amp; cd boe-var-mo
           <span class="cw-name">run the pipeline</span>
           <button class="cw-copy" data-copy>copy</button>
         </div>
-        <pre><code><span class="cm"># assemble the public data (ONS, Bank of England database, FRED)</span>
-python scripts/download_data.py
+        <pre><code><span class="cm"># the packaged dataset loads out of the box — no download step</span>
+from boe_var.data import load_data
+from boe_var.bvar import BVAR
+from boe_var.identification import identify
 
-<span class="cm"># the paper's core outputs: IRFs, FEVDs, shocks, historical decompositions</span>
-python scripts/run_replication.py
+df = load_data()                    <span class="cm"># 8 quarterly series, 1992Q1–2024Q2</span>
+model = BVAR(df.to_numpy(), lags=4)
+draws = model.sample_posterior(1000)
+pairs = identify(draws)             <span class="cm"># zero + sign restrictions, 6 shocks</span>
 
-<span class="cm"># forecasting: fan charts, latest-quarter shock signs, forecast-revision decomposition</span>
-python scripts/run_forecast_revision.py</code></pre>
+<span class="cm"># full figure pipeline (IRFs, FEVDs, forecasts): the repo's scripts —
+# clone only if you want to develop or regenerate results/</span></code></pre>
       </div>
 
       <div class="code-window cw-out">
@@ -653,8 +655,9 @@ UK CPI  identified global <span class="out-val">50.1%</span>  domestic <span cla
         Under the hood: an 8-variable Bayesian VAR (1992Q1–2023Q2, Covid
         dummies) is sampled from its normal-inverse-Wishart posterior, and each
         draw is rotated per Arias–Rubio-Ramírez–Waggoner (2018) until the zero
-        and sign restrictions name six structural shocks. Figures and summary
-        tables land in <code>results/</code>.
+        and sign restrictions name six structural shocks. The macromod CLI
+        wraps the common outputs: <code>macromod forecast</code>,
+        <code>macromod shocks</code>, <code>macromod summary</code>.
       </p>
 
       <div class="dials">
