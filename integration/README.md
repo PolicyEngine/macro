@@ -20,7 +20,17 @@ one CLI and one MCP server:
 
 ## Install
 
-Into the conda `python313` env (unset `VIRTUAL_ENV` first if set):
+No clone needed — one pip install pulls the CLI plus all three models
+(the OBR emulator and the SVAR ship their data as package data):
+
+```bash
+pip install "macromod[models] @ git+https://github.com/PolicyEngine/MacroMod#subdirectory=integration"
+```
+
+A shorter `pip install macromod` will come with PyPI publication.
+
+For development, install the local checkouts editable instead
+(into the conda `python313` env; unset `VIRTUAL_ENV` first if set):
 
 ```bash
 PY=/Users/janansadeqian/anaconda3/envs/python313/bin/python

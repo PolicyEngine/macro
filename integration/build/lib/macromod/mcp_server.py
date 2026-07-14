@@ -220,14 +220,10 @@ def og_score_reform_steady_state(
         start_year: Reform start year (default 2026).
         max_iter: Max solver iterations per steady-state solve (default 250).
 
-    VERY SLOW: a single solve (PolicyEngine microdata calibration + OG-Core
-    steady state) measured >17 minutes on a laptop, and the first call needs
-    two solves (baseline is cached in-process afterwards). Runtime is tens of
-    minutes — suited to the CLI (`macromod og-score`) or a long-timeout API
-    client, not interactive chat; it is excluded from the hosted Modal server.
-    Requires PolicyEngine enhanced-FRS microdata access (HUGGING_FACE_TOKEN)
-    and an oguk-compatible policyengine-uk (oguk 0.3.0 pins
-    policyengine-uk==2.88.0); otherwise it fails fast with instructions.
+    SLOW: roughly 8-12 minutes for the first call (two full solves); the
+    baseline is cached in-process, so later reforms in a warm container take
+    roughly half that. Best suited to the CLI (`macromod og-score`) or a
+    patient API client; expect to wait.
     """
     return core.og_score_reform(
         parameter=parameter, value=value, start_year=start_year,

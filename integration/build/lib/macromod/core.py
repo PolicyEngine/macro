@@ -567,40 +567,12 @@ def _og_build_policy(parameter: str, value: float, start_year: int):
     )
 
 
-def _og_solve(solve_fn, **kwargs):
-    """Run an oguk steady-state solve, failing fast with an actionable error.
-
-    oguk's calibration builds tax functions from the PolicyEngine
-    enhanced-FRS UK microdata, downloaded via
-    policyengine.tax_benefit_models.uk.ensure_datasets. Known environment
-    failures are translated into clear messages: (a) no HuggingFace access to
-    the dataset — set HUGGING_FACE_TOKEN; (b) policyengine-uk >= 2.89 renamed
-    the dataset keys from enhanced_frs_2023_24_<year> to populace_uk_*, which
-    makes oguk 0.3.0 (pinning policyengine-uk==2.88.0) fail with a KeyError.
-    """
-    try:
-        return solve_fn(**kwargs)
-    except KeyError as e:
-        raise RuntimeError(
-            "OG-UK calibration could not find the PolicyEngine enhanced-FRS "
-            f"microdata dataset (missing dataset key {e}). Likely causes: "
-            "(a) no access to the enhanced-FRS dataset on HuggingFace — set "
-            "HUGGING_FACE_TOKEN to a token with access "
-            "(policyengine.tax_benefit_models.uk.ensure_datasets downloads "
-            "it); (b) incompatible policyengine-uk version — oguk 0.3.0 "
-            "requires policyengine-uk==2.88.0 (>= 2.89 renamed the datasets)"
-            ": pip install 'policyengine-uk==2.88.0'."
-        ) from e
-
-
 def _og_solve_baseline(start_year: int, max_iter: int, use_cache: bool = True):
     solve_steady_state, _ = _import_oguk()
     key = (int(start_year), int(max_iter))
     if use_cache and key in _OG_BASELINE_CACHE:
         return _OG_BASELINE_CACHE[key]
-    ss = _og_solve(
-        solve_steady_state, start_year=int(start_year), max_iter=int(max_iter)
-    )
+    ss = solve_steady_state(start_year=int(start_year), max_iter=int(max_iter))
     if use_cache:
         _OG_BASELINE_CACHE[key] = ss
     return ss
@@ -645,9 +617,8 @@ def og_score_reform(
     solve_steady_state, map_to_real_world = _import_oguk()
     policy = _og_build_policy(parameter, float(value), int(start_year))
     baseline_ss = _og_solve_baseline(start_year, max_iter, use_cache=baseline_cache)
-    reform_ss = _og_solve(
-        solve_steady_state, start_year=int(start_year), policy=policy,
-        max_iter=int(max_iter),
+    reform_ss = solve_steady_state(
+        start_year=int(start_year), policy=policy, max_iter=int(max_iter)
     )
     impact = map_to_real_world(baseline_ss, reform_ss)
     imp = impact.model_dump()
@@ -707,18 +678,12 @@ def _parse_md_table(text: str, heading: str) -> list[dict]:
 def svar_summary() -> dict:
     """Parse the SVAR repo's committed results (no estimation; instant).
 
-    Reads summary.md and forecast_summary.md via boe_var.data.results_dir(),
-    which resolves the repo checkout when present and the packaged snapshot
-    otherwise (so this works from a bare pip install).
+    Reads results/summary.md and results/forecast_summary.md from the
+    boe-var-model checkout.
     """
-    try:
-        from boe_var.data import results_dir
-        rdir = results_dir()
-    except ImportError:
-        rdir = BOE_VAR_REPO / "results"
-    summary_path = rdir / "summary.md"
-    fsummary_path = rdir / "forecast_summary.md"
-    out: dict = {"source": str(rdir)}
+    summary_path = BOE_VAR_REPO / "results" / "summary.md"
+    fsummary_path = BOE_VAR_REPO / "results" / "forecast_summary.md"
+    out: dict = {"source": str(BOE_VAR_REPO / "results")}
 
     if summary_path.exists():
         text = summary_path.read_text()

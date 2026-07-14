@@ -25,6 +25,19 @@ COST PROFILE
   calls are sub-cent noise. Idle cost is exactly $0.
 - max_containers=3 -> hard spend cap against abuse/fan-out.
 - timeout=600 -> allows high-draw forecasts (e.g. draws=6000) to finish.
+
+OG-UK (oguk) IS DELIBERATELY NOT IN THIS IMAGE
+----------------------------------------------
+The OG-UK steady-state adapters (og_score_reform / og-score CLI) need a
+PolicyEngine microdata calibration plus an OG-Core steady-state solve per
+scenario: measured >17 minutes for ONE baseline solve at defaults on a laptop,
+and a reform score needs two solves. That cannot fit the 600s Modal timeout
+with any headroom, so oguk is excluded here; the og_score_reform_steady_state
+MCP tool will return an ImportError on the hosted server. Use the local CLI
+(`macromod og-score`) or a local MCP server instead. If it is ever added,
+`pip install git+https://github.com/PSLmodels/OG-UK` works (hatchling build;
+heavy deps: ogcore, policyengine-uk==2.88.0), but calibration also downloads
+the enhanced FRS dataset (HUGGING_FACE_TOKEN) and UN demographics at runtime.
 """
 
 from __future__ import annotations

@@ -15,9 +15,16 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# obr-macro-model and boe_var are installed from local checkouts;
-# policyengine comes from PyPI (heavy: full UK+US country models).
-models = ["policyengine>=4,<5"]
+# The two model packages install straight from GitHub (they ship their data
+# as package data — no clone needed); policyengine comes from PyPI (heavy:
+# full UK+US country models).
+models = [
+    "obr-macro-model @ git+https://github.com/PolicyEngine/obr-macroeconomic-model",
+    "boe_var @ git+https://github.com/PolicyEngine/boe-var-model",
+    # [models] pulls the pinned policyengine-uk / policyengine-us country
+    # packages that pe.uk / pe.us need at runtime.
+    "policyengine[models]>=4,<5",
+]
 
 [project.scripts]
 macromod = "macromod.cli:main"

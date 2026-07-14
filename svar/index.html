@@ -128,15 +128,19 @@
     </div>
     <div class="prose">
       <p>
-        The package installs straight from GitHub; the runner scripts live in
-        the repository, so grab a checkout for those. Every input series is
-        public — ONS, the Bank of England database, and FRED — and the data
-        script assembles them for you.
+        The package installs straight from GitHub — no clone needed. The
+        prepared quarterly dataset ships inside the package, so
+        <code>boe_var.data.load_data()</code> works immediately. Every input
+        series is public — ONS, the Bank of England database, and FRED.
       </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model
-git clone https://github.com/PolicyEngine/boe-var-model &amp;&amp; cd boe-var-model
-python scripts/download_data.py     <span class="cm"># assemble the public data</span></code></pre></div>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="cm"># the paper's core outputs: IRFs, FEVDs, shocks, historical decompositions</span>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
+      <p>
+        The runner scripts are for development — clone the repository if you
+        want to rebuild the dataset or regenerate the paper outputs:
+      </p>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>python scripts/download_data.py     <span class="cm"># reassemble the public data</span>
+
+<span class="cm"># the paper's core outputs: IRFs, FEVDs, shocks, historical decompositions</span>
 python scripts/run_replication.py
 
 <span class="cm"># the forecasting toolkit: fan charts, latest-quarter shock distributions,</span>
