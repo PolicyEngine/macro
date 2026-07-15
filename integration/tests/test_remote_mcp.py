@@ -43,6 +43,33 @@ async def _call(tool: str, args: dict | None = None):
 
 
 @pytest.mark.anyio
+async def test_liveness_handshake():
+    """Canonical uptime probe for the deployed server.
+
+    A full MCP handshake over streamable HTTP: initialize (server responds and
+    identifies itself), tools/list (the expected tools are advertised), and one
+    instant tool call (model_summary returns real content). If this passes, the
+    live Modal endpoint is up and answering correctly.
+    """
+    from mcp import ClientSession
+    from mcp.client.streamable_http import streamablehttp_client
+
+    async with streamablehttp_client(URL, timeout=60) as (read, write, _):
+        async with ClientSession(read, write) as session:
+            init = await session.initialize()
+            assert init.serverInfo is not None, "no serverInfo in initialize result"
+
+            tools = await session.list_tools()
+            names = {t.name for t in tools.tools}
+            assert EXPECTED_TOOLS <= names, names
+
+            res = await session.call_tool("model_summary", {})
+            assert not res.isError, res.content
+            out = json.loads(res.content[0].text)
+            assert "replication" in out, out
+
+
+@pytest.mark.anyio
 async def test_lists_all_five_tools():
     from mcp import ClientSession
     from mcp.client.streamable_http import streamablehttp_client

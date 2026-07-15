@@ -1,0 +1,50 @@
+name: Integration tests
+
+# Fast wiring/integration suite for the macromod integration layer. Runs on
+# PRs and pushes that touch integration/**. It installs the base macromod
+# package plus the two lightweight model repos (OBR emulator + UK SVAR) so the
+# real OBR/SVAR wiring is exercised, but NOT the heavy PolicyEngine country
+# models — those (and every full model solve) are marked `slow` and skipped by
+# default, and are covered by local `pytest --runslow` and by the post-deploy
+# remote smoke test in deploy-mcp.yml. Any test that needs a model that is not
+# installed skips cleanly rather than failing.
+
+on:
+  pull_request:
+    paths: [integration/**, .github/workflows/test-integration.yml]
+  push:
+    branches: [main]
+    paths: [integration/**, .github/workflows/test-integration.yml]
+
+concurrency:
+  group: test-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: integration
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install macromod + the two lightweight model repos
+        run: |
+          python -m pip install --upgrade pip
+          # Base package (click, numpy, pandas, mcp) + pytest.
+          pip install -e . pytest
+          # OBR emulator and UK SVAR ship their data and are light (numpy/
+          # pandas/scipy); install so the real OBR/SVAR wiring is exercised.
+          # PolicyEngine (heavy) is intentionally omitted: its adapters are
+          # covered by pure-Python and mocked tests, and full runs are `slow`.
+          pip install \
+            "obr-macro-model @ git+https://github.com/PolicyEngine/obr-macroeconomic-model" \
+            "boe_var @ git+https://github.com/PolicyEngine/boe-var-model"
+      - name: Run fast integration suite
+        # No --runslow: slow model solves/imports are skipped. The remote
+        # (live-deployment) tests are skipped because MACROMOD_REMOTE_TESTS is
+        # unset. Keeps the check fast and green without Modal auth.
+        run: pytest tests -q

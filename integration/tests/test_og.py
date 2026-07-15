@@ -2,13 +2,52 @@
 
 Fast tests mock the oguk solver and policy construction (a real solve takes
 minutes). One slow end-to-end test runs a real reform score.
+
+OG-UK (oguk) is a local-only tool: it is deliberately excluded from the Modal
+deployment image (see modal_app.py). oguk 0.3.0 calibrates its tax functions
+from the PolicyEngine enhanced-FRS microdata and pins policyengine-uk==2.88.0;
+policyengine-uk >= 2.89 renamed the dataset keys (enhanced_frs_2023_24_* ->
+populace_uk_*), so calibration KeyError-fails under a newer PE. The macromod
+package itself requires policyengine[models]>=4 (which brings pe-uk >= 2.89 for
+the household/population tools), so a single env cannot satisfy both. The real
+end-to-end solve is therefore skipped when the installed PE is incompatible
+with oguk's calibration; the adapter's translation of that failure into an
+actionable error is covered by test_og_dataset_keyerror_translated.
 """
 
 import json
+import os
 
 import pytest
 
 from macromod import core
+
+
+def _oguk_calibration_skip_reason():
+    """Return a skip reason if a real oguk solve can't calibrate here, else None."""
+    try:
+        import oguk  # noqa: F401
+    except ImportError:
+        return "oguk not installed (local-only tool; excluded from Modal image)"
+    try:
+        from importlib.metadata import version
+
+        peuk = version("policyengine-uk")
+        major, minor = (int(x) for x in peuk.split(".")[:2])
+    except Exception:
+        return "policyengine-uk not importable for oguk calibration"
+    if (major, minor) >= (2, 89):
+        return (
+            f"oguk 0.3.0 needs policyengine-uk==2.88.x; installed {peuk} renamed "
+            "the enhanced-FRS dataset keys (calibration KeyError). Error path is "
+            "covered by test_og_dataset_keyerror_translated."
+        )
+    if not (os.environ.get("HUGGING_FACE_TOKEN") or os.environ.get("HF_TOKEN")):
+        return "set HUGGING_FACE_TOKEN to download the enhanced-FRS microdata"
+    return None
+
+
+_OGUK_SKIP = _oguk_calibration_skip_reason()
 
 
 class _FakeSS:
@@ -132,6 +171,7 @@ def test_og_build_policy_real():
 
 
 @pytest.mark.slow
+@pytest.mark.skipif(_OGUK_SKIP is not None, reason=_OGUK_SKIP or "")
 def test_og_score_reform_end_to_end():
     """Full baseline + reform steady-state solves (~10+ minutes)."""
     res = core.og_score_reform("gov.hmrc.income_tax.rates.uk[0].rate", 0.21)

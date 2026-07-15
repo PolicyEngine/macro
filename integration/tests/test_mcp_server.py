@@ -29,6 +29,7 @@ def _payload(result):
     return json.loads(result.content[0].text)
 
 
+@pytest.mark.slow
 @pytest.mark.anyio
 async def test_mcp_tools_and_calls():
     async with stdio_client(SERVER) as (read, write):

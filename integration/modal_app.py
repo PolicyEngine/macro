@@ -34,7 +34,7 @@ COST PROFILE
 
 POPULATION DATA (population_reform_impact)
 ------------------------------------------
-- Secret "huggingface-token" provides HUGGING_FACE_TOKEN for the private UK
+- Secret "macromod-hf" provides HUGGING_FACE_TOKEN for the private UK
   enhanced-FRS microdata on HuggingFace.
 - A modal.Volume ("macromod-pe-data") is mounted at /root/.cache/macromod;
   HF_HOME points the HuggingFace download cache inside it and
@@ -150,12 +150,17 @@ pe_data_volume = modal.Volume.from_name("macromod-pe-data", create_if_missing=Tr
     min_containers=0,       # scale to zero: no idle cost
     scaledown_window=300,   # stay warm 5 min between calls, then sleep
     max_containers=3,       # spend cap
-    secrets=[modal.Secret.from_name("huggingface-token")],
+    secrets=[modal.Secret.from_name("macromod-hf")],
     volumes={CACHE_DIR: pe_data_volume},
 )
 @modal.concurrent(max_inputs=20)
 @modal.asgi_app()
 def serve():
+    import os
+    # Accept either variable name; policyengine reads HUGGING_FACE_TOKEN.
+    if "HUGGING_FACE_TOKEN" not in os.environ and os.environ.get("HF_TOKEN"):
+        os.environ["HUGGING_FACE_TOKEN"] = os.environ["HF_TOKEN"]
+
     from macromod import core
     from macromod.mcp_server import mcp
 
