@@ -20,6 +20,11 @@ on:
   schedule:
     - cron: "0 7 * * *"    # daily 07:00 UTC — catch drift between deploys
   workflow_dispatch:
+    inputs:
+      deep:
+        description: "Also run the slow investment-closure solve (minutes on the server)"
+        type: boolean
+        default: false
 
 concurrency:
   group: validate-deployment
@@ -29,7 +34,14 @@ jobs:
   validate:
     name: Live model correctness (remote)
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Fast correctness (spending multiplier, forecast bands, household net
+    # income, liveness) completes in a few minutes. The investment-closure
+    # regression is a real closure solve (minutes on the server) and is the
+    # authoritative HARD GATE in the OBR repo CI (local, pre-deploy); here it
+    # runs only on a manual `deep` dispatch. force_build guarantees the deployed
+    # model is always freshly cloned, so the fast suite is enough to confirm a
+    # functional deploy on the automatic path.
+    timeout-minutes: 20
     # On workflow_run, only validate when the deploy actually succeeded;
     # schedule/manual runs always validate.
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
@@ -42,8 +54,15 @@ jobs:
         # The remote suite talks to the public MCP endpoint over HTTP; it needs
         # no Modal auth and does not import the macromod package.
         run: pip install --upgrade pip && pip install "mcp[cli]" pytest anyio
-      - name: Validate the live deployment (full correctness, incl. slow solves)
+      - name: Validate the live deployment
         working-directory: integration
         env:
           MACROMOD_REMOTE_TESTS: "1"
-        run: pytest tests/test_remote_mcp.py -q --runslow -rA
+        # Default: fast correctness only. `deep=true` (manual) adds --runslow to
+        # also exercise the slow investment-closure solve on the live server.
+        run: |
+          if [ "${{ github.event.inputs.deep }}" = "true" ]; then
+            pytest tests/test_remote_mcp.py -q --runslow -rA
+          else
+            pytest tests/test_remote_mcp.py -q -rA
+          fi

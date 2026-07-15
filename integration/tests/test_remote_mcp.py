@@ -117,10 +117,23 @@ async def test_score_reform_investment_closure_bounded_and_signed():
     server (the stabilisation adds a tracking pass), so it is marked `slow` and
     run in the scheduled full-validation workflow rather than on every deploy.
     """
-    out = await _call(
-        "score_reform",
-        {"var": "TCPRO", "shock": -0.05, "periods": 4, "investment_closure": True},
-    )
+    import asyncio
+
+    try:
+        out = await asyncio.wait_for(
+            _call(
+                "score_reform",
+                {"var": "TCPRO", "shock": -0.05, "periods": 4,
+                 "investment_closure": True},
+            ),
+            timeout=420,
+        )
+    except asyncio.TimeoutError:
+        pytest.fail(
+            "investment-closure solve did not return within 420s on the server "
+            "— too slow (or the container timed out). The closure invariant is "
+            "hard-gated locally in the OBR repo CI."
+        )
     ifs = [r["delta_if_m"] for r in out["results"] if r["delta_if_m"] is not None]
     assert ifs, "no investment deltas returned"
     peak = max(abs(x) for x in ifs)
