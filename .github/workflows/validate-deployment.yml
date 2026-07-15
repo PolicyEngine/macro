@@ -1,0 +1,49 @@
+name: Validate live deployment
+
+# Full correctness validation of the LIVE Modal deployment — not just "the
+# tools respond" but "the model returns correct numbers". This is the guard the
+# deploy pipeline lacked when a stale/broken OBR model (corp-tax investment
+# closure diverging to £-trillions) stayed live behind a green liveness check.
+#
+# Runs the complete remote suite WITH --runslow, so it includes the slow
+# investment-closure regression solve that is skipped on every deploy (too slow
+# for the per-deploy gate). Scheduled daily and on demand; also runnable after a
+# deploy to confirm the served model, and after an OBR/BoE model change.
+
+on:
+  # After every successful deploy, validate the freshly-served model. Using
+  # workflow_run (not repository_dispatch) so this runs AFTER the deploy
+  # finishes, never racing it against the old deployment.
+  workflow_run:
+    workflows: ["Deploy MCP server to Modal"]
+    types: [completed]
+  schedule:
+    - cron: "0 7 * * *"    # daily 07:00 UTC — catch drift between deploys
+  workflow_dispatch:
+
+concurrency:
+  group: validate-deployment
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Live model correctness (remote)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    # On workflow_run, only validate when the deploy actually succeeded;
+    # schedule/manual runs always validate.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install remote test deps
+        # The remote suite talks to the public MCP endpoint over HTTP; it needs
+        # no Modal auth and does not import the macromod package.
+        run: pip install --upgrade pip && pip install "mcp[cli]" pytest anyio
+      - name: Validate the live deployment (full correctness, incl. slow solves)
+        working-directory: integration
+        env:
+          MACROMOD_REMOTE_TESTS: "1"
+        run: pytest tests/test_remote_mcp.py -q --runslow -rA

@@ -104,6 +104,30 @@ async def test_score_reform_cgg():
     assert 3.0 < cum < 8.0, cum
 
 
+@pytest.mark.slow
+@pytest.mark.anyio
+async def test_score_reform_investment_closure_bounded_and_signed():
+    """Regression guard for the corp-tax investment-closure instability.
+
+    This is the exact path that once diverged to +/-£7tn in production while the
+    liveness/tools smoke test stayed green. A corporation-tax (TCPRO) CUT scored
+    WITH the investment closure must (a) stay bounded — |Δ business investment|
+    well under £50bn/quarter — and (b) be correctly signed: a cut lowers the
+    user cost of capital and RAISES investment. Runs a real closure solve on the
+    server (the stabilisation adds a tracking pass), so it is marked `slow` and
+    run in the scheduled full-validation workflow rather than on every deploy.
+    """
+    out = await _call(
+        "score_reform",
+        {"var": "TCPRO", "shock": -0.05, "periods": 4, "investment_closure": True},
+    )
+    ifs = [r["delta_if_m"] for r in out["results"] if r["delta_if_m"] is not None]
+    assert ifs, "no investment deltas returned"
+    peak = max(abs(x) for x in ifs)
+    assert peak < 50_000, f"investment response £{peak:,.0f}m — closure diverging again"
+    assert ifs[-1] > 0, f"corp-tax CUT should raise investment, got {ifs[-1]:+,.0f}"
+
+
 @pytest.mark.anyio
 async def test_forecast_uk_small():
     out = await _call("forecast_uk", {"horizons": 4, "draws": 200})
