@@ -183,9 +183,12 @@ def list_reform_parameters() -> list[dict]:
     `reform` argument of calculate_household / household_reform_impact.
 
     Returns ~10 well-known UK and US parameters with their exact path,
-    description, and units (decimal rates vs annual £/$ amounts). Every path
-    has been verified to resolve. Instant. Other parameter paths from the
-    policyengine-uk/-us parameter trees also work, but are not verified here.
+    description, units (decimal rates vs annual £/$ amounts), and the current
+    baseline_value resolved live from the policyengine parameter tree (so it
+    is never stale). An entry with "live": false failed to resolve upstream —
+    trust its live_error over its static description. Other parameter paths
+    from the policyengine-uk/-us parameter trees also work, but are not
+    listed here.
     """
     return core.pe_list_common_parameters()
 

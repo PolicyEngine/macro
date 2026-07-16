@@ -262,7 +262,10 @@ def parameters(as_json):
     if as_json:
         _emit_json(res)
         return
-    click.echo(_table(res, ["country", "path", "description", "unit"]))
+    cols = ["country", "path", "description", "unit"]
+    if any("baseline_value" in r for r in res):
+        cols.append("baseline_value")
+    click.echo(_table(res, cols))
 
 
 def _echo_og_impact(res: dict) -> None:

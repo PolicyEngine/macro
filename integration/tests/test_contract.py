@@ -1,0 +1,106 @@
+"""Upstream contract tests: every name this package hardcodes must still
+exist upstream.
+
+The adapters compose upstream packages but necessarily hardcode a few names —
+curated parameter paths, headline output-variable names, SVAR column names.
+These tests fail loudly when an upstream rename would otherwise surface as a
+silent drift (stale baseline, mislabeled series) or a runtime AttributeError.
+
+The boe_var checks are fast and run by default. The PolicyEngine checks need
+the full country models (~20s import) and are marked `slow`
+(`pytest --runslow`); they also run implicitly wherever PE is installed,
+e.g. the Modal image.
+"""
+
+import pytest
+
+from macromod import core
+
+
+# ---------------------------------------------------------------------------
+# boe_var (fast)
+# ---------------------------------------------------------------------------
+
+def test_svar_headline_columns_exist_upstream():
+    data = pytest.importorskip("boe_var.data")
+    for col in (core._COL_CPI, core._COL_GDP):
+        assert col in data.COLUMNS, (
+            f"boe_var.data.COLUMNS no longer contains {col!r}; "
+            "the SVAR headline series lookup would fail"
+        )
+
+
+def test_svar_shock_names_mark_unidentified():
+    analysis = pytest.importorskip("boe_var.analysis")
+    identified = [n for n in analysis.SHOCK_NAMES if not n.startswith("Unident")]
+    assert len(identified) == 6, (
+        "expected 6 identified shocks in boe_var.analysis.SHOCK_NAMES, "
+        f"got {identified}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# PolicyEngine (slow: full country-model import)
+# ---------------------------------------------------------------------------
+
+# Every variable name _pe_summary and pe_population_impact read off results.
+PE_VARIABLE_CONTRACT = {
+    "uk": [
+        "income_tax", "national_insurance", "hbai_household_net_income",
+        "household_tax", "household_benefits", "universal_credit",
+        "child_benefit",
+        # population scoring
+        "gov_balance", "gov_tax", "household_net_income",
+        "household_income_decile",
+    ],
+    "us": [
+        "income_tax", "employee_payroll_tax", "state_income_tax", "ctc",
+        "eitc", "household_net_income", "household_tax",
+        "household_benefits",
+    ],
+}
+
+
+def _pe_model(country):
+    # importorskip only catches ImportError; a broken policyengine install
+    # (e.g. a pydantic version mismatch) raises other exceptions at import
+    # time and should also skip, not error.
+    try:
+        import policyengine as pe
+    except Exception as e:
+        pytest.skip(f"policyengine not importable: {type(e).__name__}: {e}")
+    return getattr(pe, country).model
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("entry", core.PE_PARAMETERS,
+                         ids=lambda e: f"{e['country']}:{e['path']}")
+def test_curated_parameter_paths_resolve(entry):
+    model = _pe_model(entry["country"])
+    model.get_parameter(entry["path"])  # raises ValueError if renamed away
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("country", sorted(PE_VARIABLE_CONTRACT))
+def test_hardcoded_variable_names_exist(country):
+    model = _pe_model(country)
+    missing = []
+    for name in PE_VARIABLE_CONTRACT[country]:
+        try:
+            model.get_variable(name)
+        except ValueError:
+            missing.append(name)
+    assert not missing, (
+        f"{country} model no longer defines {missing}; "
+        "_pe_summary/pe_population_impact would break or silently change"
+    )
+
+
+@pytest.mark.slow
+def test_parameters_resolve_live_with_baselines():
+    _pe_model("uk")  # skip cleanly when policyengine is not importable
+    out = core.pe_list_common_parameters()
+    broken = [(p["path"], p.get("live_error")) for p in out if not p.get("live")]
+    assert not broken, f"parameter paths failed live resolution: {broken}"
+    no_baseline = [p["path"] for p in out if p.get("baseline_value") is None]
+    assert not no_baseline, f"no current baseline value for: {no_baseline}"

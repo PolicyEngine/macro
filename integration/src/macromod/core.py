@@ -13,10 +13,10 @@ import numpy as np
 
 BOE_VAR_REPO = Path("/Users/janansadeqian/boe-var-model")
 
-# Column indices in the boe_var 8-variable dataset.
-_I_CPI, _I_GDP = 5, 7
-# The 6 identified shocks (indices into SHOCK_NAMES; 3 and 7 are unidentified).
-_IDENTIFIED = [0, 1, 2, 4, 5, 6]
+# boe_var column names for the two headline series. Resolved to indices by
+# name against the loaded dataset's own columns, so an upstream reorder can
+# never silently mislabel a series.
+_COL_CPI, _COL_GDP = "cpisa", "uk_gdp"
 
 
 # ---------------------------------------------------------------------------
@@ -248,8 +248,8 @@ def svar_forecast(horizons: int = 12, draws: int = 500) -> dict:
         "accepted_draws": est["n_accepted"],
         "ess": round(est["ess"], 1),
         "units": "YoY percent (4-quarter log difference of 100*log levels)",
-        "gdp_growth_yoy": _series(_I_GDP),
-        "cpi_inflation_yoy": _series(_I_CPI),
+        "gdp_growth_yoy": _series(list(est["df_full"].columns).index(_COL_GDP)),
+        "cpi_inflation_yoy": _series(list(est["df_full"].columns).index(_COL_CPI)),
     }
     _FORECAST_CACHE[key] = out
     return out
@@ -277,8 +277,12 @@ def svar_latest_shocks(draws: int = 500) -> dict:
     dist = forecast.shock_distribution_T(est["pairs"], resid_fn, weights=est["weights"])
     last_q = str(est["df_full"].index[-1])
 
+    # Identified shocks, derived from upstream's own names (the rest are
+    # explicitly "Unident." in SHOCK_NAMES).
+    identified = [j for j, n in enumerate(SHOCK_NAMES) if not n.startswith("Unident")]
+
     shocks = []
-    for j in _IDENTIFIED:
+    for j in identified:
         p = float(dist["p_pos"][j])
         p_dom = max(p, 1 - p)
         sign = "positive" if p >= 0.5 else "negative"
@@ -330,31 +334,31 @@ PE_PARAMETERS = [
         "country": "uk",
         "path": "gov.hmrc.income_tax.rates.uk[0].rate",
         "description": "Income tax basic rate (England/Wales/NI)",
-        "unit": "decimal rate (baseline 0.20)",
+        "unit": "decimal rate",
     },
     {
         "country": "uk",
         "path": "gov.hmrc.income_tax.rates.uk[1].rate",
         "description": "Income tax higher rate",
-        "unit": "decimal rate (baseline 0.40)",
+        "unit": "decimal rate",
     },
     {
         "country": "uk",
         "path": "gov.hmrc.income_tax.allowances.personal_allowance.amount",
         "description": "Income tax personal allowance",
-        "unit": "GBP per year (baseline 12,570)",
+        "unit": "GBP per year",
     },
     {
         "country": "uk",
         "path": "gov.dwp.universal_credit.means_test.reduction_rate",
         "description": "Universal Credit taper (earnings reduction) rate",
-        "unit": "decimal rate (baseline 0.55)",
+        "unit": "decimal rate",
     },
     {
         "country": "uk",
         "path": "gov.hmrc.national_insurance.class_1.rates.employee.main",
         "description": "Employee National Insurance main rate",
-        "unit": "decimal rate (baseline 0.08)",
+        "unit": "decimal rate",
     },
     {
         "country": "uk",
@@ -387,19 +391,19 @@ PE_PARAMETERS = [
         "country": "us",
         "path": "gov.irs.credits.ctc.amount.base[0].amount",
         "description": "Child Tax Credit base amount per child",
-        "unit": "USD per year (baseline 2,000)",
+        "unit": "USD per year",
     },
     {
         "country": "us",
         "path": "gov.irs.credits.ctc.amount.adult_dependent",
         "description": "CTC amount for adult dependents (credit for other dependents)",
-        "unit": "USD per year (baseline 500)",
+        "unit": "USD per year",
     },
     {
         "country": "us",
         "path": "gov.irs.income.bracket.rates.2",
-        "description": "Federal income tax rate in the third bracket",
-        "unit": "decimal rate (baseline 0.22)",
+        "description": "Federal income tax rate (bracket 2 — the 12% bracket)",
+        "unit": "decimal rate",
     },
     {
         "country": "us",
@@ -410,9 +414,67 @@ PE_PARAMETERS = [
 ]
 
 
-def pe_list_common_parameters() -> list[dict]:
-    """Curated, verified PolicyEngine reform parameters with paths and units."""
-    return [dict(p) for p in PE_PARAMETERS]
+def _pe_current_value(param):
+    """The parameter value in force today, from upstream's own value history.
+
+    The value with the latest start_date that is <= today. end_date is
+    deliberately ignored: upstream builds parameter_values from a
+    newest-first values_list, so each entry's end_date is the chronologically
+    *previous* instant, not a validity end.
+    """
+    from datetime import date
+
+    def _d(v):
+        return v.date() if hasattr(v, "date") else v
+
+    today = date.today()
+    best_start, current = None, None
+    for pv in param.parameter_values:
+        start = _d(pv.start_date) if pv.start_date else None
+        if start is not None and start <= today and (
+            best_start is None or start > best_start
+        ):
+            best_start, current = start, pv.value
+    return current
+
+
+def pe_list_common_parameters(resolve: bool = True) -> list[dict]:
+    """Curated PolicyEngine reform parameters, enriched from the live model.
+
+    The path list is curated here, but baseline values, labels, and units are
+    resolved from the policyengine package's own parameter tree at call time,
+    so they can never go stale. A path that no longer resolves upstream is
+    returned with ``"live": False`` and an explicit ``"live_error"`` instead
+    of a silently wrong entry. ``resolve=False`` skips the (heavy) policyengine
+    import and returns just the static catalogue.
+    """
+    out = [dict(p) for p in PE_PARAMETERS]
+    if not resolve:
+        return out
+    try:
+        pe = _import_pe()
+    except Exception as e:
+        # policyengine missing or its import broken: return the static
+        # catalogue rather than failing the whole listing, but say so.
+        for p in out:
+            p["live"] = False
+            p["live_error"] = f"{type(e).__name__}: {e}"
+        return out
+    for p in out:
+        model = getattr(pe, p["country"]).model
+        try:
+            param = model.get_parameter(p["path"])
+        except ValueError as e:
+            p["live"] = False
+            p["live_error"] = str(e)
+            continue
+        p["live"] = True
+        if param.label:
+            p["label"] = param.label
+        if param.unit:
+            p["upstream_unit"] = param.unit
+        p["baseline_value"] = _pe_jsonify(_pe_current_value(param))
+    return out
 
 
 def _pe_jsonify(value):
