@@ -52,7 +52,7 @@ def score(country, reform, model, year, max_iter, as_json):
             country=country, reform=_json_opt(reform, "reform"), model=model,
             start_year=year, max_iter=max_iter,
         )
-    except NotImplementedError as e:
+    except (NotImplementedError, ValueError) as e:
         raise click.ClickException(str(e)) from e
     if as_json:
         _emit_json(res)
@@ -66,8 +66,9 @@ def score(country, reform, model, year, max_iter, as_json):
               help="Shock size; units depend on the variable (£m/quarter for CGG, decimal for TCPRO).")
 @click.option("--periods", default=12, show_default=True, help="Quarters the shock is applied.")
 @click.option("--name", default=None, help="Label for the reform.")
-@click.option("--investment-closure", is_flag=True,
-              help="Activate the cost-of-capital investment channel (needed for TCPRO shocks).")
+@click.option("--investment-closure/--no-investment-closure", default=None,
+              help="Cost-of-capital investment channel; omit for the safe "
+                   "per-variable default (on for TCPRO, off otherwise).")
 @click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
 def obr_shock(var, shock, periods, name, investment_closure, as_json):
     """Shock one OBR variable directly, in model units (escape hatch)."""
@@ -336,9 +337,13 @@ def _echo_og_impact(res: dict) -> None:
 @click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
 def og_score(reform, year, max_iter, as_json):
     """Score a reform with the OG-UK model (alias for `score --model og`; slow: ~10 min)."""
-    res = core.og_score_reform(
-        reform=_json_opt(reform, "reform"), start_year=year, max_iter=max_iter,
-    )
+    try:
+        res = core.og_score_reform(
+            reform=_json_opt(reform, "reform"), start_year=year,
+            max_iter=max_iter,
+        )
+    except ValueError as e:
+        raise click.ClickException(str(e)) from e
     if as_json:
         _emit_json(res)
         return

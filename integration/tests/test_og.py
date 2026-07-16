@@ -90,8 +90,11 @@ def fake_oguk(monkeypatch):
         return _FakeImpact()
 
     monkeypatch.setattr(core, "_import_oguk", lambda: (fake_solve, fake_map))
-    monkeypatch.setattr(core, "_og_build_policy",
-                        lambda reform, start_year: object())
+    def fake_build_policy(reform, start_year):
+        calls.setdefault("policy_reforms", []).append(dict(reform))
+        return object()
+
+    monkeypatch.setattr(core, "_og_build_policy", fake_build_policy)
     monkeypatch.setattr(core, "_OG_BASELINE_CACHE", {})
     return calls
 
@@ -188,6 +191,17 @@ def test_og_score_reform_end_to_end():
 # ---------------------------------------------------------------------------
 # Unified score_reform dispatcher (one reform vocabulary across the suite)
 # ---------------------------------------------------------------------------
+
+def test_og_multi_parameter_reform_passes_through(fake_oguk):
+    """The full multi-parameter dict reaches policy construction (fast guard
+    for the PR's central behavior; real Policy construction is slow-marked)."""
+    reform = {
+        "gov.hmrc.income_tax.rates.uk[0].rate": 0.21,
+        "gov.hmrc.income_tax.allowances.personal_allowance.amount": 15000,
+    }
+    core.og_score_reform(reform)
+    assert fake_oguk["policy_reforms"] == [reform]
+
 
 def test_score_reform_routes_og(fake_oguk):
     res = core.score_reform(

@@ -15,18 +15,20 @@ general-equilibrium engine.
 
 Every model in the suite scores the same PolicyEngine reform objects and reports
 the same real-world quantities (GDP, consumption, investment, government,
-revenue, debt in £bn), so results are comparable across model classes. The
-structural VAR is the empirical exception: a Python replication of the Bank of
-England's Bayesian SVAR for the UK, it reads the current state of the economy
-in structural-shock terms and forecasts it, but does not score PolicyEngine
-reform objects yet.
+revenue, debt in £bn), so results are comparable across model classes. Two
+current exceptions, stated plainly: the OBR emulator does not take PolicyEngine
+reform objects yet (the microsim static-costing bridge is
+[#9](https://github.com/PolicyEngine/MacroMod/issues/9); raw variable shocks go
+through `obr_shock`), and the structural VAR — a Python replication of the Bank
+of England's Bayesian SVAR for the UK — reads the current state of the economy
+in structural-shock terms and forecasts it, but does not score reforms.
 
 | model | status | repo |
 |-------|--------|------|
 | **Overlapping generations (OG-UK)** | shipped | [PSLmodels/OG-UK](https://github.com/PSLmodels/OG-UK) |
 | **OBR macroeconometric model** | shipped | [PolicyEngine/obr-macroeconomic-model](https://github.com/PolicyEngine/obr-macroeconomic-model) |
 | **Bank of England structural VAR (boe-svar)** | shipped (analysis & forecasting; reform scoring: planned) | [PolicyEngine/boe-var-model](https://github.com/PolicyEngine/boe-var-model) |
-| **PolicyEngine tax-benefit microsimulation** | shipped (household calculator & household reform impacts; population-level scoring: planned) | [PolicyEngine/policyengine.py](https://github.com/PolicyEngine/policyengine.py) |
+| **PolicyEngine tax-benefit microsimulation** | shipped (household calculator, household reform impacts, and population-level scoring) | [PolicyEngine/policyengine.py](https://github.com/PolicyEngine/policyengine.py) |
 | More model classes | planned | — |
 
 PolicyEngine is the *micro* member: person/household-resolution taxes and

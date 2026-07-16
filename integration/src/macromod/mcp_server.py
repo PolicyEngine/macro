@@ -59,7 +59,7 @@ def obr_shock(
     shock: float,
     periods: int = 12,
     name: str | None = None,
-    investment_closure: bool = False,
+    investment_closure: bool | None = None,
 ) -> dict:
     """Shock one OBR model variable directly, in model units (the escape
     hatch under score_reform — no PolicyEngine reform translation).
@@ -76,9 +76,10 @@ def obr_shock(
             TCPRO is a rate change in decimal (e.g. -0.05 = 5 percentage point cut).
         periods: Number of quarters the shock is applied (default 12 = 3 years).
         name: Optional label for the reform.
-        investment_closure: Set True for corporation tax (TCPRO) shocks — it
-            activates the cost-of-capital investment channel; without it TCPRO
-            shocks have no effect on business investment.
+        investment_closure: Omit to use the safe per-variable default (True
+            for TCPRO, False otherwise). It activates the cost-of-capital
+            investment channel; a TCPRO shock without it solves to misleading
+            all-zero deltas, which is why the default is per-variable.
 
     Returns per-period rows (period, delta_gdp_bn, pct_gdp, delta_cons_m,
     delta_if_m), the cumulative GDP effect in £bn over the shocked periods, and
@@ -92,11 +93,12 @@ def obr_shock(
 
 @mcp.tool()
 def list_reform_variables() -> list[dict]:
-    """List the OBR policy variables commonly shocked with score_reform.
+    """List the OBR policy variables commonly shocked with obr_shock.
 
     Returns each variable's code, description, shock units (£m per quarter vs
-    decimal rate change), and whether it needs investment_closure=True.
-    Instant; call this before score_reform if unsure of units.
+    decimal rate change), and whether it defaults investment_closure=True.
+    Instant; call this before obr_shock if unsure of units. (score_reform
+    takes PolicyEngine reform dicts, not these raw variables.)
     """
     return core.obr_list_variables()
 

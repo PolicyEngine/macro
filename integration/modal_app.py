@@ -3,7 +3,7 @@
     modal deploy integration/modal_app.py
 
 Serves the FastMCP instance from `macromod.mcp_server` (tools: score_reform,
-list_reform_variables, forecast_uk, latest_shocks, model_summary,
+obr_shock, list_reform_variables, forecast_uk, latest_shocks, model_summary,
 calculate_household, household_reform_impact, list_reform_parameters,
 population_reform_impact) as an
 ASGI app at  https://policyengine--macromod-mcp-serve.modal.run/mcp
