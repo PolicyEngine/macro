@@ -262,7 +262,19 @@ def parameters(as_json):
     if as_json:
         _emit_json(res)
         return
-    click.echo(_table(res, ["country", "path", "description", "unit"]))
+    cols = ["country", "path", "description", "unit"]
+    for extra in ("baseline_value", "live"):
+        if any(extra in r for r in res):
+            cols.append(extra)
+    click.echo(_table(res, cols))
+    dead = [r for r in res if r.get("live") is False]
+    if dead:
+        click.echo(
+            f"\nWARNING: {len(dead)} parameter(s) failed live resolution "
+            "(static catalogue shown for them):", err=True,
+        )
+        for r in dead:
+            click.echo(f"  {r['path']}: {r.get('live_error')}", err=True)
 
 
 def _echo_og_impact(res: dict) -> None:
