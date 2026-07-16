@@ -39,7 +39,7 @@ def score_reform(
                     locally via `macromod score --model og`; calling it here
                     returns install/CLI instructions.
             'obr' — OBR macroeconometric emulator: NOT WIRED YET. The
-                    microsim-static-costing bridge is tracked in PolicyEngine Macro#9;
+                    microsim-static-costing bridge is tracked in PolicyEngine/macro#9;
                     until it lands, use obr_shock for raw variable shocks.
         start_year: Reform start year (default 2026).
         max_iter: OG steady-state solver iteration cap (default 250).
