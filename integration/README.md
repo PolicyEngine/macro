@@ -52,9 +52,12 @@ until [PSLmodels/OG-UK#68](https://github.com/PSLmodels/OG-UK/issues/68)
 lands:
 
 ```bash
-uv venv .venv-og && uv pip install -p .venv-og/bin/python \
+uv venv .venv-og && uv pip install -p .venv-og/bin/python -e ./integration \
     "oguk @ git+https://github.com/PSLmodels/OG-UK"
 ```
+
+(`-e ./integration` gives that env the `macromod` executable; the base
+package pins no policyengine version, so OG-UK's own pins win there.)
 
 ## CLI
 
