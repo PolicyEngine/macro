@@ -14,15 +14,16 @@ jobs:
   contracts:
     name: PolicyEngine + boe_var contracts (slow, full install)
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: integration
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v8
       - name: Install with full models
         run: uv pip install --system -e ".[models]" pytest
       - name: Contract tests (failures fail, never skip)

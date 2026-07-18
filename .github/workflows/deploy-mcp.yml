@@ -14,14 +14,19 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # A healthy deploy takes ~4 minutes. Without a cap, a hung `modal deploy`
+    # sits on the runner until GitHub's 6-hour ceiling (this happened on
+    # 2026-07-17) and blocks the deploy-mcp concurrency group behind it.
+    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
       - name: Install Modal
         run: pip install modal
       - name: Deploy
+        timeout-minutes: 15
         run: modal deploy integration/modal_app.py
         env:
           MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
