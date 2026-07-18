@@ -4,6 +4,7 @@
 The implementation is validated against the Fed's own artefacts in two layers, both of which run as hard gates in the package's test suite and continuous integration. All experiments use the VAR model over 2026Q1--2030Q4 with the Fed's standard demo fiscal configuration (surplus-ratio targeting: \texttt{dfpdbt} $=0$, \texttt{dfpsrp} $=1$) and the April 2026 LONGBASE vintage.
 
 \subsection{Tracking invariant}
+\label{subsec:tracking}
 
 After \texttt{init\_trac}, solving the baseline must reproduce LONGBASE exactly for all 284 endogenous variables in all 20 quarters. This exercises the entire pipeline --- parser, lexer, coefficient substitution, compiled residuals, Jacobian and Newton solver --- against the Fed's own data. Table~\ref{tab:tracking} shows the result: the maximum absolute error across all $284\times20$ variable-quarters is $5.6\times10^{-17}$, i.e.\ machine precision.
 
@@ -57,3 +58,25 @@ Variable & Description & Max abs.\ diff. & Max rel.\ diff. \\
 \end{table}
 
 Tables~\ref{tab:crossval} and \ref{tab:crossval-key} summarise the agreement. The worst-agreeing variables are near-zero expectational gap terms (\texttt{zgap05}, relative difference $4.9\times10^{-8}$ on values of order $10^{-4}$), which reflect the two solvers' respective step tolerances rather than any semantic difference; with the vendor solver at its default looser tolerance (\texttt{scipy.optimize.root}, \texttt{xtol} $=10^{-6}$) the discrepancy is $\sim1.7\times10^{-5}$ and again concentrated in the same terms. The headline variables agree to $10^{-10}$ or better in absolute terms. Since the vendor's block-decomposed solver and this implementation's single-block Newton solve the same $F(x)=0$, agreement up to solver tolerance is the expected --- and observed --- outcome.
+
+\subsection{How large is $10^{-8}$? The reference implementation against itself}
+\label{subsec:refnoise}
+
+A residual is only meaningful against a yardstick, and the natural one is the reference implementation's own version-to-version variation. The vendored reference is \texttt{pyfrbus} 1.0.0 (files dated 6~April~2022); the Board also ships 1.1.1 (5~February~2026), whose \texttt{model.xml} and LONGBASE are byte-identical to 1.0.0's, so a comparison between them isolates solver differences from model differences. Version 1.1.1 rewrites the Newton routine to reuse its LU factorisation across iterations, recomputing only when the residual fails to halve --- a change to the iterate path, not to the fixed point. Repeating the identical shock experiment across all three implementations gives Table~\ref{tab:refnoise}.
+
+\begin{table}[htbp]
+\centering
+\caption{Three-way comparison: identical 100bp funds-rate shock, 284 endogenous $\times$ 20 quarters}
+\label{tab:refnoise}
+\begin{tabular}{lcc}
+\toprule
+Comparison & Max abs.\ diff. & Max rel.\ diff. \\
+\midrule
+This implementation vs.\ \texttt{pyfrbus} 1.0.0 & $6.0\times10^{-9}$ & $4.9\times10^{-8}$ \\
+This implementation vs.\ \texttt{pyfrbus} 1.1.1 & $1.4\times10^{-8}$ & $1.8\times10^{-7}$ \\
+\texttt{pyfrbus} 1.1.1 vs.\ \texttt{pyfrbus} 1.0.0 & $1.3\times10^{-8}$ & $1.3\times10^{-7}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The third row is the informative one: the Board's own two releases differ from each other by as much as this implementation differs from either, and all three residuals are concentrated in the same near-zero series (\texttt{wpsn}, \texttt{zgap05}). The agreement documented above is therefore not an artefact of the particular vendored release --- it sits at the scale of the reference implementation's own numerical noise. On the tracking invariant of Section~\ref{subsec:tracking}, \texttt{pyfrbus} 1.1.1 reproduces LONGBASE to $1.1\times10^{-8}$, against this implementation's $5.6\times10^{-17}$. The committed reference remains 1.0.0 so that the regression gate has a fixed anchor. Only the VAR path was exercised in this comparison; 1.1.1 additionally fixes a lead-substitution guard that affects the MCE path, which this implementation does not support and which was therefore not tested.
