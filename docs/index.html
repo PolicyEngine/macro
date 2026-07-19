@@ -62,10 +62,10 @@
         Which model answers your question?
       </h1>
       <p class="lede reveal" style="--d:2">
-        Start with the question, then check the comparison. Below that: a
-        reference page per model and the working paper behind each. How far
-        each model can be checked against ground truth is the subject of the
-        <a href="/validation/">validation page</a>.
+        Start with the question and country, then check the comparison. The
+        suite covers both the UK and US; each model's country scope is stated
+        explicitly. Below: a reference page and working paper for each model,
+        plus a separate <a href="/validation/">validation review</a>.
       </p>
     </div>
   </section>
@@ -73,41 +73,16 @@
   <section id="choose" class="band">
     <div class="band-head">
       <span class="kicker mono">start here</span>
-      <h2>Match the model to the question — and the country.</h2>
+      <h2>Choose by question and country.</h2>
     </div>
-    <div class="prose">
-      <p>
-        The first cut is geographic: <strong>obr-macro</strong> and
-        <strong>boe-svar</strong> are UK models, <strong>frb-us</strong> is a
-        US model, and <strong>psl-og</strong> and <strong>pe-microsim</strong>
-        span both countries. The second cut is the question:
-      </p>
-      <ul>
-        <li><strong>"How does this tax change affect UK growth and the deficit over the next 3–5 years?"</strong> — the OBR model. Near-term fiscal scoring in the language of the official forecast.</li>
-        <li><strong>"What does a 100bp Fed tightening — or a US fiscal shock — do to GDP, unemployment, and inflation?"</strong> — FRB/US, via <code>frbus_shock</code> on the hosted server or the CLI. Shocks to model variables, not PolicyEngine reforms.</li>
-        <li><strong>"What does this reform do to work incentives, saving, and the long-run size of the economy?"</strong> — the OLG model, which captures how households of every age re-optimise over their lifetimes.</li>
-        <li><strong>"What's driving UK GDP and inflation — and why did the forecast change?"</strong> — the structural VAR. It decomposes the latest data vintage (currently 2024 Q2) into named structural shocks, forecasts with credible bands, and splits a revision into news and reassessment. It does not score reforms.</li>
-        <li><strong>"What does this reform mean for a nurse on £35,000 with two kids?"</strong> — PolicyEngine. It runs the actual UK or US statute for that exact family, before and after.</li>
-        <li><strong>"I want both the transition and the destination."</strong> — run both UK scoring models (OBR and OLG). Agreement raises confidence; divergence marks where long-run behavioural response departs from near-term empirical dynamics.</li>
-      </ul>
-      <p>
-        <strong>Verification gradient.</strong> The third cut is how far a
-        model can be checked against ground truth <em>at all</em> — weight its
-        answers accordingly. <strong>obr-macro</strong>,
-        <strong>boe-svar</strong> and <strong>frb-us</strong> are
-        <em>replications</em>: each reproduces a specific published artefact,
-        so a deviation from it is a meaningful number.
-        <strong>pe-microsim</strong> is validated against <em>statute</em> —
-        checkable rule by rule, with no forecast error to speak of.
-        <strong>psl-og</strong> is a <em>structural counterfactual</em>:
-        calibrated to national-accounts targets, with no published result to
-        validate against. A replication you can audit against its anchor;
-        statute you can audit against the law; a calibrated counterfactual you
-        can only reason about — and no amount of agreement with a target it
-        was fitted to changes that.
-        <a href="/validation/">Every model's numbers beside the official ones →</a>
-      </p>
+    <div class="question-list">
+      <a href="/pe/"><span>Household taxes, benefits, or distributional effects</span><strong>UK + US · PolicyEngine</strong></a>
+      <a href="/frb-us/"><span>US monetary or fiscal shocks</span><strong>US · FRB/US</strong></a>
+      <a href="/obr/"><span>Near-term growth and borrowing after a UK reform</span><strong>UK · OBR macro</strong></a>
+      <a href="/olg/"><span>Long-run work, saving, and capital effects</span><strong>UK + US · PSL OLG</strong></a>
+      <a href="/svar/"><span>Drivers of UK GDP and inflation</span><strong>UK · BoE SVAR</strong></a>
     </div>
+    <p class="chooser-note">Check evidence and limitations before using a result. <a href="/validation/">Review validation</a>.</p>
   </section>
 
   <section id="compare" class="band">
@@ -125,7 +100,7 @@
           <tr><th scope="row"><strong>Method</strong></th><td>Structural macroeconometric emulator — Gauss–Seidel over 372 equations per quarter</td><td>Bayesian structural VAR — posterior sampling with zero + sign restrictions naming the shocks</td><td>Large-scale macroeconometric model — 284 equations solved under VAR expectations</td><td>Dynamic general equilibrium (OLG) — steady-state root-find and transition-path iteration</td><td>Static tax-benefit microsimulation — direct rule evaluation, no behavioural response</td></tr>
           <tr><th scope="row"><strong>Country</strong></th><td>UK</td><td>UK</td><td>US</td><td>UK &amp; US (UK wired today; US newer)</td><td>UK &amp; US</td></tr>
           <tr><th scope="row"><strong>Data vintage</strong></th><td>OBR <em>Economic and Fiscal Outlook</em>, November 2025</td><td>ONS, BoE and FRED series — estimation sample 1992Q1–2023Q2, packaged to a 2024Q2 edge</td><td>The Fed's <code>model.xml</code> and LONGBASE database, April 2026</td><td>ONS, OBR and BoE national accounts as calibration targets; OG-UK 0.3.0</td><td>UK &amp; US statute; enhanced FRS (53k households) / CPS microdata for population runs</td></tr>
-          <tr><th scope="row"><strong>Verification class</strong> (<a href="/validation/">numbers →</a>)</th><td>Replication with a published anchor</td><td>Replication with a published anchor</td><td>Replication with a published anchor</td><td class="vc-warn">Calibrated counterfactual — no ground truth</td><td>Validated against statute</td></tr>
+          <tr><th scope="row"><strong>Verification class</strong> (<a href="/validation/">numbers →</a>)</th><td>Replication with a published anchor</td><td>Replication with a published anchor</td><td>Replication with a published anchor</td><td>Calibrated counterfactual — no ground truth</td><td>Validated against statute</td></tr>
           <tr><th scope="row"><strong>Reform scoring</strong></th><td>Yes — shocks to exogenous model variables; static-costing bridge from PolicyEngine reforms</td><td>No — the baseline/conditioning member: it reads the economy reforms are scored against</td><td>No — shock experiments only (funds-rate or fiscal shocks under VAR expectations); <code>score_reform</code> refuses <code>model="frbus"</code>, as no PolicyEngine reform bridge exists</td><td>Yes — a PolicyEngine policy translated into estimated tax functions</td><td>Yes — a PolicyEngine parameter + a new value, applied directly to households</td></tr>
           <tr><th scope="row"><strong>Run surface</strong></th><td>Hosted (CLI, MCP, Python API)</td><td>Hosted (CLI, MCP, Python API)</td><td>Hosted (CLI, MCP, Python API) — raw shocks only</td><td>Local only</td><td>Hosted</td></tr>
           <tr><th scope="row"><strong>Typical runtime</strong></th><td>Seconds to minutes per scenario</td><td>Minutes per full estimation + identification run</td><td>Seconds to minutes per simulation</td><td>~17+ min per steady-state solve (two per score); hours for transition paths</td><td>Sub-second per household; minutes for population runs</td></tr>
@@ -135,127 +110,43 @@
     </div>
   </section>
 
-  <section id="models" class="band">
-    <div class="band-head">
-      <span class="kicker mono">reference</span>
-      <h2>Each model has its own reference page.</h2>
-    </div>
-    <div class="prose">
-      <div class="doc-index">
-        <a href="/obr/">
-          <span class="di-id">obr-macro · UK · hosted</span>
-          <h3>OBR macroeconometric model</h3>
-          <p>The OBR publishes its equation listing as EViews source; this transpiles those 372 equations to Python and solves them, 636 variables over 17 thematic groups, with 253 exogenous inputs as the levers. Add-factors anchor the baseline to the November 2025 EFO &mdash; the March 2026 vintage has not been adopted. Two household-income equations are numerically inert, their inputs <code>MAJGDP</code> and <code>CORP</code> being absent from the databank, and every published figure is computed that way.</p>
-          <span class="di-go">read the OBR reference →</span>
-        </a>
-        <a href="/svar/">
-          <span class="di-id">boe-svar · UK · hosted</span>
-          <h3>Bank of England structural VAR model</h3>
-          <p>Brignone &amp; Piffer (2025), BoE Macro Technical Paper No. 3, shipped without a replication package; this rebuilds the pipeline end to end. Eight quarterly series, three global and five UK, estimated 1992Q1&ndash;2023Q2 under a Minnesota prior, with zero and sign restrictions naming six shocks. The frozen 2024Q2 edge is what makes its forecast scoreable out of sample.</p>
-          <span class="di-go">read the SVAR reference →</span>
-        </a>
-        <a href="/frb-us/">
-          <span class="di-id">frb-us · US · hosted</span>
-          <h3>FRB/US</h3>
-          <p>Parses the Board's public <code>model.xml</code> rather than re-specifying it, and solves all 284 equations per quarter by damped Newton on an analytic sparse Jacobian, against April 2026 LONGBASE. Shocks are additions to an equation's error term, read under a selectable policy rule. Only the VAR-expectations path exists; <code>mcontrol</code>, model-consistent expectations and stochastic simulation do not.</p>
-          <span class="di-go">read the FRB/US reference →</span>
-        </a>
-        <a href="/olg/">
-          <span class="di-id">psl-og · UK · US · local</span>
-          <h3>PSL overlapping generations model</h3>
-          <p>OG-Core, deployed through its OG-UK calibration: households aged 20 to 99 choosing labour supply and saving over their remaining lifetimes, with Gouveia&ndash;Strauss tax functions fitted to PolicyEngine microdata so the reform's shape across income and age is what the model sees. Solves a steady state or a 60-year transition path. The UK integration is wired; OG-USA is newer.</p>
-          <span class="di-go">read the OLG reference →</span>
-        </a>
-        <a href="/pe/">
-          <span class="di-id">pe-microsim · UK · US · hosted</span>
-          <h3>PolicyEngine tax-benefit microsimulation</h3>
-          <p>Four layers: a simulation framework forked from OpenFisca, a statutory rule package per country, and the analyst-facing <code>policyengine</code> package on top, which pins the model and dataset versions each release certifies. Reforms are a dict of parameter path to new value, identical in shape at household and population level. Population runs use <code>enhanced_frs_2023_24</code> (53,000 households) and CPS microdata; household calculations need no data access at all.</p>
-          <span class="di-go">read the PolicyEngine reference →</span>
-        </a>
-      </div>
-    </div>
-  </section>
-
   <section id="papers" class="band">
     <div class="band-head">
-      <span class="kicker mono">papers</span>
-      <h2>Each macro model ships with a paper.</h2>
+      <span class="kicker mono">model library</span>
+      <h2>References and papers.</h2>
+      <p class="section-intro">Open a model guide for setup and limitations, or read its working paper for the full method and evidence.</p>
     </div>
-    <div class="prose">
-      <p>
-        Readable in the browser or as PDF. LaTeX sources and the scripts that
-        regenerate every figure live in
-        <a href="https://github.com/PolicyEngine/macro/tree/main/papers">papers/</a>,
-        so each number on a chart is traceable to a committed artefact.
-        pe-microsim is the exception with no paper: its rules are documented
-        as statute at <a href="https://policyengine.org">policyengine.org</a>.
-      </p>
-      <div class="doc-index">
-        <a href="/papers/obr-macro/">
-          <span class="di-id">obr-macro · 35 pages · read in browser</span>
-          <h3>An open emulator of the OBR macroeconometric model</h3>
-          <p>Transpiles the OBR's 372 published EViews equations into Python, solves them by Gauss&ndash;Seidel iteration, and anchors the baseline to the November 2025 Economic and Fiscal Outlook.</p>
-          <span class="paper-result">Anchored to the Nov 2025 EFO: GDP MAPE <strong>0.18%</strong>, consumption <strong>0.29%</strong> over 2025Q1&ndash;2027Q4 &mdash; hard-gated in CI. Free-running fit reported without flattery: only 4 of 11 computed variables in band.</span>
-          <span class="di-go">read the OBR working paper →</span>
-        </a>
-        <a href="/papers/boe-svar/">
-          <span class="di-id">boe-svar · 28 pages · read in browser</span>
-          <h3>Replicating the Bank of England's structural VAR</h3>
-          <p>An eight-variable Bayesian SVAR with a Minnesota prior and zero plus sign restrictions imposed via Arias et al. (2018), identifying six named structural shocks.</p>
-          <span class="paper-result">Out-of-sample from the 2024Q2 edge: RMSE <strong>0.32pp</strong> for both GDP growth and CPI inflation, with <strong>14/14 outturns inside the 68% bands</strong>. Global shocks explain 40.9% of GDP and 50.1% of CPI FEV at one year, vs ~40% and ~50% in the paper.</span>
-          <span class="di-go">read the SVAR working paper →</span>
-        </a>
-        <a href="/papers/frb-us/">
-          <span class="di-id">frb-us · 36 pages · read in browser</span>
-          <h3>A modern Python implementation of FRB/US</h3>
-          <p>A from-scratch reimplementation of the Fed's 284-equation FRB/US model under VAR expectations, with a sparse analytic Jacobian and a damped Newton solver.</p>
-          <span class="paper-result">Baseline reproduces LONGBASE to <strong>5.6e-17</strong> (machine precision); an identical 100bp funds-rate shock matches the Fed's pyfrbus to <strong>1.4e-8</strong> against current pyfrbus 1.1.1 (6.0e-9 vs 1.0.0) across all 284 variables and 20 quarters.</span>
-          <span class="di-go">read the FRB/US working paper →</span>
-        </a>
-        <a href="/papers/psl-og/">
-          <span class="di-id">psl-og · 34 pages · read in browser</span>
-          <h3>The PSL overlapping-generations model in PolicyEngine Macro</h3>
-          <p>OG-Core deployed through its OG-UK calibration, with 80 age cohorts and effective- and marginal-tax-rate functions estimated from PolicyEngine microdata.</p>
-          <span class="paper-result"><strong>No published ground truth</strong> &mdash; unlike the OBR, SVAR and FRB/US members this is a structural counterfactual, calibrated to ONS and OBR national-accounts targets rather than validated against a replication anchor.</span>
-          <span class="di-go">read the OLG working paper →</span>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <section id="workflow" class="band">
-    <div class="band-head">
-      <span class="kicker mono">shared pipeline</span>
-      <h2>What the models have in common.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        For the scoring engines the shape of the work is the same:
-        <strong>build</strong> a reform, <strong>solve</strong> baseline and
-        reform, <strong>read</strong> the difference in real-world quantities.
-        All report deviations from a baseline anchored to official data —
-        always "relative to current forecast", never a raw level to be
-        misread. The structural VAR sits upstream, establishing the empirical
-        starting point; PolicyEngine sits underneath, supplying the reform
-        objects and the household-level answer.
-      </p>
-      <p class="research-link mono">
-        <a href="/obr/">OBR model reference</a> &nbsp;·&nbsp;
-        <a href="/svar/">SVAR reference</a> &nbsp;·&nbsp;
-        <a href="/frb-us/">FRB/US reference</a> &nbsp;·&nbsp;
-        <a href="/olg/">OLG reference</a> &nbsp;·&nbsp;
-        <a href="/pe/">PolicyEngine reference</a> &nbsp;·&nbsp;
-        <a href="https://obr-macroeconomic-model.vercel.app/">OBR live dashboard</a> &nbsp;·&nbsp;
-        <a href="/connect/">Run a model →</a>
-      </p>
-    </div>
-  </section>
-
-  <section class="band band-cta">
-    <h2>Pick a model and score a reform.</h2>
-    <div class="hero-cta">
-      <a class="btn btn-primary" href="/connect/">Use it</a>
-      <a class="btn btn-ghost" href="https://github.com/PolicyEngine/macro">github.com/PolicyEngine/macro</a>
+    <div class="library-grid">
+      <article class="library-card">
+        <span class="di-id">obr-macro · UK · hosted</span>
+        <h3>OBR macroeconometric model</h3>
+        <p>Near-term UK reform effects against the November 2025 EFO baseline.</p>
+        <div class="library-actions"><a href="/obr/">Reference</a><a href="/papers/obr-macro/">Working paper · 35 pages</a></div>
+      </article>
+      <article class="library-card">
+        <span class="di-id">boe-svar · UK · hosted</span>
+        <h3>Bank of England structural VAR</h3>
+        <p>UK GDP and inflation forecasts, structural shocks, and revision analysis.</p>
+        <div class="library-actions"><a href="/svar/">Reference</a><a href="/papers/boe-svar/">Working paper · 28 pages</a></div>
+      </article>
+      <article class="library-card">
+        <span class="di-id">frb-us · US · hosted</span>
+        <h3>FRB/US</h3>
+        <p>US monetary and fiscal shock responses under selectable policy rules.</p>
+        <div class="library-actions"><a href="/frb-us/">Reference</a><a href="/papers/frb-us/">Working paper · 36 pages</a></div>
+      </article>
+      <article class="library-card">
+        <span class="di-id">psl-og · UK · US · local</span>
+        <h3>PSL overlapping generations model</h3>
+        <p>Long-run work, saving, capital, and public-finance effects.</p>
+        <div class="library-actions"><a href="/olg/">Reference</a><a href="/papers/psl-og/">Working paper · 34 pages</a></div>
+      </article>
+      <article class="library-card">
+        <span class="di-id">pe-microsim · UK · US · hosted</span>
+        <h3>PolicyEngine microsimulation</h3>
+        <p>Household and population tax-benefit effects under current law or reform.</p>
+        <div class="library-actions"><a href="/pe/">Reference</a><a href="https://policyengine.org">Statutory documentation</a></div>
+      </article>
     </div>
   </section>
 </main>

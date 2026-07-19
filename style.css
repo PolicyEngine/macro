@@ -507,11 +507,6 @@ h2 {
 
 /* ---------- commons ---------- */
 
-/* ---------- cta band ---------- */
-.band-cta { text-align: center; }
-.band-cta h2 { max-width: 22ch; margin: 0 auto 34px; }
-.band-cta .hero-cta { justify-content: center; }
-
 /* ---------- footer ---------- */
 .foot {
   max-width: var(--max);
@@ -534,7 +529,7 @@ h2 {
    rules keep it a no-op. */
 .reveal, .in-view,
 .band-head, .prose, .metrics, .stack-note,
-.band-cta h2, .band-cta .hero-cta {
+.hero-cta {
   opacity: 1;
   transform: none;
   animation: none;
@@ -757,8 +752,6 @@ h2 {
 .foot-nav a:hover { color: var(--brand-strong); }
 .foot-nav .foot-pe img { height: 18px; }
 
-.cta-sub { max-width: 64ch; margin: 0 auto 30px; text-align: center; font-size: var(--fs-body); line-height: 1.65; color: var(--paper-faint); }
-
 /* ==========================================================================
    Validation page — comparison charts and provenance styling
    Used by /validation/. Charts are hand-authored inline SVG (no third-party JS)
@@ -806,32 +799,7 @@ h2 {
 .vchart .vc-b2 { fill: color-mix(in srgb, var(--paper) 34%, transparent); }
 .vchart .vc-b3 { fill: color-mix(in srgb, var(--paper) 18%, transparent); }
 
-/* =====================================================================
-   THE VERIFICATION GRADE — the one thing on this site that gets emphasis.
-   The project's distinctive claim is that it grades each model honestly:
-   a replication with a published anchor, validated against statute, or a
-   calibrated counterfactual with no ground truth. `.vc-warn` marks the
-   third case, wherever it appears (comparison tables, validation rows,
-   the papers index). It used to be rendered as faint grey italics — the
-   site's most honest statement, styled as its least important. It now
-   reads as a deliberate, legible grade: a warning-toned rule and a bold
-   label, not an apology. Restraint everywhere else pays for this.
-   Colour is --brand-warning (#9A3412, 5.63:1 light / #FFB066, 10.72:1
-   dark) — the AA-verified warning token, unchanged.
-   ===================================================================== */
-.vc-warn {
-  color: var(--brand-warning);
-}
-.prose td.vc-warn, .prose th.vc-warn {
-  font-style: normal;
-  font-weight: 500;
-  box-shadow: inset 3px 0 0 var(--brand-warning);
-  padding-left: var(--s-3);
-  background: color-mix(in srgb, var(--brand-warning) 6%, transparent);
-}
-/* one rule per flagged ROW, not per cell */
-.prose td.vc-warn + td.vc-warn { box-shadow: none; }
-/* the same grade, on the papers index and the docs model cards */
+/* Paper index result emphasis. */
 .paper-result strong { color: var(--brand); font-weight: 600; }
 .paper-result:has(> strong:first-child) { border-top-color: var(--line); }
 
@@ -889,6 +857,24 @@ h2 {
 .doc-index h3 { font-family: var(--display); font-weight: 500; font-size: var(--fs-h3-sm); margin: 8px 0 8px; color: var(--paper); }
 .doc-index p { font-size: var(--fs-body-sm); line-height: 1.55; color: var(--paper-dim); margin: 0; }
 .doc-index .di-go { display: block; margin-top: 12px; font-family: var(--mono); font-size: var(--fs-label); color: var(--brand-strong); }
+
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-4);
+}
+.library-card {
+  min-width: 0;
+  padding: var(--s-5);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+}
+.library-card .di-id { color: var(--brand); font-family: var(--mono); font-size: var(--fs-label); }
+.library-card h3 { margin: 10px 0 8px; font-family: var(--display); font-size: var(--fs-h3-sm); font-weight: 500; }
+.library-card p { color: var(--paper-dim); font-size: var(--fs-body-sm); line-height: 1.55; }
+.library-actions { display: flex; flex-wrap: wrap; gap: 10px 20px; margin-top: var(--s-4); }
+.library-actions a { color: var(--brand-strong); font-family: var(--mono); font-size: var(--fs-label); }
+@media (max-width: 680px) { .library-grid { grid-template-columns: 1fr; } }
 
 /* ============================================================
    working papers — index cards + in-page PDF viewer
