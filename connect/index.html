@@ -98,7 +98,9 @@
   background: var(--amber); margin-left: 7px; vertical-align: middle;
 }
 .steps.dimmed { opacity: 0.55; }
-.model-seg { margin: 6px 0 22px; flex-wrap: nowrap; overflow-x: auto; border: 0; padding: 0 0 4px; gap: 8px; }
+/* display:flex (not inline-flex) + max-width so the overflow-x scroller
+   actually engages on narrow viewports instead of widening the page. */
+.model-seg { display: flex; max-width: 100%; margin: 6px 0 22px; flex-wrap: nowrap; overflow-x: auto; border: 0; padding: 0 0 4px; gap: 8px; }
 .model-seg button { white-space: nowrap; flex-shrink: 0; font-size: var(--fs-small); padding: 8px 14px; }
 .model-seg button { border: 1px solid var(--line-soft); border-radius: 999px; padding: 9px 18px; transition: all 0.15s ease; }
 .model-seg button:hover { color: var(--text, #111); border-color: var(--text, #111); }
@@ -188,14 +190,14 @@
 <main id="top">
   <section class="hero connect-hero">
     <div class="hero-inner" style="text-align:center;">
-      <p class="eyebrow reveal" style="--d:0">PolicyEngine Macro for any ai — and any coder</p>
+      <p class="eyebrow reveal" style="--d:0">mcp · cli · python</p>
       <h1 class="reveal page-title" style="--d:1;">
         Connect it. Or <em>code</em> it.
       </h1>
       <p class="lede reveal" style="--d:2; margin-left:auto; margin-right:auto;">
-        Hook PolicyEngine Macro up to Claude or ChatGPT and score reforms from your
-        prompts — or skip the middleman and drive the Python API yourself.
-        Free and open source. No account, no sign-in.
+        Add the hosted MCP server to Claude or ChatGPT and score reforms from
+        your prompts, run the same models from a terminal, or import them as
+        Python packages. Free and open source, no account and no key.
       </p>
     </div>
   </section>
@@ -274,8 +276,49 @@
         </div>
 
         <hr class="panel-divider" />
-        <p class="mono foot-head" style="margin-bottom:10px;">on the server</p>
-        <p class="soon-hint" style="max-width: none;">Ten tools across four of the five models (FRB/US is local-only): <code class="mono">score_reform</code> (a PolicyEngine reform dict through a chosen macro model — the OBR arm runs hosted via the static-costing bridge; OG-UK runs locally only, since a solve takes tens of minutes); <code class="mono">obr_shock</code> and <code class="mono">list_reform_variables</code> (OBR raw variable shocks); <code class="mono">forecast_uk</code>, <code class="mono">latest_shocks</code>, <code class="mono">model_summary</code> (SVAR); and <code class="mono">calculate_household</code>, <code class="mono">household_reform_impact</code>, <code class="mono">list_reform_parameters</code>, <code class="mono">population_reform_impact</code> (PolicyEngine). The server scales to zero — the first call after a quiet spell takes ~10 seconds to wake.</p>
+        <p class="mono foot-head" style="margin-bottom:10px;">the ten tools</p>
+        <div class="dials">
+          <div class="dial">
+            <span class="dial-name">scoring</span>
+            <p><code>score_reform</code> — one PolicyEngine reform dict, scored by <code>model="obr"</code> (macroeconometric emulator, via the static-costing bridge), <code>"microsim"</code> (static population costing) or <code>"og"</code>. Every result carries the same <code>score</code> block, so models are comparable side by side.</p>
+          </div>
+          <div class="dial">
+            <span class="dial-name">obr emulator</span>
+            <p><code>obr_shock</code> shocks one model variable directly (<code>CGG</code>, <code>CGIPS</code>, <code>TCPRO</code>); <code>list_reform_variables</code> returns those variables with their units. Units differ per variable — call it first.</p>
+          </div>
+          <div class="dial">
+            <span class="dial-name">uk svar</span>
+            <p><code>forecast_uk</code> (GDP growth and CPI fan bands), <code>latest_shocks</code> (sign probabilities for the six identified shocks), <code>model_summary</code> (committed replication headlines, instant).</p>
+          </div>
+          <div class="dial">
+            <span class="dial-name">microsimulation</span>
+            <p><code>calculate_household</code>, <code>household_reform_impact</code>, <code>population_reform_impact</code>, and <code>list_reform_parameters</code> for verified parameter paths, units and live baseline values.</p>
+          </div>
+        </div>
+        <p class="soon-hint" style="max-width: none;">
+          Four of the five models are reachable here. FRB/US is not on the server at all
+          (US, local only), and OG-UK is excluded from hosting because one solve takes
+          tens of minutes — asking <code class="mono">score_reform</code> for
+          <code class="mono">model="og"</code> returns local install instructions rather
+          than a result.
+        </p>
+
+        <hr class="panel-divider" />
+        <p class="mono foot-head" style="margin-bottom:10px;">three things that will trip you up</p>
+        <div class="dials">
+          <div class="dial">
+            <span class="dial-name">country is required</span>
+            <p>There is no default on <code>score_reform</code>, <code>calculate_household</code> or <code>household_reform_impact</code>: pass <code>"uk"</code> or <code>"us"</code>. They are different tax-benefit models, so the server refuses rather than guessing. (<code>population_reform_impact</code> alone defaults to <code>"uk"</code>.)</p>
+          </div>
+          <div class="dial">
+            <span class="dial-name">reform dict shapes</span>
+            <p>Flat — <code>{"gov.hmrc.income_tax.rates.uk[0].rate": 0.21}</code> — or a single effective date: <code>{"gov.hmrc.income_tax.rates.uk[0].rate": {"2026-01-01": 0.21}}</code>. Date <em>ranges</em> are rejected: reform values have no expiry, so a range would silently score a permanent change. For a time-limited reform, score each affected year separately.</p>
+          </div>
+          <div class="dial">
+            <span class="dial-name">it scales to zero</span>
+            <p>The first call after an idle spell spends ~10s waking the container. Then: <code>list_*</code> and <code>model_summary</code> are instant; households a few seconds; <code>forecast_uk</code> and <code>population_reform_impact</code> tens of seconds; <code>score_reform</code> with <code>model="obr"</code> a minute or more. Set a generous client timeout.</p>
+          </div>
+        </div>
       </div>
 
       <!-- ================= CLI ================= -->
@@ -286,7 +329,7 @@
           <div class="step">
             <span class="step-n mono">1</span>
             <h3>Install</h3>
-            <p>Python 3.11+. One package wraps the OBR emulator, the UK SVAR, and PolicyEngine behind a single command — models and data included.</p>
+            <p>Python 3.10+. One package wraps the OBR emulator, the UK SVAR and PolicyEngine behind a single command — models and data included, no cloning.</p>
             <div class="copyblock"><code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code><button data-copy>copy</button></div>
           </div>
           <div class="step">
@@ -298,7 +341,7 @@
           <div class="step">
             <span class="step-n mono">3</span>
             <h3>Read the results</h3>
-            <p>Per-quarter GDP deltas in £bn and the cumulative effect — printed as a table or exported with <code class="mono">--json</code>. Other commands: <code class="mono">score</code> (a PolicyEngine reform through a macro model), <code class="mono">variables</code>, <code class="mono">forecast</code>, <code class="mono">shocks</code>, <code class="mono">summary</code>, <code class="mono">household</code>, <code class="mono">household-impact</code>, <code class="mono">population-impact</code>, <code class="mono">parameters</code>, and <code class="mono">og-score</code> (needs OG-UK installed; slow).</p>
+            <p>Per-quarter GDP deltas in £bn and the cumulative effect — a table by default, JSON with <code class="mono">--json</code>. The rest: <code class="mono">score</code> (a PolicyEngine reform through <code class="mono">--model og|obr|microsim</code>) and <code class="mono">compare</code>; <code class="mono">variables</code>; <code class="mono">forecast</code>, <code class="mono">shocks</code>, <code class="mono">summary</code>; <code class="mono">household</code>, <code class="mono">household-impact</code>, <code class="mono">population-impact</code>, <code class="mono">parameters</code>; and <code class="mono">og-score</code> / <code class="mono">og-baseline</code>, which need OG-UK installed and take tens of minutes. Unlike the MCP tools, CLI <code class="mono">--country</code> defaults to <code class="mono">uk</code>.</p>
           </div>
         </div>
 
@@ -306,7 +349,7 @@
           <div class="step">
             <span class="step-n mono">1</span>
             <h3>Install</h3>
-            <p>Python 3.11+. One package wraps the OBR emulator, the UK SVAR, and PolicyEngine behind a single command — models and data included.</p>
+            <p>Python 3.10+. One package wraps the OBR emulator, the UK SVAR and PolicyEngine behind a single command — models and data included, no cloning.</p>
             <div class="copyblock"><code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code><button data-copy>copy</button></div>
           </div>
           <div class="step">
@@ -318,20 +361,20 @@
           <div class="step">
             <span class="step-n mono">3</span>
             <h3>Read the results</h3>
-            <p>Per-quarter GDP deltas in £bn and the cumulative effect — printed as a table or exported with <code class="mono">--json</code>. Other commands: <code class="mono">score</code> (a PolicyEngine reform through a macro model), <code class="mono">variables</code>, <code class="mono">forecast</code>, <code class="mono">shocks</code>, <code class="mono">summary</code>, <code class="mono">household</code>, <code class="mono">household-impact</code>, <code class="mono">population-impact</code>, <code class="mono">parameters</code>, and <code class="mono">og-score</code> (needs OG-UK installed; slow).</p>
+            <p>Per-quarter GDP deltas in £bn and the cumulative effect — a table by default, JSON with <code class="mono">--json</code>. The rest: <code class="mono">score</code> (a PolicyEngine reform through <code class="mono">--model og|obr|microsim</code>) and <code class="mono">compare</code>; <code class="mono">variables</code>; <code class="mono">forecast</code>, <code class="mono">shocks</code>, <code class="mono">summary</code>; <code class="mono">household</code>, <code class="mono">household-impact</code>, <code class="mono">population-impact</code>, <code class="mono">parameters</code>; and <code class="mono">og-score</code> / <code class="mono">og-baseline</code>, which need OG-UK installed and take tens of minutes. Unlike the MCP tools, CLI <code class="mono">--country</code> defaults to <code class="mono">uk</code>.</p>
           </div>
         </div>
 
         <hr class="panel-divider" />
-        <p class="soon-hint" style="max-width: none;">One <code class="mono">pip install</code> pulls the CLI plus the three hosted models with their data, no cloning required. It lives in this repo's <a href="https://github.com/PolicyEngine/macro/tree/main/integration"><code class="mono">integration/</code></a> directory; a shorter <code class="mono">pip install policyengine-macro</code> will come with PyPI publication.</p>
+        <p class="soon-hint" style="max-width: none;">The <code class="mono">[models]</code> extra pulls the OBR emulator, the UK SVAR and the PolicyEngine country packages, each of which ships its own data. FRB/US and OG-UK install separately. The package lives in this repo's <a href="https://github.com/PolicyEngine/macro/tree/main/integration"><code class="mono">integration/</code></a> directory; a shorter <code class="mono">pip install policyengine-macro</code> follows PyPI publication. Reform dicts take the same shapes as the MCP tools — flat or single-effective-date, never a date range.</p>
         <p class="panel-foot mono" style="color: var(--paper-faint);">
-          coding agents with a terminal — Claude Code, Codex — can run the CLI directly, no MCP needed; or add the MCP server with one command (see the MCP tab).
+          the CLI runs everything the MCP server does, plus OG-UK, which is too slow to host. FRB/US is a separate package with its own Python API.
         </p>
       </div>
 
     </div>
     <p class="stack-note" style="text-align:center; margin-top: 26px;">
-      <span class="mono">using Claude Code or Codex? connect via MCP (one command, MCP tab) or drive the CLI and the code below directly.</span>
+      <span class="mono">all three routes call the same code — <a href="https://github.com/PolicyEngine/macro/tree/main/integration">integration/</a> in the repo.</span>
     </p>
   </section>
 
@@ -342,10 +385,11 @@
     </div>
     <div class="prose">
       <p>
-        No connector, no CLI — just Python. Pick a model: score a reform with
-        the OLG or OBR engine in a handful of lines, read the economy's
-        current shocks and forecast it with the structural VAR, or compute a
-        household's taxes and benefits with PolicyEngine.
+        No connector, no CLI — just Python. Every model is its own installable
+        package: score a reform with the OLG or OBR engine in a handful of
+        lines, read and forecast the economy with the structural VAR, or
+        compute a household's taxes and benefits with PolicyEngine. Each
+        entry point below takes the country explicitly; nothing is inferred.
       </p>
 
       <div class="seg model-seg" role="tablist" aria-label="Model" id="model-seg">
@@ -642,11 +686,11 @@ results = run_reform(
           <button class="cw-copy" data-copy>copy</button>
         </div>
         <pre><code><span class="cm"># the packaged dataset loads out of the box — no download step</span>
-from boe_var.data import load_data
-from boe_var.bvar import BVAR
-from boe_var.identification import identify
+<span class="kw">from</span> boe_var.data <span class="kw">import</span> load_data
+<span class="kw">from</span> boe_var.bvar <span class="kw">import</span> BVAR
+<span class="kw">from</span> boe_var.identification <span class="kw">import</span> identify
 
-df = load_data()                    <span class="cm"># 8 quarterly series, 1992Q1–2024Q2</span>
+df = load_data()                    <span class="cm"># 8 quarterly series, through 2024Q2</span>
 model = BVAR(df.to_numpy(), lags=4)
 draws = model.sample_posterior(1000)
 pairs = identify(draws)             <span class="cm"># zero + sign restrictions, 6 shocks</span>
@@ -666,8 +710,9 @@ UK CPI  identified global <span class="out-val">50.1%</span>  domestic <span cla
       </div>
 
       <p>
-        Under the hood: an 8-variable Bayesian VAR (1992Q1–2023Q2, Covid
-        dummies) is sampled from its normal-inverse-Wishart posterior, and each
+        Under the hood: an 8-variable Bayesian VAR — estimated on 1992Q1–2023Q2
+        with Covid dummies, leaving the 2023Q3–2024Q2 quarters of the packaged
+        dataset for out-of-sample checking — is sampled from its normal-inverse-Wishart posterior, and each
         draw is rotated per Arias–Rubio-Ramírez–Waggoner (2018) until the zero
         and sign restrictions name six structural shocks. The PolicyEngine Macro CLI
         wraps the common outputs: <code>pe-macro forecast</code>,
@@ -764,7 +809,7 @@ us = pe.us.calculate_household(
         </div>
         <div class="dial">
           <span class="dial-name">reform</span>
-          <p>A parameter path and a new value: <code>{"gov.hmrc.income_tax.rates.uk[0].rate": 0.21}</code> — the same paths the OLG model scores.</p>
+          <p>A parameter path and a new value: <code>{"gov.hmrc.income_tax.rates.uk[0].rate": 0.21}</code>, or a single effective date: <code>{"...rate": {"2026-01-01": 0.21}}</code>. Date ranges are not a shape — values never expire. Same paths the OLG model scores.</p>
         </div>
         <div class="dial">
           <span class="dial-name">Simulation</span>
