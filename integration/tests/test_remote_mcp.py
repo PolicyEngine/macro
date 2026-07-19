@@ -24,12 +24,33 @@ URL = os.environ.get(
     "https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp",
 )
 
-EXPECTED_TOOLS = {
-    "score_reform", "obr_shock", "list_reform_variables", "forecast_uk",
-    "latest_shocks", "model_summary", "calculate_household",
-    "household_reform_impact", "list_reform_parameters",
-    "population_reform_impact",
-}
+from tool_surface import GOLDEN_TOOL_COUNT, GOLDEN_TOOLS, assert_surface
+
+EXPECTED_TOOLS = set(GOLDEN_TOOLS)
+
+
+async def _list_tool_names():
+    from mcp import ClientSession
+    from mcp.client.streamable_http import streamablehttp_client
+
+    async with streamablehttp_client(URL, timeout=60) as (read, write, _):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            tools = await session.list_tools()
+            return [t.name for t in tools.tools]
+
+
+async def _call_expecting_error(tool: str, args: dict):
+    """Call a tool that must fail, and return the joined error text."""
+    from mcp import ClientSession
+    from mcp.client.streamable_http import streamablehttp_client
+
+    async with streamablehttp_client(URL, timeout=60) as (read, write, _):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            res = await session.call_tool(tool, args)
+    assert res.isError, f"{tool}{args} was accepted but should have been rejected"
+    return "\n".join(c.text for c in res.content if getattr(c, "text", None))
 
 
 async def _call(tool: str, args: dict | None = None):
@@ -72,16 +93,75 @@ async def test_liveness_handshake():
 
 
 @pytest.mark.anyio
-async def test_lists_all_five_tools():
-    from mcp import ClientSession
-    from mcp.client.streamable_http import streamablehttp_client
+async def test_hosted_tool_surface_is_exactly_the_golden_set():
+    """Hard contract on the PUBLIC surface of the deployment: the live server
+    advertises exactly the golden tools — no more, no less. A subset check
+    would let a stray or renamed tool ship to clients unnoticed."""
+    assert_surface(await _list_tool_names())
 
-    async with streamablehttp_client(URL, timeout=60) as (read, write, _):
-        async with ClientSession(read, write) as session:
-            await session.initialize()
-            tools = await session.list_tools()
-            names = {t.name for t in tools.tools}
-    assert EXPECTED_TOOLS <= names, names
+
+@pytest.mark.anyio
+async def test_hosted_tool_count_is_exactly_ten():
+    names = await _list_tool_names()
+    assert len(names) == GOLDEN_TOOL_COUNT, sorted(names)
+
+
+@pytest.mark.anyio
+async def test_hosted_tools_have_no_duplicate_names():
+    names = await _list_tool_names()
+    assert len(names) == len(set(names)), sorted(names)
+
+
+# --- reform-input validation, as served (#38) ------------------------------
+
+
+@pytest.mark.anyio
+async def test_hosted_reform_date_range_rejected_actionably():
+    """The date-range key that once leaked 'unconverted data remains' must be
+    refused by the DEPLOYED server with the single-date form spelled out."""
+    msg = await _call_expecting_error(
+        "household_reform_impact",
+        {"country": "uk", "people": [{"age": 35, "employment_income": 50_000}],
+         "reform": {"gov.hmrc.income_tax.rates.uk[0].rate":
+                    {"2026-01-01.2029-12-31": 0.21}}},
+    )
+    assert "range" in msg.lower(), msg
+    assert "2029-12-31" in msg, msg
+    assert '{"2026-01-01": 0.21}' in msg, msg
+    assert "unconverted data remains" not in msg, msg
+
+
+@pytest.mark.anyio
+async def test_hosted_missing_country_rejected_actionably():
+    """calculate_household with no country must return a sentence, not a raw
+    pydantic 'Field required' dump."""
+    msg = await _call_expecting_error("calculate_household", {})
+    assert "country is required" in msg, msg
+    assert "'uk' or 'us'" in msg, msg
+    assert "validation error" not in msg, msg
+
+
+@pytest.mark.anyio
+async def test_hosted_empty_reform_rejected_actionably():
+    msg = await _call_expecting_error(
+        "population_reform_impact", {"country": "uk", "reform": {}}
+    )
+    assert "non-empty" in msg, msg
+    assert "effective date" in msg, msg
+
+
+@pytest.mark.anyio
+async def test_hosted_valid_dated_reform_is_accepted():
+    """The mirror of the rejection tests: a legal single-date reform must be
+    accepted by the live server and actually score."""
+    out = await _call(
+        "household_reform_impact",
+        {"country": "uk", "people": [{"age": 35, "employment_income": 50_000}],
+         "reform": {"gov.hmrc.income_tax.rates.uk[0].rate": {"2026-01-01": 0.21}}},
+    )
+    assert out["baseline"]["household_net_income"] > 0, out
+    # A basic-rate rise (20% -> 21%) must reduce net income.
+    assert out["net_income_change"] < 0, out
 
 
 @pytest.mark.anyio

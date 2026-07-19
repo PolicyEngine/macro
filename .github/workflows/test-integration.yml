@@ -44,6 +44,18 @@ jobs:
           pip install \
             "obr-macro-model @ git+https://github.com/PolicyEngine/obr-macroeconomic-model" \
             "boe_var @ git+https://github.com/PolicyEngine/boe-var-model"
+      # HARD GATE 1: the published MCP tool surface. Runs before the rest of
+      # the suite and needs no model installs, so a tool added, removed or
+      # renamed without updating tests/tool_surface.py fails fast and loudly.
+      - name: Tool-surface contract (exact names and count)
+        run: pytest tests/test_tool_surface.py -q
+
+      # HARD GATE 2: reform/country/people input validation (#38) — the
+      # accepted shapes and the exact actionable error text for the rejected
+      # ones. Pure-Python, no PolicyEngine import.
+      - name: Reform-input validation contract
+        run: pytest tests/test_reform_input.py -q
+
       - name: Run fast integration suite
         # No --runslow: slow model solves/imports are skipped. The remote
         # (live-deployment) tests are skipped because MACROMOD_REMOTE_TESTS is

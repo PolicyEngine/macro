@@ -23,7 +23,10 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-      - uses: astral-sh/setup-uv@v8
+      # Pinned to a tag that exists: astral-sh/setup-uv publishes no moving
+      # `v8` major tag, so `@v8` failed to resolve and this nightly job had
+      # been erroring out in ~5s at "Set up job" since the action bump in #36.
+      - uses: astral-sh/setup-uv@v8.3.2
       - name: Install with full models
         run: uv pip install --system -e ".[models]" pytest
       - name: Contract tests (failures fail, never skip)

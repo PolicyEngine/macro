@@ -18,7 +18,12 @@ on:
     workflows: ["Deploy MCP server to Modal"]
     types: [completed]
   schedule:
-    - cron: "0 7 * * *"    # daily 07:00 UTC — catch drift between deploys
+    - cron: "0 7 * * 1-6"  # daily 07:00 UTC (Mon-Sat) — catch drift between deploys
+    # Weekly DEEP run: Sunday 03:00 UTC also exercises the slow legs (the
+    # investment-closure solve and the OBR bridge end-to-end), which the
+    # per-deploy and daily gates skip for runtime. Without this, the only
+    # thing ever running them against the live server was a manual dispatch.
+    - cron: "0 3 * * 0"
   workflow_dispatch:
     inputs:
       deep:
@@ -38,7 +43,7 @@ jobs:
     # income, liveness) completes in a few minutes. The investment-closure
     # regression is a real closure solve (minutes on the server) and is the
     # authoritative HARD GATE in the OBR repo CI (local, pre-deploy); here it
-    # runs only on a manual `deep` dispatch. force_build guarantees the deployed
+    # runs on the weekly Sunday cron and on a manual `deep` dispatch. force_build guarantees the deployed
     # model is always freshly cloned, so the fast suite is enough to confirm a
     # functional deploy on the automatic path.
     # 35 min: the slow leg now includes the OBR bridge end-to-end test (up to
@@ -64,7 +69,8 @@ jobs:
         # Default: fast correctness only. `deep=true` (manual) adds --runslow to
         # also exercise the slow investment-closure solve on the live server.
         run: |
-          if [ "${{ github.event.inputs.deep }}" = "true" ]; then
+          if [ "${{ github.event.inputs.deep }}" = "true" ] || \
+             [ "${{ github.event.schedule }}" = "0 3 * * 0" ]; then
             pytest tests/test_remote_mcp.py -q --runslow -rA
           else
             pytest tests/test_remote_mcp.py -q -rA
