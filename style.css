@@ -1006,3 +1006,29 @@ h2 {
   mask-image: linear-gradient(to bottom, #000 0, #000 42vh, transparent 88vh);
 }
 @media (prefers-color-scheme: dark) { #field { opacity: 0.7; } }
+
+/* The verdict band — "how far to trust it" on every model page, and the
+   validation summary. This is the suite's distinguishing claim (each model
+   publishes how far it can be checked), so it gets a surface of its own rather
+   than reading as one more section. Kept quiet: a tint and a top rule, no box.
+   .band-result was referenced on all five model pages with no rule behind it. */
+.band.band-result, .band + .band.band-result {
+  background: color-mix(in srgb, var(--brand) 4%, transparent);
+  /* Specificity note: `.band + .band` (0,2,0) sets the generic hairline, so a
+     bare `.band-result` (0,1,0) loses and the accent rule silently vanishes. */
+  border-top: 2px solid color-mix(in srgb, var(--brand) 55%, transparent);
+}
+.band-result > .band-head .kicker { color: var(--brand); }
+@media (prefers-color-scheme: dark) {
+  .band-result { background: color-mix(in srgb, var(--brand) 9%, transparent); }
+}
+
+/* Model card grid: give the cards room and a consistent stacking rhythm.
+   .band-stack was referenced on the homepage models section with no rule. */
+.band-stack { padding-top: var(--s-7); }
+
+/* Hero fan: the two quarter labels bracketing the x-axis. They carry the
+   date range, so unlike the value ticks they survive at narrow widths where
+   .hf-tick is hidden. */
+.hf-q { fill: var(--paper-faint); }
+@media (max-width: 1000px) { .hf-tick.hf-q { display: initial; } }
