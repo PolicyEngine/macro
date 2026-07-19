@@ -60,17 +60,9 @@
       <p>
         The five models differ in <strong>how far they can be checked
         against ground truth at all</strong>, and that difference matters
-        more than any single percentage on this page. Three are
-        <em>replications</em> with published anchors: obr-macro, boe-svar,
-        and frb-us each reproduce a specific published artefact, so a
-        deviation is a meaningful number.
-        <strong>pe-microsim</strong> is validated against statute itself —
-        checkable rule by rule, with no forecast error to speak of.
-        <strong>psl-og</strong> is a <em>structural counterfactual</em>:
-        calibrated to national-accounts targets, with no published result to
-        validate against. A replication you can audit against its anchor;
-        statute you can audit against the law; a calibrated counterfactual
-        you can only reason about.
+        more than any single percentage on this page. The
+        <a href="/docs/#choose">verification gradient</a> sorts them into
+        three classes; this page supplies the numbers for each.
       </p>
       <div class="table-scroll">
       <table>
@@ -258,7 +250,34 @@
         reason reform deltas are always scored against the anchored baseline
         rather than the raw one. The free-running score is de-seeded, with
         passthrough variables excluded, and is published report-only.
+        Across the full scorecard only <strong>4 of the 11 computed headline
+        variables land within band</strong> (real GDP, consumption, the trade
+        balance, and the trivial employment identity); the remaining 21
+        headline lines include 10 passthroughs held at the OBR value. The
+        worst line is company profits at <strong>54.57% MAPE</strong>, which
+        traces to a single unpublished constant in households' operating
+        surplus <code>OSHH</code> — the paper documents and regression-gates
+        it rather than re-tuning it, since tuning it would be fitting to the
+        answer.
       </p>
+      <div class="callout">
+        <strong>Two equations do not fire.</strong> The October 2025 model
+        file contains two household-income equations with a bare
+        <code>log(X)</code> left-hand side — <code>log(HHTFA)</code> and
+        <code>log(NDIVHH)</code>. The transpiler now parses that form, but
+        both still fail to execute for an independent reason: their exogenous
+        right-hand-side inputs <code>MAJGDP</code> and <code>CORP</code> are
+        absent from the databank entirely, so the right-hand side evaluates
+        non-finite and the solver skips the update. Every OBR figure on this
+        page is computed with those two channels inert. The practical effect
+        is bounded and demonstrable: household dividend income does not
+        respond to a corporate-profits change, so the household-income channel
+        of a corporation-tax reform is muted — a 5pp corporation-tax rise
+        moves <code>FYCPR</code> by &minus;£1,780m while
+        &Delta;<code>NDIVHH</code> is exactly zero. Reviving the channel needs
+        a sourced <code>CORP</code> series, a calibration decision rather than
+        a code fix.
+      </div>
       <p>
         <strong>Forecast versus outturn.</strong> Comparing one forecast
         vintage with another tests agreement, not accuracy. Against ONS
@@ -284,6 +303,24 @@
         </tbody>
       </table>
       </div>
+      <p>
+        <strong>Vintage drift: the March 2026 EFO.</strong> Everything above
+        compares against the November 2025 EFO because that is the vintage the
+        emulator is anchored to. It has <em>not</em> been re-anchored to the
+        OBR's subsequent March 2026 forecast, which revises 2026 real GDP
+        growth down to 1.1% — 0.3 points below November — and 2026 CPI
+        inflation down 0.2 points. The anchored baseline's 2026 paths (1.5%
+        GDP growth, 1.4% consumption growth, against the November EFO's 1.4%
+        and 1.2%) therefore now sit 0.3&ndash;0.4 points above the official
+        March view. That gap is vintage drift, not model error: it is almost
+        exactly the OBR's own November-to-March revision, and an emulator
+        re-anchored to the March tables would inherit the new path by
+        construction. The lesson is about levels, not deltas — reform effects
+        are differences between structurally identical runs and are
+        insensitive to modest baseline drift, but anyone quoting the anchored
+        <em>baseline</em> should treat it as a November 2025 snapshot the
+        official forecaster has since marked down.
+      </p>
       <p class="vlinks mono">
         <a href="/papers/obr-macro/main.pdf">working paper (pdf) →</a>
         <a href="/obr/">obr-macro model page →</a>
@@ -509,12 +546,14 @@
         and it does not transfer to population aggregates, where the binding
         constraint is the microdata rather than the rules: population-level
         scoring runs on a 53,000-household enhanced Family Resources Survey
-        for the UK and CPS microdata for the US. The OBR emulator's costing
-        comparison above is the clearest read on how those aggregates land
-        against an official costing — £6.46bn against HMRC's £6.9bn — and the
-        residual is attributable to survey-versus-administrative data
-        vintage, baseline policy assumptions, and HMRC's embedded
-        taxable-income elasticities.
+        for the UK and CPS microdata for the US. The clearest read on how
+        those aggregates land against an official costing is the
+        <a href="#obr">1pp basic-rate comparison above</a>, which runs through
+        this engine — a &minus;6.4% deviation from HMRC in the first year,
+        widening later. That residual is attributable to
+        survey-versus-administrative data vintage, baseline policy
+        assumptions, and HMRC's embedded taxable-income elasticities, none of
+        which are rule-encoding errors.
       </p>
       <p class="vlinks mono">
         <a href="/pe/">pe-microsim model page →</a>
