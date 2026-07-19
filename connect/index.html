@@ -61,7 +61,7 @@
   border-radius: 50%;
   margin-bottom: 14px;
 }
-.step h3 { font-size: var(--fs-h4); margin: 0 0 10px; }
+.step .step-h { font-size: var(--fs-h4); font-weight: 600; margin: 0 0 10px; letter-spacing: -0.01em; }
 .step p { font-size: var(--fs-body-sm); line-height: 1.6; color: var(--paper-faint); margin: 0 0 14px; }
 .copyblock {
   background: color-mix(in srgb, #2a7f7a 5%, var(--background, #fff));
@@ -175,6 +175,19 @@
 .legend span { display: inline-flex; align-items: center; gap: 7px; }
 .legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
 .chart-note { font-size: var(--fs-small); color: var(--paper-faint); margin: 4px 0 0; }
+
+/* progressive disclosure — page-local, no JS, CSP-safe */
+.more { border-top: 1px solid var(--line-soft); margin: 26px 0 0; padding-top: 4px; }
+.more > summary {
+  cursor: pointer; list-style: none; padding: 14px 0;
+  font-family: var(--mono); font-size: var(--fs-small);
+  color: var(--paper-faint);
+}
+.more > summary::-webkit-details-marker { display: none; }
+.more > summary::before { content: "+ "; }
+.more[open] > summary::before { content: "\2212 "; }
+.more > summary:hover, .more > summary:focus-visible { color: var(--text, #111); }
+.more > :last-child { margin-bottom: 8px; }
 </style>
 <style>
 /* shared shim — belongs in style.css; inlined here so every page is self-contained.
@@ -229,21 +242,21 @@
         Connect it. Or <em>code</em> it.
       </h1>
       <p class="lede reveal" style="--d:2; margin-left:auto; margin-right:auto;">
-        Add the hosted MCP server to Claude or ChatGPT and score reforms from
-        your prompts, run the same models from a terminal, or import them as
-        Python packages. Free and open source, no account and no key.
+        The fastest route is one URL pasted into Claude or ChatGPT — that is
+        the section below, and it takes about two minutes. A terminal CLI and
+        the raw Python packages follow, for when you want them. Free and open
+        source, no account and no key.
       </p>
     </div>
   </section>
 
   <section id="connect" class="connect-panel">
-    <h2 class="visually-hidden">Connect a client, or install the CLI</h2>
+    <div class="band-head" style="padding:0; margin-bottom: 26px;">
+      <span class="kicker mono">the happy path — about two minutes</span>
+      <h2>Paste one URL into Claude or ChatGPT.</h2>
+    </div>
     <div class="panel-card">
       <div class="panel-bars">
-        <div class="seg" role="tablist" aria-label="Integration" id="seg-integration">
-          <button role="tab" data-pane="mcp" aria-selected="true">MCP</button>
-          <button role="tab" data-pane="cli" aria-selected="false">CLI</button>
-        </div>
         <div class="seg" role="tablist" aria-label="Client" id="seg-client">
           <button role="tab" data-client="claude" aria-selected="true">Claude</button>
           <button role="tab" data-client="chatgpt" aria-selected="false">ChatGPT</button>
@@ -257,18 +270,18 @@
         <div class="steps" data-for="claude">
           <div class="step">
             <span class="step-n mono">1</span>
-            <h3>Copy the PolicyEngine Macro URL</h3>
+            <p class="step-h">Copy the PolicyEngine Macro URL</p>
             <p>Click the copy button — you'll paste it in the next step.</p>
             <div class="copyblock"><code>https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
           </div>
           <div class="step">
             <span class="step-n mono">2</span>
-            <h3>Open Settings → Connectors</h3>
+            <p class="step-h">Open Settings → Connectors</p>
             <p>In Claude, add a <strong>custom connector</strong>, name it PolicyEngine Macro, and paste the URL.</p>
           </div>
           <div class="step">
             <span class="step-n mono">3</span>
-            <h3>Connect and ask</h3>
+            <p class="step-h">Connect and ask</p>
             <p>Click <strong>Add → Connect</strong>, then ask Claude to <em>score a £5bn government spending rise</em> or <em>forecast UK GDP and inflation</em>.</p>
           </div>
         </div>
@@ -276,7 +289,7 @@
         <hr class="panel-divider" data-for="claude" />
         <div class="steps" data-for="claude" style="margin-top: 0;">
           <div class="step" style="grid-column: 1 / -1;">
-            <h3>Using Claude Code?</h3>
+            <p class="step-h">Using Claude Code?</p>
             <p>One command adds the same server to Claude Code:</p>
             <div class="copyblock"><code>claude mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
           </div>
@@ -285,18 +298,18 @@
         <div class="steps" data-for="chatgpt" hidden>
           <div class="step">
             <span class="step-n mono">1</span>
-            <h3>Copy the PolicyEngine Macro URL</h3>
+            <p class="step-h">Copy the PolicyEngine Macro URL</p>
             <p>Click the copy button — you'll paste it in the next step.</p>
             <div class="copyblock"><code>https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
           </div>
           <div class="step">
             <span class="step-n mono">2</span>
-            <h3>Open Settings → Connectors</h3>
+            <p class="step-h">Open Settings → Connectors</p>
             <p>In ChatGPT, enable <strong>Developer mode</strong> under Connectors, then <strong>Create</strong> a connector named PolicyEngine Macro and paste the URL.</p>
           </div>
           <div class="step">
             <span class="step-n mono">3</span>
-            <h3>Connect and ask</h3>
+            <p class="step-h">Connect and ask</p>
             <p>Save it, then ask ChatGPT to <em>score a £5bn government spending rise</em> or <em>forecast UK GDP and inflation</em>.</p>
           </div>
         </div>
@@ -304,14 +317,14 @@
         <hr class="panel-divider" data-for="chatgpt" hidden />
         <div class="steps" data-for="chatgpt" hidden style="margin-top: 0;">
           <div class="step" style="grid-column: 1 / -1;">
-            <h3>Using Codex?</h3>
+            <p class="step-h">Using Codex?</p>
             <p>One command adds the same server to OpenAI's Codex CLI:</p>
             <div class="copyblock"><code>codex mcp add policyengine-macro --url https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
           </div>
         </div>
 
-        <hr class="panel-divider" />
-        <h3 class="mono foot-head" style="margin-bottom:10px;">the ten tools</h3>
+        <details class="more">
+        <summary>All ten tools on the server, and which models they reach</summary>
         <div class="dials">
           <div class="dial">
             <span class="dial-name">scoring</span>
@@ -337,6 +350,7 @@
           <code class="mono">model="og"</code> returns local install instructions rather
           than a result.
         </p>
+        </details>
 
         <hr class="panel-divider" />
         <h3 class="mono foot-head" style="margin-bottom:10px;">three things that will trip you up</h3>
@@ -356,61 +370,62 @@
         </div>
       </div>
 
-      <!-- ================= CLI ================= -->
-      <div class="pane" id="pane-cli" hidden>
-        <p class="status-note">live</p>
-
-        <div class="steps" data-for="claude">
-          <div class="step">
-            <span class="step-n mono">1</span>
-            <h3>Install</h3>
-            <p>Python 3.10+. One package wraps the OBR emulator, the UK SVAR and PolicyEngine behind a single command — models and data included, no cloning.</p>
-            <div class="copyblock"><code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code><button data-copy>copy</button></div>
-          </div>
-          <div class="step">
-            <span class="step-n mono">2</span>
-            <h3>Ask Claude Code</h3>
-            <p>Claude Code runs the CLI from its terminal — just describe the reform, or run it yourself:</p>
-            <div class="copyblock"><code>pe-macro obr-shock --var CGG --shock 1250 --periods 4</code><button data-copy>copy</button></div>
-          </div>
-          <div class="step">
-            <span class="step-n mono">3</span>
-            <h3>Read the results</h3>
-            <p>Per-quarter GDP deltas in £bn and the cumulative effect — a table by default, JSON with <code class="mono">--json</code>. The rest: <code class="mono">score</code> (a PolicyEngine reform through <code class="mono">--model og|obr|microsim</code>) and <code class="mono">compare</code>; <code class="mono">variables</code>; <code class="mono">forecast</code>, <code class="mono">shocks</code>, <code class="mono">summary</code>; <code class="mono">household</code>, <code class="mono">household-impact</code>, <code class="mono">population-impact</code>, <code class="mono">parameters</code>; and <code class="mono">og-score</code> / <code class="mono">og-baseline</code>, which need OG-UK installed and take tens of minutes. Unlike the MCP tools, CLI <code class="mono">--country</code> defaults to <code class="mono">uk</code>.</p>
-          </div>
-        </div>
-
-        <div class="steps" data-for="chatgpt" hidden>
-          <div class="step">
-            <span class="step-n mono">1</span>
-            <h3>Install</h3>
-            <p>Python 3.10+. One package wraps the OBR emulator, the UK SVAR and PolicyEngine behind a single command — models and data included, no cloning.</p>
-            <div class="copyblock"><code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code><button data-copy>copy</button></div>
-          </div>
-          <div class="step">
-            <span class="step-n mono">2</span>
-            <h3>Ask Codex</h3>
-            <p>Codex runs the CLI from its terminal — just describe the reform, or run it yourself:</p>
-            <div class="copyblock"><code>pe-macro obr-shock --var CGG --shock 1250 --periods 4</code><button data-copy>copy</button></div>
-          </div>
-          <div class="step">
-            <span class="step-n mono">3</span>
-            <h3>Read the results</h3>
-            <p>Per-quarter GDP deltas in £bn and the cumulative effect — a table by default, JSON with <code class="mono">--json</code>. The rest: <code class="mono">score</code> (a PolicyEngine reform through <code class="mono">--model og|obr|microsim</code>) and <code class="mono">compare</code>; <code class="mono">variables</code>; <code class="mono">forecast</code>, <code class="mono">shocks</code>, <code class="mono">summary</code>; <code class="mono">household</code>, <code class="mono">household-impact</code>, <code class="mono">population-impact</code>, <code class="mono">parameters</code>; and <code class="mono">og-score</code> / <code class="mono">og-baseline</code>, which need OG-UK installed and take tens of minutes. Unlike the MCP tools, CLI <code class="mono">--country</code> defaults to <code class="mono">uk</code>.</p>
-          </div>
-        </div>
-
-        <hr class="panel-divider" />
-        <p class="soon-hint" style="max-width: none;">The <code class="mono">[models]</code> extra pulls the OBR emulator, the UK SVAR and the PolicyEngine country packages, each of which ships its own data. <a href="/frb-us/">FRB/US</a> and OG-UK install separately. The package lives in this repo's <a href="https://github.com/PolicyEngine/macro/tree/main/integration"><code class="mono">integration/</code></a> directory; a shorter <code class="mono">pip install policyengine-macro</code> follows PyPI publication. Reform dicts take the same shapes as the MCP tools — flat or single-effective-date, never a date range.</p>
-        <p class="panel-foot mono" style="color: var(--paper-faint);">
-          the CLI runs everything the MCP server does, plus OG-UK, which is too slow to host. <a href="/frb-us/">FRB/US</a> is a separate package with its own Python API.
-        </p>
-      </div>
-
     </div>
-    <p class="stack-note" style="text-align:center; margin-top: 26px;">
-      <span class="mono">all three routes call the same code — <a href="https://github.com/PolicyEngine/macro/tree/main/integration">integration/</a> in the repo.</span>
-    </p>
+  </section>
+
+  <section id="cli" class="band">
+    <div class="band-head">
+      <span class="kicker mono">or — a terminal instead</span>
+      <h2>Same models, one command.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        One package (Python 3.10+) wraps the OBR emulator, the UK SVAR and
+        PolicyEngine behind a single command, models and data included, no
+        cloning. Claude Code and Codex can drive it from their own terminal,
+        or you can run it yourself.
+      </p>
+      <div class="copyblock" style="margin-bottom:14px;"><code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code><button data-copy>copy</button></div>
+      <div class="copyblock"><code>pe-macro obr-shock --var CGG --shock 1250 --periods 4</code><button data-copy>copy</button></div>
+      <p>
+        That prints per-quarter GDP deltas in £bn and the cumulative effect —
+        a table by default, JSON with <code class="mono">--json</code>. The
+        CLI runs everything the MCP server does, plus OG-UK, which is too slow
+        to host. Unlike the MCP tools, CLI
+        <code class="mono">--country</code> defaults to
+        <code class="mono">uk</code>; reform dicts take the same shapes as the
+        MCP tools — flat or single-effective-date, never a date range.
+      </p>
+      <details class="more">
+        <summary>Every command, and what installs with what</summary>
+        <p>
+          Beyond <code class="mono">obr-shock</code>:
+          <code class="mono">score</code> (a PolicyEngine reform through
+          <code class="mono">--model og|obr|microsim</code>) and
+          <code class="mono">compare</code>; <code class="mono">variables</code>;
+          <code class="mono">forecast</code>, <code class="mono">shocks</code>,
+          <code class="mono">summary</code>; <code class="mono">household</code>,
+          <code class="mono">household-impact</code>,
+          <code class="mono">population-impact</code>,
+          <code class="mono">parameters</code>; and
+          <code class="mono">og-score</code> / <code class="mono">og-baseline</code>,
+          which need OG-UK installed and take tens of minutes.
+        </p>
+        <p>
+          The <code class="mono">[models]</code> extra pulls the OBR emulator,
+          the UK SVAR and the PolicyEngine country packages, each of which
+          ships its own data. <a href="/frb-us/">FRB/US</a> and OG-UK install
+          separately; FRB/US is a separate package with its own Python API.
+          The package lives in this repo's
+          <a href="https://github.com/PolicyEngine/macro/tree/main/integration"><code class="mono">integration/</code></a>
+          directory; a shorter <code class="mono">pip install policyengine-macro</code>
+          follows PyPI publication.
+        </p>
+      </details>
+      <p class="stack-note" style="text-align:left; margin-top: 26px;">
+        <span class="mono">all three routes call the same code — <a href="https://github.com/PolicyEngine/macro/tree/main/integration">integration/</a> in the repo.</span>
+      </p>
+    </div>
   </section>
 
   <section id="code" class="band">
@@ -421,10 +436,8 @@
     <div class="prose">
       <p>
         No connector, no CLI — just Python. Every model is its own installable
-        package: score a reform with the OLG or OBR engine in a handful of
-        lines, read and forecast the economy with the structural VAR, or
-        compute a household's taxes and benefits with PolicyEngine. Each
-        entry point below takes the country explicitly; nothing is inferred.
+        package. Pick one below: install, then the whole call in one screen,
+        with the mechanics and options behind the expander underneath.
       </p>
 
       <div class="seg model-seg" role="tablist" aria-label="Model" id="model-seg">
@@ -499,6 +512,8 @@ Revenue: <span class="out-val">+6.4bn</span>
 Debt:    <span class="out-val">−3.1bn</span></code></pre>
       </div>
 
+      <details class="more">
+        <summary>How it works, the transition path, and the options</summary>
       <p>
         Under the hood: PolicyEngine runs the reform through the actual UK
         tax-benefit rules on representative microdata, OG-UK estimates tax
@@ -599,6 +614,7 @@ Debt:    <span class="out-val">−3.1bn</span></code></pre>
         </div>
       </div>
 
+      </details>
       <p class="research-link mono">
         <a href="/olg/">Full guide — parameter paths, every option, transition paths, and outputs → the OG-UK model page</a>
       </p>
@@ -661,6 +677,8 @@ results = run_reform(
      4  <span class="out-val">2.05          0.07</span></code></pre>
       </div>
 
+      <details class="more">
+        <summary>How it works, and the options</summary>
       <p>
         Under the hood: the OBR's 372 published equations are transpiled to
         Python and solved simultaneously by Gauss–Seidel each quarter. For a
@@ -684,6 +702,7 @@ results = run_reform(
         </div>
       </div>
 
+      </details>
       <p class="research-link mono">
         <a href="/obr/">Full guide — the solver, every lever, forecasting, and calibration → the OBR model page</a>
       </p>
@@ -744,6 +763,8 @@ UK GDP  identified global <span class="out-val">40.9%</span>  domestic <span cla
 UK CPI  identified global <span class="out-val">50.1%</span>  domestic <span class="out-val">35.4%</span></code></pre>
       </div>
 
+      <details class="more">
+        <summary>How it works, and what ships in the package</summary>
       <p>
         Under the hood: an 8-variable Bayesian VAR — estimated on 1992Q1–2023Q2
         with Covid dummies, leaving the 2023Q3–2024Q2 quarters of the packaged
@@ -769,6 +790,7 @@ UK CPI  identified global <span class="out-val">50.1%</span>  domestic <span cla
         </div>
       </div>
 
+      </details>
       <p class="research-link mono">
         <a href="/svar/">Full guide — the model, identification, validation against the paper → the SVAR model page</a>
       </p>
@@ -826,6 +848,8 @@ us = pe.us.calculate_household(
 <span class="kw">print</span>(us.tax_unit.income_tax, us.household.household_net_income)</code></pre>
       </div>
 
+      <details class="more">
+        <summary>How it works, and the options</summary>
       <p>
         Under the hood: PolicyEngine encodes the UK and US tax-and-benefit
         rules as parameterised statute and computes each variable — income
@@ -852,6 +876,7 @@ us = pe.us.calculate_household(
         </div>
       </div>
 
+      </details>
       <p class="research-link mono">
         <a href="/pe/">Full guide — household calculator, reforms, population analysis → the PolicyEngine model page</a>
       </p>
@@ -891,7 +916,6 @@ us = pe.us.calculate_household(
 <script>
 (function () {
   "use strict";
-  var integ = document.getElementById("seg-integration");
   var client = document.getElementById("seg-client");
 
   function select(seg, btn) {
@@ -909,15 +933,6 @@ us = pe.us.calculate_household(
       s.hidden = s.dataset.for !== c;
     });
   }
-
-  integ.addEventListener("click", function (e) {
-    var btn = e.target.closest("button"); if (!btn) return;
-    select(integ, btn);
-    document.querySelectorAll(".pane").forEach(function (p) {
-      p.hidden = p.id !== "pane-" + btn.dataset.pane;
-    });
-    applyClient();
-  });
 
   client.addEventListener("click", function (e) {
     var btn = e.target.closest("button"); if (!btn) return;
