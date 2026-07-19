@@ -20,30 +20,6 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css" />
-<style>
-/* shared shim — belongs in style.css; inlined here so every page is self-contained.
-   1. skip link, 2. row-header cells keep body-text styling, 3. table captions. */
-.skip-link {
-  position: absolute; left: -9999px; top: 0; z-index: 100;
-  background: var(--background, #fff); color: var(--text, #111);
-  border: 1px solid var(--line-soft); border-radius: 4px;
-  font-family: var(--mono); font-size: var(--fs-small); padding: 10px 16px;
-}
-.skip-link:focus { left: 12px; top: 12px; }
-.prose tbody th {
-  font-family: inherit; font-size: inherit; font-weight: 500;
-  letter-spacing: normal; text-transform: none; color: inherit;
-}
-.prose caption {
-  caption-side: top; text-align: left; font-family: var(--mono);
-  font-size: var(--fs-label); letter-spacing: var(--ls-label);
-  text-transform: uppercase; color: var(--paper-faint); padding-bottom: 12px;
-}
-.visually-hidden {
-  position: absolute; width: 1px; height: 1px; overflow: hidden;
-  clip-path: inset(50%); white-space: nowrap;
-}
-</style>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -55,12 +31,10 @@
     <span class="brand-dot" aria-hidden="true"></span>PolicyEngine Macro
   </a>
   <nav class="nav-links" aria-label="Primary">
-    <a href="/#idea">idea</a>
-    <a href="/#models">models</a>
-    <a href="/#validation">validation</a>
-    <a href="/#workflow">workflow</a>
-    <a href="/docs/">docs</a>
-    <a href="/connect/">use it</a>
+    <a class="nav-mobile" href="/#models">Models</a>
+    <a href="/docs/">Compare</a>
+    <a href="/validation/">Validation</a>
+    <a class="nav-mobile nav-start" href="/connect/">Get started</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
   </nav>
 </header>
@@ -74,16 +48,14 @@
         <br />the economy.
       </h1>
       <p class="lede reveal" style="--d:2">
-        <strong>Five open economic models for the UK and US</strong> — the
-        OBR's forecasting model, the Bank of England's structural VAR, the
-        Fed's FRB/US, an overlapping-generations model, and PolicyEngine's
-        tax-benefit microsimulation. Each answers a different question, and
-        each publishes how far it can be checked against ground truth.
+        <strong>Choose the model that matches your policy question.</strong>
+        Estimate a reform's household impact, trace its economy-wide effects,
+        test a shock, or build a forecast with five open UK and US models.
+        Every result comes with explicit assumptions and validation evidence.
       </p>
       <div class="hero-cta reveal" style="--d:3">
-        <a class="btn btn-primary" href="#models">Explore the models</a>
-        <a class="btn btn-ghost" href="/validation/">See how they check out</a>
-        <a class="btn btn-ghost" href="https://github.com/PolicyEngine/macro">Read the code</a>
+        <a class="btn btn-primary" href="#choose">Choose a model</a>
+        <a class="btn btn-ghost" href="/connect/">Get started</a>
       </div>
       </div>
       <figure class="hero-fig">
@@ -110,10 +82,8 @@
 </svg>
 <!-- hero-fan:end -->
         <figcaption>
-          Not an illustration: the boe-svar model's own posterior forecast for UK
-          real GDP growth to 2027Q3, median with 68% and 90% credible bands over
-          3,000 draws. The lower edge stays under zero throughout — the model
-          does not rule out a contraction. <a href="/svar/">How it is built</a>.
+          UK real GDP growth forecast from boe-svar, with 68% and 90% credible
+          bands over 3,000 draws. <a href="/svar/">Explore the forecast model</a>.
         </figcaption>
       </figure>
     </div>
@@ -121,36 +91,48 @@
 
   <section id="idea" class="band">
     <div class="band-head">
-      <span class="kicker mono">01 — the idea</span>
-      <h2>From static scores to microfounded models.</h2>
+      <span class="kicker mono">01 — why macro</span>
+      <h2>A policy score is only the first step.</h2>
     </div>
     <div class="prose">
       <p>
-        Policy analysis usually stops at a static score — who pays what the
-        morning after a reform. But people respond: work, saving, and
-        investment shift; wages, prices, and interest rates move, and the
-        fiscal arithmetic moves with them. Modeling that response has been the
-        preserve of institutions with in-house model teams. PolicyEngine Macro
-        opens those engines up, in Python, in public.
+        Microsimulation shows who pays and who benefits immediately. Macro
+        models trace what happens next as work, saving, investment, wages,
+        prices, and interest rates respond. PolicyEngine Macro makes both
+        layers available through open models and a shared interface.
       </p>
       <p>
-        Opening an engine up is only half of it. The other half is publishing
-        what each one is worth — <a href="#validation">its own section
-        below</a>, because it is the thing most model suites leave unsaid.
+        These models are not interchangeable. Start with the decision you need
+        to make, then inspect the model's evidence and limitations before using
+        its result.
       </p>
     </div>
   </section>
 
+  <section id="choose" class="band band-stack">
+    <div class="band-head">
+      <span class="kicker mono">02 — choose by question</span>
+      <h2>What do you need to understand?</h2>
+    </div>
+    <div class="question-list">
+      <a href="/pe/"><span>Taxes and benefits for a household or population</span><strong>PolicyEngine microsimulation</strong></a>
+      <a href="/obr/"><span>A UK reform's effect on growth and borrowing over 3–5 years</span><strong>OBR macro model</strong></a>
+      <a href="/svar/"><span>What is driving UK GDP and inflation now</span><strong>Bank of England SVAR</strong></a>
+      <a href="/frb-us/"><span>A US monetary or fiscal shock over coming quarters</span><strong>FRB/US</strong></a>
+      <a href="/olg/"><span>Work, saving, and capital effects over decades</span><strong>PSL OLG model</strong></a>
+    </div>
+    <p class="chooser-note">Need assumptions and tradeoffs side by side? <a href="/docs/">Compare all five models</a>.</p>
+  </section>
+
   <section id="models" class="band band-stack">
     <div class="band-head">
-      <span class="kicker mono">02 — the models</span>
-      <h2>One suite, many lenses on the economy.</h2>
+      <span class="kicker mono">03 — model catalog</span>
+      <h2>Inspect the model before you use it.</h2>
     </div>
     <div class="prose" style="margin-bottom: 36px;">
       <p>
-        Each keeps its own assumptions, inputs, and outputs — no single reform
-        object flows through all five. Side-by-side comparison and
-        when-to-use-which are in the <a href="/docs/">docs</a>.
+        Each reference page explains inputs, outputs, methodology, validation,
+        limitations, and how to run the model.
       </p>
     </div>
     <div class="strategy-grid">
@@ -223,7 +205,7 @@
 
   <section id="validation" class="band">
     <div class="band-head">
-      <span class="kicker mono">03 — validation</span>
+      <span class="kicker mono">04 — validation</span>
       <h2>Validation is a gradient, not a badge.</h2>
     </div>
     <div class="prose">
@@ -262,21 +244,16 @@
 
   <section id="workflow" class="band">
     <div class="band-head">
-      <span class="kicker mono">04 — the workflow</span>
-      <h2>One interface, results in real-world units.</h2>
+      <span class="kicker mono">05 — get a result</span>
+      <h2>Use a hosted tool, the CLI, or Python.</h2>
     </div>
     <div class="prose">
       <p>
-        Every analysis records its <strong>assumptions, data vintage, model
-        version, and units</strong>, and each result is a deviation from an
-        official baseline in real-world units: £ per year for a household,
-        £bn and % of GDP for the economy. One CLI, one Python API, and a
-        hosted MCP server with thirteen tools reach the models — including
-        <code class="mono">score_reform</code>, which costs a reform through the
-        OBR static bridge, and <code class="mono">frbus_shock</code>, which runs
-        FRB/US impulse responses in about a second. The OLG model is the one
-        member that still runs locally only.
-        <a href="/connect/">Connect a client →</a>
+        Use the hosted tools from an AI client, run the shared CLI, or call a
+        model's Python API directly. Results retain the assumptions, data
+        vintage, model version, baseline, and units needed to interpret them.
+        The OLG model runs locally because a solve takes 17 minutes or more.
+        <a href="/connect/">Choose a setup and run your first analysis →</a>
       </p>
     </div>
   </section>
@@ -301,7 +278,7 @@
     <a href="/">home</a>
     <a href="/docs/">docs</a>
     <a href="/validation/">validation</a>
-    <a href="/connect/">use it</a>
+    <a href="/connect/">get started</a>
     <a href="https://github.com/PolicyEngine/macro">GitHub</a>
     <a class="foot-pe" href="https://policyengine.org" aria-label="PolicyEngine"><img src="/assets/policyengine.svg" alt="PolicyEngine" /></a>
   </nav>

@@ -89,6 +89,37 @@
   --radius-sm: 4px;
 }
 
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 10px 16px;
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+}
+.skip-link:focus { left: 12px; top: 12px; }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.prose tbody th {
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* ---------- focus (WCAG 2.4.7) ----------
@@ -275,7 +306,22 @@ body {
 .nav-gh svg { width: 18px; height: 18px; display: block; }
 .nav-links a:not(.nav-gh) { display: none; }
 
+/* Keep the two primary journeys available on small screens. The previous
+   mobile header reduced the entire site navigation to a GitHub icon. */
+.nav-links a.nav-mobile { display: inline-flex; }
+.nav-links .nav-start {
+  align-items: center;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--brand);
+  border-radius: 4px;
+  color: var(--brand-strong);
+}
+.nav-links .nav-start:hover { background: var(--ink-2); }
+
 @media (min-width: 760px) {
+  .nav-links .nav-start { min-height: auto; padding: 0; border: 0; }
+  .nav-links .nav-start:hover { background: transparent; }
   .nav-links a:not(.nav-gh) { display: inline; }
 }
 
@@ -592,6 +638,9 @@ h2 {
 .doc .prose p code,
 .doc .prose li code,
 .doc .prose td code { font-family: var(--mono); font-size: var(--fs-code-inline); color: var(--brand-strong); }
+.doc .prose p code,
+.doc .prose li code,
+.connect-panel p code { overflow-wrap: anywhere; }
 
 /* section headings on content pages read a touch tighter than the band default */
 .doc .band-head { margin-bottom: var(--s-6); }
@@ -659,6 +708,45 @@ h2 {
 .next-invite { margin-top: 30px; text-align: center; font-size: var(--fs-small); color: var(--paper-faint); display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
 .next-invite a { color: var(--text, #111); text-decoration: none; border-bottom: 1px solid var(--line-soft); padding-bottom: 1px; }
 .next-invite a:hover { color: var(--brand-strong); border-bottom-color: var(--brand-strong); }
+
+/* Homepage decision path. This is intentionally a list rather than another
+   card grid: readers scan from their question to the model in one line. */
+.question-list {
+  border-top: 1px solid var(--line);
+  margin-top: var(--s-6);
+}
+.question-list a {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(180px, 0.7fr) 18px;
+  gap: var(--s-5);
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--paper);
+  text-decoration: none;
+}
+.question-list a::after { content: "→"; color: var(--brand); }
+.question-list a:hover strong,
+.question-list a:hover::after { color: var(--brand-deep); }
+.question-list span { font-size: var(--fs-body); line-height: 1.45; }
+.question-list strong {
+  color: var(--brand-strong);
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+.chooser-note { margin-top: var(--s-5); color: var(--paper-dim); font-size: var(--fs-body-sm); }
+.chooser-note a { color: var(--brand-strong); }
+
+@media (max-width: 620px) {
+  .nav { gap: 10px; }
+  .brand { font-size: 11px; }
+  .nav-links { gap: 10px; }
+  .nav-links a.nav-mobile:first-child { display: none; }
+  .question-list a { grid-template-columns: 1fr 18px; gap: 8px 14px; }
+  .question-list strong { grid-column: 1; grid-row: 2; }
+  .question-list a::after { grid-column: 2; grid-row: 1 / span 2; }
+}
 
 /* slim footer bar */
 .foot-bar { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding-top: 26px; padding-bottom: 30px; }
