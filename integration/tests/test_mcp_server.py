@@ -10,18 +10,9 @@ from mcp.client.stdio import stdio_client
 
 SERVER = StdioServerParameters(command=sys.executable, args=["-m", "policyengine_macro.mcp_server"])
 
-EXPECTED_TOOLS = {
-    "score_reform",
-    "list_reform_variables",
-    "forecast_uk",
-    "latest_shocks",
-    "model_summary",
-    "calculate_household",
-    "household_reform_impact",
-    "list_reform_parameters",
-    "population_reform_impact",
-    "obr_shock",
-}
+from tool_surface import GOLDEN_TOOLS, assert_surface
+
+EXPECTED_TOOLS = set(GOLDEN_TOOLS)
 
 
 def _payload(result):
@@ -37,8 +28,7 @@ async def test_mcp_tools_and_calls():
             await session.initialize()
 
             tools = await session.list_tools()
-            names = {t.name for t in tools.tools}
-            assert EXPECTED_TOOLS <= names
+            assert_surface(t.name for t in tools.tools)
 
             res = await session.call_tool("model_summary", {})
             summary = _payload(res)
