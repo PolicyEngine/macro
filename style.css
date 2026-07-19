@@ -46,21 +46,47 @@
   --max: 1140px;
 
   /* ---------- type scale (single source of truth for font sizes) ---------- */
-  --fs-hero: clamp(2.2rem, 5.2vw, 3.9rem);     /* homepage h1 */
-  --fs-hero-sub: clamp(2.1rem, 5vw, 3.6rem);   /* interior-page h1 */
-  --fs-h2: clamp(1.9rem, 4.6vw, 3.2rem);       /* band headings */
-  --fs-h3: 1.4rem;                             /* card h3 */
-  --fs-h3-sm: 1.25rem;                         /* compact card h3 */
-  --fs-h4: 17px;                               /* step / minor headings */
-  --fs-lede: clamp(1.05rem, 2.2vw, 1.4rem);    /* hero ledes */
-  --fs-stat: 3rem;                             /* big metric numerals */
-  --fs-body: 16px;                             /* prose + card body text */
+  /* Steps are ~1.3x apart so h1 > h2 > h3 > body reads as four distinct
+     levels. The old scale topped out at 3.9rem/3.2rem: h1 and h2 were close
+     enough to compete, and both were loud enough to fight the body copy. */
+  --fs-hero: clamp(2.1rem, 4.4vw, 3.1rem);     /* homepage h1 */
+  --fs-hero-sub: clamp(1.9rem, 4vw, 2.7rem);   /* interior-page h1 */
+  --fs-h2: clamp(1.5rem, 2.6vw, 1.95rem);      /* band headings */
+  --fs-h3: 1.2rem;                             /* card h3 */
+  --fs-h3-sm: 1.1rem;                          /* compact card h3 */
+  --fs-h4: 16px;                               /* step / minor headings */
+  --fs-lede: clamp(1.05rem, 1.8vw, 1.25rem);   /* hero ledes */
+  --fs-stat: 2.4rem;                           /* big metric numerals */
+  --fs-body: 17px;                             /* prose + card body text */
   --fs-body-sm: 14px;                          /* secondary text, notes, tables */
   --fs-small: 13px;                            /* captions, nav, fine print */
   --fs-mono: 13px;                             /* code blocks */
   --fs-label: 12px;                            /* uppercase mono micro-labels */
   --fs-code-inline: 0.9em;                     /* inline code, relative to its text */
   --ls-label: 0.08em;                          /* letter-spacing for micro-labels */
+
+  /* ---------- spacing scale (single source of truth for rhythm) ----------
+     One geometric-ish ramp. Component margins/padding pick a step from here
+     instead of inventing a number, so seams between sections are consistent
+     and the eye can find them. */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+  /* band gutter + vertical band rhythm */
+  --gutter: clamp(20px, 5vw, 56px);
+  --band-y: clamp(56px, 8vw, 104px);
+
+  /* ---------- one border radius, one border colour ----------
+     Cards, code blocks, charts and panels used 2px/3px/6px/8px in different
+     places for the same job. One value now. */
+  --radius: 8px;
+  --radius-sm: 4px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -89,7 +115,19 @@
 /* Never let a clipping ancestor eat the ring. */
 :focus-visible { position: relative; z-index: 1; }
 
-html { scroll-behavior: smooth; }
+/* ---------- fragment navigation ----------
+   `scroll-behavior: smooth` was here, and it is why `/docs/#papers` did not
+   work: the four paper viewer pages link to that fragment, the target sits
+   ~4,400px down, and Chrome does not run the smooth animation for the
+   initial same-document fragment jump at all (measured: scrollY stayed 0
+   with smooth, landed exactly on target with auto). It was also the wrong
+   call for its own sake — a multi-second animated flight down a long
+   reference page is disorienting, not calm. Instant jumps now.
+   scroll-margin-top keeps the landed heading clear of the fixed nav
+   instead of tucked underneath it. */
+:target,
+section[id],
+[id]:not(body) { scroll-margin-top: clamp(88px, 12vh, 112px); }
 
 body {
   background: var(--ink);
@@ -102,35 +140,15 @@ body {
   position: relative;
 }
 
-/* deep radial wash + base atmosphere */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -3;
-  background:
-    radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--primary) 7%, transparent), transparent 55%),
-    radial-gradient(90% 60% at 80% 110%, color-mix(in srgb, var(--primary) 4%, transparent), transparent 60%),
-    var(--ink);
-}
-
-#field {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  width: 100%;
-  height: 100%;
-  opacity: 0.5;
-}
-
-.grain {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.04;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
+/* ---------- background: deliberately nothing ----------
+   The page used to stack three ambient layers behind the reading column: two
+   fixed teal radial washes, an animated canvas of 120–360 drifting/twinkling
+   dots (field.js, now deleted along with its markup), and an SVG noise grain.
+   These are reference pages of continuous prose; ambient motion and
+   texture directly behind that much body copy is what "the background is confusing" means.
+   One flat surface, so the only thing moving on the page is the text.
+   .grain is a <div> on all 14 pages (markup owned elsewhere) — retired here. */
+.grain { display: none; }
 
 /* ---------- nav ---------- */
 .nav {
@@ -140,9 +158,9 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 22px clamp(20px, 5vw, 56px);
-  backdrop-filter: blur(7px);
-  background: linear-gradient(var(--ink), transparent);
+  padding: var(--s-4) var(--gutter);
+  backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--ink) 88%, transparent);
   border-bottom: 1px solid var(--line-soft);
 }
 
@@ -160,10 +178,7 @@ body::before {
   width: 9px; height: 9px;
   border-radius: 50%;
   background: var(--brand);
-  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--primary) 55%, transparent);
-  animation: pulse 3.4s ease-in-out infinite;
 }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
 
 .nav-links {
   display: flex;
@@ -189,10 +204,9 @@ body::before {
 
 /* ---------- hero ---------- */
 .hero {
-  min-height: 100svh;
   display: flex;
   align-items: center;
-  padding: clamp(96px, 14vh, 150px) clamp(20px, 5vw, 56px) clamp(48px, 8vh, 90px);
+  padding: clamp(120px, 16vh, 168px) var(--gutter) var(--s-9);
 }
 .hero-inner { max-width: 980px; margin: 0 auto; width: 100%; }
 
@@ -202,17 +216,17 @@ body::before {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--brand);
-  margin-bottom: 26px;
+  margin-bottom: var(--s-4);
 }
 
 h1 {
   font-family: var(--display);
   font-weight: 400;
   font-size: var(--fs-hero);
-  line-height: 1.02;
+  line-height: 1.08;
   letter-spacing: -0.015em;
   font-optical-sizing: auto;
-  margin-bottom: 30px;
+  margin-bottom: var(--s-5);
 }
 h1 em {
   font-style: italic;
@@ -225,28 +239,32 @@ h1 em {
   line-height: 1.55;
   color: var(--paper);
   max-width: 56ch;
-  margin-bottom: 38px;
+  margin-bottom: var(--s-6);
 }
 .lede strong { color: var(--brand-strong); font-weight: 600; }
 
-.hero-cta { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 54px; }
+.hero-cta { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-bottom: 0; }
 
 .btn {
   font-family: var(--mono);
   font-size: var(--fs-body-sm);
   letter-spacing: 0.01em;
   text-decoration: none;
-  padding: 13px 24px;
-  border-radius: 2px;
-  transition: transform 0.2s, background 0.2s, color 0.2s, border-color 0.2s;
+  padding: 12px 22px;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
   display: inline-block;
+  /* some buttons are labelled with a full repo URL; let the label break
+     rather than push the page sideways at 375px */
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .btn-primary {
   background: var(--brand);
   color: var(--ink);
   font-weight: 500;
 }
-.btn-primary:hover { transform: translateY(-2px); background: var(--brand-deep); }
+.btn-primary:hover { background: var(--brand-deep); }
 .btn-ghost {
   color: var(--paper);
   border: 1px solid var(--line);
@@ -258,51 +276,60 @@ h1 em {
 .band {
   max-width: var(--max);
   margin: 0 auto;
-  padding: clamp(80px, 13vw, 170px) clamp(20px, 5vw, 56px);
+  padding: var(--band-y) var(--gutter);
   position: relative;
 }
 .band + .band { border-top: 1px solid var(--line-soft); }
 
-.band-head { margin-bottom: 54px; }
+.band-head { margin-bottom: var(--s-6); max-width: 60ch; }
 .kicker {
   display: block;
   font-size: var(--fs-small);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--brand);
-  margin-bottom: 20px;
+  margin-bottom: var(--s-3);
 }
 h2 {
   font-family: var(--display);
   font-weight: 400;
   font-size: var(--fs-h2);
-  line-height: 1.08;
+  line-height: 1.2;
   letter-spacing: -0.012em;
-  max-width: 18ch;
+  max-width: 26ch;
 }
 
-.prose { max-width: 74ch; }
-.prose p { margin-bottom: 22px; color: var(--paper); font-size: var(--fs-body); line-height: 1.62; }
+.prose { max-width: 68ch; }
+/* Long unbreakable tokens — file paths, package names, URLs printed inline in
+   the prose — are wider than a 375px column at this body size and pushed the
+   page 2–3px sideways on /validation/. Break them instead of shrinking the
+   type. <pre>/.codeblock keep their own horizontal scroll and are untouched. */
+.prose p, .prose li, .prose td, .prose figcaption { overflow-wrap: break-word; }
+.prose p { margin-bottom: var(--s-5); color: var(--paper); font-size: var(--fs-body); line-height: 1.7; }
 .prose p:last-child { margin-bottom: 0; }
 .prose em { font-style: italic; color: var(--brand-strong); }
-.prose strong { font-weight: 600; color: var(--paper); border-bottom: 1px solid color-mix(in srgb, var(--primary) 40%, transparent); }
+.prose strong { font-weight: 600; color: var(--paper); }
 
 /* ---------- cards ---------- */
 .card-id { font-size: var(--fs-small); color: var(--brand); letter-spacing: 0.04em; }
+/* ONE chip form. Variants differ only by colour, never by shape or size. */
 .tag {
+  display: inline-block;
   font-family: var(--mono);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   padding: 3px 9px;
-  border-radius: 100px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  white-space: nowrap;
 }
 .tag-wip { background: var(--ink-2); color: var(--paper-dim); }
 
 /* model access + status badges (accurate to how each model can be used) */
 .tag-hosted { background: color-mix(in srgb, var(--primary) 12%, transparent); color: var(--text-success); }
 .tag-local { background: color-mix(in srgb, var(--brand-warning) 16%, transparent); color: var(--brand-warning); }
-.tag-country { background: transparent; color: var(--paper-dim); border: 1px solid var(--ink-2); }
+.tag-country { background: transparent; color: var(--paper-dim); border-color: var(--line); }
 /* two badges sit side by side in a card header */
 .tag-row { display: inline-flex; gap: 6px; flex-wrap: wrap; }
 
@@ -315,9 +342,9 @@ h2 {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0;
-  margin: 48px 0 28px;
-  border: 1px solid var(--line);
-  border-radius: 3px;
+  margin: var(--s-7) 0 var(--s-6);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
   overflow: hidden;
 }
 @media (min-width: 720px) { .metrics { grid-template-columns: repeat(3, 1fr); } }
@@ -373,51 +400,63 @@ h2 {
 .foot-pe img { height: 20px; width: auto; display: block; opacity: 0.82; transition: opacity 0.2s; }
 .foot-pe:hover img { opacity: 1; }
 
-/* ---------- reveal ---------- */
-.reveal {
-  opacity: 0;
-  transform: translateY(18px);
-  animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
-  animation-delay: calc(var(--d) * 130ms + 150ms);
+/* ---------- reveal: retired ----------
+   Every band-head, prose block, card grid and metric row started at
+   opacity:0 and slid up on scroll. On documentation pages that meant the
+   reader could not skim: content arrived under them as they moved, and a
+   staggered `--d` delay meant it arrived out of order. Reveal-on-scroll is
+   for a landing page with four things on it, not a 4,900-word reference.
+   Everything is now painted immediately. reveal.js still adds `.in-view`
+   (its <script> tag lives in markup owned elsewhere) — harmless, and these
+   rules keep it a no-op. */
+.reveal, .in-view,
+.band-head, .prose, .metrics, .stack-note,
+.band-cta h2, .band-cta .hero-cta {
+  opacity: 1;
+  transform: none;
+  animation: none;
 }
-@keyframes rise { to { opacity: 1; transform: none; } }
-
-.band-head, .prose, .metrics, .stack-note, .band-cta h2, .band-cta .hero-cta {
-  opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-.in-view { opacity: 1 !important; transform: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
-  .reveal, .band-head, .prose, .metrics, .stack-note, .band-cta h2, .band-cta .hero-cta { opacity: 1; transform: none; }
+  html { scroll-behavior: auto; }
 }
 
 /* ---------- strategy grid (papers aggregator, homepage overview) ---------- */
 .strategy-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 18px;
+  gap: var(--s-4);
 }
 @media (min-width: 640px) { .strategy-grid { grid-template-columns: repeat(2, 1fr); } }
 /* four model cards: keep a balanced 2x2 at desktop */
 
-.strategy-card {
+/* Cards: ONE treatment, shared by .strategy-card and .doc-index a (below).
+   Previously two padding values, two radii, two border colours and two hover
+   transforms did the same job. */
+.strategy-card,
+.doc-index a {
   display: block;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-soft);
   background: var(--card);
-  padding: 24px 22px 26px;
-  border-radius: 3px;
+  padding: var(--s-5);
+  border-radius: var(--radius);
   text-decoration: none;
-  transition: border-color 0.3s, transform 0.3s;
+  transition: border-color 0.2s, background 0.2s;
 }
-.strategy-card:hover { border-color: var(--primary); transform: translateY(-3px); }
-.strategy-card header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.strategy-card:hover,
+.doc-index a:hover {
+  border-color: var(--brand);
+  background: color-mix(in srgb, var(--primary) 4%, var(--card));
+}
+.strategy-card header { display: flex; justify-content: space-between; align-items: center; gap: var(--s-3); margin-bottom: var(--s-3); }
 .strategy-card .card-id { font-size: var(--fs-small); color: var(--brand); letter-spacing: 0.04em; }
+/* The restructured cards lead with a bolded question inside the body copy,
+   which was out-weighting the card title. The title takes 600 so the
+   heading level still wins. */
 .strategy-card h3 {
   font-family: var(--display);
-  font-weight: 500;
+  font-weight: 600;
   font-size: var(--fs-h3-sm);
   color: var(--paper);
   margin-bottom: 10px;
@@ -454,6 +493,10 @@ h2 {
    lets code, tables, charts, and card grids span the whole band.
    ===================================================================== */
 .doc .band { max-width: var(--max); }
+/* The hero's inner column was 980px while bands are 1140px, so a page's h1
+   started 26px to the right of every heading under it — a visible kink down
+   the left edge. One column edge for the whole page. */
+.doc .hero-inner { max-width: var(--max); }
 
 /* text fills the line; rich blocks go edge-to-edge inside the band */
 .doc .prose { max-width: none; }
@@ -463,29 +506,28 @@ h2 {
 .doc .prose > .research-link,
 .doc .prose > .soon-hint,
 .doc .prose > .chart-note,
-.doc .prose > .opt-note { max-width: 88ch; }
+.doc .prose > .opt-note { max-width: 74ch; }
 
 /* consistent body copy across every content page */
-.doc .prose p { font-size: var(--fs-body); line-height: 1.62; }
+.doc .prose p { font-size: var(--fs-body); line-height: 1.7; }
 .doc .prose ul { padding-left: 22px; }
-.doc .prose li { margin: 8px 0; line-height: 1.6; font-size: var(--fs-body); }
+.doc .prose li { margin: var(--s-2) 0; line-height: 1.7; font-size: var(--fs-body); max-width: 74ch; }
 .doc .prose p code,
 .doc .prose li code,
 .doc .prose td code { font-family: var(--mono); font-size: var(--fs-code-inline); color: var(--brand-strong); }
 
 /* section headings on content pages read a touch tighter than the band default */
-.doc .band-head { margin-bottom: 40px; }
-.doc h2 { max-width: 24ch; }
+.doc .band-head { margin-bottom: var(--s-6); }
+.doc h2 { max-width: 30ch; }
 
 /* --- code blocks: one look everywhere (was duplicated inline) --- */
 .codeblock {
   position: relative;
   border: 1px solid var(--line-soft);
-  border-radius: 6px;
-  background: color-mix(in srgb, #2a7f7a 5%, var(--background, #fff));
-  backdrop-filter: blur(6px);
-  padding: 18px 22px;
-  margin: 22px 0 6px;
+  border-radius: var(--radius);
+  background: var(--ink-2);
+  padding: var(--s-4) var(--s-5);
+  margin: var(--s-5) 0 var(--s-2);
   overflow-x: auto;
 }
 .codeblock pre { margin: 0; }
@@ -530,7 +572,7 @@ h2 {
 .opt-note { font-size: var(--fs-body-sm); line-height: 1.55; color: var(--paper-faint); }
 .callout {
   border-left: 2px solid var(--brand);
-  padding: 6px 0 6px 20px; margin: 26px 0;
+  padding: var(--s-1) 0 var(--s-1) var(--s-5); margin: var(--s-6) 0;
   font-size: var(--fs-body-sm); line-height: 1.6; color: var(--paper-dim); max-width: 80ch;
 }
 
@@ -576,7 +618,7 @@ h2 {
   height: auto;
   overflow: visible;
   border: 1px solid var(--line-soft);
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 14px 10px 6px;
   background: var(--surface);
 }
@@ -599,9 +641,68 @@ h2 {
 .vchart .vc-b2 { fill: color-mix(in srgb, var(--paper) 34%, transparent); }
 .vchart .vc-b3 { fill: color-mix(in srgb, var(--paper) 18%, transparent); }
 
-/* flags a row whose "match" is imposed by construction, or a known weak result */
-.vc-warn { color: var(--paper-faint); }
-.prose td.vc-warn, .prose th.vc-warn { font-style: italic; }
+/* =====================================================================
+   THE VERIFICATION GRADE — the one thing on this site that gets emphasis.
+   The project's distinctive claim is that it grades each model honestly:
+   a replication with a published anchor, validated against statute, or a
+   calibrated counterfactual with no ground truth. `.vc-warn` marks the
+   third case, wherever it appears (comparison tables, validation rows,
+   the papers index). It used to be rendered as faint grey italics — the
+   site's most honest statement, styled as its least important. It now
+   reads as a deliberate, legible grade: a warning-toned rule and a bold
+   label, not an apology. Restraint everywhere else pays for this.
+   Colour is --brand-warning (#9A3412, 5.63:1 light / #FFB066, 10.72:1
+   dark) — the AA-verified warning token, unchanged.
+   ===================================================================== */
+.vc-warn {
+  color: var(--brand-warning);
+}
+.prose td.vc-warn, .prose th.vc-warn {
+  font-style: normal;
+  font-weight: 500;
+  box-shadow: inset 3px 0 0 var(--brand-warning);
+  padding-left: var(--s-3);
+  background: color-mix(in srgb, var(--brand-warning) 6%, transparent);
+}
+/* one rule per flagged ROW, not per cell */
+.prose td.vc-warn + td.vc-warn { box-shadow: none; }
+/* the same grade, on the papers index and the docs model cards */
+.paper-result strong { color: var(--brand); font-weight: 600; }
+.paper-result:has(> strong:first-child) { border-top-color: var(--line); }
+
+/* ---------------------------------------------------------------------
+   Section seams. Bands are separated by a hairline and generous, EQUAL
+   space above and below it, so the eye can find where one section ends.
+   --------------------------------------------------------------------- */
+.band + .band,
+.hero + .band { border-top: 1px solid var(--line-soft); }
+
+/* heading rhythm inside prose: space belongs above a heading, not below */
+.prose h3, .doc .prose h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: var(--fs-h3);
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  margin: var(--s-7) 0 var(--s-3);
+  color: var(--paper);
+}
+.prose > :first-child { margin-top: 0; }
+.prose table, .prose .table-scroll, .prose figure, .prose .codeblock { margin-block: var(--s-6); }
+.prose caption {
+  text-align: left;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--paper-faint);
+  padding-bottom: var(--s-3);
+}
+
+/* one callout treatment (was: left-rule callout + tinted note + bordered box) */
+.callout, .opt-note, .chart-note, .soon-hint, .caveat {
+  max-width: 74ch;
+}
 
 .vlinks { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-top: 26px; font-size: var(--fs-small); }
 
@@ -616,13 +717,9 @@ h2 {
 /* ============================================================
    doc index cards (shared: /docs/ and /papers/)
    ============================================================ */
-.doc-index { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 26px 0; }
+.doc-index { display: grid; grid-template-columns: 1fr; gap: var(--s-4); margin: var(--s-6) 0; }
 @media (min-width: 760px) { .doc-index { grid-template-columns: 1fr 1fr; } }
-.doc-index a {
-  display: block; border: 1px solid var(--line-soft); border-radius: 8px;
-  padding: 20px 22px; text-decoration: none; transition: border-color 0.25s, transform 0.25s;
-}
-.doc-index a:hover { border-color: var(--primary); transform: translateY(-2px); }
+ /* .doc-index a shares the card rule defined with .strategy-card above. */
 .doc-index .di-id { font-family: var(--mono); font-size: var(--fs-label); color: var(--brand); }
 .doc-index h3 { font-family: var(--display); font-weight: 500; font-size: var(--fs-h3-sm); margin: 8px 0 8px; color: var(--paper); }
 .doc-index p { font-size: var(--fs-body-sm); line-height: 1.55; color: var(--paper-dim); margin: 0; }
@@ -661,7 +758,7 @@ h2 {
   height: min(78vh, 1000px);
   min-height: 460px;
   border: 1px solid var(--line-soft);
-  border-radius: 8px;
+  border-radius: var(--radius);
   overflow: hidden;
   background: var(--ink-2);
 }
@@ -694,7 +791,7 @@ h2 {
   .pdf-frame { display: none; }
   .pdf-mobile {
     display: flex; flex-direction: column; align-items: flex-start; gap: 14px;
-    border: 1px solid var(--line-soft); border-radius: 8px;
+    border: 1px solid var(--line-soft); border-radius: var(--radius);
     padding: 24px 22px; background: var(--ink-2);
   }
   .pdf-mobile p {
