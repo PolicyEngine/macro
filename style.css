@@ -980,3 +980,29 @@ h2 {
     --brand-warning: #FFB066;
   }
 }
+
+/* Ambient field — restored, deliberately quieter than the original.
+   Density and alpha roughly halved from the original, and the three things that
+   actually pulled the eye off the text are gone: the twinkle (oscillating
+   opacity), the mouse parallax, and the glow halo on heavy points. What remains
+   is slow uniform drift.
+
+   The canvas is position:fixed, so the mask is VIEWPORT-relative, not
+   document-relative: the field is densest in the upper part of whatever you are
+   looking at and clears by 88vh, leaving the bottom of every screen clean. It
+   does still pass behind body copy while scrolling — that is intended, and is
+   readable because text no longer fades in (the reveal animation that used to
+   hold copy at opacity:0 is retired). Motion stops under prefers-reduced-motion,
+   handled in field.js. */
+#field {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  opacity: 0.55;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 42vh, transparent 88vh);
+  mask-image: linear-gradient(to bottom, #000 0, #000 42vh, transparent 88vh);
+}
+@media (prefers-color-scheme: dark) { #field { opacity: 0.7; } }
