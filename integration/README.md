@@ -174,7 +174,7 @@ Defined in `modal_app.py`. `policyengine[models]` is installed in the image;
 because it is imported lazily inside the adapters, cold starts stay fast and
 only the first PolicyEngine tool call in a fresh container pays the ~20 s
 model load. The private UK microdata credential comes from the Modal secret
-`policyengine-macro-hf`, with derived datasets cached on the `policyengine-macro-pe-data` volume.
+`macromod-hf`, with derived datasets cached on the `policyengine-macro-pe-data` volume.
 
 **Add it as a connector**
 

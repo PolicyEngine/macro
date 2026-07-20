@@ -76,8 +76,10 @@ unbounded nested fixed-point search; only the first fits a 600s request.
 
 POPULATION DATA (population_reform_impact)
 ------------------------------------------
-- Secret "policyengine-macro-hf" provides HUGGING_FACE_TOKEN for the private UK
-  enhanced-FRS microdata on HuggingFace.
+- Secret "macromod-hf" provides HUGGING_FACE_TOKEN for the private UK
+  enhanced-FRS microdata on HuggingFace. The name predates the
+  PolicyEngine Macro rename and is kept because Modal has no rename for
+  Secrets: changing it means recreating the Secret with the token value.
 - A modal.Volume ("policyengine-macro-pe-data") is mounted at
   /root/.cache/policyengine-macro;
   HF_HOME points the HuggingFace download cache inside it and
@@ -261,7 +263,7 @@ pe_data_volume = modal.Volume.from_name("policyengine-macro-pe-data", create_if_
     min_containers=0,       # scale to zero: no idle cost
     scaledown_window=300,   # stay warm 5 min between calls, then sleep
     max_containers=3,       # spend cap
-    secrets=[modal.Secret.from_name("policyengine-macro-hf")],
+    secrets=[modal.Secret.from_name("macromod-hf")],
     volumes={CACHE_DIR: pe_data_volume},
 )
 @modal.concurrent(max_inputs=20)
