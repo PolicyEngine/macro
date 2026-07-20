@@ -23,11 +23,14 @@
 <style>
 /* ---------- connect page ---------- */
 .connect-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 24px; }
+.connect-hero .hero-inner { display: block; }
+.connect-hero .lede { margin-left: 0; margin-right: 0; }
 .connect-panel {
   max-width: var(--max);
   margin: 0 auto;
   padding: 0 clamp(20px, 5vw, 56px) clamp(80px, 10vw, 130px);
 }
+.connect-panel + .band { border-top: 1px solid var(--line-soft); }
 .panel-card {
   border: 1px solid var(--line-soft);
   border-radius: 6px;
@@ -61,7 +64,7 @@
   border-radius: 50%;
   margin-bottom: 14px;
 }
-.step .step-h { font-size: var(--fs-h4); font-weight: 600; margin: 0 0 10px; letter-spacing: -0.01em; }
+.step .step-h { font-size: var(--fs-h4); font-weight: 600; margin: 0 0 10px; letter-spacing: 0; }
 .step p { font-size: var(--fs-body-sm); line-height: 1.6; color: var(--paper-faint); margin: 0 0 14px; }
 .copyblock {
   background: color-mix(in srgb, #2a7f7a 5%, var(--background, #fff));
@@ -73,11 +76,11 @@
   padding: 10px 12px;
   font-family: var(--mono);
   font-size: var(--fs-mono);
-  overflow-x: auto;
+  overflow: hidden;
   white-space: pre;
 }
 .copyblock[hidden] { display: none; }
-.copyblock code { flex: 1; }
+.copyblock code { display: block; flex: 1; min-width: 0; overflow-x: auto; }
 .copyblock button {
   border: 0; background: none; cursor: pointer; color: var(--paper-faint);
   font-family: var(--mono); font-size: var(--fs-label); flex-shrink: 0;
@@ -108,13 +111,16 @@
   background: var(--amber); margin-left: 7px; vertical-align: middle;
 }
 .steps.dimmed { opacity: 0.55; }
-/* display:flex (not inline-flex) + max-width so the overflow-x scroller
-   actually engages on narrow viewports instead of widening the page. */
-.model-seg { display: flex; max-width: 100%; margin: 6px 0 22px; flex-wrap: nowrap; overflow-x: auto; border: 0; padding: 0 0 4px; gap: 8px; }
-.model-seg button { white-space: nowrap; flex-shrink: 0; font-size: var(--fs-small); padding: 8px 14px; }
-.model-seg button { border: 1px solid var(--line-soft); border-radius: 999px; padding: 9px 18px; transition: all 0.15s ease; }
+/* Every model stays visible: no horizontal tab scrolling. */
+.model-seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); max-width: 100%; margin: 6px 0 22px; border: 0; padding: 0; gap: 8px; }
+.model-seg button { min-width: 0; min-height: 68px; border: 1px solid var(--line-soft); border-radius: 6px; padding: 11px 13px; text-align: left; transition: all 0.15s ease; }
+.model-seg button strong,
+.model-seg button span { display: block; }
+.model-seg button strong { color: inherit; font-family: var(--mono); font-size: var(--fs-small); font-weight: 600; }
+.model-seg button span { margin-top: 4px; color: var(--paper-faint); font-size: 11px; line-height: 1.35; }
 .model-seg button:hover { color: var(--text, #111); border-color: var(--text, #111); }
-.model-seg button[aria-selected="true"] { background: var(--text, #111); color: var(--background, #fff); border-color: var(--text, #111); }
+.model-seg button[aria-selected="true"] { background: var(--brand-wash); color: var(--brand-strong); border-color: var(--brand); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 18%, transparent); }
+.model-seg button[aria-selected="true"] span { color: var(--paper-dim); }
 .panel-divider { border: 0; border-top: 1px solid var(--line-soft); margin: 30px 0; }
 .model-pane[hidden] { display: none; }
 
@@ -189,29 +195,43 @@
 .more[open] > summary::before { content: "\2212 "; }
 .more > summary:hover, .more > summary:focus-visible { color: var(--text, #111); }
 .more > :last-child { margin-bottom: 8px; }
-</style>
-<style>
-/* shared shim — belongs in style.css; inlined here so every page is self-contained.
-   1. skip link, 2. row-header cells keep body-text styling, 3. table captions. */
-.skip-link {
-  position: absolute; left: -9999px; top: 0; z-index: 100;
-  background: var(--background, #fff); color: var(--text, #111);
-  border: 1px solid var(--line-soft); border-radius: 4px;
-  font-family: var(--mono); font-size: var(--fs-small); padding: 10px 16px;
+.section-intro { margin-top: 10px; color: var(--paper-dim); font-size: var(--fs-body); line-height: 1.55; }
+.connect-steps { margin-top: 24px; }
+.compact-more { margin-top: 18px; }
+.compact-more .copyblock { margin-top: 14px; }
+.command-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
 }
-.skip-link:focus { left: 12px; top: 12px; }
-.prose tbody th {
-  font-family: inherit; font-size: inherit; font-weight: 500;
-  letter-spacing: normal; text-transform: none; color: inherit;
+.command-grid > div {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
 }
-.prose caption {
-  caption-side: top; text-align: left; font-family: var(--mono);
-  font-size: var(--fs-label); letter-spacing: var(--ls-label);
-  text-transform: uppercase; color: var(--paper-faint); padding-bottom: 12px;
+.command-grid code {
+  display: block;
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+  color: var(--brand-strong);
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+  line-height: 1.55;
 }
-.visually-hidden {
-  position: absolute; width: 1px; height: 1px; overflow: hidden;
-  clip-path: inset(50%); white-space: nowrap;
+.model-picker { margin-top: var(--s-5); }
+.compact-pane {
+  min-height: 210px;
+  padding: clamp(22px, 4vw, 36px);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+}
+.compact-pane h3 { margin: 18px 0 8px; font-family: var(--display); font-size: var(--fs-h3); font-weight: 500; }
+.compact-pane p { max-width: 58ch; margin-bottom: 24px; color: var(--paper-dim); line-height: 1.6; }
+@media (max-width: 760px) {
+  .command-grid { grid-template-columns: 1fr; }
+  .compact-pane { min-height: 0; }
 }
 </style>
 </head>
@@ -222,683 +242,140 @@
 
 <header class="nav">
   <a class="brand" href="/">
-    <span class="brand-dot" aria-hidden="true"></span>PolicyEngine Macro
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" />PolicyEngine Macro
   </a>
   <nav class="nav-links" aria-label="Primary">
-    <a href="/#idea">idea</a>
-    <a href="/#models">models</a>
-    <a href="/#validation">validation</a>
-    <a href="/#workflow">workflow</a>
-    <a href="/docs/">docs</a>
-    <a href="/connect/">use it</a>
+    <a class="nav-mobile" href="/">Home</a>
+    <a class="nav-mobile" href="/models/">Explore</a>
+    <a class="nav-mobile nav-start" href="/connect/" aria-current="page">Start</a>
+    <a class="nav-mobile" href="/contact/">Contact</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
   </nav>
 </header>
 
 <main id="top">
   <section class="hero connect-hero">
-    <div class="hero-inner" style="text-align:center;">
+    <div class="hero-inner">
       <p class="eyebrow reveal" style="--d:0">mcp · cli · python</p>
       <h1 class="reveal page-title" style="--d:1;">
-        Connect it. Or <em>code</em> it.
+        Run a model your way.
       </h1>
-      <p class="lede reveal" style="--d:2; margin-left:auto; margin-right:auto;">
-        Three routes onto the same models, in descending order of hurry: a
-        connector you paste into a chat client, a terminal CLI, and the raw
-        Python packages. Free and open source, no account and no key.
+      <p class="lede reveal" style="--d:2;">
+        Use the hosted tools in a supported AI client, install the shared CLI,
+        or call the Python packages directly. Start with the quickest route
+        that gives you the control you need. No PolicyEngine account or API key
+        is required.
       </p>
     </div>
   </section>
 
   <section id="connect" class="connect-panel">
-    <div class="band-head" style="padding:0; margin-bottom: 26px;">
-      <span class="kicker mono">the happy path — about two minutes</span>
-      <h2>Paste one URL into Claude or ChatGPT.</h2>
+    <div class="band-head">
+      <span class="kicker mono">hosted</span>
+      <h2>Connect in three steps.</h2>
+      <p class="section-intro">No account or API key required.</p>
     </div>
     <div class="panel-card">
-      <div class="panel-bars">
-        <div class="seg" role="tablist" aria-label="Client" id="seg-client">
-          <button role="tab" data-client="claude" aria-selected="true">Claude</button>
-          <button role="tab" data-client="chatgpt" aria-selected="false">ChatGPT</button>
+      <div class="seg" role="tablist" aria-label="Client" id="seg-client">
+        <button role="tab" data-client="claude" aria-selected="true">Claude</button>
+        <button role="tab" data-client="chatgpt" aria-selected="false">ChatGPT</button>
+      </div>
+      <div class="steps connect-steps">
+        <div class="step">
+          <span class="step-n mono">1</span>
+          <p class="step-h">Copy the server URL</p>
+          <div class="copyblock"><code>https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
+        </div>
+        <div class="step" data-for="claude">
+          <span class="step-n mono">2</span>
+          <p class="step-h">Add a Claude connector</p>
+          <p>Open Settings → Connectors, add a custom connector, and paste the URL.</p>
+        </div>
+        <div class="step" data-for="chatgpt" hidden>
+          <span class="step-n mono">2</span>
+          <p class="step-h">Add a ChatGPT connector</p>
+          <p>Enable Developer mode under Connectors, create a connector, and paste the URL.</p>
+        </div>
+        <div class="step">
+          <span class="step-n mono">3</span>
+          <p class="step-h">Ask a policy question</p>
+          <p>Try a US rate shock, a UK forecast, or a household reform in either country.</p>
         </div>
       </div>
-
-      <!-- ================= MCP ================= -->
-      <div class="pane" id="pane-mcp">
-        <p class="status-note">live</p>
-
-        <div class="steps">
-          <div class="step">
-            <span class="step-n mono">1</span>
-            <p class="step-h">Copy the PolicyEngine Macro URL</p>
-            <div class="copyblock"><code>https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
-          </div>
-          <div class="step" data-for="claude">
-            <span class="step-n mono">2</span>
-            <p class="step-h">Open Settings → Connectors</p>
-            <p>In Claude, add a <strong>custom connector</strong>, name it PolicyEngine Macro, and paste the URL.</p>
-          </div>
-          <div class="step" data-for="chatgpt" hidden>
-            <span class="step-n mono">2</span>
-            <p class="step-h">Open Settings → Connectors</p>
-            <p>In ChatGPT, enable <strong>Developer mode</strong> under Connectors, then <strong>Create</strong> a connector named PolicyEngine Macro and paste the URL.</p>
-          </div>
-          <div class="step">
-            <span class="step-n mono">3</span>
-            <p class="step-h">Connect and ask</p>
-            <p>Confirm it — <strong>Add → Connect</strong> in Claude, <strong>Save</strong> in ChatGPT — then ask for <em>a £5bn government spending rise, scored</em> or <em>a UK GDP and inflation forecast</em>.</p>
-          </div>
-        </div>
-
-        <hr class="panel-divider" />
-        <div class="steps" style="margin-top: 0;">
-          <div class="step" style="grid-column: 1 / -1;">
-            <p class="step-h">Working in a coding agent instead?</p>
-            <p>One command adds the same server to the terminal.</p>
-            <div class="copyblock" data-for="claude"><code>claude mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
-            <div class="copyblock" data-for="chatgpt" hidden><code>codex mcp add policyengine-macro --url https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
-          </div>
-        </div>
-
-        <details class="more">
-        <summary>All thirteen tools on the server, and which models they reach</summary>
-        <div class="dials">
-          <div class="dial">
-            <span class="dial-name">scoring</span>
-            <p><code>score_reform</code> — one PolicyEngine reform dict, scored by <code>model="obr"</code> (macroeconometric emulator, via the static-costing bridge), <code>"microsim"</code> (static population costing) or <code>"og"</code>. Every result carries the same <code>score</code> block, so models are comparable side by side.</p>
-          </div>
-          <div class="dial">
-            <span class="dial-name">obr emulator</span>
-            <p><code>obr_shock</code> shocks one model variable directly (<code>CGG</code>, <code>CGIPS</code>, <code>TCPRO</code>); <code>list_reform_variables</code> returns those variables with their units. Units differ per variable — call it first.</p>
-          </div>
-          <div class="dial">
-            <span class="dial-name">uk svar</span>
-            <p><code>forecast_uk</code> (GDP growth and CPI fan bands), <code>latest_shocks</code> (sign probabilities for the six identified shocks), <code>model_summary</code> (committed replication headlines, instant).</p>
-          </div>
-          <div class="dial">
-            <span class="dial-name">frb/us</span>
-            <p><code>frbus_shock</code> shocks one FRB/US lever and returns US impulse responses, under <code>policy_rule</code> <code>inertial_taylor</code> (default), <code>taylor</code> or <code>fixed_funds_rate</code> — the rule materially changes the answer. <code>frbus_list_variables</code> returns the levers and their units; <code>frbus_summary</code> gives vintage and validation provenance. Raw variable shocks only: it does not score PolicyEngine reforms.</p>
-          </div>
-          <div class="dial">
-            <span class="dial-name">microsimulation</span>
-            <p><code>calculate_household</code>, <code>household_reform_impact</code>, <code>population_reform_impact</code>, and <code>list_reform_parameters</code> for verified parameter paths, units and live baseline values.</p>
-          </div>
-        </div>
-        <p class="soon-hint" style="max-width: none;">
-          Four of the five models are reachable here, and <a href="/frb-us/">FRB/US</a> is
-          reachable only as raw variable shocks — <code class="mono">score_reform</code> refuses
-          <code class="mono">model="frbus"</code> and points at <code class="mono">frbus_shock</code>,
-          because no bridge from a PolicyEngine US reform to FRB/US fiscal levers exists.
-          OG-UK is the one model excluded from hosting, because one solve takes
-          tens of minutes — asking <code class="mono">score_reform</code> for
-          <code class="mono">model="og"</code> returns local install instructions rather
-          than a result.
-        </p>
-        </details>
-
-        <hr class="panel-divider" />
-        <h3 class="mono foot-head" style="margin-bottom:10px;">three things that will trip you up</h3>
-        <div class="dials">
-          <div class="dial">
-            <span class="dial-name">country is required</span>
-            <p>There is no default on <code>score_reform</code>, <code>calculate_household</code> or <code>household_reform_impact</code>: pass <code>"uk"</code> or <code>"us"</code>. They are different tax-benefit models, so the server refuses rather than guessing. (<code>population_reform_impact</code> alone defaults to <code>"uk"</code>.)</p>
-          </div>
-          <div class="dial">
-            <span class="dial-name">reform dict shapes</span>
-            <p>Flat — <code>{"gov.hmrc.income_tax.rates.uk[0].rate": 0.21}</code> — or a single effective date: <code>{"gov.hmrc.income_tax.rates.uk[0].rate": {"2026-01-01": 0.21}}</code>. Date <em>ranges</em> are rejected: reform values have no expiry, so a range would silently score a permanent change. For a time-limited reform, score each affected year separately.</p>
-          </div>
-          <div class="dial">
-            <span class="dial-name">it scales to zero</span>
-            <p>The first call after an idle spell spends ~10s waking the container. Then: <code>list_*</code>, <code>model_summary</code> and <code>frbus_summary</code> are instant; <code>frbus_shock</code> ~3s cold and well under a second warm; households a few seconds; <code>forecast_uk</code> and <code>population_reform_impact</code> tens of seconds; <code>score_reform</code> with <code>model="obr"</code> a minute or more. Set a generous client timeout.</p>
-          </div>
-        </div>
-      </div>
-
+      <details class="more compact-more">
+        <summary>Terminal setup</summary>
+        <div class="copyblock" data-for="claude"><code>claude mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
+        <div class="copyblock" data-for="chatgpt" hidden><code>codex mcp add policyengine-macro --url https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
+      </details>
     </div>
   </section>
-
   <section id="cli" class="band">
     <div class="band-head">
-      <span class="kicker mono">or — a terminal instead</span>
-      <h2>Same models, one command.</h2>
+      <span class="kicker mono">terminal</span>
+      <h2>Run the shared CLI.</h2>
+      <p class="section-intro">Install once, then choose a model command.</p>
     </div>
     <div class="prose">
-      <p>
-        One package (Python 3.10+) wraps the OBR emulator, the UK SVAR, FRB/US
-        and PolicyEngine behind a single command, models and data included —
-        no cloning, except for FRB/US (see below). Claude Code and Codex can drive it from their own terminal,
-        or you can run it yourself.
-      </p>
-      <div class="copyblock" style="margin-bottom:14px;"><code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code><button data-copy>copy</button></div>
-      <div class="copyblock"><code>pe-macro obr-shock --var CGG --shock 1250 --periods 4</code><button data-copy>copy</button></div>
-      <p>
-        That prints per-quarter GDP deltas in £bn and the cumulative effect —
-        a table by default, JSON with <code class="mono">--json</code>. The
-        CLI runs everything the MCP server does, plus OG-UK, which is too slow
-        to host. Unlike the MCP tools, CLI
-        <code class="mono">--country</code> defaults to
-        <code class="mono">uk</code>; reform dicts take the same shapes as the
-        MCP tools — flat or single-effective-date, never a date range.
-      </p>
-      <details class="more">
-        <summary>Every command, and what installs with what</summary>
-        <p>
-          Beyond <code class="mono">obr-shock</code>:
-          <code class="mono">score</code> (a PolicyEngine reform through
-          <code class="mono">--model og|obr|microsim</code>) and
-          <code class="mono">compare</code>; <code class="mono">variables</code>;
-          <code class="mono">forecast</code>, <code class="mono">shocks</code>,
-          <code class="mono">summary</code>; <code class="mono">household</code>,
-          <code class="mono">household-impact</code>,
-          <code class="mono">population-impact</code>,
-          <code class="mono">parameters</code>;
-          <code class="mono">frbus-shock</code>,
-          <code class="mono">frbus-variables</code> and
-          <code class="mono">frbus-summary</code>; and
-          <code class="mono">og-score</code> / <code class="mono">og-baseline</code>,
-          which need OG-UK installed and take tens of minutes.
-        </p>
-        <p>
-          The <code class="mono">[models]</code> extra pulls the OBR emulator,
-          the UK SVAR and the PolicyEngine country packages, each of which
-          ships its own data. OG-UK installs separately. The extra also pulls
-          <a href="/frb-us/">FRB/US</a>, but that one must be installed
-          <strong>editably</strong> from a checkout: its
-          <code class="mono">model.xml</code> and
-          <code class="mono">LONGBASE.TXT</code> live in the repository's
-          <code class="mono">vendor/</code> directory rather than inside the
-          wheel, so a plain install imports but has no model to run. The hosted
-          server has no such caveat.
-          The package lives in this repo's
-          <a href="https://github.com/PolicyEngine/macro/tree/main/integration"><code class="mono">integration/</code></a>
-          directory; a shorter <code class="mono">pip install policyengine-macro</code>
-          follows PyPI publication.
-        </p>
-      </details>
-      <p class="stack-note" style="text-align:left; margin-top: 26px;">
-        <span class="mono">all three routes call the same code — <a href="https://github.com/PolicyEngine/macro/tree/main/integration">integration/</a> in the repo.</span>
-      </p>
+      <div class="copyblock"><code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code><button data-copy>copy</button></div>
+      <div class="command-grid">
+        <div><span class="dial-name">US rate shock</span><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code></div>
+        <div><span class="dial-name">UK forecast</span><code>pe-macro forecast</code></div>
+        <div><span class="dial-name">Household calculation</span><code>pe-macro household --country us</code></div>
+      </div>
+      <p class="chooser-note"><a href="https://github.com/PolicyEngine/macro/tree/main/integration">View every CLI command →</a></p>
     </div>
   </section>
-
   <section id="code" class="band">
     <div class="band-head">
-      <span class="kicker mono">or — write the code yourself</span>
-      <h2>The Python API, in one screen.</h2>
+      <span class="kicker mono">python</span>
+      <h2>Use a model package directly.</h2>
+      <p class="section-intro">Choose a model for its install and API reference.</p>
     </div>
-    <div class="prose">
-      <p>
-        No connector, no CLI — just Python. Every model is its own installable
-        package. Pick one below: install, then the whole call in one screen,
-        with the mechanics and options behind the expander underneath.
-      </p>
-
+    <div class="model-picker">
       <div class="seg model-seg" role="tablist" aria-label="Model" id="model-seg">
-        <button role="tab" data-model="oguk" aria-selected="true">OG-UK · overlapping generations</button>
-        <button role="tab" data-model="obr" aria-selected="false">OBR · macroeconometric</button>
-        <button role="tab" data-model="svar" aria-selected="false">BoE SVAR · structural VAR</button>
-        <button role="tab" data-model="pe" aria-selected="false">PE · tax-benefit microsimulation</button>
+        <button role="tab" data-model="oguk" aria-selected="true"><strong>psl-og</strong><span>Long-run reform</span></button>
+        <button role="tab" data-model="obr" aria-selected="false"><strong>obr-macro</strong><span>Near-term fiscal</span></button>
+        <button role="tab" data-model="frbus" aria-selected="false"><strong>frb-us</strong><span>US shocks</span></button>
+        <button role="tab" data-model="svar" aria-selected="false"><strong>boe-svar</strong><span>UK forecasts</span></button>
+        <button role="tab" data-model="pe" aria-selected="false"><strong>pe-microsim</strong><span>Households</span></button>
       </div>
-
-      <!-- ===================== OG-UK ===================== -->
-      <div class="model-pane" data-model="oguk">
-      <p>
-        Install straight from GitHub, no clone needed (Python 3.11–3.13). The
-        whole scoring loop is four moves:
-      </p>
-
-      <div class="moves">
-        <div class="move"><span class="move-n">01 · build</span><b>the reform</b><span class="d">a PolicyEngine parameter + a new value</span></div>
-        <div class="move"><span class="move-n">02 · solve</span><b>both worlds</b><span class="d">baseline and reform steady states</span></div>
-        <div class="move"><span class="move-n">03 · map</span><b>to £bn</b><span class="d">model units → current-price aggregates</span></div>
-        <div class="move"><span class="move-n">04 · read</span><b>the impact</b><span class="d">level, change, and % per aggregate</span></div>
+      <div class="model-pane compact-pane" data-model="oguk">
+        <span class="tag tag-local">local</span><h3>Long-run reform effects</h3>
+        <p>Model work, saving, capital, and public finances over decades.</p>
+        <a class="btn btn-primary" href="/olg/#run">Open OG-UK setup</a>
       </div>
-
-      <div class="code-window">
-        <div class="cw-bar">
-          <span class="cw-dots"><i></i><i></i><i></i></span>
-          <span class="cw-name">install</span>
-          <button class="cw-copy" data-copy>copy</button>
-        </div>
-        <pre><code>pip install git+https://github.com/PSLmodels/OG-UK</code></pre>
+      <div class="model-pane compact-pane" data-model="obr" hidden>
+        <span class="tag tag-hosted">hosted</span><h3>Near-term UK fiscal effects</h3>
+        <p>Trace tax and spending changes against the OBR baseline.</p>
+        <a class="btn btn-primary" href="/obr/#run">Open OBR setup</a>
       </div>
-
-      <div class="code-window">
-        <div class="cw-bar">
-          <span class="cw-dots"><i></i><i></i><i></i></span>
-          <span class="cw-name">score_reform.py</span>
-          <button class="cw-copy" data-copy>copy</button>
-        </div>
-        <pre><code><span class="kw">from</span> datetime <span class="kw">import</span> datetime
-<span class="kw">from</span> policyengine.core <span class="kw">import</span> ParameterValue, Policy
-<span class="kw">from</span> policyengine.tax_benefit_models.uk <span class="kw">import</span> uk_latest
-<span class="kw">from</span> oguk <span class="kw">import</span> solve_steady_state, map_to_real_world
-
-<span class="cm"># 01 BUILD — a reform is real statute: a PolicyEngine parameter + a new value.</span>
-<span class="cm">#          Here: basic rate of income tax 20% → 21% from 2026.</span>
-param = uk_latest.get_parameter(<span class="kw">"gov.hmrc.income_tax.rates.uk[0].rate"</span>)
-reform = Policy(name=<span class="kw">"Basic rate 21%"</span>, parameter_values=[
-    ParameterValue(parameter=param, value=0.21,
-                   start_date=datetime(2026, 1, 1))])
-
-<span class="cm"># 02 SOLVE — two general-equilibrium solves (~5-15 min each).</span>
-<span class="cm">#          No policy argument = current law. Same call + policy = the reform.</span>
-baseline  = solve_steady_state(start_year=2026)
-reform_ss = solve_steady_state(start_year=2026, policy=reform)
-
-<span class="cm"># 03 MAP  — model units → current-price £bn, anchored to ONS/OBR data.</span>
-impact = map_to_real_world(baseline, reform_ss)
-
-<span class="cm"># 04 READ — level, change, and % change for each aggregate.</span>
-<span class="kw">print</span>(f<span class="kw">"GDP:     {impact.gdp_change:+.1f}bn ({impact.gdp_pct:+.3f}%)"</span>)
-<span class="kw">print</span>(f<span class="kw">"Revenue: {impact.tax_revenue_change:+.1f}bn"</span>)
-<span class="kw">print</span>(f<span class="kw">"Debt:    {impact.debt_change:+.1f}bn"</span>)</code></pre>
+      <div class="model-pane compact-pane" data-model="frbus" hidden>
+        <span class="tag tag-hosted">hosted</span><h3>US monetary and fiscal shocks</h3>
+        <p>Run frb-us impulse responses under a chosen policy rule.</p>
+        <a class="btn btn-primary" href="/frb-us/#run">Open frb-us setup</a>
       </div>
-
-      <div class="code-window cw-out">
-        <div class="cw-bar">
-          <span class="cw-dots"><i></i><i></i><i></i></span>
-          <span class="cw-name">output · illustrative</span>
-        </div>
-        <pre><code>GDP:     <span class="out-val">+2.9bn (+0.041%)</span>
-Revenue: <span class="out-val">+6.4bn</span>
-Debt:    <span class="out-val">−3.1bn</span></code></pre>
+      <div class="model-pane compact-pane" data-model="svar" hidden>
+        <span class="tag tag-hosted">hosted</span><h3>UK forecasts and shock decomposition</h3>
+        <p>Forecast GDP and inflation or explain what moved them.</p>
+        <a class="btn btn-primary" href="/svar/#run">Open SVAR setup</a>
       </div>
-
-      <details class="more">
-        <summary>How it works, the transition path, and the options</summary>
-      <p>
-        Under the hood: PolicyEngine runs the reform through the actual UK
-        tax-benefit rules on representative microdata, OG-UK estimates tax
-        functions from that, and the OLG model solves for how 80 age cohorts and
-        firms re-optimise — giving you the new equilibrium wages, interest rate,
-        and aggregates.
-      </p>
-
-      <p>
-        Swap <code>solve_steady_state</code> for <code>run_transition_path</code>
-        and you get the whole profile, year by year — and every series the model
-        tracks. Here is the same basic-rate reform, actually solved:
-      </p>
-
-      <div class="charts">
-        <div class="chart-card">
-          <h3>Reform impact over the transition path</h3>
-          <p class="chart-sub">£bn change from baseline · fiscal years 2026–2055</p>
-          <svg viewBox="0 0 680 300" role="img" aria-label="Reform impact over the transition path" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
-<line x1="54" y1="266.0" x2="664" y2="266.0" stroke="currentColor" stroke-opacity="0.07" stroke-width="1"/>
-<text x="46" y="269.0" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">-8</text>
-<line x1="54" y1="221.3" x2="664" y2="221.3" stroke="currentColor" stroke-opacity="0.07" stroke-width="1"/>
-<text x="46" y="224.3" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">-4</text>
-<line x1="54" y1="176.5" x2="664" y2="176.5" stroke="currentColor" stroke-opacity="0.18" stroke-width="1"/>
-<text x="46" y="179.5" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">+0</text>
-<line x1="54" y1="131.8" x2="664" y2="131.8" stroke="currentColor" stroke-opacity="0.07" stroke-width="1"/>
-<text x="46" y="134.8" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">+4</text>
-<line x1="54" y1="87.1" x2="664" y2="87.1" stroke="currentColor" stroke-opacity="0.07" stroke-width="1"/>
-<text x="46" y="90.1" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">+8</text>
-<line x1="54" y1="42.4" x2="664" y2="42.4" stroke="currentColor" stroke-opacity="0.07" stroke-width="1"/>
-<text x="46" y="45.4" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">+12</text>
-<text x="54.0" y="290" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">2026</text>
-<text x="243.3" y="290" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">2035</text>
-<text x="453.7" y="290" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">2045</text>
-<text x="664.0" y="290" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.5" font-family="monospace">2055</text>
-<path d="M54.0 167.6 L75.0 42.4 L96.1 83.7 L117.1 86.0 L138.1 89.3 L159.2 91.6 L180.2 93.8 L201.2 96.0 L222.3 98.3 L243.3 99.4 L264.3 100.5 L285.4 102.7 L306.4 103.9 L327.4 105.0 L348.5 105.0 L369.5 106.1 L390.6 107.2 L411.6 107.2 L432.6 108.3 L453.7 108.3 L474.7 108.3 L495.7 108.3 L516.8 109.5 L537.8 109.5 L558.8 109.5 L579.9 109.5 L600.9 109.5 L621.9 109.5 L643.0 109.5 L664.0 110.6" fill="none" stroke="#d69e2e" stroke-width="2.4" stroke-linejoin="round"/>
-<path d="M54.0 137.4 L75.0 154.2 L96.1 217.9 L117.1 220.2 L138.1 221.3 L159.2 223.5 L180.2 226.9 L201.2 229.1 L222.3 231.3 L243.3 233.6 L264.3 235.8 L285.4 236.9 L306.4 238.0 L327.4 239.2 L348.5 240.3 L369.5 241.4 L390.6 242.5 L411.6 243.6 L432.6 243.6 L453.7 244.8 L474.7 244.8 L495.7 245.9 L516.8 245.9 L537.8 245.9 L558.8 247.0 L579.9 247.0 L600.9 247.0 L621.9 247.0 L643.0 248.1 L664.0 248.1" fill="none" stroke="#319795" stroke-width="2.4" stroke-linejoin="round"/>
-<circle cx="664.0" cy="248.1" r="3" fill="#319795"/>
-<circle cx="664.0" cy="110.6" r="3" fill="#d69e2e"/>
-</svg>
-          <div class="legend">
-            <span><i style="background:#319795"></i>GDP</span>
-            <span><i style="background:#d69e2e"></i>Tax revenue</span>
-          </div>
-        </div>
-        <div class="chart-card">
-          <h3>Sector output, long-run</h3>
-          <p class="chart-sub">% change vs baseline · 8-sector model, 2055</p>
-          <svg viewBox="0 0 680 300" role="img" aria-label="Sector output change at long run" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
-<line x1="244.8" y1="14" x2="244.8" y2="274" stroke="currentColor" stroke-opacity="0.18"/>
-<rect x="254.2" y="20.2" width="305.0" height="20.1" rx="2" fill="#d69e2e" fill-opacity="0.85"/>
-<text x="130" y="33.2" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Energy</text>
-<text x="248.2" y="33.2" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">-0.58%</text>
-<rect x="207.6" y="52.7" width="351.6" height="20.1" rx="2" fill="#d69e2e" fill-opacity="0.85"/>
-<text x="130" y="65.8" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Manufacturing</text>
-<text x="201.6" y="65.8" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">-0.67%</text>
-<rect x="204.5" y="85.2" width="354.7" height="20.1" rx="2" fill="#d69e2e" fill-opacity="0.85"/>
-<text x="130" y="98.2" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Construction</text>
-<text x="198.5" y="98.2" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">-0.68%</text>
-<rect x="208.6" y="117.7" width="350.6" height="20.1" rx="2" fill="#d69e2e" fill-opacity="0.85"/>
-<text x="130" y="130.8" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Trade &amp; Transport</text>
-<text x="202.6" y="130.8" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">-0.67%</text>
-<rect x="201.3" y="150.2" width="357.9" height="20.1" rx="2" fill="#d69e2e" fill-opacity="0.85"/>
-<text x="130" y="163.2" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Info &amp; Finance</text>
-<text x="195.3" y="163.2" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">-0.68%</text>
-<rect x="191.9" y="182.7" width="367.3" height="20.1" rx="2" fill="#d69e2e" fill-opacity="0.85"/>
-<text x="130" y="195.8" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Real Estate</text>
-<text x="185.9" y="195.8" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">-0.70%</text>
-<rect x="207.1" y="215.2" width="352.1" height="20.1" rx="2" fill="#d69e2e" fill-opacity="0.85"/>
-<text x="130" y="228.2" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Business Services</text>
-<text x="201.1" y="228.2" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">-0.67%</text>
-<rect x="559.2" y="247.7" width="61.3" height="20.1" rx="2" fill="#319795" fill-opacity="0.85"/>
-<text x="130" y="260.8" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.72" font-family="monospace">Public &amp; Other</text>
-<text x="626.5" y="260.8" text-anchor="start" font-size="10" fill="currentColor" fill-opacity="0.55" font-family="monospace">+0.12%</text>
-</svg>
-          <p class="chart-note">Higher income tax pulls labor and capital out of the market sectors; the public &amp; other sector expands relative to them.</p>
-        </div>
+      <div class="model-pane compact-pane" data-model="pe" hidden>
+        <span class="tag tag-hosted">hosted</span><h3>UK and US household impacts</h3>
+        <p>Calculate taxes, benefits, and reform effects.</p>
+        <a class="btn btn-primary" href="/pe/#run">Open PolicyEngine setup</a>
       </div>
-      <p class="chart-note" style="margin-bottom: 24px;">
-        Real output from OG-UK's transition-path solver for a +1p basic-rate
-        rise — the same charts the model exports to
-        <code>tpi_charts.html</code>. Revenue rises then settles; GDP dips as
-        higher labor taxes trim work and saving over the long run.
-      </p>
-
-      <div class="dials">
-        <div class="dial">
-          <span class="dial-name">mode</span>
-          <p><code>solve_steady_state()</code> for the long-run answer; <code>run_transition_path()</code> for the year-by-year fiscal profile (slower, runs on Dask).</p>
-        </div>
-        <div class="dial">
-          <span class="dial-name">age_specific</span>
-          <p><code>"pooled"</code> (default, fastest) → <code>"brackets"</code> → <code>"each"</code> for finer age-specific tax functions.</p>
-        </div>
-        <div class="dial">
-          <span class="dial-name">param_overrides</span>
-          <p>Structural shocks that aren't statute: <code>{"cit_rate": [[0.25]]}</code> for corporation tax, <code>{"Z": [[1.004]]}</code> for TFP.</p>
-        </div>
-      </div>
-
-      </details>
-      <p class="research-link mono">
-        <a href="/olg/">Full guide — parameter paths, every option, transition paths, and outputs → the OG-UK model page</a>
-      </p>
-      </div><!-- /oguk pane -->
-
-      <!-- ===================== OBR ===================== -->
-      <div class="model-pane" data-model="obr" hidden>
-      <p>
-        The OBR emulator ships its equation listing and forecast data inside
-        the package — one pip install, no clone — then a reform is a single
-        shock to an exogenous variable:
-      </p>
-
-      <div class="moves">
-        <div class="move"><span class="move-n">01 · pick</span><b>a lever</b><span class="d">an exogenous variable to shock</span></div>
-        <div class="move"><span class="move-n">02 · shock</span><b>the value</b><span class="d">a spend increase or a rate change</span></div>
-        <div class="move"><span class="move-n">03 · solve</span><b>the system</b><span class="d">Gauss–Seidel, shocked vs baseline</span></div>
-        <div class="move"><span class="move-n">04 · read</span><b>the deviation</b><span class="d">£bn impact, quarter by quarter</span></div>
-      </div>
-
-      <div class="code-window">
-        <div class="cw-bar">
-          <span class="cw-dots"><i></i><i></i><i></i></span>
-          <span class="cw-name">install</span>
-          <button class="cw-copy" data-copy>copy</button>
-        </div>
-        <pre><code>pip install git+https://github.com/PolicyEngine/obr-macroeconomic-model</code></pre>
-      </div>
-
-      <div class="code-window">
-        <div class="cw-bar">
-          <span class="cw-dots"><i></i><i></i><i></i></span>
-          <span class="cw-name">run_reform.py</span>
-          <button class="cw-copy" data-copy>copy</button>
-        </div>
-        <pre><code><span class="kw">from</span> obr_macro <span class="kw">import</span> run_reform
-
-<span class="cm"># A £5bn government spending shock: £1.25bn per quarter over 4 quarters.</span>
-<span class="cm"># CGG is the OBR's exogenous government-consumption variable.</span>
-results = run_reform(
-    name=<span class="kw">"Fiscal Stimulus"</span>,
-    var=<span class="kw">"CGG"</span>,
-    shock=1250,
-    periods=4,
-)
-
-<span class="cm"># Deviation from baseline, quarter by quarter — the fiscal multiplier.</span>
-<span class="kw">print</span>(results[[<span class="kw">"period"</span>, <span class="kw">"delta_gdp_bn"</span>, <span class="kw">"pct_gdp"</span>]])</code></pre>
-      </div>
-
-      <div class="code-window cw-out">
-        <div class="cw-bar">
-          <span class="cw-dots"><i></i><i></i><i></i></span>
-          <span class="cw-name">output · illustrative</span>
-        </div>
-        <pre><code>period  delta_gdp_bn  pct_gdp
-     1  <span class="out-val">1.31          0.05</span>
-     2  <span class="out-val">1.72          0.06</span>
-     3  <span class="out-val">1.94          0.07</span>
-     4  <span class="out-val">2.05          0.07</span></code></pre>
-      </div>
-
-      <details class="more">
-        <summary>How it works, and the options</summary>
-      <p>
-        Under the hood: 372 transpiled equations, solved simultaneously by
-        Gauss–Seidel each quarter, with the closure swapping for a shock so
-        that GDP becomes endogenous rather than held fixed. <a href="/obr/">The
-        model page</a> covers the solver, the anchoring and every lever.
-      </p>
-
-      <div class="dials">
-        <div class="dial">
-          <span class="dial-name">var</span>
-          <p>The exogenous lever to shock: <code>"CGG"</code> (gov. consumption), <code>"CGIPS"</code> (public investment), <code>"TCPRO"</code> (corporation tax rate).</p>
-        </div>
-        <div class="dial">
-          <span class="dial-name">periods</span>
-          <p>How many quarters to solve — the multiplier builds over the first few quarters and settles.</p>
-        </div>
-        <div class="dial">
-          <span class="dial-name">investment_closure</span>
-          <p>Set <code>True</code> to switch on the investment channel for tax-rate shocks like a corporation-tax change.</p>
-        </div>
-      </div>
-
-      </details>
-      <p class="research-link mono">
-        <a href="/obr/">Full guide — the solver, every lever, forecasting, and calibration → the OBR model page</a>
-      </p>
-      </div><!-- /obr pane -->
-
-      <!-- ===================== SVAR ===================== -->
-      <div class="model-pane" data-model="svar" hidden>
-      <p>
-        The structural VAR doesn't score reforms — it's the suite's
-        baseline/conditioning member: it reads the economy.
-        One pip install — the assembled dataset and latest results ship inside
-        the package — and the pipeline is four moves:
-      </p>
-
-      <div class="moves">
-        <div class="move"><span class="move-n">01 · assemble</span><b>the data</b><span class="d">8 quarterly series from ONS, BoE, FRED</span></div>
-        <div class="move"><span class="move-n">02 · estimate</span><b>the BVAR</b><span class="d">Minnesota/NIW prior, posterior draws</span></div>
-        <div class="move"><span class="move-n">03 · identify</span><b>the shocks</b><span class="d">zero + sign restrictions, six named shocks</span></div>
-        <div class="move"><span class="move-n">04 · read</span><b>the economy</b><span class="d">IRFs, decompositions, fan-chart forecasts</span></div>
-      </div>
-
-      <div class="code-window">
-        <div class="cw-bar">
-          <span class="cw-dots"><i></i><i></i><i></i></span>
-          <span class="cw-name">install</span>
-          <button class="cw-copy" data-copy>copy</button>
-        </div>
-        <pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre>
-      </div>
-
-      <div class="code-window">
-        <div class="cw-bar">
-          <span class="cw-dots"><i></i><i></i><i></i></span>
-          <span class="cw-name">run the pipeline</span>
-          <button class="cw-copy" data-copy>copy</button>
-        </div>
-        <pre><code><span class="cm"># the packaged dataset loads out of the box — no download step</span>
-<span class="kw">from</span> boe_var.data <span class="kw">import</span> load_data
-<span class="kw">from</span> boe_var.bvar <span class="kw">import</span> BVAR
-<span class="kw">from</span> boe_var.identification <span class="kw">import</span> identify
-
-df = load_data()                    <span class="cm"># 8 quarterly series, through 2024Q2</span>
-model = BVAR(df.to_numpy(), lags=4)
-draws = model.sample_posterior(1000)
-pairs = identify(draws)             <span class="cm"># zero + sign restrictions, 6 shocks</span>
-
-<span class="cm"># full figure pipeline (IRFs, FEVDs, forecasts): the repo's scripts —
-# clone only if you want to develop or regenerate results/</span></code></pre>
-      </div>
-
-      <div class="code-window cw-out">
-        <div class="cw-bar">
-          <span class="cw-dots"><i></i><i></i><i></i></span>
-          <span class="cw-name">output · from results/summary.md</span>
-        </div>
-        <pre><code>FEVD at 1-year horizon (median shares)
-UK GDP  identified global <span class="out-val">40.9%</span>  domestic <span class="out-val">38.0%</span>
-UK CPI  identified global <span class="out-val">50.1%</span>  domestic <span class="out-val">35.4%</span></code></pre>
-      </div>
-
-      <details class="more">
-        <summary>How it works, and what ships in the package</summary>
-      <p>
-        Under the hood: an 8-variable Bayesian VAR — estimated on 1992Q1–2023Q2
-        with Covid dummies, leaving the 2023Q3–2024Q2 quarters of the packaged
-        dataset for out-of-sample checking — is sampled from its normal-inverse-Wishart posterior, and each
-        draw is rotated per Arias–Rubio-Ramírez–Waggoner (2018) until the zero
-        and sign restrictions name six structural shocks. The PolicyEngine Macro CLI
-        wraps the common outputs: <code>pe-macro forecast</code>,
-        <code>pe-macro shocks</code>, <code>pe-macro summary</code>.
-      </p>
-
-      <div class="dials">
-        <div class="dial">
-          <span class="dial-name">run_replication.py</span>
-          <p>The paper's Figures 2–6: IRFs, variance decompositions, estimated shocks, and historical decompositions of UK GDP and inflation.</p>
-        </div>
-        <div class="dial">
-          <span class="dial-name">run_forecast_revision.py</span>
-          <p>The forecasting toolkit: fan charts, P(sign) of the latest quarter's shocks, composite IRFs, and the Section-5 forecast-revision split.</p>
-        </div>
-        <div class="dial">
-          <span class="dial-name">boe_var</span>
-          <p>The library underneath: <code>load_data()</code>, the <code>BVAR</code> class, <code>identify()</code>, and the IRF/FEVD/decomposition analysis functions.</p>
-        </div>
-      </div>
-
-      </details>
-      <p class="research-link mono">
-        <a href="/svar/">Full guide — the model, identification, validation against the paper → the SVAR model page</a>
-      </p>
-      </div><!-- /svar pane -->
-
-      <!-- ===================== PolicyEngine ===================== -->
-      <div class="model-pane" data-model="pe" hidden>
-      <p>
-        The micro member of the suite: PolicyEngine's tax-benefit
-        microsimulation runs the actual UK and US statute for a specific
-        family — the same engine behind policyengine.org. One pip install,
-        and a household calculation is one call:
-      </p>
-
-      <div class="moves">
-        <div class="move"><span class="move-n">01 · describe</span><b>the household</b><span class="d">ages, incomes, family structure</span></div>
-        <div class="move"><span class="move-n">02 · calculate</span><b>the statute</b><span class="d">every tax and benefit, current law</span></div>
-        <div class="move"><span class="move-n">03 · reform</span><b>a parameter</b><span class="d">re-run the same family under new law</span></div>
-        <div class="move"><span class="move-n">04 · read</span><b>the impact</b><span class="d">net income, person by person</span></div>
-      </div>
-
-      <div class="code-window">
-        <div class="cw-bar">
-          <span class="cw-dots"><i></i><i></i><i></i></span>
-          <span class="cw-name">install</span>
-          <button class="cw-copy" data-copy>copy</button>
-        </div>
-        <pre><code>pip install policyengine</code></pre>
-      </div>
-
-      <div class="code-window">
-        <div class="cw-bar">
-          <span class="cw-dots"><i></i><i></i><i></i></span>
-          <span class="cw-name">household.py</span>
-          <button class="cw-copy" data-copy>copy</button>
-        </div>
-        <pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
-
-<span class="cm"># UK: a single adult earning £50,000 — current law</span>
-uk = pe.uk.calculate_household(
-    people=[{<span class="kw">"age"</span>: 35, <span class="kw">"employment_income"</span>: 50_000}],
-    year=2026,
-)
-<span class="kw">print</span>(uk.person[0].income_tax)
-<span class="kw">print</span>(uk.household.hbai_household_net_income)
-
-<span class="cm"># US: same idea, with a reform applied</span>
-us = pe.us.calculate_household(
-    people=[{<span class="kw">"age"</span>: 35, <span class="kw">"employment_income"</span>: 60_000}],
-    tax_unit={<span class="kw">"filing_status"</span>: <span class="kw">"SINGLE"</span>},
-    household={<span class="kw">"state_code"</span>: <span class="kw">"CA"</span>},
-    year=2026,
-    reform={<span class="kw">"gov.irs.credits.ctc.amount.adult_dependent"</span>: 1000},
-)
-<span class="kw">print</span>(us.tax_unit.income_tax, us.household.household_net_income)</code></pre>
-      </div>
-
-      <details class="more">
-        <summary>How it works, and the options</summary>
-      <p>
-        Under the hood the call resolves a dependency graph of statutory
-        rules for the household you describe — <a href="/pe/">the model
-        page</a> has the mechanics. Worth knowing here: the same package runs
-        whole representative datasets, and population scoring works on the
-        hosted server with no setup (the gated-microdata credential is
-        provisioned server-side) but needs your own
-        <code>HUGGING_FACE_TOKEN</code> locally.
-      </p>
-
-      <div class="dials">
-        <div class="dial">
-          <span class="dial-name">calculate_household</span>
-          <p><code>pe.uk</code> and <code>pe.us</code> — taxes, benefits, and net income for one family, with an optional <code>reform</code> dict.</p>
-        </div>
-        <div class="dial">
-          <span class="dial-name">reform</span>
-          <p>A parameter path and a new value: <code>{"gov.hmrc.income_tax.rates.uk[0].rate": 0.21}</code>, or a single effective date: <code>{"...rate": {"2026-01-01": 0.21}}</code>. Date ranges are not a shape — values never expire. Same paths the OLG model scores.</p>
-        </div>
-        <div class="dial">
-          <span class="dial-name">Simulation</span>
-          <p>Population analysis: run a dataset like <code>enhanced_frs_2023_24</code> through the model and aggregate any variable by decile or entity.</p>
-        </div>
-      </div>
-
-      </details>
-      <p class="research-link mono">
-        <a href="/pe/">Full guide — household calculator, reforms, population analysis → the PolicyEngine model page</a>
-      </p>
-      </div><!-- /pe pane -->
-    </div>
-  </section>
-
-  <section class="band band-cta">
-    <h2>Pick a model and score a reform.</h2>
-    <p class="cta-sub">
-      The docs say which model answers which question; the validation page
-      says how far each one can be trusted. Both are worth five minutes before
-      you quote a number.
-    </p>
-    <div class="hero-cta">
-      <a class="btn btn-primary" href="/docs/">Documentation</a>
-      <a class="btn btn-ghost" href="/validation/">Validation</a>
-      <a class="btn btn-ghost" href="https://github.com/PolicyEngine/macro">GitHub</a>
     </div>
   </section>
 </main>
 
 <footer class="foot foot-bar">
-  <span class="brand"><span class="brand-dot" aria-hidden="true"></span>PolicyEngine Macro</span>
-  <nav class="foot-nav mono" aria-label="Footer">
-    <a href="/">home</a>
-    <a href="/docs/">docs</a>
-    <a href="/validation/">validation</a>
-    <a href="/connect/">use it</a>
-    <a href="https://github.com/PolicyEngine/macro">GitHub</a>
-    <a class="foot-pe" href="https://policyengine.org" aria-label="PolicyEngine"><img src="/assets/policyengine.svg" alt="PolicyEngine" /></a>
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+    <a href="https://policyengine.org" aria-label="PolicyEngine website" title="PolicyEngine website"><img src="/assets/policyengine-mark.svg" alt="" /></a>
+    <a href="https://github.com/PolicyEngine" aria-label="PolicyEngine on GitHub" title="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a>
+    <a href="mailto:vahid@policyengine.org" aria-label="Email Vahid" title="Email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a>
+    <a href="https://www.linkedin.com/company/thepolicyengine" aria-label="PolicyEngine on LinkedIn" title="LinkedIn"><svg class="footer-icon-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45Z"/></svg></a>
+    <a href="https://x.com/PolicyEngineUS" aria-label="PolicyEngine on X" title="X"><svg class="footer-icon-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.66l-5.21-6.82-5.97 6.82H1.67l7.73-8.84L1.25 2.25h6.83l4.71 6.23 5.45-6.23Zm-1.16 17.52h1.83L7.08 4.13H5.12l11.96 15.64Z"/></svg></a>
   </nav>
 </footer>
 
