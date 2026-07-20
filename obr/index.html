@@ -10,7 +10,7 @@
 <meta property="og:url" content="https://policyengine-macro.vercel.app/obr" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
 <meta property="og:title" content="OBR macroeconometric model — PolicyEngine Macro" />
-<meta property="og:description" content="A Python emulator of the OBR's published 372-equation forecasting model, anchored to the November 2025 Economic and Fiscal Outlook." />
+<meta property="og:description" content="A Python emulator of the OBR's published 372-equation forecasting model, anchored to the March 2026 Economic and Fiscal Outlook." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -60,7 +60,7 @@
       </h1>
       <p class="lede reveal" style="--d:2">
         Estimate how a UK tax or spending change affects growth and borrowing
-        over 3–5 years, against the November 2025 EFO baseline.
+        over 3–5 years, against the March 2026 EFO baseline.
       </p>
       <div class="hero-cta reveal" style="--d:3">
         <a class="btn btn-primary" href="#run">Run it</a>
@@ -143,6 +143,9 @@
         <strong>holds them constant</strong>, and projects to
         <strong>2027Q4</strong> with exogenous inputs extrapolated
         (seasonal cash series at their trailing annual mean). Scenario solves run twelve quarters, 2025Q1–2027Q4.
+        The anchored horizon extends to <strong>2031Q1</strong> (GDP reproduced
+        to 0.29% at 2031Q1); anchored unemployment (<code>LFSUR</code>) is
+        unreliable beyond 2027Q4, drifting to 0.9% against the EFO's 4.1% by 2031Q1.
       </p>
     </div>
   </section>
@@ -155,7 +158,7 @@
     <div class="prose">
       <p>
         The package installs straight from GitHub — the equation listing, the
-        November 2025 EFO forecast tables, and the ONS snapshot ship inside
+        March 2026 EFO forecast tables, and the ONS snapshot ship inside
         it, so there is no data step. A reform is one call: pick an exogenous
         variable, apply a shock, read the deviation from baseline.
       </p>
@@ -227,8 +230,9 @@ results = run_reform(
         2026–27 rising to about £8.2bn by 2028–29, so the static costing sits inside the
         official range, toward its lower end. Converted to a quarterly
         <code>HHDI</code> shock of −£1.62bn to −£1.85bn and propagated through
-        the consumption function, GDP falls <strong>0.020% on impact in
-        2026Q1, 0.040% by 2026Q4, and 0.057% by 2027Q4</strong> — the sign
+        the consumption function, GDP falls <strong>0.020% (−£0.14bn) on impact in
+        2026Q1, deepening to 0.058% (−£0.40bn) by 2027Q4</strong> on the
+        March 2026 baseline — the sign
         and order of magnitude the OBR's own indirect-effect conventions
         imply.
       </p>
@@ -258,22 +262,22 @@ results = run_reform(
     <div class="metrics">
       <div class="metric">
         <span class="metric-label mono">anchored — real GDP</span>
-        <span class="metric-val">0.18<span class="metric-vs">% MAPE</span></span>
+        <span class="metric-val">0.15<span class="metric-vs">% MAPE</span></span>
         <span class="metric-note">vs published EFO; CI fails at 1%</span>
       </div>
       <div class="metric">
         <span class="metric-label mono">anchored — consumption</span>
-        <span class="metric-val">0.29<span class="metric-vs">% MAPE</span></span>
+        <span class="metric-val">0.25<span class="metric-vs">% MAPE</span></span>
         <span class="metric-note">vs published EFO; CI fails at 1%</span>
       </div>
       <div class="metric">
         <span class="metric-label mono">held-add-factor forecast</span>
-        <span class="metric-val">2.2<span class="metric-vs">% MAPE</span></span>
-        <span class="metric-note">real GDP; 6 of 10 computed variables in band</span>
+        <span class="metric-val">0.37<span class="metric-vs">% MAPE</span></span>
+        <span class="metric-note">real GDP, 2026Q1–2027Q4 window; 6 of 8 computed in band</span>
       </div>
       <div class="metric">
         <span class="metric-label mono">free-running</span>
-        <span class="metric-val">5.70<span class="metric-vs">% MAPE</span></span>
+        <span class="metric-val">5.75<span class="metric-vs">% MAPE</span></span>
         <span class="metric-note">real GDP; 4 of 11 computed in band — report-only</span>
       </div>
     </div>
@@ -284,18 +288,18 @@ results = run_reform(
         <tbody>
           <tr>
             <th scope="row"><strong>Anchored</strong></th>
-            <td>Add-factors on, matched to the November 2025 EFO. The configuration every reform score uses.</td>
-            <td>GDP 0.18% MAPE, consumption 0.29% over 2025Q1–2027Q4. Hard-gated in CI, alongside finiteness and a 0.5%-of-GDP expenditure-identity check. Structural sign invariants gated too.</td>
+            <td>Add-factors on, matched to the March 2026 EFO. The configuration every reform score uses.</td>
+            <td>GDP 0.15% MAPE, consumption 0.25% over 2025Q1–2027Q4; the horizon extends to 2031Q1, where GDP is reproduced to 0.29% (anchored unemployment is unreliable beyond 2027Q4). Hard-gated in CI, alongside finiteness and a 0.5%-of-GDP expenditure-identity check. Structural sign invariants gated too.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Held add-factors</strong></th>
-            <td>Add-factors fitted 2024Q1–2025Q4, held flat, projected to 2027Q4 — a genuine forecast.</td>
-            <td>GDP 2.2%, consumption 3.6%, unemployment 0.75pp, current account 0.9% of GDP, trade balance 0.11% — in band. Business investment ~18%, household income ~12%, company profits ~47% — over band.</td>
+            <td>Add-factors fitted 2024Q1–2025Q4, held flat, projected to 2027Q4 — a genuine forecast. Scored over 2026Q1–2027Q4 on the March 2026 baseline.</td>
+            <td>GDP 0.37%, consumption 0.33%; 6 of 8 computed variables within band. (The working paper's November-2025-vintage scorecard, over its own longer window, reports GDP 2.2% and consumption 3.6%.)</td>
           </tr>
           <tr>
             <th scope="row"><strong>Free-running</strong></th>
             <td>De-seeded, add-factors off. The raw structural dynamics with no OBR judgement.</td>
-            <td><strong>Weak, and reported as such.</strong> GDP 5.70%, consumption 9.45%, household income 14.76%, business investment 15.48%, company profits 54.57%. The model contracts 1–2%/yr while the EFO grows.</td>
+            <td><strong>Weak, and reported as such.</strong> GDP 5.75%, consumption 9.56%, household income 14.15%, business investment 16.12%, company profits 79.80%. The model contracts 1–2%/yr while the EFO grows.</td>
           </tr>
         </tbody>
       </table></div>
@@ -350,7 +354,7 @@ results = run_reform(
           </tr>
           <tr>
             <th scope="row"><strong>Vintage</strong></th>
-            <td>October 2025 equation listing, November 2025 EFO, current-vintage ONS series. Where the ONS has revised history the identities don't close exactly, and that slack lands in the add-factors. The March 2026 EFO has not been adopted.</td>
+            <td>October 2025 equation listing, March 2026 EFO, current-vintage ONS series. Where the ONS has revised history the identities don't close exactly, and that slack lands in the add-factors. The working paper's results remain a November 2025 EFO vintage study.</td>
           </tr>
           <tr>
             <th scope="row"><strong>No behavioural micro</strong></th>

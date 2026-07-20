@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>PolicyEngine Macro — validation</title>
-<meta name="description" content="Every PolicyEngine Macro model set beside its official counterpart: the OBR emulator against the November 2025 EFO and HMRC's ready reckoner, the structural VAR against Brignone and Piffer (2025), frb-us against the Fed's pyfrbus, PolicyEngine against statute, and the OLG model against its calibration targets — with the verification gradient stated, not flattened." />
+<meta name="description" content="Every PolicyEngine Macro model set beside its official counterpart: the OBR emulator against the March 2026 EFO and HMRC's ready reckoner, the structural VAR against Brignone and Piffer (2025), frb-us against the Fed's pyfrbus, PolicyEngine against statute, and the OLG model against its calibration targets — with the verification gradient stated, not flattened." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/validation" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://policyengine-macro.vercel.app/validation" />
@@ -110,8 +110,8 @@
           <tr>
             <th scope="row"><a href="#obr"><strong>obr-macro</strong></a></th>
             <td>Replication with a published anchor</td>
-            <td>OBR <em>Economic and Fiscal Outlook</em>, November 2025; HMRC ready reckoner; ONS outturns</td>
-            <td>Anchored GDP MAPE 0.18%, consumption 0.29%</td>
+            <td>OBR <em>Economic and Fiscal Outlook</em>, March 2026; HMRC ready reckoner; ONS outturns</td>
+            <td>Anchored GDP MAPE 0.15%, consumption 0.25%</td>
           </tr>
           <tr>
             <th scope="row"><a href="#svar"><strong>boe-svar</strong></a></th>
@@ -159,13 +159,17 @@
     </div>
     <div class="prose">
       <p>
-        The emulator is anchored to the November 2025 EFO using the OBR's own
+        The emulator is anchored to the March 2026 EFO using the OBR's own
         add-factor device, so reproducing the published aggregates is a
         by-construction <em>invariant</em>, not a forecast success: real GDP
-        tracks to a mean absolute percentage error of <strong>0.18%</strong>
-        and consumption to <strong>0.29%</strong>, against a CI gate of 1%.
-        The number that carries evidential weight is the reform costing
-        below.
+        tracks to a mean absolute percentage error of <strong>0.15%</strong>
+        and consumption to <strong>0.25%</strong> over 2025Q1&ndash;2027Q4,
+        against a CI gate of 1%. The anchored horizon now extends to 2031Q1,
+        where GDP is reproduced to 0.29% — though anchored unemployment is
+        unreliable beyond 2027Q4 (it drifts to 0.9% against the EFO's 4.1% by
+        2031Q1). The number that carries evidential weight is the reform
+        costing below. The charts in this section are the working paper's
+        figures and show its November 2025 EFO study vintage.
       </p>
       <figure class="vfig">
         <svg class="vchart" data-chart="obr-anchored" viewBox="0 0 760 326" role="img" aria-labelledby="obr-anchored-t obr-anchored-d">
@@ -216,7 +220,7 @@
 <circle class="vc-s2-dot" cx="663.5" cy="85.5" r="3"/>
 <circle class="vc-s2-dot" cx="724.0" cy="77.3" r="3"/>
 </svg>
-        <figcaption>CI hard-fails at &#177;1.00% &#8212; off the top and bottom of this frame. MAPE over the horizon: 0.18% (GDP), 0.29% (consumption). Quarterly deviation of the anchored emulator from the published November 2025 EFO, 2025Q1–2027Q4. Computed from <code>papers/obr-macro/figures/fig_anchored_data.csv</code>; matches the selected quarters in the paper's comparison table (+0.05%, &minus;0.16%, +0.19%, +0.32% on GDP).</figcaption>
+        <figcaption>November 2025 EFO vintage — the working paper's study, not the live March 2026 baseline (which anchors at 0.15% GDP / 0.25% consumption). CI hard-fails at &#177;1.00% &#8212; off the top and bottom of this frame. MAPE over this November-vintage horizon: 0.18% (GDP), 0.29% (consumption). Quarterly deviation of the anchored emulator from the published November 2025 EFO, 2025Q1–2027Q4. Computed from <code>papers/obr-macro/figures/fig_anchored_data.csv</code>; matches the selected quarters in the paper's comparison table (+0.05%, &minus;0.16%, +0.19%, +0.32% on GDP).</figcaption>
       </figure>
       <p>
         The independent check is the reform costing. Raising the basic rate
@@ -264,7 +268,7 @@
       </figure>
       <div class="table-scroll">
       <table>
-        <caption>obr-macro against the November 2025 EFO and HMRC's ready reckoner</caption>
+        <caption>obr-macro against the OBR EFO and HMRC's ready reckoner (anchored-levels panel: working paper, November 2025 vintage; tracking-error panel: live March 2026 baseline)</caption>
         <thead><tr><td></td><th scope="col">Ours</th><th scope="col">Official</th><th scope="col">Deviation</th></tr></thead>
         <tbody>
           <tr><th colspan="4" scope="colgroup"><strong>Anchored levels vs EFO Nov 2025, £bn/qtr</strong></th></tr>
@@ -276,20 +280,20 @@
           <tr><th scope="row">2026&ndash;27</th><td>6.46</td><td>6.9</td><td>&minus;6.4%</td></tr>
           <tr><th scope="row">2028&ndash;29 (interpolated)</th><td>6.92</td><td>8.2</td><td>&minus;15.6%</td></tr>
           <tr><th scope="row">2030 (end of window)</th><td>7.38</td><td>≈8.2</td><td>&minus;10.0%</td></tr>
-          <tr><th colspan="4" scope="colgroup"><strong>Tracking error vs the published EFO path, MAPE 2025Q1&ndash;2027Q4</strong></th></tr>
-          <tr><th scope="row">Anchored (GDP / consumption)</th><td>0.18% / 0.29%</td><td colspan="2">CI gate &lt;1% — passes</td></tr>
-          <tr><th scope="row">Held add-factors (GDP / consumption)</th><td>2.2% / 3.6%</td><td colspan="2">within band</td></tr>
-          <tr><th class="vc-warn" scope="row">Free-running, raw (GDP / consumption)</th><td class="vc-warn">5.70% / 9.45%</td><td colspan="2" class="vc-warn">over band — report-only, and weak</td></tr>
+          <tr><th colspan="4" scope="colgroup"><strong>Tracking error vs the published March 2026 EFO path, MAPE 2025Q1&ndash;2027Q4</strong></th></tr>
+          <tr><th scope="row">Anchored (GDP / consumption)</th><td>0.15% / 0.25%</td><td colspan="2">CI gate &lt;1% — passes</td></tr>
+          <tr><th scope="row">Held add-factors (GDP / consumption), 2026Q1&ndash;2027Q4 window</th><td>0.37% / 0.33%</td><td colspan="2">6 of 8 computed within band (paper's Nov-2025-vintage scorecard, over its own longer window: 2.2% / 3.6%)</td></tr>
+          <tr><th class="vc-warn" scope="row">Free-running, raw (GDP / consumption)</th><td class="vc-warn">5.75% / 9.56%</td><td colspan="2" class="vc-warn">over band — report-only, and weak</td></tr>
         </tbody>
       </table>
       </div>
       <details class="more">
-        <summary>The honest scorecard, the two dead equations, outturns, and vintage drift</summary>
+        <summary>The honest scorecard, the two dead equations, outturns, and the March 2026 re-anchoring</summary>
       <p>
         <strong>The honest scorecard.</strong> The last row is the one that
-        matters for anyone tempted to read the 0.18% as forecasting skill.
-        The same equations that track the EFO to 0.18% when anchored miss it
-        by <strong>5.70%</strong> free-running — precisely the gap the OBR's
+        matters for anyone tempted to read the 0.15% as forecasting skill.
+        The same equations that track the EFO to 0.15% when anchored miss it
+        by <strong>5.75%</strong> free-running — precisely the gap the OBR's
         own add-factor judgement closes in the official process, and the
         reason reform deltas are always scored against the anchored baseline
         rather than the raw one. The free-running score is de-seeded, with
@@ -298,11 +302,17 @@
         variables land within band</strong> (real GDP, consumption, the trade
         balance, and the trivial employment identity); of the full 21-line
         scorecard, 10 lines are passthroughs held at the OBR value. The
-        worst line is company profits at <strong>54.57% MAPE</strong>, which
+        worst line is company profits at <strong>79.80% MAPE</strong> on the
+        March baseline (54.57% on the paper's November vintage), which
         traces to a single unpublished constant in households' operating
         surplus <code>OSHH</code> — the paper documents and regression-gates
         it rather than re-tuning it, since tuning it would be fitting to the
-        answer.
+        answer. Other lines that moved on re-anchoring, reported rather than
+        smoothed: the free-running current account widened from 2.76 to
+        <strong>4.17% of GDP</strong> and is now over band; RPI improved from
+        2.03pp to <strong>1.71pp</strong>; business investment worsened from
+        15.48% to <strong>16.12%</strong>; the two household-income
+        lines stand at 14.15% and 13.86%.
       </p>
       <figure class="vfig">
         <svg class="vchart" data-chart="obr-freerun" viewBox="0 0 760 330" role="img" aria-labelledby="obr-freerun-t obr-freerun-d">
@@ -331,7 +341,7 @@
 <text class="vc-tick" x="542.4" y="312" text-anchor="middle">2027Q1</text>
 <text class="vc-tick" x="724.0" y="312" text-anchor="middle">2027Q4</text>
 </svg>
-        <figcaption>Real GDP, &pound;bn/qtr, 2025Q1&ndash;2027Q4. The anchored path (0.18% MAPE) sits on top of the EFO; the same equations free-running — de-seeded, no add-factors — contract away from it (5.70% MAPE on the full scorecard definition; 5.70% recomputed on this plotted series). Computed from <code>papers/obr-macro/figures/fig_free_running_data.csv</code> and <code>fig_anchored_data.csv</code>.</figcaption>
+        <figcaption>November 2025 EFO vintage — the working paper's study; on the live March 2026 baseline the same comparison scores 0.15% anchored and 5.75% free-running. Real GDP, &pound;bn/qtr, 2025Q1&ndash;2027Q4. The anchored path (0.18% MAPE on this vintage) sits on top of the EFO; the same equations free-running — de-seeded, no add-factors — contract away from it (5.70% MAPE on the full scorecard definition; 5.70% recomputed on this plotted series). Computed from <code>papers/obr-macro/figures/fig_free_running_data.csv</code> and <code>fig_anchored_data.csv</code>.</figcaption>
       </figure>
       <div class="callout">
         <strong>Two equations do not fire.</strong> The October 2025 model
@@ -409,7 +419,7 @@
 <text class="vc-val" x="689.5" y="53.1" text-anchor="middle">0.60</text>
 <text class="vc-lab" x="633.5" y="296" text-anchor="middle">2026Q1</text>
 </svg>
-        <figcaption>% q/q real GDP growth. The emulator tracks the three 2025 outturns to within 0.06pp; both model rows miss the strong 2026Q1 outturn (0.6%) by roughly a quarter point. Computed from <code>papers/obr-macro/figures/fig_outturn_data.csv</code>; the table below carries the exact values.</figcaption>
+        <figcaption>November 2025 EFO vintage — the working paper's study; the live baseline is anchored to the March 2026 EFO. % q/q real GDP growth. The emulator tracks the three 2025 outturns to within 0.06pp; both model rows miss the strong 2026Q1 outturn (0.6%) by roughly a quarter point. Computed from <code>papers/obr-macro/figures/fig_outturn_data.csv</code>; the table below carries the exact values.</figcaption>
       </figure>
       <div class="table-scroll">
       <table>
@@ -424,22 +434,20 @@
       </table>
       </div>
       <p>
-        <strong>Vintage drift: the March 2026 EFO.</strong> Everything above
-        compares against the November 2025 EFO because that is the vintage the
-        emulator is anchored to. It has <em>not</em> been re-anchored to the
-        OBR's subsequent March 2026 forecast, which revises 2026 real GDP
-        growth down to 1.1% — 0.3 points below November — and 2026 CPI
-        inflation down 0.2 points. The anchored baseline's 2026 paths (1.5%
-        GDP growth, 1.4% consumption growth, against the November EFO's 1.4%
-        and 1.2%) therefore now sit 0.3&ndash;0.4 points above the official
-        March view. That gap is vintage drift, not model error: it is almost
-        exactly the OBR's own November-to-March revision, and an emulator
-        re-anchored to the March tables would inherit the new path by
-        construction. The lesson is about levels, not deltas — reform effects
-        are differences between structurally identical runs and are
-        insensitive to modest baseline drift, but anyone quoting the anchored
-        <em>baseline</em> should treat it as a November 2025 snapshot the
-        official forecaster has since marked down.
+        <strong>Vintage: re-anchored to the March 2026 EFO.</strong> The
+        hosted emulator has been re-anchored from the November 2025 EFO to
+        the OBR's March 2026 forecast, and the headline numbers on this page
+        are computed on that baseline: anchored GDP 0.15% MAPE, consumption
+        0.25% over 2025Q1&ndash;2027Q4, with the anchored horizon extended to
+        2031Q1 (GDP reproduced to 0.29% at 2031Q1; anchored unemployment is
+        unreliable beyond 2027Q4, drifting to 0.9% against the EFO's 4.1% by
+        2031Q1). The charts and the working paper remain a November 2025
+        vintage study and are labelled as such — the paper's results have not
+        been rewritten. Reform effects are differences between structurally
+        identical runs and are insensitive to modest baseline drift, which is
+        why the re-anchoring leaves the £6.46bn/£7.38bn static costing
+        untouched and moves the second-round GDP effect only from
+        &minus;0.057% to &minus;0.058% by 2027Q4.
       </p>
       </details>
       <p class="vlinks mono">
