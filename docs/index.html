@@ -145,21 +145,28 @@
   var root = document.querySelector('[data-mobile-compare]');
   var table = document.querySelector('.desktop-comparison table');
   if (!root || !table) return;
-  var names = Array.from(table.tHead.rows[0].cells).slice(1).map(function (cell) { return cell.textContent.trim(); });
+  var models = Array.from(table.tHead.rows[0].cells).slice(1).map(function (cell) {
+    var link = cell.querySelector('a');
+    var id = cell.querySelector('span').textContent.trim();
+    var name = Array.from(link.childNodes).filter(function (node) {
+      return node.nodeType === Node.TEXT_NODE && node.textContent.trim();
+    }).map(function (node) { return node.textContent.trim(); }).join(' ');
+    return { id: id, name: name };
+  });
   var rows = Array.from(table.tBodies[0].rows).map(function (row) {
     return { label: row.cells[0].textContent.trim(), values: Array.from(row.cells).slice(1).map(function (cell) { return cell.innerHTML; }) };
   });
   var first = root.querySelector('[data-compare-first]');
   var second = root.querySelector('[data-compare-second]');
-  names.forEach(function (name, index) {
-    first.add(new Option(name, index));
-    second.add(new Option(name, index));
+  models.forEach(function (model, index) {
+    first.add(new Option(model.id + ' — ' + model.name, index));
+    second.add(new Option(model.id + ' — ' + model.name, index));
   });
   second.selectedIndex = 1;
   function render() {
     var a = Number(first.value), b = Number(second.value);
     root.querySelector('[data-comparison-output]').innerHTML = rows.map(function (row) {
-      return '<section class="mobile-compare-row"><h4>' + row.label + '</h4><div><strong>' + names[a] + '</strong><p>' + row.values[a] + '</p></div><div><strong>' + names[b] + '</strong><p>' + row.values[b] + '</p></div></section>';
+      return '<section class="mobile-compare-row"><h4>' + row.label + '</h4><div><strong>' + models[a].id + '</strong><p>' + row.values[a] + '</p></div><div><strong>' + models[b].id + '</strong><p>' + row.values[b] + '</p></div></section>';
     }).join('');
   }
   first.addEventListener('change', render);
