@@ -418,21 +418,27 @@ def dynamic_reform_impact(
     max_iter: int = 250,
 ) -> dict:
     """Dynamic population score (issue #11): the OG-UK overlapping-
-    generations model's long-run wage and labour-supply changes become an
-    EconomicAssumptions overlay on the PolicyEngine microsimulation's
-    OBR uprating indices, and the reform is re-scored under those
-    macro-adjusted assumptions against the stock-parameter baseline.
+    generations model's long-run wage change becomes an EconomicAssumptions
+    overlay applied as DIRECT INPUT SCALING — the reform simulation's
+    employment-income arrays are multiplied by the wage factor through the
+    engine's Dynamic(simulation_modifier=...) hook — and the reform is
+    re-scored against the untouched stock baseline. (Input scaling, not a
+    parameter overlay: uprating-parameter overrides are dead in population
+    runs because the per-year microdata are pre-uprated at dataset build
+    time; reforms touching gov.economic_assumptions.* are refused here for
+    the same reason.)
 
     The overlay carries only the reform/baseline RATIO from the macro
     model (the stock baseline already embeds the OBR forecast), so the
-    static effect is never double-counted; a null macro result reduces
-    this exactly to population_reform_impact.
+    static effect is never double-counted; a null macro result attaches no
+    modifier and reduces this exactly to population_reform_impact.
 
     Args:
         country: 'uk' only (OG-UK is a UK model).
         reform: REQUIRED flat {parameter_path: value} dict, same shape as
             population_reform_impact. Must NOT touch
-            gov.economic_assumptions.* (the overlay owns that subtree).
+            gov.economic_assumptions.* (such overrides are silently dead
+            in population runs, so they are refused).
         year: Reform start year / microsim year (default 2026).
         dataset: Optional microdata dataset name override.
         max_iter: OG steady-state solver iteration cap (default 250).
@@ -445,7 +451,8 @@ def dynamic_reform_impact(
     `pe-macro dynamic-score --reform '...'` instead.
 
     Returns the microsim result plus the OG payload, the
-    economic_assumptions factors, the overlay reform actually applied,
+    economic_assumptions factors, an `application` block describing the
+    input scaling actually applied,
     and a common `score` block (model 'og+microsim').
     """
     try:

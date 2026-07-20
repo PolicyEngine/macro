@@ -42,18 +42,27 @@ scoring model by its declared contract:
   ```
   reform ──> OG-UK steady states (baseline cached, reform solved)
                 └─> EconomicAssumptions: earnings factor = w_reform/w_baseline
-                      └─> overlay on gov.economic_assumptions.indices.obr.
-                          average_earnings (the DERIVED index; overriding
-                          yoy_growth would not rebuild it)
-  reform + overlay ──> microsim vs the stock-parameter baseline
+                      └─> DIRECT INPUT SCALING: the reform simulation's
+                          employment-income arrays are multiplied by the
+                          factor via the engine's supported
+                          Dynamic(simulation_modifier=...) hook
+  reform (+ modifier) ──> microsim vs the untouched stock baseline
   ```
 
-  The overlay carries only the reform/baseline RATIO, so the static effect
-  embedded in the stock parameters is never double-counted; a null macro
-  result reduces it exactly to `microsim`. Caveats (spelled out in every
-  result): the steady-state factor is applied flat from the start year with
-  no transition dynamics; the aggregate labour-supply change is reported
-  but not distributionally allocated in v1; earnings only (the OG model is
+  Input scaling — not a parameter overlay — because uprating-parameter
+  overrides are empirically DEAD in population runs: the per-year microdata
+  are pre-uprated at dataset build time, so overriding
+  `gov.economic_assumptions.indices.obr.average_earnings` returns exactly
+  zero everywhere (verified against the production engine; such reforms are
+  refused in dynamic scoring rather than silently ignored). The overlay
+  carries only the reform/baseline RATIO, applied to the reform side only,
+  so the static effect embedded in the stock inputs is never
+  double-counted; a null macro result attaches no modifier and reduces it
+  exactly to `microsim`. Caveats (spelled out in every result): the
+  steady-state factor is applied flat from the start year with no
+  transition dynamics; the aggregate labour-supply change is reported but
+  not distributionally allocated in v1; employment income only
+  (self-employment and pension income are not adjusted, and the OG model is
   real, so there is no price-level overlay). UK-only and local-only (oguk
   is excluded from the hosted image); also exposed as
   `pe-macro dynamic-score` and the `dynamic_reform_impact` MCP tool.
