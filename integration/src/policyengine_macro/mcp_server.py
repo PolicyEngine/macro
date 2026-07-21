@@ -446,5 +446,70 @@ def population_reform_impact(
     )
 
 
+@mcp.tool()
+def dynamic_reform_impact(
+    country: str = "uk",
+    reform: dict | None = None,
+    year: int = 2026,
+    dataset: str | None = None,
+    max_iter: int = 250,
+) -> dict:
+    """Dynamic population score (issue #11): the OG-UK overlapping-
+    generations model's long-run wage change becomes an EconomicAssumptions
+    overlay applied as DIRECT INPUT SCALING — the reform simulation's
+    employment-income arrays are multiplied by the wage factor through the
+    engine's Dynamic(simulation_modifier=...) hook — and the reform is
+    re-scored against the untouched stock baseline. (Input scaling, not a
+    parameter overlay: uprating-parameter overrides are dead in population
+    runs because the per-year microdata are pre-uprated at dataset build
+    time; reforms touching gov.economic_assumptions.* are refused here for
+    the same reason.)
+
+    The overlay carries only the reform/baseline RATIO from the macro
+    model (the stock baseline already embeds the OBR forecast), so the
+    static effect is never double-counted; a null macro result attaches no
+    modifier and reduces this exactly to population_reform_impact.
+
+    Args:
+        country: 'uk' only (OG-UK is a UK model).
+        reform: REQUIRED flat {parameter_path: value} dict, same shape as
+            population_reform_impact. Must NOT touch
+            gov.economic_assumptions.* (such overrides are silently dead
+            in population runs, so they are refused).
+        year: Reform start year / microsim year (default 2026).
+        dataset: Optional microdata dataset name override.
+        max_iter: OG steady-state solver iteration cap (default 250).
+
+    Runtime: ~two OG-UK steady-state solves (the baseline is cached
+    in-process, but a cold solve takes >10 minutes) plus one microsim run.
+    NOT AVAILABLE on the hosted server: oguk is deliberately excluded from
+    the Modal image (a solve cannot fit the 600s request timeout), so this
+    tool returns an actionable error there — run it locally via
+    `pe-macro dynamic-score --reform '...'` instead.
+
+    Returns the microsim result plus the OG payload, the
+    economic_assumptions factors, an `application` block describing the
+    input scaling actually applied,
+    and a common `score` block (model 'og+microsim').
+    """
+    try:
+        return core.dynamic_population_reform_impact(
+            country=country, reform=reform, year=year, dataset=dataset,
+            max_iter=max_iter,
+        )
+    except ImportError as e:
+        return {
+            "error": (
+                "dynamic scoring is not available on the hosted server: "
+                "oguk is excluded from the Modal image because an OG-UK "
+                "steady-state solve cannot fit the request timeout. Run "
+                "it locally: pip install "
+                "git+https://github.com/PSLmodels/OG-UK, then "
+                "`pe-macro dynamic-score --reform '...'`. "
+                f"(underlying error: {e})"
+            )
+        }
+
+
 if __name__ == "__main__":
     mcp.run(transport="stdio")
