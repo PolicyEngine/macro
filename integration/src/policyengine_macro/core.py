@@ -1475,6 +1475,7 @@ def pe_population_impact(
     reform: dict | None = None,
     year: int = 2026,
     dataset: str | None = None,
+    reform_modifier=None,
 ) -> dict:
     """Score a reform against the whole population with PolicyEngine.
 
@@ -1490,6 +1491,14 @@ def pe_population_impact(
 
     The baseline simulation is cached in-process per (country, year,
     dataset). UK data needs HUGGING_FACE_TOKEN on first download.
+
+    ``reform_modifier`` (internal; used by dynamic_population_reform_impact)
+    is an optional callable applied to the underlying engine simulation of
+    the REFORM run only, attached via the engine's supported
+    ``Dynamic(simulation_modifier=...)`` hook. The baseline — cached and
+    shared with static scores — NEVER sees it, which is the structural
+    guarantee that a macro overlay is applied exactly once, to the reform
+    side only.
     """
     reform = validate_reform(reform)
     country = _validate_country(country)
@@ -1499,11 +1508,23 @@ def pe_population_impact(
     from policyengine.core import Simulation
     from policyengine.outputs.decile_impact import calculate_decile_impacts
 
+    ref_kwargs = {}
+    if reform_modifier is not None:
+        from policyengine.core import Dynamic
+
+        ref_kwargs["dynamic"] = Dynamic(
+            name="policyengine-macro EconomicAssumptions overlay",
+            simulation_modifier=reform_modifier,
+            # Exogenous macro input scaling, not a behavioural response:
+            # do not trigger the engine's labour-supply-response outputs.
+            affects_labor_supply_response=False,
+        )
     ref = Simulation(
         dataset=ds,
         tax_benefit_model_version=getattr(pe, country).model,
         policy=dict(reform),
         extra_variables=_pe_pop_extra_variables(country),
+        **ref_kwargs,
     )
     ref.run()
 
@@ -2112,10 +2133,167 @@ def obr_score_reform(
 
 
 # ---------------------------------------------------------------------------
+# Dynamic scoring: OG-UK EconomicAssumptions overlay on the microsim (#11)
+# ---------------------------------------------------------------------------
+
+def _check_overlay_collision(reform: dict) -> None:
+    """Refuse user reforms under gov.economic_assumptions.* in dynamic runs.
+
+    Empirical finding (2026-07-20, production engine): uprating-parameter
+    overrides there are DEAD in population runs — the per-year datasets are
+    pre-uprated at build time, so such a reform silently does nothing (two
+    index-override calls returned exactly zero everywhere; see
+    assumptions.py). A dynamic score must never carry a silently inert
+    piece of reform, so it is refused here. The overlay itself no longer
+    touches parameters at all — it scales the reform simulation's
+    employment-income inputs directly — so this guard is about honesty,
+    not merge collisions.
+    """
+    from policyengine_macro.assumptions import OVERLAY_PARAM_PREFIX
+
+    hit = [p for p in reform if p.startswith(OVERLAY_PARAM_PREFIX)]
+    if hit:
+        raise ValueError(
+            "gov.economic_assumptions.* overrides have no effect in "
+            "population runs (the per-year microdata are pre-uprated at "
+            "dataset build time), so the dynamic score refuses them rather "
+            f"than silently ignoring them (paths: {', '.join(hit)})."
+        )
+
+
+def dynamic_population_reform_impact(
+    country: str = "uk",
+    reform: dict | None = None,
+    year: int = 2026,
+    dataset: str | None = None,
+    max_iter: int = OG_DEFAULT_MAX_ITER,
+    baseline_cache: bool = True,
+) -> dict:
+    """Dynamic population score: OG-UK macro overlay on the microsim (#11).
+
+    Pipeline:
+      1. og_score_reform (baseline steady state cached in-process) —
+         long-run wage and labour-supply changes under the reform;
+      2. EconomicAssumptions.from_og_result — reform/baseline factors;
+      3. the earnings factor becomes DIRECT INPUT SCALING of the reform
+         simulation's employment-income arrays, attached through the
+         engine's Dynamic(simulation_modifier=...) hook (parameter
+         overrides on the uprating indices are dead in population runs:
+         the per-year microdata are pre-uprated at build time — see
+         assumptions.py for the empirical evidence);
+      4. one pe_population_impact run: user reform as policy + the scaling
+         modifier on the reform side only, against the stock baseline
+         (cached; NEVER modified — the structural once-and-reform-side-only
+         guarantee).
+
+    Double-counting rule: the overlay carries only the reform/baseline
+    RATIO from the macro model; the stock baseline already embeds the OBR
+    forecast the OG baseline is calibrated to, so the static effect is
+    never counted twice — a null macro result attaches no modifier and
+    reduces this exactly to the static score.
+
+    UK only (OG-UK is UK-only). Runtime: two OG steady-state solves
+    (baseline cached; ~10+ min cold) plus one microsim run.
+    """
+    from policyengine_macro.assumptions import (
+        SCALED_INPUT_VARIABLES, EconomicAssumptions,
+    )
+
+    country = _validate_country(country)
+    if country != "uk":
+        raise ValueError(
+            "dynamic scoring is UK-only (OG-UK is a UK model); country "
+            "must be 'uk'"
+        )
+    reform = validate_reform(reform)
+    _check_overlay_collision(reform)
+
+    og = og_score_reform(
+        reform=reform, start_year=year, max_iter=max_iter,
+        baseline_cache=baseline_cache,
+    )
+    ea = EconomicAssumptions.from_og_result(og)
+    modifier = ea.input_scaling_modifier()
+
+    micro = pe_population_impact(
+        country="uk", reform=reform, year=year, dataset=dataset,
+        reform_modifier=modifier,
+    )
+
+    assumptions = ea.assumption_strings()
+    caveats = ea.caveat_strings() + [
+        "corporation-tax incidence stops at the OG model's boundary: any "
+        "wage effect it implies flows through the overlay, but the "
+        "microsim itself still treats corporation tax as not "
+        "household-borne",
+    ]
+    out = {
+        "model": "OG-UK overlay + PolicyEngine population microsimulation",
+        "country": "uk",
+        "year": int(year),
+        "reform": dict(reform),
+        "economic_assumptions": ea.model_dump(),
+        "application": {
+            "method": "input-scaling",
+            "variables_tried": list(SCALED_INPUT_VARIABLES),
+            "earnings_factor": ea.earnings_factor,
+            "applied": modifier is not None,
+        },
+        "og": og,
+        "microsim": micro,
+        "assumptions": assumptions,
+        "caveats": caveats,
+    }
+    out["score"] = ScoreResult(
+        model="og+microsim",
+        model_class="olg-ge overlay on microsim",
+        analysis_type="experimental steady-state earnings overlay",
+        country="uk",
+        reform=dict(reform),
+        baseline=(
+            f"PolicyEngine baseline policy for {year}, with OG-UK steady-state "
+            "reform-to-baseline earnings feedback"
+        ),
+        provenance=_provenance(
+            model_id="og+microsim",
+            distribution="policyengine-macro",
+            data_vintage=(
+                f"PolicyEngine dataset {micro.get('dataset', dataset or 'default')}; "
+                "OG-UK packaged calibration inputs"
+            ),
+            baseline=f"baseline policy for {year} and OG-UK steady state",
+        ),
+        horizon=f"annual {year} under long-run steady-state assumptions",
+        quantities={
+            "revenue": ScoreQuantity(
+                delta_bn=micro["budgetary_impact_bn"],
+                units=f"{micro['currency']} bn per year",
+                basis=(
+                    f"{micro['budgetary_impact_basis']}, under the OG-UK "
+                    "earnings overlay"
+                ),
+                time_basis=(
+                    f"annual {year}, applying a long-run steady-state wage "
+                    "ratio from the first year"
+                ),
+            ),
+        },
+        assumptions=assumptions,
+        caveats=caveats,
+        distributional=ScoreDistribution(
+            decile_impacts=micro["decile_impacts"],
+            winners=micro["winners"],
+            losers=micro["losers"],
+        ),
+    ).model_dump()
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Unified reform scoring across the suite
 # ---------------------------------------------------------------------------
 
-SCORE_MODELS = ("og", "obr", "microsim")
+SCORE_MODELS = ("og", "obr", "microsim", "og+microsim")
 
 # Models that exist in the suite but deliberately have NO PolicyEngine-reform
 # bridge, mapped to the error explaining what to use instead. score_reform must
@@ -2169,6 +2347,11 @@ def score_reform(
     - "microsim": PolicyEngine population microsimulation itself (static
       annual costing + distribution, no macro feedback). UK or US.
       Extra arg: dataset.
+    - "og+microsim": dynamic scoring (issue #11): OG-UK long-run wage and
+      labour-supply changes become an EconomicAssumptions overlay applied
+      as direct input scaling of the reform simulation's employment-income
+      arrays, scored against the stock baseline. UK only. Extra args:
+      max_iter, dataset.
 
     "frbus" is deliberately NOT accepted and raises: FRB/US has no
     PolicyEngine-reform bridge (see SCORE_MODELS_WITHOUT_REFORM_BRIDGE), so
@@ -2207,6 +2390,16 @@ def score_reform(
     if model == "microsim":
         return pe_population_impact(
             country=country, reform=reform, year=start_year, dataset=dataset
+        )
+    if model == "og+microsim":
+        if country != "uk":
+            raise ValueError(
+                "the og+microsim member is UK-only (OG-UK); country must "
+                "be 'uk'"
+            )
+        return dynamic_population_reform_impact(
+            country=country, reform=reform, year=start_year,
+            dataset=dataset, max_iter=max_iter,
         )
     raise ValueError(f"model must be one of {SCORE_MODELS}, got {model!r}")
 
