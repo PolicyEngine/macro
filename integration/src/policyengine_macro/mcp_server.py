@@ -270,35 +270,42 @@ def frbus_summary() -> dict:
 
 
 @mcp.tool()
-def forecast_uk(horizons: int = 12, draws: int = 500) -> dict:
+def forecast_uk(horizons: int = 12, draws: int = 2000) -> dict:
     """Forecast UK YoY GDP growth and CPI inflation with the UK SVAR model.
 
     Estimates a Bayesian VAR (1992Q1-2023Q2 sample, sign-identified structural
     shocks) and simulates the predictive distribution from the latest data
     quarter. Returns, per future quarter, the median and 68%/90% bands for YoY
-    GDP growth and YoY CPI inflation, both in percent.
+    GDP growth and YoY CPI inflation, both in percent. The response includes a
+    `warnings` list flagging weak inference (fewer than 100 accepted draws or
+    importance-weight ESS below 100) with a recommended draw count.
 
     Args:
         horizons: Forecast horizon in quarters (default 12 = 3 years).
-        draws: Posterior draws (default 500, responds in tens of seconds;
-            can be raised, e.g. 2000-6000, for smoother bands at the cost of
-            minutes of runtime). Results are cached in-process, so repeated
+        draws: Posterior draws (default 2000: ~165 accepted draws, ESS ~64,
+            about two minutes of runtime on first call; ~3500 draws reaches
+            ESS >= 100 in ~3.5 minutes; 500 responds in ~25s but yields ESS
+            ~15 and a warning). Results are cached in-process, so repeated
             calls with the same (horizons, draws) are instant.
     """
     return core.svar_forecast(horizons=horizons, draws=draws)
 
 
 @mcp.tool()
-def latest_shocks(draws: int = 500) -> dict:
+def latest_shocks(draws: int = 2000) -> dict:
     """Structural-shock reading for the latest data quarter from the UK SVAR.
 
     For each of the 6 identified shocks (world demand/energy/supply, UK
     demand/supply/monetary policy) returns the posterior probability the shock
     was positive vs negative in the latest quarter, plus a one-line reading.
 
+    The response includes a `warnings` list flagging weak inference (fewer
+    than 100 accepted draws or importance-weight ESS below 100).
+
     Args:
-        draws: Posterior draws (default 500; can be raised for precision).
-            Cached in-process, so repeat calls are instant.
+        draws: Posterior draws (default 2000, ~2 minutes on first call; can
+            be raised for precision). Cached in-process, so repeat calls are
+            instant.
     """
     return core.svar_latest_shocks(draws=draws)
 

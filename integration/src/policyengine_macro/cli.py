@@ -295,7 +295,9 @@ def frbus_summary(as_json):
 
 @main.command()
 @click.option("--horizons", default=12, show_default=True, help="Forecast horizon in quarters.")
-@click.option("--draws", default=500, show_default=True, help="Posterior draws (more = slower, smoother).")
+@click.option("--draws", default=2000, show_default=True,
+              help="Posterior draws (more = slower, smoother; 2000 takes "
+                   "~2 min and ~3500 reaches importance-weight ESS >= 100).")
 @click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
 def forecast(horizons, draws, as_json):
     """UK SVAR forecast: YoY GDP growth and CPI inflation with bands."""
@@ -305,6 +307,8 @@ def forecast(horizons, draws, as_json):
         return
     click.echo(f"UK SVAR forecast from {res['forecast_origin']} "
                f"({res['draws']} draws, {res['accepted_draws']} accepted, ESS {res['ess']})")
+    for msg in res.get("warnings", []):
+        click.secho(f"WARNING: {msg}", fg="yellow", err=True)
     for key, label in [("gdp_growth_yoy", "YoY GDP growth (%)"),
                        ("cpi_inflation_yoy", "YoY CPI inflation (%)")]:
         click.echo(f"\n{label}")
@@ -312,7 +316,7 @@ def forecast(horizons, draws, as_json):
 
 
 @main.command()
-@click.option("--draws", default=500, show_default=True, help="Posterior draws.")
+@click.option("--draws", default=2000, show_default=True, help="Posterior draws.")
 @click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
 def shocks(draws, as_json):
     """P(sign) of the identified structural shocks in the latest quarter."""
@@ -321,7 +325,10 @@ def shocks(draws, as_json):
         _emit_json(res)
         return
     click.echo(f"Structural shocks in {res['quarter']} "
-               f"({res['draws']} draws, {res['accepted_draws']} accepted, ESS {res['ess']})\n")
+               f"({res['draws']} draws, {res['accepted_draws']} accepted, ESS {res['ess']})")
+    for msg in res.get("warnings", []):
+        click.secho(f"WARNING: {msg}", fg="yellow", err=True)
+    click.echo()
     click.echo(_table(res["shocks"], ["shock", "p_positive", "p_negative"]))
     click.echo()
     for s in res["shocks"]:

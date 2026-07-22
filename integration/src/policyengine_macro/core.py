@@ -726,7 +726,24 @@ def _covid_dummies(index) -> np.ndarray:
     return D
 
 
-def _estimate(draws: int = 500, seed: int = 0) -> dict:
+# Estimation window for the hosted SVAR (start of Great-Moderation sample;
+# end held fixed so hosted results only move on a deliberate refresh). The
+# provenance strings are derived from the actual df_est index, never retyped.
+_SVAR_EST_START = "1992Q1"
+_SVAR_EST_END = "2023Q2"
+
+# Default posterior draws for hosted calls. Measured on the 2026Q1 vintage
+# (Apple Silicon, single process): draws=500 -> 42 accepted, ESS 15.5, ~23s;
+# 1000 -> 76 accepted, ESS 26.5, ~44s; 2000 -> 165 accepted, ESS 63.6,
+# ~117s. Acceptance is ~8% and ESS ~3% of draws, so 2000 is the smallest
+# default that clears the 100-accepted-draws reliability threshold at
+# roughly two minutes of first-call runtime (results are cached in-process).
+# Full ESS >= 100 needs ~3500 draws (~3.5 min); a `warnings` entry flags the
+# residual ESS shortfall honestly instead of hiding it.
+_SVAR_DEFAULT_DRAWS = 2000
+
+
+def _estimate(draws: int = _SVAR_DEFAULT_DRAWS, seed: int = 0) -> dict:
     """Estimate the BVAR and identify structural shocks. Cached by draws."""
     if draws in _ESTIMATION_CACHE:
         return _ESTIMATION_CACHE[draws]
@@ -735,8 +752,8 @@ def _estimate(draws: int = 500, seed: int = 0) -> dict:
 
     rng = np.random.default_rng(seed)
     df_full = load_data()
-    df_full = df_full.loc[df_full.index >= pd.Period("1992Q1", "Q")]
-    df_est = df_full.loc[df_full.index <= pd.Period("2023Q2", "Q")]
+    df_full = df_full.loc[df_full.index >= pd.Period(_SVAR_EST_START, "Q")]
+    df_est = df_full.loc[df_full.index <= pd.Period(_SVAR_EST_END, "Q")]
     dummies_est = _covid_dummies(df_est.index)
     dummies_full = _covid_dummies(df_full.index)
 
@@ -749,6 +766,18 @@ def _estimate(draws: int = 500, seed: int = 0) -> dict:
         )
     pairs = [(d, B) for d, B, _ in triples]
     w = np.array([t[2] for t in triples], dtype=float)
+    try:
+        from boe_var.identification import weak_inference_warnings
+        warnings = weak_inference_warnings(len(pairs), float(ess(w)), draws)
+    except ImportError:  # older boe_var without the helper
+        warnings = []
+        if len(pairs) < 100 or float(ess(w)) < 100.0:
+            warnings.append(
+                f"Weak inference: {len(pairs)} accepted draws, "
+                f"importance-weight ESS {float(ess(w)):.1f} (thresholds "
+                "100/100); bands may be noisy. Re-run with a higher draw "
+                "count."
+            )
     out = {
         "df_full": df_full,
         "y_full": df_full.to_numpy(dtype=float),
@@ -758,6 +787,8 @@ def _estimate(draws: int = 500, seed: int = 0) -> dict:
         "n_accepted": len(pairs),
         "n_draws": draws,
         "ess": float(ess(w)),
+        "estimation_sample": f"{df_est.index[0]}-{df_est.index[-1]}",
+        "warnings": warnings,
         "rng": rng,
         "modules": (analysis, forecast),
     }
@@ -765,7 +796,8 @@ def _estimate(draws: int = 500, seed: int = 0) -> dict:
     return out
 
 
-def svar_forecast(horizons: int = 12, draws: int = 500) -> dict:
+def svar_forecast(horizons: int = 12,
+                  draws: int = _SVAR_DEFAULT_DRAWS) -> dict:
     """YoY UK GDP growth and CPI inflation forecast from the UK SVAR.
 
     Returns median and 68/90 percent bands per future quarter. Bands combine
@@ -812,13 +844,14 @@ def svar_forecast(horizons: int = 12, draws: int = 500) -> dict:
             distribution="boe_var",
             data_vintage=f"conditioned through {last_q}",
             baseline=f"unconditional forecast from {last_q}",
-            estimation_sample="1992Q1-2023Q2",
+            estimation_sample=est["estimation_sample"],
         ),
         "forecast_origin": str(last_q),
         "horizons": int(horizons),
         "draws": int(draws),
         "accepted_draws": est["n_accepted"],
         "ess": round(est["ess"], 1),
+        "warnings": list(est["warnings"]),
         "units": "YoY percent (4-quarter log difference of 100*log levels)",
         "gdp_growth_yoy": _series(list(est["df_full"].columns).index(_COL_GDP)),
         "cpi_inflation_yoy": _series(list(est["df_full"].columns).index(_COL_CPI)),
@@ -827,7 +860,7 @@ def svar_forecast(horizons: int = 12, draws: int = 500) -> dict:
     return out
 
 
-def svar_latest_shocks(draws: int = 500) -> dict:
+def svar_latest_shocks(draws: int = _SVAR_DEFAULT_DRAWS) -> dict:
     """P(sign) of the 6 identified structural shocks in the latest data quarter."""
     key = int(draws)
     if key in _SHOCKS_CACHE:
@@ -877,11 +910,12 @@ def svar_latest_shocks(draws: int = 500) -> dict:
             distribution="boe_var",
             data_vintage=f"conditioned through {last_q}",
             baseline="identified structural shocks",
-            estimation_sample="1992Q1-2023Q2",
+            estimation_sample=est["estimation_sample"],
         ),
         "draws": key,
         "accepted_draws": est["n_accepted"],
         "ess": round(est["ess"], 1),
+        "warnings": list(est["warnings"]),
         "shocks": shocks,
     }
     _SHOCKS_CACHE[key] = out
