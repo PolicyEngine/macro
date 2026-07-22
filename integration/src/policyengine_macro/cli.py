@@ -562,6 +562,11 @@ def og_score(reform, year, max_iter, as_json):
 
 @main.command("dynamic-score")
 @click.option("--reform", required=True, help=_REFORM_HELP)
+@click.option("--og-payload", "og_payload_path", default=None,
+              type=click.Path(exists=True, dir_okay=False),
+              help="Path to a pe-macro og-score --json output produced in a "
+                   "separate OG environment (two-env pipeline; see "
+                   "PSLmodels/OG-UK#68).")
 @click.option("--start-year", "start_year", default=2026, show_default=True,
               help="Reform start year (OG solve and microsim year).")
 @click.option("--max-iter", default=250, show_default=True,
@@ -569,16 +574,23 @@ def og_score(reform, year, max_iter, as_json):
 @click.option("--dataset", default=None,
               help="Microdata dataset name override.")
 @click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
-def dynamic_score(reform, start_year, max_iter, dataset, as_json):
+def dynamic_score(reform, og_payload_path, start_year, max_iter, dataset,
+                  as_json):
     """Dynamic population score: OG-UK macro overlay on the microsim.
 
-    Alias for `score --model og+microsim` (UK only; slow: two OG
-    steady-state solves, baseline cached, plus one microsim run).
+    Alias for `score --model og+microsim` (UK only). With --og-payload it
+    consumes a pre-computed OG solve (two-environment pipeline); without,
+    it solves OG in-process, which requires an oguk-compatible env.
     """
+    og_payload = None
+    if og_payload_path is not None:
+        with open(og_payload_path) as f:
+            og_payload = json.load(f)
     try:
         res = core.dynamic_population_reform_impact(
             country="uk", reform=_json_opt(reform, "reform"),
             year=start_year, max_iter=max_iter, dataset=dataset,
+            og_payload=og_payload,
         )
     except (ValueError, ImportError, RuntimeError) as e:
         raise click.ClickException(str(e)) from e

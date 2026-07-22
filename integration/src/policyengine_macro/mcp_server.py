@@ -97,6 +97,10 @@ def score_reform(
                     few minutes (one microsim run per year + two OBR solves).
             'microsim' — the PolicyEngine population costing itself (static,
                     no macro feedback), wrapped in the same ScoreResult.
+            'og+microsim' — dynamic scoring: the OG-UK long-run wage change
+                    becomes an earnings overlay on the reform simulation
+                    (see dynamic_reform_impact for details and the
+                    local-only caveat). UK only.
             'frbus' — NOT ACCEPTED, and deliberately so: it raises an error.
                     FRB/US has no PolicyEngine-reform bridge, because no
                     mapping exists today from a PolicyEngine US reform to
@@ -492,23 +496,15 @@ def dynamic_reform_impact(
     input scaling actually applied,
     and a common `score` block (model 'og+microsim').
     """
-    try:
-        return core.dynamic_population_reform_impact(
-            country=country, reform=reform, year=year, dataset=dataset,
-            max_iter=max_iter,
-        )
-    except ImportError as e:
-        return {
-            "error": (
-                "dynamic scoring is not available on the hosted server: "
-                "oguk is excluded from the Modal image because an OG-UK "
-                "steady-state solve cannot fit the request timeout. Run "
-                "it locally: pip install "
-                "git+https://github.com/PSLmodels/OG-UK, then "
-                "`pe-macro dynamic-score --reform '...'`. "
-                f"(underlying error: {e})"
-            )
-        }
+    # Errors — including the hosted "oguk not importable" case — surface as
+    # MCP tool errors (isError=true), never as a successful result whose
+    # payload happens to contain an "error" key; core raises the actionable
+    # two-step guidance itself, so score_reform(model="og+microsim") gets
+    # the identical behaviour.
+    return core.dynamic_population_reform_impact(
+        country=country, reform=reform, year=year, dataset=dataset,
+        max_iter=max_iter,
+    )
 
 
 if __name__ == "__main__":

@@ -23,6 +23,29 @@ MODELS = {
         "uncertainty": "none for household arithmetic; survey/calibration uncertainty for population estimates",
         "status": "production-ready for selected household applications",
     },
+    "og-microsim-dynamic": {
+        "display_name": "OG-UK overlay dynamic scoring (og+microsim)",
+        "model_class": "olg-ge overlay on microsimulation",
+        "geography": ["uk"],
+        "question_types": ["dynamic_scoring", "policy_reform"],
+        "inputs": ["parameter reform", "optional pre-computed OG payload"],
+        "outputs": ["revenue (dynamic)", "distribution under GE feedback"],
+        "cannot_answer": [
+            "transition paths (steady-state factor applied flat)",
+            "price-level effects (the OG model is real)",
+            "distributional incidence of hours changes (reported, not allocated)",
+        ],
+        "horizon": "one policy year under long-run steady-state assumptions",
+        "access": ["CLI", "Python"],
+        "runtime": "two OG steady-state solves (baseline cached; >10 min cold) + one microsim run",
+        "uncertainty": "none quantified; steady-state comparative statics",
+        "status": (
+            "experimental; local-only (oguk excluded from the hosted image), "
+            "and until PSLmodels/OG-UK#68 the OG solve needs its own "
+            "environment — use the two-step --og-payload pipeline"
+        ),
+        "data_vintage": "PolicyEngine dataset + OG-UK packaged calibration inputs",
+    },
     "obr-macro": {
         "display_name": "OBR macroeconometric emulator",
         "model_class": "macroeconometric",
