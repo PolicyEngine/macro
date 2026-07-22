@@ -111,7 +111,14 @@ class EconomicAssumptions(BaseModel):
             ) from e
         for name in ("w", "L"):
             for side, vals in (("baseline", base), ("reform", ref)):
-                v = vals[name]
+                try:
+                    v = float(vals[name])
+                except (TypeError, ValueError) as e:
+                    raise ValueError(
+                        f"OG {side} steady state has non-numeric "
+                        f"{name}={vals[name]!r}; pass the unmodified output "
+                        "of `pe-macro og-score --json`"
+                    ) from e
                 if not (v and v > 0) or v != v or v in (float("inf"),):
                     raise ValueError(
                         f"OG {side} steady state has non-positive/non-finite "

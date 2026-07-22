@@ -502,3 +502,33 @@ def test_dynamic_og_payload_end_to_end_bites():
     )
     assert res["application"]["applied"] is True
     assert abs(res["microsim"]["household_net_income_change_bn"]) > 1.0
+
+
+def test_mixed_mode_valueerror_gets_two_step_guidance(fake_dynamic, monkeypatch):
+    """A mixed-computation-mode import clash is rewritten into the two-env
+    guidance; an unrelated ValueError mentioning 'computation' is NOT."""
+    reform = {"gov.hmrc.income_tax.rates.uk[0].rate": 0.21}
+
+    def clash(**kw):
+        raise ValueError("mixed computation mode: policyengine-uk 2.88 ...")
+
+    monkeypatch.setattr(core, "og_score_reform", clash)
+    with pytest.raises(RuntimeError, match="og-payload"):
+        core.dynamic_population_reform_impact(reform=reform, year=2026)
+
+    def unrelated(**kw):
+        raise ValueError("steady-state computation did not converge")
+
+    monkeypatch.setattr(core, "og_score_reform", unrelated)
+    with pytest.raises(ValueError, match="did not converge"):
+        core.dynamic_population_reform_impact(reform=reform, year=2026)
+
+
+def test_non_numeric_payload_field_is_actionable(fake_dynamic):
+    reform = {"gov.hmrc.income_tax.rates.uk[0].rate": 0.21}
+    bad = _payload_for(reform)
+    bad["reform_steady_state_model_units"]["w"] = "not-a-number"
+    with pytest.raises(ValueError, match="og-score"):
+        core.dynamic_population_reform_impact(
+            reform=reform, year=2026, og_payload=bad
+        )

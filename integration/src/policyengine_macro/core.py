@@ -2391,7 +2391,9 @@ def dynamic_population_reform_impact(
                 baseline_cache=baseline_cache,
             )
         except (ImportError, ValueError) as e:
-            if isinstance(e, ValueError) and "computation" not in str(e).lower():
+            if isinstance(e, ValueError) and (
+                "computation mode" not in str(e).lower()
+            ):
                 raise  # an unrelated ValueError, not the mixed-mode import clash
             raise RuntimeError(
                 "dynamic scoring needs an OG-UK solve, and oguk is not "

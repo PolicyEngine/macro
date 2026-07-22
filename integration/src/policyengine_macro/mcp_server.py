@@ -38,7 +38,7 @@ def recommend_model(
     """Deterministically recommend only models registered for a question.
 
     question_type must be one of household, population, policy_reform,
-    economic_shock, translated_policy_scenario, forecast,
+    dynamic_scoring, economic_shock, translated_policy_scenario, forecast,
     economic_diagnosis, or structural_change. Unsupported combinations return
     no model rather than an invented mapping.
     """
@@ -466,8 +466,9 @@ def dynamic_reform_impact(
     re-scored against the untouched stock baseline. (Input scaling, not a
     parameter overlay: uprating-parameter overrides are dead in population
     runs because the per-year microdata are pre-uprated at dataset build
-    time; reforms touching gov.economic_assumptions.* are refused here for
-    the same reason.)
+    time; reforms touching gov.economic_assumptions.* are refused — they
+    would double-drive the overlay's channel, and the input-uprating index
+    paths among them are additionally inert; see the reform arg below.)
 
     The overlay carries only the reform/baseline RATIO from the macro
     model (the stock baseline already embeds the OBR forecast), so the
