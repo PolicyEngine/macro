@@ -478,8 +478,12 @@ def dynamic_reform_impact(
         country: 'uk' only (OG-UK is a UK model).
         reform: REQUIRED flat {parameter_path: value} dict, same shape as
             population_reform_impact. Must NOT touch
-            gov.economic_assumptions.* (such overrides are silently dead
-            in population runs, so they are refused).
+            gov.economic_assumptions.*: the overlay already carries the
+            macro model's economic assumptions (an override would
+            double-drive the channel), and the input-uprating index paths
+            there are additionally inert in population runs — so such
+            reforms are refused. Some paths in that namespace ARE live at
+            simulation time; apply those via a static run if intended.
         year: Reform start year / microsim year (default 2026).
         dataset: Optional microdata dataset name override.
         max_iter: OG steady-state solver iteration cap (default 250).
@@ -488,8 +492,11 @@ def dynamic_reform_impact(
     in-process, but a cold solve takes >10 minutes) plus one microsim run.
     NOT AVAILABLE on the hosted server: oguk is deliberately excluded from
     the Modal image (a solve cannot fit the 600s request timeout), so this
-    tool returns an actionable error there — run it locally via
-    `pe-macro dynamic-score --reform '...'` instead.
+    tool returns an actionable error there — run it locally instead, as
+    the TWO-STEP pipeline (oguk needs its own environment until
+    PSLmodels/OG-UK#68): in an OG env, `pe-macro og-score --reform '...'
+    --json > og.json`; then `pe-macro dynamic-score --reform '...'
+    --og-payload og.json`.
 
     Returns the microsim result plus the OG payload, the
     economic_assumptions factors, an `application` block describing the

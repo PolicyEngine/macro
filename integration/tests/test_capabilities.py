@@ -4,7 +4,7 @@ from policyengine_macro import capabilities
 def test_registry_has_exact_integrated_models():
     assert set(capabilities.MODELS) == {
         "pe-microsim", "obr-macro", "boe-svar", "frb-us", "og-uk",
-        "og-microsim-dynamic",
+        "og+microsim",
     }
 
 

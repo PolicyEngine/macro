@@ -98,9 +98,17 @@ class EconomicAssumptions(BaseModel):
         K, L, ...). The model is real, so w and L ratios are the only price
         signals carried; r is reported for context.
         """
-        base = og_payload["baseline_steady_state_model_units"]
-        ref = og_payload["reform_steady_state_model_units"]
-        start_year = int(og_payload["start_year"])
+        try:
+            base = og_payload["baseline_steady_state_model_units"]
+            ref = og_payload["reform_steady_state_model_units"]
+            start_year = int(og_payload["start_year"])
+            (base["w"], base["L"], base["r"], ref["w"], ref["L"], ref["r"])
+        except (KeyError, TypeError) as e:
+            raise ValueError(
+                "og_payload is not an og-score result (missing field "
+                f"{e}); pass the unmodified output of "
+                "`pe-macro og-score --json`"
+            ) from e
         for name in ("w", "L"):
             for side, vals in (("baseline", base), ("reform", ref)):
                 v = vals[name]
@@ -189,11 +197,12 @@ class EconomicAssumptions(BaseModel):
         ]
 
     def caveat_strings(self) -> list[str]:
-        hours_pct = 100.0 * (self.labour_supply_factor - 1.0)
+        labour_pct = 100.0 * (self.labour_supply_factor - 1.0)
         return [
-            f"aggregate hours change {hours_pct:+.2f}% not distributionally "
-            "allocated in v1 (labour_supply_factor is reported, not applied "
-            "to any input)",
+            f"aggregate effective-labour change {labour_pct:+.2f}% not "
+            "distributionally allocated in v1 (labour_supply_factor is "
+            "reported, not applied to any input; OG's L is effective "
+            "labour units, not raw hours)",
             "earnings factor applied to employment income only; "
             "self-employment/mixed income and pension income are not "
             "adjusted in v1",

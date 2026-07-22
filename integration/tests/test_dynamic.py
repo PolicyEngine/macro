@@ -152,9 +152,11 @@ def test_null_macro_result_yields_no_modifier():
 # ---------------------------------------------------------------------------
 
 def test_guard_rejects_dead_economic_assumption_reforms():
-    """gov.economic_assumptions.* overrides silently do nothing in
-    population runs (pre-uprated datasets; see module docstring), so the
-    dynamic score refuses them — before any heavy import."""
+    """Dynamic scoring refuses gov.economic_assumptions.* user overrides:
+    they double-drive the overlay's channel, and the input-uprating index
+    paths are additionally inert on pre-built datasets (some paths in the
+    namespace ARE live at sim time — the guard's error says to apply those
+    via a static run). Refused before any heavy import."""
     with pytest.raises(ValueError, match="double-drive"):
         core.dynamic_population_reform_impact(
             reform={
@@ -194,6 +196,12 @@ def fake_dynamic(monkeypatch):
             "budgetary_impact_basis": "change in gov_balance",
             "headline": "The reform raises £5.0bn/year in 2026.",
             "decile_impacts": [], "winners": 0, "losers": 0,
+            # Nested static score, as the real pe_population_impact
+            # returns: the dynamic wrapper must STRIP it (one
+            # authoritative score) — without this key the single-score
+            # test would be vacuous.
+            "score": {"model": "pe-microsim",
+                      "analysis_type": "static microsimulation"},
         }
 
     monkeypatch.setattr(core, "og_score_reform", fake_og)
@@ -214,7 +222,7 @@ def test_dynamic_applies_modifier_to_reform_side_only(fake_dynamic):
     assert res["application"]["variables_tried"] == list(SCALED_INPUT_VARIABLES)
     assert res["score"]["model"] == "og+microsim"
     assert res["economic_assumptions"]["earnings_factor"] == pytest.approx(0.99)
-    assert any("hours change" in c for c in res["caveats"])
+    assert any("effective-labour change" in c for c in res["caveats"])
     assert any("input" in a for a in res["assumptions"])
     json.dumps(res)
 
@@ -458,8 +466,26 @@ def test_implausible_og_ratio_refused():
 
 
 def test_small_factor_survives_unrounded():
-    """Review #72.2: a wage ratio of 1.00004 must NOT quantize to 1.0."""
-    ea = EconomicAssumptions.from_og_result(_synthetic_og(w_reform=1.00004))
+    """Review #72.2 / verify-round: a wage ratio of 1.00004 must NOT
+    quantize to 1.0 — traversing core._og_ss_dict, the layer where the
+    original 4dp rounding lived, not just the assumptions math."""
+
+    class _SS:
+        def __init__(self, w):
+            self._d = {"r": 0.05, "w": w, "Y": 2.0, "K": 6.0, "L": 1.0,
+                       "C": 1.4, "I": 0.4, "G": 0.2, "tax_revenue": 0.6,
+                       "debt": 1.8}
+
+        def model_dump(self):
+            return dict(self._d)
+
+    payload = {
+        "start_year": 2026,
+        "baseline_steady_state_model_units": core._og_ss_dict(_SS(1.0)),
+        "reform_steady_state_model_units": core._og_ss_dict(_SS(1.00004)),
+    }
+    ea = EconomicAssumptions.from_og_result(payload)
+    assert ea.earnings_factor == pytest.approx(1.00004, abs=1e-9)
     assert ea.earnings_factor != 1.0
     assert ea.input_scaling_modifier() is not None
 

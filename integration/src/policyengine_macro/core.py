@@ -2390,10 +2390,12 @@ def dynamic_population_reform_impact(
                 reform=reform, start_year=year, max_iter=max_iter,
                 baseline_cache=baseline_cache,
             )
-        except ImportError as e:
+        except (ImportError, ValueError) as e:
+            if isinstance(e, ValueError) and "computation" not in str(e).lower():
+                raise  # an unrelated ValueError, not the mixed-mode import clash
             raise RuntimeError(
                 "dynamic scoring needs an OG-UK solve, and oguk is not "
-                "importable here (on the hosted server it is deliberately "
+                "usable in this process (on the hosted server it is deliberately "
                 "excluded: a solve cannot fit the request timeout; locally "
                 "it needs its own environment until PSLmodels/OG-UK#68 — "
                 "oguk pins policyengine-uk==2.88.0, which cannot share a "

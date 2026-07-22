@@ -62,9 +62,10 @@ def model_status(model_id, as_json):
 @click.option("--model", required=True,
               type=click.Choice(list(core.SCORE_MODELS)),
               help="Scoring model: og (OG-UK steady state; slow), obr (OBR "
-                   "emulator via the microsim static-costing bridge) or "
+                   "emulator via the microsim static-costing bridge), "
                    "microsim (PolicyEngine population costing, no macro "
-                   "feedback).")
+                   "feedback), or og+microsim (dynamic scoring: OG earnings "
+                   "overlay on the microsim; UK, local-only).")
 @click.option("--year", default=2026, show_default=True, help="Reform start year.")
 @click.option("--max-iter", default=250, show_default=True,
               help="og only: solver iteration cap per steady-state solve.")
@@ -584,8 +585,19 @@ def dynamic_score(reform, og_payload_path, start_year, max_iter, dataset,
     """
     og_payload = None
     if og_payload_path is not None:
-        with open(og_payload_path) as f:
-            og_payload = json.load(f)
+        try:
+            with open(og_payload_path) as f:
+                og_payload = json.load(f)
+        except (OSError, json.JSONDecodeError) as e:
+            raise click.ClickException(
+                f"--og-payload {og_payload_path}: not readable JSON ({e}); "
+                "pass the unmodified output of `pe-macro og-score --json`"
+            ) from e
+        if not isinstance(og_payload, dict):
+            raise click.ClickException(
+                "--og-payload must contain a JSON object (the og-score "
+                f"result), got {type(og_payload).__name__}"
+            )
     try:
         res = core.dynamic_population_reform_impact(
             country="uk", reform=_json_opt(reform, "reform"),
