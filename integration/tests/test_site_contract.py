@@ -14,10 +14,25 @@ def _read(path: str) -> str:
 
 
 def test_svar_site_uses_runtime_estimation_endpoint():
+    """The published estimation endpoint must match the one the server actually
+    estimates on.
+
+    Derived from ``_SVAR_EST_END`` rather than hardcoded: the point of this
+    guard is to catch the site drifting away from the runtime, and a literal
+    makes it fail on the refresh it is supposed to permit while still missing
+    drift in the other direction."""
+    from policyengine_macro.core import _SVAR_EST_END
+
     pages = _read("svar/index.html") + _read("docs/index.html")
-    assert "estimated through 2023Q2" in pages
-    assert "estimation sample to 2025Q1" not in pages
-    assert "Estimation to 2025Q1" not in pages
+    assert f"estimated through {_SVAR_EST_END}" in pages
+
+    # No other quarter may be presented as the estimation endpoint.
+    stale = {
+        q
+        for q in re.findall(r"estimat\w*\s+(?:through|to)\s+(\d{4}Q[1-4])", pages)
+        if q != _SVAR_EST_END
+    }
+    assert not stale, f"site quotes stale estimation endpoint(s): {sorted(stale)}"
 
 
 def test_og_is_not_labelled_as_us_model():
