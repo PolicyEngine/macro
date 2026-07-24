@@ -1766,7 +1766,7 @@ def _og_solve(solve_fn, **kwargs):
     failures are translated into clear messages: (a) no HuggingFace access to
     the dataset — set HUGGING_FACE_TOKEN; (b) policyengine-uk >= 2.89 renamed
     the dataset keys from enhanced_frs_2023_24_<year> to populace_uk_*, which
-    makes oguk 0.3.0 (pinning policyengine-uk==2.88.0) fail with a KeyError.
+    makes oguk 0.3.2 (pinning policyengine-uk==2.88.0) fail with a KeyError.
     """
     try:
         return solve_fn(**kwargs)
@@ -1777,7 +1777,7 @@ def _og_solve(solve_fn, **kwargs):
             "(a) no access to the enhanced-FRS dataset on HuggingFace — set "
             "HUGGING_FACE_TOKEN to a token with access "
             "(policyengine.tax_benefit_models.uk.ensure_datasets downloads "
-            "it); (b) incompatible policyengine-uk version — oguk 0.3.0 "
+            "it); (b) incompatible policyengine-uk version — oguk 0.3.2 "
             "requires policyengine-uk==2.88.0 (>= 2.89 renamed the datasets)"
             ": pip install 'policyengine-uk==2.88.0'."
         ) from e

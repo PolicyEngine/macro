@@ -24,6 +24,12 @@
      that --brand and --brand-strong resolve to the same AA-passing value.
      #285E61 = teal-700, 7.33:1 on white. */
   --brand-deep: #285E61;
+  /* Chart series 2. --brand-strong collapsed onto --primary for AA, which
+     left .vc-s1 and .vc-s2 the same colour, distinguished only by a dash
+     pattern -- while .vc-lab/.vc-lab2 styled the legend as two colours.
+     A dark slate keeps the two-series-plus-neutrals restraint and reads
+     apart from teal in greyscale. 10.4:1 on white. */
+  --chart-s2: #334155;
   /* AA-safe warning text. --text-warning (#c2410c) is only 4.10:1 against the
      16%-tinted chip .tag-local paints behind it; #9A3412 is 5.63:1 there. */
   --brand-warning: #9A3412;
@@ -86,6 +92,12 @@
      Cards, code blocks, charts and panels used 2px/3px/6px/8px in different
      places for the same job. One value now. */
   --radius: 8px;
+  /* Referenced by .section-tabs, the model navs, .contact-email,
+     .comparison-table row hover and .verification-tag, but never defined --
+     so those backgrounds resolved to nothing and the PUBLISHED ANCHOR chips
+     rendered as bare text while STATUTE/CALIBRATED rendered as pills. */
+  --brand-wash: color-mix(in srgb, var(--primary) 8%, transparent);
+  --radius-card: var(--radius);
   --radius-sm: 4px;
 }
 
@@ -1068,8 +1080,8 @@ h2 {
 }
 .vchart text { font-family: var(--mono); fill: var(--paper-dim); }
 .vchart .vc-tick { font-size: 11px; }
-.vchart .vc-lab { font-size: 12px; fill: var(--paper); }
-.vchart .vc-lab2 { fill: var(--brand-strong); }
+.vchart .vc-lab { font-size: 12px; fill: var(--brand); }
+.vchart .vc-lab2 { fill: var(--chart-s2); }
 .vchart .vc-rowlab { font-size: 11.5px; fill: var(--paper-dim); }
 .vchart .vc-val { font-size: 12px; fill: var(--paper); font-weight: 600; }
 .vchart .vc-note { font-size: 10.5px; fill: var(--paper-faint); }
@@ -1079,11 +1091,14 @@ h2 {
 /* series 1 = ours, series 2 = the official/published counterpart */
 .vchart .vc-s1 { fill: none; stroke: var(--brand); stroke-width: 2; stroke-linejoin: round; }
 .vchart .vc-s1-dot { fill: var(--brand); }
-.vchart .vc-s2 { fill: none; stroke: var(--brand-strong); stroke-width: 2; stroke-dasharray: 5 4; stroke-linejoin: round; }
-.vchart .vc-s2-dot { fill: var(--brand-strong); }
+.vchart .vc-s2 { fill: none; stroke: var(--chart-s2); stroke-width: 2; stroke-dasharray: 5 4; stroke-linejoin: round; }
+.vchart .vc-s2-dot { fill: var(--chart-s2); }
 .vchart .vc-b1 { fill: var(--brand); }
-.vchart .vc-b2 { fill: color-mix(in srgb, var(--paper) 34%, transparent); }
-.vchart .vc-b3 { fill: color-mix(in srgb, var(--paper) 18%, transparent); }
+/* 34%/18% measured ~2.3:1 and ~1.3:1 on the chart surface, under the 3:1
+   WCAG 1.4.11 floor -- and these are the official/comparison bars our numbers
+   are judged against. */
+.vchart .vc-b2 { fill: color-mix(in srgb, var(--paper) 55%, transparent); }
+.vchart .vc-b3 { fill: color-mix(in srgb, var(--paper) 35%, transparent); }
 .vchart .vc-band90 { fill: color-mix(in srgb, var(--brand) 13%, transparent); }
 .vchart .vc-band68 { fill: color-mix(in srgb, var(--brand) 26%, transparent); }
 .current-outlook { margin: 28px 0 8px; }
@@ -1443,18 +1458,6 @@ h2 {
    readable because text no longer fades in (the reveal animation that used to
    hold copy at opacity:0 is retired). Motion stops under prefers-reduced-motion,
    handled in field.js. */
-#field {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  width: 100%;
-  height: 100%;
-  opacity: 0.55;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 42vh, transparent 88vh);
-  mask-image: linear-gradient(to bottom, #000 0, #000 42vh, transparent 88vh);
-}
-@media (prefers-color-scheme: dark) { #field { opacity: 0.7; } }
 
 /* The verdict band — "how far to trust it" on every model page, and the
    validation summary. This is the suite's distinguishing claim (each model
@@ -1483,4 +1486,6 @@ h2 {
 @media (max-width: 1000px) { .hf-tick.hf-q { display: initial; } }
 
 /* honest-warning cells in validation tables (over-band, imposed, targeted) */
-.vchart .vc-warn, td.vc-warn, th.vc-warn { color: var(--brand-strong); font-weight: 600; }
+/* Was --brand-strong: the same teal as links, series 1 and .metric-val, so
+   "Weak" read in the site's affirmative accent. --brand-warning is AA-tested. */
+.vchart .vc-warn, td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }

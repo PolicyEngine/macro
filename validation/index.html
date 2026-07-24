@@ -42,7 +42,6 @@
 <body class="doc has-section-tabs validation-page">
 <a class="skip-link" href="#top">Skip to main content</a>
 <div class="grain" aria-hidden="true"></div>
-<canvas id="field" aria-hidden="true"></canvas>
 
 <header class="nav">
   <a class="brand" href="/">
@@ -156,7 +155,7 @@
         <thead><tr><th scope="col">Evidence dimension</th><th scope="col">obr-macro</th><th scope="col">boe-svar</th><th scope="col">frb-us</th></tr></thead>
         <tbody>
           <tr><th scope="row">Implementation fidelity</th><td>Moderate — incomplete channels</td><td>Strong — restrictions and identities gated</td><td>Strong — four gated scenarios at the reference-solver noise floor</td></tr>
-          <tr><th scope="row">Predictive validation</th><td class="vc-warn">Weak — raw GDP 5.75%, consumption 9.56% MAPE</td><td>Moderate — CPI beats no change; GDP does not in rolling tests</td><td>Not assessed — LONGBASE is not a Fed forecast</td></tr>
+          <tr><th scope="row">Predictive validation</th><td class="vc-warn">Weak — raw GDP 5.75%, consumption 9.56% MAPE</td><td>Moderate — CPI significantly beats no change at short horizons; GDP is statistically indistinguishable from it</td><td>Not assessed — LONGBASE is not a Fed forecast</td></tr>
           <tr><th scope="row">Identification robustness</th><td>Not applicable</td><td>Moderate — proxy data and specification matter</td><td>Not applicable</td></tr>
           <tr><th scope="row">Policy-counterfactual validity</th><td class="vc-warn">Weak — one independent tax benchmark, constrained channels</td><td>Not applicable — reform scoring refused</td><td>Moderate — published ranges, VAR expectations only</td></tr>
           <tr><th scope="row">Uncertainty calibration</th><td class="vc-warn">Weak — sensitivity envelopes pending</td><td>Moderate — posterior bands, limited coverage history</td><td class="vc-warn">Weak — bootstrap engine exists, public runs remain deterministic</td></tr>
@@ -513,7 +512,7 @@
         <figcaption>Global shocks = world demand + energy + supply. Ours = 10,000-draw production run; paper values approximate. Global-shock FEVD shares at the one-year horizon: the production run against the paper's published values. Source: <code>papers/boe-svar/figures/comparison_numbers.json</code> and the paper's validation table.</figcaption>
       </figure>
       <details class="more">
-        <summary>Why the fast CI configuration lands 7&ndash;8 points off</summary>
+        <summary>Why the fast CI configuration lands 6&ndash;10 points off</summary>
       <p>
         The deliberately cheap unweighted CI configuration lands at 49.6% and
         43.8% — 6&ndash;10 points off, in opposite directions for the two
@@ -900,7 +899,7 @@
       <figure class="vfig">
         <svg class="vchart" data-chart="svar-relrmse" viewBox="0 0 760 304" role="img" aria-labelledby="svar-relrmse-t svar-relrmse-d">
           <title id="svar-relrmse-t">boe-svar RMSE relative to a random walk, by horizon</title>
-          <desc id="svar-relrmse-d">Line chart of RMSE ratios versus a random-walk benchmark at horizons one to eight quarters. UK CPI stays between 0.62 and 0.68 at all horizons, well below the 1.0 parity line. UK real GDP sits between 1.06 and 1.09 at all horizons, slightly above parity. Expanding-window evaluation with 49 origins from 2012Q1 to 2024Q1.</desc>
+          <desc id="svar-relrmse-d">Line chart of RMSE ratios versus a random-walk benchmark at horizons one to eight quarters. UK CPI stays between 0.62 and 0.68 at all horizons, well below the 1.0 parity line, and the difference is statistically significant at short horizons (Diebold-Mariano p below 0.005 at one quarter). UK real GDP sits between 1.06 and 1.09, slightly above parity, but that gap is not statistically significant at any horizon (p from 0.38 to 0.67) — the model is indistinguishable from the benchmark for GDP rather than beaten by it. Expanding-window evaluation with 49 origins from 2012Q1 to 2024Q1.</desc>
           <text class="vc-lab" x="58" y="25">RMSE &divide; random-walk RMSE &middot; horizons 1&ndash;8 quarters &middot; below 1.0 beats naive</text>
           <line class="vc-grid" x1="58" y1="40.0" x2="730" y2="40.0"/>
           <text class="vc-tick" x="48" y="44" text-anchor="end">1.2</text>
@@ -1015,7 +1014,6 @@
 </footer>
 
 <script src="/reveal.js" defer></script>
-<script src="/field.js" defer></script>
 <script>
 (function () {
   var links = Array.from(document.querySelectorAll('.validation-model-nav a'));

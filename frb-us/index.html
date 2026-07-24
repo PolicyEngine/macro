@@ -28,7 +28,6 @@
 <body class="doc has-section-tabs">
 <a class="skip-link" href="#top">Skip to main content</a>
 <div class="grain" aria-hidden="true"></div>
-<canvas id="field" aria-hidden="true"></canvas>
 
 <header class="nav">
   <a class="brand" href="/">
@@ -295,8 +294,9 @@ sim = model.solve(start, end, with_adds)
       <p>
         This is a <strong>replication with a published anchor</strong>, and it
         is the sharpest-tested member of the suite — because for once the
-        ground truth is exact rather than statistical. Two invariants carry
-        the weight, and both are enforced in continuous integration.
+        ground truth is exact rather than statistical. Three invariants carry
+        the weight, and all are enforced in continuous integration &mdash; including
+        four like-for-like scenarios gated against vendor-generated references.
       </p>
     </div>
     <div class="metrics">
@@ -390,8 +390,8 @@ sim = model.solve(start, end, with_adds)
             <td>The model-consistent-expectations (MCE) equation variants are not implemented — <code>Frbus(path, mce=...)</code> raises <code>NotImplementedError</code>. Anything that turns on agents anticipating announced future policy, forward guidance most obviously, is out of scope.</td>
           </tr>
           <tr>
-            <th scope="row"><strong>No <code>mcontrol</code>, no stochastic simulation</strong></th>
-            <td>The reference implementation's targeting routine and its stochastic-simulation machinery are both out of scope, so confidence bands around a projection are not available here.</td>
+            <th scope="row"><strong>No <code>mcontrol</code></strong></th>
+            <td>The reference implementation's trajectory-targeting routine is out of scope. Stochastic simulation <em>is</em> implemented &mdash; <code>stochsim_bands()</code> produces seeded residual-bootstrap percentile bands &mdash; but the hosted <code>frbus_shock</code> path still returns a single deterministic projection, so bands are not available through the MCP surface.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Hosted, but only as raw shocks</strong></th>
@@ -438,6 +438,5 @@ document.addEventListener("click", function (e) {
   });
 });
 </script>
-<script src="/field.js" defer></script>
 </body>
 </html>

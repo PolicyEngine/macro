@@ -184,11 +184,16 @@ MODEL_QUALITY = {
         ),
         "predictive_validation": _quality(
             "moderate",
-            "Across 49 leakage-safe rolling origins, CPI beats no change at one- "
-            "and eight-quarter horizons, while GDP is about 6% worse; the separate "
-            "seven-quarter frozen-edge evaluation gives 0.32pp RMSE.",
-            "Compare with a declared BVAR benchmark and publish proper predictive "
-            "scores across the rolling origins.",
+            "Across 49 leakage-safe rolling origins, only 3 of 64 (variable, "
+            "horizon) cells differ significantly from a random walk by a "
+            "Diebold-Mariano test. UK CPI is significantly better at short "
+            "horizons (ratio 0.63, p<0.005 at h=1); UK GDP's higher ratio "
+            "(1.06-1.09) is NOT significant at any horizon (p=0.38-0.67), so "
+            "it is indistinguishable from the benchmark rather than beaten by "
+            "it. The exchange rate is significantly worse at h=8 (1.41, "
+            "p=0.03). The frozen-edge evaluation gives 0.32pp RMSE.",
+            "Add a declared BVAR benchmark, score the predictive densities "
+            "(not just point forecasts), and report interval coverage.",
         ),
         "identification_robustness": _quality(
             "moderate",
@@ -219,9 +224,11 @@ MODEL_QUALITY = {
     "frb-us": {
         "implementation_fidelity": _quality(
             "strong",
-            "The baseline and a reference shock match LONGBASE and pyfrbus at the "
-            "reference solver's numerical noise floor.",
-            "Extend like-for-like gates across official demos, closures and recodes.",
+            "The baseline and four like-for-like scenarios (monetary, fiscal "
+            "egfe, tax trp, non-inertial Taylor) match LONGBASE and pyfrbus at "
+            "the reference solver's numerical noise floor.",
+            "Extend like-for-like gates across further official demos, closures "
+            "and recodes; add the MCE expectations path.",
         ),
         "predictive_validation": _quality(
             "not_assessed",
