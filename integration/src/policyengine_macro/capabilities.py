@@ -219,9 +219,11 @@ MODEL_QUALITY = {
     "frb-us": {
         "implementation_fidelity": _quality(
             "strong",
-            "The baseline and a reference shock match LONGBASE and pyfrbus at the "
-            "reference solver's numerical noise floor.",
-            "Extend like-for-like gates across official demos, closures and recodes.",
+            "The baseline and four like-for-like scenarios (monetary, fiscal "
+            "egfe, tax trp, non-inertial Taylor) match LONGBASE and pyfrbus at "
+            "the reference solver's numerical noise floor.",
+            "Extend like-for-like gates across further official demos, closures "
+            "and recodes; add the MCE expectations path.",
         ),
         "predictive_validation": _quality(
             "not_assessed",
