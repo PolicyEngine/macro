@@ -157,7 +157,7 @@
           <tr><th scope="row">Implementation fidelity</th><td>Moderate — incomplete channels</td><td>Strong — restrictions and identities gated</td><td>Strong — four gated scenarios at the reference-solver noise floor</td></tr>
           <tr><th scope="row">Predictive validation</th><td class="vc-warn">Weak — raw GDP 5.75%, consumption 9.56% MAPE</td><td class="vc-warn">Weak — the CPI win does not survive a drift benchmark; Bank Rate is the only defensible claim</td><td>Not assessed — LONGBASE is not a Fed forecast</td></tr>
           <tr><th scope="row">Identification robustness</th><td>Not applicable</td><td>Moderate — proxy data and specification matter</td><td>Not applicable</td></tr>
-          <tr><th scope="row">Policy-counterfactual validity</th><td class="vc-warn">Weak — one independent tax benchmark, constrained channels</td><td>Not applicable — reform scoring refused</td><td>Moderate — published ranges, VAR expectations only</td></tr>
+          <tr><th scope="row">Policy-counterfactual validity</th><td class="vc-warn">Weak — one independent tax benchmark; spending multiplier ~1.0 vs the OBR's 0.6</td><td>Not applicable — reform scoring refused</td><td>Moderate — published ranges, VAR expectations only</td></tr>
           <tr><th scope="row">Uncertainty calibration</th><td class="vc-warn">Weak — sensitivity envelopes pending</td><td>Moderate — posterior bands, limited coverage history</td><td class="vc-warn">Weak — bootstrap engine exists, public runs remain deterministic</td></tr>
           <tr><th scope="row">Vintage reproducibility</th><td>Moderate — multi-EFO archive pending</td><td>Moderate — public proxies replace internal series</td><td>Moderate — artifacts hashed; multi-vintage tests pending</td></tr>
         </tbody>
@@ -298,6 +298,28 @@
         </tbody>
       </table>
       </div>
+      <p class="vc-warn">
+        <strong>The spending multiplier is ~1.0 by construction, against the
+        OBR's own published 0.6.</strong> Under the demand closure a spending
+        shock lands directly in the GDP identity and the behavioural second
+        round is largely inactive, so a &pound;5bn injection returns almost
+        exactly &pound;5bn of GDP. That is roughly a
+        <strong>two-thirds overstatement</strong> of the impact multiplier
+        relative to the institution being replicated, and it applies to every
+        spending-side figure this page reports. It is the single most
+        important number for anyone reading a policy score off this model.
+      </p>
+      <p>
+        Three of the channels that would normally damp such a shock are held
+        exogenous in this configuration &mdash; imports (so the usual leakage
+        is switched off), Bank Rate (no monetary offset) and CPI. The first
+        two bias the estimated effect <em>upward</em>; the dead
+        profits&rarr;dividends channel biases corporation-tax effects
+        <em>downward</em>. These do not cancel, and their net sign is not
+        established. Reform figures here are best read as
+        <em>relative</em> comparisons between structurally identical runs,
+        where the biases largely difference out, rather than as magnitudes.
+      </p>
       <details class="more">
         <summary>The honest scorecard, the two dead equations, outturns, and the March 2026 re-anchoring</summary>
       <p>
@@ -538,10 +560,29 @@
       </details>
       <p>
         <strong>Out-of-sample.</strong> Forecasting seven quarters ahead from
-        a frozen 2024Q2 edge, RMSE is <strong>0.32pp</strong> for both GDP
-        growth and CPI inflation. <strong>All fourteen outturns fall inside
-        the 68% bands.</strong> Activity tracks well; the median misses the
+        a frozen 2024Q2 edge, RMSE is <strong>0.3pp</strong> for both GDP
+        growth and CPI inflation. Activity tracks well; the median misses the
         2025 inflation peak by up to 0.6pp but captures its reversal.
+      </p>
+      <p>
+        <strong>Fourteen of fourteen outturns inside the 68% band is a
+        calibration failure, not a pass.</strong> A correctly calibrated 68%
+        interval should contain roughly <strong>9.5 of 14</strong>. Containing
+        all of them means the bands are too wide &mdash; the intervals are
+        roughly &plusmn;0.95pp around a forecast whose RMSE is 0.3pp, about
+        three times wider than the errors warrant. The model is under-confident
+        here, and this figure was previously presented as a validation win. It
+        is reported now as what it is: evidence of over-dispersion.
+      </p>
+      <p class="vc-note">
+        Neither reading is strong evidence either way. The fourteen points are
+        seven quarters &times; two variables from a <em>single</em> forecast
+        origin, so they are heavily correlated across horizon and across
+        variables; the effective number of independent observations is perhaps
+        two or three. Coverage cannot be established from one origin in either
+        direction. The rolling-origin machinery could produce a genuine
+        coverage table across 49 origins and eight horizons; until it does,
+        this page makes no coverage claim.
       </p>
       <p>
         <strong>Rolling-origin audit.</strong> A stricter expanding-window test
@@ -612,7 +653,7 @@
 <text class="vc-tick" x="570.0" y="334" text-anchor="middle">26Q1</text>
 <text class="vc-tick" x="724.0" y="334" text-anchor="middle">27Q3</text>
 </svg>
-        <figcaption>All fourteen outturns (seven quarters &times; two variables, 2024Q3&ndash;2026Q1) fall inside the 68% credible band; RMSE 0.32pp for both. Median forecast and 68% band from the frozen 2024Q2 data edge. Computed from <code>papers/boe-svar/figures/figure_numbers.json</code> (medians and 68% bands) and the ONS outturn series in <code>papers/boe-svar/figures/make_figures.py</code>.</figcaption>
+        <figcaption>All fourteen outturns (seven quarters &times; two variables, 2024Q3&ndash;2026Q1) fall inside the 68% credible band, where a calibrated band would contain about 9.5 &mdash; the bands are too wide, not the forecast unusually good. RMSE 0.3pp for both. Median forecast and 68% band from the frozen 2024Q2 data edge. Computed from <code>papers/boe-svar/figures/figure_numbers.json</code> (medians and 68% bands) and the ONS outturn series in <code>papers/boe-svar/figures/make_figures.py</code>.</figcaption>
       </figure>
       <details class="more">
         <summary>Why there is no official yardstick for those forecast errors</summary>
