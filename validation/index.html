@@ -298,6 +298,31 @@
         </tbody>
       </table>
       </div>
+      <figure class="vfig">
+        <svg class="vchart" data-chart="obr-computed-share" viewBox="0 0 760 270" role="img" aria-labelledby="obr-cs-t obr-cs-d">
+        <title id="obr-cs-t">How much of the OBR emulator scorecard the model actually computes</title>
+        <desc id="obr-cs-d">Two stacked bars. Of 21 headline variables in the OBR emulator calibration scorecard, 11 are actually computed by the model and 10 are passthrough, held at the OBR published value and therefore scoring zero error trivially. Of the 11 computed, 3 are fair (real GDP 5.75 per cent, consumption 9.56 per cent, trade balance 0.70 per cent of GDP), 1 is a trivial accounting identity (employment, where both inputs are themselves passthrough), 5 are poor and 2 are off (company profits 79.80 per cent, current account 4.17 per cent of GDP). Four of the 11, or 36 per cent, land within band, and one of those four is the trivial identity, so only three non-trivial computed variables are in band.</desc>
+        <text class="vc-lab" x="64" y="30">21 headline scorecard variables</text>
+        <rect class="vc-b1" x="64.0" y="52" width="345.7" height="40"/>
+        <rect class="vc-b3" x="409.7" y="52" width="314.3" height="40"/>
+        <text class="vc-val" x="236.9" y="77" text-anchor="middle">11 computed</text>
+        <text class="vc-rowlab" x="566.9" y="77" text-anchor="middle">10 passthrough &mdash; held at the OBR value</text>
+        <line class="vc-edge" x1="64.0" y1="92" x2="64.0" y2="120"/>
+        <line class="vc-edge" x1="409.7" y1="92" x2="409.7" y2="120"/>
+        <text class="vc-lab" x="64" y="140">of which, the 11 the model computes</text>
+        <rect class="vc-b1" x="64.0" y="152" width="94.3" height="40"/>
+        <text class="vc-rowlab" x="111.1" y="207" text-anchor="middle">fair 3</text>
+        <rect class="vc-b2" x="158.3" y="152" width="31.4" height="40"/>
+        <text class="vc-rowlab" x="174.0" y="207" text-anchor="middle">identity 1</text>
+        <rect class="vc-b3" x="189.7" y="152" width="157.1" height="40"/>
+        <text class="vc-rowlab" x="268.3" y="207" text-anchor="middle">poor 5</text>
+        <rect class="vc-b3" x="346.9" y="152" width="62.9" height="40" stroke="currentColor" stroke-dasharray="3 2" stroke-width="1"/>
+        <text class="vc-rowlab" x="378.3" y="207" text-anchor="middle">off 2</text>
+        <text class="vc-warn" x="64" y="234">Only 4 of the 11 computed variables land within band &mdash; 36% &mdash; and one of those four is a trivial identity.</text>
+        <text class="vc-note" x="64" y="252">bands: rates &plusmn;1.0pp &middot; net balances &plusmn;1.5% of GDP &middot; levels &le;10% MAPE</text>
+        </svg>
+        <figcaption>Raw (un-anchored) calibration against the March 2026 EFO, a single vintage. The two &ldquo;off&rdquo; verdicts are bounded by constants the OBR does not publish &mdash; the OSHH base constant, the RPI index history, and the overseas rate-of-return normalisers &mdash; rather than by live bugs, and are gated against regression rather than tuned to the target. Source: <code>docs/calibration_scorecard.md</code> in the obr-macroeconomic-model repository.</figcaption>
+      </figure>
       <p class="vc-warn">
         <strong>The spending multiplier is ~1.0 by construction, against the
         OBR's own published 0.6.</strong> Under the demand closure a spending
@@ -979,40 +1004,188 @@
         <code>worst_origin_mse_share</code> diagnostic for exactly this reason.
       </p>
       <figure class="vfig">
-        <svg class="vchart" data-chart="svar-relrmse" viewBox="0 0 760 304" role="img" aria-labelledby="svar-relrmse-t svar-relrmse-d">
-          <title id="svar-relrmse-t">boe-svar RMSE relative to a random walk, by horizon</title>
-          <desc id="svar-relrmse-d">Line chart of RMSE ratios versus a random-walk benchmark at horizons one to eight quarters. UK CPI stays between 0.62 and 0.68 at all horizons, well below the 1.0 parity line, and the difference is statistically significant at short horizons (Diebold-Mariano p below 0.005 at one quarter). UK real GDP sits between 1.06 and 1.09, slightly above parity, but that gap is not statistically significant at any horizon (p from 0.38 to 0.67) — the model is indistinguishable from the benchmark for GDP rather than beaten by it. Expanding-window evaluation with 49 origins from 2012Q1 to 2024Q1.</desc>
-          <text class="vc-lab" x="58" y="25">RMSE &divide; random-walk RMSE &middot; horizons 1&ndash;8 quarters &middot; below 1.0 beats naive</text>
-          <line class="vc-grid" x1="58" y1="40.0" x2="730" y2="40.0"/>
-          <text class="vc-tick" x="48" y="44" text-anchor="end">1.2</text>
-          <line class="vc-axis" x1="58" y1="102.9" x2="730" y2="102.9"/>
-          <text class="vc-tick" x="48" y="106.9" text-anchor="end">1.0</text>
-          <line class="vc-grid" x1="58" y1="165.7" x2="730" y2="165.7"/>
-          <text class="vc-tick" x="48" y="169.7" text-anchor="end">0.8</text>
-          <line class="vc-grid" x1="58" y1="228.6" x2="730" y2="228.6"/>
-          <text class="vc-tick" x="48" y="232.6" text-anchor="end">0.6</text>
-          <polyline class="vc-s2" points="58.0,82.8 154.0,76.2 250.0,77.3 346.0,75.7 442.0,75.8 538.0,79.3 634.0,82.6 730.0,84.6"/>
-          <circle class="vc-s2-dot" cx="730.0" cy="84.6" r="3.5"/>
-          <polyline class="vc-s1" points="58.0,219.4 154.0,223.0 250.0,214.2 346.0,208.9 442.0,204.9 538.0,203.6 634.0,204.3 730.0,205.6"/>
-          <circle class="vc-s1-dot" cx="730.0" cy="205.6" r="3.5"/>
-          <text class="vc-note" x="730" y="70" text-anchor="end">UK real GDP (level)</text>
-          <text class="vc-note" x="730" y="226" text-anchor="end">UK CPI (level)</text>
-          <text class="vc-tick" x="58" y="290" text-anchor="middle">h=1</text>
-          <text class="vc-tick" x="250" y="290" text-anchor="middle">h=3</text>
-          <text class="vc-tick" x="442" y="290" text-anchor="middle">h=5</text>
-          <text class="vc-tick" x="634" y="290" text-anchor="middle">h=7</text>
+        <svg class="vchart" data-chart="svar-skill-all" viewBox="0 0 760 404" role="img" aria-labelledby="svar-skill-all-t svar-skill-all-d">
+        <title id="svar-skill-all-t">boe-svar forecast skill against a random walk with drift, all eight variables</title>
+        <desc id="svar-skill-all-d">Dot matrix of forecast error relative to a random walk with drift, eight variables by eight quarterly horizons, from 49 expanding-window origins spanning 2012Q1 to 2024Q1. A ratio below 1.0 means the model beats the benchmark; filled dots mark differences significant at 5 per cent by a Diebold-Mariano test, hollow dots differences that are not statistically distinguishable. Bank Rate is the only variable that beats the benchmark at every horizon, ranging 0.79 to 0.89, and its one-quarter advantage is significant (p = 0.018). UK CPI starts at 0.83 at one quarter, significant at p = 0.031, but drifts to 1.03 by eight quarters, losing its advantage. World CPI follows the same pattern, 0.94 rising to 1.07. Oil price and CPI energy sit near parity throughout. UK real GDP (1.06 to 1.12) and world GDP (1.07 to 1.10) stay just above parity, but none of those differences is statistically significant. The exchange rate is worst and worsens monotonically from 1.03 to 1.33. Against this harder benchmark only 4 of eight variables beat naive at one quarter and 2 at eight.</desc>
+        <text class="vc-lab" x="150" y="30">RMSE &divide; drifting-random-walk RMSE &middot; horizons 1&ndash;8 quarters</text>
+        <text class="vc-note" x="150" y="48">filled = difference significant at 5% (Diebold&ndash;Mariano); hollow = not distinguishable</text>
+        <line class="vc-grid" x1="194.2" y1="62" x2="194.2" y2="362"/>
+        <text class="vc-tick" x="194.2" y="378" text-anchor="middle">0.8</text>
+        <line class="vc-grid" x1="282.5" y1="62" x2="282.5" y2="362"/>
+        <text class="vc-tick" x="282.5" y="378" text-anchor="middle">0.9</text>
+        <line class="vc-grid" x1="459.1" y1="62" x2="459.1" y2="362"/>
+        <text class="vc-tick" x="459.1" y="378" text-anchor="middle">1.1</text>
+        <line class="vc-grid" x1="547.4" y1="62" x2="547.4" y2="362"/>
+        <text class="vc-tick" x="547.4" y="378" text-anchor="middle">1.2</text>
+        <line class="vc-grid" x1="635.7" y1="62" x2="635.7" y2="362"/>
+        <text class="vc-tick" x="635.7" y="378" text-anchor="middle">1.3</text>
+        <line class="vc-axis" x1="370.8" y1="62" x2="370.8" y2="362"/>
+        <text class="vc-tick" x="370.8" y="378" text-anchor="middle">1.0</text>
+        <text class="vc-note" x="362.8" y="396" text-anchor="end">&larr; model better</text>
+        <text class="vc-note" x="378.8" y="396">benchmark better &rarr;</text>
+        <text class="vc-rowlab" x="140" y="82.0" text-anchor="end">Bank Rate</text>
+        <line class="vc-grid" x1="188.2" y1="78.0" x2="273.1" y2="78.0"/>
+        <circle class="vc-s1-dot" cx="188.2" cy="78.0" r="2.6"/>
+        <circle class="vc-s1-dot" cx="241.4" cy="78.0" r="2.6"/>
+        <circle class="vc-s1-dot" cx="262.2" cy="78.0" r="2.6"/>
+        <circle class="vc-s1-dot" cx="273.1" cy="78.0" r="2.6"/>
+        <circle class="vc-s1-dot" cx="272.7" cy="78.0" r="2.6"/>
+        <circle cx="264.1" cy="78.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="253.3" cy="78.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="241.4" cy="78.0" r="4.0" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <text class="vc-val" x="283.1" y="82.0">0.85</text>
+        <text class="vc-rowlab" x="140" y="120.0" text-anchor="end">UK CPI</text>
+        <line class="vc-grid" x1="221.2" y1="116.0" x2="399.0" y2="116.0"/>
+        <circle class="vc-s1-dot" cx="221.2" cy="116.0" r="2.6"/>
+        <circle cx="238.3" cy="116.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="283.1" cy="116.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="316.2" cy="116.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="344.4" cy="116.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="366.5" cy="116.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="383.4" cy="116.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="399.0" cy="116.0" r="4.0" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <text class="vc-val" x="409.0" y="120.0">1.03</text>
+        <text class="vc-rowlab" x="140" y="158.0" text-anchor="end">World CPI</text>
+        <line class="vc-grid" x1="320.7" y1="154.0" x2="431.8" y2="154.0"/>
+        <circle cx="320.7" cy="154.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="327.9" cy="154.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="355.0" cy="154.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="375.2" cy="154.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="393.4" cy="154.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="406.9" cy="154.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="419.7" cy="154.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="431.8" cy="154.0" r="4.0" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <text class="vc-val" x="441.8" y="158.0">1.07</text>
+        <text class="vc-rowlab" x="140" y="196.0" text-anchor="end">Oil price</text>
+        <line class="vc-grid" x1="352.9" y1="192.0" x2="387.1" y2="192.0"/>
+        <circle cx="382.7" cy="192.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="385.1" cy="192.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="387.1" cy="192.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="379.9" cy="192.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="369.8" cy="192.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="359.5" cy="192.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="352.9" cy="192.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="354.0" cy="192.0" r="4.0" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <text class="vc-val" x="397.1" y="196.0">0.98</text>
+        <text class="vc-rowlab" x="140" y="234.0" text-anchor="end">CPI energy</text>
+        <line class="vc-grid" x1="348.2" y1="230.0" x2="466.1" y2="230.0"/>
+        <circle cx="350.5" cy="230.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="348.2" cy="230.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="375.0" cy="230.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="396.3" cy="230.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="414.4" cy="230.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="430.6" cy="230.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle class="vc-s2-dot" cx="445.2" cy="230.0" r="2.6"/>
+        <circle class="vc-s2-dot" cx="466.1" cy="230.0" r="4.0"/>
+        <text class="vc-val" x="476.1" y="234.0">1.11</text>
+        <text class="vc-rowlab" x="140" y="272.0" text-anchor="end">UK real GDP</text>
+        <line class="vc-grid" x1="426.9" y1="268.0" x2="480.7" y2="268.0"/>
+        <circle cx="426.9" cy="268.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="449.3" cy="268.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="453.1" cy="268.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="461.8" cy="268.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="470.1" cy="268.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="470.8" cy="268.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="472.9" cy="268.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="480.7" cy="268.0" r="4.0" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <text class="vc-val" x="490.7" y="272.0">1.12</text>
+        <text class="vc-rowlab" x="140" y="310.0" text-anchor="end">World GDP</text>
+        <line class="vc-grid" x1="433.5" y1="306.0" x2="467.6" y2="306.0"/>
+        <circle cx="433.5" cy="306.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="458.6" cy="306.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="460.6" cy="306.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="464.2" cy="306.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="467.6" cy="306.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="461.0" cy="306.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="456.3" cy="306.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="460.5" cy="306.0" r="4.0" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <text class="vc-val" x="477.6" y="310.0">1.10</text>
+        <text class="vc-rowlab" x="140" y="348.0" text-anchor="end">Exchange rate</text>
+        <line class="vc-grid" x1="397.2" y1="344.0" x2="661.1" y2="344.0"/>
+        <circle cx="397.2" cy="344.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="452.1" cy="344.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="497.2" cy="344.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="539.9" cy="344.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="573.2" cy="344.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="606.3" cy="344.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="637.9" cy="344.0" r="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <circle cx="661.1" cy="344.0" r="4.0" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+        <text class="vc-val" x="671.1" y="348.0">1.33</text>
         </svg>
-        <figcaption>Expanding-window pseudo-out-of-sample RMSE ratios, boe-svar over random walk, on the level of each series. 49 forecast origins, 2012Q1&ndash;2024Q1 (the window includes the Covid quarters); estimation sample starts 1992Q1, data through 2026Q1; 4 lags. Source and provenance: <code>papers/boe-svar/figures/rolling_evaluation.json</code>.</figcaption>
+        <figcaption>Expanding-window pseudo-out-of-sample error ratios against a random walk <strong>with drift</strong>, on the level of each series. A driftless walk is too weak a benchmark for a trending series, so this is the fair comparison; the no-change ratios are in the table below. 49 forecast origins, 2012Q1&ndash;2024Q1 (the window includes the Covid quarters); estimation sample from 1992Q1, data through 2026Q1; 4 lags. Estimation uses final revised data, so this is pseudo- rather than real-time out-of-sample. No single origin contributes more than 35% of any drift-benchmark squared error. Source: <code>papers/boe-svar/figures/rolling_evaluation.json</code>.</figcaption>
+      </figure>
+      <figure class="vfig">
+        <svg class="vchart" data-chart="svar-winrate" viewBox="0 0 760 300" role="img" aria-labelledby="svar-winrate-t svar-winrate-d">
+        <title id="svar-winrate-t">How many of eight variables beat a drifting random walk, by horizon</title>
+        <desc id="svar-winrate-d">Stacked column chart. Of the model's eight forecast variables, how many have lower root mean squared error than a random walk with drift, at horizons one to eight quarters. The counts are 4, 4, 3, 2, 3, 3, 2, 2 respectively. Each column also separates wins whose difference is statistically significant at 5 per cent by a Diebold-Mariano test from wins that are not: significant wins number 2, 1, 1, 1, 1, 0, 0, 0. From horizon six onward no variable beats the benchmark by a statistically significant margin. At one quarter the two significant wins are Bank Rate and UK CPI; beyond four quarters only Bank Rate remains ahead at all.</desc>
+        <text class="vc-lab" x="64" y="30">Of 8 forecast variables, how many beat a random walk with drift</text>
+        <line class="vc-grid" x1="64" y1="202.5" x2="724" y2="202.5"/>
+        <text class="vc-tick" x="54" y="206.5" text-anchor="end">2</text>
+        <line class="vc-grid" x1="64" y1="155.0" x2="724" y2="155.0"/>
+        <text class="vc-tick" x="54" y="159.0" text-anchor="end">4</text>
+        <line class="vc-grid" x1="64" y1="107.5" x2="724" y2="107.5"/>
+        <text class="vc-tick" x="54" y="111.5" text-anchor="end">6</text>
+        <line class="vc-grid" x1="64" y1="60.0" x2="724" y2="60.0"/>
+        <text class="vc-tick" x="54" y="64.0" text-anchor="end">8</text>
+        <line class="vc-axis" x1="64" y1="250.0" x2="724" y2="250.0"/>
+        <text class="vc-tick" x="54" y="254.0" text-anchor="end">0</text>
+        <rect class="vc-b1" x="76.0" y="202.5" width="56" height="47.5"/>
+        <rect class="vc-b2" x="76.0" y="155.0" width="56" height="47.5"/>
+        <rect class="vc-b3" x="76.0" y="60.0" width="56" height="95.0"/>
+        <text class="vc-val" x="104" y="149.0" text-anchor="middle">4</text>
+        <text class="vc-tick" x="104" y="270.0" text-anchor="middle">h=1</text>
+        <rect class="vc-b1" x="156.0" y="226.2" width="56" height="23.8"/>
+        <rect class="vc-b2" x="156.0" y="155.0" width="56" height="71.2"/>
+        <rect class="vc-b3" x="156.0" y="60.0" width="56" height="95.0"/>
+        <text class="vc-val" x="184" y="149.0" text-anchor="middle">4</text>
+        <text class="vc-tick" x="184" y="270.0" text-anchor="middle">h=2</text>
+        <rect class="vc-b1" x="236.0" y="226.2" width="56" height="23.8"/>
+        <rect class="vc-b2" x="236.0" y="178.8" width="56" height="47.5"/>
+        <rect class="vc-b3" x="236.0" y="60.0" width="56" height="118.8"/>
+        <text class="vc-val" x="264" y="172.8" text-anchor="middle">3</text>
+        <text class="vc-tick" x="264" y="270.0" text-anchor="middle">h=3</text>
+        <rect class="vc-b1" x="316.0" y="226.2" width="56" height="23.8"/>
+        <rect class="vc-b2" x="316.0" y="202.5" width="56" height="23.8"/>
+        <rect class="vc-b3" x="316.0" y="60.0" width="56" height="142.5"/>
+        <text class="vc-val" x="344" y="196.5" text-anchor="middle">2</text>
+        <text class="vc-tick" x="344" y="270.0" text-anchor="middle">h=4</text>
+        <rect class="vc-b1" x="396.0" y="226.2" width="56" height="23.8"/>
+        <rect class="vc-b2" x="396.0" y="178.8" width="56" height="47.5"/>
+        <rect class="vc-b3" x="396.0" y="60.0" width="56" height="118.8"/>
+        <text class="vc-val" x="424" y="172.8" text-anchor="middle">3</text>
+        <text class="vc-tick" x="424" y="270.0" text-anchor="middle">h=5</text>
+        <rect class="vc-b2" x="476.0" y="178.8" width="56" height="71.2"/>
+        <rect class="vc-b3" x="476.0" y="60.0" width="56" height="118.8"/>
+        <text class="vc-val" x="504" y="172.8" text-anchor="middle">3</text>
+        <text class="vc-tick" x="504" y="270.0" text-anchor="middle">h=6</text>
+        <rect class="vc-b2" x="556.0" y="202.5" width="56" height="47.5"/>
+        <rect class="vc-b3" x="556.0" y="60.0" width="56" height="142.5"/>
+        <text class="vc-val" x="584" y="196.5" text-anchor="middle">2</text>
+        <text class="vc-tick" x="584" y="270.0" text-anchor="middle">h=7</text>
+        <rect class="vc-b2" x="636.0" y="202.5" width="56" height="47.5"/>
+        <rect class="vc-b3" x="636.0" y="60.0" width="56" height="142.5"/>
+        <text class="vc-val" x="664" y="196.5" text-anchor="middle">2</text>
+        <text class="vc-tick" x="664" y="270.0" text-anchor="middle">h=8</text>
+        <rect class="vc-b1" x="64" y="272" width="14" height="10"/><text class="vc-note" x="84" y="281">beats it, and the difference is significant</text>
+        <rect class="vc-b2" x="330" y="272" width="14" height="10"/><text class="vc-note" x="350" y="281">beats it, not significantly</text>
+        <rect class="vc-b3" x="560" y="272" width="14" height="10"/><text class="vc-note" x="580" y="281">does not beat it</text>
+        </svg>
+        <figcaption>Wins are counted at a ratio strictly below 1.0, which is a hard cut: a variable at 0.99 counts as a win and one at 1.01 does not, even though neither is distinguishable from the benchmark. That is why the significance split matters more than the count. Same 49 origins and benchmark as the chart above. Source: <code>papers/boe-svar/figures/rolling_evaluation.json</code>.</figcaption>
       </figure>
       <div class="table-scroll">
       <table>
-        <caption>boe-svar RMSE relative to a random-walk benchmark (ratio; below 1.0 beats naive), by forecast horizon in quarters</caption>
-        <thead><tr><th scope="col">variable</th><th scope="col">h=1</th><th scope="col">h=2</th><th scope="col">h=3</th><th scope="col">h=4</th><th scope="col">h=6</th><th scope="col">h=8</th></tr></thead>
+        <caption>boe-svar forecast error relative to two naive benchmarks (ratio; below 1.0 beats the benchmark). Bold marks a win that is statistically significant; <abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr> marks any significant difference. All eight variables are shown &mdash; the four previously omitted were among the weakest.</caption>
+        <thead><tr><th scope="col" rowspan="2">variable</th><th scope="col" colspan="2">h=1</th><th scope="col" colspan="2">h=2</th><th scope="col" colspan="2">h=4</th><th scope="col" colspan="2">h=8</th><th scope="col" rowspan="2">h=1 ex-Covid<br/>(vs no-change)</th></tr>
+        <tr><th scope="col">vs drift</th><th scope="col">vs no-change</th><th scope="col">vs drift</th><th scope="col">vs no-change</th><th scope="col">vs drift</th><th scope="col">vs no-change</th><th scope="col">vs drift</th><th scope="col">vs no-change</th></tr></thead>
         <tbody>
-          <tr><th scope="row">UK CPI (level)</th><td><strong>0.63</strong></td><td><strong>0.62</strong></td><td><strong>0.65</strong></td><td><strong>0.66</strong></td><td><strong>0.68</strong></td><td><strong>0.67</strong></td></tr>
-          <tr><th scope="row">World CPI (level)</th><td><strong>0.73</strong></td><td><strong>0.68</strong></td><td><strong>0.69</strong></td><td><strong>0.69</strong></td><td><strong>0.69</strong></td><td><strong>0.67</strong></td></tr>
-          <tr><th scope="row">Bank Rate</th><td><strong>0.88</strong></td><td><strong>0.96</strong></td><td><strong>0.99</strong></td><td>1.02</td><td>1.03</td><td>1.03</td></tr>
-          <tr><th scope="row">UK real GDP (level)</th><td>1.06</td><td>1.08</td><td>1.08</td><td>1.09</td><td>1.07</td><td>1.06</td></tr>
+          <tr><th scope="row">Bank Rate</th><td><strong>0.79</strong><abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">0.88</td><td><strong>0.85</strong><abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">0.96</td><td><strong>0.89</strong><abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">1.02</td><td>0.85</td><td class="vc-note">1.03</td><td class="vc-note">0.86</td></tr>
+          <tr><th scope="row">UK CPI (level)</th><td><strong>0.83</strong><abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">0.63</td><td>0.85</td><td class="vc-note">0.62</td><td>0.94</td><td class="vc-note">0.66</td><td>1.03</td><td class="vc-note">0.67</td><td class="vc-note">0.62</td></tr>
+          <tr><th scope="row">World CPI (level)</th><td>0.94</td><td class="vc-note">0.73</td><td>0.95</td><td class="vc-note">0.68</td><td>1.00</td><td class="vc-note">0.69</td><td>1.07</td><td class="vc-note">0.67</td><td class="vc-note">0.73</td></tr>
+          <tr><th scope="row">Oil price</th><td>1.01</td><td class="vc-note">1.03</td><td>1.02</td><td class="vc-note">1.05</td><td>1.01</td><td class="vc-note">1.06</td><td>0.98</td><td class="vc-note">1.08</td><td class="vc-note">1.05</td></tr>
+          <tr><th scope="row">CPI energy</th><td>0.98</td><td class="vc-note">0.98</td><td>0.97</td><td class="vc-note">0.98</td><td>1.03</td><td class="vc-note">1.04</td><td>1.11<abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">1.13</td><td class="vc-note">0.97</td></tr>
+          <tr><th scope="row">UK real GDP (level)</th><td>1.06</td><td class="vc-note">1.06</td><td>1.09</td><td class="vc-note">1.08</td><td>1.10</td><td class="vc-note">1.09</td><td>1.12</td><td class="vc-note">1.06</td><td class="vc-note">0.77</td></tr>
+          <tr><th scope="row">World GDP (level)</th><td>1.07</td><td class="vc-note">1.04</td><td>1.10</td><td class="vc-note">1.03</td><td>1.11</td><td class="vc-note">0.93</td><td>1.10</td><td class="vc-note">0.71</td><td class="vc-note">0.51</td></tr>
+          <tr><th scope="row">Exchange rate</th><td>1.03</td><td class="vc-note">1.04</td><td>1.09</td><td class="vc-note">1.11</td><td>1.19</td><td class="vc-note">1.22</td><td>1.33</td><td class="vc-note">1.41</td><td class="vc-note">1.05</td></tr>
         </tbody>
       </table>
       </div>
