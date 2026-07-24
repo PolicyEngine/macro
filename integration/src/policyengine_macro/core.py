@@ -725,17 +725,24 @@ def _covid_dummies(index) -> np.ndarray:
 # Estimation window for the hosted SVAR (start of Great-Moderation sample;
 # end held fixed so hosted results only move on a deliberate refresh). The
 # provenance strings are derived from the actual df_est index, never retyped.
+#
+# 2026-07-24 refresh: bumped 2023Q2 -> 2025Q1 (126 -> 133 observations) to match
+# the sample boe-var-model's production replication now runs on. Held one
+# quarter short of the 2026Q1 data edge, matching the repo, so the forecast
+# origin sits outside the estimation sample.
 _SVAR_EST_START = "1992Q1"
-_SVAR_EST_END = "2023Q2"
+_SVAR_EST_END = "2025Q1"
 
-# Default posterior draws for hosted calls. Measured on the 2026Q1 vintage
-# (Apple Silicon, single process): draws=500 -> 42 accepted, ESS 15.5, ~23s;
-# 1000 -> 76 accepted, ESS 26.5, ~44s; 2000 -> 165 accepted, ESS 63.6,
-# ~117s. Acceptance is ~8% and ESS ~3% of draws, so 2000 is the smallest
-# default that clears the 100-accepted-draws reliability threshold at
-# roughly two minutes of first-call runtime (results are cached in-process).
-# Full ESS >= 100 needs ~3500 draws (~3.5 min); a `warnings` entry flags the
-# residual ESS shortfall honestly instead of hiding it.
+# Default posterior draws for hosted calls. Re-measured on the 1992Q1-2025Q1
+# estimation sample (seed 0), since the longer sample tightens the posterior
+# and lowers the sign-restriction acceptance rate: draws=500 -> 35 accepted,
+# ESS 13.6; 1000 -> 69, ESS 31.5; 2000 -> 135, ESS 65.3; 3500 -> 233,
+# ESS 101.4. Acceptance is ~6.8% and ESS ~3.3% of draws (was ~8% and ~3% on
+# the old 2023Q2 sample), so 2000 remains the smallest default that clears
+# the 100-accepted-draws reliability threshold -- 1000 would not (69).
+# Full ESS >= 100 still needs ~3500 draws; a `warnings` entry flags the
+# residual ESS shortfall honestly instead of hiding it. First-call runtime is
+# a couple of minutes end to end and results are cached in-process.
 _SVAR_DEFAULT_DRAWS = 2000
 
 
@@ -2705,7 +2712,7 @@ def svar_summary() -> dict:
         "provenance": _provenance(
             model_id="boe-svar",
             distribution="boe-var-model",
-            data_vintage="estimation through 2023Q2; conditioning data through 2026Q1",
+            data_vintage="estimation through 2025Q1; conditioning data through 2026Q1",
             baseline="committed replication and forecast artefacts",
         ),
     }
