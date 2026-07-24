@@ -76,9 +76,9 @@ MODELS = {
         "runtime": "minutes per estimation and identification run",
         "uncertainty": "posterior 68% and 90% intervals",
         "status": "validated replication for selected outputs",
-        "estimation_sample": "1992Q1-2023Q2",
+        "estimation_sample": "1992Q1-2025Q1",
         "data_edge": "2026Q1",
-        "data_vintage": "2026Q1 conditioning data; estimation ends 2023Q2",
+        "data_vintage": "2026Q1 conditioning data; estimation ends 2025Q1",
     },
     "frb-us": {
         "display_name": "Federal Reserve FRB-US implementation",

@@ -290,7 +290,7 @@ def frbus_summary() -> dict:
 def forecast_uk(horizons: int = 12, draws: int = 2000) -> dict:
     """Forecast UK YoY GDP growth and CPI inflation with the UK SVAR model.
 
-    Estimates a Bayesian VAR (1992Q1-2023Q2 sample, sign-identified structural
+    Estimates a Bayesian VAR (1992Q1-2025Q1 sample, sign-identified structural
     shocks) and simulates the predictive distribution from the latest data
     quarter. Returns, per future quarter, the median and 68%/90% bands for YoY
     GDP growth and YoY CPI inflation, both in percent. The response includes a
@@ -299,11 +299,11 @@ def forecast_uk(horizons: int = 12, draws: int = 2000) -> dict:
 
     Args:
         horizons: Forecast horizon in quarters (default 12 = 3 years).
-        draws: Posterior draws (default 2000: ~165 accepted draws, ESS ~64,
-            about two minutes of runtime on first call; ~3500 draws reaches
-            ESS >= 100 in ~3.5 minutes; 500 responds in ~25s but yields ESS
-            ~15 and a warning). Results are cached in-process, so repeated
-            calls with the same (horizons, draws) are instant.
+        draws: Posterior draws (default 2000: ~135 accepted draws, ESS ~65,
+            a couple of minutes on first call; ~3500 draws reaches ESS >= 100;
+            500 is faster but yields ~35 accepted, ESS ~14, and a warning).
+            Results are cached in-process, so repeated calls with the same
+            (horizons, draws) are instant.
     """
     return core.svar_forecast(horizons=horizons, draws=draws)
 
