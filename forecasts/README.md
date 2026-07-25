@@ -14,7 +14,7 @@ directory tests the forecasts, in real time, where nobody does.
 | path | mutable? | what it is |
 |------|----------|------------|
 | `rounds/<round-id>/<model>.json` | **no** | A forecast as it stood on a date. Append-only. |
-| `outturns.json` | yes | Realised data, versioned by vintage. |
+| `outturns.json` | append-only | Realised data, versioned by vintage. Written by `ingest_outturns.py` from `data/`. |
 | `scorecard.json` | generated | Scores. Written by `score.py`, never by hand. |
 | `index.html` | partly generated | The public page. Blocks between `<!-- scorecard-*:begin -->` markers are generated. |
 
@@ -28,11 +28,13 @@ python3 forecasts/archive.py
 #    the git timestamp is what makes the forecast falsifiable.
 git add forecasts/rounds && git commit -m "Archive forecast round <date>"
 
-# 3. When outturns land, add them to outturns.json and rescore.
+# 3. When outturns land, pull them from the vintage store and rescore.
+python3 data/fetch.py
+python3 forecasts/ingest_outturns.py
 python3 forecasts/score.py
 ```
 
-Both scripts take `--check` and are wired into
+All three scripts take `--check` and are wired into
 `.github/workflows/forecast-archive.yml`, which also fails any pull request that
 modifies, renames or deletes an already-archived round.
 
