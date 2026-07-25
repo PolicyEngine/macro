@@ -1,0 +1,52 @@
+name: Forecast archive
+
+# The forecast track record is only evidence if a round provably existed before
+# its outturn did. Everything under forecasts/rounds/ is therefore append-only:
+# rounds may be added, never edited or deleted. Enforced here rather than by
+# convention, because a silent rewrite is exactly the failure that would destroy
+# the claim — and it would look like a routine refresh in review.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  immutability:
+    name: Archived rounds are append-only
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Need the base commit to diff against, so no shallow clone.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Reject edits and deletions under forecasts/rounds/
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # --diff-filter=MDR: Modified, Deleted, Renamed. Added (A) is the only
+          # legitimate change to an archived round.
+          touched=$(git diff --name-only --diff-filter=MDR "$BASE" "$HEAD" -- forecasts/rounds/ || true)
+          if [ -n "$touched" ]; then
+            echo "::error::archived forecast rounds were modified, renamed or deleted:"
+            echo "$touched" | sed 's/^/  /'
+            echo ""
+            echo "Rounds are append-only. To correct a forecast, archive a new"
+            echo "round — the superseded one stays in the history."
+            exit 1
+          fi
+          echo "OK — no archived round was edited."
+
+      - name: Validate the archive
+        run: python3 forecasts/archive.py --check
+
+      - name: Scorecard is current
+        run: python3 forecasts/score.py --check
