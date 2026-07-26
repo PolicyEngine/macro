@@ -73,6 +73,7 @@ ONS_SERIES = {
 
 BOE_URL = "https://www.bankofengland.co.uk/boeapps/database/"
 BOE_CSV = BOE_URL + "_iadb-fromshowcolumns.asp"
+BOE_START = "01/Jan/2020"
 BOE_SERIES = {
     "uk_bank_rate": {
         "cdid": "IUDBEDR",
@@ -198,7 +199,7 @@ def fetch_boe_series(name: str, spec: dict, vintage: str) -> str:
     query = urllib.parse.urlencode(
         {
             "csv.x": "yes",
-            "Datefrom": "01/Jan/2000",
+            "Datefrom": BOE_START,
             "Dateto": "now",
             "SeriesCodes": spec["cdid"],
             "CSVF": "TN",

@@ -50,6 +50,9 @@ so `latest/` is the flattened copy the page builders read.
 
 ONS and Bank of England data are released under the
 [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+Daily Bank of England series retain observations from 2020 onward: enough
+history for current-state comparisons without duplicating the full database
+inside both the immutable snapshot and its published `latest/` copy.
 
 ## Usage
 
