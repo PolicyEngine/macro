@@ -92,8 +92,8 @@
      Cards, code blocks, charts and panels used 2px/3px/6px/8px in different
      places for the same job. One value now. */
   --radius: 8px;
-  /* Referenced by .section-tabs, the model navs, .contact-email,
-     .comparison-table row hover and .verification-tag, but never defined --
+  /* Referenced by the model navs, .contact-email, .comparison-table row hover
+     and .verification-tag, but never defined --
      so those backgrounds resolved to nothing and the PUBLISHED ANCHOR chips
      rendered as bare text while STATUTE/CALIBRATED rendered as pills. */
   --brand-wash: color-mix(in srgb, var(--primary) 8%, transparent);
@@ -171,9 +171,6 @@
 :target,
 section[id],
 [id]:not(body) { scroll-margin-top: clamp(88px, 12vh, 112px); }
-.has-section-tabs :target,
-.has-section-tabs section[id],
-.has-section-tabs [id]:not(body) { scroll-margin-top: 160px; }
 
 body {
   background: var(--ink);
@@ -348,34 +345,31 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
 }
 .nav-links .nav-start:hover { background: var(--ink-2); }
 
-@media (min-width: 760px) {
+@media (min-width: 940px) {
   .nav-links .nav-start { min-height: auto; padding: 0; border: 0; }
   .nav-links .nav-start:hover { background: transparent; }
   .nav-links a:not(.nav-gh) { display: inline; }
 }
 
-/* Research library navigation. The global header answers "where am I in the
-   product?" while this row keeps the four evidence surfaces visibly related. */
-.section-tabs {
-  position: fixed;
-  z-index: 9;
-  top: 59px;
-  left: 0;
-  right: 0;
+/* Topic-level wayfinding for the economy dashboard. Unlike the retired second
+   global nav row, this names sections within one destination and scrolls
+   naturally with the page. */
+.economy-topics {
   display: flex;
-  justify-content: center;
-  gap: 6px;
-  padding: 9px var(--gutter);
+  gap: var(--s-2);
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: var(--s-4) var(--gutter);
   overflow-x: auto;
   scrollbar-width: none;
-  background: color-mix(in srgb, var(--ink) 94%, transparent);
+  border-top: 1px solid var(--line-soft);
   border-bottom: 1px solid var(--line-soft);
 }
-.section-tabs::-webkit-scrollbar { display: none; }
-.section-tabs a {
+.economy-topics::-webkit-scrollbar { display: none; }
+.economy-topics a {
   flex: 0 0 auto;
-  padding: 8px 16px;
-  border: 1px solid transparent;
+  padding: 8px 12px;
+  border: 1px solid var(--line-soft);
   border-radius: 999px;
   color: var(--paper-dim);
   font-family: var(--mono);
@@ -383,14 +377,10 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   text-decoration: none;
   white-space: nowrap;
 }
-.section-tabs a:hover { color: var(--brand-strong); background: var(--ink-2); border-color: var(--line-soft); }
-.section-tabs a[aria-current="page"] {
+.economy-topics a:hover {
   color: var(--brand-strong);
   background: var(--brand-wash);
-  border-color: color-mix(in srgb, var(--brand) 32%, var(--line-soft));
-  box-shadow: none;
 }
-.has-section-tabs .hero { padding-top: clamp(162px, 20vh, 210px); }
 
 .model-local-nav,
 .validation-model-nav {
@@ -445,12 +435,6 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   font-size: var(--fs-label);
 }
 .model-breadcrumb a { color: var(--brand-strong); }
-
-@media (max-width: 620px) {
-  .section-tabs { justify-content: flex-start; top: 76px; padding-inline: 8px; }
-  .section-tabs a { padding-inline: 11px; }
-  .has-section-tabs .hero { padding-top: 174px; }
-}
 
 /* ---------- hero ---------- */
 .hero {
@@ -912,8 +896,6 @@ h2 {
   .nav-links a.nav-mobile:first-child { display: inline-flex; }
   .nav-links .nav-start { min-height: 44px; padding-inline: 12px; }
   .nav-gh { min-width: 44px; min-height: 44px; justify-content: center; }
-  .section-tabs { top: 112px; }
-  .has-section-tabs .hero { padding-top: 210px; }
   .question-list a { grid-template-columns: 1fr 18px; gap: 8px 14px; }
   .question-list strong { grid-column: 1; grid-row: 2; }
   .question-list a::after { grid-column: 2; grid-row: 1 / span 2; }
@@ -1324,12 +1306,6 @@ h2 {
 
 /* --- viewer page --- */
 .paper-viewer { padding-top: clamp(96px, 14vh, 140px); }
-.has-section-tabs .paper-viewer {
-  padding-top: clamp(152px, 19vh, 184px);
-}
-@media (max-width: 620px) {
-  .has-section-tabs .paper-viewer { padding-top: 214px; }
-}
 .paper-viewer-head {
   display: flex; align-items: flex-end; justify-content: space-between;
   gap: 20px; flex-wrap: wrap; margin-bottom: 18px;
