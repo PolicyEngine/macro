@@ -167,6 +167,9 @@ def obr_shock(
     closure solves to all-zero deltas, which would read as a misleading
     "no effect" result rather than a mis-specified run.
     """
+    periods = _bounded_int(
+        "periods", periods, _OBR_MIN_PERIODS, _OBR_MAX_PERIODS
+    )
     run_reform = _import_obr()
     if investment_closure is None:
         known = {v["var"]: v["investment_closure"] for v in OBR_VARIABLES}
@@ -177,7 +180,7 @@ def obr_shock(
         name=name,
         var=var,
         shock=float(shock),
-        periods=int(periods),
+        periods=periods,
         investment_closure=bool(investment_closure),
     )
     rows = _obr_result_rows(df)
@@ -1081,6 +1084,27 @@ _SVAR_EST_END = "2025Q1"
 # residual ESS shortfall honestly instead of hiding it. First-call runtime is
 # a couple of minutes end to end and results are cached in-process.
 _SVAR_DEFAULT_DRAWS = 2000
+_SVAR_MIN_DRAWS = 50
+_SVAR_MAX_DRAWS = 10_000
+_SVAR_MIN_HORIZONS = 1
+_SVAR_MAX_HORIZONS = 40
+_OBR_MIN_PERIODS = 1
+_OBR_MAX_PERIODS = 40
+
+
+def _bounded_int(name: str, value: int, minimum: int, maximum: int) -> int:
+    """Normalize a public integer input and reject unsafe work requests."""
+    try:
+        normalized = int(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{name} must be an integer") from exc
+    if normalized != value:
+        raise ValueError(f"{name} must be an integer")
+    if not minimum <= normalized <= maximum:
+        raise ValueError(
+            f"{name} must be between {minimum} and {maximum}; got {value}"
+        )
+    return normalized
 
 
 def _estimate(draws: int = _SVAR_DEFAULT_DRAWS, seed: int = 0) -> dict:
@@ -1143,10 +1167,14 @@ def svar_forecast(horizons: int = 12,
     Returns median and 68/90 percent bands per future quarter. Bands combine
     parameter and shock uncertainty. Cached in-process by (horizons, draws).
     """
-    key = (int(horizons), int(draws))
+    horizons = _bounded_int(
+        "horizons", horizons, _SVAR_MIN_HORIZONS, _SVAR_MAX_HORIZONS
+    )
+    draws = _bounded_int("draws", draws, _SVAR_MIN_DRAWS, _SVAR_MAX_DRAWS)
+    key = (horizons, draws)
     if key in _FORECAST_CACHE:
         return _FORECAST_CACHE[key]
-    est = _estimate(int(draws))
+    est = _estimate(draws)
     analysis, forecast = est["modules"]
     y_full = est["y_full"]
     rng = np.random.default_rng(1)
@@ -1156,13 +1184,13 @@ def svar_forecast(horizons: int = 12,
     n_paths = 5
     for i, (d, _B) in enumerate(est["pairs"]):
         for _ in range(n_paths):
-            path = forecast.sample_forecast(d, y_full, horizons=int(horizons), rng=rng)
+            path = forecast.sample_forecast(d, y_full, horizons=horizons, rng=rng)
             yoy_paths.append(forecast.yoy(np.vstack([tail, path])))
             pw.append(est["weights"][i])
     bands = analysis.aggregate(yoy_paths, weights=np.asarray(pw))
 
     last_q = est["df_full"].index[-1]
-    quarters = [str(last_q + h) for h in range(1, int(horizons) + 1)]
+    quarters = [str(last_q + h) for h in range(1, horizons + 1)]
 
     def _series(idx: int) -> list[dict]:
         return [
@@ -1174,7 +1202,7 @@ def svar_forecast(horizons: int = 12,
                 "lo90": round(float(bands["lo90"][h, idx]), 3),
                 "hi90": round(float(bands["hi90"][h, idx]), 3),
             }
-            for h in range(int(horizons))
+            for h in range(horizons)
         ]
 
     out = {
@@ -1187,8 +1215,8 @@ def svar_forecast(horizons: int = 12,
             estimation_sample=est["estimation_sample"],
         ),
         "forecast_origin": str(last_q),
-        "horizons": int(horizons),
-        "draws": int(draws),
+        "horizons": horizons,
+        "draws": draws,
         "accepted_draws": est["n_accepted"],
         "ess": round(est["ess"], 1),
         "warnings": list(est["warnings"]),
@@ -1202,7 +1230,7 @@ def svar_forecast(horizons: int = 12,
 
 def svar_latest_shocks(draws: int = _SVAR_DEFAULT_DRAWS) -> dict:
     """P(sign) of the 6 identified structural shocks in the latest data quarter."""
-    key = int(draws)
+    key = _bounded_int("draws", draws, _SVAR_MIN_DRAWS, _SVAR_MAX_DRAWS)
     if key in _SHOCKS_CACHE:
         return _SHOCKS_CACHE[key]
     est = _estimate(key)

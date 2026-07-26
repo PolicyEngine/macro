@@ -16,6 +16,32 @@ def test_list_variables():
     json.dumps(vars_)
 
 
+@pytest.mark.parametrize("periods", [0, 41, 1.5, "many"])
+def test_obr_shock_rejects_unsafe_periods_before_import(periods):
+    with pytest.raises(ValueError, match="periods"):
+        core.obr_shock(var="CGG", shock=1250, periods=periods)
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "field"),
+    [
+        ({"horizons": 0, "draws": 100}, "horizons"),
+        ({"horizons": 41, "draws": 100}, "horizons"),
+        ({"horizons": 4, "draws": 49}, "draws"),
+        ({"horizons": 4, "draws": 10_001}, "draws"),
+    ],
+)
+def test_svar_forecast_rejects_unsafe_work_before_import(kwargs, field):
+    with pytest.raises(ValueError, match=field):
+        core.svar_forecast(**kwargs)
+
+
+@pytest.mark.parametrize("draws", [0, 49, 10_001, "many"])
+def test_latest_shocks_rejects_unsafe_draws_before_import(draws):
+    with pytest.raises(ValueError, match="draws"):
+        core.svar_latest_shocks(draws=draws)
+
+
 def test_summary_parses():
     s = core.svar_summary()
     if "error" in s:

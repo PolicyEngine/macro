@@ -7,7 +7,10 @@ Exposes the same adapter functions as the `pe-macro` CLI as MCP tools.
 
 from __future__ import annotations
 
+from typing import Annotated
+
 from mcp.server.fastmcp import FastMCP
+from pydantic import Field
 
 from policyengine_macro import core
 from policyengine_macro import capabilities
@@ -147,7 +150,7 @@ def score_reform(
 def obr_shock(
     var: str,
     shock: float,
-    periods: int = 12,
+    periods: Annotated[int, Field(ge=1, le=40)] = 12,
     name: str | None = None,
     investment_closure: bool | None = None,
 ) -> dict:
@@ -164,7 +167,8 @@ def obr_shock(
         shock: Shock size, applied each quarter. UNITS DEPEND ON THE VARIABLE:
             CGG and CGIPS are in £ million per quarter (e.g. 1250 = £5bn/year);
             TCPRO is a rate change in decimal (e.g. -0.05 = 5 percentage point cut).
-        periods: Number of quarters the shock is applied (default 12 = 3 years).
+        periods: Number of quarters the shock is applied (1-40; default 12 =
+            3 years).
         name: Optional label for the reform.
         investment_closure: Omit to use the safe per-variable default (True
             for TCPRO, False otherwise). It activates the cost-of-capital
@@ -365,7 +369,10 @@ def hank_summary() -> dict:
 
 
 @mcp.tool()
-def forecast_uk(horizons: int = 12, draws: int = 2000) -> dict:
+def forecast_uk(
+    horizons: Annotated[int, Field(ge=1, le=40)] = 12,
+    draws: Annotated[int, Field(ge=50, le=10_000)] = 2000,
+) -> dict:
     """Forecast UK YoY GDP growth and CPI inflation with the UK SVAR model.
 
     Estimates a Bayesian VAR (1992Q1-2025Q1 sample, sign-identified structural
@@ -376,18 +383,21 @@ def forecast_uk(horizons: int = 12, draws: int = 2000) -> dict:
     importance-weight ESS below 100) with a recommended draw count.
 
     Args:
-        horizons: Forecast horizon in quarters (default 12 = 3 years).
+        horizons: Forecast horizon in quarters (1-40; default 12 = 3 years).
         draws: Posterior draws (default 2000: ~135 accepted draws, ESS ~65,
             a couple of minutes on first call; ~3500 draws reaches ESS >= 100;
             500 is faster but yields ~35 accepted, ESS ~14, and a warning).
-            Results are cached in-process, so repeated calls with the same
+            Must be between 50 and 10,000. Results are cached in-process, so
+            repeated calls with the same
             (horizons, draws) are instant.
     """
     return core.svar_forecast(horizons=horizons, draws=draws)
 
 
 @mcp.tool()
-def latest_shocks(draws: int = 2000) -> dict:
+def latest_shocks(
+    draws: Annotated[int, Field(ge=50, le=10_000)] = 2000,
+) -> dict:
     """Structural-shock reading for the latest data quarter from the UK SVAR.
 
     For each of the 6 identified shocks (world demand/energy/supply, UK
@@ -398,9 +408,9 @@ def latest_shocks(draws: int = 2000) -> dict:
     than 100 accepted draws or importance-weight ESS below 100).
 
     Args:
-        draws: Posterior draws (default 2000, ~2 minutes on first call; can
-            be raised for precision). Cached in-process, so repeat calls are
-            instant.
+        draws: Posterior draws (50-10,000; default 2000, ~2 minutes on first
+            call; can be raised for precision). Cached in-process, so repeat
+            calls are instant.
     """
     return core.svar_latest_shocks(draws=draws)
 
