@@ -21,6 +21,29 @@
     ]
   },
 
+  "obr_computed_share": {
+    "source": "PolicyEngine/obr-macroeconomic-model docs/calibration_scorecard.md (March 2026 EFO vintage), cross-checked against papers/obr-macro/sections/validation.tex",
+    "total": 21,
+    "computed": 11,
+    "passthrough": 10,
+    "bands_note": "bands: rates ±1.0pp · net balances ±1.5% of GDP · levels ≤10% MAPE",
+    "_grades_comment": "The 11 computed variables graded against the bands above. 'identity' is employment, where both inputs are themselves passthrough, so the accounting identity closes trivially and the pass carries no information.",
+    "grades": [
+      { "key": "fair", "label": "fair", "count": 3, "series": 1, "in_band": true,
+        "examples": ["real GDP 5.75 per cent", "consumption 9.56 per cent", "trade balance 0.70 per cent of GDP"],
+        "source": "calibration_scorecard.md, free-running MAPE column" },
+      { "key": "identity", "label": "identity", "count": 1, "series": 2, "in_band": true, "trivial": true,
+        "examples": ["employment"],
+        "source": "calibration_scorecard.md; employment closes from two passthrough inputs" },
+      { "key": "poor", "label": "poor", "count": 5, "series": 3, "in_band": false,
+        "examples": [],
+        "source": "calibration_scorecard.md, variables outside band but within an order of magnitude" },
+      { "key": "off", "label": "off", "count": 2, "series": 3, "in_band": false,
+        "examples": ["company profits 79.80 per cent", "the current account 4.17 per cent of GDP"],
+        "source": "calibration_scorecard.md, worst two computed variables" }
+    ]
+  },
+
   "frbus_residuals": {
     "source": "papers/frb-us/sections/validation.tex, Tables tab:tracking and tab:refnoise",
     "rows": [
