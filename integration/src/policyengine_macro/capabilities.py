@@ -95,6 +95,30 @@ MODELS = {
         "status": "validated software replication with scope limits",
         "data_vintage": "LONGBASE file from the installed frbus package",
     },
+    "us-hank": {
+        "display_name": "US two-asset HANK (Auclert-Bardóczy-Rognlie-Straub 2021)",
+        "model_class": "heterogeneous-agent New Keynesian (sequence-space)",
+        "geography": ["us"],
+        "question_types": ["economic_shock"],
+        "inputs": ["stylized shock (kind, size, persistence)"],
+        "outputs": ["gdp", "consumption", "investment", "inflation", "real_rate"],
+        "cannot_answer": [
+            "forecasts (IRFs around a calibrated steady state, not a forecaster)",
+            "detailed tax reforms (only monetary/fiscal-spending/productivity instruments; the labor tax is endogenous)",
+            "PolicyEngine reforms",
+            "nonlinear or state-dependent dynamics (responses are first-order)",
+        ],
+        "horizon": "quarterly impulse responses, typically 5 years",
+        "access": ["hosted stylized shocks", "CLI", "Python"],
+        "runtime": "~18s cold per variant (steady state + jacobian, cached); instant warm",
+        "uncertainty": "none quantified; deterministic linear IRFs",
+        "status": (
+            "validated replication for hosted stylized-shock experiments; "
+            "VAR-free sequence-space HANK; not a forecaster; distributional "
+            "outputs are first-order approximations"
+        ),
+        "data_vintage": "Auclert-Bardóczy-Rognlie-Straub (2021) calibration",
+    },
     "og-uk": {
         "display_name": "OG-UK overlapping generations model",
         "model_class": "overlapping-generations general equilibrium",
@@ -264,6 +288,55 @@ MODEL_QUALITY = {
             "Model and LONGBASE archives are independently SHA-256 gated because "
             "the Board updates their pages and artifacts on separate schedules.",
             "Retain and test multiple historical model/data artifact pairs.",
+        ),
+    },
+    "us-hank": {
+        "implementation_fidelity": _quality(
+            "strong",
+            "Built directly on the authors' sequence-jacobian toolkit at the "
+            "paper's production grids; the model repo's 18-test suite gates "
+            "steady-state targets, market clearing, and shock responses "
+            "against the published Econometrica 2021 results.",
+            "Keep the replication gates hard-failing and extend them across "
+            "all three shock kinds and both variants.",
+        ),
+        "predictive_validation": _quality(
+            "not_applicable",
+            "The model produces impulse responses around a calibrated steady "
+            "state; it is not a forecaster and makes no predictive claims.",
+            "Keep this dimension explicitly not applicable and continue to "
+            "refuse forecast framing.",
+        ),
+        "identification_robustness": _quality(
+            "not_applicable",
+            "A calibrated structural model, not a VAR identified by sign or "
+            "zero restrictions.",
+            "Keep this dimension explicitly not applicable.",
+        ),
+        "policy_counterfactual_validity": _quality(
+            "weak",
+            "Stylized monetary/fiscal-spending/productivity shocks only; the "
+            "labor tax is endogenous, so no detailed tax-reform "
+            "counterfactuals exist, and responses are first-order.",
+            "Validate the fiscal-spending multiplier and monetary responses "
+            "against published HANK estimates before broader policy use.",
+        ),
+        "uncertainty_calibration": _quality(
+            "weak",
+            "Deterministic linear IRFs with no parameter or shock "
+            "uncertainty; distributional outputs are first-order "
+            "approximations from steady-state policies.",
+            "Publish sensitivity of headline IRFs to key calibration "
+            "parameters (sticky-price/wage slopes, MPC targets).",
+        ),
+        "vintage_reproducibility": _quality(
+            "strong",
+            "No data vintages: the calibration is the published paper's and "
+            "is pinned in the package, so identical versions reproduce "
+            "identical numbers exactly.",
+            "Record the package version in every result (done via "
+            "provenance) and keep the calibration frozen unless deliberately "
+            "revised.",
         ),
     },
 }

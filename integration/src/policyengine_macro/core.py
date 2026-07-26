@@ -48,6 +48,7 @@ def _provenance(
         "pe-microsim": "https://github.com/PolicyEngine/policyengine",
         "obr-macro": "https://github.com/PolicyEngine/obr-macroeconomic-model",
         "og+microsim": "https://github.com/PolicyEngine/macro",
+        "us-hank": "https://github.com/PolicyEngine/us-hank-model",
     }
     return {
         "model_id": model_id,
@@ -697,6 +698,342 @@ def frbus_summary() -> dict:
         distribution="frbus",
         data_vintage="April 2026 LONGBASE",
         baseline="Federal Reserve LONGBASE tracking baseline",
+    )
+    return out
+
+
+# ---------------------------------------------------------------------------
+# US HANK adapters
+# ---------------------------------------------------------------------------
+#
+# us_hank (PolicyEngine/us-hank-model) is a validated replication of the
+# two-asset HANK of Auclert, Bardóczy, Rognlie & Straub (Econometrica 2021),
+# solved in the sequence space at the paper's production grids. It scores
+# STYLIZED shocks (monetary / fiscal spending / productivity AR(1) paths),
+# not detailed tax reforms, and it is NOT a forecaster: IRFs are linear
+# deviations around a calibrated steady state. Distributional outputs are
+# first-order approximations built from steady-state policies.
+
+# Model variants. 'two_asset' is the paper model; 'one_asset' is a fast
+# textbook variant with no capital (no investment IRF, no fiscal instrument).
+HANK_VARIANTS = ("two_asset", "one_asset")
+
+# The internal IRF length. The GE Jacobian is a T x T object solved once per
+# (variant); 300 matches the model package's default and is long enough that
+# truncation error at any reported horizon is negligible. Fixed rather than
+# caller-set so the expensive jacobian is computed exactly once per variant.
+HANK_T = 300
+
+HANK_DEFAULT_HORIZON = 20  # quarters reported (5 years), matching frbus
+
+# Curated shock catalogue: the HANK analogue of FRBUS_VARIABLES. Units differ
+# per kind and are stated per entry; there is deliberately no transfer or
+# tax-rate instrument (the labor tax is endogenous — a G shock is implicitly
+# tax-financed), so such requests are rejected upstream with an explanation.
+HANK_SHOCK_KINDS = [
+    {
+        "kind": "monetary",
+        "input": "rstar",
+        "description": "Taylor-rule intercept (monetary policy) shock",
+        "units": "level change in the QUARTERLY real policy rate "
+                 "(-0.0025 = a 25bp-per-quarter easing on impact)",
+        "typical_size": -0.0025,
+        "variants": ["two_asset", "one_asset"],
+    },
+    {
+        "kind": "fiscal_spending",
+        "input": "G",
+        "description": "Real government spending shock, implicitly financed "
+                       "by the endogenous labor tax (the fiscal block "
+                       "balances the budget)",
+        "units": "level change in G; steady-state Y = 1, so 0.01 = 1% of "
+                 "steady-state GDP on impact",
+        "typical_size": 0.01,
+        "variants": ["two_asset"],
+    },
+    {
+        "kind": "productivity",
+        "input": "Z",
+        "description": "Total factor productivity shock",
+        "units": "level change in Z around its steady-state value "
+                 "(0.01 ~ a 1% impact TFP improvement)",
+        "typical_size": 0.01,
+        "variants": ["two_asset", "one_asset"],
+    },
+]
+
+_HANK_KIND_INDEX = {k["kind"]: k for k in HANK_SHOCK_KINDS}
+
+# Series meaning per variant. Y/C/I are % deviations from steady state; pi/r
+# are level deviations of QUARTERLY rates in percentage points.
+HANK_HEADLINE = {
+    "Y": "Output, % deviation from steady state",
+    "C": "Aggregate consumption, % deviation from steady state",
+    "I": "Investment, % deviation from steady state (two_asset only)",
+    "pi": "Inflation (quarterly rate), pp deviation from steady state",
+    "r": "Real interest rate (quarterly rate), pp deviation from steady state",
+}
+
+# Cache the steady state + GE jacobian per (variant, T). The steady state
+# takes ~13s and the jacobian ~5s at production grids; with both cached every
+# repeat IRF is a matrix-vector product and effectively instant. The us_hank
+# package keeps its own module-level cache too, but this one also pins the
+# (ss, G) pair the adapters report against, keyed the same way as
+# _FRBUS_BASELINE_CACHE.
+_HANK_CACHE: dict[tuple[str, int], tuple] = {}
+
+
+def _import_us_hank():
+    try:
+        import us_hank  # noqa: F401
+        from us_hank import distributional, model, one_asset
+    except ImportError as e:
+        raise ImportError(
+            "The US HANK package `us_hank` is not importable. Install it "
+            "with: pip install git+https://github.com/PolicyEngine/us-hank-model"
+        ) from e
+    return us_hank, model, one_asset, distributional
+
+
+def _hank_module(variant: str):
+    _, model, one_asset, _ = _import_us_hank()
+    return {"two_asset": model, "one_asset": one_asset}[variant]
+
+
+def _hank_solved(variant: str, T: int = HANK_T):
+    """(steady state, GE jacobian) for a variant, cached at module level."""
+    key = (variant, int(T))
+    if key in _HANK_CACHE:
+        return _HANK_CACHE[key]
+    mod = _hank_module(variant)
+    ss = mod.solve_steady_state()
+    G = mod.solve_jacobian(ss, T=int(T))
+    _HANK_CACHE[key] = (ss, G)
+    return ss, G
+
+
+def _hank_check_kind(kind: str, variant: str) -> None:
+    if variant not in HANK_VARIANTS:
+        raise ValueError(
+            f"variant must be one of {HANK_VARIANTS}, got {variant!r}. "
+            "'two_asset' is the Auclert-Bardóczy-Rognlie-Straub (2021) paper "
+            "model; 'one_asset' is a fast no-capital variant (monetary and "
+            "productivity shocks only)."
+        )
+    entry = _HANK_KIND_INDEX.get(kind)
+    if entry is None:
+        known = ", ".join(sorted(_HANK_KIND_INDEX))
+        raise ValueError(
+            f"kind must be one of: {known}; got {kind!r}. There is "
+            "deliberately no transfer or tax-rate shock: the model's labor "
+            "tax is endogenous (the fiscal block balances the budget), so no "
+            "such exogenous instrument exists in the DAG — inventing one "
+            "would produce plausible-looking wrong numbers."
+        )
+    if variant not in entry["variants"]:
+        raise ValueError(
+            f"kind {kind!r} is not available in the {variant!r} variant "
+            f"(available there: monetary, productivity). The one-asset DAG "
+            "has no exogenous G — use variant='two_asset' for fiscal shocks."
+        )
+
+
+def hank_list_shocks() -> list[dict]:
+    """Shockable HANK instruments with descriptions, units and variants."""
+    return [dict(k) for k in HANK_SHOCK_KINDS]
+
+
+def hank_shock(
+    kind: str,
+    size: float,
+    persistence: float = 0.9,
+    horizon: int = HANK_DEFAULT_HORIZON,
+    variant: str = "two_asset",
+    include_distribution: bool = False,
+    name: str | None = None,
+) -> dict:
+    """Run one stylized HANK shock experiment and return the IRFs.
+
+    The HANK analogue of frbus_shock: a raw shock in model units, no
+    PolicyEngine reform translation (there is deliberately no such bridge —
+    the model scores stylized shocks, not detailed tax reforms). The shock is
+    an AR(1) path ``size * persistence**t``; responses are LINEAR (first-order
+    sequence-space) deviations around the calibrated steady state, so they
+    scale exactly with ``size`` and carry no state-dependence.
+
+    ``include_distribution`` (two_asset only) adds steady-state MPC statistics
+    and the impact consumption response by total-wealth quartile — a
+    first-order approximation from steady-state policies, capturing the
+    MPC-heterogeneity channel only, not full household-level dynamics.
+
+    First call per variant pays the steady-state (~13s) + jacobian (~5s)
+    solves; both are cached, so every later call is effectively instant.
+    """
+    _hank_check_kind(kind, variant)
+    horizon = int(horizon)
+    if not 1 <= horizon <= HANK_T:
+        raise ValueError(f"horizon must be between 1 and {HANK_T}, got {horizon}")
+    persistence = float(persistence)
+    if not 0.0 <= persistence < 1.0:
+        raise ValueError(
+            f"persistence must be in [0, 1) — the shock path is "
+            f"size * persistence**t and must decay — got {persistence}"
+        )
+    if include_distribution and variant != "two_asset":
+        raise ValueError(
+            "include_distribution requires variant='two_asset': the one-asset "
+            "variant has no illiquid asset, so the liquid/total-wealth "
+            "distributional cuts are not defined for it."
+        )
+
+    mod = _hank_module(variant)
+    ss, G = _hank_solved(variant)
+    irf = mod.shock(kind, float(size), persistence, T=HANK_T, ss=ss, G_jac=G)
+
+    series_names = [v for v in HANK_HEADLINE if v in irf]
+    series = {
+        v: [round(float(x), 6) for x in irf[v][:horizon]] for v in series_names
+    }
+    shock_path = [round(float(x), 8) for x in irf["shock"][:horizon]]
+    rows = [
+        {"quarter": t, **{v: series[v][t] for v in series_names},
+         "shock": shock_path[t]}
+        for t in range(horizon)
+    ]
+
+    def _peak(values):
+        best = max(range(len(values)), key=lambda i: abs(values[i]))
+        return {"value": values[best], "quarter": best}
+
+    peaks = {v: _peak(series[v]) for v in series_names}
+
+    entry = _HANK_KIND_INDEX[kind]
+    result = {
+        "name": name or f"{kind} shock {size:+g} (persistence {persistence:g})",
+        "provenance": _provenance(
+            model_id="us-hank",
+            distribution="us-hank-model",
+            data_vintage="Auclert-Bardóczy-Rognlie-Straub (2021) calibration",
+            baseline="calibrated steady state (production grids)",
+        ),
+        "kind": kind,
+        "shock_input": irf["shock_input"],
+        "size": float(size),
+        "units": entry["units"],
+        "persistence": persistence,
+        "horizon": horizon,
+        "variant": variant,
+        "framing": (
+            "Validated replication of Auclert, Bardóczy, Rognlie & Straub "
+            "(Econometrica 2021); stylized shocks around a calibrated steady "
+            "state; VAR-free sequence-space HANK; NOT a forecaster and does "
+            "not score detailed tax reforms; responses are linear/first-order."
+        ),
+        "series_meaning": {v: HANK_HEADLINE[v] for v in series_names},
+        "results": rows,
+        "peaks": peaks,
+    }
+
+    # Same misuse guard as frbus_shock: a converged run in which nothing moves
+    # is a mis-specified experiment (e.g. size=0), not a finding.
+    if all(abs(peaks[v]["value"]) < 1e-12 for v in series_names):
+        result["warning"] = (
+            f"every response is numerically zero: the {size:+g} {kind} shock "
+            "did not move the model. Treat this as a mis-specified experiment "
+            "(check the size and its units in hank_summary), not as evidence "
+            "of no effect."
+        )
+
+    if include_distribution:
+        _, _, _, distributional = _import_us_hank()
+        result["distributional"] = {
+            "note": (
+                "FIRST-ORDER APPROXIMATION from steady-state policies: the "
+                "by-quantile impact consumption response allocates the "
+                "aggregate response in proportion to each group's liquid-asset "
+                "MPC. It captures the MPC-heterogeneity channel, not full "
+                "household-level dynamics."
+            ),
+            "aggregate_quarterly_mpc_liquid": round(
+                float(distributional.aggregate_mpc(ss)), 4
+            ),
+            "mpc_by_liquid_quartile": {
+                k: round(float(v), 4)
+                for k, v in distributional.mpc_by_liquid_quartile(ss).items()
+            },
+            "hand_to_mouth_share": round(
+                float(distributional.hand_to_mouth_share(ss)), 4
+            ),
+            "impact_consumption_response_pct_by_wealth_quartile": {
+                k: round(float(v), 4)
+                for k, v in distributional.consumption_response_by_wealth_quantile(
+                    ss, irf
+                ).items()
+            },
+        }
+    return result
+
+
+def hank_summary() -> dict:
+    """Static metadata and validation provenance for the US HANK member.
+
+    No solve: instant, like frbus_summary. States what the model is, the
+    available shock kinds and variants, and the honest scope limits.
+    """
+    out = {
+        "model": "US two-asset HANK (sequence-space)",
+        "implementation": "us_hank — PolicyEngine/us-hank-model, built on the "
+                          "authors' sequence-jacobian toolkit at the paper's "
+                          "production grids (nB=50, nA=70, nK=50)",
+        "upstream": "Auclert, Bardóczy, Rognlie & Straub, 'Using the "
+                    "Sequence-Space Jacobian to Solve and Estimate "
+                    "Heterogeneous-Agent Models', Econometrica 2021",
+        "package_version": _package_version("us-hank-model"),
+        "framing": (
+            "Validated replication; stylized shocks; VAR-free sequence-space "
+            "HANK; not a forecaster; distributional outputs are first-order "
+            "approximations."
+        ),
+        "variants": {
+            "two_asset": "the paper model: liquid + illiquid assets, sticky "
+                         "prices and wages, capital; all three shock kinds",
+            "one_asset": "fast textbook variant: no capital (no investment "
+                         "IRF), no exogenous G; monetary and productivity "
+                         "shocks only",
+        },
+        "shock_kinds": hank_list_shocks(),
+        "no_tax_or_transfer_instrument": (
+            "The labor tax rate is endogenous — the fiscal block balances the "
+            "government budget (tax = (r*Bg + G)/(w*N)) — so a fiscal_spending "
+            "shock is implicitly tax-financed and there is NO transfer or "
+            "tax-rate shock kind."
+        ),
+        "solution_method": "first-order (linear) impulse responses via the "
+                           "general-equilibrium sequence-space Jacobian "
+                           f"(T={HANK_T}); responses scale exactly with the "
+                           "shock size",
+        "runtime": "steady state ~13s and jacobian ~5s on first use per "
+                   "variant, both cached in-process; IRFs are then instant",
+        "validation": {
+            "suite": "the model repo's 18-test suite gates the steady-state "
+                     "calibration targets, market clearing, and shock-response "
+                     "signs/magnitudes against the published paper results",
+            "note": "a replication gate, not a forecast-accuracy claim: no "
+                    "predictive validation exists or is claimed for this model",
+        },
+        "reform_bridge": (
+            "NONE. There is deliberately no PolicyEngine-reform bridge for "
+            "the HANK member: it scores stylized aggregate shocks, not "
+            "detailed tax reforms, and no mapping exists from a PolicyEngine "
+            "US reform to its three exogenous instruments. score_reform "
+            "rejects model='hank'; hank_shock is the supported entry point."
+        ),
+    }
+    out["provenance"] = _provenance(
+        model_id="us-hank",
+        distribution="us-hank-model",
+        data_vintage="Auclert-Bardóczy-Rognlie-Straub (2021) calibration",
+        baseline="calibrated steady state (production grids)",
     )
     return out
 
@@ -2557,7 +2894,20 @@ SCORE_MODELS_WITHOUT_REFORM_BRIDGE = {
         "units, and frbus_list_variables to discover the levers and their "
         "units."
     ),
+    "hank": (
+        "The US HANK member has no PolicyEngine-reform bridge, by design: it "
+        "scores stylized aggregate shocks (monetary, fiscal_spending, "
+        "productivity), not detailed tax reforms, and no mapping exists from "
+        "a PolicyEngine US reform to its three exogenous instruments — "
+        "inventing one would produce plausible-looking wrong numbers. Use the "
+        "hank_shock tool (or `pe-macro hank-shock`) with a shock kind, size "
+        "and persistence in model units; hank_summary documents the kinds "
+        "and their units."
+    ),
 }
+SCORE_MODELS_WITHOUT_REFORM_BRIDGE["us-hank"] = (
+    SCORE_MODELS_WITHOUT_REFORM_BRIDGE["hank"]
+)
 
 
 def _validate_reform(reform) -> None:

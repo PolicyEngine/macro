@@ -2,10 +2,11 @@
 
     modal deploy integration/modal_app.py
 
-Serves the FastMCP instance from `policyengine_macro.mcp_server` (18 tools:
+Serves the FastMCP instance from `policyengine_macro.mcp_server` (20 tools:
 list_model_capabilities, get_model_status, recommend_model,
 format_score_report, score_reform, obr_shock, list_reform_variables, frbus_shock,
-frbus_list_variables, frbus_summary, forecast_uk, latest_shocks, model_summary,
+frbus_list_variables, frbus_summary, hank_shock, hank_summary, forecast_uk,
+latest_shocks, model_summary,
 calculate_household, household_reform_impact, list_reform_parameters,
 population_reform_impact, dynamic_reform_impact — the last returns an
 actionable "run locally" error here, because oguk is excluded from this
@@ -203,6 +204,14 @@ image = (
         # (and via import, UK) call raise at import time. Keep this pin in
         # sync with the manifest version reported by the certification error.
         "policyengine-us==1.764.6",
+        # US HANK (hank_shock / hank_summary). Installed from GitHub as a
+        # normal wheel — no data files or repo checkout needed at runtime;
+        # the calibration is code. Cost profile: the first hank_shock call
+        # per variant in a fresh container pays the steady-state (~13s) +
+        # jacobian (~5s) solves, cached in core._HANK_CACHE, so warm calls
+        # are a matrix-vector product (instant); memory is the T x T
+        # jacobian per variant (tens of MB). hank_summary is static.
+        "us-hank-model @ git+https://github.com/PolicyEngine/us-hank-model",
     )
 )
 
