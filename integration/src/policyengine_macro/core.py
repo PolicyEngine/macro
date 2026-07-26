@@ -47,9 +47,29 @@ def _provenance(
         "og-uk": "https://github.com/PolicyEngine/og-uk",
         "pe-microsim": "https://github.com/PolicyEngine/policyengine",
         "obr-macro": "https://github.com/PolicyEngine/obr-macroeconomic-model",
+        "boe-svar": "https://github.com/PolicyEngine/boe-var-model",
+        "frb-us": "https://github.com/PolicyEngine/us-frb-model",
         "og+microsim": "https://github.com/PolicyEngine/macro",
         "us-hank": "https://github.com/PolicyEngine/us-hank-model",
     }
+    revision_env = {
+        "obr-macro": "POLICYENGINE_MACRO_SOURCE_REVISION_OBR",
+        "boe-svar": "POLICYENGINE_MACRO_SOURCE_REVISION_BOE",
+        "frb-us": "POLICYENGINE_MACRO_SOURCE_REVISION_FRB",
+        "us-hank": "POLICYENGINE_MACRO_SOURCE_REVISION_HANK",
+    }
+    source_revision = os.environ.get(revision_env.get(model_id, ""))
+    if not source_revision:
+        source_revision = f"installed {distribution} {package_version}"
+    reproducibility = (
+        "Check out the recorded source URL at the recorded source revision, "
+        "install the recorded adapter version, and rerun the serialized "
+        "request against the recorded baseline and data vintage."
+        if re.fullmatch(r"[0-9a-f]{40}", source_revision)
+        else
+        "Install the recorded package versions and rerun the serialized "
+        "request against the recorded baseline and data vintage."
+    )
     return {
         "model_id": model_id,
         "package": distribution,
@@ -57,16 +77,13 @@ def _provenance(
         "model_version": package_version,
         "adapter_version": _package_version("policyengine-macro"),
         "source_url": source_urls.get(model_id, "https://github.com/PolicyEngine/macro"),
-        "source_revision": f"installed {distribution} {package_version}",
+        "source_revision": source_revision,
         "data_vintage": data_vintage,
         "baseline_vintage": baseline,
         "baseline": baseline,
         "estimation_sample": estimation_sample,
         "run_at": datetime.now(timezone.utc).isoformat(),
-        "reproducibility": (
-            "Install the recorded package versions and rerun the serialized "
-            "request against the recorded baseline and data vintage."
-        ),
+        "reproducibility": reproducibility,
     }
 
 
