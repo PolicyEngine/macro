@@ -257,6 +257,7 @@ def build_snapshot(name: str, spec: dict, payload: dict) -> dict:
         "units": spec["units"],
         "url": f"https://www.ons.gov.uk/{spec['path']}/data",
         "release_updated": release_stamp(payload),
+        "next_release": payload.get("description", {}).get("nextRelease") or None,
         "first_period": observations[0]["period"],
         "last_period": observations[-1]["period"],
         "observations": observations,
@@ -265,7 +266,14 @@ def build_snapshot(name: str, spec: dict, payload: dict) -> dict:
 
 def same_data(a: dict, b: dict) -> bool:
     """Compare only the payload, ignoring when we happened to fetch it."""
-    keys = ("observations", "release_updated", "last_period", "title", "units")
+    keys = (
+        "observations",
+        "release_updated",
+        "next_release",
+        "last_period",
+        "title",
+        "units",
+    )
     return all(a.get(k) == b.get(k) for k in keys)
 
 
@@ -384,6 +392,7 @@ def rebuild_manifest() -> dict:
                 "vintages": vintages,
                 "latest_vintage": vintages[-1],
                 "release_updated": newest.get("release_updated"),
+                "next_release": newest.get("next_release"),
                 "coverage": [newest["first_period"], newest["last_period"]],
             }
 

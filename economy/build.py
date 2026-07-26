@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -327,6 +328,43 @@ def market_rows() -> str:
     return "\n".join(rows)
 
 
+def calendar_rows() -> str:
+    names = (
+        "uk_monthly_gva",
+        "uk_unemployment_rate",
+        "uk_average_weekly_earnings",
+        "uk_vacancies",
+        "uk_cpi_yoy",
+        "uk_core_cpi_yoy",
+        "uk_public_sector_net_borrowing",
+        "uk_public_sector_net_debt_gdp",
+        "uk_gdp_cvm",
+        "uk_business_investment",
+    )
+    releases: dict[str, list[dict]] = {}
+    for name in names:
+        series = load(name)
+        date = " ".join((series.get("next_release") or "").split())
+        if date:
+            releases.setdefault(date, []).append(series)
+
+    def sort_key(item: tuple[str, list[dict]]) -> datetime:
+        return datetime.strptime(item[0], "%d %B %Y")
+
+    rows = []
+    for date, series_list in sorted(releases.items(), key=sort_key):
+        labels = ", ".join(series["title"] for series in series_list)
+        sources = ", ".join(series["cdid"] for series in series_list)
+        rows.append(
+            "          <tr>"
+            f'<th scope="row">{date}</th>'
+            f"<td>{labels}</td>"
+            f"<td>ONS · {sources}</td>"
+            "</tr>"
+        )
+    return "\n".join(rows)
+
+
 def replace(html: str, name: str, value: str) -> str:
     start, end = f"<!-- {name}:begin -->", f"<!-- {name}:end -->"
     updated, count = re.subn(
@@ -346,6 +384,7 @@ def render() -> str:
     html = replace(html, "economy-indicators", indicator_rows())
     html = replace(html, "economy-outlook", outlook_rows())
     html = replace(html, "economy-markets", market_rows())
+    html = replace(html, "economy-calendar", calendar_rows())
     html = replace(html, "economy-releases", release_rows())
     return html
 
