@@ -69,6 +69,67 @@ ONS_SERIES = {
         "units": "percent",
         "cdid": "MGSX",
     },
+    "uk_core_cpi_yoy": {
+        "path": "economy/inflationandpriceindices/timeseries/dko8/mm23",
+        "title": "UK core CPI annual rate",
+        "frequency": "monthly",
+        "units": "percent, year-on-year",
+        "cdid": "DKO8",
+    },
+    "uk_average_weekly_earnings": {
+        "path": (
+            "employmentandlabourmarket/peopleinwork/earningsandworkinghours/"
+            "timeseries/kab9/lms"
+        ),
+        "title": "Average weekly earnings, whole economy, total pay",
+        "frequency": "monthly",
+        "units": "£ per week, seasonally adjusted",
+        "cdid": "KAB9",
+    },
+    "uk_vacancies": {
+        "path": (
+            "employmentandlabourmarket/peopleinwork/employmentandemployeetypes/"
+            "timeseries/ap2y/lms"
+        ),
+        "title": "UK vacancies",
+        "frequency": "monthly",
+        "units": "thousands, seasonally adjusted three-month average",
+        "cdid": "AP2Y",
+    },
+    "uk_monthly_gva": {
+        "path": "economy/grossdomesticproductgdp/timeseries/ecy2/mgdp",
+        "title": "UK monthly gross value added",
+        "frequency": "monthly",
+        "units": "index, chained volume measure, seasonally adjusted",
+        "cdid": "ECY2",
+    },
+    "uk_public_sector_net_borrowing": {
+        "path": (
+            "economy/governmentpublicsectorandtaxes/publicsectorfinance/"
+            "timeseries/j5ii/pusf"
+        ),
+        "title": "Public sector net borrowing excluding public sector banks",
+        "frequency": "monthly",
+        "units": "£m, current prices, not seasonally adjusted",
+        "cdid": "J5II",
+    },
+    "uk_public_sector_net_debt_gdp": {
+        "path": (
+            "economy/governmentpublicsectorandtaxes/publicsectorfinance/"
+            "timeseries/hf6x/pusf"
+        ),
+        "title": "Public sector net debt excluding public sector banks",
+        "frequency": "monthly",
+        "units": "percent of GDP, not seasonally adjusted",
+        "cdid": "HF6X",
+    },
+    "uk_business_investment": {
+        "path": "economy/grossdomesticproductgdp/timeseries/npel/ukea",
+        "title": "UK business investment",
+        "frequency": "quarterly",
+        "units": "£m, chained volume measure, seasonally adjusted",
+        "cdid": "NPEL",
+    },
 }
 
 BOE_URL = "https://www.bankofengland.co.uk/boeapps/database/"
@@ -130,6 +191,44 @@ def parse_quarters(payload: dict) -> list[dict]:
     return out
 
 
+def parse_months(payload: dict) -> list[dict]:
+    """ONS monthly rows -> [{period: '2026-06', value: float}], oldest first."""
+    month_numbers = {
+        name: number
+        for number, name in enumerate(
+            (
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December",
+            ),
+            start=1,
+        )
+    }
+    out = []
+    for row in payload.get("months", []):
+        year, month = row.get("year"), row.get("month")
+        if not year or month not in month_numbers:
+            continue
+        try:
+            value = float(row["value"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        out.append(
+            {"period": f"{year}-{month_numbers[month]:02d}", "value": value}
+        )
+    out.sort(key=lambda row: row["period"])
+    return out
+
+
 def release_stamp(payload: dict) -> str | None:
     """Latest updateDate across observations — when this vintage was published."""
     stamps = [
@@ -141,7 +240,11 @@ def release_stamp(payload: dict) -> str | None:
 
 
 def build_snapshot(name: str, spec: dict, payload: dict) -> dict:
-    observations = parse_quarters(payload)
+    observations = (
+        parse_months(payload)
+        if spec["frequency"] == "monthly"
+        else parse_quarters(payload)
+    )
     if not observations:
         raise SystemExit(f"{name}: no quarterly observations parsed — refusing to write")
 

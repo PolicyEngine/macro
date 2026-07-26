@@ -43,6 +43,13 @@ so `latest/` is the flattened copy the page builders read.
 | `uk_gdp_cvm` | ABMI | ONS QNA | £m, chained volume measure |
 | `uk_cpi_yoy` | D7G7 | ONS MM23 | percent, year-on-year |
 | `uk_unemployment_rate` | MGSX | ONS LMS | percent |
+| `uk_core_cpi_yoy` | DKO8 | ONS MM23 | percent |
+| `uk_average_weekly_earnings` | KAB9 | ONS LMS | £ per week |
+| `uk_vacancies` | AP2Y | ONS LMS | thousands |
+| `uk_monthly_gva` | ECY2 | ONS MGDP | index |
+| `uk_public_sector_net_borrowing` | J5II | ONS PUSF | £m |
+| `uk_public_sector_net_debt_gdp` | HF6X | ONS PUSF | percent of GDP |
+| `uk_business_investment` | NPEL | ONS UKEA | £m |
 | `uk_bank_rate` | IUDBEDR | Bank of England IADB | percent |
 | `uk_gilt_5y` | IUDSNPY | Bank of England IADB | percent |
 | `uk_gilt_10y` | IUDMNPY | Bank of England IADB | percent |
