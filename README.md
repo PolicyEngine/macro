@@ -23,6 +23,7 @@ model classes are often complementary rather than directly comparable.
 | **Bank of England structural VAR (boe-svar)** | validated replication for selected hosted outputs; does not score reforms | [PolicyEngine/boe-var-model](https://github.com/PolicyEngine/boe-var-model) |
 | **PolicyEngine tax-benefit microsimulation** | hosted household and population analysis; no macro feedback | [PolicyEngine/policyengine.py](https://github.com/PolicyEngine/policyengine.py) |
 | **FRB-US (US macroeconometric model)** | hosted raw-shock experiments; VAR expectations only | [PolicyEngine/us-frb-model](https://github.com/PolicyEngine/us-frb-model) |
+| **US HANK (two-asset heterogeneous-agent NK)** | validated replication for hosted shock experiments; does not score reforms | [PolicyEngine/us-hank-model](https://github.com/PolicyEngine/us-hank-model) |
 | More model classes (incl. OG-USA) | planned | — |
 
 PolicyEngine is the *micro* member: person/household-resolution taxes and
@@ -94,7 +95,11 @@ models:
   variable shocks in model units), `frbus_shock`, `frbus_list_variables` and
   `frbus_summary` (FRB/US impulse responses under a selectable monetary policy
   rule; `score_reform` refuses `model='frbus'` because there is deliberately no
-  PolicyEngine-reform bridge for it), `forecast_uk`, `latest_shocks`,
+  PolicyEngine-reform bridge for it), `hank_shock` and `hank_summary` (US HANK
+  stylized-shock impulse responses with optional first-order distributional
+  output; a validated replication of Auclert-Bardóczy-Rognlie-Straub 2021 —
+  not a forecaster, and `score_reform` refuses `model='hank'` likewise),
+  `forecast_uk`, `latest_shocks`,
   `model_summary` (SVAR), and the PolicyEngine microsimulation tools
   (`calculate_household`, `household_reform_impact`, `list_reform_parameters`,
   `population_reform_impact`). `score_reform` with `model='og'` works locally
@@ -105,7 +110,8 @@ models:
   incidence model. Direct OBR scenarios use `obr_shock`.
   The server runs serverless and scales to zero — the first call after idle
   may take ~10 s to wake.
-- **CLI** — the `pe-macro` CLI (`score`, `obr-shock`, `variables`, `forecast`,
+- **CLI** — the `pe-macro` CLI (`score`, `obr-shock`, `variables`,
+  `hank-shock`, `hank-summary`, `forecast`,
   `shocks`, `summary`, `household`, `household-impact`, `population-impact`,
   `parameters`, `og-score`) lives
   in [`integration/`](integration/); PyPI publish is planned. Install it with
@@ -173,6 +179,7 @@ non-real numbers as illustrative.
 - [x] OG-UK steady-state scoring (`pe-macro score --model og` / `pe-macro og-score`, local only)
 - [x] Population-level PolicyEngine reform scoring (`population_reform_impact`, hosted and local)
 - [x] FRB/US Python implementation ([PolicyEngine/us-frb-model](https://github.com/PolicyEngine/us-frb-model)), wired into the CLI (`pe-macro frbus-shock`) and the hosted MCP server
+- [x] US HANK model ([PolicyEngine/us-hank-model](https://github.com/PolicyEngine/us-hank-model)), wired into the CLI (`pe-macro hank-shock`) and the hosted MCP server
 - [ ] Additional macroeconomic model classes (incl. OG-USA)
 
 ---

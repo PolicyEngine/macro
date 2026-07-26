@@ -1,0 +1,24 @@
+name: Site provenance
+
+# The validation charts are generated from the papers' committed data, and
+# make_charts.py --check exists to prove the page has not drifted from it.
+# Nothing ran it, so it silently stopped holding: #89 added three hand-authored
+# charts and the gate had been failing on main ever since. Run it in CI.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  charts:
+    name: validation/index.html matches its sources
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Charts are regenerable from committed data
+        run: python3 validation/figures/make_charts.py --check
