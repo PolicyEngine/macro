@@ -32,6 +32,12 @@ jobs:
       - name: Validate the store
         run: python3 data/fetch.py --check
 
+      - name: Generate factual notes for new vintages
+        run: python3 notes/generate_release_notes.py --vintage "$(date -u +%F)"
+
+      - name: Validate generated-note indexes
+        run: python3 notes/generate_release_notes.py --check
+
       - name: Open a PR if anything changed
         uses: peter-evans/create-pull-request@v7
         with:
@@ -40,6 +46,8 @@ jobs:
           commit-message: "Refresh official data vintages"
           body: |
             Automated ONS and Bank of England vintage refresh from `data/fetch.py`.
+            New factual release-note pages are generated from changed snapshots
+            on the same branch and remain subject to review before publication.
 
             New files under `data/vintages/` are new vintages — an upstream
             revision or a new observation. Nothing is edited in place, so the
