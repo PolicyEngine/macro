@@ -211,7 +211,10 @@ image = (
         # jacobian (~5s) solves, cached in core._HANK_CACHE, so warm calls
         # are a matrix-vector product (instant); memory is the T x T
         # jacobian per variant (tens of MB). hank_summary is static.
-        "us-hank-model @ git+https://github.com/PolicyEngine/us-hank-model",
+        # Tarball URL, not git+: this pip layer runs before (and without)
+        # apt_install("git"), so a VCS requirement fails with "Cannot find
+        # command 'git'" during the Modal image build.
+        "us-hank-model @ https://github.com/PolicyEngine/us-hank-model/archive/refs/heads/main.tar.gz",
     )
 )
 
