@@ -10,7 +10,7 @@
 <meta property="og:url" content="https://policyengine-macro.vercel.app/connect" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
 <meta property="og:title" content="PolicyEngine Macro — use it" />
-<meta property="og:description" content="Add the hosted MCP server to Claude or ChatGPT, run the models from a terminal, or drive the Python API directly. Free and open source, no account and no key." />
+<meta property="og:description" content="Add the hosted MCP server to Claude, ChatGPT, or any MCP client, run the models from a terminal, or drive the Python API directly. Free and open source, no account and no key." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -279,6 +279,7 @@
       <div class="seg" role="tablist" aria-label="Client" id="seg-client">
         <button role="tab" data-client="claude" aria-selected="true"><img src="/assets/claude-mark.svg" alt="" width="22" height="22" /><span>Claude</span></button>
         <button role="tab" data-client="chatgpt" aria-selected="false"><img src="/assets/chatgpt-mark.svg" alt="" width="22" height="22" /><span>ChatGPT</span></button>
+        <button role="tab" data-client="other" aria-selected="false"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 7v-3M15 7v-3M7 7h10v5a5 5 0 0 1-10 0V7ZM12 17v4"/></svg><span>More clients</span></button>
       </div>
       <div class="steps connect-steps">
         <div class="step">
@@ -296,6 +297,11 @@
           <p class="step-h">Add a ChatGPT connector</p>
           <p>On an eligible ChatGPT web plan, enable Developer mode in Settings → Apps → Advanced Settings, create a custom app, and paste the URL. Workspace administrators may need to grant or publish access.</p>
         </div>
+        <div class="step" data-for="other" hidden>
+          <span class="step-n mono">2</span>
+          <p class="step-h">Add a remote MCP server</p>
+          <p>Any MCP-capable client works: add the URL as a remote (HTTP) MCP server. That includes the Gemini CLI, Cursor, VS Code, Windsurf, and Mistral Le Chat — look for “MCP servers” or “connectors” in the client's settings.</p>
+        </div>
         <div class="step">
           <span class="step-n mono">3</span>
           <p class="step-h">Ask a policy question</p>
@@ -308,6 +314,10 @@
         <div data-for="chatgpt" hidden>
           <p>For Codex CLI, register the same MCP endpoint:</p>
           <div class="copyblock"><code>codex mcp add policyengine-macro --url https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
+        </div>
+        <div data-for="other" hidden>
+          <p>For the Gemini CLI, register the same MCP endpoint:</p>
+          <div class="copyblock"><code>gemini mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
         </div>
       </details>
     </div>
@@ -323,6 +333,7 @@
       <div class="command-grid">
         <div><span class="dial-name">US rate shock</span><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code></div>
         <div><span class="dial-name">UK forecast</span><code>pe-macro forecast</code></div>
+        <div><span class="dial-name">US HANK shock</span><code>pe-macro hank-shock --kind monetary --size -0.0025</code></div>
         <div><span class="dial-name">Household calculation</span><code>pe-macro household --country us</code></div>
       </div>
       <p class="chooser-note"><a href="https://github.com/PolicyEngine/macro/tree/main/integration">View every CLI command →</a></p>
@@ -340,6 +351,7 @@
         <button role="tab" data-model="obr" aria-selected="false"><strong>obr-macro</strong><span>Near-term fiscal</span></button>
         <button role="tab" data-model="frbus" aria-selected="false"><strong>frb-us</strong><span>US shocks</span></button>
         <button role="tab" data-model="svar" aria-selected="false"><strong>boe-svar</strong><span>UK forecasts</span></button>
+        <button role="tab" data-model="hank" aria-selected="false"><strong>us-hank</strong><span>US distributional</span></button>
         <button role="tab" data-model="pe" aria-selected="false"><strong>pe-microsim</strong><span>Households</span></button>
       </div>
       <div class="model-pane compact-pane" data-model="oguk">
@@ -361,6 +373,11 @@
         <span class="tag tag-hosted">hosted</span><h3>UK forecasts and shock decomposition</h3>
         <p>Forecast GDP and inflation or explain what moved them.</p>
         <a class="btn btn-primary" href="/svar/#run">Open SVAR setup</a>
+      </div>
+      <div class="model-pane compact-pane" data-model="hank" hidden>
+        <span class="tag tag-hosted">hosted</span><h3>US shocks across the wealth distribution</h3>
+        <p>Run stylized HANK shocks with MPC and hand-to-mouth detail.</p>
+        <a class="btn btn-primary" href="/us-hank/#run">Open us-hank setup</a>
       </div>
       <div class="model-pane compact-pane" data-model="pe" hidden>
         <span class="tag tag-hosted">hosted</span><h3>UK and US household impacts</h3>
