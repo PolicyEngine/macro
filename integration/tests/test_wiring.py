@@ -74,6 +74,24 @@ def test_mcp_tool_schema_exposes_expected_params(tool, params):
     assert params <= props, f"{tool} missing {params - props}"
 
 
+def test_expensive_mcp_inputs_publish_safe_schema_bounds():
+    tools = _registered_tools()
+    obr_periods = tools["obr_shock"].inputSchema["properties"]["periods"]
+    forecast = tools["forecast_uk"].inputSchema["properties"]
+    shocks_draws = tools["latest_shocks"].inputSchema["properties"]["draws"]
+
+    assert (obr_periods["minimum"], obr_periods["maximum"]) == (1, 40)
+    assert (forecast["horizons"]["minimum"], forecast["horizons"]["maximum"]) == (
+        1,
+        40,
+    )
+    assert (forecast["draws"]["minimum"], forecast["draws"]["maximum"]) == (
+        50,
+        10_000,
+    )
+    assert (shocks_draws["minimum"], shocks_draws["maximum"]) == (50, 10_000)
+
+
 # ---------------------------------------------------------------------------
 # MCP thin wrappers dispatch to core (instant tools, no heavy solve)
 # ---------------------------------------------------------------------------
