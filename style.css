@@ -1173,8 +1173,65 @@ h2 {
    the 2-column grid exactly, so the span would orphan the second-to-last. */
 .verification-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
 
+/* --- economy dashboard --- */
+.economy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line-soft);
+  border: 1px solid var(--line-soft);
+  margin-top: var(--s-6);
+}
+.economy-stat {
+  background: var(--ink);
+  padding: clamp(22px, 3vw, 34px);
+  min-width: 0;
+}
+.economy-stat-label {
+  color: var(--paper-faint);
+  font-size: var(--fs-small);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.economy-stat-value {
+  color: var(--paper);
+  font: 500 clamp(36px, 5vw, 58px)/1 var(--display);
+  letter-spacing: -.035em;
+  margin: 18px 0 8px;
+}
+.economy-stat-change {
+  color: var(--brand-strong);
+  min-height: 2.7em;
+}
+.economy-stat dl {
+  border-top: 1px solid var(--line-soft);
+  margin: 22px 0 0;
+  padding-top: 14px;
+}
+.economy-stat dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 0;
+  font: var(--fs-small)/1.45 var(--mono);
+}
+.economy-stat dt { color: var(--paper-faint); }
+.economy-stat dd { color: var(--paper); margin: 0; text-align: right; }
+.economy-stat dd a { color: inherit; }
+.economy-method {
+  color: var(--paper-faint);
+  font-size: var(--fs-body-sm);
+  max-width: 72ch;
+  margin-top: var(--s-5);
+}
+
+@media (max-width: 900px) {
+  .economy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 @media (max-width: 700px) {
   .verification-grid { grid-template-columns: 1fr; }
+  .economy-grid { grid-template-columns: 1fr; }
   .verification-card:last-child { grid-column: auto; }
 }
 
