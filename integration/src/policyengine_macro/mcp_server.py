@@ -125,6 +125,10 @@ def score_reform(
                     plausible-looking wrong numbers. For FRB/US, use the
                     frbus_shock tool with raw variable shocks in model units
                     (frbus_list_variables lists the levers).
+            'hank' — NOT ACCEPTED, likewise: the US HANK member scores
+                    stylized shocks, not detailed tax reforms, and its labor
+                    tax is endogenous, so no reform mapping exists. Use the
+                    hank_shock tool instead.
         start_year: Reform start year (default 2026).
         max_iter: og only — steady-state solver iteration cap (default 250).
         years: obr only — costing window length in years (default 5).
@@ -284,6 +288,80 @@ def frbus_summary() -> dict:
     point.
     """
     return core.frbus_summary()
+
+
+@mcp.tool()
+def hank_shock(
+    kind: str,
+    size: float,
+    persistence: float = 0.9,
+    horizon: int = 20,
+    variant: str = "two_asset",
+    include_distribution: bool = False,
+    name: str | None = None,
+) -> dict:
+    """Run a stylized shock through the US HANK model (Auclert, Bardóczy,
+    Rognlie & Straub, Econometrica 2021 — two-asset heterogeneous-agent New
+    Keynesian, solved in the sequence space) and return the impulse responses.
+
+    HONEST FRAMING: a validated replication scoring STYLIZED shocks — a
+    VAR-free sequence-space HANK. It is NOT a forecaster and does NOT score
+    detailed tax reforms (score_reform rejects model='hank'); distributional
+    outputs are first-order approximations. Responses are linear deviations
+    around a calibrated steady state and scale exactly with the shock size.
+
+    Args:
+        kind: 'monetary' (Taylor-rule intercept rstar), 'fiscal_spending'
+            (real G, implicitly financed by the endogenous labor tax;
+            two_asset only), or 'productivity' (TFP Z). There is deliberately
+            NO transfer or tax-rate shock: the labor tax is endogenous, so no
+            such instrument exists in the model.
+        size: Impact size of the shock, in model units — UNITS DIFFER PER
+            KIND: monetary is a level change in the QUARTERLY policy rate
+            (-0.0025 = a 25bp easing); fiscal_spending is a level change in G
+            (steady-state Y = 1, so 0.01 = 1% of GDP); productivity is a
+            level change in Z (0.01 ~ 1% TFP). See hank_summary for the
+            catalogue.
+        persistence: AR(1) decay of the shock path size * persistence**t
+            (default 0.9; must be in [0, 1)).
+        horizon: Quarters reported (default 20 = 5 years; max 300).
+        variant: 'two_asset' (default — the paper model) or 'one_asset' (fast
+            no-capital variant: monetary/productivity only, no investment
+            series).
+        include_distribution: two_asset only — add steady-state MPC by
+            liquid-wealth quartile, the hand-to-mouth share, and the impact
+            consumption response by total-wealth quartile (first-order
+            approximation from steady-state policies: the MPC-heterogeneity
+            channel only, not full household-level dynamics).
+        name: Optional label for the experiment.
+
+    Returns per-quarter rows (Y, C, I in % deviation from steady state; pi
+    and r in pp deviations of quarterly rates; plus the shock path), a
+    `peaks` block, and `series_meaning`. First call per variant pays the
+    steady-state (~13s) and jacobian (~5s) solves; both are cached, so warm
+    calls are effectively instant.
+    """
+    return core.hank_shock(
+        kind=kind, size=size, persistence=persistence, horizon=horizon,
+        variant=variant, include_distribution=include_distribution, name=name,
+    )
+
+
+@mcp.tool()
+def hank_summary() -> dict:
+    """Metadata and validation provenance for the US HANK member (instant,
+    no solve).
+
+    States what the model is (a validated replication of Auclert, Bardóczy,
+    Rognlie & Straub, Econometrica 2021, at the paper's production grids),
+    the available shock kinds and their units, the two variants, and the
+    scope limits: stylized shocks only, VAR-free sequence-space HANK, not a
+    forecaster, no PolicyEngine-reform bridge (hank_shock is the supported
+    entry point), distributional outputs are first-order approximations, and
+    there is no transfer or tax-rate instrument because the labor tax is
+    endogenous.
+    """
+    return core.hank_summary()
 
 
 @mcp.tool()

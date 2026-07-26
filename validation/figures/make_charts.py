@@ -112,6 +112,37 @@ def load_transcribed():
     return json.loads((HERE / "chart_data.json").read_text())
 
 
+def load_rolling_eval():
+    """Expanding-window forecast skill against a random walk with drift.
+
+    Source: papers/boe-svar/figures/rolling_evaluation.json, which stores, per
+    horizon, ``relative_rmse_vs_drift_by_variable`` (model RMSE / benchmark
+    RMSE; below 1 means the model wins) and ``dm_pvalue_vs_drift_by_variable``
+    (Diebold-Mariano p-value for that difference).
+
+    The drift benchmark is used rather than the plain random walk because it is
+    the harder of the two: a drifting series makes a no-change forecast look
+    worse than it is, and the model's advantage shrinks against drift.
+    """
+    d = json.loads(
+        (ROOT / "papers" / "boe-svar" / "figures" / "rolling_evaluation.json").read_text()
+    )
+    horizons = sorted(d["horizons"], key=lambda h: h["horizon"])
+    ratio = {h["horizon"]: h["relative_rmse_vs_drift_by_variable"] for h in horizons}
+    pval = {h["horizon"]: h["dm_pvalue_vs_drift_by_variable"] for h in horizons}
+    return [h["horizon"] for h in horizons], ratio, pval, d
+
+
+# Descriptions are read aloud by screen readers, where digits for small counts
+# scan worse than words.
+WORDS = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five",
+         6: "six", 7: "seven", 8: "eight"}
+
+
+def word(k):
+    return WORDS.get(k, str(k))
+
+
 # ---------------------------------------------------------------- chart builders
 
 def svg_open(view_w, view_h, chart_id, title, desc):
@@ -496,14 +527,253 @@ def chart_svar_fan():
     return "\n".join(out)
 
 
+def chart_obr_computed_share():
+    """Two stacked bars: how much of the OBR scorecard the model actually computes.
+
+    The point of the chart is that a headline "within band" rate is meaningless
+    until the passthrough variables — held at the OBR published value, so scoring
+    zero error trivially — are separated out from the ones the model computes.
+    """
+    d = load_transcribed()["obr_computed_share"]
+    total = d["total"]
+    computed, passthrough = d["computed"], d["passthrough"]
+    grades = d["grades"]
+
+    W, H = 760, 270
+    x0, x1 = 64.0, 724.0
+    span = x1 - x0
+    per_var = span / total
+
+    in_band = sum(g["count"] for g in grades if g["in_band"])
+    trivial = sum(g["count"] for g in grades if g.get("trivial"))
+    off = next(g for g in grades if g["key"] == "off")
+
+    desc = (
+        f"Two stacked bars. Of {total} headline variables in the OBR emulator "
+        f"calibration scorecard, {computed} are actually computed by the model and "
+        f"{passthrough} are passthrough, held at the OBR published value and therefore "
+        f"scoring zero error trivially. Of the {computed} computed, "
+        + ", ".join(f"{g['count']} are {g['label']}" for g in grades)
+        + f". {in_band} of the {computed}, or {100 * in_band / computed:.0f} per cent, land "
+        f"within band, and {word(trivial)} of those is a trivial accounting identity, so only "
+        f"{in_band - trivial} non-trivial computed variables are in band. The worst are "
+        + " and ".join(off["examples"])
+        + "."
+    )
+
+    out = svg_open(W, H, "obr-computed-share",
+                   "How much of the OBR emulator scorecard the model actually computes", desc)
+
+    # Row 1 — computed vs passthrough, out of the full scorecard.
+    split = x0 + computed * per_var
+    out.append(f'<text class="vc-lab" x="64" y="30">{total} headline scorecard variables</text>')
+    out.append(f'<rect class="vc-b1" x="{n(x0)}" y="52" width="{n(split - x0)}" height="40"/>')
+    out.append(f'<rect class="vc-b3" x="{n(split)}" y="52" width="{n(x1 - split)}" height="40"/>')
+    out.append(f'<text class="vc-val" x="{n((x0 + split) / 2)}" y="77" text-anchor="middle">'
+               f'{computed} computed</text>')
+    out.append(f'<text class="vc-rowlab" x="{n((split + x1) / 2)}" y="77" text-anchor="middle">'
+               f'{passthrough} passthrough &mdash; held at the OBR value</text>')
+    out.append(f'<line class="vc-edge" x1="{n(x0)}" y1="92" x2="{n(x0)}" y2="120"/>')
+    out.append(f'<line class="vc-edge" x1="{n(split)}" y1="92" x2="{n(split)}" y2="120"/>')
+
+    # Row 2 — the computed variables broken down by grade, on the same scale, so
+    # the second bar reads as a zoom into the first bar's left-hand segment.
+    out.append(f'<text class="vc-lab" x="64" y="140">of which, the {computed} the model '
+               f'computes</text>')
+    x = x0
+    for g in grades:
+        w = g["count"] * per_var
+        dash = ' stroke="currentColor" stroke-dasharray="3 2" stroke-width="1"' if g["key"] == "off" else ""
+        out.append(f'<rect class="vc-b{g["series"]}" x="{n(x)}" y="152" width="{n(w)}" '
+                   f'height="40"{dash}/>')
+        out.append(f'<text class="vc-rowlab" x="{n(x + w / 2)}" y="207" text-anchor="middle">'
+                   f'{esc(g["label"])} {g["count"]}</text>')
+        x += w
+
+    out.append(f'<text class="vc-warn" x="64" y="234">Only {in_band} of the {computed} computed '
+               f'variables land within band &mdash; {100 * in_band / computed:.0f}% &mdash; and '
+               f'{word(trivial)} of those {word(in_band)} is a trivial identity.</text>')
+    out.append(f'<text class="vc-note" x="64" y="252">{esc(d["bands_note"])}</text>')
+    out.append("</svg>")
+    return "\n".join(out)
+
+
+# Display order and labels for the skill matrix. Ordered roughly best to worst so
+# the eye can read down the column; the ordering is presentational, the numbers
+# come from rolling_evaluation.json.
+SKILL_ROWS = [
+    ("bank_rate", "Bank Rate"),
+    ("cpisa", "UK CPI"),
+    ("world_cpi", "World CPI"),
+    ("oil_price", "Oil price"),
+    ("cpi_energy", "CPI energy"),
+    ("uk_gdp", "UK real GDP"),
+    ("world_gdp", "World GDP"),
+    ("eri", "Exchange rate"),
+]
+
+SIGNIF = 0.05
+
+
+
+def chart_svar_skill_all():
+    horizons, ratio, pval, meta = load_rolling_eval()
+    W, H = 760, 404
+    x_one, per_unit = 370.8, 883.0        # value 1.0 at x_one
+    xs = lambda v: x_one + (v - 1.0) * per_unit
+
+    last = horizons[-1]
+    best = min(SKILL_ROWS, key=lambda r: ratio[last][r[0]])
+    worst = max(SKILL_ROWS, key=lambda r: ratio[last][r[0]])
+    n_win_1 = sum(1 for k, _ in SKILL_ROWS if ratio[horizons[0]][k] < 1)
+    n_win_last = sum(1 for k, _ in SKILL_ROWS if ratio[last][k] < 1)
+
+    desc = (
+        f"Dot matrix of forecast error relative to a random walk with drift, "
+        f"{word(len(SKILL_ROWS))} variables by {word(len(horizons))} quarterly horizons, from "
+        f"{meta['origins']} expanding-window origins. A ratio below 1.0 means the model "
+        f"beats the benchmark; filled dots mark differences significant at 5 per cent by a "
+        f"Diebold-Mariano test, hollow dots differences that are not statistically "
+        f"distinguishable. "
+        + "; ".join(
+            f"{label} runs {ratio[horizons[0]][key]:.2f} at one quarter to "
+            f"{ratio[last][key]:.2f} at {last}"
+            for key, label in SKILL_ROWS
+        )
+        + f". {best[1]} is the best at the longest horizon and {worst[1]} the worst. "
+        f"Against this harder benchmark only {word(n_win_1)} of {word(len(SKILL_ROWS))} "
+        f"variables beat naive at one quarter and {word(n_win_last)} at {last}."
+    )
+
+    out = svg_open(W, H, "svar-skill-all",
+                   "boe-svar forecast skill against a random walk with drift, "
+                   "all eight variables", desc)
+    out.append('<text class="vc-lab" x="150" y="30">RMSE &divide; drifting-random-walk RMSE '
+               '&middot; horizons 1&ndash;8 quarters</text>')
+    out.append('<text class="vc-note" x="150" y="48">filled = difference significant at 5% '
+               '(Diebold&ndash;Mariano); hollow = not distinguishable</text>')
+
+    for tick in (0.8, 0.9, 1.1, 1.2, 1.3):
+        x = xs(tick)
+        out.append(f'<line class="vc-grid" x1="{n(x)}" y1="62" x2="{n(x)}" y2="362"/>')
+        out.append(f'<text class="vc-tick" x="{n(x)}" y="378" text-anchor="middle">{tick}</text>')
+    out.append(f'<line class="vc-axis" x1="{n(x_one)}" y1="62" x2="{n(x_one)}" y2="362"/>')
+    out.append(f'<text class="vc-tick" x="{n(x_one)}" y="378" text-anchor="middle">1.0</text>')
+    out.append(f'<text class="vc-note" x="{n(x_one - 8)}" y="396" text-anchor="end">'
+               f'&larr; model better</text>')
+    out.append(f'<text class="vc-note" x="{n(x_one + 8)}" y="396">benchmark better &rarr;</text>')
+
+    for i, (key, label) in enumerate(SKILL_ROWS):
+        y = 78.0 + 38 * i
+        values = [ratio[h][key] for h in horizons]
+        out.append(f'<text class="vc-rowlab" x="140" y="{n(y + 4)}" text-anchor="end">'
+                   f'{esc(label)}</text>')
+        out.append(f'<line class="vc-grid" x1="{n(xs(min(values)))}" y1="{n(y)}" '
+                   f'x2="{n(xs(max(values)))}" y2="{n(y)}"/>')
+        for h in horizons:
+            v, p = ratio[h][key], pval[h][key]
+            r = 4.0 if h == last else 2.6
+            if p < SIGNIF:
+                series = 1 if v < 1 else 2
+                out.append(f'<circle class="vc-s{series}-dot" cx="{n(xs(v))}" cy="{n(y)}" '
+                           f'r="{r}"/>')
+            else:
+                out.append(f'<circle cx="{n(xs(v))}" cy="{n(y)}" r="{r}" fill="none" '
+                           f'stroke="currentColor" stroke-width="1.2" opacity="0.55"/>')
+        out.append(f'<text class="vc-val" x="{n(xs(max(values)) + 10)}" y="{n(y + 4)}">'
+                   f'{ratio[last][key]:.2f}</text>')
+
+    out.append("</svg>")
+    return "\n".join(out)
+
+
+def chart_svar_winrate():
+    horizons, ratio, pval, _meta = load_rolling_eval()
+    keys = [k for k, _ in SKILL_ROWS]
+    total = len(keys)
+
+    counts = []
+    for h in horizons:
+        wins = [k for k in keys if ratio[h][k] < 1]
+        sig = [k for k in wins if pval[h][k] < SIGNIF]
+        counts.append({"h": h, "wins": len(wins), "sig": len(sig)})
+
+    W, H = 760, 300
+    x0, x1 = 64, 724
+    y_zero, y_top = 250.0, 60.0
+    per_var = (y_zero - y_top) / total
+
+    first_dry = next((c["h"] for c in counts if c["sig"] == 0), None)
+    desc = (
+        f"Stacked column chart. Of the model's {word(total)} forecast variables, how many have "
+        f"lower root mean squared error than a random walk with drift, at horizons one to "
+        f"{word(horizons[-1])} quarters. The counts are "
+        + ", ".join(str(c["wins"]) for c in counts)
+        + " respectively. Each column also separates wins whose difference is statistically "
+        "significant at 5 per cent by a Diebold-Mariano test from wins that are not: "
+        "significant wins number "
+        + ", ".join(str(c["sig"]) for c in counts)
+        + "."
+        + (f" From horizon {first_dry} onward no variable beats the benchmark by a "
+           f"statistically significant margin." if first_dry else "")
+    )
+
+    out = svg_open(W, H, "svar-winrate",
+                   "How many of eight variables beat a drifting random walk, by horizon", desc)
+    out.append(f'<text class="vc-lab" x="64" y="30">Of {total} forecast variables, how many '
+               f'beat a random walk with drift</text>')
+
+    for k in (2, 4, 6, 8):
+        y = y_zero - k * per_var
+        out.append(f'<line class="vc-grid" x1="{x0}" y1="{n(y)}" x2="{x1}" y2="{n(y)}"/>')
+        out.append(f'<text class="vc-tick" x="54" y="{n(y + 4)}" text-anchor="end">{k}</text>')
+    out.append(f'<line class="vc-axis" x1="{x0}" y1="{n(y_zero)}" x2="{x1}" y2="{n(y_zero)}"/>')
+    out.append(f'<text class="vc-tick" x="54" y="{n(y_zero + 4)}" text-anchor="end">0</text>')
+
+    bar_w, pitch = 56, 80
+    for i, c in enumerate(counts):
+        bx = x0 + 12 + i * pitch
+        mid = bx + bar_w / 2
+        # Bottom-up: significant wins, then the rest of the wins, then the losses.
+        y_sig = y_zero - c["sig"] * per_var
+        y_win = y_zero - c["wins"] * per_var
+        if c["sig"]:
+            out.append(f'<rect class="vc-b1" x="{n(bx)}" y="{n(y_sig)}" width="{bar_w}" '
+                       f'height="{n(y_zero - y_sig)}"/>')
+        if c["wins"] > c["sig"]:
+            out.append(f'<rect class="vc-b2" x="{n(bx)}" y="{n(y_win)}" width="{bar_w}" '
+                       f'height="{n(y_sig - y_win)}"/>')
+        out.append(f'<rect class="vc-b3" x="{n(bx)}" y="{n(y_top)}" width="{bar_w}" '
+                   f'height="{n(y_win - y_top)}"/>')
+        out.append(f'<text class="vc-val" x="{n(mid)}" y="{n(y_win - 6)}" '
+                   f'text-anchor="middle">{c["wins"]}</text>')
+        out.append(f'<text class="vc-tick" x="{n(mid)}" y="270.0" text-anchor="middle">'
+                   f'h={c["h"]}</text>')
+
+    out.append('<rect class="vc-b1" x="64" y="272" width="14" height="10"/>'
+               '<text class="vc-note" x="84" y="281">beats it, and the difference is '
+               'significant</text>')
+    out.append('<rect class="vc-b2" x="330" y="272" width="14" height="10"/>'
+               '<text class="vc-note" x="350" y="281">beats it, not significantly</text>')
+    out.append('<rect class="vc-b3" x="560" y="272" width="14" height="10"/>'
+               '<text class="vc-note" x="580" y="281">does not beat it</text>')
+    out.append("</svg>")
+    return "\n".join(out)
+
+
+# Order must match the order the SVGs appear in validation/index.html: the
+# substitution below is positional.
 BUILDERS = [
     ("obr-anchored", chart_obr_anchored),
     ("obr-reform", chart_obr_reform),
+    ("obr-computed-share", chart_obr_computed_share),
     ("obr-freerun", chart_obr_freerun),
     ("obr-outturn", chart_obr_outturn),
     ("svar-fevd", chart_svar_fevd),
     ("svar-fan", chart_svar_fan),
     ("frbus-residuals", chart_frbus_residuals),
+    ("svar-skill-all", chart_svar_skill_all),
+    ("svar-winrate", chart_svar_winrate),
 ]
 
 SVG_RE = re.compile(r'<svg class="vchart".*?</svg>', re.DOTALL)
