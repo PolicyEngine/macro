@@ -1,0 +1,50 @@
+name: Fetch data vintages
+
+# Pulls the tracked ONS series and opens a PR when a vintage actually changed.
+# Deliberately a PR and not a direct push: a data revision changes what the site
+# claims, so it should be visible as a reviewable diff rather than appearing in
+# main overnight. The append-only store means a revision shows up as a new file
+# beside the old one, never as an edit.
+on:
+  schedule:
+    # Weekday mornings, after the 07:00 London release window.
+    - cron: "30 7 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  fetch:
+    name: Fetch ONS series
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Fetch
+        run: python3 data/fetch.py
+
+      - name: Validate the store
+        run: python3 data/fetch.py --check
+
+      - name: Open a PR if anything changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: data/vintage-refresh
+          title: "Refresh ONS data vintages"
+          commit-message: "Refresh ONS data vintages"
+          body: |
+            Automated vintage refresh from `data/fetch.py`.
+
+            New files under `data/vintages/` are new vintages — an upstream
+            revision or a new observation. Nothing is edited in place, so the
+            diff should be additions plus the regenerated `MANIFEST.json` and
+            `latest/`. **An edit to an existing vintage file is a bug**; check
+            the fetcher rather than accepting it.
+          labels: data
+          delete-branch: true
