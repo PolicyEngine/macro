@@ -137,7 +137,7 @@ python3 -m http.server 8000   # then open http://localhost:8000/
 | path | page |
 |------|------|
 | `index.html` | the suite — idea, models, pipeline, outputs |
-| `models/` | model discovery — choose by question and browse all five models |
+| `models/` | model discovery — choose by question and browse all six models |
 | `olg/` | the OG-UK model page — install, quickstart, options, shocks, outputs |
 | `obr/` | the OBR macroeconometric model — quickstart, solver, levers, forecasting |
 | `svar/` | the UK structural VAR — the model, quickstart, outputs, validation |

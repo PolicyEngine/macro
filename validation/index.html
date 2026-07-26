@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>PolicyEngine Macro — validation</title>
-<meta name="description" content="Every PolicyEngine Macro model set beside its official counterpart: the OBR emulator against the March 2026 EFO and HMRC's ready reckoner, the structural VAR against Brignone and Piffer (2025), frb-us against the Fed's pyfrbus, PolicyEngine against statute, and the OLG model against its calibration targets — with the verification gradient stated, not flattened." />
+<meta name="description" content="Every PolicyEngine Macro model set beside its reference: the OBR emulator against the March 2026 EFO and HMRC's ready reckoner, the structural VAR against Brignone and Piffer (2025), frb-us against the Fed's pyfrbus, us-hank against Auclert et al. (2021), PolicyEngine against statute, and OLG against calibration targets." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/validation" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://policyengine-macro.vercel.app/validation" />
@@ -78,6 +78,7 @@
     <a href="#obr">obr-macro</a>
     <a href="#svar">boe-svar</a>
     <a href="#frbus">frb-us</a>
+    <a href="#hank">us-hank</a>
     <a href="#pe">pe-microsim</a>
     <a href="#olg">psl-og</a>
     <a href="#shops">vs others</a>
@@ -91,7 +92,7 @@
     </div>
     <div class="prose">
       <p>
-        The five models support different kinds of checks. The
+        The six models support different kinds of checks. The
         <a href="/docs/#choose">verification gradient</a> groups them into
         three classes; choose a row, then open its evidence below.
       </p>
@@ -117,6 +118,12 @@
             <td>Replication with a published anchor</td>
             <td>The Fed's LONGBASE database and <code>pyfrbus</code> solver; Coenen et al. and CBO multiplier ranges</td>
             <td>Tracking invariant 5.6&times;10<sup>&minus;17</sup> — machine precision</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#hank"><strong>us-hank</strong></a></th>
+            <td>Replication with a published anchor</td>
+            <td>Auclert, Bardóczy, Rognlie &amp; Straub (2021), using the authors' <code>sequence-jacobian</code> toolkit</td>
+            <td>18 tests gate steady-state targets, market clearing, and published shock-response magnitudes</td>
           </tr>
           <tr>
             <th scope="row"><a href="#pe"><strong>pe-microsim</strong></a></th>
@@ -795,9 +802,36 @@
     </div>
   </section>
 
+  <section id="hank" class="band">
+    <div class="band-head">
+      <span class="kicker mono">05 — us-hank</span>
+      <h2>Against the published two-asset HANK replication targets.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        The implementation reproduces the calibrated steady state and
+        sequence-space impulse responses of Auclert, Bardóczy, Rognlie and
+        Straub (<em>Econometrica</em>, 2021). Its 18-test upstream suite gates
+        calibration targets, market clearing, and the signs and magnitudes of
+        published shock responses at the paper's production grids, using the
+        authors' <code>sequence-jacobian</code> toolkit.
+      </p>
+      <div class="callout">
+        <strong>This validates replication fidelity, not prediction.</strong>
+        The model generates deterministic, first-order responses around a
+        calibrated steady state. It does not forecast the US economy, quantify
+        parameter uncertainty, or map detailed tax reforms into its stylized
+        instruments.
+      </div>
+      <p>
+        <a href="/us-hank/#trust">Read the replication evidence and limits →</a>
+      </p>
+    </div>
+  </section>
+
   <section id="pe" class="band">
     <div class="band-head">
-      <span class="kicker mono">05 — pe-microsim</span>
+      <span class="kicker mono">06 — pe-microsim</span>
       <h2>Against implemented legislation.</h2>
     </div>
     <div class="prose">
@@ -823,7 +857,7 @@
 
   <section id="olg" class="band">
     <div class="band-head">
-      <span class="kicker mono">06 — psl-og</span>
+      <span class="kicker mono">07 — psl-og</span>
       <h2>No ground truth. Calibration targets instead.</h2>
     </div>
     <div class="prose">
@@ -882,7 +916,7 @@
 
   <section id="shops" class="band">
     <div class="band-head">
-      <span class="kicker mono">07 — side by side</span>
+      <span class="kicker mono">08 — side by side</span>
       <h2>The same questions, answered by other shops.</h2>
     </div>
     <div class="prose">
