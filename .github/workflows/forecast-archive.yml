@@ -48,5 +48,11 @@ jobs:
       - name: Validate the archive
         run: python3 forecasts/archive.py --check
 
-      - name: Scorecard is current
+      - name: Data vintage store is consistent
+        run: python3 data/fetch.py --check
+
+      - name: No outturn is available but unrecorded
+        run: python3 forecasts/ingest_outturns.py --check
+
+      - name: Scorecard and page are current
         run: python3 forecasts/score.py --check

@@ -78,22 +78,43 @@
   <section id="status" class="band">
     <div class="band-head">
       <span class="kicker mono">01 — where this stands</span>
-      <h2>The record is one round old.</h2>
+      <h2>One round in, one result.</h2>
     </div>
     <div class="prose">
 <!-- scorecard-status:begin -->
       <p>
-        <strong>1 round archived; 0 forecast period(s) scored.</strong>
-        The earliest period that can be scored is <strong>2026Q2</strong>, once the ONS first quarterly estimate lands.
+        <strong>1 round archived; 1 forecast period scored.</strong>
+        The next result due is 2026Q2 (UK real GDP, y/y), which lands when the ONS publishes it.
       </p>
 <!-- scorecard-status:end -->
       <p>
-        There is no headline accuracy figure on this page yet, because one
-        cannot honestly be computed from zero observations. That is the point of
-        publishing the record from its first day rather than from the day it
-        starts to look good: the empty state is part of the evidence, and it is
-        checkable that nothing was quietly discarded before the record began.
+        There is no headline accuracy figure on this page, and there will not be
+        one until the scored count is large enough to carry it. That is the point
+        of publishing the record from its first day rather than from the day it
+        starts to look good: the early, near-empty state is part of the evidence,
+        and it is checkable that nothing was quietly discarded before the record
+        began.
       </p>
+
+<!-- scorecard-results:begin -->
+      <div class="table-scroll">
+      <table>
+        <caption>Scored forecasts. Error is forecast minus outturn; the band column is the narrowest credible band the outturn fell inside.</caption>
+        <thead><tr><th scope="col">Period</th><th scope="col">Variable</th><th scope="col">Forecast</th><th scope="col">Outturn</th><th scope="col">Error</th><th scope="col">Band</th><th scope="col">Round</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row">2026Q2</th>
+            <td>UK CPI, y/y</td>
+            <td>2.68%</td>
+            <td>2.80%</td>
+            <td>-0.12pp</td>
+            <td>68%</td>
+            <td>2026-07-21</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+<!-- scorecard-results:end -->
       <p>
         What already exists is a <em>pseudo</em>-out-of-sample evaluation — the
         boe-svar model re-estimated at 49 expanding-window origins and compared
@@ -123,13 +144,26 @@
             <td>boe-svar</td>
             <td>2026Q1</td>
             <td>13</td>
-            <td>0</td>
+            <td>1</td>
             <td><a href="https://github.com/PolicyEngine/macro/blob/main/forecasts/rounds/2026-07-21/boe-svar.json"><code>2026-07-21/boe-svar.json</code></a></td>
           </tr>
 <!-- scorecard-rounds:end -->
         </tbody>
       </table>
       </div>
+      <p>
+        <strong>The first round is a retroactive archive, and its lead time was
+        thin.</strong> The <code>2026-07-21</code> round was not archived by this
+        machinery — it was copied out of
+        <code>papers/boe-svar/figures/current_forecast.json</code> after the fact,
+        so its provenance rests on that file's git history rather than on the
+        archive. The commit landed 2026-07-21 14:54 BST; the ONS published the
+        2026Q2 CPI figure on the following morning's release. So the forecast did
+        precede the outturn, by about sixteen hours, and the model was conditioned
+        only through 2026Q1 — but a sixteen-hour lead is not the same evidence as
+        a round archived weeks ahead, and it is recorded here rather than left for
+        a reader to discover. Every round from here is archived before the fact.
+      </p>
       <p>
         Rounds are append-only. Files under <code>forecasts/rounds/</code> can be
         added but never edited or deleted, and a

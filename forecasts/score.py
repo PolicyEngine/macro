@@ -120,14 +120,15 @@ def build() -> dict:
     scored = [score_round(r, outturns) for r in rounds]
     total_scored = sum(s["periods_scored"] for s in scored)
 
-    # The first period any round forecast that is still unscored — i.e. the
-    # earliest date this track record can start meaning something.
+    # The earliest period still waiting on any variable. Checked per variable,
+    # not per period: CPI lands roughly six weeks before the quarterly GDP
+    # estimate, so a period with one of the two in is not finished.
     pending = sorted(
         {
             period
             for r in rounds
-            for period in r["forecast"]
-            if not any((period, v) in outturns for v in r["forecast"][period])
+            for period, block in r["forecast"].items()
+            if not all((period, v) in outturns for v in block)
         }
     )
 
@@ -136,6 +137,21 @@ def build() -> dict:
         "rounds": len(rounds),
         "periods_scored": total_scored,
         "next_period_to_score": pending[0] if pending else None,
+        "pending_detail": (
+            {
+                "period": pending[0],
+                "variables": sorted(
+                    {
+                        v
+                        for r in rounds
+                        for v in r["forecast"].get(pending[0], {})
+                        if (pending[0], v) not in outturns
+                    }
+                ),
+            }
+            if pending
+            else None
+        ),
         "status": (
             "accumulating — no forecast period has an outturn yet"
             if total_scored == 0
@@ -147,27 +163,29 @@ def build() -> dict:
 
 # ---------------------------------------------------------------- page
 
+VARIABLE_LABELS = {"gdp": "UK real GDP, y/y", "cpi": "UK CPI, y/y"}
+
 def esc(s: str) -> str:
     return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 def render_status(card: dict) -> str:
     """The headline paragraph. Deliberately refuses to state an accuracy figure
-    while the scored count is zero — see the module docstring."""
+    while the scored count is small — see the module docstring."""
     rounds = card["rounds"]
     scored = card["periods_scored"]
-    plural = "" if rounds == 1 else "s"
 
     lines = [
         "      <p>",
-        f"        <strong>{rounds} round{plural} archived; {scored} forecast "
-        "period(s) scored.</strong>",
+        f"        <strong>{rounds} round{'' if rounds == 1 else 's'} archived; "
+        f"{scored} forecast period{'' if scored == 1 else 's'} scored.</strong>",
     ]
-    if card["next_period_to_score"]:
+    pending = card.get("pending_detail")
+    if pending:
+        who = ", ".join(f"{VARIABLE_LABELS.get(v, v)}" for v in pending["variables"])
         lines.append(
-            "        The earliest period that can be scored is "
-            f"<strong>{esc(card['next_period_to_score'])}</strong>, once the "
-            "ONS first quarterly estimate lands."
+            f"        The next result due is {esc(pending['period'])} "
+            f"({esc(who)}), which lands when the ONS publishes it."
         )
     else:
         lines.append("        Every archived period now has an outturn.")
@@ -193,13 +211,61 @@ def render_rounds(card: dict) -> str:
     return "\n".join(rows)
 
 
+def render_results(card: dict) -> str:
+    """The scored entries. Absent entirely until something has been scored."""
+    rows = [
+        (detail, entry)
+        for detail in card["detail"]
+        for entry in detail["entries"]
+    ]
+    if not rows:
+        return "      <!-- nothing scored yet -->"
+
+    body = []
+    for detail, e in sorted(rows, key=lambda r: (r[1]["period"], r[1]["variable"])):
+        band = "68%" if e["in_68"] else ("90%" if e["in_90"] else "outside 90%")
+        body.append(
+            "          <tr>\n"
+            f"            <th scope=\"row\">{esc(e['period'])}</th>\n"
+            f"            <td>{esc(VARIABLE_LABELS.get(e['variable'], e['variable']))}</td>\n"
+            f"            <td>{e['forecast']:.2f}%</td>\n"
+            f"            <td>{e['outturn']:.2f}%</td>\n"
+            f"            <td>{e['error']:+.2f}pp</td>\n"
+            f"            <td>{esc(band)}</td>\n"
+            f"            <td>{esc(detail['round_id'])}</td>\n"
+            "          </tr>"
+        )
+
+    return "\n".join(
+        [
+            "      <div class=\"table-scroll\">",
+            "      <table>",
+            "        <caption>Scored forecasts. Error is forecast minus outturn; "
+            "the band column is the narrowest credible band the outturn fell inside.</caption>",
+            "        <thead><tr><th scope=\"col\">Period</th><th scope=\"col\">Variable</th>"
+            "<th scope=\"col\">Forecast</th><th scope=\"col\">Outturn</th>"
+            "<th scope=\"col\">Error</th><th scope=\"col\">Band</th>"
+            "<th scope=\"col\">Round</th></tr></thead>",
+            "        <tbody>",
+            *body,
+            "        </tbody>",
+            "      </table>",
+            "      </div>",
+        ]
+    )
+
+
 def render_page(html: str, card: dict) -> str:
     """Inject the generated blocks between their markers.
 
     Same contract as validation/figures/make_charts.py: the page is committed,
     the numbers inside it are generated, and --check fails if they drift apart.
     """
-    blocks = {"scorecard-status": render_status(card), "scorecard-rounds": render_rounds(card)}
+    blocks = {
+        "scorecard-status": render_status(card),
+        "scorecard-results": render_results(card),
+        "scorecard-rounds": render_rounds(card),
+    }
     for marker, body in blocks.items():
         pattern = re.compile(
             rf"(<!-- {marker}:begin -->\n).*?(<!-- {marker}:end -->)", re.DOTALL
