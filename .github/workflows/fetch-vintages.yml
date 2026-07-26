@@ -1,6 +1,6 @@
 name: Fetch data vintages
 
-# Pulls the tracked ONS series and opens a PR when a vintage actually changed.
+# Pulls the tracked ONS and Bank of England series and opens a PR when a vintage actually changed.
 # Deliberately a PR and not a direct push: a data revision changes what the site
 # claims, so it should be visible as a reviewable diff rather than appearing in
 # main overnight. The append-only store means a revision shows up as a new file
@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   fetch:
-    name: Fetch ONS series
+    name: Fetch official series
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -36,10 +36,10 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           branch: data/vintage-refresh
-          title: "Refresh ONS data vintages"
-          commit-message: "Refresh ONS data vintages"
+          title: "Refresh official data vintages"
+          commit-message: "Refresh official data vintages"
           body: |
-            Automated vintage refresh from `data/fetch.py`.
+            Automated ONS and Bank of England vintage refresh from `data/fetch.py`.
 
             New files under `data/vintages/` are new vintages — an upstream
             revision or a new observation. Nothing is edited in place, so the

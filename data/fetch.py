@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch UK official statistics into an append-only vintage store.
+"""Fetch UK official statistics and market data into an append-only vintage store.
 
 Run:  python3 data/fetch.py                  # fetch every series
       python3 data/fetch.py --series uk_cpi_yoy
@@ -27,9 +27,12 @@ of an opaque binary blob.
 from __future__ import annotations
 
 import argparse
+import csv
+import io
 import json
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -68,6 +71,32 @@ ONS_SERIES = {
     },
 }
 
+BOE_URL = "https://www.bankofengland.co.uk/boeapps/database/"
+BOE_CSV = BOE_URL + "_iadb-fromshowcolumns.asp"
+BOE_START = "01/Jan/2020"
+BOE_SERIES = {
+    "uk_bank_rate": {
+        "cdid": "IUDBEDR",
+        "title": "Official Bank Rate",
+        "description": "Wholesale interest and discount rates, Official Bank Rate, Daily",
+    },
+    "uk_gilt_5y": {
+        "cdid": "IUDSNPY",
+        "title": "UK nominal par yield, 5 year",
+        "description": "British Government Securities nominal par yield, 5 year, Daily",
+    },
+    "uk_gilt_10y": {
+        "cdid": "IUDMNPY",
+        "title": "UK nominal par yield, 10 year",
+        "description": "British Government Securities nominal par yield, 10 year, Daily",
+    },
+    "uk_gilt_20y": {
+        "cdid": "IUDLNPY",
+        "title": "UK nominal par yield, 20 year",
+        "description": "British Government Securities nominal par yield, 20 year, Daily",
+    },
+}
+
 
 # ---------------------------------------------------------------- fetching
 
@@ -75,6 +104,12 @@ def get_json(url: str) -> dict:
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=60) as resp:
         return json.loads(resp.read())
+
+
+def get_text(url: str) -> str:
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        return resp.read().decode("utf-8-sig")
 
 
 def parse_quarters(payload: dict) -> list[dict]:
@@ -160,47 +195,101 @@ def fetch_series(name: str, spec: dict, vintage: str) -> str:
     return "written"
 
 
+def fetch_boe_series(name: str, spec: dict, vintage: str) -> str:
+    query = urllib.parse.urlencode(
+        {
+            "csv.x": "yes",
+            "Datefrom": BOE_START,
+            "Dateto": "now",
+            "SeriesCodes": spec["cdid"],
+            "CSVF": "TN",
+            "UsingCodes": "Y",
+            "VPD": "Y",
+            "VFD": "N",
+        }
+    )
+    rows = csv.DictReader(io.StringIO(get_text(f"{BOE_CSV}?{query}")))
+    observations = []
+    for row in rows:
+        raw_date, raw_value = row.get("DATE"), row.get(spec["cdid"])
+        if not raw_date or raw_value in (None, ""):
+            continue
+        period = datetime.strptime(raw_date.strip(), "%d %b %Y").strftime("%Y-%m-%d")
+        observations.append({"period": period, "value": float(raw_value)})
+    if not observations:
+        raise SystemExit(f"{name}: no Bank of England observations parsed")
+
+    snapshot = {
+        "series": name,
+        "source": "Bank of England",
+        "cdid": spec["cdid"],
+        "title": spec["title"],
+        "description": spec["description"],
+        "frequency": "daily",
+        "units": "percent",
+        "url": BOE_URL,
+        "release_updated": observations[-1]["period"],
+        "first_period": observations[0]["period"],
+        "last_period": observations[-1]["period"],
+        "observations": observations,
+    }
+    series_dir = VINTAGES / "boe" / name
+    previous = latest_vintage(series_dir)
+    if previous and same_data(json.loads(previous.read_text()), snapshot):
+        return "unchanged"
+    out = series_dir / f"{vintage}.json"
+    if out.exists():
+        return "exists"
+    snapshot["vintage"] = vintage
+    snapshot["fetched_utc"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    series_dir.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(snapshot, indent=2) + "\n")
+    return "written"
+
+
 # ---------------------------------------------------------------- derived files
 
 def rebuild_latest() -> list[str]:
     """Flatten the newest vintage of each series into latest/ for the site."""
     LATEST.mkdir(parents=True, exist_ok=True)
     written = []
-    for series_dir in sorted((VINTAGES / "ons").glob("*")):
-        newest = latest_vintage(series_dir)
-        if not newest:
-            continue
-        (LATEST / f"{series_dir.name}.json").write_text(newest.read_text())
-        written.append(series_dir.name)
+    for source_dir in sorted(VINTAGES.glob("*")):
+        for series_dir in sorted(source_dir.glob("*")):
+            newest = latest_vintage(series_dir)
+            if not newest:
+                continue
+            (LATEST / f"{series_dir.name}.json").write_text(newest.read_text())
+            written.append(series_dir.name)
     return written
 
 
 def rebuild_manifest() -> dict:
     entries = {}
-    for series_dir in sorted((VINTAGES / "ons").glob("*")):
-        vintages = sorted(p.stem for p in series_dir.glob("*.json"))
-        if not vintages:
-            continue
-        newest = json.loads((series_dir / f"{vintages[-1]}.json").read_text())
-        entries[series_dir.name] = {
-            "source": newest["source"],
-            "cdid": newest["cdid"],
-            "title": newest["title"],
-            "units": newest["units"],
-            "frequency": newest["frequency"],
-            "url": newest["url"],
-            "vintages": vintages,
-            "latest_vintage": vintages[-1],
-            "release_updated": newest.get("release_updated"),
-            "coverage": [newest["first_period"], newest["last_period"]],
-        }
+    for source_dir in sorted(VINTAGES.glob("*")):
+        for series_dir in sorted(source_dir.glob("*")):
+            vintages = sorted(p.stem for p in series_dir.glob("*.json"))
+            if not vintages:
+                continue
+            newest = json.loads((series_dir / f"{vintages[-1]}.json").read_text())
+            entries[series_dir.name] = {
+                "source": newest["source"],
+                "cdid": newest["cdid"],
+                "title": newest["title"],
+                "units": newest["units"],
+                "frequency": newest["frequency"],
+                "url": newest["url"],
+                "vintages": vintages,
+                "latest_vintage": vintages[-1],
+                "release_updated": newest.get("release_updated"),
+                "coverage": [newest["first_period"], newest["last_period"]],
+            }
 
     manifest = {
         "_comment": (
             "Generated by data/fetch.py. Every series is stored as dated, "
             "append-only vintages under data/vintages/; latest/ is a flattened "
-            "copy for the static site. Licence: ONS data is released under the "
-            "Open Government Licence v3.0."
+            "copy for the static site. Licence: ONS and Bank of England data "
+            "are released under the Open Government Licence v3.0."
         ),
         "licence": "Open Government Licence v3.0",
         "series": entries,
@@ -218,7 +307,7 @@ def check() -> int:
         print("no vintages stored yet")
         return 0
 
-    for path in sorted((VINTAGES / "ons").glob("*/*.json")):
+    for path in sorted(VINTAGES.glob("*/*/*.json")):
         rel = path.relative_to(HERE)
         data = json.loads(path.read_text())
         if data.get("vintage") != path.stem:
@@ -240,8 +329,9 @@ def check() -> int:
     if problems:
         return 1
 
-    n = len(list((VINTAGES / "ons").glob("*/*.json")))
-    print(f"OK — {n} vintage file(s) across {len(list((VINTAGES / 'ons').glob('*')))} series")
+    files = list(VINTAGES.glob("*/*/*.json"))
+    series = list(VINTAGES.glob("*/*"))
+    print(f"OK — {len(files)} vintage file(s) across {len(series)} series")
     return 0
 
 
@@ -256,12 +346,22 @@ def main() -> int:
         return check()
 
     vintage = args.vintage or datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    wanted = {args.series: ONS_SERIES[args.series]} if args.series else ONS_SERIES
+    all_series = {
+        **{name: ("ons", spec) for name, spec in ONS_SERIES.items()},
+        **{name: ("boe", spec) for name, spec in BOE_SERIES.items()},
+    }
+    if args.series and args.series not in all_series:
+        ap.error(f"unknown series {args.series!r}")
+    wanted = {args.series: all_series[args.series]} if args.series else all_series
 
     failures = 0
-    for name, spec in wanted.items():
+    for name, (source, spec) in wanted.items():
         try:
-            result = fetch_series(name, spec, vintage)
+            result = (
+                fetch_series(name, spec, vintage)
+                if source == "ons"
+                else fetch_boe_series(name, spec, vintage)
+            )
         except (urllib.error.URLError, TimeoutError) as exc:
             # A transient upstream failure must not look like "no revision".
             print(f"FAIL {name}: {type(exc).__name__} {exc}", file=sys.stderr)
