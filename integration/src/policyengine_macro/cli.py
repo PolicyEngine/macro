@@ -323,6 +323,91 @@ def frbus_summary(as_json):
     click.echo(f"\nReform bridge: {res['reform_bridge']}")
 
 
+@main.command("hank-shock")
+@click.option("--kind", required=True,
+              type=click.Choice([k["kind"] for k in core.HANK_SHOCK_KINDS]),
+              help="Shock kind (see `pe-macro hank-summary` for units).")
+@click.option("--size", required=True, type=float,
+              help="Impact size in model units; UNITS DIFFER PER KIND "
+                   "(quarterly-rate level for monetary, level of G for "
+                   "fiscal_spending, level of Z for productivity).")
+@click.option("--persistence", default=0.9, show_default=True, type=float,
+              help="AR(1) decay of the shock path (in [0, 1)).")
+@click.option("--horizon", default=core.HANK_DEFAULT_HORIZON, show_default=True,
+              help="Quarters reported.")
+@click.option("--variant", default="two_asset", show_default=True,
+              type=click.Choice(list(core.HANK_VARIANTS)),
+              help="two_asset (the paper model) or one_asset (fast, no "
+                   "capital, monetary/productivity only).")
+@click.option("--distribution", "include_distribution", is_flag=True,
+              help="two_asset only: add MPC-by-quartile, hand-to-mouth share "
+                   "and the first-order impact consumption response by "
+                   "wealth quartile.")
+@click.option("--name", default=None, help="Label for the experiment.")
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
+def hank_shock(kind, size, persistence, horizon, variant,
+               include_distribution, name, as_json):
+    """Run a stylized US HANK shock (validated replication; not a forecaster)."""
+    try:
+        res = core.hank_shock(
+            kind=kind, size=size, persistence=persistence, horizon=horizon,
+            variant=variant, include_distribution=include_distribution,
+            name=name,
+        )
+    except (ValueError, ImportError) as e:
+        raise click.ClickException(str(e)) from e
+    if as_json:
+        _emit_json(res)
+        return
+    click.echo(f"Experiment: {res['name']}  (kind={res['kind']}, "
+               f"size={res['size']:+g}, persistence={res['persistence']:g}, "
+               f"variant={res['variant']})")
+    click.echo(f"Units: {res['units']}")
+    click.echo(f"Framing: {res['framing']}")
+    columns = list(res["results"][0])
+    click.echo(_table(res["results"], columns))
+    click.echo("\nPeak absolute deviations:")
+    for v, peak in res["peaks"].items():
+        click.echo(f"  {v:3s} {peak['value']:+.4f} at quarter {peak['quarter']}"
+                   f"   ({res['series_meaning'][v]})")
+    if res.get("distributional"):
+        d = res["distributional"]
+        click.echo("\nDistributional (first-order approximation):")
+        click.echo(f"  aggregate quarterly MPC (liquid): "
+                   f"{d['aggregate_quarterly_mpc_liquid']}")
+        click.echo(f"  MPC by liquid-wealth quartile:    "
+                   f"{d['mpc_by_liquid_quartile']}")
+        click.echo(f"  hand-to-mouth share:              "
+                   f"{d['hand_to_mouth_share']}")
+        click.echo(f"  impact dC (%) by wealth quartile: "
+                   f"{d['impact_consumption_response_pct_by_wealth_quartile']}")
+    if res.get("warning"):
+        click.echo(f"\nWARNING: {res['warning']}")
+
+
+@main.command("hank-summary")
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
+def hank_summary(as_json):
+    """US HANK model metadata, shock catalogue and scope limits (instant)."""
+    res = core.hank_summary()
+    if as_json:
+        _emit_json(res)
+        return
+    click.echo(f"{res['model']} — {res['implementation']}")
+    click.echo(f"  upstream: {res['upstream']}")
+    click.echo(f"  {res['framing']}\n")
+    click.echo("Variants:")
+    for variant, desc in res["variants"].items():
+        click.echo(f"  {variant:10s} {desc}")
+    click.echo("\nShock kinds:")
+    for k in res["shock_kinds"]:
+        click.echo(f"  {k['kind']:16s} ({'/'.join(k['variants'])}) {k['units']}")
+    click.echo(f"\n{res['no_tax_or_transfer_instrument']}")
+    click.echo(f"\nValidation: {res['validation']['suite']} "
+               f"({res['validation']['note']})")
+    click.echo(f"\nReform bridge: {res['reform_bridge']}")
+
+
 @main.command()
 @click.option("--horizons", default=12, show_default=True, help="Forecast horizon in quarters.")
 @click.option("--draws", default=2000, show_default=True,
