@@ -8,11 +8,13 @@ Maps the variables the models forecast onto the ONS series in ``data/``, convert
 them to the forecasts' units (year-on-year percent), and appends them to
 ``outturns.json`` tagged with the data vintage they were read from.
 
-Appends, never edits. When the ONS revises a quarter, a later run adds a second
-observation for that period under the new vintage; ``score.py`` scores against
-the newest but every earlier score stays reproducible. Only periods that some
-archived round actually forecast are ingested — this file is evidence for the
-track record, not a general data mirror.
+Appends, never edits. When the ONS revises a quarter's value, a later run adds a
+second observation for that period under the new vintage; metadata-only
+snapshots with an unchanged value do not create duplicate outturns. ``score.py``
+scores against the newest observation but every earlier score stays
+reproducible. Only periods that some archived round actually forecast are
+ingested — this file is evidence for the track record, not a general data
+mirror.
 """
 
 from __future__ import annotations
@@ -97,9 +99,19 @@ def available() -> list[dict]:
 
 
 def merge(existing: list[dict], fresh: list[dict]) -> tuple[list[dict], list[dict]]:
-    """Append observations not already recorded for the same (period, variable, vintage)."""
-    seen = {(o["period"], o["variable"], o.get("vintage")) for o in existing}
-    added = [r for r in fresh if (r["period"], r["variable"], r["vintage"]) not in seen]
+    """Append value revisions, ignoring newer snapshots whose value is unchanged."""
+    latest: dict[tuple[str, str], dict] = {}
+    for row in sorted(existing, key=lambda o: o.get("vintage", "")):
+        latest[(row["period"], row["variable"])] = row
+
+    added = []
+    for row in fresh:
+        key = (row["period"], row["variable"])
+        prior = latest.get(key)
+        if prior is not None and prior["value"] == row["value"]:
+            continue
+        added.append(row)
+        latest[key] = row
     return existing + added, added
 
 

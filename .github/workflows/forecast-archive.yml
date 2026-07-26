@@ -68,6 +68,9 @@ jobs:
       - name: Data vintage store is consistent
         run: python3 data/fetch.py --check
 
+      - name: Test outturn ingestion
+        run: python3 -m unittest discover -s forecasts/tests -p 'test_*.py'
+
       - name: No outturn is available but unrecorded
         run: python3 forecasts/ingest_outturns.py --check
 
