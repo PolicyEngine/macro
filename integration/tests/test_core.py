@@ -42,6 +42,22 @@ def test_latest_shocks_rejects_unsafe_draws_before_import(draws):
         core.svar_latest_shocks(draws=draws)
 
 
+def test_provenance_uses_exact_deployed_source_revision(monkeypatch):
+    revision = "a" * 40
+    monkeypatch.setenv("POLICYENGINE_MACRO_SOURCE_REVISION_HANK", revision)
+    provenance = core._provenance(
+        model_id="us-hank",
+        distribution="us-hank-model",
+        data_vintage="paper calibration",
+        baseline="steady state",
+    )
+    assert provenance["source_revision"] == revision
+    assert provenance["source_url"] == (
+        "https://github.com/PolicyEngine/us-hank-model"
+    )
+    assert "recorded source revision" in provenance["reproducibility"]
+
+
 def test_summary_parses():
     s = core.svar_summary()
     if "error" in s:

@@ -118,13 +118,27 @@ BOE_REPO = f"{HOME}/boe-var-model"
 FRB_REPO = f"{HOME}/us-frb-model"
 INTEGRATION = str(Path(__file__).parent)
 
-# POLICYENGINE_MACRO_IMAGE_SOURCE=github (used by CI) clones the model repos from
-# GitHub main at image-build time instead of copying the local checkouts —
-# same absolute paths, so all data-file resolution is unchanged.
+# POLICYENGINE_MACRO_IMAGE_SOURCE=github (used by CI) fetches reviewed model
+# commits instead of copying local checkouts. The absolute paths stay the same,
+# so all data-file resolution is unchanged.
 GITHUB_SOURCE = os.environ.get("POLICYENGINE_MACRO_IMAGE_SOURCE") == "github"
 OBR_URL = "https://github.com/PolicyEngine/obr-macroeconomic-model"
 BOE_URL = "https://github.com/PolicyEngine/boe-var-model"
 FRB_URL = "https://github.com/PolicyEngine/us-frb-model"
+HANK_URL = "https://github.com/PolicyEngine/us-hank-model"
+OBR_REVISION = "85ada9be070a34a4a4a0a65d92f8f148a476ccb1"
+BOE_REVISION = "3ab56259224c20a0bf65caa523e6e7440e56b37e"
+FRB_REVISION = "ca80394c99e9aeae410723ef3f51b9fdf9b84a77"
+HANK_REVISION = "b9b3130d47d02edd07668531dfb4fce54f241b9b"
+SOURCE_REVISION_ENV = {
+    "POLICYENGINE_MACRO_SOURCE_REVISION_HANK": HANK_REVISION,
+}
+if GITHUB_SOURCE:
+    SOURCE_REVISION_ENV.update({
+        "POLICYENGINE_MACRO_SOURCE_REVISION_OBR": OBR_REVISION,
+        "POLICYENGINE_MACRO_SOURCE_REVISION_BOE": BOE_REVISION,
+        "POLICYENGINE_MACRO_SOURCE_REVISION_FRB": FRB_REVISION,
+    })
 
 # Keep the image lean: skip the 412MB dashboard, VCS, caches, docs.
 # "**/.venv" matters more than it looks: a local checkout that has been set up
@@ -214,21 +228,29 @@ image = (
         # Tarball URL, not git+: this pip layer runs before (and without)
         # apt_install("git"), so a VCS requirement fails with "Cannot find
         # command 'git'" during the Modal image build.
-        "us-hank-model @ https://github.com/PolicyEngine/us-hank-model/archive/refs/heads/main.tar.gz",
+        f"us-hank-model @ {HANK_URL}/archive/{HANK_REVISION}.tar.gz",
     )
 )
 
 if GITHUB_SOURCE:
-    # force_build=True: the clone command string never changes, so without it
-    # Modal caches this layer and every redeploy reuses a STALE checkout —
-    # model fixes merged to OBR/BoE main would never reach production. Forcing a
-    # rebuild re-clones the current main on each github-source deploy (~10s).
+    # Fetch reviewed commits rather than mutable branches. Updating a model is
+    # an explicit source change, and the revision is also returned in every
+    # adapter's provenance.
     image = image.apt_install("git").run_commands(
-        f"git clone --depth 1 {OBR_URL} {OBR_REPO}",
-        f"git clone --depth 1 {BOE_URL} {BOE_REPO}",
-        f"git clone --depth 1 {FRB_URL} {FRB_REPO}",
+        f"mkdir -p {HOME}",
+        f"git init {OBR_REPO}",
+        f"git -C {OBR_REPO} remote add origin {OBR_URL}",
+        f"git -C {OBR_REPO} fetch --depth 1 origin {OBR_REVISION}",
+        f"git -C {OBR_REPO} checkout --detach FETCH_HEAD",
+        f"git init {BOE_REPO}",
+        f"git -C {BOE_REPO} remote add origin {BOE_URL}",
+        f"git -C {BOE_REPO} fetch --depth 1 origin {BOE_REVISION}",
+        f"git -C {BOE_REPO} checkout --detach FETCH_HEAD",
+        f"git init {FRB_REPO}",
+        f"git -C {FRB_REPO} remote add origin {FRB_URL}",
+        f"git -C {FRB_REPO} fetch --depth 1 origin {FRB_REVISION}",
+        f"git -C {FRB_REPO} checkout --detach FETCH_HEAD",
         _FRB_PRUNE,
-        force_build=True,
     )
 else:
     image = (
@@ -247,6 +269,7 @@ else:
 
 image = (
     image
+    .env(SOURCE_REVISION_ENV)
     .add_local_dir(INTEGRATION, remote_path=f"{HOME}/macro/integration",
                    copy=True, ignore=_IGNORE + ["modal_app.py"])
     # Editable installs keep each package's __file__ inside its repo, so the
