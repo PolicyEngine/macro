@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PolicyEngine Macro — forecast track record</title>
+<meta name="description" content="Every PolicyEngine Macro forecast, archived with a timestamp before its outturn exists, then scored against realised data and against random-walk, drift and AR(1) baselines. Point error, directional bias and band coverage, round by round — including the rounds that have not been scored yet." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/forecasts" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://policyengine-macro.vercel.app/forecasts" />
+<meta property="og:site_name" content="PolicyEngine Macro" />
+<meta property="og:title" content="PolicyEngine Macro — forecast track record" />
+<meta property="og:description" content="Forecasts archived before the outturn exists, then scored in public against naive baselines — point error, bias and band coverage." />
+<meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
+<meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css" />
+<style>
+/* page-local, no JS, CSP-safe */
+.more { border-top: 1px solid var(--line-soft); margin: 26px 0 0; padding-top: 4px; }
+.more > summary {
+  cursor: pointer; list-style: none; padding: 14px 0;
+  font-family: var(--mono); font-size: var(--fs-small);
+  color: var(--paper-faint);
+}
+.more > summary::-webkit-details-marker { display: none; }
+.more > summary::before { content: "+ "; }
+.more[open] > summary::before { content: "\2212 "; }
+.more > summary:hover, .more > summary:focus-visible { color: var(--text, #111); }
+.more > :last-child { margin-bottom: 8px; }
+</style>
+</head>
+<body class="doc has-section-tabs">
+<a class="skip-link" href="#top">Skip to main content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a class="nav-mobile" href="/">Home</a>
+    <a class="nav-mobile" href="/models/">Explore</a>
+    <a class="nav-mobile nav-start" href="/connect/">Start</a>
+    <a class="nav-mobile" href="/contact/">Contact</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<nav class="section-tabs" aria-label="Explore PolicyEngine Macro">
+  <a href="/models/">Models</a>
+  <a href="/docs/">Compare</a>
+  <a href="/papers/">Papers</a>
+  <a href="/validation/">Validation</a>
+  <a href="/forecasts/" aria-current="page">Forecasts</a>
+</nav>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <p class="eyebrow reveal" style="--d:0">real-time forecast record</p>
+      <h1 class="reveal page-title" style="--d:1;">
+        Every forecast, archived before the answer exists.
+      </h1>
+      <p class="lede reveal" style="--d:2">
+        A forecast is only evidence if it was fixed in public before the outturn
+        was published. Each round below was committed with a timestamp, and is
+        scored here against realised data — whatever that shows.
+      </p>
+    </div>
+  </section>
+
+  <section id="status" class="band">
+    <div class="band-head">
+      <span class="kicker mono">01 — where this stands</span>
+      <h2>The record is one round old.</h2>
+    </div>
+    <div class="prose">
+<!-- scorecard-status:begin -->
+      <p>
+        <strong>1 round archived; 0 forecast period(s) scored.</strong>
+        The earliest period that can be scored is <strong>2026Q2</strong>, once the ONS first quarterly estimate lands.
+      </p>
+<!-- scorecard-status:end -->
+      <p>
+        There is no headline accuracy figure on this page yet, because one
+        cannot honestly be computed from zero observations. That is the point of
+        publishing the record from its first day rather than from the day it
+        starts to look good: the empty state is part of the evidence, and it is
+        checkable that nothing was quietly discarded before the record began.
+      </p>
+      <p>
+        What already exists is a <em>pseudo</em>-out-of-sample evaluation — the
+        boe-svar model re-estimated at 49 expanding-window origins and compared
+        with random-walk, drift and AR(1) baselines. That is a genuine test of
+        the method and it is reported on the
+        <a href="/validation/#forecasters">validation page</a>. It is not the
+        same thing as a real-time record, because the modeller already knew what
+        happened. Both are needed; only the second is on this page.
+      </p>
+    </div>
+  </section>
+
+  <section id="rounds" class="band">
+    <div class="band-head">
+      <span class="kicker mono">02 — the rounds</span>
+      <h2>What was claimed, and when.</h2>
+    </div>
+    <div class="prose">
+      <div class="table-scroll">
+      <table>
+        <caption>Archived forecast rounds. Each row links to the immutable artifact in the repository.</caption>
+        <thead><tr><th scope="col">Round</th><th scope="col">Model</th><th scope="col">Data edge</th><th scope="col">Periods</th><th scope="col">Scored</th><th scope="col">Artifact</th></tr></thead>
+        <tbody>
+<!-- scorecard-rounds:begin -->
+          <tr>
+            <th scope="row">2026-07-21</th>
+            <td>boe-svar</td>
+            <td>2026Q1</td>
+            <td>13</td>
+            <td>0</td>
+            <td><a href="https://github.com/PolicyEngine/macro/blob/main/forecasts/rounds/2026-07-21/boe-svar.json"><code>2026-07-21/boe-svar.json</code></a></td>
+          </tr>
+<!-- scorecard-rounds:end -->
+        </tbody>
+      </table>
+      </div>
+      <p>
+        Rounds are append-only. Files under <code>forecasts/rounds/</code> can be
+        added but never edited or deleted, and a
+        <a href="https://github.com/PolicyEngine/macro/blob/main/.github/workflows/forecast-archive.yml">CI job</a>
+        fails any pull request that tries. If a forecast turns out to have been
+        built on a mistake, the correction is a new round; the superseded one
+        stays in the history where it can still be counted against us.
+      </p>
+    </div>
+  </section>
+
+  <section id="method" class="band">
+    <div class="band-head">
+      <span class="kicker mono">03 — how it is scored</span>
+      <h2>Four numbers, not one.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        A single accuracy headline hides the failures that matter, so each round
+        is scored on four things:
+      </p>
+      <div class="table-scroll">
+      <table>
+        <caption>Scoring measures and what each one is there to catch</caption>
+        <thead><tr><th scope="col">Measure</th><th scope="col">What it catches</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row">Mean absolute error</th>
+            <td>Typical size of a miss, in percentage points.</td>
+          </tr>
+          <tr>
+            <th scope="row">Signed bias</th>
+            <td>Whether the model is persistently high or low. A model that is always 0.4pp too optimistic is a different — and more fixable — problem than one that is 0.4pp out in random directions, and MAE cannot tell them apart.</td>
+          </tr>
+          <tr>
+            <th scope="row">Band coverage</th>
+            <td>How often the outturn fell inside the 68% and 90% credible bands. A fan chart whose 68% band catches 30% of outturns is overconfident regardless of how good its central path looks.</td>
+          </tr>
+          <tr>
+            <th scope="row">Baseline comparison</th>
+            <td>Error relative to a random walk, a random walk with drift, and an AR(1). Beating a naive baseline is the minimum bar for a model to have earned its complexity; a forecast reported without one is marketing.</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <details class="more">
+        <summary>Why outturns are versioned rather than overwritten</summary>
+        <p>
+          Official data is revised, sometimes substantially and sometimes years
+          later. A track record that always scores against the latest vintage
+          quietly rewrites its own history every time the ONS revises a quarter,
+          and can flatter or punish a forecast that never changed.
+        </p>
+        <p>
+          So <code>forecasts/outturns.json</code> stores the vintage alongside
+          every observation and appends revisions rather than replacing them.
+          Each score records which vintage it was computed against, and can be
+          reproduced exactly.
+        </p>
+      </details>
+    </div>
+  </section>
+
+  <section id="limits" class="band">
+    <div class="band-head">
+      <span class="kicker mono">04 — what this is not</span>
+      <h2>Limits worth stating plainly.</h2>
+    </div>
+    <div class="prose">
+      <ul>
+        <li>
+          <strong>The record is short.</strong> One round is not a track record,
+          and will not be one for at least a year. Nothing on this page should be
+          read as demonstrated forecasting skill until the scored count is well
+          into double figures.
+        </li>
+        <li>
+          <strong>Two variables only.</strong> UK GDP growth and CPI inflation.
+          Bank Rate, unemployment, wage growth and borrowing are not forecast
+          here yet.
+        </li>
+        <li>
+          <strong>The coefficients are not re-estimated each round.</strong> The
+          boe-svar replication stays estimated on the paper's 1992Q1–2023Q2
+          sample; only the conditioning data edge moves. This keeps the hosted
+          model identical to the published replication, at the cost of ignoring
+          post-2023 information in the coefficients themselves.
+        </li>
+        <li>
+          <strong>Rounds are irregular.</strong> They follow data-edge refreshes,
+          not a fixed calendar. A regular cadence is the intended next step, and
+          until it exists the round spacing is itself a discretionary choice.
+        </li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot foot-bar">
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+    <a href="https://policyengine.org" aria-label="PolicyEngine website" title="PolicyEngine website"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" /></a>
+    <a href="https://github.com/PolicyEngine" aria-label="PolicyEngine on GitHub" title="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a>
+    <a href="mailto:vahid@policyengine.org" aria-label="Email Vahid" title="Email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a>
+    <a href="https://www.linkedin.com/company/thepolicyengine" aria-label="PolicyEngine on LinkedIn" title="LinkedIn"><svg class="footer-icon-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45Z"/></svg></a>
+    <a href="https://x.com/PolicyEngineUS" aria-label="PolicyEngine on X" title="X"><svg class="footer-icon-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.66l-5.21-6.82-5.97 6.82H1.67l7.73-8.84L1.25 2.25h6.83l4.71 6.23 5.45-6.23Zm-1.16 17.52h1.83L7.08 4.13H5.12l11.96 15.64Z"/></svg></a>
+  </nav>
+</footer>
+
+<script src="/reveal.js" defer></script>
+</body>
+</html>
