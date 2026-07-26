@@ -65,6 +65,10 @@ def cards() -> str:
     gdp = load("uk_gdp_cvm")
     cpi = load("uk_cpi_yoy")
     unemployment = load("uk_unemployment_rate")
+    bank_rate = load("uk_bank_rate")
+    gilt_5y = load("uk_gilt_5y")
+    gilt_10y = load("uk_gilt_10y")
+    gilt_20y = load("uk_gilt_20y")
     forecast = json.loads(
         (ROOT / "papers" / "boe-svar" / "figures" / "current_forecast.json").read_text()
     )
@@ -135,6 +139,33 @@ def cards() -> str:
                 "generated scorecard",
                 "/forecasts/",
             ),
+            card(
+                "BANK RATE",
+                f"{fmt(latest(bank_rate)['value'], 2)}%",
+                latest(bank_rate)["period"],
+                f"{latest(bank_rate)['value'] - previous(bank_rate, 5)['value']:+.2f}pp over five observations",
+                f"Bank of England · {bank_rate['cdid']}",
+                bank_rate["vintage"],
+                bank_rate["url"],
+            ),
+            card(
+                "10-YEAR GILT YIELD",
+                f"{fmt(latest(gilt_10y)['value'], 2)}%",
+                latest(gilt_10y)["period"],
+                f"{latest(gilt_10y)['value'] - previous(gilt_10y, 5)['value']:+.2f}pp over five observations",
+                f"Bank of England · {gilt_10y['cdid']}",
+                gilt_10y["vintage"],
+                gilt_10y["url"],
+            ),
+            card(
+                "GILT CURVE · 20Y MINUS 5Y",
+                f"{latest(gilt_20y)['value'] - latest(gilt_5y)['value']:+.2f}pp",
+                latest(gilt_20y)["period"],
+                f"5y {latest(gilt_5y)['value']:.2f}% · 20y {latest(gilt_20y)['value']:.2f}%",
+                "Bank of England yield curve",
+                gilt_20y["vintage"],
+                gilt_20y["url"],
+            ),
         ]
     )
 
@@ -159,7 +190,15 @@ def outlook_rows() -> str:
 
 def release_rows() -> str:
     rows = []
-    for name in ("uk_gdp_cvm", "uk_cpi_yoy", "uk_unemployment_rate"):
+    for name in (
+        "uk_gdp_cvm",
+        "uk_cpi_yoy",
+        "uk_unemployment_rate",
+        "uk_bank_rate",
+        "uk_gilt_5y",
+        "uk_gilt_10y",
+        "uk_gilt_20y",
+    ):
         series = load(name)
         now = latest(series)
         rows.append(
@@ -168,7 +207,25 @@ def release_rows() -> str:
             f"<td>{now['period']}</td>"
             f"<td>{(series.get('release_updated') or 'not supplied').split('T')[0]}</td>"
             f"<td>{series['vintage']}</td>"
-            f'<td><a href="{series["url"]}">ONS · {series["cdid"]}</a></td>'
+            f'<td><a href="{series["url"]}">{series["source"]} · {series["cdid"]}</a></td>'
+            "</tr>"
+        )
+    return "\n".join(rows)
+
+
+def market_rows() -> str:
+    rows = []
+    for name in ("uk_bank_rate", "uk_gilt_5y", "uk_gilt_10y", "uk_gilt_20y"):
+        series = load(name)
+        now = latest(series)
+        five = previous(series, 5)
+        rows.append(
+            "          <tr>"
+            f'<th scope="row">{series["title"]}</th>'
+            f"<td>{now['value']:.3f}%</td>"
+            f"<td>{now['value'] - five['value']:+.3f}pp</td>"
+            f"<td>{now['period']}</td>"
+            f"<td>{series['vintage']}</td>"
             "</tr>"
         )
     return "\n".join(rows)
@@ -191,6 +248,7 @@ def render() -> str:
     html = PAGE.read_text()
     html = replace(html, "economy-cards", cards())
     html = replace(html, "economy-outlook", outlook_rows())
+    html = replace(html, "economy-markets", market_rows())
     html = replace(html, "economy-releases", release_rows())
     return html
 

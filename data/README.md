@@ -1,10 +1,11 @@
 # Data vintage store
 
-Append-only snapshots of the UK official statistics the site depends on.
+Append-only snapshots of the UK official statistics and market data the site depends on.
 
 ```
 data/
   vintages/ons/<series>/<YYYY-MM-DD>.json   # never edited, never deleted
+  vintages/boe/<series>/<YYYY-MM-DD>.json   # never edited, never deleted
   latest/<series>.json                       # flattened newest, read at build time
   MANIFEST.json                              # generated index
   fetch.py
@@ -42,8 +43,13 @@ so `latest/` is the flattened copy the page builders read.
 | `uk_gdp_cvm` | ABMI | ONS QNA | £m, chained volume measure |
 | `uk_cpi_yoy` | D7G7 | ONS MM23 | percent, year-on-year |
 | `uk_unemployment_rate` | MGSX | ONS LMS | percent |
+| `uk_bank_rate` | IUDBEDR | Bank of England IADB | percent |
+| `uk_gilt_5y` | IUDSNPY | Bank of England IADB | percent |
+| `uk_gilt_10y` | IUDMNPY | Bank of England IADB | percent |
+| `uk_gilt_20y` | IUDLNPY | Bank of England IADB | percent |
 
-ONS data is released under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+ONS and Bank of England data are released under the
+[Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
 
 ## Usage
 
