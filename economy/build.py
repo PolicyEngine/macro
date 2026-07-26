@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -188,12 +189,108 @@ def outlook_rows() -> str:
     return "\n".join(rows)
 
 
+def indicator_rows() -> str:
+    specs = []
+
+    gva = load("uk_monthly_gva")
+    now, prior = latest(gva), previous(gva)
+    specs.append(
+        (
+            "Activity",
+            gva,
+            f"{100 * (now['value'] / prior['value'] - 1):+.1f}% m/m",
+            f"index {now['value']:.1f}",
+        )
+    )
+
+    core = load("uk_core_cpi_yoy")
+    now, prior = latest(core), previous(core)
+    specs.append(
+        ("Prices", core, f"{now['value'] - prior['value']:+.1f}pp m/m", f"{now['value']:.1f}%")
+    )
+
+    earnings = load("uk_average_weekly_earnings")
+    now, year_ago = latest(earnings), previous(earnings, 12)
+    specs.append(
+        (
+            "Labour",
+            earnings,
+            f"{100 * (now['value'] / year_ago['value'] - 1):+.1f}% y/y",
+            f"£{now['value']:,.0f}/week",
+        )
+    )
+
+    vacancies = load("uk_vacancies")
+    now, year_ago = latest(vacancies), previous(vacancies, 12)
+    specs.append(
+        (
+            "Labour",
+            vacancies,
+            f"{now['value'] - year_ago['value']:+,.0f}k y/y",
+            f"{now['value']:,.0f}k",
+        )
+    )
+
+    borrowing = load("uk_public_sector_net_borrowing")
+    now, year_ago = latest(borrowing), previous(borrowing, 12)
+    # J5II records net borrowing as a negative financial balance. Present the
+    # conventional positive "amount borrowed" and document the sign conversion.
+    specs.append(
+        (
+            "Fiscal",
+            borrowing,
+            f"{(-now['value'] + year_ago['value']) / 1000:+.1f}bn y/y",
+            f"£{-now['value'] / 1000:,.1f}bn borrowed",
+        )
+    )
+
+    debt = load("uk_public_sector_net_debt_gdp")
+    now, prior = latest(debt), previous(debt)
+    specs.append(
+        ("Fiscal", debt, f"{now['value'] - prior['value']:+.1f}pp m/m", f"{now['value']:.1f}% GDP")
+    )
+
+    investment = load("uk_business_investment")
+    now, prior = latest(investment), previous(investment)
+    specs.append(
+        (
+            "Investment",
+            investment,
+            f"{100 * (now['value'] / prior['value'] - 1):+.1f}% q/q",
+            f"£{now['value'] / 1000:,.1f}bn",
+        )
+    )
+
+    rows = []
+    for area, series, change, value in specs:
+        now = latest(series)
+        rows.append(
+            "          <tr>"
+            f"<td>{area}</td>"
+            f'<th scope="row">{series["title"]}</th>'
+            f"<td>{value}</td>"
+            f"<td>{change}</td>"
+            f"<td>{now['period']}</td>"
+            f"<td>{series['vintage']}</td>"
+            f'<td><a href="{series["url"]}">ONS · {series["cdid"]}</a></td>'
+            "</tr>"
+        )
+    return "\n".join(rows)
+
+
 def release_rows() -> str:
     rows = []
     for name in (
         "uk_gdp_cvm",
         "uk_cpi_yoy",
         "uk_unemployment_rate",
+        "uk_core_cpi_yoy",
+        "uk_average_weekly_earnings",
+        "uk_vacancies",
+        "uk_monthly_gva",
+        "uk_public_sector_net_borrowing",
+        "uk_public_sector_net_debt_gdp",
+        "uk_business_investment",
         "uk_bank_rate",
         "uk_gilt_5y",
         "uk_gilt_10y",
@@ -231,6 +328,43 @@ def market_rows() -> str:
     return "\n".join(rows)
 
 
+def calendar_rows() -> str:
+    names = (
+        "uk_monthly_gva",
+        "uk_unemployment_rate",
+        "uk_average_weekly_earnings",
+        "uk_vacancies",
+        "uk_cpi_yoy",
+        "uk_core_cpi_yoy",
+        "uk_public_sector_net_borrowing",
+        "uk_public_sector_net_debt_gdp",
+        "uk_gdp_cvm",
+        "uk_business_investment",
+    )
+    releases: dict[str, list[dict]] = {}
+    for name in names:
+        series = load(name)
+        date = " ".join((series.get("next_release") or "").split())
+        if date:
+            releases.setdefault(date, []).append(series)
+
+    def sort_key(item: tuple[str, list[dict]]) -> datetime:
+        return datetime.strptime(item[0], "%d %B %Y")
+
+    rows = []
+    for date, series_list in sorted(releases.items(), key=sort_key):
+        labels = ", ".join(series["title"] for series in series_list)
+        sources = ", ".join(series["cdid"] for series in series_list)
+        rows.append(
+            "          <tr>"
+            f'<th scope="row">{date}</th>'
+            f"<td>{labels}</td>"
+            f"<td>ONS · {sources}</td>"
+            "</tr>"
+        )
+    return "\n".join(rows)
+
+
 def replace(html: str, name: str, value: str) -> str:
     start, end = f"<!-- {name}:begin -->", f"<!-- {name}:end -->"
     updated, count = re.subn(
@@ -247,8 +381,10 @@ def replace(html: str, name: str, value: str) -> str:
 def render() -> str:
     html = PAGE.read_text()
     html = replace(html, "economy-cards", cards())
+    html = replace(html, "economy-indicators", indicator_rows())
     html = replace(html, "economy-outlook", outlook_rows())
     html = replace(html, "economy-markets", market_rows())
+    html = replace(html, "economy-calendar", calendar_rows())
     html = replace(html, "economy-releases", release_rows())
     return html
 
