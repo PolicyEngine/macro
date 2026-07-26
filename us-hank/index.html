@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PolicyEngine Macro — us-hank</title>
+<meta name="description" content="A validated replication of the two-asset heterogeneous-agent New Keynesian model of Auclert, Bardóczy, Rognlie and Straub (Econometrica 2021), solved in the sequence space at the paper's production grids — stylized US shocks with first-order distributional output. Not a forecaster; does not score reforms." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/us-hank" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://policyengine-macro.vercel.app/us-hank" />
+<meta property="og:site_name" content="PolicyEngine Macro" />
+<meta property="og:title" content="us-hank — PolicyEngine Macro" />
+<meta property="og:description" content="A validated replication of the Auclert–Bardóczy–Rognlie–Straub (2021) two-asset HANK — stylized US shocks with first-order distributional output. Not a forecaster." />
+<meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
+<meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css" />
+<style>
+/* page-specific: hero sizing only — shared component styles live in style.css */
+.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
+</style>
+</head>
+<body class="doc has-section-tabs">
+<a class="skip-link" href="#top">Skip to main content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a class="nav-mobile" href="/">Home</a>
+    <a class="nav-mobile" href="/models/">Explore</a>
+    <a class="nav-mobile nav-start" href="/connect/">Start</a>
+    <a class="nav-mobile" href="/contact/">Contact</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<nav class="section-tabs" aria-label="Explore PolicyEngine Macro">
+  <a href="/models/" aria-current="page">Models</a>
+  <a href="/docs/">Compare</a>
+  <a href="/papers/">Papers</a>
+  <a href="/validation/">Validation</a>
+</nav>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <span class="model-breadcrumb"><a href="/models/">Models</a> / us-hank</span>
+      <p class="eyebrow reveal" style="--d:0">model 06 · us-hank · US · hosted</p>
+      <h1 class="reveal page-title" style="--d:1;">
+        See who responds to a US shock, not just how much.
+      </h1>
+      <p class="lede reveal" style="--d:2">
+        Run stylized monetary, fiscal-spending, and productivity shocks through
+        a two-asset heterogeneous-agent New Keynesian model and read the
+        aggregate impulse responses alongside first-order distributional
+        output — MPCs by wealth quartile and the hand-to-mouth share.
+      </p>
+      <div class="hero-cta reveal" style="--d:3">
+        <a class="btn btn-primary" href="#run">Run it</a>
+        <a class="btn btn-ghost" href="https://github.com/PolicyEngine/us-hank-model">Read the code</a>
+      </div>
+    </div>
+  </section>
+
+  <nav class="model-local-nav" aria-label="On this model page">
+    <a href="#what">Overview</a><a href="#how">Method</a><a href="#run">Run</a><a href="#answers">Answers</a><a href="#trust">Validation</a>
+  </nav>
+
+  <section id="what" class="band">
+    <div class="band-head">
+      <span class="kicker mono">01 — what it is</span>
+      <h2>The distributional member for the US.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        This is a <strong>validated replication</strong> of the two-asset
+        heterogeneous-agent New Keynesian (HANK) model of Auclert, Bardóczy,
+        Rognlie and Straub — the model of their <em>Econometrica</em> 2021
+        paper, "Using the Sequence-Space Jacobian to Solve and Estimate
+        Heterogeneous-Agent Models" — built directly on the authors'
+        <code>sequence-jacobian</code> toolkit at the paper's production grid
+        sizes rather than the packaged demo grids.
+      </p>
+      <p>
+        Where <a href="/frb-us/">frb-us</a> answers "how much does US output
+        move after a shock", this model answers a question frb-us cannot:
+        <strong>who</strong> moves. Households differ in liquid and illiquid
+        wealth, so their marginal propensities to consume differ, and the
+        model carries that whole distribution through the general-equilibrium
+        response. It is a <strong>VAR-free, sequence-space HANK</strong>: no
+        estimated reduced form, no expectations shortcut — first-order
+        impulse responses computed from the model's own general-equilibrium
+        Jacobian.
+      </p>
+      <p>
+        It is <strong>not a forecaster</strong>, and it does not score
+        detailed tax reforms: it scores <strong>stylized shocks</strong> —
+        monetary, fiscal spending, and productivity — around a calibrated
+        steady state, and its distributional outputs are first-order
+        approximations from steady-state policies.
+      </p>
+    </div>
+  </section>
+
+  <section id="how" class="band">
+    <div class="band-head">
+      <span class="kicker mono">02 — how it works</span>
+      <h2>Steady state, Jacobian, then instant IRFs.</h2>
+    </div>
+    <div class="prose">
+      <div class="table-scroll"><table>
+        <caption>The us-hank solve pipeline, stage by stage</caption>
+        <thead><tr><th scope="col">stage</th><th scope="col">what it does</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><strong>Calibrate &amp; solve</strong></th>
+            <td>Solves the general-equilibrium steady state at the paper's production grids (50 liquid × 70 illiquid × 50 capital points), calibrating discounting and portfolio-adjustment costs to hit the paper's asset-market targets. About 13 seconds, computed once and cached.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Differentiate</strong></th>
+            <td>Builds the general-equilibrium sequence-space Jacobian — the T×T linear map from each exogenous path to each outcome path (T = 300 quarters). About 5 seconds, cached alongside the steady state.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Shock</strong></th>
+            <td>A shock is an AR(1) path, <code>size × persistence<sup>t</sup></code>, on one of three instruments: the Taylor-rule intercept (<code>monetary</code>), real government spending (<code>fiscal_spending</code>), or TFP (<code>productivity</code>). With both caches warm an IRF is a matrix–vector product — effectively instant.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Distribute</strong></th>
+            <td>From the steady-state joint distribution and consumption policy: MPCs by liquid-wealth quartile, the hand-to-mouth share, and a first-order allocation of the impact consumption response across total-wealth quartiles.</td>
+          </tr>
+        </tbody>
+      </table></div>
+      <p>
+        One design point matters for what you can ask it:
+        <strong>the labor tax is endogenous</strong>. The fiscal block balances
+        the government budget each period, so a spending shock is implicitly
+        tax-financed — and there is <em>no</em> exogenous transfer or tax-rate
+        instrument to shock. Requests for one are refused with that
+        explanation rather than answered with an invented mapping.
+      </p>
+    </div>
+  </section>
+
+  <section id="run" class="band">
+    <div class="band-head">
+      <span class="kicker mono">03 — how to run it</span>
+      <h2>Ask the server, or install it.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        The quickest route is the <a href="/connect/">hosted MCP server</a>,
+        where two tools reach this model: <code>hank_shock</code> (run a
+        stylized shock, optionally with the distributional block) and
+        <code>hank_summary</code> (the shock catalogue, units, variants, and
+        scope limits — instant, no solve). The first call per variant pays the
+        steady-state and Jacobian solves, roughly <strong>18 seconds
+        cold</strong>; both are cached, so warm calls are effectively instant.
+        The same two are on the CLI:
+      </p>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro hank-summary
+pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6 --distribution</code></pre></div>
+      <p>
+        <strong>Units differ per kind.</strong> <code>monetary</code> is a
+        level change in the <em>quarterly</em> policy rate (&minus;0.0025 = a
+        25bp easing); <code>fiscal_spending</code> is a level change in
+        G (steady-state output is 1, so 0.01 = 1% of GDP);
+        <code>productivity</code> is a level change in TFP. A
+        <code>variant</code> option selects the paper's
+        <code>two_asset</code> model (the default) or a fast
+        <code>one_asset</code> textbook variant — no capital, so no investment
+        response, and monetary/productivity shocks only.
+      </p>
+      <p>
+        For anything beyond the hosted surface, install the package and use
+        its Python API directly:
+      </p>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/us-hank-model</code></pre></div>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> us_hank <span class="kw">import</span> model, distributional
+
+ss = model.solve_steady_state()          <span class="cm"># ~13s, cached</span>
+G = model.solve_jacobian(ss, T=<span class="kw">300</span>)      <span class="cm"># ~5s, cached</span>
+
+irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0025</span>, persistence=<span class="kw">0.6</span>, ss=ss, G_jac=G)
+<span class="kw">print</span>(irf[<span class="kw">"Y"</span>][:<span class="kw">8</span>])                      <span class="cm"># output, % deviation from steady state</span>
+<span class="kw">print</span>(distributional.summary(ss))        <span class="cm"># MPCs by quartile, hand-to-mouth share</span></code></pre></div>
+    </div>
+  </section>
+
+  <section id="answers" class="band">
+    <div class="band-head">
+      <span class="kicker mono">04 — what it can answer</span>
+      <h2>Stylized US shocks, with the household distribution attached.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        The model's designed job is the qualitative and quantitative
+        <em>transmission</em> of a stylized aggregate shock through a
+        realistic household wealth distribution: how a monetary easing raises
+        output, consumption, investment and inflation; how a tax-financed
+        spending expansion raises output while the endogenous labor tax leans
+        on consumption; and how the response concentrates among
+        <strong>high-MPC, low-liquid-wealth households</strong> — the economic
+        point of a HANK model, and the thing a representative-agent model
+        cannot say.
+      </p>
+      <div class="callout">
+        <strong>It cannot</strong> forecast — responses are deviations around
+        a calibrated steady state, not a projection of the US economy. It
+        cannot score a PolicyEngine reform: <code>score_reform</code> refuses
+        <code>model="hank"</code> outright, because the model has three
+        stylized instruments and an endogenous labor tax, so no mapping from
+        statute exists. Its responses are <strong>first-order</strong> —
+        linear in the shock, with no state dependence — and its
+        distributional cuts are first-order approximations from steady-state
+        policies, not full household-level dynamics.
+      </div>
+    </div>
+  </section>
+
+  <section id="trust" class="band band-result">
+    <div class="band-head">
+      <span class="kicker mono">05 — how far to trust it</span>
+      <h2>A replication gate, not a forecast-accuracy claim.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        The ground truth here is the published paper. The model repository's
+        <strong>18-test suite</strong> gates the steady-state calibration
+        targets, market clearing, and the signs and magnitudes of the shock
+        responses against the published Econometrica 2021 results, and the
+        implementation builds on the authors' own
+        <code>sequence-jacobian</code> toolkit rather than re-deriving the
+        model. That makes fidelity strong and the claim narrow: this is
+        evidence the replication is right, not evidence the model predicts
+        the US economy — no predictive validation exists or is claimed.
+      </p>
+      <p class="callout">
+        This is an independent replication of a published academic model. It
+        is not produced or endorsed by the paper's authors, and its results
+        are model counterfactuals, not official estimates or forecasts.
+      </p>
+    </div>
+  </section>
+
+  <section id="caveats" class="band">
+    <div class="band-head">
+      <span class="kicker mono">06 — limits</span>
+      <h2>What is absent, and what is deliberate.</h2>
+    </div>
+    <div class="prose">
+      <div class="table-scroll"><table>
+        <caption>Known limits of the us-hank implementation</caption>
+        <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><strong>Not a forecaster</strong></th>
+            <td>There is no data, no estimation, and no forecast origin: every result is an impulse response around the paper's calibrated steady state. Use <a href="/svar/">boe-svar</a> (UK) for forecasts; nothing in this suite forecasts the US.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Stylized instruments only</strong></th>
+            <td>Three shock kinds — monetary, fiscal spending, productivity. The labor tax is endogenous (the fiscal block balances the budget), so there is no transfer or tax-rate instrument, and <code>score_reform</code> refuses <code>model="hank"</code> rather than inventing a reform mapping.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>First-order responses</strong></th>
+            <td>IRFs are linear in the shock size, with no state dependence, no zero-lower-bound, and no asymmetry between large and small or positive and negative shocks.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Approximate distributional output</strong></th>
+            <td>The by-quartile consumption response allocates the aggregate response in proportion to steady-state MPCs. It captures the MPC-heterogeneity channel, not full household-level dynamics along the transition.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Calibration, not vintage</strong></th>
+            <td>The parameterisation is the published paper's. There is no data vintage to refresh; revisiting the calibration would be a deliberate model change, not a data update.</td>
+          </tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot foot-bar">
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+    <a href="https://policyengine.org" aria-label="PolicyEngine website" title="PolicyEngine website"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" /></a>
+    <a href="https://github.com/PolicyEngine" aria-label="PolicyEngine on GitHub" title="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a>
+    <a href="mailto:vahid@policyengine.org" aria-label="Email Vahid" title="Email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a>
+    <a href="https://www.linkedin.com/company/thepolicyengine" aria-label="PolicyEngine on LinkedIn" title="LinkedIn"><svg class="footer-icon-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45Z"/></svg></a>
+    <a href="https://x.com/PolicyEngineUS" aria-label="PolicyEngine on X" title="X"><svg class="footer-icon-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.66l-5.21-6.82-5.97 6.82H1.67l7.73-8.84L1.25 2.25h6.83l4.71 6.23 5.45-6.23Zm-1.16 17.52h1.83L7.08 4.13H5.12l11.96 15.64Z"/></svg></a>
+  </nav>
+</footer>
+
+<script src="/reveal.js" defer></script>
+<script>
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest("[data-copy]"); if (!btn) return;
+  var code = btn.parentElement.querySelector("code");
+  navigator.clipboard.writeText(code.textContent).then(function () {
+    btn.textContent = "copied";
+    setTimeout(function () { btn.textContent = "copy"; }, 1400);
+  });
+});
+</script>
+</body>
+</html>
