@@ -16,7 +16,7 @@
       if (active) {
         link.setAttribute("aria-current", "location");
         link.scrollIntoView({
-          behavior: "smooth",
+          behavior: "auto",
           block: "nearest",
           inline: "center"
         });

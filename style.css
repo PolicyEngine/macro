@@ -327,7 +327,13 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   transition: color 0.25s;
 }
 .nav-links a:hover { color: var(--brand-strong); }
-.nav-links a[aria-current="page"] { color: var(--brand-strong); }
+.nav-links a[aria-current="page"] {
+  color: var(--brand-strong);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 8px;
+}
 .nav-gh { color: var(--paper) !important; display: inline-flex; align-items: center; }
 .nav-gh svg { width: 18px; height: 18px; display: block; }
 .nav-links a:not(.nav-gh) { display: none; }
@@ -444,7 +450,7 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   max-width: var(--max);
-  margin: 0 auto;
+  margin: var(--s-5) auto 0;
   border-top: 1px solid var(--line-soft);
   border-bottom: 1px solid var(--line-soft);
 }
@@ -715,22 +721,24 @@ h2 {
 .foot-pe img { height: 20px; width: auto; display: block; opacity: 0.82; transition: opacity 0.2s; }
 .foot-pe:hover img { opacity: 1; }
 
-/* ---------- reveal: retired ----------
-   Every band-head, prose block, card grid and metric row started at
-   opacity:0 and slid up on scroll. On documentation pages that meant the
-   reader could not skim: content arrived under them as they moved, and a
-   staggered `--d` delay meant it arrived out of order. Reveal-on-scroll is
-   for a landing page with four things on it, not a 4,900-word reference.
-   Everything is now painted immediately. reveal.js still adds `.in-view`
-   (its <script> tag lives in markup owned elsewhere) — harmless, and these
-   rules keep it a no-op. */
-.reveal, .in-view,
-.band-head, .prose, .metrics, .stack-note,
-.hero-cta {
+/* ---------- scroll reveal ----------
+   Heroes paint immediately. Section-level blocks reached by scrolling move
+   once, together, so long technical pages never arrive out of order. */
+.reveal {
   opacity: 1;
   transform: none;
   animation: none;
 }
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 420ms ease-out, transform 420ms ease-out;
+}
+.scroll-reveal.in-view {
+  opacity: 1;
+  transform: none;
+}
+.scroll-reveal.reveal-initial { transition: none; }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
@@ -1039,10 +1047,11 @@ h2 {
 .footer-links svg { width: 17px; height: 17px; flex: 0 0 auto; }
 .footer-links svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .footer-links .footer-icon-fill { fill: currentColor; stroke: none; }
-.footer-links .footer-contact {
+.footer-links .footer-text {
   width: auto;
   padding-inline: 8px;
 }
+.footer-links .footer-policyengine { gap: 7px; }
 
 /* Homepage: one compact path section replaces two overlapping explainers. */
 .home-page .band { padding-block: clamp(48px, 6vw, 72px); }
@@ -1058,6 +1067,10 @@ h2 {
   border: 1px solid var(--line-soft);
   background: var(--line-soft);
 }
+.model-evidence-links-top {
+  max-width: var(--max);
+  margin: var(--s-6) auto 0;
+}
 .model-evidence-links a {
   display: grid;
   gap: 8px;
@@ -1072,6 +1085,18 @@ h2 {
 
 .forecast-result-list,
 .forecast-round-list { margin-block: var(--s-6); }
+.forecast-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin-block: var(--s-6);
+  border: 1px solid var(--line-soft);
+  background: var(--line-soft);
+}
+.forecast-summary article { display: grid; gap: 6px; padding: var(--s-5); background: var(--ink); }
+.forecast-summary strong { color: var(--paper); font: 600 var(--fs-stat)/1 var(--display); }
+.forecast-summary span { color: var(--paper-faint); font-size: var(--fs-small); }
+.forecast-next { padding-left: var(--s-4); border-left: 2px solid var(--brand); }
 .forecast-result,
 .forecast-round {
   padding: var(--s-5);
@@ -1146,7 +1171,8 @@ h2 {
 
 @media (max-width: 700px) {
   .model-evidence-links,
-  .score-method-grid { grid-template-columns: 1fr; }
+  .score-method-grid,
+  .forecast-summary { grid-template-columns: 1fr; }
   .forecast-result header { align-items: flex-start; }
   .forecast-result-plot > div { grid-template-columns: 62px minmax(60px, 1fr) 58px; gap: 8px; }
 }
@@ -1487,6 +1513,22 @@ h2 {
 .economy-model-card a,
 .economy-note-card a { color: var(--brand-strong); font-family: var(--mono); }
 .economy-note-card { margin-top: var(--s-6); }
+.economy-subsection {
+  margin-top: var(--s-7);
+  padding-top: var(--s-7);
+  border-top: 1px solid var(--line-soft);
+}
+.economy-source-detail {
+  margin-block: var(--s-5);
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+}
+.economy-source-detail > summary {
+  cursor: pointer;
+  padding: 16px 0;
+  color: var(--brand-strong);
+  font: var(--fs-small)/1.5 var(--mono);
+}
 
 @media (max-width: 900px) {
   .economy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1615,6 +1657,8 @@ h2 {
   margin: 6px 0 0; max-width: 30ch; color: var(--paper);
 }
 @media (max-width: 620px) {
+  .economy-topics { top: 112px; }
+  .economy-page section[id] { scroll-margin-top: 188px; }
   .economy-topics-hint {
     display: block;
     margin: 0;

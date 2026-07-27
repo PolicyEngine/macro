@@ -1,6 +1,7 @@
 """Dependency-free contracts for high-risk public website claims."""
 
 from pathlib import Path
+import re
 
 
 ROOT = Path(__file__).resolve().parent
@@ -58,6 +59,11 @@ def check_economy_navigation() -> None:
                 failures.append(f"{path}: missing country link {href}")
         if 'src="/economy/economy-nav.js"' not in page:
             failures.append(f"{path}: missing scroll-aware topic navigation")
+        if path == "economy/index.html" and "ons.gov.uk/" in page:
+            if re.search(r'href="https://www\.ons\.gov\.uk/[^"]+/data"', page):
+                failures.append(
+                    f"{path}: displayed ONS source link points to a JSON endpoint"
+                )
 
     for path in MODEL_INVENTORY_PAGES:
         header = _read(path).split("</header>", 1)[0]
