@@ -13,6 +13,19 @@ ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "economy" / "index.html"
 US_PAGE = ROOT / "economy" / "us" / "index.html"
 
+PUBLIC_LABELS = {
+    "ABMI": "Real gross domestic product",
+    "D7G7": "CPI inflation",
+    "MGSX": "Unemployment rate",
+    "DKO8": "Core CPI inflation",
+    "KAB9": "Average weekly earnings",
+    "AP2Y": "UK vacancies",
+    "ECY2": "Monthly gross value added index",
+    "J5II": "Public-sector net borrowing",
+    "HF6X": "Public-sector net debt",
+    "NPEL": "Real business investment",
+}
+
 
 def load(name: str) -> dict:
     return json.loads((ROOT / "data" / "latest" / f"{name}.json").read_text())
@@ -24,6 +37,10 @@ def fmt(value: float, digits: int = 1) -> str:
 
 def latest(series: dict) -> dict:
     return series["observations"][-1]
+
+
+def public_label(series: dict) -> str:
+    return PUBLIC_LABELS.get(series["cdid"], series["title"])
 
 
 def previous(series: dict, periods: int = 1) -> dict:
@@ -105,7 +122,7 @@ def line_chart(
           <text class="economy-chart-label" x="{width - right}" y="{height - 12}" text-anchor="end">{last['period']}</text>
           <text class="economy-chart-value" x="{width - right}" y="{max(y(last['value']) - 10, 16):.1f}" text-anchor="end">{last['value']:.1f}{units}</text>
         </svg>
-        <figcaption><strong>{title}</strong><span>{description}</span><a href="{url}">{source} →</a></figcaption>
+        <figcaption><strong>{title}</strong><span>{description}</span><a href="{url}" target="_blank" rel="noopener">View source · {source} ↗</a></figcaption>
       </figure>"""
 
 
@@ -410,7 +427,7 @@ def us_indicator_rows() -> str:
         rows.append(
             "          <tr>"
             f"<td>{area}</td>"
-            f'<th scope="row">{series["title"]}</th>'
+            f'<th scope="row">{public_label(series)}</th>'
             f"<td>{value}</td>"
             f"<td>{change}</td>"
             f"<td>{now['period']}</td>"
@@ -517,7 +534,7 @@ def indicator_rows() -> str:
         rows.append(
             "          <tr>"
             f"<td>{area}</td>"
-            f'<th scope="row">{series["title"]}</th>'
+            f'<th scope="row">{public_label(series)}</th>'
             f"<td>{value}</td>"
             f"<td>{change}</td>"
             f"<td>{now['period']}</td>"
@@ -550,7 +567,7 @@ def release_rows() -> str:
         now = latest(series)
         rows.append(
             "          <tr>"
-            f'<th scope="row">{series["title"]}</th>'
+            f'<th scope="row">{public_label(series)}</th>'
             f"<td>{now['period']}</td>"
             f"<td>{(series.get('release_updated') or 'not supplied').split('T')[0]}</td>"
             f"<td>{series['vintage']}</td>"
@@ -644,7 +661,7 @@ def calendar_rows() -> str:
 
     rows = []
     for date, series_list in sorted(releases.items(), key=sort_key):
-        labels = ", ".join(series["title"] for series in series_list)
+        labels = ", ".join(public_label(series) for series in series_list)
         sources = ", ".join(series["cdid"] for series in series_list)
         rows.append(
             "          <tr>"

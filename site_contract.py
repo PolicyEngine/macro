@@ -74,7 +74,34 @@ def check_economy_navigation() -> None:
         raise SystemExit("\n".join(failures))
 
 
+def check_editorial_consistency() -> None:
+    failures: list[str] = []
+    stale_claims = {
+        "notes/2026-07-25-cpi-2026q2/index.html": "1992Q1–2023Q2",
+        "papers/index.html": "against its November 2025 forecast",
+        "validation/index.html": "This audit covers the three macro models",
+        "forecasts/index.html": "a forecast reported without one is marketing",
+    }
+    for path, stale in stale_claims.items():
+        if stale in _read(path):
+            failures.append(f"{path}: stale or redundant copy remains: {stale}")
+
+    home = _read("index.html")
+    for proof in (
+        "Preserved vintages",
+        "Public forecast record",
+        "Honest validation",
+        "Run a hosted model",
+    ):
+        if proof not in home:
+            failures.append(f"index.html: missing primary selling point: {proof}")
+
+    if failures:
+        raise SystemExit("\n".join(failures))
+
+
 if __name__ == "__main__":
     check_public_model_inventory()
     check_economy_navigation()
-    print("Public model inventory and Economy navigation are consistent.")
+    check_editorial_consistency()
+    print("Public inventory, navigation, and editorial claims are consistent.")
