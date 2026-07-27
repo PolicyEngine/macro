@@ -49,6 +49,32 @@ def check_public_model_inventory() -> None:
         raise SystemExit("\n".join(failures))
 
 
+def check_economy_navigation() -> None:
+    failures: list[str] = []
+    for path in ("economy/index.html", "economy/us/index.html"):
+        page = _read(path)
+        for href in ('href="/economy/"', 'href="/economy/us/"'):
+            if href not in page:
+                failures.append(f"{path}: missing country link {href}")
+        if 'src="/economy/economy-nav.js"' not in page:
+            failures.append(f"{path}: missing scroll-aware topic navigation")
+
+    for path in MODEL_INVENTORY_PAGES:
+        header = _read(path).split("</header>", 1)[0]
+        home_position = header.find('href="/"')
+        economy_position = header.find('href="/economy/"')
+        if home_position == -1 or economy_position == -1:
+            failures.append(f"{path}: missing Home or Economy navigation")
+        elif home_position > economy_position:
+            failures.append(f"{path}: Home is not the first navigation tab")
+        if 'href="/notes/"' in header:
+            failures.append(f"{path}: Notes remains a global navigation tab")
+
+    if failures:
+        raise SystemExit("\n".join(failures))
+
+
 if __name__ == "__main__":
     check_public_model_inventory()
-    print("Public model inventory is consistent across discovery and evidence pages.")
+    check_economy_navigation()
+    print("Public model inventory and Economy navigation are consistent.")

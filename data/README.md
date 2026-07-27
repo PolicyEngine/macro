@@ -1,11 +1,12 @@
 # Data vintage store
 
-Append-only snapshots of the UK official statistics and market data the site depends on.
+Append-only snapshots of the UK and US official statistics the site depends on.
 
 ```
 data/
   vintages/ons/<series>/<YYYY-MM-DD>.json   # never edited, never deleted
   vintages/boe/<series>/<YYYY-MM-DD>.json   # never edited, never deleted
+  vintages/fred/<series>/<YYYY-MM-DD>.json  # never edited, never deleted
   latest/<series>.json                       # flattened newest, read at build time
   MANIFEST.json                              # generated index
   fetch.py
@@ -54,12 +55,22 @@ so `latest/` is the flattened copy the page builders read.
 | `uk_gilt_5y` | IUDSNPY | Bank of England IADB | percent |
 | `uk_gilt_10y` | IUDMNPY | Bank of England IADB | percent |
 | `uk_gilt_20y` | IUDLNPY | Bank of England IADB | percent |
+| `us_real_gdp` | GDPC1 | BEA via FRED | chained 2017 dollars |
+| `us_cpi` | CPIAUCSL | BLS via FRED | index |
+| `us_unemployment_rate` | UNRATE | BLS via FRED | percent |
+| `us_payroll_employment` | PAYEMS | BLS via FRED | thousands |
+| `us_federal_funds_rate` | FEDFUNDS | Federal Reserve via FRED | percent |
+| `us_treasury_10y` | DGS10 | Federal Reserve via FRED | percent |
 
 ONS and Bank of England data are released under the
 [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
 Daily Bank of England series retain observations from 2020 onward: enough
 history for current-state comparisons without duplicating the full database
 inside both the immutable snapshot and its published `latest/` copy.
+
+US series are distributed by the Federal Reserve Bank of St. Louis with their
+original BEA, BLS, and Federal Reserve attribution. FRED requests also retain
+observations from 2020 onward.
 
 ## Usage
 
