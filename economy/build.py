@@ -377,6 +377,54 @@ def us_figures() -> str:
     )
 
 
+def trends_directory() -> str:
+    uk_gdp = gdp_growth(load("uk_gdp_cvm"))[-1]
+    uk_cpi = latest(load("uk_cpi_yoy"))
+    uk_unemployment = latest(load("uk_unemployment_rate"))
+    us_gdp = gdp_growth(load("us_real_gdp"))[-1]
+    us_cpi = yoy_growth(load("us_cpi"), 12)[-1]
+    us_unemployment = latest(load("us_unemployment_rate"))
+
+    def country_card(
+        code: str,
+        country: str,
+        href: str,
+        gdp: dict,
+        cpi: dict,
+        unemployment: dict,
+    ) -> str:
+        return f"""      <article class="economy-trends-card">
+        <header><span class="mono">{code}</span><h3>{country}</h3></header>
+        <dl>
+          <div><dt>GDP growth</dt><dd>{gdp["value"]:.1f}%<small>{gdp["period"]}</small></dd></div>
+          <div><dt>CPI inflation</dt><dd>{cpi["value"]:.1f}%<small>{cpi["period"]}</small></dd></div>
+          <div><dt>Unemployment</dt><dd>{unemployment["value"]:.1f}%<small>{unemployment["period"]}</small></dd></div>
+        </dl>
+        <a href="{href}">View all three plots →</a>
+      </article>"""
+
+    return "\n".join(
+        (
+            country_card(
+                "UK",
+                "United Kingdom",
+                "/economy/trends/",
+                uk_gdp,
+                uk_cpi,
+                uk_unemployment,
+            ),
+            country_card(
+                "US",
+                "United States",
+                "/economy/us/trends/",
+                us_gdp,
+                us_cpi,
+                us_unemployment,
+            ),
+        )
+    )
+
+
 def us_indicator_rows() -> str:
     gdp = load("us_real_gdp")
     cpi = load("us_cpi")
@@ -677,6 +725,7 @@ def render_uk() -> str:
     html = PAGE.read_text()
     html = remove_embedded_trends(html, "economy-figures")
     html = replace(html, "economy-cards", cards())
+    html = replace(html, "economy-trends-directory", trends_directory())
     html = replace(html, "economy-indicators", indicator_rows())
     html = replace(html, "economy-outlook", outlook_rows())
     html = replace(html, "economy-markets", market_rows())
@@ -689,6 +738,7 @@ def render_us() -> str:
     html = US_PAGE.read_text()
     html = remove_embedded_trends(html, "us-economy-figures")
     html = replace(html, "us-economy-cards", us_cards())
+    html = replace(html, "us-economy-trends-directory", trends_directory())
     html = replace(html, "us-economy-indicators", us_indicator_rows())
     html = replace(html, "us-economy-markets", us_market_rows())
     html = replace(html, "us-economy-releases", us_release_rows())

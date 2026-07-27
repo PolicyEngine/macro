@@ -63,6 +63,16 @@ def check_economy_navigation() -> None:
                 failures.append(f"{path}: missing country link {href}")
         if trends_href not in page:
             failures.append(f"{path}: missing dedicated Trends link {trends_href}")
+        if 'id="trends"' not in page:
+            failures.append(f"{path}: missing in-page Trends section")
+        for country_href in (
+            'href="/economy/trends/"',
+            'href="/economy/us/trends/"',
+        ):
+            if country_href not in page:
+                failures.append(
+                    f"{path}: Trends section missing country link {country_href}"
+                )
         if 'id="figures"' in page or "economy-figures:begin" in page:
             failures.append(f"{path}: duplicates charts from its Trends page")
         if 'src="/economy/economy-nav.js"' not in page:
