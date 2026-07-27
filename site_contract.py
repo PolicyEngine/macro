@@ -69,6 +69,12 @@ def check_economy_navigation() -> None:
             failures.append(f"{path}: Home is not the first navigation tab")
         if 'href="/notes/"' in header:
             failures.append(f"{path}: Notes remains a global navigation tab")
+        if 'href="/validation/"' in header:
+            failures.append(f"{path}: Evidence remains a global navigation tab")
+        if 'href="/contact/"' in header:
+            failures.append(f"{path}: Contact remains a global navigation tab")
+        if ">Track record</a>" not in header:
+            failures.append(f"{path}: Forecasts is not labelled Track record")
 
     if failures:
         raise SystemExit("\n".join(failures))

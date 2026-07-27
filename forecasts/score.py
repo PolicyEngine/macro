@@ -194,20 +194,24 @@ def render_status(card: dict) -> str:
 
 
 def render_rounds(card: dict) -> str:
-    rows = []
+    rows = ['      <div class="forecast-round-list">']
     for detail in card["detail"]:
         href = f"{REPO_BLOB}/{detail['path']}"
         label = "/".join(Path(detail["path"]).parts[-2:])
         rows.append(
-            "          <tr>\n"
-            f"            <th scope=\"row\">{esc(detail['round_id'])}</th>\n"
-            f"            <td>{esc(detail['model'])}</td>\n"
-            f"            <td>{esc(detail['data_edge'])}</td>\n"
-            f"            <td>{detail['periods_forecast']}</td>\n"
-            f"            <td>{detail['periods_scored']}</td>\n"
-            f"            <td><a href=\"{href}\"><code>{esc(label)}</code></a></td>\n"
-            "          </tr>"
+            "        <article class=\"forecast-round\">\n"
+            f"          <div><span class=\"mono\">{esc(detail['round_id'])}</span>"
+            f"<strong>{esc(detail['model'])}</strong></div>\n"
+            "          <dl>\n"
+            f"            <div><dt>Data edge</dt><dd>{esc(detail['data_edge'])}</dd></div>\n"
+            f"            <div><dt>Periods</dt><dd>{detail['periods_forecast']}</dd></div>\n"
+            f"            <div><dt>Scored</dt><dd>{detail['periods_scored']}</dd></div>\n"
+            "          </dl>\n"
+            f"          <a class=\"mono\" href=\"{href}\">Open immutable artifact · "
+            f"<code>{esc(label)}</code> →</a>\n"
+            "        </article>"
         )
+    rows.append("      </div>")
     return "\n".join(rows)
 
 
@@ -221,38 +225,32 @@ def render_results(card: dict) -> str:
     if not rows:
         return "      <!-- nothing scored yet -->"
 
-    body = []
+    body = ['      <div class="forecast-result-list">']
     for detail, e in sorted(rows, key=lambda r: (r[1]["period"], r[1]["variable"])):
         band = "68%" if e["in_68"] else ("90%" if e["in_90"] else "outside 90%")
+        scale = max(abs(e["forecast"]), abs(e["outturn"]), 1.0)
+        forecast_width = abs(e["forecast"]) / scale * 100
+        outturn_width = abs(e["outturn"]) / scale * 100
         body.append(
-            "          <tr>\n"
-            f"            <th scope=\"row\">{esc(e['period'])}</th>\n"
-            f"            <td>{esc(VARIABLE_LABELS.get(e['variable'], e['variable']))}</td>\n"
-            f"            <td>{e['forecast']:.2f}%</td>\n"
-            f"            <td>{e['outturn']:.2f}%</td>\n"
-            f"            <td>{e['error']:+.2f}pp</td>\n"
-            f"            <td>{esc(band)}</td>\n"
-            f"            <td>{esc(detail['round_id'])}</td>\n"
-            "          </tr>"
+            "        <article class=\"forecast-result\">\n"
+            "          <header>\n"
+            f"            <div><span class=\"mono\">{esc(e['period'])}</span>"
+            f"<h3>{esc(VARIABLE_LABELS.get(e['variable'], e['variable']))}</h3></div>\n"
+            f"            <span class=\"forecast-band\">Inside {esc(band)} band</span>\n"
+            "          </header>\n"
+            "          <div class=\"forecast-result-plot\" "
+            f"aria-label=\"Forecast {e['forecast']:.2f} percent; outturn {e['outturn']:.2f} percent\">\n"
+            f"            <div><span>Forecast</span><i style=\"width:{forecast_width:.1f}%\"></i>"
+            f"<strong>{e['forecast']:.2f}%</strong></div>\n"
+            f"            <div><span>Outturn</span><i style=\"width:{outturn_width:.1f}%\"></i>"
+            f"<strong>{e['outturn']:.2f}%</strong></div>\n"
+            "          </div>\n"
+            f"          <footer><span>Error <strong>{e['error']:+.2f}pp</strong></span>"
+            f"<span>Round {esc(detail['round_id'])}</span></footer>\n"
+            "        </article>"
         )
-
-    return "\n".join(
-        [
-            "      <div class=\"table-scroll\">",
-            "      <table>",
-            "        <caption>Scored forecasts. Error is forecast minus outturn; "
-            "the band column is the narrowest credible band the outturn fell inside.</caption>",
-            "        <thead><tr><th scope=\"col\">Period</th><th scope=\"col\">Variable</th>"
-            "<th scope=\"col\">Forecast</th><th scope=\"col\">Outturn</th>"
-            "<th scope=\"col\">Error</th><th scope=\"col\">Band</th>"
-            "<th scope=\"col\">Round</th></tr></thead>",
-            "        <tbody>",
-            *body,
-            "        </tbody>",
-            "      </table>",
-            "      </div>",
-        ]
-    )
+    body.append("      </div>")
+    return "\n".join(body)
 
 
 def render_page(html: str, card: dict) -> str:
