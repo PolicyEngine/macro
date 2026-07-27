@@ -663,10 +663,20 @@ def replace(html: str, name: str, value: str) -> str:
     return updated
 
 
+def remove_embedded_trends(html: str, marker: str) -> str:
+    """Migrate legacy overview charts to their dedicated Trends route."""
+    pattern = (
+        r'    <div id="figures" class="economy-subsection">.*?'
+        + re.escape(f"<!-- {marker}:end -->")
+        + r"\n    </div>\n    </div>\n"
+    )
+    return re.sub(pattern, "", html, count=1, flags=re.S)
+
+
 def render_uk() -> str:
     html = PAGE.read_text()
+    html = remove_embedded_trends(html, "economy-figures")
     html = replace(html, "economy-cards", cards())
-    html = replace(html, "economy-figures", uk_figures())
     html = replace(html, "economy-indicators", indicator_rows())
     html = replace(html, "economy-outlook", outlook_rows())
     html = replace(html, "economy-markets", market_rows())
@@ -677,8 +687,8 @@ def render_uk() -> str:
 
 def render_us() -> str:
     html = US_PAGE.read_text()
+    html = remove_embedded_trends(html, "us-economy-figures")
     html = replace(html, "us-economy-cards", us_cards())
-    html = replace(html, "us-economy-figures", us_figures())
     html = replace(html, "us-economy-indicators", us_indicator_rows())
     html = replace(html, "us-economy-markets", us_market_rows())
     html = replace(html, "us-economy-releases", us_release_rows())

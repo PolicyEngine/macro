@@ -63,6 +63,8 @@ def check_economy_navigation() -> None:
                 failures.append(f"{path}: missing country link {href}")
         if trends_href not in page:
             failures.append(f"{path}: missing dedicated Trends link {trends_href}")
+        if 'id="figures"' in page or "economy-figures:begin" in page:
+            failures.append(f"{path}: duplicates charts from its Trends page")
         if 'src="/economy/economy-nav.js"' not in page:
             failures.append(f"{path}: missing scroll-aware topic navigation")
         if path == "economy/index.html" and "ons.gov.uk/" in page:
