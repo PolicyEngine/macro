@@ -52,11 +52,17 @@ def check_public_model_inventory() -> None:
 
 def check_economy_navigation() -> None:
     failures: list[str] = []
-    for path in ("economy/index.html", "economy/us/index.html"):
+    overview_routes = {
+        "economy/index.html": 'href="/economy/trends/"',
+        "economy/us/index.html": 'href="/economy/us/trends/"',
+    }
+    for path, trends_href in overview_routes.items():
         page = _read(path)
         for href in ('href="/economy/"', 'href="/economy/us/"'):
             if href not in page:
                 failures.append(f"{path}: missing country link {href}")
+        if trends_href not in page:
+            failures.append(f"{path}: missing dedicated Trends link {trends_href}")
         if 'src="/economy/economy-nav.js"' not in page:
             failures.append(f"{path}: missing scroll-aware topic navigation")
         if path == "economy/index.html" and "ons.gov.uk/" in page:
@@ -64,6 +70,17 @@ def check_economy_navigation() -> None:
                 failures.append(
                     f"{path}: displayed ONS source link points to a JSON endpoint"
                 )
+
+    for path in ("economy/trends/index.html", "economy/us/trends/index.html"):
+        page = _read(path)
+        for href in (
+            'href="/economy/trends/"',
+            'href="/economy/us/trends/"',
+        ):
+            if href not in page:
+                failures.append(f"{path}: missing country-preserving link {href}")
+        if page.count('class="economy-figure"') != 3:
+            failures.append(f"{path}: expected three generated trend figures")
 
     for path in MODEL_INVENTORY_PAGES:
         header = _read(path).split("</header>", 1)[0]
