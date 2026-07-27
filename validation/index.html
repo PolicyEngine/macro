@@ -147,7 +147,7 @@
       </div>
       <h3>Software fidelity and economic validity are separate.</h3>
       <p>
-        This audit covers the three macro models. Levels are categorical
+        The dimensional audit below covers obr-macro, boe-svar, and frb-us. Levels are categorical
         evidence judgements, not a synthetic score: a model can reproduce its
         reference code perfectly while still lacking independent forecast or
         counterfactual validation.
@@ -180,10 +180,8 @@
         reproduces GDP to <strong>0.15% MAPE</strong> and consumption to
         <strong>0.25%</strong> over 2025Q1&ndash;2027Q4 (CI gate: 1%). GDP
         remains within 0.29% through 2031Q1, but unemployment becomes
-        unreliable after 2027Q4. This fit is by construction; the independent
-        reform costing below is the stronger test. The headline chart and
-        table now use the live March 2026 vintage; the older November 2025
-        forecast is retained only inside the historical outturn audit.
+        unreliable after 2027Q4. Because anchoring is by construction, the
+        independent HMRC costing below is the stronger test.
       </p>
       <figure class="vfig">
         <svg class="vchart" data-chart="obr-anchored" viewBox="0 0 760 326" role="img" aria-labelledby="obr-anchored-t obr-anchored-d">
@@ -302,9 +300,9 @@
       </table>
       </div>
       <figure class="vfig">
-        <svg class="vchart" data-chart="obr-computed-share" viewBox="0 0 760 270" role="img" aria-labelledby="obr-computed-share-t obr-computed-share-d">
+        <svg class="vchart" data-chart="obr-computed-share" viewBox="0 0 760 290" role="img" aria-labelledby="obr-computed-share-t obr-computed-share-d">
 <title id="obr-computed-share-t">How much of the OBR emulator scorecard the model actually computes</title>
-<desc id="obr-computed-share-d">Two stacked bars. Of 21 headline variables in the OBR emulator calibration scorecard, 11 are actually computed by the model and 10 are passthrough, held at the OBR published value and therefore scoring zero error trivially. Of the 11 computed, 3 are fair, 1 are identity, 5 are poor, 2 are off. 4 of the 11, or 36 per cent, land within band, and one of those is a trivial accounting identity, so only 3 non-trivial computed variables are in band. The worst are company profits 79.80 per cent and the current account 4.17 per cent of GDP.</desc>
+<desc id="obr-computed-share-d">Two stacked bars. Of 21 headline variables in the OBR emulator calibration scorecard, 11 are actually computed by the model and 10 are passthrough, held at the OBR published value and therefore scoring zero error trivially. Of the 11 computed, 3 are fair, 1 is an identity, 5 are poor, 2 are off. 4 of the 11, or 36 per cent, land within band, and one of those is a trivial accounting identity, so only 3 non-trivial computed variables are in band. The worst are company profits 79.80 per cent and the current account 4.17 per cent of GDP.</desc>
 <text class="vc-lab" x="64" y="30">21 headline scorecard variables</text>
 <rect class="vc-b1" x="64.0" y="52" width="345.7" height="40"/>
 <rect class="vc-b3" x="409.7" y="52" width="314.3" height="40"/>
@@ -321,10 +319,11 @@
 <text class="vc-rowlab" x="268.3" y="207" text-anchor="middle">poor 5</text>
 <rect class="vc-b3" x="346.9" y="152" width="62.9" height="40" stroke="currentColor" stroke-dasharray="3 2" stroke-width="1"/>
 <text class="vc-rowlab" x="378.3" y="207" text-anchor="middle">off 2</text>
-<text class="vc-warn" x="64" y="234">Only 4 of the 11 computed variables land within band &mdash; 36% &mdash; and one of those four is a trivial identity.</text>
-<text class="vc-note" x="64" y="252">bands: rates ±1.0pp · net balances ±1.5% of GDP · levels ≤10% MAPE</text>
+<text class="vc-warn" x="64" y="232">Only 3 of 11 non-trivial variables are in band.</text>
+<text class="vc-warn" x="64" y="250">A fourth pass is an identity over passthrough inputs.</text>
+<text class="vc-note" x="64" y="274">bands: rates ±1.0pp · net balances ±1.5% of GDP · levels ≤10% MAPE</text>
 </svg>
-        <figcaption>Raw (un-anchored) calibration against the March 2026 EFO, a single vintage. The two &ldquo;off&rdquo; verdicts are bounded by constants the OBR does not publish &mdash; the OSHH base constant, the RPI index history, and the overseas rate-of-return normalisers &mdash; rather than by live bugs, and are gated against regression rather than tuned to the target. Source: <code>docs/calibration_scorecard.md</code> in the obr-macroeconomic-model repository.</figcaption>
+        <figcaption>Raw calibration against the March 2026 EFO. Two &ldquo;off&rdquo; variables depend on unpublished OBR constants and are regression-gated rather than tuned. Source: <code>docs/calibration_scorecard.md</code> in the obr-macroeconomic-model repository.</figcaption>
       </figure>
       <p class="vc-warn">
         <strong>The spending multiplier is ~1.0 by construction, against the
@@ -681,7 +680,7 @@
 <text class="vc-tick" x="570.0" y="334" text-anchor="middle">26Q1</text>
 <text class="vc-tick" x="724.0" y="334" text-anchor="middle">27Q3</text>
 </svg>
-        <figcaption>All fourteen outturns (seven quarters &times; two variables, 2024Q3&ndash;2026Q1) fall inside the 68% credible band, where a calibrated band would contain about 9.5 &mdash; the bands are too wide, not the forecast unusually good. RMSE 0.3pp for both. Median forecast and 68% band from the frozen 2024Q2 data edge. Computed from <code>papers/boe-svar/figures/figure_numbers.json</code> (medians and 68% bands) and the ONS outturn series in <code>papers/boe-svar/figures/make_figures.py</code>.</figcaption>
+        <figcaption>All 14 outturns fall inside the 68% band; calibrated bands would contain about 9.5. This suggests the bands are too wide. RMSE is 0.3pp for both variables. Frozen 2024Q2 data edge; source: <code>papers/boe-svar/figures/figure_numbers.json</code>.</figcaption>
       </figure>
       <details class="more">
         <summary>Why there is no official yardstick for those forecast errors</summary>
@@ -972,7 +971,7 @@
 
   <section id="forecasters" class="band">
     <div class="band-head">
-      <span class="kicker mono">08 — forecast accuracy</span>
+      <span class="kicker mono">09 — forecast accuracy</span>
       <h2>How do we compare to other forecasters?</h2>
     </div>
     <div class="prose">
@@ -986,6 +985,13 @@
         forecasting accuracy).
       </p>
 
+      <p>
+        <strong>Bank Rate is the only robust forecasting win.</strong> CPI
+        loses its advantage against a drift benchmark; GDP does not beat that
+        benchmark over the full sample, and Covid dominates squared error.
+      </p>
+      <details class="more">
+      <summary>Benchmark and sample diagnostics</summary>
       <h3>boe-svar against a random walk, computed from our own runs</h3>
       <p>
         An expanding-window pseudo-out-of-sample exercise re-fits the BVAR at
@@ -1033,6 +1039,7 @@
         arithmetic, not evidence. Every benchmark now carries a
         <code>worst_origin_mse_share</code> diagnostic for exactly this reason.
       </p>
+      </details>
       <figure class="vfig">
         <svg class="vchart" data-chart="svar-skill-all" viewBox="0 0 760 404" role="img" aria-labelledby="svar-skill-all-t svar-skill-all-d">
 <title id="svar-skill-all-t">boe-svar forecast skill against a random walk with drift, all eight variables</title>

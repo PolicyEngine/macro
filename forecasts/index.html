@@ -83,12 +83,9 @@
       </p>
 <!-- scorecard-status:end -->
       <p>
-        There is no headline accuracy figure on this page, and there will not be
-        one until the scored count is large enough to carry it. That is the point
-        of publishing the record from its first day rather than from the day it
-        starts to look good: the early, near-empty state is part of the evidence,
-        and it is checkable that nothing was quietly discarded before the record
-        began.
+        One scored period is not enough for an accuracy headline. Publishing
+        from day one makes the sparse early record—and any later failures—part
+        of the evidence.
       </p>
 
 <!-- scorecard-results:begin -->
@@ -111,13 +108,10 @@
       </div>
 <!-- scorecard-results:end -->
       <p>
-        What already exists is a <em>pseudo</em>-out-of-sample evaluation — the
-        boe-svar model re-estimated at 49 expanding-window origins and compared
-        with random-walk, drift and AR(1) baselines. That is a genuine test of
-        the method and it is reported on the
-        <a href="/validation/#forecasters">validation page</a>. It is not the
-        same thing as a real-time record, because the modeller already knew what
-        happened. Both are needed; only the second is on this page.
+        A separate 49-origin pseudo-out-of-sample evaluation compares boe-svar
+        with naive baselines on the
+        <a href="/validation/#forecasters">validation page</a>. It tests the
+        method with hindsight; this page records forecasts fixed in real time.
       </p>
     </div>
   </section>
@@ -147,25 +141,18 @@
       </table>
       </div>
       <p>
-        <strong>The first round is a retroactive archive, and its lead time was
-        thin.</strong> The <code>2026-07-21</code> round was not archived by this
-        machinery — it was copied out of
-        <code>papers/boe-svar/figures/current_forecast.json</code> after the fact,
-        so its provenance rests on that file's git history rather than on the
-        archive. The commit landed 2026-07-21 14:54 BST; the ONS published the
-        2026Q2 CPI figure on the following morning's release. So the forecast did
-        precede the outturn, by about sixteen hours, and the model was conditioned
-        only through 2026Q1 — but a sixteen-hour lead is not the same evidence as
-        a round archived weeks ahead, and it is recorded here rather than left for
-        a reader to discover. Every round from here is archived before the fact.
+        <strong>The first round was archived retroactively</strong> from a
+        forecast file already committed to Git. That commit preceded the CPI
+        outturn by about 16 hours, so the forecast was genuinely prior—but with
+        thin lead time and weaker provenance than future rounds. Every later
+        round is archived directly before the fact.
       </p>
       <p>
         Rounds are append-only. Files under <code>forecasts/rounds/</code> can be
         added but never edited or deleted, and a
         <a href="https://github.com/PolicyEngine/macro/blob/main/.github/workflows/forecast-archive.yml">CI job</a>
-        fails any pull request that tries. If a forecast turns out to have been
-        built on a mistake, the correction is a new round; the superseded one
-        stays in the history where it can still be counted against us.
+        fails any pull request that tries. Corrections create a new round; the
+        superseded forecast remains scored.
       </p>
     </div>
   </section>
@@ -199,7 +186,7 @@
           </tr>
           <tr>
             <th scope="row">Baseline comparison</th>
-            <td>Error relative to a random walk, a random walk with drift, and an AR(1). Beating a naive baseline is the minimum bar for a model to have earned its complexity; a forecast reported without one is marketing.</td>
+            <td>Shows whether the model improves on a random walk, drift, or AR(1) forecast.</td>
           </tr>
         </tbody>
       </table>

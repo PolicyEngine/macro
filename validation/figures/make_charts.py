@@ -539,7 +539,7 @@ def chart_obr_computed_share():
     computed, passthrough = d["computed"], d["passthrough"]
     grades = d["grades"]
 
-    W, H = 760, 270
+    W, H = 760, 290
     x0, x1 = 64.0, 724.0
     span = x1 - x0
     per_var = span / total
@@ -553,7 +553,11 @@ def chart_obr_computed_share():
         f"calibration scorecard, {computed} are actually computed by the model and "
         f"{passthrough} are passthrough, held at the OBR published value and therefore "
         f"scoring zero error trivially. Of the {computed} computed, "
-        + ", ".join(f"{g['count']} are {g['label']}" for g in grades)
+        + ", ".join(
+            f"{g['count']} {'is' if g['count'] == 1 else 'are'} "
+            f"{'an identity' if g['count'] == 1 and g['key'] == 'identity' else g['label']}"
+            for g in grades
+        )
         + f". {in_band} of the {computed}, or {100 * in_band / computed:.0f} per cent, land "
         f"within band, and {word(trivial)} of those is a trivial accounting identity, so only "
         f"{in_band - trivial} non-trivial computed variables are in band. The worst are "
@@ -590,10 +594,11 @@ def chart_obr_computed_share():
                    f'{esc(g["label"])} {g["count"]}</text>')
         x += w
 
-    out.append(f'<text class="vc-warn" x="64" y="234">Only {in_band} of the {computed} computed '
-               f'variables land within band &mdash; {100 * in_band / computed:.0f}% &mdash; and '
-               f'{word(trivial)} of those {word(in_band)} is a trivial identity.</text>')
-    out.append(f'<text class="vc-note" x="64" y="252">{esc(d["bands_note"])}</text>')
+    out.append(f'<text class="vc-warn" x="64" y="232">Only {in_band - trivial} of {computed} '
+               f'non-trivial variables are in band.</text>')
+    out.append('<text class="vc-warn" x="64" y="250">A fourth pass is an identity over '
+               'passthrough inputs.</text>')
+    out.append(f'<text class="vc-note" x="64" y="274">{esc(d["bands_note"])}</text>')
     out.append("</svg>")
     return "\n".join(out)
 
@@ -620,7 +625,8 @@ def chart_svar_skill_all():
     horizons, ratio, pval, meta = load_rolling_eval()
     W, H = 760, 404
     x_one, per_unit = 370.8, 883.0        # value 1.0 at x_one
-    xs = lambda v: x_one + (v - 1.0) * per_unit
+    def xs(v):
+        return x_one + (v - 1.0) * per_unit
 
     last = horizons[-1]
     best = min(SKILL_ROWS, key=lambda r: ratio[last][r[0]])
