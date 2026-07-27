@@ -1078,14 +1078,33 @@ h2 {
   margin: var(--s-6) auto 0;
 }
 .model-evidence-links a {
+  position: relative;
   display: grid;
   gap: 8px;
   padding: var(--s-5);
+  padding-right: calc(var(--s-5) + 28px);
   color: var(--paper);
   background: var(--ink);
   text-decoration: none;
+  transition: background .2s, box-shadow .2s;
 }
-.model-evidence-links a:hover { background: var(--brand-wash); }
+.model-evidence-links a::after {
+  content: "→";
+  position: absolute;
+  top: var(--s-5);
+  right: var(--s-5);
+  color: var(--brand-strong);
+  font-family: var(--mono);
+  transition: transform .2s;
+}
+.model-evidence-links a:hover,
+.model-evidence-links a:focus-visible {
+  background: var(--brand-wash);
+  box-shadow: inset 0 0 0 1px var(--brand);
+}
+.model-evidence-links a:hover::after,
+.model-evidence-links a:focus-visible::after { transform: translateX(4px); }
+.model-evidence-links a:hover strong { color: var(--brand-strong); }
 .model-evidence-links strong { font-family: var(--display); font-size: var(--fs-h3-sm); }
 .model-evidence-links span { color: var(--paper-dim); font-size: var(--fs-body-sm); line-height: 1.5; }
 
@@ -1262,17 +1281,19 @@ h2 {
 }
 .contact-socials a {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 3px 12px;
+  grid-template-columns: auto 1fr auto;
+  gap: 3px 14px;
+  align-items: center;
   padding: 18px 20px;
   border: 1px solid var(--line-soft);
   color: var(--paper);
   text-decoration: none;
 }
 .contact-socials a + a { border-left: 0; }
-.contact-socials strong { font-family: var(--display); font-weight: 600; }
-.contact-socials small { grid-column: 1; color: var(--paper-faint); }
-.contact-socials a > span { grid-column: 2; grid-row: 1 / span 2; color: var(--brand-strong); }
+.contact-socials .soc-icon { grid-column: 1; grid-row: 1 / span 2; color: var(--brand-strong); }
+.contact-socials strong { grid-column: 2; font-family: var(--display); font-weight: 600; }
+.contact-socials small { grid-column: 2; color: var(--paper-faint); }
+.contact-socials a > span { grid-column: 3; grid-row: 1 / span 2; color: var(--brand-strong); }
 .contact-socials a:hover { border-color: var(--brand); background: var(--brand-wash); }
 .models-page .model-hero + .band { border-top: 0; }
 .validation-page .model-hero { padding-bottom: var(--s-5); }
