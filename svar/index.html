@@ -83,7 +83,9 @@
       </p>
       <p>
         Within the suite it is the <strong>empirical, time-series
-        member</strong> — and the <strong>baseline/conditioning
+        member</strong> — a structural VAR (SVAR: a statistical model of a
+        small set of series, with just enough economic structure to give the
+        shocks driving them names) — and the <strong>baseline/conditioning
         member</strong>. It imposes just enough structure to name the shocks
         hitting the economy and to say how uncertain the baseline is, before
         you simulate changing it with the structural members.
@@ -183,7 +185,18 @@
     </div>
     <div class="prose">
       <p>
-        The package installs straight from GitHub with the prepared quarterly
+        The quickest route is the <a href="/connect/">hosted MCP server</a>,
+        where three tools reach this model: <code>forecast_uk</code>
+        (fan-chart forecast of YoY GDP growth and CPI inflation, with 68%/90%
+        bands), <code>latest_shocks</code> (the posterior sign probabilities
+        of each identified shock in the latest quarter), and
+        <code>model_summary</code> (headline replication results — instant,
+        no estimation). All run hosted — no install, no credentials. The CLI
+        mirrors them: <code>pe-macro forecast</code>,
+        <code>pe-macro shocks</code>, and <code>pe-macro summary</code>.
+      </p>
+      <p>
+        To run it locally, the package installs straight from GitHub with the prepared quarterly
         dataset inside, so <code>boe_var.data.load_data()</code> works
         immediately with no credentials. Every input series is public: ONS
         (CPI, CPI energy, real GDP), Bank of England (Bank Rate, sterling
@@ -227,7 +240,7 @@ python scripts/run_forecast_revision.py</code></pre></div>
         <tbody>
           <tr>
             <th scope="row"><strong>IRFs &amp; FEVDs</strong></th>
-            <td>How each named shock propagates through the UK economy, and how much of GDP and inflation variance each explains at every horizon.</td>
+            <td>How each named shock propagates through the UK economy (the impulse response function, IRF), and how much of GDP and inflation variance each explains at every horizon (the forecast-error variance decomposition, FEVD).</td>
           </tr>
           <tr>
             <th scope="row"><strong>Historical decompositions</strong></th>

@@ -13,10 +13,11 @@ PUBLIC_MODELS = (
     "pe-microsim",
     "psl-og",
 )
+# docs/index.html is now a thin moved-notice that meta-refreshes to
+# /models/#compare, so it no longer carries the model inventory itself.
 MODEL_INVENTORY_PAGES = (
     "index.html",
     "models/index.html",
-    "docs/index.html",
     "validation/index.html",
 )
 

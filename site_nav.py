@@ -45,7 +45,7 @@ def section(path: Path) -> str | None:
         return "economy"
     if root == "forecasts":
         return "forecasts"
-    if root == "connect":
+    if root in {"connect", "score"}:
         return "use"
     return None
 

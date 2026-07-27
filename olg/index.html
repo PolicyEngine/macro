@@ -58,6 +58,7 @@
       <div class="hero-cta reveal" style="--d:3">
         <a class="btn btn-primary" href="#run">Run it</a>
         <a class="btn btn-ghost" href="https://github.com/PSLmodels/OG-UK">Read the code</a>
+        <a class="btn btn-ghost" href="/papers/psl-og/">Working paper</a>
       </div>
     </div>
   </section>
@@ -165,6 +166,23 @@
         need a <code>HUGGING_FACE_TOKEN</code> with read access to
         <code>policyengine/policyengine-uk-data</code>.
       </p>
+      <div class="callout">
+        <strong>Local-only.</strong> OG-UK is deliberately excluded from the
+        <a href="/connect/">hosted MCP server</a> — a solve cannot fit its
+        request timeout — so the MCP tools that reach it,
+        <code>score_reform</code> with <code>model="og"</code> and
+        <code>dynamic_reform_impact</code>, return install/CLI instructions
+        rather than results when called hosted. Locally it is a
+        <strong>two-environment pipeline</strong> until
+        <a href="https://github.com/PSLmodels/OG-UK/issues/68">PSLmodels/OG-UK#68</a>
+        lands: <code>oguk</code> pins <code>policyengine-uk==2.88.0</code>, so
+        it needs its own environment. There, run
+        <code>pe-macro og-score --reform '...' --json &gt; og.json</code>;
+        then, in the main environment,
+        <code>pe-macro dynamic-score --reform '...' --og-payload og.json</code>.
+        A <code>HUGGING_FACE_TOKEN</code> with access to the gated UK
+        microdata is a hard prerequisite in both.
+      </div>
       <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PSLmodels/OG-UK.git
 cd OG-UK
 uv sync
@@ -317,7 +335,7 @@ impact = map_transition_to_real_world(base_tp, reform_tp)
         <tbody>
           <tr>
             <th scope="row"><strong>Calibration targets vs official UK aggregates</strong></th>
-            <td>The imposed and targeted quantities match by construction — that is anchoring, not validation, and the paper's tables label which is which. The over-identifying checks are the <em>emergent</em> quantities, the capital–output ratio and the steady-state interest rate, for which no published reconciliation yet exists.</td>
+            <td>The imposed and targeted quantities match by construction — that is anchoring, not validation, and <a href="/papers/psl-og/">the paper's tables</a> label which is which. The over-identifying checks are the <em>emergent</em> quantities, the capital–output ratio and the steady-state interest rate, for which no published reconciliation yet exists.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Parameters vs OG-Core / OG-USA defaults</strong></th>

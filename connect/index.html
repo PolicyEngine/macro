@@ -233,6 +233,35 @@
   .command-grid { grid-template-columns: 1fr; }
   .compact-pane { min-height: 0; }
 }
+.no-code-note {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 56px) 28px;
+}
+.no-code-note p {
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  padding: 14px 18px;
+  font-size: var(--fs-body-sm);
+  line-height: 1.6;
+  color: var(--paper-faint);
+  margin: 0;
+}
+.no-code-note a { color: var(--text, #111); }
+.hosted-note {
+  margin-top: 26px;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 18px;
+  font-size: var(--fs-small);
+  line-height: 1.6;
+  color: var(--paper-faint);
+}
+.hosted-note .tag { margin-right: 8px; }
+.prompt-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.prompt-list li { margin: 0; }
+.prompt-list .copyblock { white-space: normal; }
+.prompt-list .copyblock code { white-space: normal; font-size: var(--fs-small); }
+.prompt-tool { display: block; font-family: var(--mono); font-size: var(--fs-label); color: var(--paper-faint); margin: 0 0 4px; }
 </style>
 </head>
 <body class="doc">
@@ -268,6 +297,12 @@
     </div>
   </section>
 
+  <div class="no-code-note">
+    <p><strong>No code?</strong> You don't need any of this to read the results:
+    browse the <a href="/economy/">economy dashboards</a> or check the
+    <a href="/forecasts/">forecast track record</a>.</p>
+  </div>
+
   <section id="connect" class="connect-panel">
     <div class="band-head">
       <span class="kicker mono">hosted</span>
@@ -288,7 +323,7 @@
         <div class="step" id="client-panel-claude" role="tabpanel" aria-labelledby="client-tab-claude" data-for="claude">
           <span class="step-n mono">2</span>
           <p class="step-h">Add a Claude connector</p>
-          <p>Open Settings → Connectors, add a custom connector, and paste the URL.</p>
+          <p>On claude.ai or in the Claude Desktop app, open Settings → Connectors, choose “Add custom connector”, and paste the URL.</p>
         </div>
         <div class="step" id="client-panel-chatgpt" role="tabpanel" aria-labelledby="client-tab-chatgpt" data-for="chatgpt" hidden>
           <span class="step-n mono">2</span>
@@ -303,9 +338,20 @@
         <div class="step">
           <span class="step-n mono">3</span>
           <p class="step-h">Ask a policy question</p>
-          <p>Try a US rate shock, a UK forecast, or a household reform in either country.</p>
+          <p>Try a US rate shock, a UK forecast, or a household reform in either country — copy an example prompt below.</p>
         </div>
       </div>
+      <details class="more compact-more" open>
+        <summary>Example prompts</summary>
+        <ul class="prompt-list">
+          <li><span class="prompt-tool">frbus_shock</span><div class="copyblock"><code>What happens to US GDP and unemployment if the Fed raises rates by 100 basis points?</code><button data-copy>copy</button></div></li>
+          <li><span class="prompt-tool">score_reform</span><div class="copyblock"><code>Score raising the UK basic rate of income tax to 21p.</code><button data-copy>copy</button></div></li>
+          <li><span class="prompt-tool">forecast_uk</span><div class="copyblock"><code>What is the UK GDP and inflation outlook for the next four quarters?</code><button data-copy>copy</button></div></li>
+          <li><span class="prompt-tool">hank_shock</span><div class="copyblock"><code>How does a 25 basis point US rate cut hit households across the wealth distribution?</code><button data-copy>copy</button></div></li>
+          <li><span class="prompt-tool">calculate_household</span><div class="copyblock"><code>How much tax would a single 35-year-old earning $50,000 pay in the US?</code><button data-copy>copy</button></div></li>
+        </ul>
+        <p class="chart-note">Not sure which tool fits a question? Ask the model to call <code>recommend_model</code> or <code>list_model_capabilities</code> — the server describes what each tool answers.</p>
+      </details>
       <details class="more compact-more">
         <summary>Terminal setup</summary>
         <div class="copyblock" data-for="claude"><code>claude mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
@@ -318,6 +364,24 @@
           <div class="copyblock"><code>gemini mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
         </div>
       </details>
+      <div class="hosted-note">
+        <p>
+          <span class="tag tag-hosted">hosted</span>
+          No account or API key required. Capacity is shared on a fair-use
+          basis (a few concurrent runs). The first call in a fresh container
+          can take around 20 seconds while the models load, and forecast
+          tools take longer — a UK forecast runs a couple of minutes on
+          first call.
+        </p>
+        <p style="margin-top: 10px;">
+          <span class="tag tag-local">local</span>
+          OG-UK long-run scoring (<code>score_reform</code> with
+          <code>model='og'</code>) and <code>dynamic_reform_impact</code>
+          run locally only — they take tens of minutes, and the hosted
+          server will tell you so and point to the local CLI. Everything
+          else on this page is available hosted.
+        </p>
+      </div>
     </div>
   </section>
   <section id="cli" class="band">
