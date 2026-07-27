@@ -12,6 +12,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "economy" / "index.html"
 US_PAGE = ROOT / "economy" / "us" / "index.html"
+TRENDS_PAGE = ROOT / "economy" / "trends" / "index.html"
+US_TRENDS_PAGE = ROOT / "economy" / "us" / "trends" / "index.html"
 
 PUBLIC_LABELS = {
     "ABMI": "Real gross domestic product",
@@ -683,26 +685,46 @@ def render_us() -> str:
     return html
 
 
+def render_uk_trends() -> str:
+    return replace(
+        TRENDS_PAGE.read_text(), "economy-trends-figures", uk_figures()
+    )
+
+
+def render_us_trends() -> str:
+    return replace(
+        US_TRENDS_PAGE.read_text(), "us-economy-trends-figures", us_figures()
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     rendered_uk = render_uk()
     rendered_us = render_us()
+    rendered_uk_trends = render_uk_trends()
+    rendered_us_trends = render_us_trends()
     if args.check:
         stale = []
-        if rendered_uk != PAGE.read_text():
-            stale.append("economy/index.html")
-        if rendered_us != US_PAGE.read_text():
-            stale.append("economy/us/index.html")
+        for path, rendered in (
+            (PAGE, rendered_uk),
+            (US_PAGE, rendered_us),
+            (TRENDS_PAGE, rendered_uk_trends),
+            (US_TRENDS_PAGE, rendered_us_trends),
+        ):
+            if rendered != path.read_text():
+                stale.append(str(path.relative_to(ROOT)))
         if stale:
             print(f"{', '.join(stale)} stale; run python3 economy/build.py")
             return 1
-        print("UK and US Economy pages match committed data")
+        print("UK and US Economy overview and Trends pages match committed data")
         return 0
     PAGE.write_text(rendered_uk)
     US_PAGE.write_text(rendered_us)
-    print("updated UK and US Economy pages")
+    TRENDS_PAGE.write_text(rendered_uk_trends)
+    US_TRENDS_PAGE.write_text(rendered_us_trends)
+    print("updated UK and US Economy overview and Trends pages")
     return 0
 
 
