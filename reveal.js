@@ -1,16 +1,12 @@
-// Scroll-reveal for bands: adds `.in-view` to elements as they enter the
-// viewport, matching the `.reveal` / `.in-view` CSS in style.css. Split out
-// of field.js so pages without the hero canvas (every strategy and paper
-// page) still get their content revealed — field.js exits early via
-// `if (!canvas) return`, which used to skip this observer entirely on any
-// page without a `#field` canvas, leaving `.band-head`, `.prose`, `.cards`,
-// and `.metrics` stuck at opacity: 0 forever.
+// A restrained, one-time reveal for section-level content. The hero and
+// navigation paint immediately; only content reached by scrolling moves.
 (function () {
   "use strict";
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const targets = document.querySelectorAll(
-    ".band-head, .prose, .cards, .metrics, .caveat, .commons-rails, .stack-note, .band-cta h2, .band-cta .hero-cta"
+    "main .band > *, main .model-evidence-links-top"
   );
+  targets.forEach(function (el) { el.classList.add("scroll-reveal"); });
   if (reduce || !("IntersectionObserver" in window)) {
     targets.forEach(function (el) { el.classList.add("in-view"); });
     return;
@@ -24,7 +20,13 @@
         }
       });
     },
-    { threshold: 0.12 }
+    { threshold: 0.08, rootMargin: "0px 0px -7% 0px" }
   );
-  targets.forEach(function (el) { io.observe(el); });
+  targets.forEach(function (el) {
+    if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
+      el.classList.add("in-view", "reveal-initial");
+    } else {
+      io.observe(el);
+    }
+  });
 })();

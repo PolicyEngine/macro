@@ -170,21 +170,34 @@ def esc(s: str) -> str:
 
 
 def render_status(card: dict) -> str:
-    """The headline paragraph. Deliberately refuses to state an accuracy figure
-    while the scored count is small — see the module docstring."""
+    """Visual record totals without turning a one-period sample into a claim."""
     rounds = card["rounds"]
     scored = card["periods_scored"]
-
+    entries = [
+        entry
+        for detail in card["detail"]
+        for entry in detail["entries"]
+    ]
+    latest_entry = sorted(entries, key=lambda entry: entry["period"])[-1] if entries else None
+    latest_error = (
+        f"{latest_entry['abs_error']:.2f}pp" if latest_entry else "Awaiting outturn"
+    )
     lines = [
-        "      <p>",
-        f"        <strong>{rounds} round{'' if rounds == 1 else 's'} archived; "
-        f"{scored} forecast period{'' if scored == 1 else 's'} scored.</strong>",
+        '      <div class="forecast-summary" aria-label="Current forecast record">',
+        f"        <article><strong>{rounds}</strong><span>Archived "
+        f"round{'' if rounds == 1 else 's'}</span></article>",
+        f"        <article><strong>{scored}</strong><span>Scored "
+        f"period{'' if scored == 1 else 's'}</span></article>",
+        f"        <article><strong>{latest_error}</strong><span>Latest absolute "
+        "error</span></article>",
+        "      </div>",
+        '      <p class="forecast-next">',
     ]
     pending = card.get("pending_detail")
     if pending:
         who = ", ".join(f"{VARIABLE_LABELS.get(v, v)}" for v in pending["variables"])
         lines.append(
-            f"        The next result due is {esc(pending['period'])} "
+            f"        <strong>Next due:</strong> {esc(pending['period'])} "
             f"({esc(who)}), which lands when the ONS publishes it."
         )
     else:
