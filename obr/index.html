@@ -64,7 +64,7 @@
   </section>
 
   <nav class="model-local-nav" aria-label="On this model page">
-    <a href="#what">Overview</a><a href="#how">Method</a><a href="#run">Run</a><a href="#trust">Validation</a><a href="/papers/obr-macro/">Paper</a>
+    <a href="#what">Overview</a><a href="#answers">Worked example</a><a href="#how">Method</a><a href="#run">Run</a><a href="#trust">Validation</a><a href="/papers/obr-macro/">Paper</a>
   </nav>
 
   <section id="what" class="band">
@@ -128,12 +128,69 @@
     </div>
   </section>
 
+  <section id="answers" class="band">
+    <div class="band-head">
+      <span class="kicker mono">02 — what it can answer</span>
+      <h2>Second-round effects on a static costing.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        The emulator's designed job is the second half of the official
+        workflow: microsimulation supplies the direct Exchequer effect, the
+        macro model supplies the economy-wide feedback. A static-costing
+        bridge wires <a href="/pe/">PolicyEngine's microsimulation</a> into
+        the emulator so a statutory reform can be scored end to end.
+      </p>
+      <p>
+        Worked example — 1p on the basic rate of income tax from April 2026,
+        scored 2026–2030. PolicyEngine puts the direct yield at
+        <strong>£6.46bn in 2026</strong>, rising to <strong>£7.38bn by
+        2030</strong>; HMRC's June 2025 ready reckoner puts 1p at £6.9bn in
+        2026–27 rising to about £8.2bn by 2028–29, so the static costing sits inside the
+        official range, toward its lower end. Converted to a positive quarterly
+        revenue-costing path of £1.62bn to £1.85bn, the
+        <code>HHDI_ADDFACTOR</code> adapter applies the corresponding negative
+        held add-factor (an add-factor is the residual adjustment the OBR
+        itself uses to reconcile an equation to data) to household disposable
+        income. Propagated through the
+        consumption function, GDP falls <strong>0.020% (−£0.14bn) on impact in
+        2026Q1, deepening to 0.058% (−£0.40bn) by 2027Q4</strong> on the
+        March 2026 baseline — the sign
+        and order of magnitude the OBR's own indirect-effect conventions
+        imply.
+      </p>
+      <div class="callout">
+        <strong>Read GDP-feedback estimates as an upper bound.</strong> Under
+        the demand closure a spending shock lands directly in the GDP identity
+        and the behavioural second round is largely inactive, so the impact
+        multiplier is ~1 by construction; the OBR's published impact
+        multiplier for current spending is 0.6.
+      </div>
+      <div class="callout">
+        <strong>It cannot</strong> tell you who wins and loses — pair it with
+        <a href="/pe/">PolicyEngine</a> for distributional analysis. It
+        cannot give you a long-run structural counterfactual — that is the
+        <a href="/olg/">OLG model</a>. And it cannot tell you what state the
+        economy is in today — that is the <a href="/svar/">SVAR</a>
+        (structural vector autoregression).
+      </div>
+    </div>
+  </section>
+
   <section id="how" class="band">
     <div class="band-head">
-      <span class="kicker mono">02 — how it works</span>
+      <span class="kicker mono">03 — how it works</span>
       <h2>Transpile, solve, swap the closure.</h2>
     </div>
     <div class="prose">
+      <p>
+        In outline: the OBR's published EViews equation listing is rewritten
+        in Python, solved quarter by quarter until the equations agree,
+        anchored so the baseline reproduces the published EFO, and shocked
+        against an identical baseline so the difference is the policy effect.
+      </p>
+      <details class="economy-source-detail">
+      <summary>Technical detail: solver and translation</summary>
       <div class="table-scroll"><table>
         <caption>The transpile–solve–shock pipeline, stage by stage</caption>
         <thead><tr><th scope="col">stage</th><th scope="col">what it does</th></tr></thead>
@@ -174,17 +231,30 @@
         to 0.29% at 2031Q1); anchored unemployment (<code>LFSUR</code>) is
         unreliable beyond 2027Q4, drifting to 0.9% against the EFO's 4.1% by 2031Q1.
       </p>
+      </details>
     </div>
   </section>
 
   <section id="run" class="band">
     <div class="band-head">
-      <span class="kicker mono">03 — how to run it</span>
+      <span class="kicker mono">04 — how to run it</span>
       <h2>Shock a variable, read the deviation.</h2>
     </div>
     <div class="prose">
       <p>
-        The package installs straight from GitHub — the equation listing, the
+        The quickest route is the <a href="/connect/">hosted MCP server</a>,
+        where two tools reach this model: <code>obr_shock</code> (shock one
+        variable in model units and read the per-quarter GDP deviation) and
+        <code>list_reform_variables</code> (the shockable levers, with their
+        units); <code>score_reform</code> with <code>model="obr"</code> scores
+        a PolicyEngine reform end to end through the static-costing bridge.
+        All run hosted — no install, no credentials. The CLI mirrors them:
+        <code>pe-macro obr-shock --var CGG --shock 1250</code>,
+        <code>pe-macro variables</code>, and
+        <code>pe-macro score --reform '{...}' --model obr</code>.
+      </p>
+      <p>
+        To run it locally, the package installs straight from GitHub — the equation listing, the
         March 2026 EFO forecast tables, and the ONS snapshot ship inside
         it, so there is no data step. A reform is one call: pick an exogenous
         variable, apply a shock, read the deviation from baseline.
@@ -203,7 +273,7 @@ results = run_reform(
 <span class="cm"># ΔGDP ≈ £1.25bn in the impact quarter, near-flat thereafter —</span>
 <span class="cm"># under the demand closure the impact multiplier is ~1 by construction</span></code></pre></div>
       <p class="opt-note">
-        two solves, so about a minute. run the five bundled scenarios with
+        Two solves, so about a minute. Run the five bundled scenarios with
         charts via <code>python -m obr_macro.reform_analysis</code> — a £5bn
         spending rise, a 5pp corporation-tax cut and rise, £10bn public
         real investment (~£3bn nominal <code>CGIPS</code> per quarter), and a £10bn
@@ -230,49 +300,10 @@ results = run_reform(
         </tbody>
       </table></div>
       <p class="opt-note">
-        the full searchable glossary — all 636 codes with descriptions, ONS
+        The full searchable glossary — all 636 codes with descriptions, ONS
         series and equations — is the
         model package's variable and equation references.
       </p>
-    </div>
-  </section>
-
-  <section id="answers" class="band">
-    <div class="band-head">
-      <span class="kicker mono">04 — what it can answer</span>
-      <h2>Second-round effects on a static costing.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        The emulator's designed job is the second half of the official
-        workflow: microsimulation supplies the direct Exchequer effect, the
-        macro model supplies the economy-wide feedback. A static-costing
-        bridge wires <a href="/pe/">PolicyEngine's microsimulation</a> into
-        the emulator so a statutory reform can be scored end to end.
-      </p>
-      <p>
-        Worked example — 1p on the basic rate of income tax from April 2026,
-        scored 2026–2030. PolicyEngine puts the direct yield at
-        <strong>£6.46bn in 2026</strong>, rising to <strong>£7.38bn by
-        2030</strong>; HMRC's June 2025 ready reckoner puts 1p at £6.9bn in
-        2026–27 rising to about £8.2bn by 2028–29, so the static costing sits inside the
-        official range, toward its lower end. Converted to a positive quarterly
-        revenue-costing path of £1.62bn to £1.85bn, the
-        <code>HHDI_ADDFACTOR</code> adapter applies the corresponding negative
-        held add-factor to household disposable income. Propagated through the
-        consumption function, GDP falls <strong>0.020% (−£0.14bn) on impact in
-        2026Q1, deepening to 0.058% (−£0.40bn) by 2027Q4</strong> on the
-        March 2026 baseline — the sign
-        and order of magnitude the OBR's own indirect-effect conventions
-        imply.
-      </p>
-      <div class="callout">
-        <strong>It cannot</strong> tell you who wins and loses — pair it with
-        <a href="/pe/">PolicyEngine</a> for distributional analysis. It
-        cannot give you a long-run structural counterfactual — that is the
-        <a href="/olg/">OLG model</a>. And it cannot tell you what state the
-        economy is in today — that is the <a href="/svar/">SVAR</a>.
-      </div>
     </div>
   </section>
 
@@ -286,7 +317,9 @@ results = run_reform(
         There are three configurations and they earn very different levels of
         trust. Anchored is a by-construction invariant, not a forecast claim:
         the add-factors absorb the tracking error, which is exactly what
-        anchoring means, and CI hard-fails the build if it slips.
+        anchoring means, and CI hard-fails the build if it slips. Errors below
+        are reported as MAPE — mean absolute percentage error, the average
+        percentage gap from the published path.
       </p>
     </div>
     <div class="metrics">
@@ -344,12 +377,14 @@ results = run_reform(
       <a href="/papers/obr-macro/">working paper</a>; charts and source data
       in <a href="/validation/">validation</a>.
     </p>
+    <div class="prose">
       <p class="callout">
         This is an independent implementation built from the OBR's published
         model code and forecast data. It is not produced, maintained, or
         endorsed by the Office for Budget Responsibility, and its results
         should not be presented as official OBR estimates.
       </p>
+    </div>
   </section>
 
   <section id="caveats" class="band">

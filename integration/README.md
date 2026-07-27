@@ -11,6 +11,10 @@ one CLI and one MCP server:
   rule. There is deliberately NO PolicyEngine-reform bridge for FRB/US.
 - **UK SVAR** (`boe_var`): sign-identified Bayesian VAR for UK GDP/CPI
   forecasts and structural shock readings.
+- **US HANK** (`us_hank`): two-asset heterogeneous-agent New Keynesian
+  model — monetary, fiscal, and productivity shock experiments via
+  `hank_shock`, with distributional readouts (MPC by wealth quartile).
+  Does not score reforms.
 - **PolicyEngine microsimulation** (`policyengine` from PyPI, v4): full
   UK/US tax-benefit rules — household calculator, baseline-vs-reform
   impacts, and population-level reform scoring over representative
@@ -168,9 +172,13 @@ pe-macro frbus-summary                                # FRB/US metadata + valida
 pe-macro frbus-shock --var rffintay_aerr --shock 1.0  # 100bp US monetary tightening
 pe-macro frbus-shock --var egfe_aerr --shock 0.01 --periods 4 \
     --policy-rule fixed_funds_rate                    # fiscal shock, no monetary offset
-pe-macro forecast --horizons 12 --draws 500           # YoY GDP & CPI, 68/90 bands
-pe-macro shocks --draws 500                           # P(sign) of latest-quarter shocks
+pe-macro hank-shock --kind monetary --size 0.0025     # 25bp US rate shock (HANK)
+pe-macro hank-summary                                 # HANK shock kinds, units, provenance
+pe-macro forecast --horizons 12                       # YoY GDP & CPI, 68/90 bands
+pe-macro shocks                                       # P(sign) of latest-quarter shocks
 pe-macro summary                                      # instant, parses committed results
+pe-macro model-status                                 # which models are importable here
+pe-macro og-baseline                                  # pre-solve/cache the OG-UK baseline
 ```
 
 PolicyEngine tools:
@@ -204,16 +212,19 @@ benefits the MCP server).
 ## MCP server
 
 Runs over stdio via `python -m policyengine_macro.mcp_server`, exposing
-eighteen tools:
+twenty tools:
 `score_reform` (a PolicyEngine reform through a chosen macro model),
 `dynamic_reform_impact` (the OG-UK overlay dynamic score; local-only —
 the hosted server returns a "run locally" error),
 `format_score_report` (stable JSON or Markdown reports),
 `obr_shock` and `list_reform_variables` (raw OBR variable shocks),
 `frbus_shock`, `frbus_list_variables` and `frbus_summary` (FRB/US),
-`forecast_uk`, `latest_shocks`, `model_summary` (SVAR), and the PolicyEngine
+`hank_shock` and `hank_summary` (US HANK),
+`forecast_uk`, `latest_shocks`, `model_summary` (SVAR), the PolicyEngine
 tools `calculate_household`, `household_reform_impact`,
-`list_reform_parameters`, `population_reform_impact`.
+`list_reform_parameters`, `population_reform_impact`, and the discovery
+tools `list_model_capabilities`, `get_model_status`, `recommend_model`
+(which model answers your question — call these first from a fresh client).
 
 `score_reform` deliberately REFUSES `model='frbus'`: no mapping exists today
 from a PolicyEngine US reform to FRB/US fiscal levers, and inventing one would
@@ -230,8 +241,8 @@ Test locally with Claude Code:
 claude mcp add policyengine-macro -- python -m policyengine_macro.mcp_server
 ```
 
-Default `draws=500` keeps tool calls to tens of seconds; raise it (e.g. 2000+)
-for smoother bands. Repeated calls with the same parameters hit an in-process
+Default `draws=2000` gives smooth bands in about two minutes; lower it (e.g.
+500) for faster, rougher calls. Repeated calls with the same parameters hit an in-process
 cache and return instantly.
 
 ## Deployment (Modal)
@@ -246,8 +257,7 @@ https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp
 Defined in `modal_app.py`. `policyengine[models]` is installed in the image;
 because it is imported lazily inside the adapters, cold starts stay fast and
 only the first PolicyEngine tool call in a fresh container pays the ~20 s
-model load. The private UK microdata credential comes from the Modal secret
-a Modal secret, with derived datasets cached on the `policyengine-macro-pe-data` volume.
+model load. The private UK microdata credential comes from a Modal secret, with derived datasets cached on the `policyengine-macro-pe-data` volume.
 
 **Add it as a connector**
 

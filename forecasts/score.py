@@ -220,8 +220,10 @@ def render_rounds(card: dict) -> str:
             f"            <div><dt>Periods</dt><dd>{detail['periods_forecast']}</dd></div>\n"
             f"            <div><dt>Scored</dt><dd>{detail['periods_scored']}</dd></div>\n"
             "          </dl>\n"
-            f"          <a class=\"mono\" href=\"{href}\">Open immutable artifact · "
-            f"<code>{esc(label)}</code> →</a>\n"
+            f"          <a class=\"mono\" href=\"/{esc(detail['path'])}\" download>"
+            f"Download artifact · <code>{esc(label)}</code> →</a>\n"
+            f"          <a class=\"mono\" href=\"{href}\">"
+            "Open on GitHub with commit history →</a>\n"
             "        </article>"
         )
     rows.append("      </div>")

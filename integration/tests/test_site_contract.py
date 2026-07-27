@@ -23,7 +23,7 @@ def test_svar_site_uses_runtime_estimation_endpoint():
     drift in the other direction."""
     from policyengine_macro.core import _SVAR_EST_END
 
-    pages = _read("svar/index.html") + _read("docs/index.html")
+    pages = _read("svar/index.html") + _read("models/index.html")
     assert f"estimated through {_SVAR_EST_END}" in pages
 
     # No other quarter may be presented as the estimation endpoint.
