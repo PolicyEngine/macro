@@ -18,17 +18,16 @@ HEADER = re.compile(
 DESTINATIONS = (
     ("home", "/", "Home", "nav-mobile"),
     ("economy", "/economy/", "Economy", "nav-mobile"),
-    ("models", "/models/", "Models", ""),
-    ("forecasts", "/forecasts/", "Forecasts", ""),
-    ("evidence", "/validation/", "Evidence", ""),
+    ("models", "/models/", "Models", "nav-mobile"),
+    ("forecasts", "/forecasts/", "Track record", "nav-mobile"),
     ("use", "/connect/", "Use", "nav-mobile nav-start"),
-    ("contact", "/contact/", "Contact", ""),
 )
 
 MODEL_ROOTS = {"models", "obr", "svar", "frb-us", "us-hank", "olg", "pe"}
 EVIDENCE_ROOTS = {"validation", "papers", "docs"}
 
 GITHUB = """    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>"""
+FOOTER_CONTACT = '    <a class="footer-contact" href="/contact/">Contact</a>'
 
 
 def section(path: Path) -> str | None:
@@ -39,15 +38,13 @@ def section(path: Path) -> str | None:
     if root in MODEL_ROOTS:
         return "models"
     if root in EVIDENCE_ROOTS:
-        return "evidence"
+        return "models"
     if root == "economy":
         return "economy"
     if root == "forecasts":
         return "forecasts"
     if root == "connect":
         return "use"
-    if root == "contact":
-        return "contact"
     return None
 
 
@@ -85,7 +82,18 @@ def render(path: Path) -> str:
     updated, replacements = HEADER.subn(header(path), source, count=1)
     if replacements != 1:
         raise ValueError(f"could not locate navigation in {path.relative_to(ROOT)}")
-    return updated.replace(" has-section-tabs", "")
+    updated = updated.replace(" has-section-tabs", "")
+    if FOOTER_CONTACT not in updated:
+        footer_pattern = re.compile(
+            r'(<nav class="footer-links" aria-label="PolicyEngine links">.*?)(\s*</nav>)',
+            re.DOTALL,
+        )
+        updated, footer_replacements = footer_pattern.subn(
+            rf"\1\n{FOOTER_CONTACT}\2", updated, count=1
+        )
+        if footer_replacements != 1:
+            raise ValueError(f"could not locate footer navigation in {path.relative_to(ROOT)}")
+    return updated
 
 
 def main() -> int:

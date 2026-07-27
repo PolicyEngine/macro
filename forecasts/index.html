@@ -46,11 +46,9 @@
   <nav class="nav-links" aria-label="Primary">
     <a class="nav-mobile" href="/">Home</a>
     <a class="nav-mobile" href="/economy/">Economy</a>
-    <a href="/models/">Models</a>
-    <a href="/forecasts/" aria-current="page">Forecasts</a>
-    <a href="/validation/">Evidence</a>
+    <a class="nav-mobile" href="/models/">Models</a>
+    <a class="nav-mobile" href="/forecasts/" aria-current="page">Track record</a>
     <a class="nav-mobile nav-start" href="/connect/">Use</a>
-    <a href="/contact/">Contact</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
   </nav>
 </header>
@@ -89,22 +87,18 @@
       </p>
 
 <!-- scorecard-results:begin -->
-      <div class="table-scroll">
-      <table>
-        <caption>Scored forecasts. Error is forecast minus outturn; the band column is the narrowest credible band the outturn fell inside.</caption>
-        <thead><tr><th scope="col">Period</th><th scope="col">Variable</th><th scope="col">Forecast</th><th scope="col">Outturn</th><th scope="col">Error</th><th scope="col">Band</th><th scope="col">Round</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row">2026Q2</th>
-            <td>UK CPI, y/y</td>
-            <td>2.68%</td>
-            <td>2.80%</td>
-            <td>-0.12pp</td>
-            <td>68%</td>
-            <td>2026-07-21</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="forecast-result-list">
+        <article class="forecast-result">
+          <header>
+            <div><span class="mono">2026Q2</span><h3>UK CPI, y/y</h3></div>
+            <span class="forecast-band">Inside 68% band</span>
+          </header>
+          <div class="forecast-result-plot" aria-label="Forecast 2.68 percent; outturn 2.80 percent">
+            <div><span>Forecast</span><i style="width:95.7%"></i><strong>2.68%</strong></div>
+            <div><span>Outturn</span><i style="width:100.0%"></i><strong>2.80%</strong></div>
+          </div>
+          <footer><span>Error <strong>-0.12pp</strong></span><span>Round 2026-07-21</span></footer>
+        </article>
       </div>
 <!-- scorecard-results:end -->
       <p>
@@ -122,24 +116,19 @@
       <h2>What was claimed, and when.</h2>
     </div>
     <div class="prose">
-      <div class="table-scroll">
-      <table>
-        <caption>Archived forecast rounds. Each row links to the immutable artifact in the repository.</caption>
-        <thead><tr><th scope="col">Round</th><th scope="col">Model</th><th scope="col">Data edge</th><th scope="col">Periods</th><th scope="col">Scored</th><th scope="col">Artifact</th></tr></thead>
-        <tbody>
 <!-- scorecard-rounds:begin -->
-          <tr>
-            <th scope="row">2026-07-21</th>
-            <td>boe-svar</td>
-            <td>2026Q1</td>
-            <td>13</td>
-            <td>1</td>
-            <td><a href="https://github.com/PolicyEngine/macro/blob/main/forecasts/rounds/2026-07-21/boe-svar.json"><code>2026-07-21/boe-svar.json</code></a></td>
-          </tr>
-<!-- scorecard-rounds:end -->
-        </tbody>
-      </table>
+      <div class="forecast-round-list">
+        <article class="forecast-round">
+          <div><span class="mono">2026-07-21</span><strong>boe-svar</strong></div>
+          <dl>
+            <div><dt>Data edge</dt><dd>2026Q1</dd></div>
+            <div><dt>Periods</dt><dd>13</dd></div>
+            <div><dt>Scored</dt><dd>1</dd></div>
+          </dl>
+          <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/forecasts/rounds/2026-07-21/boe-svar.json">Open immutable artifact · <code>2026-07-21/boe-svar.json</code> →</a>
+        </article>
       </div>
+<!-- scorecard-rounds:end -->
       <p>
         <strong>The first round was archived retroactively</strong> from a
         forecast file already committed to Git. That commit preceded the CPI
@@ -167,29 +156,11 @@
         A single accuracy headline hides the failures that matter, so each round
         is scored on four things:
       </p>
-      <div class="table-scroll">
-      <table>
-        <caption>Scoring measures and what each one is there to catch</caption>
-        <thead><tr><th scope="col">Measure</th><th scope="col">What it catches</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row">Mean absolute error</th>
-            <td>Typical size of a miss, in percentage points.</td>
-          </tr>
-          <tr>
-            <th scope="row">Signed bias</th>
-            <td>Whether the model is persistently high or low. A model that is always 0.4pp too optimistic is a different — and more fixable — problem than one that is 0.4pp out in random directions, and MAE cannot tell them apart.</td>
-          </tr>
-          <tr>
-            <th scope="row">Band coverage</th>
-            <td>How often the outturn fell inside the 68% and 90% credible bands. A fan chart whose 68% band catches 30% of outturns is overconfident regardless of how good its central path looks.</td>
-          </tr>
-          <tr>
-            <th scope="row">Baseline comparison</th>
-            <td>Shows whether the model improves on a random walk, drift, or AR(1) forecast.</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="score-method-grid">
+        <article><span class="score-method-id mono">01</span><h3>Mean absolute error</h3><p>Typical size of a miss, in percentage points.</p></article>
+        <article><span class="score-method-id mono">02</span><h3>Signed bias</h3><p>Whether forecasts are persistently high or low rather than wrong in random directions.</p></article>
+        <article><span class="score-method-id mono">03</span><h3>Band coverage</h3><p>Whether 68% and 90% ranges contain outturns as often as they claim.</p></article>
+        <article><span class="score-method-id mono">04</span><h3>Baseline comparison</h3><p>Whether the model improves on random-walk, drift, and AR(1) forecasts.</p></article>
       </div>
       <details class="more">
         <summary>Why outturns are versioned rather than overwritten</summary>
@@ -252,6 +223,7 @@
     <a href="mailto:vahid@policyengine.org" aria-label="Email Vahid" title="Email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a>
     <a href="https://www.linkedin.com/company/thepolicyengine" aria-label="PolicyEngine on LinkedIn" title="LinkedIn"><svg class="footer-icon-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45Z"/></svg></a>
     <a href="https://x.com/PolicyEngineUS" aria-label="PolicyEngine on X" title="X"><svg class="footer-icon-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.66l-5.21-6.82-5.97 6.82H1.67l7.73-8.84L1.25 2.25h6.83l4.71 6.23 5.45-6.23Zm-1.16 17.52h1.83L7.08 4.13H5.12l11.96 15.64Z"/></svg></a>
+    <a class="footer-contact" href="/contact/">Contact</a>
   </nav>
 </footer>
 
