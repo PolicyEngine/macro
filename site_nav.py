@@ -16,10 +16,10 @@ HEADER = re.compile(
 )
 
 DESTINATIONS = (
+    ("home", "/", "Home", "nav-mobile"),
     ("economy", "/economy/", "Economy", "nav-mobile"),
     ("models", "/models/", "Models", ""),
     ("forecasts", "/forecasts/", "Forecasts", ""),
-    ("notes", "/notes/", "Notes", ""),
     ("evidence", "/validation/", "Evidence", ""),
     ("use", "/connect/", "Use", "nav-mobile nav-start"),
     ("contact", "/contact/", "Contact", ""),
@@ -35,7 +35,7 @@ def section(path: Path) -> str | None:
     relative = path.relative_to(ROOT)
     root = relative.parts[0]
     if relative == Path("index.html"):
-        return None
+        return "home"
     if root in MODEL_ROOTS:
         return "models"
     if root in EVIDENCE_ROOTS:
@@ -44,8 +44,6 @@ def section(path: Path) -> str | None:
         return "economy"
     if root == "forecasts":
         return "forecasts"
-    if root == "notes":
-        return "notes"
     if root == "connect":
         return "use"
     if root == "contact":
