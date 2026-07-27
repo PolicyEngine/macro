@@ -34,7 +34,7 @@ def check_public_model_inventory() -> None:
             failures.append(f"{path}: missing {', '.join(missing)}")
 
     papers = _read("papers/index.html")
-    if "six evidence guides" not in papers:
+    if "evidence for all six models" not in papers:
         failures.append("papers/index.html: evidence-guide count is not six")
     missing_papers = [model for model in PUBLIC_MODELS if model not in papers]
     if missing_papers:
@@ -141,8 +141,44 @@ def check_editorial_consistency() -> None:
         raise SystemExit("\n".join(failures))
 
 
+def check_docs_match_code() -> None:
+    """Documented tool counts and commands must match the integration code."""
+    failures: list[str] = []
+    mcp_source = _read("integration/src/policyengine_macro/mcp_server.py")
+    tool_count = mcp_source.count("@mcp.tool")
+    count_words = {18: "eighteen", 19: "nineteen", 20: "twenty", 21: "twenty-one",
+                   22: "twenty-two", 23: "twenty-three", 24: "twenty-four"}
+    readme = _read("integration/README.md")
+    expected = count_words.get(tool_count, str(tool_count))
+    if f"{expected} tools" not in readme:
+        failures.append(
+            f"integration/README.md: MCP tool count drifted — server defines "
+            f"{tool_count} @mcp.tool functions; README must say '{expected} tools'"
+        )
+    for name in ("hank_shock", "hank_summary", "list_model_capabilities",
+                 "get_model_status", "recommend_model"):
+        if f"def {name}" in mcp_source and name not in readme:
+            failures.append(f"integration/README.md: tool `{name}` undocumented")
+
+    connect = _read("connect/index.html")
+    endpoint = "https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp"
+    for path, page in (("connect/index.html", connect),
+                       ("integration/README.md", readme)):
+        if endpoint not in page:
+            failures.append(f"{path}: hosted MCP endpoint URL missing or drifted")
+    if "pe-macro household --country us</code>" in connect:
+        failures.append(
+            "connect/index.html: `pe-macro household` example omits required "
+            "--people option"
+        )
+
+    if failures:
+        raise SystemExit("\n".join(failures))
+
+
 if __name__ == "__main__":
     check_public_model_inventory()
     check_economy_navigation()
     check_editorial_consistency()
+    check_docs_match_code()
     print("Public inventory, navigation, and editorial claims are consistent.")

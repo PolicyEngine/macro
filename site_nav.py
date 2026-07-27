@@ -70,13 +70,39 @@ def header(path: Path) -> str:
 """ % "\n".join(links)
 
 
-def pages() -> list[Path]:
+# Standalone documents allowed to ship without the global nav header.
+# Anything else without <header class="nav"> fails the check instead of
+# being silently skipped forever.
+NAV_EXEMPT = {
+    Path("reports/us-hank-open-source.html"),
+}
+
+# Directories that never contain public pages.
+SKIP_ROOTS = {"vendor", "reveal.js", "audit", "assets", "data"}
+
+
+def all_html() -> list[Path]:
     return sorted(
         path
         for path in ROOT.rglob("*.html")
         if not any(part.startswith(".") for part in path.relative_to(ROOT).parts)
-        and '<header class="nav">' in path.read_text()
+        and path.relative_to(ROOT).parts[0] not in SKIP_ROOTS
     )
+
+
+def pages() -> list[Path]:
+    return [
+        path for path in all_html()
+        if '<header class="nav">' in path.read_text()
+    ]
+
+
+def navless_violations() -> list[Path]:
+    return [
+        path for path in all_html()
+        if '<header class="nav">' not in path.read_text()
+        and path.relative_to(ROOT) not in NAV_EXEMPT
+    ]
 
 
 def render(path: Path) -> str:
@@ -112,6 +138,16 @@ def main() -> int:
         stale.append(path)
         if args.write:
             path.write_text(updated)
+
+    violations = navless_violations()
+    if violations:
+        for path in violations:
+            print(
+                f"FAIL page without global nav (add the header or list it in "
+                f"NAV_EXEMPT): {path.relative_to(ROOT)}",
+                file=sys.stderr,
+            )
+        return 1
 
     if stale and not args.write:
         for path in stale:
