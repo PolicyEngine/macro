@@ -292,7 +292,7 @@
       <p class="lede reveal" style="--d:2;">
         Run hosted models through MCP, install the shared CLI, or use the
         Python packages. The public endpoint needs no PolicyEngine account or
-        API key; client eligibility still applies.
+        API key. (Some clients gate custom connectors by plan — details per client below.)
       </p>
     </div>
   </section>
@@ -368,9 +368,10 @@
         <p>
           <span class="tag tag-hosted">hosted</span>
           No account or API key required. Capacity is shared on a fair-use
-          basis (a few concurrent runs). The first call in a fresh container
-          can take around 20 seconds while the models load, and forecast
-          tools take longer — a UK forecast runs a couple of minutes on
+          basis (a few concurrent runs). The first household or population
+          call in a fresh container can take around 20 seconds while the
+          tax-benefit models load — other tools respond faster — and forecast
+          tools take longer: a UK forecast runs a couple of minutes on
           first call.
         </p>
         <p style="margin-top: 10px;">
@@ -409,19 +410,19 @@
     </div>
     <div class="model-picker">
       <div class="seg model-seg" role="tablist" aria-label="Model" id="model-seg">
-        <button id="model-tab-oguk" role="tab" data-model="oguk" aria-selected="true" aria-controls="model-panel-oguk" tabindex="0"><strong>psl-og</strong><span>Long-run reform</span></button>
-        <button id="model-tab-obr" role="tab" data-model="obr" aria-selected="false" aria-controls="model-panel-obr" tabindex="-1"><strong>obr-macro</strong><span>Near-term fiscal</span></button>
+        <button id="model-tab-obr" role="tab" data-model="obr" aria-selected="true" aria-controls="model-panel-obr" tabindex="0"><strong>obr-macro</strong><span>Near-term fiscal</span></button>
+        <button id="model-tab-oguk" role="tab" data-model="oguk" aria-selected="false" aria-controls="model-panel-oguk" tabindex="-1"><strong>psl-og</strong><span>Long-run reform</span></button>
         <button id="model-tab-frbus" role="tab" data-model="frbus" aria-selected="false" aria-controls="model-panel-frbus" tabindex="-1"><strong>frb-us</strong><span>US shocks</span></button>
         <button id="model-tab-svar" role="tab" data-model="svar" aria-selected="false" aria-controls="model-panel-svar" tabindex="-1"><strong>boe-svar</strong><span>UK forecasts</span></button>
         <button id="model-tab-hank" role="tab" data-model="hank" aria-selected="false" aria-controls="model-panel-hank" tabindex="-1"><strong>us-hank</strong><span>US distributional</span></button>
         <button id="model-tab-pe" role="tab" data-model="pe" aria-selected="false" aria-controls="model-panel-pe" tabindex="-1"><strong>pe-microsim</strong><span>Households</span></button>
       </div>
-      <div class="model-pane compact-pane" id="model-panel-oguk" role="tabpanel" aria-labelledby="model-tab-oguk" data-model="oguk">
+      <div class="model-pane compact-pane" id="model-panel-oguk" role="tabpanel" aria-labelledby="model-tab-oguk" data-model="oguk" hidden>
         <span class="tag tag-local">local</span><h3>Long-run reform effects</h3>
         <p>Model work, saving, capital, and public finances over decades.</p>
         <a class="btn btn-primary" href="/olg/#run">Open OG-UK setup</a>
       </div>
-      <div class="model-pane compact-pane" id="model-panel-obr" role="tabpanel" aria-labelledby="model-tab-obr" data-model="obr" hidden>
+      <div class="model-pane compact-pane" id="model-panel-obr" role="tabpanel" aria-labelledby="model-tab-obr" data-model="obr">
         <span class="tag tag-hosted">hosted</span><h3>Near-term UK fiscal effects</h3>
         <p>Trace tax and spending changes against the OBR baseline.</p>
         <a class="btn btn-primary" href="/obr/#run">Open OBR setup</a>

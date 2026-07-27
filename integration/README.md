@@ -241,7 +241,7 @@ Test locally with Claude Code:
 claude mcp add policyengine-macro -- python -m policyengine_macro.mcp_server
 ```
 
-Default `draws=2000` gives smooth bands in around a minute; lower it (e.g.
+Default `draws=2000` gives smooth bands in about two minutes; lower it (e.g.
 500) for faster, rougher calls. Repeated calls with the same parameters hit an in-process
 cache and return instantly.
 
