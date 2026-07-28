@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "round_id": "2026-07-28",
+  "archived_utc": "2026-07-28T08:27:48Z",
+  "model": {
+    "name": "okun-unemployment",
+    "description": "Okun's-law satellite: deterministic mapping of the boe-svar UK GDP growth forecast to the ONS unemployment rate (MGSX). Fit du_t = alpha + beta*g_t + gamma*du_{t-1} by OLS on 1992Q1-2025Q1 with 2020Q1-2021Q2 dummied out (furlough decoupled unemployment from GDP): alpha=0.0611, beta=-0.0474, gamma=0.1871, sigma=0.172pp, n=123, R2=0.368.",
+    "source_pipeline": "PolicyEngine/boe-var-model src/boe_var/okun.py at main (PR #8, merge 302f7ec)",
+    "generated": "2026-07-28"
+  },
+  "information_set": {
+    "data_edge": "2026Q1",
+    "forecast_start": "2026Q2",
+    "first_period": "2026Q2",
+    "last_period": "2027Q1",
+    "gdp_input": "archived round forecasts/rounds/2026-07-21/boe-svar.json (data edge 2026Q1)",
+    "unemployment_input": "ONS MGSX through 2026Q1 (u=5.0, du=-0.2), vintage 2026-07-26"
+  },
+  "units": "percent, unemployment rate level",
+  "variables": [
+    "unemployment"
+  ],
+  "caveats": [
+    "Horizon capped at 4 quarters: the rolling-origin validation (boe-var-model results/okun_validation.json) shows the end-to-end SVAR->Okun forecast beats a random walk at horizons 1-4 ex-COVID (RMSE ratios 0.82-0.99) and is clearly worse beyond 4 quarters.",
+    "The improvement over no-change is not statistically significant at 73 overlapping origins (Diebold-Mariano p >= 0.14).",
+    "Bands carry GDP-forecast uncertainty only, mapped through the deterministic Okun equation; Okun residual uncertainty (sigma 0.17pp per quarter) is NOT sampled, so the stated bands understate total uncertainty."
+  ],
+  "benchmarks": {
+    "random_walk": null,
+    "drift": null,
+    "ar1": null,
+    "official": null
+  },
+  "forecast": {
+    "2026Q2": {
+      "unemployment": {
+        "median": 4.9714,
+        "lo68": 4.9447,
+        "hi68": 4.9976,
+        "lo90": 4.9304,
+        "hi90": 5.0146
+      }
+    },
+    "2026Q3": {
+      "unemployment": {
+        "median": 4.9626,
+        "lo68": 4.8897,
+        "hi68": 5.0333,
+        "lo90": 4.8507,
+        "hi90": 5.0828
+      }
+    },
+    "2026Q4": {
+      "unemployment": {
+        "median": 4.9405,
+        "lo68": 4.8137,
+        "hi68": 5.0744,
+        "lo90": 4.7354,
+        "hi90": 5.1609
+      }
+    },
+    "2027Q1": {
+      "unemployment": {
+        "median": 4.9332,
+        "lo68": 4.7351,
+        "hi68": 5.1395,
+        "lo90": 4.611,
+        "hi90": 5.2693
+      }
+    }
+  }
+}
