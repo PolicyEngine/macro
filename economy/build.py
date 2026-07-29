@@ -221,7 +221,6 @@ def cards() -> str:
     okun = json.loads(
         (ROOT / "forecasts" / "rounds" / "2026-07-28" / "okun-unemployment.json").read_text()
     )
-    scorecard = json.loads((ROOT / "forecasts" / "scorecard.json").read_text())
 
     growth = gdp_growth(gdp)
     g_now, g_prev = growth[-1], growth[-2]
@@ -253,8 +252,6 @@ def cards() -> str:
         "/forecasts",
         f"round {okun['round_id']}",
     )
-    scored = scorecard["periods_scored"]
-    rounds = scorecard["rounds"]
 
     return "\n".join(
         [
@@ -290,15 +287,6 @@ def cards() -> str:
                 unemployment["url"],
                 model_line(u_fc, u_period),
                 okun_source,
-            ),
-            card(
-                "REAL-TIME FORECAST RECORD",
-                f"{scored} scored",
-                "current scorecard",
-                f"{rounds} archived round{'s' if rounds != 1 else ''}",
-                "PolicyEngine forecast archive",
-                "generated scorecard",
-                "/forecasts",
             ),
         ]
     )
