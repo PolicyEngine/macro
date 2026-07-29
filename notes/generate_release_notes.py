@@ -144,7 +144,11 @@ def note_page(series: dict, vintage: str) -> str:
     </div>
   </section>
 </main>
-<footer class="foot foot-bar"><p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p></footer>
+<footer class="foot foot-bar">
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+  </nav>
+</footer>
 <script src="/reveal.js" defer></script>
 </body>
 </html>
@@ -164,7 +168,7 @@ def rebuild_indexes() -> None:
         title_match = re.search(r"<h1 class=\"page-title\">(.*?)</h1>", page.read_text())
         title = title_match.group(1) if title_match else series
         index_rows.append(
-            f'        <a href="/notes/releases/{slug}/"><span>{title}</span>'
+            f'        <a href="/notes/releases/{slug}"><span>{title}</span>'
             f"<strong>{date} · automatic release note</strong></a>"
         )
         sitemap_rows.append(
@@ -181,7 +185,7 @@ def check() -> int:
     sitemap = SITEMAP.read_text()
     for page in generated_pages():
         slug = page.parent.name
-        if f"/notes/releases/{slug}/" not in index:
+        if f"/notes/releases/{slug}" not in index:
             failures.append(f"{slug}: missing from notes index")
         if f"/notes/releases/{slug}</loc>" not in sitemap:
             failures.append(f"{slug}: missing from sitemap")
