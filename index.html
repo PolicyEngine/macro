@@ -89,10 +89,15 @@
 
   <section id="uk-now" class="band">
     <div class="band-head">
-      <span class="kicker mono">00 — the UK, at a glance</span>
+      <span class="kicker mono">00 — at a glance</span>
       <h2>Latest outturns beside the model's near-term view.</h2>
+      <div class="glance-switch mono" role="tablist" aria-label="Country">
+        <button type="button" id="glance-tab-uk" role="tab" aria-selected="true" aria-controls="glance-uk">UK</button>
+        <button type="button" id="glance-tab-us" role="tab" aria-selected="false" aria-controls="glance-us">US</button>
+      </div>
     </div>
     <div class="prose">
+      <div id="glance-uk" role="tabpanel" aria-labelledby="glance-tab-uk">
 <!-- home-uk-now:begin -->
       <div class="table-scroll">
         <table>
@@ -112,15 +117,8 @@
         <a href="/forecasts">boe-svar round</a>. Full sources and the complete
         horizon are on the <a href="/economy">economy page</a>.
       </p>
-    </div>
-  </section>
-
-  <section id="us-now" class="band">
-    <div class="band-head">
-      <span class="kicker mono">00 — the US, at a glance</span>
-      <h2>Latest outturns beside the official baseline.</h2>
-    </div>
-    <div class="prose">
+      </div>
+      <div id="glance-us" role="tabpanel" aria-labelledby="glance-tab-us" hidden>
 <!-- home-us-now:begin -->
       <div class="table-scroll">
         <table>
@@ -140,7 +138,22 @@
         FRB/US LONGBASE conditioning baseline, not a forecast. Full sources
         are on the <a href="/economy/us">US economy page</a>.
       </p>
+      </div>
     </div>
+    <script>
+      (function () {
+        var tabs = [["glance-tab-uk", "glance-uk"], ["glance-tab-us", "glance-us"]];
+        tabs.forEach(function (pair) {
+          document.getElementById(pair[0]).addEventListener("click", function () {
+            tabs.forEach(function (other) {
+              var active = other[0] === pair[0];
+              document.getElementById(other[0]).setAttribute("aria-selected", active ? "true" : "false");
+              document.getElementById(other[1]).hidden = !active;
+            });
+          });
+        });
+      })();
+    </script>
   </section>
 
 
