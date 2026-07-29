@@ -54,12 +54,12 @@ def check_public_model_inventory() -> None:
 def check_economy_navigation() -> None:
     failures: list[str] = []
     overview_routes = {
-        "economy/index.html": 'href="/economy/trends/"',
-        "economy/us/index.html": 'href="/economy/us/trends/"',
+        "economy/index.html": 'href="/economy/trends"',
+        "economy/us/index.html": 'href="/economy/us/trends"',
     }
     for path, trends_href in overview_routes.items():
         page = _read(path)
-        for href in ('href="/economy/"', 'href="/economy/us/"'):
+        for href in ('href="/economy"', 'href="/economy/us"'):
             if href not in page:
                 failures.append(f"{path}: missing country link {href}")
         if trends_href not in page:
@@ -67,8 +67,8 @@ def check_economy_navigation() -> None:
         if 'id="trends"' not in page:
             failures.append(f"{path}: missing in-page Trends section")
         for country_href in (
-            'href="/economy/trends/"',
-            'href="/economy/us/trends/"',
+            'href="/economy/trends"',
+            'href="/economy/us/trends"',
         ):
             if country_href not in page:
                 failures.append(
@@ -87,8 +87,8 @@ def check_economy_navigation() -> None:
     for path in ("economy/trends/index.html", "economy/us/trends/index.html"):
         page = _read(path)
         for href in (
-            'href="/economy/trends/"',
-            'href="/economy/us/trends/"',
+            'href="/economy/trends"',
+            'href="/economy/us/trends"',
         ):
             if href not in page:
                 failures.append(f"{path}: missing country-preserving link {href}")
@@ -98,16 +98,16 @@ def check_economy_navigation() -> None:
     for path in MODEL_INVENTORY_PAGES:
         header = _read(path).split("</header>", 1)[0]
         home_position = header.find('href="/"')
-        economy_position = header.find('href="/economy/"')
+        economy_position = header.find('href="/economy"')
         if home_position == -1 or economy_position == -1:
             failures.append(f"{path}: missing Home or Economy navigation")
         elif home_position > economy_position:
             failures.append(f"{path}: Home is not the first navigation tab")
-        if 'href="/notes/"' in header:
+        if 'href="/notes"' in header:
             failures.append(f"{path}: Notes remains a global navigation tab")
-        if 'href="/validation/"' in header:
+        if 'href="/validation"' in header:
             failures.append(f"{path}: Evidence remains a global navigation tab")
-        if 'href="/contact/"' in header:
+        if 'href="/contact"' in header:
             failures.append(f"{path}: Contact remains a global navigation tab")
         if ">Track record</a>" not in header:
             failures.append(f"{path}: Forecasts is not labelled Track record")

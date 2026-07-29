@@ -281,15 +281,16 @@ def efo_cpi_yoy() -> dict[str, float]:
 
 
 BOE_MPR_CSV = HERE / "official" / "boe_mpr_feb_2026_central.csv"
+SEF_CSV = HERE / "official" / "boe_sef_april_2026.csv"
 
 BOE_LABEL = "BoE Feb 2026 MPR"
 
 
-def boe_mpr_paths() -> dict[str, dict[str, float]]:
-    """BoE February 2026 MPR central projection (transcribed with source)."""
+def _official_csv(path: Path) -> dict[str, dict[str, float]]:
+    """Read a quarter,cpi_yoy_pct,gdp_yoy_pct file with # comment headers."""
     import csv
 
-    with BOE_MPR_CSV.open() as fh:
+    with path.open() as fh:
         body = [line for line in fh if not line.startswith("#")]
     paths: dict[str, dict[str, float]] = {"cpi": {}, "gdp": {}}
     for row in csv.DictReader(body):
@@ -297,6 +298,11 @@ def boe_mpr_paths() -> dict[str, dict[str, float]]:
             if row[col]:
                 paths[var][row["quarter"]] = float(row[col])
     return paths
+
+
+def boe_mpr_paths() -> dict[str, dict[str, float]]:
+    """BoE February 2026 MPR central projection (transcribed with source)."""
+    return _official_csv(BOE_MPR_CSV)
 
 
 _OFFICIAL_CACHE: dict[str, dict[str, float]] | None = None
@@ -317,6 +323,16 @@ def boe_paths() -> dict[str, dict[str, float]]:
     return _BOE_CACHE
 
 
+_SEF_CACHE: dict[str, dict[str, float]] | None = None
+
+
+def sef_paths() -> dict[str, dict[str, float]]:
+    global _SEF_CACHE
+    if _SEF_CACHE is None:
+        _SEF_CACHE = _official_csv(SEF_CSV)
+    return _SEF_CACHE
+
+
 def build_vs_official(variable: str) -> list[dict]:
     """SVAR archived medians beside the EFO path, on shared quarters."""
     rnd = json.loads(SVAR_ROUND.read_text())
@@ -334,6 +350,7 @@ def build_vs_official(variable: str) -> list[dict]:
                 "hi68": g["hi68"],
                 "efo": efo[period],
                 "boe": boe_paths()[variable].get(period),
+                "sef": sef_paths()[variable].get(period),
             }
         )
     return rows
@@ -451,17 +468,20 @@ def render_vs_official_variable(variable: str) -> str:
         "2026-07-21 round.</caption>",
         '          <thead><tr><th scope="col">Quarter</th><th scope="col">boe-svar '
         'median</th><th scope="col">68% band</th><th scope="col">OBR March 2026 EFO'
-        '</th><th scope="col">BoE Feb 2026 MPR</th></tr></thead>',
+        '</th><th scope="col">BoE Feb 2026 MPR</th>'
+        '<th scope="col">Consensus (SEF, Apr 2026)</th></tr></thead>',
         "          <tbody>",
     ]
     for r in rows:
         boe = f"{r['boe']:.1f}%" if r["boe"] is not None else "—"
+        sef = f"{r['sef']:.1f}%" if r["sef"] is not None else "—"
         table.append(
             f'          <tr><th scope="row">{esc(r["period"])}</th>'
             f"<td>{r['median']:.1f}%</td>"
             f"<td>{r['lo68']:.1f}% to {r['hi68']:.1f}%</td>"
             f"<td>{r['efo']:.1f}%</td>"
-            f"<td>{boe}</td></tr>"
+            f"<td>{boe}</td>"
+            f"<td>{sef}</td></tr>"
         )
     table += [
         "          </tbody>",
@@ -469,10 +489,14 @@ def render_vs_official_variable(variable: str) -> str:
         "      </div>",
         '      <p class="forecast-note">BoE column is the February 2026 MPR '
         "central projection (the April 2026 Report published scenarios rather "
-        "than a central path), from the Bank's published projections databank; "
-        "stored in <code>forecasts/official/boe_mpr_feb_2026_central.csv</code>. "
-        "The three columns were fixed at different dates on different "
-        "information sets.</p>",
+        "than a central path), from the Bank's published projections databank "
+        "(<code>forecasts/official/boe_mpr_feb_2026_central.csv</code>). "
+        "Consensus is the average of outside forecasters' central projections "
+        "in the Bank's Survey of External Forecasters as of 16 April 2026, "
+        "published at fixed one-, two- and three-year-ahead quarters only "
+        "(<code>forecasts/official/boe_sef_april_2026.csv</code>). "
+        "The columns were fixed at different dates on different information "
+        "sets.</p>",
     ]
     return svg + "\n" + "\n".join(table)
 

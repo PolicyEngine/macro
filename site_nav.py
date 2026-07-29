@@ -17,10 +17,10 @@ HEADER = re.compile(
 
 DESTINATIONS = (
     ("home", "/", "Home", "nav-mobile"),
-    ("economy", "/economy/", "Economy", "nav-mobile"),
-    ("models", "/models/", "Models", "nav-mobile"),
-    ("forecasts", "/forecasts/", "Track record", "nav-mobile"),
-    ("use", "/connect/", "Use", "nav-mobile nav-start"),
+    ("economy", "/economy", "Economy", "nav-mobile"),
+    ("models", "/models", "Models", "nav-mobile"),
+    ("forecasts", "/forecasts", "Track record", "nav-mobile"),
+    ("use", "/connect", "Use", "nav-mobile nav-start"),
 )
 
 MODEL_ROOTS = {"models", "obr", "svar", "frb-us", "us-hank", "olg", "pe"}
@@ -29,7 +29,7 @@ EVIDENCE_ROOTS = {"validation", "papers", "docs"}
 GITHUB = """    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>"""
 FOOTER_LINKS = """    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
-    <a class="footer-text" href="/contact/">Contact</a>"""
+    <a class="footer-text" href="/contact">Contact</a>"""
 
 
 def section(path: Path) -> str | None:
@@ -55,7 +55,7 @@ def header(path: Path) -> str:
     # aria-current="page" only when the link target IS this page; section
     # ancestors get aria-current="true" so screen readers are not told a
     # different URL is the current page.
-    page_href = "/" + str(path.relative_to(ROOT).parent) + "/"
+    page_href = "/" + str(path.relative_to(ROOT).parent)
     if path.relative_to(ROOT) == Path("index.html"):
         page_href = "/"
     links = []

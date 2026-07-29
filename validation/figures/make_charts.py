@@ -769,6 +769,68 @@ def chart_svar_winrate():
 
 # Order must match the order the SVGs appear in validation/index.html: the
 # substitution below is positional.
+def chart_svar_coverage():
+    data = json.loads(
+        (ROOT / "papers" / "boe-svar" / "figures" / "coverage_evaluation.json").read_text()
+    )
+    cov = data["coverage"]
+    horizons = list(range(1, data["horizons"] + 1))
+
+    def mean_cov(level, h):
+        vals = cov[str(level)][f"h{h}"].values()
+        return sum(vals) / len(vals)
+
+    series = {lv: [mean_cov(lv, h) for h in horizons] for lv in (68, 90)}
+
+    W, H = 760, 330
+    x0, x1 = 58.0, 724.0
+    step = (x1 - x0) / (len(horizons) - 1)
+    xs = [x0 + i * step for i in range(len(horizons))]
+    lo_v, hi_v = 0.4, 1.0
+    base_y, top_y = 282.0, 40.0
+
+    def ymap(v):
+        return base_y - (v - lo_v) * (base_y - top_y) / (hi_v - lo_v)
+
+    desc = ("Line chart of empirical interval coverage by forecast horizon, averaged "
+            "across the eight model variables, against the nominal 68 and 90 percent "
+            "levels. " +
+            "; ".join(
+                f"{lv}% band, horizons one to eight: " +
+                ", ".join(f"{v:.0%}" for v in series[lv])
+                for lv in (68, 90)
+            ) +
+            ". Both bands under-cover, and coverage worsens with horizon. The window "
+            "includes the Covid quarters and the evaluation model carries no Covid "
+            "dummies, which depresses coverage.")
+
+    out = svg_open(W, H, "svar-coverage",
+                   "boe-svar: empirical band coverage across 49 origins", desc)
+    for v in (0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0):
+        out.append(f'<line class="vc-grid" x1="{n(x0)}" y1="{n(ymap(v))}" x2="{n(x1)}" y2="{n(ymap(v))}"/>')
+        out.append(f'<text class="vc-tick" x="{n(x0 - 8)}" y="{n(ymap(v) + 4)}" text-anchor="end">{v:.0%}</text>')
+    for lv, cls in ((90, "vc-s2"), (68, "vc-s1")):
+        # nominal level as a reference line
+        out.append(
+            f'<line class="vc-grid" x1="{n(x0)}" y1="{n(ymap(lv / 100))}" '
+            f'x2="{n(x1)}" y2="{n(ymap(lv / 100))}" stroke-dasharray="2 4"/>'
+        )
+        pts = " ".join(f"{n(x)},{n(ymap(v))}" for x, v in zip(xs, series[lv]))
+        out.append(f'<polyline class="{cls}" points="{pts}"/>')
+        out.append(
+            f'<text class="vc-lab{" vc-lab2" if lv == 90 else ""}" x="{n(x1 + 2)}" '
+            f'y="{n(ymap(series[lv][-1]) + 4)}" text-anchor="end"> </text>'
+        )
+    out.append(f'<text class="vc-lab" x="{n(x0)}" y="26">68% band, mean coverage across variables</text>')
+    out.append(f'<text class="vc-lab vc-lab2" x="{n(x1)}" y="26" text-anchor="end">90% band</text>')
+    out.append(f'<text class="vc-note" x="{n(x0)}" y="{n(ymap(0.68) - 6)}">nominal 68%</text>')
+    out.append(f'<text class="vc-note" x="{n(x0)}" y="{n(ymap(0.90) - 6)}">nominal 90%</text>')
+    for i, h in enumerate(horizons):
+        out.append(f'<text class="vc-tick" x="{n(xs[i])}" y="{H - 14}" text-anchor="middle">h{h}</text>')
+    out.append("</svg>")
+    return "\n".join(out)
+
+
 def chart_hank_targets():
     data = json.loads(
         (ROOT / "papers" / "us-hank" / "figures" / "replication.json").read_text()
@@ -827,6 +889,7 @@ BUILDERS = [
     ("obr-outturn", chart_obr_outturn),
     ("svar-fevd", chart_svar_fevd),
     ("svar-fan", chart_svar_fan),
+    ("svar-coverage", chart_svar_coverage),
     ("frbus-residuals", chart_frbus_residuals),
     ("hank-targets", chart_hank_targets),
     ("svar-skill-all", chart_svar_skill_all),

@@ -49,10 +49,10 @@
   </a>
   <nav class="nav-links" aria-label="Primary">
     <a class="nav-mobile" href="/">Home</a>
-    <a class="nav-mobile" href="/economy/">Economy</a>
-    <a class="nav-mobile" href="/models/" aria-current="true">Models</a>
-    <a class="nav-mobile" href="/forecasts/">Track record</a>
-    <a class="nav-mobile nav-start" href="/connect/">Use</a>
+    <a class="nav-mobile" href="/economy">Economy</a>
+    <a class="nav-mobile" href="/models" aria-current="true">Models</a>
+    <a class="nav-mobile" href="/forecasts">Track record</a>
+    <a class="nav-mobile nav-start" href="/connect">Use</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
   </nav>
 </header>
@@ -91,7 +91,7 @@
     <div class="prose">
       <p>
         The six models support different kinds of checks. The
-        <a href="/models/#choose">verification gradient</a> groups them into
+        <a href="/models#choose">verification gradient</a> groups them into
         three classes; choose a row, then open its evidence below.
       </p>
       <div class="callout">
@@ -175,7 +175,7 @@
           <tr><th scope="row">Predictive validation</th><td class="vc-warn">Weak — raw GDP 5.75%, consumption 9.56% MAPE</td><td class="vc-warn">Weak — the CPI win does not survive a drift benchmark; Bank Rate is the only defensible claim</td><td>Not assessed — LONGBASE is not a Fed forecast</td></tr>
           <tr><th scope="row">Identification robustness</th><td>Not applicable</td><td>Moderate — proxy data and specification matter</td><td>Not applicable</td></tr>
           <tr><th scope="row">Policy-counterfactual validity</th><td class="vc-warn">Weak — one independent tax benchmark; spending multiplier ~1.0 vs the OBR's 0.6</td><td>Not applicable — reform scoring refused</td><td>Moderate — published ranges, VAR expectations only</td></tr>
-          <tr><th scope="row">Uncertainty calibration</th><td class="vc-warn">Weak — sensitivity envelopes pending</td><td>Moderate — posterior bands, limited coverage history</td><td class="vc-warn">Weak — bootstrap engine exists, public runs remain deterministic</td></tr>
+          <tr><th scope="row">Uncertainty calibration</th><td class="vc-warn">Weak — sensitivity envelopes pending</td><td class="vc-warn">Weak-to-moderate — measured 49-origin coverage runs below nominal (68% band covers 57–71%)</td><td class="vc-warn">Weak — bootstrap engine exists, public runs remain deterministic</td></tr>
           <tr><th scope="row">Vintage reproducibility</th><td>Moderate — multi-EFO archive pending</td><td>Moderate — public proxies replace internal series</td><td>Moderate — artifacts hashed; multi-vintage tests pending</td></tr>
         </tbody>
       </table>
@@ -528,7 +528,7 @@
       </details>
       <p class="vlinks mono">
         <a href="/papers/obr-macro/main.pdf">working paper (pdf) →</a>
-        <a href="/obr/">obr-macro model page →</a>
+        <a href="/obr">obr-macro model page →</a>
       </p>
     </div>
   </section>
@@ -621,40 +621,8 @@
         origin, so they are heavily correlated across horizon and across
         variables; the effective number of independent observations is perhaps
         two or three. Coverage cannot be established from one origin in either
-        direction. The rolling-origin machinery could produce a genuine
-        coverage table across 49 origins and eight horizons; until it does,
-        this page makes no coverage claim.
-      </p>
-      <p>
-        <strong>Rolling-origin audit.</strong> A stricter expanding-window test
-        now evaluates 49 historical origins without future-data leakage. Against
-        a no-change benchmark, CPI-level relative RMSE is 0.63 at one quarter
-        and 0.67 at eight quarters (lower is better), while UK GDP sits at
-        1.06. But a no-change benchmark is too weak for a trending price
-        level: against a random walk with drift the CPI figures become 0.83
-        and 1.03, and the GDP gap is not statistically significant at any
-        horizon. See <a href="#forecasters">section 09</a> for the full benchmark
-        comparison. The defensible forecasting claim is Bank Rate, not
-        inflation, and the single frozen-edge result must not be read as broad
-        GDP forecast superiority.
-      </p>
-      <p>
-        <strong>Unemployment satellite.</strong> The unemployment rate is not
-        one of the eight VAR variables; the published unemployment outlook is
-        an Okun's-law satellite — a small regression of the quarterly change
-        in the ONS unemployment rate on year-on-year GDP growth (fit
-        1992Q1&ndash;2025Q1 with the furlough quarters 2020Q1&ndash;2021Q2
-        dummied out, since they decouple unemployment from GDP and attenuate
-        the coefficient about threefold). In a 73-origin rolling test fed by
-        the VAR's own GDP forecasts, it beats a no-change benchmark at
-        horizons 1&ndash;4 excluding furlough targets (relative RMSE
-        0.82&ndash;0.99) and is clearly worse beyond four quarters, so the
-        published path is capped at four quarters. The improvement is not
-        statistically significant at 73 overlapping origins, and the bands
-        carry GDP-forecast uncertainty only. Specification, code, and the
-        full skill table:
-        <a href="https://github.com/PolicyEngine/boe-var-model/blob/main/results/okun_validation.json">okun_validation.json</a>
-        in the model repository.
+        direction. The genuine test is below: empirical coverage across all
+        49 rolling origins and eight horizons.
       </p>
       <figure class="vfig">
         <svg class="vchart" data-chart="svar-fan" viewBox="0 0 760 340" role="img" aria-labelledby="svar-fan-t svar-fan-d">
@@ -712,6 +680,76 @@
 <text class="vc-tick" x="570.0" y="334" text-anchor="middle">26Q1</text>
 <text class="vc-tick" x="724.0" y="334" text-anchor="middle">27Q3</text>
 </svg>
+        <figcaption>Empirical interval coverage across 49 expanding-window origins, mean across the eight model variables, by horizon. Predictive bands combine parameter and shock uncertainty (100 posterior draws &times; 5 paths per origin), percentile intervals on series levels. Both bands <strong>under-cover</strong> &mdash; the 68% band contains outturns 57&ndash;71% of the time and the 90% band 72&ndash;87%, worsening with horizon. The window includes the Covid quarters and the evaluation model carries no Covid dummies, which depresses coverage; pseudo- rather than real-time out-of-sample, as above. So the frozen-origin over-dispersion reading and this under-coverage reading disagree &mdash; a single origin is simply too little data, and the rolling result is the one to weight. Source: <code>papers/boe-svar/figures/coverage_evaluation.json</code>, generated by <code>make_coverage.py</code>.</figcaption>
+      </figure>
+      <p>
+        <strong>Rolling-origin audit.</strong> A stricter expanding-window test
+        now evaluates 49 historical origins without future-data leakage. Against
+        a no-change benchmark, CPI-level relative RMSE is 0.63 at one quarter
+        and 0.67 at eight quarters (lower is better), while UK GDP sits at
+        1.06. But a no-change benchmark is too weak for a trending price
+        level: against a random walk with drift the CPI figures become 0.83
+        and 1.03, and the GDP gap is not statistically significant at any
+        horizon. See <a href="#forecasters">section 09</a> for the full benchmark
+        comparison. The defensible forecasting claim is Bank Rate, not
+        inflation, and the single frozen-edge result must not be read as broad
+        GDP forecast superiority.
+      </p>
+      <p>
+        <strong>Unemployment satellite.</strong> The unemployment rate is not
+        one of the eight VAR variables; the published unemployment outlook is
+        an Okun's-law satellite — a small regression of the quarterly change
+        in the ONS unemployment rate on year-on-year GDP growth (fit
+        1992Q1&ndash;2025Q1 with the furlough quarters 2020Q1&ndash;2021Q2
+        dummied out, since they decouple unemployment from GDP and attenuate
+        the coefficient about threefold). In a 73-origin rolling test fed by
+        the VAR's own GDP forecasts, it beats a no-change benchmark at
+        horizons 1&ndash;4 excluding furlough targets (relative RMSE
+        0.82&ndash;0.99) and is clearly worse beyond four quarters, so the
+        published path is capped at four quarters. The improvement is not
+        statistically significant at 73 overlapping origins, and the bands
+        carry GDP-forecast uncertainty only. Specification, code, and the
+        full skill table:
+        <a href="https://github.com/PolicyEngine/boe-var-model/blob/main/results/okun_validation.json">okun_validation.json</a>
+        in the model repository.
+      </p>
+      <figure class="vfig">
+        <svg class="vchart" data-chart="svar-coverage" viewBox="0 0 760 330" role="img" aria-labelledby="svar-coverage-t svar-coverage-d">
+<title id="svar-coverage-t">boe-svar: empirical band coverage across 49 origins</title>
+<desc id="svar-coverage-d">Line chart of empirical interval coverage by forecast horizon, averaged across the eight model variables, against the nominal 68 and 90 percent levels. 68% band, horizons one to eight: 71%, 68%, 64%, 61%, 60%, 60%, 58%, 57%; 90% band, horizons one to eight: 87%, 81%, 81%, 76%, 76%, 73%, 72%, 72%. Both bands under-cover, and coverage worsens with horizon. The window includes the Covid quarters and the evaluation model carries no Covid dummies, which depresses coverage.</desc>
+<line class="vc-grid" x1="58.0" y1="282.0" x2="724.0" y2="282.0"/>
+<text class="vc-tick" x="50.0" y="286.0" text-anchor="end">40%</text>
+<line class="vc-grid" x1="58.0" y1="241.7" x2="724.0" y2="241.7"/>
+<text class="vc-tick" x="50.0" y="245.7" text-anchor="end">50%</text>
+<line class="vc-grid" x1="58.0" y1="201.3" x2="724.0" y2="201.3"/>
+<text class="vc-tick" x="50.0" y="205.3" text-anchor="end">60%</text>
+<line class="vc-grid" x1="58.0" y1="161.0" x2="724.0" y2="161.0"/>
+<text class="vc-tick" x="50.0" y="165.0" text-anchor="end">70%</text>
+<line class="vc-grid" x1="58.0" y1="120.7" x2="724.0" y2="120.7"/>
+<text class="vc-tick" x="50.0" y="124.7" text-anchor="end">80%</text>
+<line class="vc-grid" x1="58.0" y1="80.3" x2="724.0" y2="80.3"/>
+<text class="vc-tick" x="50.0" y="84.3" text-anchor="end">90%</text>
+<line class="vc-grid" x1="58.0" y1="40.0" x2="724.0" y2="40.0"/>
+<text class="vc-tick" x="50.0" y="44.0" text-anchor="end">100%</text>
+<line class="vc-grid" x1="58.0" y1="80.3" x2="724.0" y2="80.3" stroke-dasharray="2 4"/>
+<polyline class="vc-s2" points="58.0,93.5 153.1,115.1 248.3,118.2 343.4,137.7 438.6,137.8 533.7,149.1 628.9,152.2 724.0,153.2"/>
+<text class="vc-lab vc-lab2" x="726.0" y="157.2" text-anchor="end"> </text>
+<line class="vc-grid" x1="58.0" y1="169.1" x2="724.0" y2="169.1" stroke-dasharray="2 4"/>
+<polyline class="vc-s1" points="58.0,156.3 153.1,170.7 248.3,187.1 343.4,198.5 438.6,202.6 533.7,202.6 628.9,208.7 724.0,214.9"/>
+<text class="vc-lab" x="726.0" y="218.9" text-anchor="end"> </text>
+<text class="vc-lab" x="58.0" y="26">68% band, mean coverage across variables</text>
+<text class="vc-lab vc-lab2" x="724.0" y="26" text-anchor="end">90% band</text>
+<text class="vc-note" x="58.0" y="163.1">nominal 68%</text>
+<text class="vc-note" x="58.0" y="74.3">nominal 90%</text>
+<text class="vc-tick" x="58.0" y="316" text-anchor="middle">h1</text>
+<text class="vc-tick" x="153.1" y="316" text-anchor="middle">h2</text>
+<text class="vc-tick" x="248.3" y="316" text-anchor="middle">h3</text>
+<text class="vc-tick" x="343.4" y="316" text-anchor="middle">h4</text>
+<text class="vc-tick" x="438.6" y="316" text-anchor="middle">h5</text>
+<text class="vc-tick" x="533.7" y="316" text-anchor="middle">h6</text>
+<text class="vc-tick" x="628.9" y="316" text-anchor="middle">h7</text>
+<text class="vc-tick" x="724.0" y="316" text-anchor="middle">h8</text>
+</svg>
         <figcaption>All 14 outturns fall inside the 68% band; calibrated bands would contain about 9.5. This suggests the bands are too wide. RMSE is 0.3pp for both variables. Frozen 2024Q2 data edge; source: <code>papers/boe-svar/figures/figure_numbers.json</code>.</figcaption>
       </figure>
       <details class="more">
@@ -727,7 +765,7 @@
       </details>
       <p class="vlinks mono">
         <a href="/papers/boe-svar/main.pdf">working paper (pdf) →</a>
-        <a href="/svar/">boe-svar model page →</a>
+        <a href="/svar">boe-svar model page →</a>
       </p>
     </div>
   </section>
@@ -827,7 +865,7 @@
       </details>
       <p class="vlinks mono">
         <a href="/papers/frb-us/main.pdf">working paper (pdf) →</a>
-        <a href="/frb-us/">frb-us model page →</a>
+        <a href="/frb-us">frb-us model page →</a>
         <a href="https://github.com/PolicyEngine/us-frb-model">frb-us code →</a>
       </p>
     </div>
@@ -905,7 +943,7 @@
         instruments.
       </div>
       <p>
-        <a href="/us-hank/#trust">Read the replication evidence and limits →</a>
+        <a href="/us-hank#trust">Read the replication evidence and limits →</a>
       </p>
     </div>
   </section>
@@ -930,7 +968,7 @@
         HMRC behavioural elasticities explain that separate aggregate gap.
       </p>
       <p class="vlinks mono">
-        <a href="/pe/">pe-microsim model page →</a>
+        <a href="/pe">pe-microsim model page →</a>
         <a href="https://policyengine.org">policyengine.org →</a>
       </p>
     </div>
@@ -990,7 +1028,7 @@
       </details>
       <p class="vlinks mono">
         <a href="/papers/psl-og/main.pdf">working paper (pdf) →</a>
-        <a href="/olg/">psl-og model page →</a>
+        <a href="/olg">psl-og model page →</a>
       </p>
     </div>
   </section>
@@ -1381,7 +1419,7 @@
   <nav class="footer-links" aria-label="PolicyEngine links">
     <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
-    <a class="footer-text" href="/contact/">Contact</a>
+    <a class="footer-text" href="/contact">Contact</a>
   </nav>
 </footer>
 

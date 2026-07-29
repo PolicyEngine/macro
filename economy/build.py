@@ -228,7 +228,7 @@ def cards() -> str:
                 f"68% range {fmt(g_fc['lo68'])}% to {fmt(g_fc['hi68'])}%",
                 "PolicyEngine · boe-svar",
                 forecast["generated"],
-                "/svar/",
+                "/svar",
             ),
             card(
                 "MODEL CPI OUTLOOK",
@@ -237,7 +237,7 @@ def cards() -> str:
                 f"68% range {fmt(c_fc['lo68'])}% to {fmt(c_fc['hi68'])}%",
                 "PolicyEngine · boe-svar",
                 forecast["generated"],
-                "/svar/",
+                "/svar",
             ),
             card(
                 "REAL-TIME FORECAST RECORD",
@@ -246,7 +246,7 @@ def cards() -> str:
                 f"{rounds} archived round{'s' if rounds != 1 else ''}",
                 "PolicyEngine forecast archive",
                 "generated scorecard",
-                "/forecasts/",
+                "/forecasts",
             ),
         ]
     )
@@ -427,7 +427,7 @@ def trends_directory() -> str:
             country_card(
                 "UK",
                 "United Kingdom",
-                "/economy/trends/",
+                "/economy/trends",
                 uk_gdp,
                 uk_cpi,
                 uk_unemployment,
@@ -435,7 +435,7 @@ def trends_directory() -> str:
             country_card(
                 "US",
                 "United States",
-                "/economy/us/trends/",
+                "/economy/us/trends",
                 us_gdp,
                 us_cpi,
                 us_unemployment,
@@ -797,7 +797,7 @@ def home_uk_now() -> str:
             f'          <tr><th scope="row">Unemployment rate</th>'
             f'<td>{fmt(u_now["value"])}% <span class="mono">{u_now["period"]}</span></td>'
             f'<td>{fmt(u_fc["median"])}% <span class="mono">{u_period}</span> · {rng(u_fc)}'
-            ' · <a href="/forecasts/">Okun satellite</a></td></tr>',
+            ' · <a href="/forecasts">Okun satellite</a></td></tr>',
             "          </tbody>",
             "        </table>",
             "      </div>",
