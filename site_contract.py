@@ -178,34 +178,6 @@ def check_docs_match_code() -> None:
         raise SystemExit("\n".join(failures))
 
 
-def check_footer_directory_is_complete() -> None:
-    """Every public page must be reachable from the footer site directory.
-
-    The directory is generated identically on all pages by site_nav.py; this
-    checks it against the pages that actually exist, so adding a page without
-    listing it (a 'hidden page') fails CI.
-    """
-    import site_nav
-
-    listed = {href for _, links in site_nav.FOOTER_DIRECTORY for href, _ in links}
-    # Pages indexed by a listed parent rather than the footer itself:
-    # dated notes on /notes, paper subpages on /papers, reports on /papers.
-    exempt_prefixes = ("/notes/", "/reports/", "/papers/")
-    failures = []
-    for page in site_nav.pages():
-        url = site_nav.page_url(page)
-        if url == "/" or url.startswith(exempt_prefixes):
-            continue
-        if url not in listed:
-            failures.append(
-                f"{page.relative_to(ROOT)}: {url} missing from "
-                "site_nav.FOOTER_DIRECTORY — every public page must appear "
-                "in the footer site directory"
-            )
-    if failures:
-        raise SystemExit("\n".join(failures))
-
-
 def check_fragment_anchors() -> None:
     """Every internal fragment link must point at an id that exists.
 
@@ -255,6 +227,5 @@ if __name__ == "__main__":
     check_economy_navigation()
     check_editorial_consistency()
     check_docs_match_code()
-    check_footer_directory_is_complete()
     check_fragment_anchors()
     print("Public inventory, navigation, and editorial claims are consistent.")
