@@ -310,9 +310,9 @@
     </div>
     <div class="panel-card">
       <div class="seg" role="tablist" aria-label="Client" id="seg-client">
-        <button id="client-tab-claude" role="tab" data-client="claude" aria-selected="true" aria-controls="client-panel-claude" tabindex="0"><img src="/assets/claude-mark.svg" alt="" width="22" height="22" /><span>Claude</span></button>
-        <button id="client-tab-chatgpt" role="tab" data-client="chatgpt" aria-selected="false" aria-controls="client-panel-chatgpt" tabindex="-1"><img src="/assets/chatgpt-mark.svg" alt="" width="22" height="22" /><span>ChatGPT</span></button>
-        <button id="client-tab-other" role="tab" data-client="other" aria-selected="false" aria-controls="client-panel-other" tabindex="-1"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 7v-3M15 7v-3M7 7h10v5a5 5 0 0 1-10 0V7ZM12 17v4"/></svg><span>More clients</span></button>
+        <button id="client-tab-claude" role="tab" data-client="claude" aria-selected="true" aria-controls="client-panel-claude terminal-panel-claude" tabindex="0"><img src="/assets/claude-mark.svg" alt="" width="22" height="22" /><span>Claude</span></button>
+        <button id="client-tab-chatgpt" role="tab" data-client="chatgpt" aria-selected="false" aria-controls="client-panel-chatgpt terminal-panel-chatgpt" tabindex="-1"><img src="/assets/chatgpt-mark.svg" alt="" width="22" height="22" /><span>ChatGPT</span></button>
+        <button id="client-tab-other" role="tab" data-client="other" aria-selected="false" aria-controls="client-panel-other terminal-panel-other" tabindex="-1"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 7v-3M15 7v-3M7 7h10v5a5 5 0 0 1-10 0V7ZM12 17v4"/></svg><span>More clients</span></button>
       </div>
       <div class="steps connect-steps">
         <div class="step">
@@ -354,12 +354,12 @@
       </details>
       <details class="more compact-more">
         <summary>Terminal setup</summary>
-        <div class="copyblock" data-for="claude"><code>claude mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
-        <div data-for="chatgpt" hidden>
+        <div class="copyblock" id="terminal-panel-claude" role="tabpanel" aria-labelledby="client-tab-claude" data-for="claude"><code>claude mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
+        <div id="terminal-panel-chatgpt" role="tabpanel" aria-labelledby="client-tab-chatgpt" data-for="chatgpt" hidden>
           <p>For Codex CLI, register the same MCP endpoint:</p>
           <div class="copyblock"><code>codex mcp add policyengine-macro --url https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
         </div>
-        <div data-for="other" hidden>
+        <div id="terminal-panel-other" role="tabpanel" aria-labelledby="client-tab-other" data-for="other" hidden>
           <p>For the Gemini CLI, register the same MCP endpoint:</p>
           <div class="copyblock"><code>gemini mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
         </div>
@@ -512,7 +512,7 @@
     applyClient();
   });
 
-  // model selector in the code section (OG-UK / OBR)
+  // model selector in the code section (six model tabs)
   var modelSeg = document.getElementById("model-seg");
   if (modelSeg) {
     bindTabs(modelSeg, function (btn) {

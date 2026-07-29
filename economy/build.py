@@ -11,6 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "economy" / "index.html"
+HOME_PAGE = ROOT / "index.html"
 US_PAGE = ROOT / "economy" / "us" / "index.html"
 TRENDS_PAGE = ROOT / "economy" / "trends" / "index.html"
 US_TRENDS_PAGE = ROOT / "economy" / "us" / "trends" / "index.html"
@@ -118,10 +119,18 @@ def line_chart(
     )
     first, last = values[0], values[-1]
     title_id = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+    window_low = min(row["value"] for row in values)
+    window_high = max(row["value"] for row in values)
+    desc = (
+        f"{description.rstrip('.').replace(', latest ', ' over the latest ')}, "
+        f"from {first['value']:.1f}{units} in {first['period']} "
+        f"to {last['value']:.1f}{units} in {last['period']}; "
+        f"range {window_low:.1f}{units} to {window_high:.1f}{units}."
+    )
     return f"""      <figure class="economy-figure">
         <svg viewBox="0 0 {width} {height}" role="img" aria-labelledby="{title_id}-title {title_id}-desc">
           <title id="{title_id}-title">{title}</title>
-          <desc id="{title_id}-desc">{description}</desc>
+          <desc id="{title_id}-desc">{desc}</desc>
           <line class="economy-chart-grid" x1="{left}" y1="{y(high - padding):.1f}" x2="{width - right}" y2="{y(high - padding):.1f}" />
           <line class="economy-chart-grid" x1="{left}" y1="{y(low + padding):.1f}" x2="{width - right}" y2="{y(low + padding):.1f}" />
           <polyline class="economy-chart-line" points="{points}" />
@@ -168,8 +177,18 @@ def cards() -> str:
     g_now, g_prev = growth[-1], growth[-2]
     c_now, c_prev = latest(cpi), previous(cpi)
     u_now, u_prev = latest(unemployment), previous(unemployment)
-    first_period = forecast["forecast_start"]
-    first = forecast["forecast"][first_period]
+    # First forecast quarter with no published outturn yet, per variable —
+    # showing a "forecast" for a quarter the ONS has already printed would be
+    # stale the moment the release lands.
+    def next_open(variable: str, last_observed: str) -> tuple[str, dict]:
+        for period, values in forecast["forecast"].items():
+            if period > last_observed:
+                return period, values[variable]
+        period = list(forecast["forecast"])[-1]
+        return period, forecast["forecast"][period][variable]
+
+    g_period, g_fc = next_open("gdp", g_now["period"])
+    c_period, c_fc = next_open("cpi", c_now["period"])
     scored = scorecard["periods_scored"]
     rounds = scorecard["rounds"]
 
@@ -204,18 +223,18 @@ def cards() -> str:
             ),
             card(
                 "MODEL GDP OUTLOOK",
-                f"{fmt(first['gdp']['median'])}%",
-                first_period,
-                f"68% range {fmt(first['gdp']['lo68'])}% to {fmt(first['gdp']['hi68'])}%",
+                f"{fmt(g_fc['median'])}%",
+                g_period,
+                f"68% range {fmt(g_fc['lo68'])}% to {fmt(g_fc['hi68'])}%",
                 "PolicyEngine · boe-svar",
                 forecast["generated"],
                 "/svar/",
             ),
             card(
                 "MODEL CPI OUTLOOK",
-                f"{fmt(first['cpi']['median'])}%",
-                first_period,
-                f"68% range {fmt(first['cpi']['lo68'])}% to {fmt(first['cpi']['hi68'])}%",
+                f"{fmt(c_fc['median'])}%",
+                c_period,
+                f"68% range {fmt(c_fc['lo68'])}% to {fmt(c_fc['hi68'])}%",
                 "PolicyEngine · boe-svar",
                 forecast["generated"],
                 "/svar/",
@@ -367,7 +386,7 @@ def us_figures() -> str:
             ),
             line_chart(
                 "US unemployment",
-                "Percent of the labour force, latest 20 months.",
+                "Percent of the labor force, latest 20 months.",
                 unemployment["observations"],
                 "%",
                 "BLS via FRED · UNRATE",
@@ -434,13 +453,13 @@ def us_indicator_rows() -> str:
         ("Activity", gdp, f"{gdp_growth(gdp)[-1]['value']:.1f}%", "year on year"),
         ("Prices", cpi, f"{yoy_growth(cpi, 12)[-1]['value']:.1f}%", "year on year"),
         (
-            "Labour",
+            "Labor",
             unemployment,
             f"{latest(unemployment)['value']:.1f}%",
             f"{latest(unemployment)['value'] - previous(unemployment)['value']:+.1f}pp m/m",
         ),
         (
-            "Labour",
+            "Labor",
             payrolls,
             f"{latest(payrolls)['value'] / 1000:,.1f}m",
             f"{latest(payrolls)['value'] - previous(payrolls)['value']:+,.0f}k m/m",
@@ -531,7 +550,7 @@ def indicator_rows() -> str:
         (
             "Fiscal",
             borrowing,
-            f"{(-now['value'] + year_ago['value']) / 1000:+.1f}bn y/y",
+            f"{'+' if (-now['value'] + year_ago['value']) >= 0 else '-'}£{abs(-now['value'] + year_ago['value']) / 1000:.1f}bn y/y",
             f"£{-now['value'] / 1000:,.1f}bn borrowed",
         )
     )
@@ -721,6 +740,75 @@ def remove_embedded_trends(html: str, marker: str) -> str:
     return re.sub(pattern, "", html, count=1, flags=re.S)
 
 
+def home_uk_now() -> str:
+    """Homepage 'UK at a glance' table: outturns beside next-open forecasts."""
+    gdp = load("uk_gdp_cvm")
+    cpi = load("uk_cpi_yoy")
+    unemployment = load("uk_unemployment_rate")
+    forecast = json.loads(
+        (ROOT / "papers" / "boe-svar" / "figures" / "current_forecast.json").read_text()
+    )
+    okun = json.loads(
+        (ROOT / "forecasts" / "rounds" / "2026-07-28" / "okun-unemployment.json").read_text()
+    )
+
+    growth = gdp_growth(gdp)
+    g_now = growth[-1]
+    c_now = latest(cpi)
+    u_now = latest(unemployment)
+
+    def next_open(fc: dict, variable: str, last_observed: str) -> tuple[str, dict]:
+        for period, values in fc.items():
+            if period > last_observed and variable in values:
+                return period, values[variable]
+        period = list(fc)[-1]
+        return period, fc[period][variable]
+
+    g_period, g_fc = next_open(forecast["forecast"], "gdp", g_now["period"])
+    c_period, c_fc = next_open(forecast["forecast"], "cpi", c_now["period"])
+    u_period, u_fc = next_open(okun["forecast"], "unemployment", u_now["period"])
+
+    def rng(fc: dict) -> str:
+        return f"68% range {fmt(fc['lo68'])}%–{fmt(fc['hi68'])}%"
+
+    caption = (
+        "UK headline indicators: latest official outturn and the model "
+        "near-term forecast. Outturn vintages as of "
+        f"{max(gdp['vintage'], cpi['vintage'], unemployment['vintage'])}; "
+        f"GDP and CPI from the boe-svar forecast generated {forecast['generated']} "
+        f"(conditioned on data through {forecast['data_edge']}); unemployment "
+        f"from the {okun['round_id']} Okun-satellite round."
+    )
+    return "\n".join(
+        [
+            '      <div class="table-scroll">',
+            "        <table>",
+            f"          <caption>{caption}</caption>",
+            '          <thead><tr><th scope="col">Indicator</th><th scope="col">'
+            'Latest outturn</th><th scope="col">Model near-term forecast</th>'
+            "</tr></thead>",
+            "          <tbody>",
+            f'          <tr><th scope="row">Real GDP growth, y/y</th>'
+            f'<td>{fmt(g_now["value"])}% <span class="mono">{g_now["period"]}</span></td>'
+            f'<td>{fmt(g_fc["median"])}% <span class="mono">{g_period}</span> · {rng(g_fc)}</td></tr>',
+            f'          <tr><th scope="row">CPI inflation, y/y</th>'
+            f'<td>{fmt(c_now["value"])}% <span class="mono">{c_now["period"]}</span></td>'
+            f'<td>{fmt(c_fc["median"])}% <span class="mono">{c_period}</span> · {rng(c_fc)}</td></tr>',
+            f'          <tr><th scope="row">Unemployment rate</th>'
+            f'<td>{fmt(u_now["value"])}% <span class="mono">{u_now["period"]}</span></td>'
+            f'<td>{fmt(u_fc["median"])}% <span class="mono">{u_period}</span> · {rng(u_fc)}'
+            ' · <a href="/forecasts/">Okun satellite</a></td></tr>',
+            "          </tbody>",
+            "        </table>",
+            "      </div>",
+        ]
+    )
+
+
+def render_home() -> str:
+    return replace(HOME_PAGE.read_text(), "home-uk-now", home_uk_now())
+
+
 def render_uk() -> str:
     html = PAGE.read_text()
     html = remove_embedded_trends(html, "economy-figures")
@@ -761,6 +849,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
+    rendered_home = render_home()
     rendered_uk = render_uk()
     rendered_us = render_us()
     rendered_uk_trends = render_uk_trends()
@@ -768,6 +857,7 @@ def main() -> int:
     if args.check:
         stale = []
         for path, rendered in (
+            (HOME_PAGE, rendered_home),
             (PAGE, rendered_uk),
             (US_PAGE, rendered_us),
             (TRENDS_PAGE, rendered_uk_trends),
@@ -780,6 +870,7 @@ def main() -> int:
             return 1
         print("UK and US Economy overview and Trends pages match committed data")
         return 0
+    HOME_PAGE.write_text(rendered_home)
     PAGE.write_text(rendered_uk)
     US_PAGE.write_text(rendered_us)
     TRENDS_PAGE.write_text(rendered_uk_trends)

@@ -42,14 +42,13 @@ def test_og_is_not_labelled_as_us_model():
             "index.html",
             "models/index.html",
             "papers/index.html",
-            "docs/index.html",
         )
     )
     assert "psl-og · UK + US" not in pages
 
 
 def test_site_does_not_promise_obr_borrowing_output():
-    pages = _read("index.html") + _read("models/index.html") + _read("docs/index.html")
+    pages = _read("index.html") + _read("models/index.html")
     assert "growth and borrowing" not in pages
     assert "borrowing after" not in pages
 

@@ -71,12 +71,12 @@
   <section id="status" class="band">
     <div class="band-head">
       <span class="kicker mono">01 — where this stands</span>
-      <h2>One round in, one result.</h2>
+      <h2>The record so far.</h2>
     </div>
     <div class="prose">
 <!-- scorecard-status:begin -->
       <div class="forecast-summary" aria-label="Current forecast record">
-        <article><strong>2</strong><span>Archived rounds</span></article>
+        <article><strong>3</strong><span>Archived rounds</span></article>
         <article><strong>1</strong><span>Scored period</span></article>
         <article><strong>0.12pp</strong><span>Latest absolute error</span></article>
       </div>
@@ -98,28 +98,63 @@
             <span class="forecast-band">Inside 68% band</span>
           </header>
           <div class="forecast-result-plot" aria-label="Forecast 2.68 percent; outturn 2.80 percent">
-            <div><span>Forecast</span><i style="width:95.7%"></i><strong>2.68%</strong></div>
-            <div><span>Outturn</span><i style="width:100.0%"></i><strong>2.80%</strong></div>
+            <div><span>Forecast</span><i style="width:86.4%"></i><strong>2.68%</strong></div>
+            <div><span>Outturn</span><i style="width:90.3%"></i><strong>2.80%</strong></div>
+            <div><span>Naive</span><i class="forecast-naive" style="width:100.0%"></i><strong>3.10%</strong></div>
           </div>
-          <footer><span>Error <strong>-0.12pp</strong></span><span>Round 2026-07-21</span></footer>
+          <footer><span>Error <strong>-0.12pp</strong></span><span>beats naive error <strong>0.30pp</strong></span><span>Round 2026-07-21</span></footer>
         </article>
       </div>
+      <p class="forecast-note">Naive baseline is a random walk: the last outturn available at the round's data edge, held flat. Read from the current data vintage, not the real-time one, so revisions can flatter or hurt it slightly.</p>
 <!-- scorecard-results:end -->
+<!-- scorecard-vs-official:begin -->
+      <figure class="vchart-figure">
+        <svg class="vchart" data-chart="svar-vs-efo" viewBox="0 0 760 300" role="img" aria-labelledby="svar-vs-efo-t svar-vs-efo-d">
+          <title id="svar-vs-efo-t">boe-svar GDP forecast vs OBR March 2026 EFO</title>
+          <desc id="svar-vs-efo-d">Line chart of UK real GDP year-on-year growth. The boe-svar archived median with its 68 percent band is shown beside the OBR March 2026 EFO path over the overlapping quarters.</desc>
+          <line class="vc-grid" x1="56" y1="244.4" x2="744" y2="244.4"/>
+          <line class="vc-grid" x1="56" y1="208.0" x2="744" y2="208.0"/>
+          <line class="vc-grid" x1="56" y1="171.6" x2="744" y2="171.6"/>
+          <line class="vc-grid" x1="56" y1="135.2" x2="744" y2="135.2"/>
+          <line class="vc-grid" x1="56" y1="98.8" x2="744" y2="98.8"/>
+          <line class="vc-grid" x1="56" y1="62.4" x2="744" y2="62.4"/>
+          <text class="vc-tick" x="48" y="248.4" text-anchor="end">0</text>
+          <text class="vc-tick" x="48" y="212.0" text-anchor="end">0.5</text>
+          <text class="vc-tick" x="48" y="175.6" text-anchor="end">1</text>
+          <text class="vc-tick" x="48" y="139.2" text-anchor="end">1.5</text>
+          <text class="vc-tick" x="48" y="102.8" text-anchor="end">2</text>
+          <text class="vc-tick" x="48" y="66.4" text-anchor="end">2.5</text>
+          <polygon class="vc-band68" points="56.0,123.0 170.7,81.8 285.3,49.6 400.0,51.5 514.7,54.4 629.3,54.2 744.0,54.0 744.0,238.8 629.3,229.2 514.7,236.6 400.0,238.7 285.3,203.3 170.7,206.0 56.0,204.3"/>
+          <polyline class="vc-s1" points="56.0,164.0 170.7,145.2 285.3,119.1 400.0,145.5 514.7,144.5 629.3,144.3 744.0,144.0"/>
+          <polyline class="vc-s2" points="56.0,177.2 170.7,155.9 285.3,138.6 400.0,131.6 514.7,127.8 629.3,127.0 744.0,128.4"/>
+          <text class="vc-tick" x="56.0" y="286" text-anchor="middle">2026Q2</text>
+          <text class="vc-tick" x="170.7" y="286" text-anchor="middle">2026Q3</text>
+          <text class="vc-tick" x="285.3" y="286" text-anchor="middle">2026Q4</text>
+          <text class="vc-tick" x="400.0" y="286" text-anchor="middle">2027Q1</text>
+          <text class="vc-tick" x="514.7" y="286" text-anchor="middle">2027Q2</text>
+          <text class="vc-tick" x="629.3" y="286" text-anchor="middle">2027Q3</text>
+          <text class="vc-tick" x="744.0" y="286" text-anchor="middle">2027Q4</text>
+          <text class="vc-lab" x="56" y="20">boe-svar median (68% band)</text>
+          <text class="vc-lab vc-lab2" x="744" y="20" text-anchor="end">OBR March 2026 EFO</text>
+        </svg>
+        <figcaption>UK real GDP, year-on-year growth, percent. boe-svar medians and 68% bands from the archived 2026-07-21 round; EFO path derived from <code>papers/obr-macro/figures/fig_anchored_data.csv</code>.</figcaption>
+      </figure>
       <div class="table-scroll">
         <table>
           <caption>Model vs official forecast, UK real GDP growth, year on year. EFO figures are derived from the March 2026 EFO real-GDP level path stored in <code>papers/obr-macro/figures/fig_anchored_data.csv</code>; the boe-svar medians are from the archived 2026-07-21 round.</caption>
-          <thead><tr><th scope="col">Quarter</th><th scope="col">boe-svar median</th><th scope="col">OBR March 2026 EFO</th></tr></thead>
+          <thead><tr><th scope="col">Quarter</th><th scope="col">boe-svar median</th><th scope="col">68% band</th><th scope="col">OBR March 2026 EFO</th></tr></thead>
           <tbody>
-          <tr><th scope="row">2026Q2</th><td>1.1%</td><td>0.9%</td></tr>
-          <tr><th scope="row">2026Q3</th><td>1.4%</td><td>1.2%</td></tr>
-          <tr><th scope="row">2026Q4</th><td>1.7%</td><td>1.5%</td></tr>
-          <tr><th scope="row">2027Q1</th><td>1.4%</td><td>1.6%</td></tr>
-          <tr><th scope="row">2027Q2</th><td>1.4%</td><td>1.6%</td></tr>
-          <tr><th scope="row">2027Q3</th><td>1.4%</td><td>1.6%</td></tr>
-          <tr><th scope="row">2027Q4</th><td>1.4%</td><td>1.6%</td></tr>
+          <tr><th scope="row">2026Q2</th><td>1.1%</td><td>0.6% to 1.7%</td><td>0.9%</td></tr>
+          <tr><th scope="row">2026Q3</th><td>1.4%</td><td>0.5% to 2.2%</td><td>1.2%</td></tr>
+          <tr><th scope="row">2026Q4</th><td>1.7%</td><td>0.6% to 2.7%</td><td>1.5%</td></tr>
+          <tr><th scope="row">2027Q1</th><td>1.4%</td><td>0.1% to 2.6%</td><td>1.5%</td></tr>
+          <tr><th scope="row">2027Q2</th><td>1.4%</td><td>0.1% to 2.6%</td><td>1.6%</td></tr>
+          <tr><th scope="row">2027Q3</th><td>1.4%</td><td>0.2% to 2.6%</td><td>1.6%</td></tr>
+          <tr><th scope="row">2027Q4</th><td>1.4%</td><td>0.1% to 2.6%</td><td>1.6%</td></tr>
           </tbody>
         </table>
       </div>
+<!-- scorecard-vs-official:end -->
       <p>
         No comparable official CPI forecast path is stored in this repository
         yet, so a CPI model-vs-official comparison is planned rather than shown.
@@ -162,6 +197,16 @@
           </dl>
           <a class="mono" href="/forecasts/rounds/2026-07-28/okun-unemployment.json" download>Download artifact · <code>2026-07-28/okun-unemployment.json</code> →</a>
           <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/forecasts/rounds/2026-07-28/okun-unemployment.json">Open on GitHub with commit history →</a>
+        </article>
+        <article class="forecast-round">
+          <div><span class="mono">2026-07-29</span><strong>boe-svar</strong></div>
+          <dl>
+            <div><dt>Data edge</dt><dd>2026Q1</dd></div>
+            <div><dt>Periods</dt><dd>13</dd></div>
+            <div><dt>Scored</dt><dd>0</dd></div>
+          </dl>
+          <a class="mono" href="/forecasts/rounds/2026-07-29/boe-svar.json" download>Download artifact · <code>2026-07-29/boe-svar.json</code> →</a>
+          <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/forecasts/rounds/2026-07-29/boe-svar.json">Open on GitHub with commit history →</a>
         </article>
       </div>
 <!-- scorecard-rounds:end -->
@@ -231,22 +276,24 @@
     <div class="prose">
       <ul>
         <li>
-          <strong>The record is short.</strong> One round is not a track record,
+          <strong>The record is short.</strong> A handful of rounds is not a track record,
           and will not be one for at least a year. Nothing on this page should be
           read as demonstrated forecasting skill until the scored count is well
           into double figures.
         </li>
         <li>
-          <strong>Two variables only.</strong> UK GDP growth and CPI inflation.
-          Bank Rate, unemployment, wage growth and borrowing are not forecast
+          <strong>Three variables only.</strong> UK GDP growth and CPI inflation
+          from the boe-svar rounds, and the unemployment rate from the Okun
+          satellite round. Bank Rate, wage growth and borrowing are not forecast
           here yet.
         </li>
         <li>
-          <strong>The coefficients are not re-estimated each round.</strong> The
-          boe-svar replication stays estimated on the paper's 1992Q1–2023Q2
-          sample; only the conditioning data edge moves. This keeps the hosted
-          model identical to the published replication, at the cost of ignoring
-          post-2023 information in the coefficients themselves.
+          <strong>The coefficients are not re-estimated each round.</strong>
+          Between rounds only the conditioning data edge moves; the estimation
+          sample is extended occasionally, not continuously. The 2026-07-21
+          round was estimated on the paper's 1992Q1–2023Q2 sample; the model
+          was re-estimated on 1992Q1–2025Q1 in late July 2026, and each
+          archived round records the sample it was estimated on.
         </li>
         <li>
           <strong>There is no fixed calendar yet.</strong> A new round is

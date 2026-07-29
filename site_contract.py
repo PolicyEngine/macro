@@ -13,8 +13,8 @@ PUBLIC_MODELS = (
     "pe-microsim",
     "psl-og",
 )
-# docs/index.html is now a thin moved-notice that meta-refreshes to
-# /models/#compare, so it no longer carries the model inventory itself.
+# /docs is a permanent redirect to /models#compare in vercel.json; the model
+# inventory lives on the pages below.
 MODEL_INVENTORY_PAGES = (
     "index.html",
     "models/index.html",
@@ -177,9 +177,54 @@ def check_docs_match_code() -> None:
         raise SystemExit("\n".join(failures))
 
 
+def check_fragment_anchors() -> None:
+    """Every internal fragment link must point at an id that exists.
+
+    Covers same-page ``href="#x"`` and cross-page ``href="/path/#x"`` links.
+    This is the check that catches a section being renamed or renumbered
+    while prose elsewhere still links to the old anchor.
+    """
+    skip_roots = {"vendor", "reveal.js", "audit", "assets", "data"}
+    pages = {
+        path
+        for path in ROOT.rglob("*.html")
+        if not any(part.startswith(".") for part in path.relative_to(ROOT).parts)
+        and path.relative_to(ROOT).parts[0] not in skip_roots
+    }
+    ids: dict[Path, set[str]] = {
+        page: set(re.findall(r'\bid="([^"]+)"', page.read_text())) for page in pages
+    }
+
+    def resolve(target: str) -> Path | None:
+        candidate = ROOT / target.strip("/")
+        if candidate.suffix == ".html":
+            return candidate if candidate in ids else None
+        index = candidate / "index.html"
+        return index if index in ids else None
+
+    failures = []
+    for page in sorted(pages):
+        html = page.read_text()
+        rel = page.relative_to(ROOT)
+        for target, fragment in re.findall(r'href="([^"#]*)#([^"]+)"', html):
+            if target.startswith(("http://", "https://", "mailto:")):
+                continue
+            dest = page if target == "" else resolve(target)
+            if dest is None:
+                failures.append(f"{rel}: link to missing page {target}#{fragment}")
+            elif fragment not in ids[dest]:
+                failures.append(
+                    f"{rel}: broken anchor href=\"{target}#{fragment}\" — no "
+                    f"id=\"{fragment}\" in {dest.relative_to(ROOT)}"
+                )
+    if failures:
+        raise SystemExit("\n".join(failures))
+
+
 if __name__ == "__main__":
     check_public_model_inventory()
     check_economy_navigation()
     check_editorial_consistency()
     check_docs_match_code()
+    check_fragment_anchors()
     print("Public inventory, navigation, and editorial claims are consistent.")

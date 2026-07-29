@@ -2,99 +2,72 @@
 
 This is deliberately separate from ``make_figures.py``.  The latter freezes
 the information set at 2024Q2 for honest out-of-sample validation; this script
-uses the latest complete quarterly data edge (currently 2026Q1) and forecasts
-from 2026Q2.  The replication coefficients remain estimated on the paper's
-1992Q1--2023Q2 sample, matching the hosted adapter.
+publishes the forecast from the latest complete quarterly data edge.
+
+It calls the hosted adapter (``policyengine_macro.core.svar_forecast``) rather
+than re-implementing the pipeline, so the published artifact and the hosted
+model cannot drift apart: same estimation sample, same importance weights,
+same defaults. Run it inside the integration environment::
+
+    integration/.venv/bin/python papers/boe-svar/figures/make_current_forecast.py
 """
 
 from __future__ import annotations
 
+import datetime
 import json
 import sys
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
-
-REPO = Path("/Users/janansadeqian/boe-var-model")
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(REPO / "src"))
+ROOT = HERE.parents[2]
+sys.path.insert(0, str(ROOT / "integration" / "src"))
 
-from boe_var import analysis, forecast  # noqa: E402
-from boe_var.bvar import BVAR  # noqa: E402
-from boe_var.data import load_data  # noqa: E402
-from boe_var.identification import identify  # noqa: E402
+from policyengine_macro.core import svar_forecast  # noqa: E402
 
-SEED = 20260721
-N_DRAWS = 3000
-N_PATHS = 5
+# 5600 draws clears the adapter's own effective-sample-size guidance for
+# publication-grade bands; the hosted interactive default is lower.
+N_DRAWS = 5600
 HORIZONS = 13
-I_CPI, I_GDP = 5, 7
-
-
-def covid_dummies(index: pd.PeriodIndex) -> np.ndarray:
-    quarters = pd.period_range("2020Q1", "2021Q2", freq="Q")
-    return np.column_stack([(index == q).astype(float) for q in quarters])
 
 
 def main() -> None:
-    rng = np.random.default_rng(SEED)
-    full = load_data().loc["1992Q1":"2026Q1"]
-    if full.index[-1] != pd.Period("2026Q1", "Q"):
-        raise RuntimeError(f"expected 2026Q1 data edge, got {full.index[-1]}")
+    res = svar_forecast(horizons=HORIZONS, draws=N_DRAWS)
+    if res["warnings"]:
+        raise RuntimeError(f"adapter warnings, refusing to publish: {res['warnings']}")
 
-    estimation = full.loc[:"2023Q2"]
-    model = BVAR(
-        estimation.to_numpy(float),
-        lags=4,
-        dummies=covid_dummies(estimation.index),
-        lam=0.2,
-        mu=1.0,
-    )
-    draws = model.sample_posterior(N_DRAWS, seed=SEED)
-    triples = identify(draws, rng=rng, compute_weights=False)
-    pairs = [(draw, impact) for draw, impact, _weight in triples]
-    if not pairs:
-        raise RuntimeError("no accepted identification draws")
+    origin = res["forecast_origin"]
+    by_quarter: dict[str, dict] = {}
+    for var, key in (("gdp", "gdp_growth_yoy"), ("cpi", "cpi_inflation_yoy")):
+        for row in res[key]:
+            by_quarter.setdefault(row["quarter"], {})[var] = {
+                k: row[k] for k in ("median", "lo68", "hi68", "lo90", "hi90")
+            }
 
-    history = full.to_numpy(float)
-    tail = history[-4:]
-    paths = []
-    for draw, _impact in pairs:
-        for _ in range(N_PATHS):
-            levels = forecast.sample_forecast(draw, history, horizons=HORIZONS, rng=rng)
-            paths.append(forecast.yoy(np.vstack([tail, levels])))
-    bands = analysis.aggregate(paths)
-    quarters = pd.period_range("2026Q2", periods=HORIZONS, freq="Q")
-
-    def values(i: int, h: int) -> dict[str, float]:
-        return {
-            "median": float(bands["median"][h, i]),
-            "lo68": float(bands["lo68"][h, i]),
-            "hi68": float(bands["hi68"][h, i]),
-            "lo90": float(bands["lo90"][h, i]),
-            "hi90": float(bands["hi90"][h, i]),
-        }
-
+    quarters = list(by_quarter)
     payload = {
         "model": "boe-svar",
-        "generated": "2026-07-21",
-        "data_edge": "2026Q1",
-        "forecast_start": "2026Q2",
-        "estimation_sample": "1992Q1-2023Q2",
-        "draws": N_DRAWS,
-        "accepted": len(pairs),
-        "paths_per_draw": N_PATHS,
+        "generated": datetime.date.today().isoformat(),
+        "data_edge": origin,
+        "forecast_start": quarters[0],
+        "estimation_sample": res["provenance"]["estimation_sample"],
+        "draws": res["draws"],
+        "accepted": res["accepted_draws"],
+        "ess": res["ess"],
+        "paths_per_draw": 5,
         "units": "year-on-year percent",
-        "source": "PolicyEngine/boe-var-model public-data pipeline",
-        "forecast": {
-            str(q): {"gdp": values(I_GDP, h), "cpi": values(I_CPI, h)}
-            for h, q in enumerate(quarters)
-        },
+        "source": (
+            "PolicyEngine/boe-var-model via "
+            "policyengine_macro.core.svar_forecast"
+        ),
+        "forecast": by_quarter,
     }
     target = HERE / "current_forecast.json"
     target.write_text(json.dumps(payload, indent=2) + "\n")
-    print(f"wrote {target} ({len(pairs)}/{N_DRAWS} draws accepted)")
+    print(
+        f"wrote {target} ({res['accepted_draws']}/{res['draws']} draws accepted, "
+        f"ESS {res['ess']}, sample {payload['estimation_sample']})"
+    )
 
 
 if __name__ == "__main__":

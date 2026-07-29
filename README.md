@@ -74,7 +74,7 @@ See the [OG-UK model page](https://policyengine-macro.vercel.app/olg/) for the f
 parameter paths, solver options, structural shocks, and the transition path —
 the [OBR model page](https://policyengine-macro.vercel.app/obr/) for the macroeconometric
 emulator, the [SVAR model page](https://policyengine-macro.vercel.app/svar/) for the
-structural VAR, and the [documentation](https://policyengine-macro.vercel.app/docs/) for
+structural VAR, and the [model comparison](https://policyengine-macro.vercel.app/models#compare) for
 how the model classes differ and when to use which.
 
 ## Connecting to an AI

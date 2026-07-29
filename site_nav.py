@@ -52,10 +52,21 @@ def section(path: Path) -> str | None:
 
 def header(path: Path) -> str:
     current = section(path)
+    # aria-current="page" only when the link target IS this page; section
+    # ancestors get aria-current="true" so screen readers are not told a
+    # different URL is the current page.
+    page_href = "/" + str(path.relative_to(ROOT).parent) + "/"
+    if path.relative_to(ROOT) == Path("index.html"):
+        page_href = "/"
     links = []
     for key, href, label, classes in DESTINATIONS:
         class_attr = f' class="{classes}"' if classes else ""
-        current_attr = ' aria-current="page"' if key == current else ""
+        if href == page_href:
+            current_attr = ' aria-current="page"'
+        elif key == current:
+            current_attr = ' aria-current="true"'
+        else:
+            current_attr = ""
         links.append(f"    <a{class_attr} href=\"{href}\"{current_attr}>{label}</a>")
     links.append(GITHUB)
     return """<header class="nav">

@@ -35,6 +35,52 @@ ROUNDS = HERE / "rounds"
 OUTTURNS = HERE / "outturns.json"
 SCORECARD = HERE / "scorecard.json"
 PAGE = HERE / "index.html"
+LATEST = ROOT / "data" / "latest"
+
+# Series behind the naive random-walk baseline: the last value observed at the
+# round's data edge, held flat at every horizon. Values are read from the
+# current data/latest vintage, so revisions since the round was archived can
+# differ from what a real-time forecaster saw — the scorecard says so.
+NAIVE_SERIES = {
+    "cpi": ("uk_cpi_yoy.json", "level"),
+    "gdp": ("uk_gdp_cvm.json", "yoy"),
+    "unemployment": ("uk_unemployment_rate.json", "level"),
+}
+
+NAIVE_NOTE = (
+    "Naive baseline is a random walk: the last outturn available at the "
+    "round's data edge, held flat. Read from the current data vintage, not "
+    "the real-time one, so revisions can flatter or hurt it slightly."
+)
+
+
+def _quarter_shift(period: str, back: int) -> str:
+    year, q = int(period[:4]), int(period[5])
+    idx = year * 4 + (q - 1) - back
+    return f"{idx // 4}Q{idx % 4 + 1}"
+
+
+def naive_random_walk(variable: str, data_edge: str) -> float | None:
+    """Last observed value at the data edge (y/y growth for GDP levels)."""
+    spec = NAIVE_SERIES.get(variable)
+    if spec is None:
+        return None
+    fname, transform = spec
+    path = LATEST / fname
+    if not path.exists():
+        return None
+    obs = {
+        o["period"]: o["value"]
+        for o in json.loads(path.read_text())["observations"]
+    }
+    if transform == "level":
+        return obs.get(data_edge)
+    if transform == "yoy":
+        now, prev = obs.get(data_edge), obs.get(_quarter_shift(data_edge, 4))
+        if now is None or prev is None:
+            return None
+        return (now / prev - 1.0) * 100.0
+    return None
 
 REPO_BLOB = "https://github.com/PolicyEngine/macro/blob/main"
 
@@ -67,9 +113,19 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
             if obs is None:
                 continue
 
+            # A forecast only counts if it was archived before the outturn was
+            # published. A round archived after the release still gets listed
+            # under rounds/, but its already-answered periods are never scored:
+            # scoring them would launder hindsight into the track record.
+            archived = (rnd.get("archived_utc") or "")[:10]
+            vintage = obs.get("vintage") or ""
+            if archived and vintage and archived > vintage:
+                continue
+
             point = stats["median"]
             actual = obs["value"]
             error = point - actual
+            naive = naive_random_walk(variable, rnd["information_set"]["data_edge"])
 
             entries.append(
                 {
@@ -80,6 +136,17 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
                     "outturn_vintage": obs.get("vintage"),
                     "error": error,
                     "abs_error": abs(error),
+                    # Naive random-walk baseline (see NAIVE_NOTE). None when no
+                    # series is mapped for the variable.
+                    "naive_rw": naive,
+                    "naive_abs_error": (
+                        abs(naive - actual) if naive is not None else None
+                    ),
+                    "beats_naive": (
+                        abs(error) < abs(naive - actual)
+                        if naive is not None
+                        else None
+                    ),
                     # Band coverage is the honest test of a fan chart: a model
                     # whose 68% band contains the outturn 68% of the time is
                     # calibrated, however large its point errors are.
@@ -98,6 +165,14 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
             "coverage_68": sum(r["in_68"] for r in rows) / len(rows),
             "coverage_90": sum(r["in_90"] for r in rows) / len(rows),
         }
+        with_naive = [r for r in rows if r["naive_abs_error"] is not None]
+        if with_naive:
+            by_variable[variable]["mae_naive_rw"] = sum(
+                r["naive_abs_error"] for r in with_naive
+            ) / len(with_naive)
+            by_variable[variable]["beats_naive"] = sum(
+                r["beats_naive"] for r in with_naive
+            )
 
     return {
         "round_id": rnd["round_id"],
@@ -152,6 +227,7 @@ def build() -> dict:
             if pending
             else None
         ),
+        "naive_note": NAIVE_NOTE,
         "status": (
             "accumulating — no forecast period has an outturn yet"
             if total_scored == 0
@@ -159,6 +235,148 @@ def build() -> dict:
         ),
         "detail": scored,
     }
+
+
+# ------------------------------------------------- model vs official forecast
+
+EFO_CSV = ROOT / "papers" / "obr-macro" / "figures" / "fig_anchored_data.csv"
+SVAR_ROUND = ROUNDS / "2026-07-21" / "boe-svar.json"
+
+
+def efo_gdp_yoy() -> dict[str, float]:
+    """OBR March 2026 EFO real GDP y/y growth, derived from the level path."""
+    import csv
+
+    levels: dict[str, float] = {}
+    with EFO_CSV.open() as fh:
+        for row in csv.DictReader(fh):
+            levels[row[""]] = float(row["GDPM_efo"])
+    return {
+        period: (levels[period] / levels[_quarter_shift(period, 4)] - 1.0) * 100.0
+        for period in levels
+        if _quarter_shift(period, 4) in levels
+    }
+
+
+def build_vs_official() -> list[dict]:
+    """SVAR archived GDP medians beside the EFO path, on shared quarters."""
+    rnd = json.loads(SVAR_ROUND.read_text())
+    efo = efo_gdp_yoy()
+    rows = []
+    for period in sorted(rnd["forecast"]):
+        if period not in efo or "gdp" not in rnd["forecast"][period]:
+            continue
+        g = rnd["forecast"][period]["gdp"]
+        rows.append(
+            {
+                "period": period,
+                "median": g["median"],
+                "lo68": g["lo68"],
+                "hi68": g["hi68"],
+                "efo": efo[period],
+            }
+        )
+    return rows
+
+
+def render_vs_official(rows: list[dict]) -> str:
+    """Chart + table: archived boe-svar GDP path with 68% band vs March 2026 EFO."""
+    if not rows:
+        return "      <!-- no overlapping quarters -->"
+
+    # SVG geometry mirrors the validation-page vchart conventions.
+    width, height = 760, 300
+    left, right, top, bottom = 56, 16, 34, 40
+    plot_w, plot_h = width - left - right, height - top - bottom
+    values = [v for r in rows for v in (r["lo68"], r["hi68"], r["efo"])]
+    lo = min(0.0, min(values))
+    hi = max(values)
+    span = (hi - lo) or 1.0
+    lo -= span * 0.08
+    hi += span * 0.08
+    span = hi - lo
+
+    def x(i: int) -> float:
+        return left + plot_w * i / (len(rows) - 1)
+
+    def y(v: float) -> float:
+        return top + plot_h * (1 - (v - lo) / span)
+
+    band = " ".join(f"{x(i):.1f},{y(r['hi68']):.1f}" for i, r in enumerate(rows))
+    band += " " + " ".join(
+        f"{x(i):.1f},{y(r['lo68']):.1f}" for i, r in reversed(list(enumerate(rows)))
+    )
+    median = " ".join(f"{x(i):.1f},{y(r['median']):.1f}" for i, r in enumerate(rows))
+    efo = " ".join(f"{x(i):.1f},{y(r['efo']):.1f}" for i, r in enumerate(rows))
+
+    gridlines, ticks = [], []
+    step = 0.5
+    v = (int(lo / step)) * step
+    while v <= hi:
+        if v >= lo:
+            gridlines.append(
+                f'          <line class="vc-grid" x1="{left}" y1="{y(v):.1f}" '
+                f'x2="{width - right}" y2="{y(v):.1f}"/>'
+            )
+            ticks.append(
+                f'          <text class="vc-tick" x="{left - 8}" y="{y(v) + 4:.1f}" '
+                f'text-anchor="end">{v:g}</text>'
+            )
+        v += step
+    xticks = [
+        f'          <text class="vc-tick" x="{x(i):.1f}" y="{height - 14}" '
+        f'text-anchor="middle">{r["period"]}</text>'
+        for i, r in enumerate(rows)
+    ]
+
+    svg = "\n".join(
+        [
+            '      <figure class="vchart-figure">',
+            f'        <svg class="vchart" data-chart="svar-vs-efo" viewBox="0 0 {width} {height}" '
+            'role="img" aria-labelledby="svar-vs-efo-t svar-vs-efo-d">',
+            '          <title id="svar-vs-efo-t">boe-svar GDP forecast vs OBR March 2026 EFO</title>',
+            '          <desc id="svar-vs-efo-d">Line chart of UK real GDP year-on-year growth. '
+            "The boe-svar archived median with its 68 percent band is shown beside the OBR "
+            "March 2026 EFO path over the overlapping quarters.</desc>",
+            *gridlines,
+            *ticks,
+            f'          <polygon class="vc-band68" points="{band}"/>',
+            f'          <polyline class="vc-s1" points="{median}"/>',
+            f'          <polyline class="vc-s2" points="{efo}"/>',
+            *xticks,
+            f'          <text class="vc-lab" x="{left}" y="{top - 14}">boe-svar median '
+            "(68% band)</text>",
+            f'          <text class="vc-lab vc-lab2" x="{width - right}" y="{top - 14}" '
+            'text-anchor="end">OBR March 2026 EFO</text>',
+            "        </svg>",
+            "        <figcaption>UK real GDP, year-on-year growth, percent. boe-svar "
+            "medians and 68% bands from the archived 2026-07-21 round; EFO path derived "
+            "from <code>papers/obr-macro/figures/fig_anchored_data.csv</code>.</figcaption>",
+            "      </figure>",
+        ]
+    )
+
+    table = [
+        '      <div class="table-scroll">',
+        "        <table>",
+        "          <caption>Model vs official forecast, UK real GDP growth, year on "
+        "year. EFO figures are derived from the March 2026 EFO real-GDP level path "
+        "stored in <code>papers/obr-macro/figures/fig_anchored_data.csv</code>; the "
+        "boe-svar medians are from the archived 2026-07-21 round.</caption>",
+        '          <thead><tr><th scope="col">Quarter</th><th scope="col">boe-svar '
+        'median</th><th scope="col">68% band</th><th scope="col">OBR March 2026 EFO'
+        "</th></tr></thead>",
+        "          <tbody>",
+    ]
+    for r in rows:
+        table.append(
+            f'          <tr><th scope="row">{esc(r["period"])}</th>'
+            f"<td>{r['median']:.1f}%</td>"
+            f"<td>{r['lo68']:.1f}% to {r['hi68']:.1f}%</td>"
+            f"<td>{r['efo']:.1f}%</td></tr>"
+        )
+    table += ["          </tbody>", "        </table>", "      </div>"]
+    return svg + "\n" + "\n".join(table)
 
 
 # ---------------------------------------------------------------- page
@@ -243,9 +461,29 @@ def render_results(card: dict) -> str:
     body = ['      <div class="forecast-result-list">']
     for detail, e in sorted(rows, key=lambda r: (r[1]["period"], r[1]["variable"])):
         band = "68%" if e["in_68"] else ("90%" if e["in_90"] else "outside 90%")
-        scale = max(abs(e["forecast"]), abs(e["outturn"]), 1.0)
+        naive = e.get("naive_rw")
+        scale = max(
+            abs(e["forecast"]),
+            abs(e["outturn"]),
+            abs(naive) if naive is not None else 0.0,
+            1.0,
+        )
         forecast_width = abs(e["forecast"]) / scale * 100
         outturn_width = abs(e["outturn"]) / scale * 100
+        naive_row = ""
+        naive_footer = ""
+        if naive is not None:
+            naive_width = abs(naive) / scale * 100
+            naive_row = (
+                f"            <div><span>Naive</span>"
+                f"<i class=\"forecast-naive\" style=\"width:{naive_width:.1f}%\"></i>"
+                f"<strong>{naive:.2f}%</strong></div>\n"
+            )
+            verdict = "beats" if e["beats_naive"] else "does not beat"
+            naive_footer = (
+                f"<span>{verdict} naive error "
+                f"<strong>{e['naive_abs_error']:.2f}pp</strong></span>"
+            )
         body.append(
             "        <article class=\"forecast-result\">\n"
             "          <header>\n"
@@ -259,12 +497,18 @@ def render_results(card: dict) -> str:
             f"<strong>{e['forecast']:.2f}%</strong></div>\n"
             f"            <div><span>Outturn</span><i style=\"width:{outturn_width:.1f}%\"></i>"
             f"<strong>{e['outturn']:.2f}%</strong></div>\n"
-            "          </div>\n"
+            + naive_row
+            + "          </div>\n"
             f"          <footer><span>Error <strong>{e['error']:+.2f}pp</strong></span>"
+            f"{naive_footer}"
             f"<span>Round {esc(detail['round_id'])}</span></footer>\n"
             "        </article>"
         )
     body.append("      </div>")
+    if any(e.get("naive_rw") is not None for _, e in rows):
+        body.append(
+            f'      <p class="forecast-note">{esc(NAIVE_NOTE)}</p>'
+        )
     return "\n".join(body)
 
 
@@ -278,6 +522,7 @@ def render_page(html: str, card: dict) -> str:
         "scorecard-status": render_status(card),
         "scorecard-results": render_results(card),
         "scorecard-rounds": render_rounds(card),
+        "scorecard-vs-official": render_vs_official(build_vs_official()),
     }
     for marker, body in blocks.items():
         pattern = re.compile(

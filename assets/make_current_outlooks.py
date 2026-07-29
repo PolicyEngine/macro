@@ -114,13 +114,13 @@ def boe_chart() -> str:
         )
     out += [
         "</svg>",
-        f"<figcaption>Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through {data['data_edge']}; forecast begins {data['forecast_start']}. {data['draws']:,} posterior draws, {data['accepted']} accepted; five stochastic paths per accepted draw. Source and provenance: <code>papers/boe-svar/figures/current_forecast.json</code>.</figcaption>",
+        f"<figcaption>Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through {data['data_edge']}; forecast begins {data['forecast_start']}. Estimated on {data['estimation_sample'].replace('-', '&ndash;')}; {data['draws']:,} posterior draws, {data['accepted']} accepted; five stochastic paths per accepted draw. Source and provenance: <code>papers/boe-svar/figures/current_forecast.json</code>.</figcaption>",
         "</figure>",
     ]
     return "\n".join(out)
 
 
-def inject(page: Path, name: str, content: str) -> None:
+def render(page: Path, name: str, content: str) -> str:
     start, end = f"<!-- {name}:begin -->", f"<!-- {name}:end -->"
     html = page.read_text()
     replacement = f"{start}\n{content}\n{end}"
@@ -132,10 +132,30 @@ def inject(page: Path, name: str, content: str) -> None:
     )
     if count != 1:
         raise RuntimeError(f"expected one {name} block in {page}, found {count}")
-    page.write_text(updated)
+    return updated
 
 
 if __name__ == "__main__":
-    inject(ROOT / "obr/index.html", "obr-current-outlook", obr_chart())
-    inject(ROOT / "svar/index.html", "boe-current-outlook", boe_chart())
-    print("updated current-outlook charts")
+    import sys
+
+    targets = (
+        (ROOT / "obr/index.html", "obr-current-outlook", obr_chart()),
+        (ROOT / "svar/index.html", "boe-current-outlook", boe_chart()),
+    )
+    if "--check" in sys.argv[1:]:
+        stale = [
+            str(page.relative_to(ROOT))
+            for page, name, content in targets
+            if render(page, name, content) != page.read_text()
+        ]
+        if stale:
+            print(
+                f"{', '.join(stale)} stale; run python3 assets/make_current_outlooks.py",
+                file=sys.stderr,
+            )
+            raise SystemExit(1)
+        print("current-outlook charts match committed data")
+    else:
+        for page, name, content in targets:
+            page.write_text(render(page, name, content))
+        print("updated current-outlook charts")
