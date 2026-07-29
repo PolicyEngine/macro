@@ -769,6 +769,56 @@ def chart_svar_winrate():
 
 # Order must match the order the SVGs appear in validation/index.html: the
 # substitution below is positional.
+def chart_hank_targets():
+    data = json.loads(
+        (ROOT / "papers" / "us-hank" / "figures" / "replication.json").read_text()
+    )
+    rows = data["targets"]
+    W, H = 760, 300
+    row_h = (264.0 - 40.0) / len(rows)
+
+    def dev(r):
+        d = abs(r["achieved"] - r["target"])
+        return "0" if d == 0 else f"{d:.1e}"
+
+    desc = ("Table-style chart of the hosted two-asset steady state against the "
+            "published calibration targets of Auclert, Bardóczy, Rognlie and Straub (2021). " +
+            "; ".join(
+                f"{r['name']}: target {r['target']:g}, achieved {r['achieved']:.6g}, "
+                f"deviation {dev(r)}"
+                for r in rows
+            ) +
+            ". Goods and asset market clearing residuals are "
+            f"{data['residuals'][0]['value']:.1e} and {data['residuals'][1]['value']:.1e}. "
+            "Beta is the calibrated free parameter that hits the wealth targets.")
+
+    out = svg_open(W, H, "hank-targets",
+                   "us-hank: steady state vs published calibration targets", desc)
+
+    hdr_y = 30.0
+    col_target, col_achieved, col_dev = 400, 545, 700
+    out.append(f'<text class="vc-tick" x="{col_target}" y="{n(hdr_y)}" text-anchor="end">target</text>')
+    out.append(f'<text class="vc-tick" x="{col_achieved}" y="{n(hdr_y)}" text-anchor="end">achieved</text>')
+    out.append(f'<text class="vc-tick" x="{col_dev}" y="{n(hdr_y)}" text-anchor="end">|deviation|</text>')
+    for i, r in enumerate(rows):
+        y = 40.0 + row_h * i
+        ty = y + row_h / 2 + 4
+        if i:
+            out.append(f'<line class="vc-grid" x1="24" y1="{n(y)}" x2="736" y2="{n(y)}"/>')
+        out.append(f'<text class="vc-lab vc-rowlab" x="24" y="{n(ty)}">{esc(r["name"])}</text>')
+        out.append(f'<text class="vc-val" x="{col_target}" y="{n(ty)}" text-anchor="end">{r["target"]:g}</text>')
+        out.append(f'<text class="vc-val" x="{col_achieved}" y="{n(ty)}" text-anchor="end">{r["achieved"]:.6g}</text>')
+        out.append(f'<text class="vc-tick" x="{col_dev}" y="{n(ty)}" text-anchor="end">{dev(r)}</text>')
+    res = data["residuals"]
+    out.append(
+        f'<text class="vc-note" x="24" y="290">Market clearing: goods {res[0]["value"]:.1e}, '
+        f'assets {res[1]["value"]:.1e}. Achieved values solved from the hosted adapter; '
+        "targets from the upstream test suite citing the paper.</text>"
+    )
+    out.append("</svg>")
+    return "\n".join(out)
+
+
 BUILDERS = [
     ("obr-anchored", chart_obr_anchored),
     ("obr-reform", chart_obr_reform),
@@ -778,6 +828,7 @@ BUILDERS = [
     ("svar-fevd", chart_svar_fevd),
     ("svar-fan", chart_svar_fan),
     ("frbus-residuals", chart_frbus_residuals),
+    ("hank-targets", chart_hank_targets),
     ("svar-skill-all", chart_svar_skill_all),
     ("svar-winrate", chart_svar_winrate),
 ]

@@ -126,6 +126,7 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
             actual = obs["value"]
             error = point - actual
             naive = naive_random_walk(variable, rnd["information_set"]["data_edge"])
+            official = official_paths().get(variable, {}).get(period)
 
             entries.append(
                 {
@@ -146,6 +147,13 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
                         abs(error) < abs(naive - actual)
                         if naive is not None
                         else None
+                    ),
+                    # Official forecaster's number for the same period, where a
+                    # sourced path is stored (currently the March 2026 EFO).
+                    "official": official,
+                    "official_label": OFFICIAL_LABEL if official is not None else None,
+                    "official_abs_error": (
+                        abs(official - actual) if official is not None else None
                     ),
                     # Band coverage is the honest test of a fan chart: a model
                     # whose 68% band contains the outturn 68% of the time is
@@ -240,7 +248,10 @@ def build() -> dict:
 # ------------------------------------------------- model vs official forecast
 
 EFO_CSV = ROOT / "papers" / "obr-macro" / "figures" / "fig_anchored_data.csv"
+EFO_CPI_CSV = ROOT / "papers" / "obr-macro" / "figures" / "efo_march_2026_cpi.csv"
 SVAR_ROUND = ROUNDS / "2026-07-21" / "boe-svar.json"
+
+OFFICIAL_LABEL = "OBR March 2026 EFO"
 
 
 def efo_gdp_yoy() -> dict[str, float]:
@@ -258,15 +269,63 @@ def efo_gdp_yoy() -> dict[str, float]:
     }
 
 
-def build_vs_official() -> list[dict]:
-    """SVAR archived GDP medians beside the EFO path, on shared quarters."""
+def efo_cpi_yoy() -> dict[str, float]:
+    """OBR March 2026 EFO CPI y/y path (Table 1.7, transcribed with source)."""
+    import csv
+
+    with EFO_CPI_CSV.open() as fh:
+        body = [line for line in fh if not line.startswith("#")]
+    return {
+        row["quarter"]: float(row["cpi_yoy_pct"]) for row in csv.DictReader(body)
+    }
+
+
+BOE_MPR_CSV = HERE / "official" / "boe_mpr_feb_2026_central.csv"
+
+BOE_LABEL = "BoE Feb 2026 MPR"
+
+
+def boe_mpr_paths() -> dict[str, dict[str, float]]:
+    """BoE February 2026 MPR central projection (transcribed with source)."""
+    import csv
+
+    with BOE_MPR_CSV.open() as fh:
+        body = [line for line in fh if not line.startswith("#")]
+    paths: dict[str, dict[str, float]] = {"cpi": {}, "gdp": {}}
+    for row in csv.DictReader(body):
+        for var, col in (("cpi", "cpi_yoy_pct"), ("gdp", "gdp_yoy_pct")):
+            if row[col]:
+                paths[var][row["quarter"]] = float(row[col])
+    return paths
+
+
+_OFFICIAL_CACHE: dict[str, dict[str, float]] | None = None
+_BOE_CACHE: dict[str, dict[str, float]] | None = None
+
+
+def official_paths() -> dict[str, dict[str, float]]:
+    global _OFFICIAL_CACHE
+    if _OFFICIAL_CACHE is None:
+        _OFFICIAL_CACHE = {"gdp": efo_gdp_yoy(), "cpi": efo_cpi_yoy()}
+    return _OFFICIAL_CACHE
+
+
+def boe_paths() -> dict[str, dict[str, float]]:
+    global _BOE_CACHE
+    if _BOE_CACHE is None:
+        _BOE_CACHE = boe_mpr_paths()
+    return _BOE_CACHE
+
+
+def build_vs_official(variable: str) -> list[dict]:
+    """SVAR archived medians beside the EFO path, on shared quarters."""
     rnd = json.loads(SVAR_ROUND.read_text())
-    efo = efo_gdp_yoy()
+    efo = official_paths()[variable]
     rows = []
     for period in sorted(rnd["forecast"]):
-        if period not in efo or "gdp" not in rnd["forecast"][period]:
+        if period not in efo or variable not in rnd["forecast"][period]:
             continue
-        g = rnd["forecast"][period]["gdp"]
+        g = rnd["forecast"][period][variable]
         rows.append(
             {
                 "period": period,
@@ -274,13 +333,41 @@ def build_vs_official() -> list[dict]:
                 "lo68": g["lo68"],
                 "hi68": g["hi68"],
                 "efo": efo[period],
+                "boe": boe_paths()[variable].get(period),
             }
         )
     return rows
 
 
-def render_vs_official(rows: list[dict]) -> str:
-    """Chart + table: archived boe-svar GDP path with 68% band vs March 2026 EFO."""
+# Per-variable presentation of the model-vs-official comparison.
+VS_OFFICIAL_SPECS = {
+    "gdp": {
+        "chart_id": "svar-vs-efo",
+        "name": "UK real GDP growth",
+        "series": "UK real GDP, year-on-year growth, percent",
+        "source_note": (
+            "EFO path derived from the March 2026 EFO real-GDP level path stored "
+            "in <code>papers/obr-macro/figures/fig_anchored_data.csv</code>"
+        ),
+    },
+    "cpi": {
+        "chart_id": "svar-vs-efo-cpi",
+        "name": "UK CPI inflation",
+        "series": "UK CPI, year-on-year inflation, percent",
+        "source_note": (
+            "EFO path from Table 1.7 of the March 2026 EFO detailed economy "
+            "tables, stored in "
+            "<code>papers/obr-macro/figures/efo_march_2026_cpi.csv</code>"
+        ),
+    },
+}
+
+
+def render_vs_official_variable(variable: str) -> str:
+    """Chart + table: archived boe-svar path with 68% band vs March 2026 EFO."""
+    rows = build_vs_official(variable)
+    spec = VS_OFFICIAL_SPECS[variable]
+    chart_id = spec["chart_id"]
     if not rows:
         return "      <!-- no overlapping quarters -->"
 
@@ -332,10 +419,11 @@ def render_vs_official(rows: list[dict]) -> str:
     svg = "\n".join(
         [
             '      <figure class="vchart-figure">',
-            f'        <svg class="vchart" data-chart="svar-vs-efo" viewBox="0 0 {width} {height}" '
-            'role="img" aria-labelledby="svar-vs-efo-t svar-vs-efo-d">',
-            '          <title id="svar-vs-efo-t">boe-svar GDP forecast vs OBR March 2026 EFO</title>',
-            '          <desc id="svar-vs-efo-d">Line chart of UK real GDP year-on-year growth. '
+            f'        <svg class="vchart" data-chart="{chart_id}" viewBox="0 0 {width} {height}" '
+            f'role="img" aria-labelledby="{chart_id}-t {chart_id}-d">',
+            f'          <title id="{chart_id}-t">boe-svar {spec["name"]} forecast vs '
+            "OBR March 2026 EFO</title>",
+            f'          <desc id="{chart_id}-d">Line chart of {spec["series"]}. '
             "The boe-svar archived median with its 68 percent band is shown beside the OBR "
             "March 2026 EFO path over the overlapping quarters.</desc>",
             *gridlines,
@@ -349,9 +437,8 @@ def render_vs_official(rows: list[dict]) -> str:
             f'          <text class="vc-lab vc-lab2" x="{width - right}" y="{top - 14}" '
             'text-anchor="end">OBR March 2026 EFO</text>',
             "        </svg>",
-            "        <figcaption>UK real GDP, year-on-year growth, percent. boe-svar "
-            "medians and 68% bands from the archived 2026-07-21 round; EFO path derived "
-            "from <code>papers/obr-macro/figures/fig_anchored_data.csv</code>.</figcaption>",
+            f"        <figcaption>{spec['series']}. boe-svar medians and 68% bands "
+            f"from the archived 2026-07-21 round; {spec['source_note']}.</figcaption>",
             "      </figure>",
         ]
     )
@@ -359,23 +446,34 @@ def render_vs_official(rows: list[dict]) -> str:
     table = [
         '      <div class="table-scroll">',
         "        <table>",
-        "          <caption>Model vs official forecast, UK real GDP growth, year on "
-        "year. EFO figures are derived from the March 2026 EFO real-GDP level path "
-        "stored in <code>papers/obr-macro/figures/fig_anchored_data.csv</code>; the "
-        "boe-svar medians are from the archived 2026-07-21 round.</caption>",
+        f"          <caption>Model vs official forecast, {spec['name']}, year on "
+        f"year. {spec['source_note']}; the boe-svar medians are from the archived "
+        "2026-07-21 round.</caption>",
         '          <thead><tr><th scope="col">Quarter</th><th scope="col">boe-svar '
         'median</th><th scope="col">68% band</th><th scope="col">OBR March 2026 EFO'
-        "</th></tr></thead>",
+        '</th><th scope="col">BoE Feb 2026 MPR</th></tr></thead>',
         "          <tbody>",
     ]
     for r in rows:
+        boe = f"{r['boe']:.1f}%" if r["boe"] is not None else "—"
         table.append(
             f'          <tr><th scope="row">{esc(r["period"])}</th>'
             f"<td>{r['median']:.1f}%</td>"
             f"<td>{r['lo68']:.1f}% to {r['hi68']:.1f}%</td>"
-            f"<td>{r['efo']:.1f}%</td></tr>"
+            f"<td>{r['efo']:.1f}%</td>"
+            f"<td>{boe}</td></tr>"
         )
-    table += ["          </tbody>", "        </table>", "      </div>"]
+    table += [
+        "          </tbody>",
+        "        </table>",
+        "      </div>",
+        '      <p class="forecast-note">BoE column is the February 2026 MPR '
+        "central projection (the April 2026 Report published scenarios rather "
+        "than a central path), from the Bank's published projections databank; "
+        "stored in <code>forecasts/official/boe_mpr_feb_2026_central.csv</code>. "
+        "The three columns were fixed at different dates on different "
+        "information sets.</p>",
+    ]
     return svg + "\n" + "\n".join(table)
 
 
@@ -462,10 +560,12 @@ def render_results(card: dict) -> str:
     for detail, e in sorted(rows, key=lambda r: (r[1]["period"], r[1]["variable"])):
         band = "68%" if e["in_68"] else ("90%" if e["in_90"] else "outside 90%")
         naive = e.get("naive_rw")
+        official = e.get("official")
         scale = max(
             abs(e["forecast"]),
             abs(e["outturn"]),
             abs(naive) if naive is not None else 0.0,
+            abs(official) if official is not None else 0.0,
             1.0,
         )
         forecast_width = abs(e["forecast"]) / scale * 100
@@ -484,6 +584,19 @@ def render_results(card: dict) -> str:
                 f"<span>{verdict} naive error "
                 f"<strong>{e['naive_abs_error']:.2f}pp</strong></span>"
             )
+        official_row = ""
+        official_footer = ""
+        if official is not None:
+            official_width = abs(official) / scale * 100
+            official_row = (
+                f"            <div><span>Official</span>"
+                f"<i class=\"forecast-official\" style=\"width:{official_width:.1f}%\"></i>"
+                f"<strong>{official:.2f}%</strong></div>\n"
+            )
+            official_footer = (
+                f"<span>{esc(e['official_label'])} error "
+                f"<strong>{e['official_abs_error']:.2f}pp</strong></span>"
+            )
         body.append(
             "        <article class=\"forecast-result\">\n"
             "          <header>\n"
@@ -498,9 +611,11 @@ def render_results(card: dict) -> str:
             f"            <div><span>Outturn</span><i style=\"width:{outturn_width:.1f}%\"></i>"
             f"<strong>{e['outturn']:.2f}%</strong></div>\n"
             + naive_row
+            + official_row
             + "          </div>\n"
             f"          <footer><span>Error <strong>{e['error']:+.2f}pp</strong></span>"
             f"{naive_footer}"
+            f"{official_footer}"
             f"<span>Round {esc(detail['round_id'])}</span></footer>\n"
             "        </article>"
         )
@@ -508,6 +623,14 @@ def render_results(card: dict) -> str:
     if any(e.get("naive_rw") is not None for _, e in rows):
         body.append(
             f'      <p class="forecast-note">{esc(NAIVE_NOTE)}</p>'
+        )
+    if any(e.get("official") is not None for _, e in rows):
+        body.append(
+            '      <p class="forecast-note">The official number is the OBR '
+            "March 2026 EFO. It was fixed months before these rounds, on less "
+            "data, so its larger error here reflects an information gap as "
+            "much as forecasting skill — the comparison shows where the views "
+            "differed, not who forecasts better.</p>"
         )
     return "\n".join(body)
 
@@ -522,7 +645,11 @@ def render_page(html: str, card: dict) -> str:
         "scorecard-status": render_status(card),
         "scorecard-results": render_results(card),
         "scorecard-rounds": render_rounds(card),
-        "scorecard-vs-official": render_vs_official(build_vs_official()),
+        "scorecard-vs-official": (
+            render_vs_official_variable("gdp")
+            + "\n"
+            + render_vs_official_variable("cpi")
+        ),
     }
     for marker, body in blocks.items():
         pattern = re.compile(

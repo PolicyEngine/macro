@@ -1,6 +1,6 @@
 # validation/figures
 
-Generating script for the ten inline SVG charts on `/validation/`, in the same
+Generating script for the eleven inline SVG charts on `/validation/`, in the same
 spirit as the papers' `papers/*/figures/*.py` scripts.
 
 ## Regenerate
@@ -9,7 +9,7 @@ spirit as the papers' `papers/*/figures/*.py` scripts.
 python3 validation/figures/make_charts.py
 ```
 
-This rewrites the ten `<svg class="vchart">` blocks in `validation/index.html`
+This rewrites the eleven `<svg class="vchart">` blocks in `validation/index.html`
 in place. Stdlib only — no dependencies. To assert in CI that the page has not
 drifted from its sources:
 
@@ -45,6 +45,7 @@ audit line by line, which is the point of the page.
 | `svar-fevd` | Global-shock FEVD shares at the 1-year horizon, ours vs the paper, for UK GDP and CPI | `papers/boe-svar/figures/comparison_numbers.json` |
 | `svar-fan` | Median and 68% forecast fans from the frozen 2024Q2 edge for UK GDP and CPI, with ONS outturns overlaid | `papers/boe-svar/figures/figure_numbers.json` |
 | `frbus-residuals` | Max absolute residuals against the Fed's `pyfrbus`, log scale | `chart_data.json` → `papers/frb-us/sections/validation.tex`, tables `tab:tracking` and `tab:refnoise` |
+| `hank-targets` | Hosted two-asset steady state against the ABRS (2021) published calibration targets | `papers/us-hank/figures/replication.json` |
 | `svar-skill-all` | Rolling-origin RMSE ratios vs the benchmark for every variable–horizon pair, with significance | `papers/boe-svar/figures/rolling_evaluation.json` |
 | `svar-winrate` | Per-horizon counts of variables where the SVAR beats the benchmark, split by significance | `papers/boe-svar/figures/rolling_evaluation.json` |
 
