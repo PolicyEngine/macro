@@ -127,41 +127,11 @@ def crumbs(path: Path) -> str:
 
 GITHUB = """    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>"""
 FOOTER_LINKS = """    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/validation">Validation</a>
+    <a class="footer-text" href="/papers">Papers</a>
+    <a class="footer-text" href="/notes">Notes</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
     <a class="footer-text" href="/contact">Contact</a>"""
-
-# Full site directory rendered above the footer links on every page, so no
-# public page is reachable only through in-page prose.
-FOOTER_DIRECTORY = (
-    ("Economy", (("/economy", "United Kingdom"), ("/economy/us", "United States"),
-                 ("/economy/trends", "UK trends"), ("/economy/us/trends", "US trends"),
-                 ("/notes", "Research notes"))),
-    ("Models", (("/models", "All six models"), ("/obr", "OBR emulator"),
-                ("/svar", "BoE SVAR"), ("/frb-us", "FRB-US"),
-                ("/us-hank", "US HANK"), ("/olg", "OG-UK"),
-                ("/pe", "PolicyEngine microsim"))),
-    ("Evidence", (("/validation", "Validation"), ("/papers", "Working papers"),
-                  ("/forecasts", "Forecast track record"))),
-    ("Use", (("/connect", "Connect an AI or CLI"), ("/score", "Score a reform"),
-             ("/contact", "Contact"))),
-)
-
-
-def footer_directory() -> str:
-    cols = []
-    for heading, links in FOOTER_DIRECTORY:
-        rows = "\n".join(
-            f'      <a href="{href}">{label}</a>' for href, label in links
-        )
-        cols.append(
-            f'    <div class="footer-dir-col">\n      <strong class="mono">'
-            f"{heading}</strong>\n{rows}\n    </div>"
-        )
-    return (
-        '<nav class="footer-dir" aria-label="All pages">\n'
-        + "\n".join(cols)
-        + "\n  </nav>\n  "
-    )
 
 
 def section(path: Path) -> str | None:
@@ -254,15 +224,9 @@ def render(path: Path) -> str:
     if replacements != 1:
         raise ValueError(f"could not locate navigation in {path.relative_to(ROOT)}")
     updated = updated.replace(" has-section-tabs", "")
-    # Footer directory: strip any previous copy, then insert one before the
-    # footer links so every page carries the full site map.
+    # The footer stays small: a single link row. Strip any directory block a
+    # previous revision may have left behind.
     updated = FOOTER_DIR.sub("", updated)
-    updated = updated.replace(
-        '<nav class="footer-links" aria-label="PolicyEngine links">',
-        footer_directory()
-        + '<nav class="footer-links" aria-label="PolicyEngine links">',
-        1,
-    )
     footer_pattern = re.compile(
         r'(<nav class="footer-links" aria-label="PolicyEngine links">).*?(\s*</nav>)',
         re.DOTALL,
