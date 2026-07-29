@@ -98,12 +98,12 @@ def note_page(series: dict, vintage: str) -> str:
   </a>
   <nav class="nav-links" aria-label="Primary">
     <a href="/">Home</a>
-    <a class="nav-mobile" href="/economy/">Economy</a>
-    <a href="/models/">Models</a>
-    <a href="/forecasts/">Forecasts</a>
-    <a href="/validation/">Evidence</a>
-    <a class="nav-mobile nav-start" href="/connect/">Use</a>
-    <a href="/contact/">Contact</a>
+    <a class="nav-mobile" href="/economy">Economy</a>
+    <a href="/models">Models</a>
+    <a href="/forecasts">Forecasts</a>
+    <a href="/validation">Evidence</a>
+    <a class="nav-mobile nav-start" href="/connect">Use</a>
+    <a href="/contact">Contact</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
   </nav>
 </header>
@@ -139,7 +139,7 @@ def note_page(series: dict, vintage: str) -> str:
   <section class="band">
     <div class="band-head"><span class="kicker mono">03 — model context</span><h2>Outturn first; interpretation separately.</h2></div>
     <div class="prose">
-      <p>The <a href="/economy/">Economy page</a> places this observation beside the other current indicators. If it completes an archived forecast period, the <a href="/forecasts/">forecast record</a> is scored by the separate outturn pipeline.</p>
+      <p>The <a href="/economy">Economy page</a> places this observation beside the other current indicators. If it completes an archived forecast period, the <a href="/forecasts">forecast record</a> is scored by the separate outturn pipeline.</p>
       <p>A dated research note may add model interpretation after human review. This factual page does not pretend the observation establishes a cause or policy conclusion.</p>
     </div>
   </section>

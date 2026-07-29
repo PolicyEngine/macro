@@ -206,7 +206,8 @@ image = (
         "openpyxl",
         "requests",
         "click",
-        "mcp[cli]>=1.9",  # needs FastMCP.streamable_http_app()
+        # <2: mcp 2.0.0 removed mcp.server.fastmcp
+        "mcp[cli]>=1.9,<2",  # needs FastMCP.streamable_http_app()
         # PolicyEngine microsimulation (household calculator tools). Importing
         # it loads the full UK+US country models (~20s), so policyengine_macro.core
         # imports it lazily inside the pe_* adapters — module import at
