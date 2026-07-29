@@ -119,7 +119,7 @@ def test_validation_and_paper_landings_lead_with_current_uk_vintages():
 def test_paper_page_counts_match_embedded_pdfs():
     expected = {
         "obr-macro": 36,
-        "boe-svar": 29,
+        "boe-svar": 30,
         "frb-us": 36,
         "psl-og": 34,
     }
