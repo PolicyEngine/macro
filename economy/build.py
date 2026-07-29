@@ -11,6 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "economy" / "index.html"
+HOME_PAGE = ROOT / "index.html"
 US_PAGE = ROOT / "economy" / "us" / "index.html"
 TRENDS_PAGE = ROOT / "economy" / "trends" / "index.html"
 US_TRENDS_PAGE = ROOT / "economy" / "us" / "trends" / "index.html"
@@ -67,6 +68,38 @@ def gdp_growth(series: dict) -> list[dict]:
     ]
 
 
+def quarter_of(period: str) -> str:
+    """Map a monthly period like 2026-06 to its quarter (2026Q2)."""
+    if "Q" in period:
+        return period
+    year, month = period.split("-")
+    return f"{year}Q{(int(month) + 2) // 3}"
+
+
+def longbase_baseline() -> list[dict]:
+    """FRB/US April 2026 LONGBASE conditioning baseline, near-term y/y path."""
+    path = ROOT / "papers" / "frb-us" / "figures" / "longbase_baseline_yoy.csv"
+    lines = [
+        line for line in path.read_text().splitlines()
+        if line and not line.startswith("#")
+    ]
+    header = lines[0].split(",")
+    return [
+        {key: value if key == "quarter" else float(value)
+         for key, value in zip(header, line.split(","))}
+        for line in lines[1:]
+    ]
+
+
+def baseline_next_open(rows: list[dict], last_observed: str) -> dict:
+    """First baseline quarter with no published outturn yet."""
+    last_quarter = quarter_of(last_observed)
+    for row in rows:
+        if row["quarter"] > last_quarter:
+            return row
+    return rows[-1]
+
+
 def yoy_growth(series: dict, periods: int) -> list[dict]:
     obs = series["observations"]
     by_period = {row["period"]: row["value"] for row in obs}
@@ -118,10 +151,18 @@ def line_chart(
     )
     first, last = values[0], values[-1]
     title_id = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+    window_low = min(row["value"] for row in values)
+    window_high = max(row["value"] for row in values)
+    desc = (
+        f"{description.rstrip('.').replace(', latest ', ' over the latest ')}, "
+        f"from {first['value']:.1f}{units} in {first['period']} "
+        f"to {last['value']:.1f}{units} in {last['period']}; "
+        f"range {window_low:.1f}{units} to {window_high:.1f}{units}."
+    )
     return f"""      <figure class="economy-figure">
         <svg viewBox="0 0 {width} {height}" role="img" aria-labelledby="{title_id}-title {title_id}-desc">
           <title id="{title_id}-title">{title}</title>
-          <desc id="{title_id}-desc">{description}</desc>
+          <desc id="{title_id}-desc">{desc}</desc>
           <line class="economy-chart-grid" x1="{left}" y1="{y(high - padding):.1f}" x2="{width - right}" y2="{y(high - padding):.1f}" />
           <line class="economy-chart-grid" x1="{left}" y1="{y(low + padding):.1f}" x2="{width - right}" y2="{y(low + padding):.1f}" />
           <polyline class="economy-chart-line" points="{points}" />
@@ -142,15 +183,30 @@ def card(
     source: str,
     vintage: str,
     url: str,
+    model_line: str | None = None,
+    model_source: tuple[str, str, str] | None = None,
 ) -> str:
+    """One stat card; optionally paired with a model line under the outturn."""
+    model_html = (
+        f"\n          <p class=\"economy-stat-change\">{model_line}</p>"
+        if model_line
+        else ""
+    )
+    model_row = ""
+    if model_source:
+        m_label, m_url, m_vintage = model_source
+        model_row = (
+            f"\n            <div><dt>Model</dt>"
+            f'<dd><a href="{m_url}">{m_label}</a> · {m_vintage}</dd></div>'
+        )
     return f"""        <article class="economy-stat">
           <p class="economy-stat-label mono">{label}</p>
           <p class="economy-stat-value">{value}</p>
-          <p class="economy-stat-change">{change}</p>
+          <p class="economy-stat-change">{change}</p>{model_html}
           <dl>
             <div><dt>Observation</dt><dd>{period}</dd></div>
             <div><dt>Vintage</dt><dd>{vintage}</dd></div>
-            <div><dt>Source</dt><dd><a href="{url}">{source}</a></dd></div>
+            <div><dt>Source</dt><dd><a href="{url}">{source}</a></dd></div>{model_row}
           </dl>
         </article>"""
 
@@ -162,14 +218,41 @@ def cards() -> str:
     forecast = json.loads(
         (ROOT / "papers" / "boe-svar" / "figures" / "current_forecast.json").read_text()
     )
+    okun = json.loads(
+        (ROOT / "forecasts" / "rounds" / "2026-07-28" / "okun-unemployment.json").read_text()
+    )
     scorecard = json.loads((ROOT / "forecasts" / "scorecard.json").read_text())
 
     growth = gdp_growth(gdp)
     g_now, g_prev = growth[-1], growth[-2]
     c_now, c_prev = latest(cpi), previous(cpi)
     u_now, u_prev = latest(unemployment), previous(unemployment)
-    first_period = forecast["forecast_start"]
-    first = forecast["forecast"][first_period]
+    # First forecast quarter with no published outturn yet, per variable —
+    # showing a "forecast" for a quarter the ONS has already printed would be
+    # stale the moment the release lands.
+    def next_open(fc: dict, variable: str, last_observed: str) -> tuple[str, dict]:
+        for period, values in fc.items():
+            if period > last_observed and variable in values:
+                return period, values[variable]
+        period = list(fc)[-1]
+        return period, fc[period][variable]
+
+    g_period, g_fc = next_open(forecast["forecast"], "gdp", g_now["period"])
+    c_period, c_fc = next_open(forecast["forecast"], "cpi", c_now["period"])
+    u_period, u_fc = next_open(okun["forecast"], "unemployment", u_now["period"])
+
+    def model_line(fc: dict, period: str) -> str:
+        return (
+            f"Model: {fmt(fc['median'])}% <span class=\"mono\">{period}</span>"
+            f" · 68% {fmt(fc['lo68'])}%–{fmt(fc['hi68'])}%"
+        )
+
+    svar_source = ("boe-svar", "/svar", f"generated {forecast['generated']}")
+    okun_source = (
+        "Okun satellite",
+        "/forecasts",
+        f"round {okun['round_id']}",
+    )
     scored = scorecard["periods_scored"]
     rounds = scorecard["rounds"]
 
@@ -183,6 +266,8 @@ def cards() -> str:
                 f"ONS · {gdp['cdid']}",
                 gdp["vintage"],
                 gdp["url"],
+                model_line(g_fc, g_period),
+                svar_source,
             ),
             card(
                 "CPI INFLATION",
@@ -192,6 +277,8 @@ def cards() -> str:
                 f"ONS · {cpi['cdid']}",
                 cpi["vintage"],
                 cpi["url"],
+                model_line(c_fc, c_period),
+                svar_source,
             ),
             card(
                 "UNEMPLOYMENT RATE",
@@ -201,24 +288,8 @@ def cards() -> str:
                 f"ONS · {unemployment['cdid']}",
                 unemployment["vintage"],
                 unemployment["url"],
-            ),
-            card(
-                "MODEL GDP OUTLOOK",
-                f"{fmt(first['gdp']['median'])}%",
-                first_period,
-                f"68% range {fmt(first['gdp']['lo68'])}% to {fmt(first['gdp']['hi68'])}%",
-                "PolicyEngine · boe-svar",
-                forecast["generated"],
-                "/svar/",
-            ),
-            card(
-                "MODEL CPI OUTLOOK",
-                f"{fmt(first['cpi']['median'])}%",
-                first_period,
-                f"68% range {fmt(first['cpi']['lo68'])}% to {fmt(first['cpi']['hi68'])}%",
-                "PolicyEngine · boe-svar",
-                forecast["generated"],
-                "/svar/",
+                model_line(u_fc, u_period),
+                okun_source,
             ),
             card(
                 "REAL-TIME FORECAST RECORD",
@@ -227,7 +298,7 @@ def cards() -> str:
                 f"{rounds} archived round{'s' if rounds != 1 else ''}",
                 "PolicyEngine forecast archive",
                 "generated scorecard",
-                "/forecasts/",
+                "/forecasts",
             ),
         ]
     )
@@ -283,6 +354,23 @@ def us_cards() -> str:
     u_now, u_prior = latest(unemployment), previous(unemployment)
     jobs_now = payroll_growth[-1]
 
+    baseline = longbase_baseline()
+    g_base = baseline_next_open(baseline, g_now["period"])
+    p_base = baseline_next_open(baseline, p_now["period"])
+    u_base = baseline_next_open(baseline, u_now["period"])
+
+    def baseline_line(row: dict, column: str) -> str:
+        return (
+            f"LONGBASE baseline: {fmt(row[column])}%"
+            f" <span class=\"mono\">{row['quarter']}</span>"
+        )
+
+    longbase_source = (
+        "FRB/US LONGBASE (April 2026)",
+        "/frb-us",
+        "conditioning baseline, no bands",
+    )
+
     return "\n".join(
         (
             card(
@@ -293,6 +381,8 @@ def us_cards() -> str:
                 "BEA via FRED · GDPC1",
                 gdp["vintage"],
                 gdp["url"],
+                baseline_line(g_base, "gdp_yoy_pct"),
+                longbase_source,
             ),
             card(
                 "CPI INFLATION",
@@ -302,6 +392,8 @@ def us_cards() -> str:
                 "BLS via FRED · CPIAUCSL",
                 cpi["vintage"],
                 cpi["url"],
+                baseline_line(p_base, "cpi_yoy_pct"),
+                longbase_source,
             ),
             card(
                 "UNEMPLOYMENT RATE",
@@ -311,6 +403,8 @@ def us_cards() -> str:
                 "BLS via FRED · UNRATE",
                 unemployment["vintage"],
                 unemployment["url"],
+                baseline_line(u_base, "unemployment_pct"),
+                longbase_source,
             ),
             card(
                 "PAYROLL EMPLOYMENT",
@@ -367,7 +461,7 @@ def us_figures() -> str:
             ),
             line_chart(
                 "US unemployment",
-                "Percent of the labour force, latest 20 months.",
+                "Percent of the labor force, latest 20 months.",
                 unemployment["observations"],
                 "%",
                 "BLS via FRED · UNRATE",
@@ -408,7 +502,7 @@ def trends_directory() -> str:
             country_card(
                 "UK",
                 "United Kingdom",
-                "/economy/trends/",
+                "/economy/trends",
                 uk_gdp,
                 uk_cpi,
                 uk_unemployment,
@@ -416,7 +510,7 @@ def trends_directory() -> str:
             country_card(
                 "US",
                 "United States",
-                "/economy/us/trends/",
+                "/economy/us/trends",
                 us_gdp,
                 us_cpi,
                 us_unemployment,
@@ -434,13 +528,13 @@ def us_indicator_rows() -> str:
         ("Activity", gdp, f"{gdp_growth(gdp)[-1]['value']:.1f}%", "year on year"),
         ("Prices", cpi, f"{yoy_growth(cpi, 12)[-1]['value']:.1f}%", "year on year"),
         (
-            "Labour",
+            "Labor",
             unemployment,
             f"{latest(unemployment)['value']:.1f}%",
             f"{latest(unemployment)['value'] - previous(unemployment)['value']:+.1f}pp m/m",
         ),
         (
-            "Labour",
+            "Labor",
             payrolls,
             f"{latest(payrolls)['value'] / 1000:,.1f}m",
             f"{latest(payrolls)['value'] - previous(payrolls)['value']:+,.0f}k m/m",
@@ -531,7 +625,7 @@ def indicator_rows() -> str:
         (
             "Fiscal",
             borrowing,
-            f"{(-now['value'] + year_ago['value']) / 1000:+.1f}bn y/y",
+            f"{'+' if (-now['value'] + year_ago['value']) >= 0 else '-'}£{abs(-now['value'] + year_ago['value']) / 1000:.1f}bn y/y",
             f"£{-now['value'] / 1000:,.1f}bn borrowed",
         )
     )
@@ -721,6 +815,127 @@ def remove_embedded_trends(html: str, marker: str) -> str:
     return re.sub(pattern, "", html, count=1, flags=re.S)
 
 
+def home_uk_now() -> str:
+    """Homepage 'UK at a glance' table: outturns beside next-open forecasts."""
+    gdp = load("uk_gdp_cvm")
+    cpi = load("uk_cpi_yoy")
+    unemployment = load("uk_unemployment_rate")
+    forecast = json.loads(
+        (ROOT / "papers" / "boe-svar" / "figures" / "current_forecast.json").read_text()
+    )
+    okun = json.loads(
+        (ROOT / "forecasts" / "rounds" / "2026-07-28" / "okun-unemployment.json").read_text()
+    )
+
+    growth = gdp_growth(gdp)
+    g_now = growth[-1]
+    c_now = latest(cpi)
+    u_now = latest(unemployment)
+
+    def next_open(fc: dict, variable: str, last_observed: str) -> tuple[str, dict]:
+        for period, values in fc.items():
+            if period > last_observed and variable in values:
+                return period, values[variable]
+        period = list(fc)[-1]
+        return period, fc[period][variable]
+
+    g_period, g_fc = next_open(forecast["forecast"], "gdp", g_now["period"])
+    c_period, c_fc = next_open(forecast["forecast"], "cpi", c_now["period"])
+    u_period, u_fc = next_open(okun["forecast"], "unemployment", u_now["period"])
+
+    def rng(fc: dict) -> str:
+        return f"68% range {fmt(fc['lo68'])}%–{fmt(fc['hi68'])}%"
+
+    caption = (
+        "UK headline indicators: latest official outturn and the model "
+        "near-term forecast. Outturn vintages as of "
+        f"{max(gdp['vintage'], cpi['vintage'], unemployment['vintage'])}; "
+        f"GDP and CPI from the boe-svar forecast generated {forecast['generated']} "
+        f"(conditioned on data through {forecast['data_edge']}); unemployment "
+        f"from the {okun['round_id']} Okun-satellite round."
+    )
+    return "\n".join(
+        [
+            '      <div class="table-scroll">',
+            "        <table>",
+            f"          <caption>{caption}</caption>",
+            '          <thead><tr><th scope="col">Indicator</th><th scope="col">'
+            'Latest outturn</th><th scope="col">Model near-term forecast</th>'
+            "</tr></thead>",
+            "          <tbody>",
+            f'          <tr><th scope="row">Real GDP growth, y/y</th>'
+            f'<td>{fmt(g_now["value"])}% <span class="mono">{g_now["period"]}</span></td>'
+            f'<td>{fmt(g_fc["median"])}% <span class="mono">{g_period}</span> · {rng(g_fc)}</td></tr>',
+            f'          <tr><th scope="row">CPI inflation, y/y</th>'
+            f'<td>{fmt(c_now["value"])}% <span class="mono">{c_now["period"]}</span></td>'
+            f'<td>{fmt(c_fc["median"])}% <span class="mono">{c_period}</span> · {rng(c_fc)}</td></tr>',
+            f'          <tr><th scope="row">Unemployment rate</th>'
+            f'<td>{fmt(u_now["value"])}% <span class="mono">{u_now["period"]}</span></td>'
+            f'<td>{fmt(u_fc["median"])}% <span class="mono">{u_period}</span> · {rng(u_fc)}'
+            ' · <a href="/forecasts">Okun satellite</a></td></tr>',
+            "          </tbody>",
+            "        </table>",
+            "      </div>",
+        ]
+    )
+
+
+def home_us_now() -> str:
+    """Homepage 'US at a glance' table: outturns beside the LONGBASE baseline."""
+    gdp = load("us_real_gdp")
+    cpi = load("us_cpi")
+    unemployment = load("us_unemployment_rate")
+    baseline = longbase_baseline()
+
+    g_now = gdp_growth(gdp)[-1]
+    c_now = yoy_growth(cpi, 12)[-1]
+    u_now = latest(unemployment)
+
+    g_base = baseline_next_open(baseline, g_now["period"])
+    c_base = baseline_next_open(baseline, c_now["period"])
+    u_base = baseline_next_open(baseline, u_now["period"])
+
+    caption = (
+        "US headline indicators: latest official outturn beside the FRB/US "
+        "April 2026 LONGBASE baseline. The right column is the Federal Reserve "
+        "staff-style conditioning baseline that frb-us shock experiments "
+        "deviate from — not a PolicyEngine forecast — and it carries no "
+        "uncertainty bands; a US forecasting model is planned. Baseline from "
+        "papers/frb-us/figures/longbase_baseline_yoy.csv; outturn vintages as "
+        f"of {max(gdp['vintage'], cpi['vintage'], unemployment['vintage'])}."
+    )
+    return "\n".join(
+        [
+            '      <div class="table-scroll">',
+            "        <table>",
+            f"          <caption>{caption}</caption>",
+            '          <thead><tr><th scope="col">Indicator</th><th scope="col">'
+            'Latest outturn</th><th scope="col">LONGBASE baseline path</th>'
+            "</tr></thead>",
+            "          <tbody>",
+            f'          <tr><th scope="row">Real GDP growth, y/y</th>'
+            f'<td>{fmt(g_now["value"])}% <span class="mono">{g_now["period"]}</span></td>'
+            f'<td>{fmt(g_base["gdp_yoy_pct"])}% <span class="mono">{g_base["quarter"]}</span></td></tr>',
+            f'          <tr><th scope="row">CPI inflation, y/y</th>'
+            f'<td>{fmt(c_now["value"])}% <span class="mono">{c_now["period"]}</span></td>'
+            f'<td>{fmt(c_base["cpi_yoy_pct"])}% <span class="mono">{c_base["quarter"]}</span></td></tr>',
+            f'          <tr><th scope="row">Unemployment rate</th>'
+            f'<td>{fmt(u_now["value"])}% <span class="mono">{u_now["period"]}</span></td>'
+            f'<td>{fmt(u_base["unemployment_pct"])}% <span class="mono">{u_base["quarter"]}</span></td></tr>',
+            "          </tbody>",
+            "        </table>",
+            "      </div>",
+        ]
+    )
+
+
+def render_home() -> str:
+    html = HOME_PAGE.read_text()
+    html = replace(html, "home-uk-now", home_uk_now())
+    html = replace(html, "home-us-now", home_us_now())
+    return html
+
+
 def render_uk() -> str:
     html = PAGE.read_text()
     html = remove_embedded_trends(html, "economy-figures")
@@ -761,6 +976,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
+    rendered_home = render_home()
     rendered_uk = render_uk()
     rendered_us = render_us()
     rendered_uk_trends = render_uk_trends()
@@ -768,6 +984,7 @@ def main() -> int:
     if args.check:
         stale = []
         for path, rendered in (
+            (HOME_PAGE, rendered_home),
             (PAGE, rendered_uk),
             (US_PAGE, rendered_us),
             (TRENDS_PAGE, rendered_uk_trends),
@@ -780,6 +997,7 @@ def main() -> int:
             return 1
         print("UK and US Economy overview and Trends pages match committed data")
         return 0
+    HOME_PAGE.write_text(rendered_home)
     PAGE.write_text(rendered_uk)
     US_PAGE.write_text(rendered_us)
     TRENDS_PAGE.write_text(rendered_uk_trends)

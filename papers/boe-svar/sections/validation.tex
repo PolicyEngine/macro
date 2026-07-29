@@ -45,8 +45,39 @@ RMSE is 0.63 at one quarter and 0.67 at eight quarters (values below one beat
 the benchmark), while UK GDP is worse than no change at both horizons (1.06 and
 1.06). This is less flattering, and more general, than the seven-quarter frozen
 edge result: the model contains useful inflation signal but has not demonstrated
-superior GDP forecasting performance. The generated evidence is committed as
-\texttt{results/rolling\_evaluation.json} in the model repository.
+superior GDP forecasting performance. The committed artifact also contains
+random-walk-with-drift and AR(1) benchmarks with Diebold--Mariano tests and an
+ex-Covid split (target quarters in 2020Q1--2021Q2 dropped, reported alongside
+the full sample). Against the tougher drift benchmark the CPI advantage
+shrinks: relative RMSE is 0.83 at one quarter but 1.03 at eight quarters, so
+the model's edge over drift at short horizons disappears at longer ones. The
+generated evidence is committed as \texttt{results/rolling\_evaluation.json}
+in the model repository.
+
+\subsection{Interval coverage across rolling origins (added July 2026)}
+\label{sec:coverage}
+
+A companion evaluation, added in July 2026 and committed as
+\texttt{coverage\_evaluation.json}, asks whether the predictive \emph{bands}
+are calibrated, not just whether the point forecasts beat benchmarks. Using
+the same expanding-window design, the reduced-form BVAR is re-estimated at 49
+historical origins; at each origin, 100 posterior draws with 5 stochastic
+paths per draw generate predictive distributions, and percentile bands on the
+level of each series are confronted with the subsequent outturns at horizons
+one to eight.
+
+The bands under-cover. Averaged across the eight variables and eight
+horizons, the nominal 68 per cent band contains the outturn 62.1 per cent of
+the time and the nominal 90 per cent band 77.2 per cent of the time, and
+coverage worsens with horizon: the 68 per cent band covers 71 per cent at one
+quarter but only 57 per cent at eight quarters, the 90 per cent band 87 per
+cent at one quarter and 72 per cent at eight. Three caveats bound the
+reading: the Covid quarters are included with no Covid dummies in the
+evaluation model; estimation uses final revised data, so the exercise is
+pseudo- rather than real-time; and consecutive origins overlap, so the
+effective number of independent observations is well below 49. None of these
+caveats reverses the direction of the finding --- users should treat the
+published credible bands as too narrow, especially at longer horizons.
 
 \subsection{Replication figures}
 \label{sec:repl-figures}
