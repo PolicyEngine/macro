@@ -26,7 +26,7 @@ DESTINATIONS = (
 )
 
 MODEL_ROOTS = {"models", "obr", "svar", "frb-us", "us-hank", "olg", "pe"}
-EVIDENCE_ROOTS = {"validation", "papers", "docs"}
+EVIDENCE_ROOTS = {"validation", "papers"}
 
 # Display names used in the pathway line and the footer directory.
 PAGE_NAMES = {
@@ -49,6 +49,7 @@ PAGE_NAMES = {
     "/papers/psl-og": "psl-og",
     "/forecasts": "Track record",
     "/notes": "Notes",
+    "/notes/releases": "Releases",
     "/connect": "Use",
     "/score": "Score a reform",
     "/contact": "Contact",

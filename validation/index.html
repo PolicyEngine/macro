@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PolicyEngine Macro — validation</title>
+<title>Validation — PolicyEngine Macro</title>
 <meta name="description" content="Every PolicyEngine Macro model set beside its reference: the OBR emulator against the March 2026 EFO and HMRC's ready reckoner, the structural VAR against Brignone and Piffer (2025), frb-us against the Fed's pyfrbus, us-hank against Auclert et al. (2021), PolicyEngine against statute, and OLG against calibration targets." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/validation" />
 <meta property="og:type" content="website" />
@@ -101,20 +101,14 @@
         three classes; choose a row, then open its evidence below.
       </p>
       <div class="callout">
-        <strong>In plain English:</strong> anchored to the OBR's published
-        forecast path, the emulator tracks that forecast within 0.15%
-        for GDP and 0.25% for consumption — reported below as MAPE, mean
-        absolute percentage error, the average percentage gap from the
-        reference — and run as a genuine forecast with held add-factors it
-        stays within 0.37% on GDP. In the UK structural VAR's (SVAR's)
+        <strong>In plain English:</strong> Anchored to the OBR's published
+        forecast path, the emulator tracks GDP within 0.15% and consumption
+        within 0.25%, and stays within 0.37% on GDP run as a genuine
+        forecast with held add-factors. In the UK structural VAR's (SVAR's)
         frozen-edge test, all 14 of 14 outturns fell inside its 68%
-        uncertainty bands with an RMSE (root-mean-square error) of 0.32pp —
-        though those 14 observations come from a single forecast origin, so
-        this is suggestive, not established coverage (see the caveat below).
-        frb-us reproduces the Fed's own database to
-        machine precision. The OLG model has no ground truth to score
-        against, so read its results as model-consistent magnitudes, not
-        forecasts.
+        uncertainty bands — a single-origin result, suggestive rather than
+        established coverage (see the caveat below). frb-us reproduces the
+        Fed's own database to machine precision.
       </div>
       <div class="table-scroll">
       <table>
@@ -197,7 +191,9 @@
     <div class="prose">
       <p>
         Anchored to the March 2026 EFO with OBR add-factors, the emulator
-        reproduces GDP to <strong>0.15% MAPE</strong> and consumption to
+        reproduces GDP to <strong>0.15% MAPE</strong> (mean absolute
+        percentage error — the average percentage gap from the reference
+        path) and consumption to
         <strong>0.25%</strong> over 2025Q1&ndash;2027Q4 (CI gate: 1%). GDP
         remains within 0.29% through 2031Q1, but unemployment becomes
         unreliable after 2027Q4. Because anchoring is by construction, the
@@ -357,15 +353,7 @@
         important number for anyone reading a policy score off this model.
       </p>
       <p>
-        Three of the channels that would normally damp such a shock are held
-        exogenous in this configuration &mdash; imports (so the usual leakage
-        is switched off), Bank Rate (no monetary offset) and CPI. The first
-        two bias the estimated effect <em>upward</em>; the dead
-        profits&rarr;dividends channel biases corporation-tax effects
-        <em>downward</em>. These do not cancel, and their net sign is not
-        established. Reform figures here are best read as
-        <em>relative</em> comparisons between structurally identical runs,
-        where the biases largely difference out, rather than as magnitudes.
+        Why, and what it biases &rarr; <a href="/obr">obr-macro</a>.
       </p>
       <details class="more">
         <summary>The honest scorecard, the two dead equations, outturns, and the March 2026 re-anchoring</summary>
@@ -607,7 +595,8 @@
       </details>
       <p>
         <strong>Out-of-sample.</strong> Forecasting seven quarters ahead from
-        a frozen 2024Q2 edge, RMSE is <strong>0.3pp</strong> for both GDP
+        a frozen 2024Q2 edge, RMSE (root-mean-square error) is
+        <strong>0.3pp</strong> for both GDP
         growth and CPI inflation. Activity tracks well; the median misses the
         2025 inflation peak by up to 0.6pp but captures its reversal.
       </p>
@@ -686,7 +675,7 @@
 <text class="vc-tick" x="570.0" y="334" text-anchor="middle">26Q1</text>
 <text class="vc-tick" x="724.0" y="334" text-anchor="middle">27Q3</text>
 </svg>
-        <figcaption>Empirical interval coverage across 49 expanding-window origins, mean across the eight model variables, by horizon. Predictive bands combine parameter and shock uncertainty (100 posterior draws &times; 5 paths per origin), percentile intervals on series levels. Both bands <strong>under-cover</strong> &mdash; the 68% band contains outturns 57&ndash;71% of the time and the 90% band 72&ndash;87%, worsening with horizon. The window includes the Covid quarters and the evaluation model carries no Covid dummies, which depresses coverage; pseudo- rather than real-time out-of-sample, as above. So the frozen-origin over-dispersion reading and this under-coverage reading disagree &mdash; a single origin is simply too little data, and the rolling result is the one to weight. Source: <code>papers/boe-svar/figures/coverage_evaluation.json</code>, generated by <code>make_coverage.py</code>.</figcaption>
+        <figcaption>14/14 inside the 68% band &mdash; see the over-dispersion caveat above. Frozen 2024Q2 data edge; source: <code>papers/boe-svar/figures/figure_numbers.json</code>.</figcaption>
       </figure>
       <p>
         <strong>Rolling-origin audit.</strong> A stricter expanding-window test
@@ -756,7 +745,7 @@
 <text class="vc-tick" x="628.9" y="316" text-anchor="middle">h7</text>
 <text class="vc-tick" x="724.0" y="316" text-anchor="middle">h8</text>
 </svg>
-        <figcaption>All 14 outturns fall inside the 68% band; calibrated bands would contain about 9.5. This suggests the bands are too wide. RMSE is 0.3pp for both variables. Frozen 2024Q2 data edge; source: <code>papers/boe-svar/figures/figure_numbers.json</code>.</figcaption>
+        <figcaption>Empirical interval coverage across 49 expanding-window origins, mean across the eight model variables, by horizon. Predictive bands combine parameter and shock uncertainty (100 posterior draws &times; 5 paths per origin), percentile intervals on series levels. Both bands <strong>under-cover</strong> &mdash; the 68% band contains outturns 57&ndash;71% of the time and the 90% band 72&ndash;87%, worsening with horizon. The window includes the Covid quarters and the evaluation model carries no Covid dummies, which depresses coverage; pseudo- rather than real-time out-of-sample, as above. So the frozen-origin over-dispersion reading and this under-coverage reading disagree &mdash; a single origin is simply too little data, and the rolling result is the one to weight. Source: <code>papers/boe-svar/figures/coverage_evaluation.json</code>, generated by <code>make_coverage.py</code>.</figcaption>
       </figure>
       <details class="more">
         <summary>Why there is no official yardstick for those forecast errors</summary>

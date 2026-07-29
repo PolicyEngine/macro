@@ -380,7 +380,7 @@ VS_OFFICIAL_SPECS = {
 }
 
 
-def render_vs_official_variable(variable: str) -> str:
+def render_vs_official_variable(variable: str, include_note: bool = False) -> str:
     """Chart + table: archived boe-svar path with 68% band vs March 2026 EFO."""
     rows = build_vs_official(variable)
     spec = VS_OFFICIAL_SPECS[variable]
@@ -487,17 +487,22 @@ def render_vs_official_variable(variable: str) -> str:
         "          </tbody>",
         "        </table>",
         "      </div>",
-        '      <p class="forecast-note">BoE column is the February 2026 MPR '
-        "central projection (the April 2026 Report published scenarios rather "
-        "than a central path), from the Bank's published projections databank "
-        "(<code>forecasts/official/boe_mpr_feb_2026_central.csv</code>). "
-        "Consensus is the average of outside forecasters' central projections "
-        "in the Bank's Survey of External Forecasters as of 16 April 2026, "
-        "published at fixed one-, two- and three-year-ahead quarters only "
-        "(<code>forecasts/official/boe_sef_april_2026.csv</code>). "
-        "The columns were fixed at different dates on different information "
-        "sets.</p>",
     ]
+    if include_note:
+        # Emitted once, after the last table, so the two variables share a
+        # single sourcing footnote.
+        table.append(
+            '      <p class="forecast-note">BoE column is the February 2026 MPR '
+            "central projection (the April 2026 Report published scenarios rather "
+            "than a central path), from the Bank's published projections databank "
+            "(<code>forecasts/official/boe_mpr_feb_2026_central.csv</code>). "
+            "Consensus is the average of outside forecasters' central projections "
+            "in the Bank's Survey of External Forecasters as of 16 April 2026, "
+            "published at fixed one-, two- and three-year-ahead quarters only "
+            "(<code>forecasts/official/boe_sef_april_2026.csv</code>). "
+            "The columns were fixed at different dates on different information "
+            "sets. This note applies to both the GDP and CPI tables above.</p>"
+        )
     return svg + "\n" + "\n".join(table)
 
 
@@ -653,8 +658,7 @@ def render_results(card: dict) -> str:
             '      <p class="forecast-note">The official number is the OBR '
             "March 2026 EFO. It was fixed months before these rounds, on less "
             "data, so its larger error here reflects an information gap as "
-            "much as forecasting skill — the comparison shows where the views "
-            "differed, not who forecasts better.</p>"
+            "much as forecasting skill.</p>"
         )
     return "\n".join(body)
 
@@ -672,7 +676,7 @@ def render_page(html: str, card: dict) -> str:
         "scorecard-vs-official": (
             render_vs_official_variable("gdp")
             + "\n"
-            + render_vs_official_variable("cpi")
+            + render_vs_official_variable("cpi", include_note=True)
         ),
     }
     for marker, body in blocks.items():
