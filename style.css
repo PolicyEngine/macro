@@ -360,46 +360,102 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   .nav-links a:not(.nav-gh) { display: inline; }
 }
 
-/* Topic-level wayfinding for the economy dashboard. Unlike the retired second
-   global nav row, this names sections within one destination and scrolls
-   naturally with the page. */
-.economy-topics {
+/* Economy subnav: one sticky bar for the whole section. The country scope
+   sits on the left as a segmented capsule; topic anchors read as quiet
+   underline tabs on the right and scroll horizontally when cramped. */
+.economy-subnav {
   position: sticky;
   top: 61px;
   z-index: 8;
-  display: flex;
-  gap: var(--s-2);
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: var(--s-4) var(--gutter);
-  overflow-x: auto;
-  scrollbar-width: none;
   border-top: 1px solid var(--line-soft);
   border-bottom: 1px solid var(--line-soft);
   background: color-mix(in srgb, var(--ink) 94%, transparent);
   backdrop-filter: blur(12px);
   box-shadow: 0 10px 24px color-mix(in srgb, var(--paper) 6%, transparent);
 }
-.economy-topics::-webkit-scrollbar { display: none; }
-.economy-topics a {
+.economy-subnav-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--s-5);
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+.economy-subnav-scope {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
   flex: 0 0 auto;
-  padding: 8px 12px;
+  padding: var(--s-3) 0;
+}
+.economy-subnav-label {
+  color: var(--paper-faint);
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+}
+.economy-subnav-countries {
+  display: inline-flex;
   border: 1px solid var(--line-soft);
   border-radius: 999px;
+  overflow: hidden;
+}
+.economy-subnav-countries a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 14px;
   color: var(--paper-dim);
   font-family: var(--mono);
   font-size: var(--fs-small);
   text-decoration: none;
   white-space: nowrap;
 }
-.economy-topics a:hover {
+.economy-subnav-countries a + a { border-left: 1px solid var(--line-soft); }
+.economy-subnav-countries a small {
+  font-size: var(--fs-label);
+  color: var(--paper-faint);
+}
+.economy-subnav-countries a:hover {
   color: var(--brand-strong);
   background: var(--brand-wash);
 }
-.economy-topics a[aria-current="location"] {
+.economy-subnav-countries a[aria-current="page"] {
   color: var(--ink);
-  border-color: var(--brand-strong);
   background: var(--brand-strong);
+}
+.economy-subnav-countries a[aria-current="page"] small { color: var(--ink); }
+.economy-topics {
+  display: flex;
+  gap: var(--s-5);
+  margin-left: auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.economy-topics::-webkit-scrollbar { display: none; }
+.economy-topics a {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--s-3) 2px;
+  border-bottom: 2px solid transparent;
+  color: var(--paper-dim);
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.economy-topics a:hover { color: var(--brand-strong); }
+.economy-topics a[aria-current="location"] {
+  color: var(--paper);
+  border-bottom-color: var(--brand-strong);
+}
+@media (max-width: 720px) {
+  .economy-subnav-row { flex-wrap: wrap; gap: 0 var(--s-5); }
+  .economy-subnav-scope { padding-bottom: 0; }
+  .economy-topics { margin-left: 0; width: 100%; }
+  .economy-subnav-countries a span { display: none; }
+  .economy-subnav-countries a small { font-size: var(--fs-small); color: inherit; }
 }
 
 /* Homepage at-a-glance country toggle: same capsule language as the
@@ -453,64 +509,6 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   z-index: 1;
 }
 
-/* Compact segmented control: a mono label plus two pills sharing one
-   bordered capsule; the active country is clearly filled. */
-.economy-country-switch {
-  display: flex;
-  align-items: center;
-  gap: var(--s-4);
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: var(--s-5) var(--gutter);
-}
-.economy-country-switch > span {
-  color: var(--paper-faint);
-  font-size: var(--fs-label);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-}
-.economy-country-switch a {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 8px 16px;
-  border: 1px solid var(--line-soft);
-  border-radius: 999px;
-  color: var(--paper-dim);
-  background: var(--surface);
-  font-size: var(--fs-small);
-  text-decoration: none;
-  white-space: nowrap;
-}
-.economy-country-switch a + a { margin-left: -1px; }
-.economy-country-switch a:first-of-type {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-.economy-country-switch a:last-of-type {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-.economy-country-switch a:hover {
-  color: var(--brand-strong);
-  border-color: var(--brand);
-  background: var(--brand-wash);
-  position: relative;
-  z-index: 1;
-}
-.economy-country-switch a[aria-current="page"] {
-  color: var(--ink);
-  border-color: var(--brand-strong);
-  background: var(--brand-strong);
-  position: relative;
-  z-index: 1;
-}
-.economy-country-switch small {
-  font: 600 var(--fs-label)/1 var(--mono);
-  letter-spacing: .08em;
-  color: var(--brand-strong);
-}
-.economy-country-switch a[aria-current="page"] small { color: inherit; }
 .economy-page section[id] { scroll-margin-top: 132px; }
 
 .home-proof {
@@ -1773,10 +1771,6 @@ h2 {
   padding-bottom: var(--s-4);
 }
 .trends-page .model-hero .lede { margin-bottom: var(--s-4); }
-.trends-page .economy-country-switch {
-  padding-top: var(--s-4);
-  padding-bottom: var(--s-4);
-}
 .trends-band { padding-top: clamp(36px, 5vw, 58px); }
 .trends-heading { max-width: 760px; }
 .trends-grid {
@@ -1849,11 +1843,6 @@ h2 {
   .verification-grid { grid-template-columns: 1fr; }
   .economy-grid { grid-template-columns: 1fr; }
   .verification-card:last-child { grid-column: auto; }
-  .economy-country-switch {
-    padding-top: var(--s-4);
-    padding-bottom: var(--s-4);
-  }
-  .economy-country-switch a { flex: 1 1 0; justify-content: center; }
   .economy-model-grid { grid-template-columns: 1fr; }
   .economy-trends-directory { grid-template-columns: 1fr; }
   .economy-trends-card dl { grid-template-columns: 1fr; }
