@@ -77,14 +77,24 @@ def build() -> str:
         )
         return f"M{up} L{dn} Z"
 
+    widths = [hi - lo for lo, hi in zip(lo90, hi90)]
+    w = widths.index(max(widths))
+    neg = [i for i, lo in enumerate(lo90) if lo < 0]
+    if not neg:
+        edge = "its lower edge stays positive throughout the forecast"
+    elif neg[0] == 0:
+        edge = "its lower edge is below zero throughout the forecast"
+    else:
+        edge = (
+            f"its lower edge is positive for the first "
+            f"{'quarter' if neg[0] == 1 else str(neg[0]) + ' quarters'} and dips "
+            f"below zero from {quarters[neg[0]]} onward"
+        )
     desc = (
         f"Fan chart. Posterior forecast of UK year-on-year real GDP growth from the "
         f"boe-svar model, {quarters[0]} to {quarters[-1]}, conditioned through 2026Q1. The "
         f"median path runs from {med[0]:+.2f}% to {med[-1]:+.2f}%. The 90% credible band "
-        f"is widest at {quarters[lo90.index(min(lo90))]}, spanning {min(lo90):+.2f}% to "
-        f"{max(hi90):+.2f}%, and the lower edge stays below zero throughout the forecast: "
-        f"the model does not rule out a contraction. This figure is the site's hero motif "
-        f"and uses the site's current-forecast artifact rather than the frozen validation run."
+        f"is widest at {quarters[w]}, spanning {lo90[w]:+.2f}% to {hi90[w]:+.2f}%; {edge}."
     )
 
     out = [
