@@ -50,7 +50,8 @@
       </h1>
       <p class="lede reveal" style="--d:2">
           Run the models yourself. Every result carries its assumptions,
-          official data vintage, validation, and forecast record.
+          official data vintage, and validation — and the UK forecasts are
+          scored in public.
       </p>
       <div class="hero-cta reveal" style="--d:3">
         <a class="btn btn-primary" href="/connect">Run a hosted model</a>
@@ -96,9 +97,12 @@
         <h2>Latest outturns beside the model's near-term view.</h2>
       </div>
     </div>
+    <div class="glance-tabs model-tabs-set mono" role="tablist" aria-label="Country">
+      <button type="button" id="glance-tab-uk" role="tab" aria-selected="true" aria-controls="glance-uk" class="is-current">United Kingdom</button>
+      <button type="button" id="glance-tab-us" role="tab" aria-selected="false" aria-controls="glance-us">United States</button>
+    </div>
     <div class="glance-both">
-        <div class="glance-col">
-          <h3 class="glance-title mono">United Kingdom</h3>
+        <div class="glance-col" id="glance-uk" role="tabpanel" aria-labelledby="glance-tab-uk">
 <!-- home-uk-now:begin -->
       <div class="table-scroll">
         <table>
@@ -113,8 +117,7 @@
       </div>
 <!-- home-uk-now:end -->
         </div>
-        <div class="glance-col">
-          <h3 class="glance-title mono">United States</h3>
+        <div class="glance-col" id="glance-us" role="tabpanel" aria-labelledby="glance-tab-us" hidden>
 <!-- home-us-now:begin -->
       <div class="table-scroll">
         <table>
@@ -216,5 +219,21 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
+<script>
+(function () {
+  var tabs = [["glance-tab-uk", "glance-uk"], ["glance-tab-us", "glance-us"]];
+  tabs.forEach(function (pair) {
+    document.getElementById(pair[0]).addEventListener("click", function () {
+      tabs.forEach(function (other) {
+        var active = other[0] === pair[0];
+        var btn = document.getElementById(other[0]);
+        btn.setAttribute("aria-selected", active ? "true" : "false");
+        btn.classList.toggle("is-current", active);
+        document.getElementById(other[1]).hidden = !active;
+      });
+    });
+  });
+})();
+</script>
 </body>
 </html>
