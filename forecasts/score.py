@@ -366,6 +366,10 @@ VS_OFFICIAL_SPECS = {
             "EFO path derived from the March 2026 EFO real-GDP level path stored "
             "in <code>papers/obr-macro/figures/fig_anchored_data.csv</code>"
         ),
+        "intro": (
+            "The archived GDP-growth path beside the official forecast — the "
+            "gap between the lines is where the views differ."
+        ),
     },
     "cpi": {
         "chart_id": "svar-vs-efo-cpi",
@@ -375,6 +379,10 @@ VS_OFFICIAL_SPECS = {
             "EFO path from Table 1.7 of the March 2026 EFO detailed economy "
             "tables, stored in "
             "<code>papers/obr-macro/figures/efo_march_2026_cpi.csv</code>"
+        ),
+        "intro": (
+            "Same comparison for CPI — the archived rounds see a stickier "
+            "inflation path than the EFO's return to target."
         ),
     },
 }
@@ -435,9 +443,7 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
 
     svg = "\n".join(
         [
-            f'      <p class="chart-intro">The archived {spec["name"].replace("UK ", "UK ")} path '
-            "beside the official forecast for the overlapping quarters — the gap "
-            "between the two lines is where the views differ.</p>",
+            f'      <p class="chart-intro">{spec["intro"]}</p>',
             '      <figure class="vchart-figure">',
             f'        <svg class="vchart" data-chart="{chart_id}" viewBox="0 0 {width} {height}" '
             f'role="img" aria-labelledby="{chart_id}-t {chart_id}-d">',
@@ -464,7 +470,7 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
     table = [
         '      <div class="table-scroll">',
         "        <table>",
-        f"          <caption>Quarter by quarter: the archived boe-svar median and band "
+        f"          <caption>{spec['name']}, quarter by quarter: the archived median and band "
         "beside the OBR, Bank of England and consensus paths.</caption>",
         '          <thead><tr><th scope="col">Quarter</th><th scope="col">boe-svar '
         'median</th><th scope="col">68% band</th><th scope="col">OBR March 2026 EFO'
