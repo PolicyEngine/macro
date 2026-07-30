@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-NOTES_INDEX = ROOT / "notes" / "index.html"
+NOTES_INDEX = ROOT / "forecasts" / "index.html"
 RELEASES_INDEX = ROOT / "notes" / "releases" / "index.html"
 SITEMAP = ROOT / "sitemap.xml"
 GENERATED_ROOT = ROOT / "notes" / "releases"
@@ -183,8 +183,8 @@ def rebuild_indexes() -> None:
             f"  <url><loc>https://policyengine-macro.vercel.app/notes/releases/{slug}</loc>"
             "<priority>0.6</priority></url>"
         )
-    # The full per-note list lives on /notes/releases; the Notes page carries
-    # a single collapsed row pointing at it.
+    # The full per-note list lives on /notes/releases; the notes section on
+    # /forecasts#notes carries a single collapsed row pointing at it.
     count = len(index_rows)
     summary_row = (
         f'        <a href="/notes/releases"><span>{count} automatic release '
@@ -201,7 +201,9 @@ def check() -> int:
     releases_index = RELEASES_INDEX.read_text()
     sitemap = SITEMAP.read_text()
     if 'href="/notes/releases"' not in NOTES_INDEX.read_text():
-        failures.append("notes index: missing collapsed link to /notes/releases")
+        failures.append(
+            "forecasts index: missing collapsed link to /notes/releases"
+        )
     if "/notes/releases</loc>" not in sitemap:
         failures.append("sitemap: missing /notes/releases entry")
     for page in generated_pages():
