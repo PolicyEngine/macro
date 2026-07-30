@@ -101,12 +101,38 @@ window.MathJax = {
       <div class="scrolly-steps">
       <div class="meth-step" id="meth-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Parse the Board's model file</h3></div>
+        <figure class="step-diagram" data-title="Parsing model.xml" tabindex="0" role="button" aria-label="Expand diagram: Parsing model.xml">
+          <svg viewBox="0 0 580 190" width="580" style="max-width:100%;height:auto;">
+                <defs><marker id="arr-s1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+                <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">One source of truth: the Board's model.xml</text>
+                <rect x="15" y="52" width="140" height="90" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="85" y="80" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">model.xml</text>
+                <text x="85" y="100" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">variables, equations,</text>
+                <text x="85" y="116" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">coefficients, endo/exo</text>
+                <text x="85" y="132" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">public domain</text>
+                <line x1="160" y1="97" x2="198" y2="97" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s1)"/>
+                <text x="179" y="87" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">parse</text>
+                <rect x="203" y="52" width="160" height="90" rx="10" fill="var(--accent)"/>
+                <text x="283" y="80" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">normalise</text>
+                <text x="283" y="100" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">rewrite EViews lags,</text>
+                <text x="283" y="116" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">substitute coefficients,</text>
+                <text x="283" y="132" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">flip to residual form</text>
+                <line x1="368" y1="97" x2="406" y2="97" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s1)"/>
+                <rect x="411" y="52" width="154" height="90" rx="10" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="488" y="80" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">284 equations</text>
+                <text x="488" y="100" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">behavioural + identity,</text>
+                <text x="488" y="116" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">each with aerr + trac</text>
+                <text x="488" y="132" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">VAR ("standard") set</text>
+                <text x="290" y="172" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-light)">nothing re-typed or re-specified — the XML declares the model's semantics</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
         <h4>The published artefacts</h4>
       <p>The Federal Reserve Board publishes FRB/US whole: the equation system as <code>model.xml</code>, the <code>LONGBASE</code> historical and projection database, the documentation, and a reference Python solver, <code>pyfrbus</code> — all in the public domain.</p>
       <h4>One source of truth</h4>
       <p>The parse stage reads <code>model.xml</code> directly: variables, equations, per-equation coefficients, and the endogenous / exogenous classification for the VAR-expectations ("standard") equation set. Nothing is re-typed or re-specified — the XML file is the single source of truth for the model's semantics. That yields <strong>284 endogenous variables and their equations</strong>, classified into behavioural and identity blocks exactly as the Board's file declares them.</p>
       <h4>Residual form</h4>
-      <p>Each equation is normalised — EViews lag and difference notation rewritten, coefficient references substituted by their published values — flipped to residual form <em>F</em><sub>i</sub>(·) = 0, and augmented with its additive shock term (<code>_aerr</code>) and a tracking residual (<code>_trac</code>).</p>
+      <p>Each equation is normalised — EViews lag and difference notation rewritten, coefficient references substituted by their published values — flipped to residual form \(F_i(\cdot) = 0\), and augmented with its additive shock term (<code>_aerr</code>) and a tracking residual (<code>_trac</code>), so each equation solves \(F_i + \mathrm{aerr}_i + \mathrm{trac}_i = 0\).</p>
         <div class="meth-inline" aria-hidden="true">
         <div class="meth-sec-title">parse</div>
         <div class="meth-eq"><div class="meth-eq-label">system</div><div class="meth-eq-body">\(284\) endogenous eqs (behavioural + identities), from <code>model.xml</code></div></div>
@@ -121,6 +147,32 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Load LONGBASE, then add-factor</h3></div>
+        <figure class="step-diagram" data-title="LONGBASE conditioning" tabindex="0" role="button" aria-label="Expand diagram: LONGBASE conditioning">
+          <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
+                <defs><marker id="arr-s2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+                <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Add-factoring pins the baseline</text>
+                <rect x="15" y="42" width="160" height="90" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="95" y="70" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">LONGBASE.TXT</text>
+                <text x="95" y="90" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">April 2026 vintage</text>
+                <text x="95" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">history + projection</text>
+                <text x="95" y="122" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">quarterly PeriodIndex</text>
+                <line x1="180" y1="87" x2="218" y2="87" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s2)"/>
+                <rect x="223" y="42" width="160" height="90" rx="10" fill="var(--accent)"/>
+                <text x="303" y="70" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">init_trac</text>
+                <text x="303" y="90" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">set each equation's</text>
+                <text x="303" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">tracking residual,</text>
+                <text x="303" y="122" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">per quarter</text>
+                <line x1="388" y1="87" x2="426" y2="87" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s2)"/>
+                <text x="407" y="77" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">solve</text>
+                <rect x="431" y="42" width="134" height="90" rx="10" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="498" y="70" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">= LONGBASE</text>
+                <text x="498" y="90" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">reproduced to</text>
+                <text x="498" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">machine precision</text>
+                <rect x="80" y="150" width="420" height="36" rx="8" fill="var(--bg-diagram)" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5 3"/>
+                <text x="290" y="172" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">shocks are then imposed on top of the add-factored baseline</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
         <h4>The baseline database</h4>
       <p>The load stage brings <code>LONGBASE.TXT</code> — the April 2026 vintage — into a pandas frame on a quarterly <code>PeriodIndex</code>. This is the Board's own historical and projection database, and it conditions everything that follows: every simulation is read as a deviation from this baseline.</p>
       <h4>Tracking residuals (<code>init_trac</code>)</h4>
@@ -139,12 +191,38 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Solve by damped Newton</h3></div>
+        <figure class="step-diagram" data-title="Damped Newton, period by period" tabindex="0" role="button" aria-label="Expand diagram: Damped Newton, period by period">
+          <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
+                <defs><marker id="arr-s3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+                <text x="290" y="18" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Simultaneous within the quarter, recursive across quarters</text>
+                <rect x="15" y="38" width="340" height="130" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="185" y="60" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">one quarter: damped Newton</text>
+                <text x="185" y="82" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">analytic sparse Jacobian (sympy)</text>
+                <text x="185" y="99" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">sparse LU solve (SuperLU)</text>
+                <text x="185" y="116" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">damp: halve the step to stay in-domain</text>
+                <text x="185" y="133" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">check convergence, else iterate</text>
+                <path d="M75 168 Q75 188 185 188 Q295 188 295 168" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/>
+                <rect x="147" y="178" width="76" height="14" fill="#fff"/>
+                <text x="185" y="189" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)" font-weight="500">Newton iteration</text>
+                <line x1="360" y1="103" x2="398" y2="103" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s3)"/>
+                <text x="379" y="93" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">converged</text>
+                <rect x="403" y="58" width="50" height="90" rx="8" fill="var(--accent)" opacity="0.85"/>
+                <text x="428" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="#fff" font-weight="600">t</text>
+                <rect x="459" y="58" width="50" height="90" rx="8" fill="var(--accent)" opacity="0.55"/>
+                <text x="484" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="#fff" font-weight="600">t+1</text>
+                <rect x="515" y="58" width="50" height="90" rx="8" fill="var(--accent)" opacity="0.3"/>
+                <text x="540" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="#fff" font-weight="600">t+2</text>
+                <text x="484" y="168" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">each quarter starts from</text>
+                <text x="484" y="182" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">the previous solution</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
         <h4>Period by period</h4>
       <p>Under VAR expectations every expectations term depends only on current and lagged observables, so the model is simultaneous <em>within</em> each quarter but recursive <em>across</em> quarters. The solver therefore works period by period, starting each quarter from the previous quarter's solution.</p>
       <h4>Analytic sparse Jacobian</h4>
-      <p>Each quarter, a damped Newton iteration solves the full simultaneous system with an <strong>analytic sparse Jacobian</strong> — differentiated symbolically with sympy, factorised with <code>scipy.sparse.linalg.splu</code>. Damping backtracks the step only to stay inside the domain of definition (no logs of non-positive arguments, no NaNs). Defaults are <code>xtol=1e-8</code>, <code>rtol=5e-4</code>.</p>
+      <p>Each quarter, a damped Newton iteration solves the full simultaneous system with an <strong>analytic sparse Jacobian</strong> — differentiated symbolically with sympy, factorised with <code>scipy.sparse.linalg.splu</code>. Damping backtracks the step only to stay inside the domain of definition (no logs of non-positive arguments, no NaNs). Defaults are \(\mathrm{xtol} = 10^{-8}\), \(\mathrm{rtol} = 5\times 10^{-4}\).</p>
       <h4>One block, not many</h4>
-      <p>The reference implementation decomposes each period into recursive and simultaneous blocks; this one solves the whole period at once. Both approaches solve the same <em>F</em>(<em>x</em>) = 0, which is why the two agree to solver tolerance rather than to some negotiated threshold — see <a href="/frb-us/validation">how far to trust it</a>.</p>
+      <p>The reference implementation decomposes each period into recursive and simultaneous blocks; this one solves the whole period at once. Both approaches solve the same \(F(x) = 0\), which is why the two agree to solver tolerance rather than to some negotiated threshold — see <a href="/frb-us/validation">how far to trust it</a>.</p>
         <div class="meth-inline" aria-hidden="true">
         <div class="meth-sec-title">Newton iteration</div>
         <div class="meth-eq"><div class="meth-eq-label">step</div><div class="meth-eq-body">\(J(x^{(k)})\,\Delta x = -F(x^{(k)})\), sparse LU (SuperLU)</div></div>
@@ -160,6 +238,31 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Policy rules</h3></div>
+        <figure class="step-diagram" data-title="Modular policy rules" tabindex="0" role="button" aria-label="Expand diagram: Modular policy rules">
+          <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
+                <defs><marker id="arr-s4" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+                <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">0/1 switches select which rule sets the funds rate</text>
+                <rect x="15" y="42" width="170" height="80" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="100" y="66" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">inertial_taylor</text>
+                <text x="100" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">default, LONGBASE rule</text>
+                <text x="100" y="102" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">shock: rffintay_aerr</text>
+                <rect x="205" y="42" width="170" height="80" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="290" y="66" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">taylor</text>
+                <text x="290" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">same bracket, no inertia</text>
+                <text x="290" y="102" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">shock: rfftay_aerr</text>
+                <rect x="395" y="42" width="170" height="80" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="480" y="66" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">fixed_funds_rate</text>
+                <text x="480" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">baseline path held</text>
+                <text x="480" y="102" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">no monetary offset</text>
+                <line x1="100" y1="122" x2="100" y2="145" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s4)"/>
+                <line x1="290" y1="122" x2="290" y2="145" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s4)"/>
+                <line x1="480" y1="122" x2="480" y2="145" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s4)"/>
+                <rect x="15" y="150" width="550" height="44" rx="10" fill="var(--accent)"/>
+                <text x="290" y="169" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">funds rate rff — one rule active per run</text>
+                <text x="290" y="186" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">each rule reads its own add-error; the wrong one is rejected, not zeroed</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
         <h4>A modular funds rate</h4>
       <p>Monetary policy is modular: exogenous 0/1 switches in the model file select which rule sets the funds rate. Three are exposed through <code>frbus_shock</code>: <code>inertial_taylor</code> (the default, the LONGBASE rule and the one the validation numbers use), <code>taylor</code>, and <code>fixed_funds_rate</code>, which holds the funds rate on its baseline path so there is no endogenous monetary offset.</p>
       <h4>The rule choice is the exercise</h4>
@@ -180,6 +283,31 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-5" data-step="4">
         <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Shock and compare</h3></div>
+        <figure class="step-diagram" data-title="Shock and compare" tabindex="0" role="button" aria-label="Expand diagram: Shock and compare">
+          <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
+                <defs><marker id="arr-s5" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+                <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Impulse response = shocked path minus baseline path</text>
+                <rect x="15" y="42" width="200" height="60" rx="10" fill="var(--bg-diagram)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="115" y="67" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">baseline solve</text>
+                <text x="115" y="87" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">add-factored LONGBASE</text>
+                <rect x="15" y="118" width="200" height="60" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="115" y="143" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">shocked solve</text>
+                <text x="115" y="163" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">aerr += shock, same window</text>
+                <line x1="220" y1="72" x2="268" y2="102" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s5)"/>
+                <line x1="220" y1="148" x2="268" y2="118" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s5)"/>
+                <rect x="273" y="80" width="120" height="60" rx="10" fill="var(--accent)"/>
+                <text x="333" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">difference</text>
+                <text x="333" y="124" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">sim &minus; baseline</text>
+                <line x1="398" y1="110" x2="436" y2="110" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s5)"/>
+                <rect x="441" y="62" width="124" height="96" rx="10" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="503" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">100bp IRF</text>
+                <text x="503" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">GDP &minus;0.55%</text>
+                <text x="503" y="122" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">lur +0.26pp</text>
+                <text x="503" y="138" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">picxfe &minus;0.034pp</text>
+                <text x="290" y="198" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-light)">shock units are per-lever — pp for the policy-rate error, log points of growth for spending</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
         <h4>Shocks are error-term additions</h4>
       <p>A shock is an addition to an equation's error term — <code>rffintay_aerr</code> for the policy rule, for instance. Solve shocked and baseline paths over the same window and read the difference. Shock sizes are <em>per-lever</em> and not interchangeable — percentage points for the policy-rate error, log points of quarterly growth for the spending levers; the <a href="/frb-us/code">code page</a> spells out the units trap.</p>
       <h4>What comes out</h4>
@@ -259,6 +387,17 @@ window.MathJax = {
     </div>
   </section>
 
+
+  <div class="diagram-modal" hidden>
+    <div class="diagram-modal-box" role="dialog" aria-modal="true" aria-label="Diagram">
+      <div class="diagram-modal-head">
+        <span class="diagram-modal-title"></span>
+        <button type="button" class="diagram-modal-close" aria-label="Close">×</button>
+      </div>
+      <div class="diagram-modal-body"></div>
+    </div>
+  </div>
+
 </main>
 
 <footer class="foot foot-bar">
@@ -305,6 +444,39 @@ window.MathJax = {
     btn.addEventListener("click", function () { setTimeout(update, 0); });
   });
   update();
+})();
+</script>
+<script>
+// Diagram zoom: clicking a step diagram opens it enlarged in a modal.
+(function () {
+  "use strict";
+  var modal = document.querySelector(".diagram-modal");
+  if (!modal) return;
+  var body = modal.querySelector(".diagram-modal-body");
+  var title = modal.querySelector(".diagram-modal-title");
+  function open(fig) {
+    body.innerHTML = fig.querySelector("svg").outerHTML;
+    title.textContent = fig.getAttribute("data-title") || "";
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function close() {
+    modal.hidden = true;
+    body.innerHTML = "";
+    document.body.style.overflow = "";
+  }
+  document.querySelectorAll(".step-diagram").forEach(function (fig) {
+    fig.addEventListener("click", function () { open(fig); });
+    fig.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(fig); }
+    });
+  });
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal || e.target.closest(".diagram-modal-close")) close();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !modal.hidden) close();
+  });
 })();
 </script>
 </body>

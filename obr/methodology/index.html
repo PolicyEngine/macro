@@ -24,6 +24,15 @@
 /* page-specific: hero sizing only — shared component styles live in style.css */
 .model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
 </style>
+<script>
+/* Self-hosted MathJax (vendor/mathjax), used only on this page for the
+   methodology tab's formal panels. The CSP allows no CDN loads. */
+window.MathJax = {
+  chtml: { fontURL: "/vendor/mathjax/output/chtml/fonts/woff-v2" },
+  options: { enableMenu: false }
+};
+</script>
+<script src="/vendor/mathjax/tex-chtml-full.js" defer></script>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -94,14 +103,39 @@
       <div class="scrolly-steps">
       <div class="meth-step" id="meth-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Transpile the published listing</h3></div>
+        <figure class="step-diagram" data-title="EViews listing to Python" tabindex="0" role="button" aria-label="Expand diagram: EViews listing to Python">
+          <svg viewBox="0 0 580 190" width="580" style="max-width:100%;height:auto;">
+            <defs><marker id="arr-s1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+            <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">From EViews source to open Python</text>
+            <rect x="15" y="42" width="170" height="110" rx="10" fill="var(--bg-diagram)" stroke="var(--text-light)" stroke-width="1.5"/>
+            <text x="100" y="66" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--text-light)" font-weight="700">EViews listing</text>
+            <text x="100" y="88" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--text-mid)">dlog(X)</text>
+            <text x="100" y="105" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--text-mid)">X(-1)  @elem</text>
+            <text x="100" y="122" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">error-correction terms</text>
+            <text x="100" y="140" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">needs an EViews licence</text>
+            <line x1="190" y1="97" x2="230" y2="97" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s1)"/>
+            <rect x="235" y="62" width="120" height="70" rx="10" fill="var(--accent)"/>
+            <text x="295" y="92" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">transpiler</text>
+            <text x="295" y="110" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="rgba(255,255,255,0.85)">line by line</text>
+            <line x1="360" y1="97" x2="400" y2="97" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s1)"/>
+            <rect x="405" y="42" width="160" height="110" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="485" y="66" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">Python expressions</text>
+            <text x="485" y="88" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--text-mid)">log(X) - log(X[-1])</text>
+            <text x="485" y="105" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--text-mid)">indexed array reads</text>
+            <text x="485" y="122" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">compiled once per solve</text>
+            <text x="485" y="140" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">no licence needed</text>
+            <text x="290" y="178" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-light)">same equations, identities, and technical relationships — in open code</text>
+          </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
         <h4>From EViews to Python</h4>
       <p>The OBR publishes its full equation listing, but as EViews source that few can run. The transpiler rewrites every EViews line — <code>dlog()</code>, <code>@elem</code>, lags like <code>X(-1)</code>, error-correction terms — into an equivalent Python expression, compiled once per solve.</p>
       <h4>What comes out</h4>
       <p>The result is the model itself in open code: the same behavioural equations, identities, and technical relationships the official forecaster relies on, runnable without an EViews licence.</p>
         <div class="meth-inline" aria-hidden="true">
         <div class="meth-sec-title">translation</div>
-        <div class="meth-eq"><div class="meth-eq-label">growth rates</div><div class="meth-eq-body"><code>dlog(X)</code> &rarr; <code>log(X) - log(X[-1])</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">lags &amp; elements</div><div class="meth-eq-body"><code>X(-1)</code>, <code>@elem</code> &rarr; indexed array reads</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">growth rates</div><div class="meth-eq-body">\(\mathrm{dlog}(X) \;\rightarrow\; \log X_t - \log X_{t-1}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">lags &amp; elements</div><div class="meth-eq-body">\(X_{t-1}\), <code>@elem</code> &rarr; indexed array reads</div></div>
         <div class="meth-out">
             <div class="meth-out-line"><span class="icon">&rarr;</span><span>Error-correction terms preserved as written</span></div>
             <div class="meth-out-line"><span class="icon">&rarr;</span><span>Expressions compiled once per solve</span></div>
@@ -111,6 +145,24 @@
 
       <div class="meth-step" id="meth-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Initialise from official data</h3></div>
+        <figure class="step-diagram" data-title="Initial data sources" tabindex="0" role="button" aria-label="Expand diagram: Initial data sources">
+          <svg viewBox="0 0 580 195" width="580" style="max-width:100%;height:auto;">
+            <defs><marker id="arr-s2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+            <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Where the starting values come from</text>
+            <rect x="30" y="42" width="240" height="65" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="150" y="66" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">OBR detailed forecast tables</text>
+            <text x="150" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">March 2026 EFO</text>
+            <rect x="310" y="42" width="240" height="65" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="430" y="66" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">vendored ONS snapshot</text>
+            <text x="430" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">348 series, ships in the package</text>
+            <line x1="150" y1="107" x2="150" y2="130" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s2)"/>
+            <line x1="430" y1="107" x2="430" y2="130" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s2)"/>
+            <rect x="30" y="135" width="520" height="45" rx="10" fill="var(--accent)"/>
+            <text x="290" y="155" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">model history: 199 of 261 unprinted endogenous variables matched by ONS code</text>
+            <text x="290" y="172" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">fiscal and financial sub-blocks get real balancing data</text>
+          </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
         <h4>Loading history</h4>
       <p>History loads from the OBR's detailed forecast tables. Of the 261 endogenous variables the listing referenced but the outlook did not print, <strong>199 had ONS series codes</strong>; a vendored 348-series ONS snapshot supplies them.</p>
       <h4>Why it matters</h4>
@@ -128,6 +180,31 @@
 
       <div class="meth-step" id="meth-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Solve by Gauss–Seidel iteration</h3></div>
+        <figure class="step-diagram" data-title="Gauss–Seidel solve" tabindex="0" role="button" aria-label="Expand diagram: Gauss–Seidel solve">
+          <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
+            <defs><marker id="arr-s3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+            <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Simultaneous within a quarter, sequential across quarters</text>
+            <rect x="20" y="40" width="230" height="125" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="135" y="62" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">within a quarter</text>
+            <text x="135" y="84" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">cycle through the equations</text>
+            <text x="135" y="101" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">update each in turn</text>
+            <text x="135" y="118" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">repeat to convergence</text>
+            <path d="M75 140 Q75 157 135 157 Q195 157 195 140" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr-s3)"/>
+            <line x1="255" y1="102" x2="295" y2="102" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s3)"/>
+            <text x="275" y="92" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">converged</text>
+            <rect x="300" y="72" width="70" height="60" rx="8" fill="var(--accent)"/>
+            <text x="335" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">Q1</text>
+            <line x1="374" y1="102" x2="394" y2="102" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s3)"/>
+            <rect x="398" y="72" width="70" height="60" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="433" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">Q2</text>
+            <line x1="472" y1="102" x2="492" y2="102" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s3)"/>
+            <rect x="496" y="72" width="70" height="60" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="531" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">Q3 …</text>
+            <text x="433" y="155" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-light)">quarters solve sequentially forward</text>
+            <text x="290" y="188" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-light)">12-quarter anchored solve: ~30–40 s single-threaded; a reform run is two solves</text>
+          </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
         <h4>Simultaneous within a quarter</h4>
       <p>The equations depend on each other, so each quarter is solved simultaneously: cycle through the equations, update, repeat to convergence. Quarters then solve sequentially forward.</p>
       <h4>Runtime</h4>
@@ -145,6 +222,27 @@
 
       <div class="meth-step" id="meth-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Anchor to the published EFO</h3></div>
+        <figure class="step-diagram" data-title="Anchoring with add-factors" tabindex="0" role="button" aria-label="Expand diagram: Anchoring with add-factors">
+          <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
+            <defs><marker id="arr-s4" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+            <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Add-factors pull the baseline onto the published EFO</text>
+            <rect x="60" y="38" width="180" height="130" rx="8" fill="var(--accent-light)" opacity="0.5"/>
+            <text x="150" y="56" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--accent)" font-weight="600">fit window 2024Q1–2025Q4</text>
+            <path d="M60 130 C 150 118, 300 100, 520 78" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+            <path d="M60 130 C 150 140, 300 130, 520 112" fill="none" stroke="var(--text-light)" stroke-width="2" stroke-dasharray="5 4"/>
+            <line x1="330" y1="118" x2="330" y2="94" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s4)"/>
+            <text x="345" y="112" font-family="Roboto, sans-serif" font-size="10" fill="var(--accent)" font-weight="600">add-factors</text>
+            <text x="525" y="72" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700" text-anchor="start">EFO</text>
+            <text x="525" y="118" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-light)" text-anchor="start">raw</text>
+            <line x1="40" y1="175" x2="545" y2="175" stroke="var(--text-light)" stroke-width="1.5" marker-end="url(#arr-s4)"/>
+            <line x1="240" y1="170" x2="240" y2="180" stroke="var(--text-light)" stroke-width="1.5"/>
+            <line x1="430" y1="170" x2="430" y2="180" stroke="var(--text-light)" stroke-width="1.5"/>
+            <text x="150" y="195" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">fit add-factors</text>
+            <text x="335" y="195" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">hold constant, project to 2027Q4</text>
+            <text x="490" y="195" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">to 2031Q1</text>
+          </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
         <h4>Add-factors, the OBR's own device</h4>
       <p>Add-factors — the residuals reconciling each behavioural equation to data — are set so the baseline reproduces the published EFO. This is the OBR's own device, used the OBR's own way.</p>
       <h4>Forecasting with held add-factors</h4>
@@ -165,6 +263,29 @@
 
       <div class="meth-step" id="meth-5" data-step="4">
         <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Swap the closure, shock, compare</h3></div>
+        <figure class="step-diagram" data-title="Closure swap and shock" tabindex="0" role="button" aria-label="Expand diagram: Closure swap and shock">
+          <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
+            <defs><marker id="arr-s5" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+            <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Two identical solves; the difference is the policy effect</text>
+            <rect x="15" y="40" width="175" height="80" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="102" y="63" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">closure swap</text>
+            <text x="102" y="83" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--text-mid)">GDPM endogenised</text>
+            <text x="102" y="100" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--text-mid)">DINV = residual</text>
+            <line x1="195" y1="80" x2="230" y2="80" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s5)"/>
+            <path d="M245 110 C 330 105, 420 100, 520 92" fill="none" stroke="var(--text-light)" stroke-width="2" stroke-dasharray="5 4"/>
+            <path d="M245 110 C 330 95, 420 68, 520 52" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+            <text x="525" y="56" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700" text-anchor="start">shocked</text>
+            <text x="525" y="96" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-light)" text-anchor="start">baseline</text>
+            <line x1="470" y1="90" x2="470" y2="60" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s5)"/>
+            <text x="455" y="78" text-anchor="end" font-family="Roboto, sans-serif" font-size="10" fill="var(--accent)" font-weight="600">policy effect</text>
+            <circle cx="245" cy="110" r="4" fill="var(--accent)"/>
+            <text x="245" y="132" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">shock applied</text>
+            <rect x="120" y="150" width="340" height="42" rx="8" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5 3"/>
+            <text x="290" y="168" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">reported result = shocked path − baseline path</text>
+            <text x="290" y="184" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">identical structure isolates the policy from the forecast</text>
+          </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
         <h4>Closure swap</h4>
       <p>The GDP identity is switched off in the OBR file, so for a shock <code>GDPM</code> is swapped in and inventories (<code>DINV</code>) become the residual — output responds to the policy instead of being fixed.</p>
       <h4>Shock against an identical baseline</h4>
@@ -172,7 +293,7 @@
         <div class="meth-inline" aria-hidden="true">
         <div class="meth-sec-title">closure and shock</div>
         <div class="meth-eq"><div class="meth-eq-label">closure swap</div><div class="meth-eq-body"><code>GDPM</code> endogenised; <code>DINV</code> becomes the residual</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">policy effect</div><div class="meth-eq-body">shocked path &minus; baseline path, identical structure</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">policy effect</div><div class="meth-eq-body">\(X_t^{\text{shocked}} - X_t^{\text{baseline}}\), identical structure</div></div>
         <div class="meth-out">
             <div class="meth-out-line"><span class="icon">&rarr;</span><span>GDP identity is off in the OBR file by default</span></div>
             <div class="meth-out-line"><span class="icon">&rarr;</span><span>Difference isolates the policy effect from the forecast</span></div>
@@ -184,8 +305,8 @@
         <div class="meth-panel" data-step="0">
           <div class="meth-panel-head"><span class="meth-panel-title">Transpile the published listing</span><span class="meth-panel-badge mono">Step 1</span></div>
           <div class="meth-sec-title">translation</div>
-        <div class="meth-eq"><div class="meth-eq-label">growth rates</div><div class="meth-eq-body"><code>dlog(X)</code> &rarr; <code>log(X) - log(X[-1])</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">lags &amp; elements</div><div class="meth-eq-body"><code>X(-1)</code>, <code>@elem</code> &rarr; indexed array reads</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">growth rates</div><div class="meth-eq-body">\(\mathrm{dlog}(X) \;\rightarrow\; \log X_t - \log X_{t-1}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">lags &amp; elements</div><div class="meth-eq-body">\(X_{t-1}\), <code>@elem</code> &rarr; indexed array reads</div></div>
         <div class="meth-out">
             <div class="meth-out-line"><span class="icon">&rarr;</span><span>Error-correction terms preserved as written</span></div>
             <div class="meth-out-line"><span class="icon">&rarr;</span><span>Expressions compiled once per solve</span></div>
@@ -226,7 +347,7 @@
           <div class="meth-panel-head"><span class="meth-panel-title">Swap the closure, shock, compare</span><span class="meth-panel-badge mono">Step 5</span></div>
           <div class="meth-sec-title">closure and shock</div>
         <div class="meth-eq"><div class="meth-eq-label">closure swap</div><div class="meth-eq-body"><code>GDPM</code> endogenised; <code>DINV</code> becomes the residual</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">policy effect</div><div class="meth-eq-body">shocked path &minus; baseline path, identical structure</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">policy effect</div><div class="meth-eq-body">\(X_t^{\text{shocked}} - X_t^{\text{baseline}}\), identical structure</div></div>
         <div class="meth-out">
             <div class="meth-out-line"><span class="icon">&rarr;</span><span>GDP identity is off in the OBR file by default</span></div>
             <div class="meth-out-line"><span class="icon">&rarr;</span><span>Difference isolates the policy effect from the forecast</span></div>
@@ -235,6 +356,17 @@
       </aside>
     </div>
   </section>
+
+  <div class="diagram-modal" hidden>
+    <div class="diagram-modal-box" role="dialog" aria-modal="true" aria-label="Diagram">
+      <div class="diagram-modal-head">
+        <span class="diagram-modal-title"></span>
+        <button type="button" class="diagram-modal-close" aria-label="Close">×</button>
+      </div>
+      <div class="diagram-modal-body"></div>
+    </div>
+  </div>
+
 </main>
 
 <footer class="foot foot-bar">
@@ -278,6 +410,39 @@
   window.addEventListener("resize", update, { passive: true });
   window.addEventListener("hashchange", function () { setTimeout(update, 0); });
   update();
+})();
+</script>
+<script>
+// Diagram zoom: clicking a step diagram opens it enlarged in a modal.
+(function () {
+  "use strict";
+  var modal = document.querySelector(".diagram-modal");
+  if (!modal) return;
+  var body = modal.querySelector(".diagram-modal-body");
+  var title = modal.querySelector(".diagram-modal-title");
+  function open(fig) {
+    body.innerHTML = fig.querySelector("svg").outerHTML;
+    title.textContent = fig.getAttribute("data-title") || "";
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function close() {
+    modal.hidden = true;
+    body.innerHTML = "";
+    document.body.style.overflow = "";
+  }
+  document.querySelectorAll(".step-diagram").forEach(function (fig) {
+    fig.addEventListener("click", function () { open(fig); });
+    fig.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(fig); }
+    });
+  });
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal || e.target.closest(".diagram-modal-close")) close();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !modal.hidden) close();
+  });
 })();
 </script>
 </body>
