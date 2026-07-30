@@ -223,6 +223,36 @@
       </p>
   </section>
 
+
+  <section id="worked-shock" class="band">
+    <div class="band-head">
+      <span class="kicker mono">evidence — a worked shock</span>
+      <h2>Run the same 100bp shock, read it against the Board.</h2>
+    </div>
+    <div class="prose">
+      <p class="mo-lead">
+        One command reproduces the validation experiment — a 100 basis-point
+        funds-rate tightening under the inertial Taylor rule:
+      </p>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code></pre></div>
+      <div class="table-scroll mo-tablecard cmp-compare">
+      <table>
+        <thead><tr><th scope="col">Response</th><th scope="col">Ours</th><th scope="col">Published Fed reference</th><th scope="col">Reading</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Funds rate, on impact</th><td><strong>+1.000pp</strong></td><td>+1.00pp by design</td><td>exact</td></tr>
+          <tr><th scope="row">Real GDP, trough</th><td><strong>&minus;0.55%</strong></td><td>consistent with the Board's documented VAR-expectations properties</td><td>right sign, size and timing</td></tr>
+          <tr><th scope="row">Output gap, trough</th><td><strong>&minus;0.50pp</strong></td><td>~&minus;0.4pp (2014 FEDS Note, read off charts)</td><td>approximate — vintage and shock-design differences</td></tr>
+          <tr><th scope="row">Unemployment, peak</th><td><strong>+0.26pp</strong></td><td>consistent with the documented properties</td><td>right sign and order</td></tr>
+          <tr><th scope="row">Core inflation, trough</th><td><strong>&minus;0.034pp</strong></td><td>consistent with the documented properties</td><td>right sign and order</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="meth-out plain">
+        <div class="meth-out-line"><span class="icon">&rarr;</span><span>The exact cross-check is numerical, not chart-reading: the same shock run in the Board's own <code>pyfrbus</code> matches to 6.0&times;10<sup>&minus;9</sup> (see the invariants above).</span></div>
+        <div class="meth-out-line"><span class="icon">&rarr;</span><span>The FEDS Note comparison is approximate by nature — its values are read off 2014-vintage charts.</span></div>
+      </div>
+    </div>
+  </section>
   <section id="caveats" class="band">
     <div class="band-head">
       <span class="kicker mono">limits</span>
@@ -274,5 +304,15 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
+<script>
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest("[data-copy]"); if (!btn) return;
+  var code = btn.parentElement.querySelector("code");
+  navigator.clipboard.writeText(code.textContent).then(function () {
+    btn.textContent = "copied";
+    setTimeout(function () { btn.textContent = "copy"; }, 1400);
+  });
+});
+</script>
 </body>
 </html>
