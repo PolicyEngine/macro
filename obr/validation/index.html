@@ -75,44 +75,41 @@
     </div>
   </nav>
 
-  <section id="trust" class="band band-result">
+  <section id="trust" class="band">
     <div class="band-head">
       <span class="kicker mono">how far to trust it</span>
       <h2>Excellent anchored. Weak free-running. Both published.</h2>
     </div>
     <div class="prose">
       <p>
-        Three configurations, three very different levels of trust. Anchored
-        is a by-construction invariant, not a forecast claim: the add-factors
-        absorb the tracking error — exactly what anchoring means — and CI
-        hard-fails the build if it slips. Errors below are MAPE — mean
-        absolute percentage error against the published path.
+        Three configurations, three very different levels of trust — errors
+        are MAPE (mean absolute percentage error) against the published EFO path.
       </p>
     </div>
-    <div class="metrics">
-      <div class="metric">
-        <span class="metric-label mono">anchored — real GDP</span>
-        <span class="metric-val">0.15<span class="metric-vs">% MAPE</span></span>
-        <span class="metric-note">vs published EFO; CI fails at 1%</span>
+    <div class="vmet-strip">
+      <div class="vmet-stat">
+        <span class="vmet-label mono">anchored — real GDP</span>
+        <span class="vmet-val">0.15<span class="vmet-unit">% MAPE</span></span>
+        <span class="vmet-note">vs published EFO; CI fails at 1%</span>
       </div>
-      <div class="metric">
-        <span class="metric-label mono">anchored — consumption</span>
-        <span class="metric-val">0.25<span class="metric-vs">% MAPE</span></span>
-        <span class="metric-note">vs published EFO; CI fails at 1%</span>
+      <div class="vmet-stat">
+        <span class="vmet-label mono">anchored — consumption</span>
+        <span class="vmet-val">0.25<span class="vmet-unit">% MAPE</span></span>
+        <span class="vmet-note">vs published EFO; CI fails at 1%</span>
       </div>
-      <div class="metric">
-        <span class="metric-label mono">held-add-factor forecast</span>
-        <span class="metric-val">0.37<span class="metric-vs">% MAPE</span></span>
-        <span class="metric-note">real GDP, 2026Q1–2027Q4 window; 6 of 8 computed in band</span>
+      <div class="vmet-stat">
+        <span class="vmet-label mono">held-add-factor forecast</span>
+        <span class="vmet-val">0.37<span class="vmet-unit">% MAPE</span></span>
+        <span class="vmet-note">real GDP, 2026Q1–2027Q4; 6 of 8 computed in band</span>
       </div>
-      <div class="metric">
-        <span class="metric-label mono">free-running</span>
-        <span class="metric-val">5.75<span class="metric-vs">% MAPE</span></span>
-        <span class="metric-note">real GDP; 4 of 11 computed in band — report-only</span>
+      <div class="vmet-stat">
+        <span class="vmet-label mono">free-running</span>
+        <span class="vmet-val">5.75<span class="vmet-unit">% MAPE</span></span>
+        <span class="vmet-note">real GDP; 4 of 11 computed in band — report-only</span>
       </div>
     </div>
     <div class="prose">
-      <div class="table-scroll"><table>
+      <div class="table-scroll mo-tablecard"><table>
         <caption>The three emulator configurations and how each one scores</caption>
         <thead><tr><th scope="col">configuration</th><th scope="col">what it is</th><th scope="col">how it scores</th></tr></thead>
         <tbody>
@@ -134,16 +131,13 @@
         </tbody>
       </table></div>
     </div>
-    <p class="chart-note" style="max-width: 80ch;">
-      "In band" collapses per-metric thresholds — rates within 1.0pp, net
-      balances within 1.5% of GDP, levels within 10% MAPE. Two caveats on the
-      forecast configuration: it is initialised at the EFO values it is
-      scored against, and its add-factor base window extends into quarters
-      that are OBR forecast rather than outturn, so the held add-factors
-      partly encode "agree with the OBR". Full scorecards in the
-      <a href="/papers/obr-macro">working paper</a>; charts and source data
-      in <a href="/validation">validation</a>.
-    </p>
+    <div class="vmet-notes mono">
+      <p class="vmet-notes-line"><span class="vmet-notes-key">in band</span> rates within 1.0pp · net balances within 1.5% of GDP · levels within 10% MAPE.</p>
+      <p class="vmet-notes-line"><span class="vmet-notes-key">note</span> anchored accuracy is a by-construction invariant, not a forecast claim: add-factors absorb the tracking error; CI hard-fails if it slips.</p>
+      <p class="vmet-notes-line"><span class="vmet-notes-key">caveat</span> the held-add-factor forecast is initialised at the EFO values it is scored against.</p>
+      <p class="vmet-notes-line"><span class="vmet-notes-key">caveat</span> its add-factor base window includes OBR-forecast (not outturn) quarters, so held add-factors partly encode "agree with the OBR".</p>
+      <p class="vmet-notes-line"><span class="vmet-notes-key">more</span> full scorecards in the <a href="/papers/obr-macro">working paper</a>; charts and source data in <a href="/validation">validation</a>.</p>
+    </div>
     <div class="prose">
       <p class="callout">
         An independent implementation built from the OBR's published model
@@ -160,13 +154,13 @@
       <h2>Known limitations.</h2>
     </div>
     <div class="prose">
-      <div class="table-scroll"><table>
+      <div class="table-scroll mo-tablecard"><table>
         <caption>Known limits of the OBR emulator</caption>
         <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
         <tbody>
           <tr>
             <th scope="row"><strong>Two household-income equations never fire</strong></th>
-            <td>The listing's only bare <code>log()</code> left-hand sides — <code>log(HHTFA)</code> and <code>log(NDIVHH)</code> — never execute: their inputs <code>MAJGDP</code> and <code>CORP</code> are absent from the databank. The profits → dividends → household-income channel therefore does not run: a 5pp corporation-tax rise moves <code>FYCPR</code> by −£1,780m while ΔNDIVHH is exactly zero. A parser fix landed and is numerically inert; reviving the channel needs a <code>CORP</code> series — a calibration decision not yet made. Every published figure is computed with these channels inert.</td>
+            <td>The listing's only bare <code>log()</code> left-hand sides — <code>log(HHTFA)</code> and <code>log(NDIVHH)</code> — never execute: inputs <code>MAJGDP</code> and <code>CORP</code> are absent from the databank. The profits → dividends → household-income channel is inert: a 5pp corporation-tax rise moves <code>FYCPR</code> by −£1,780m; ΔNDIVHH is exactly zero. A parser fix landed, numerically inert; reviving the channel needs a <code>CORP</code> series — a calibration decision not yet made. All published figures have these channels inert.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Impact multiplier ~1 by construction</strong></th>
@@ -174,7 +168,7 @@
           </tr>
           <tr>
             <th scope="row"><strong>Corporation-tax closure is specialised</strong></th>
-            <td>The investment closure activates the published <code>TCPRO</code> → cost-of-capital → investment chain, available through <code>obr_shock</code>. It reconstructs the business-investment equation from the OBR's commented, truncated published line, anchors its level with held add-factors, and freezes <code>MSGVA</code>, <code>PIF</code>, and <code>PIRHH</code> to a shared tracking path to prevent uncalibrated feedback. CI hard-gates the expected sign and a £50bn-per-quarter bound — a controlled scenario closure, not a fully calibrated supply block.</td>
+            <td>The investment closure runs the published <code>TCPRO</code> → cost-of-capital → investment chain via <code>obr_shock</code>: business-investment equation reconstructed from the OBR's commented, truncated line; level anchored with held add-factors; <code>MSGVA</code>, <code>PIF</code>, <code>PIRHH</code> frozen to a shared tracking path against uncalibrated feedback. CI hard-gates the expected sign and a £50bn-per-quarter bound. A controlled scenario closure, not a calibrated supply block.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Passthrough channels</strong></th>

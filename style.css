@@ -2876,13 +2876,18 @@ h2 {
 }
 .qa[open] summary::after { content: "\2212"; }
 .qa summary:hover { background: var(--brand-wash); }
-.qa summary span { font-weight: 600; }
+.qa summary span { font-weight: 600; font-size: var(--fs-body); }
 .qa summary strong {
   flex: 0 0 auto;
-  color: var(--paper-faint);
+  padding: 4px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  color: var(--brand-strong);
+  background: var(--brand-wash);
   font-family: var(--mono);
   font-size: var(--fs-label);
   font-weight: 500;
+  white-space: nowrap;
 }
 .qa-body { padding: 0 var(--s-5) var(--s-4); border-top: 1px solid var(--line-soft); }
 .qa-body > p:first-child { margin-top: var(--s-4); color: var(--paper-dim); }
@@ -2896,3 +2901,73 @@ h2 {
 }
 .qa-fact .icon { flex: 0 0 auto; color: var(--brand-strong); font-weight: 600; }
 .qa-link { margin: var(--s-3) 0 0; }
+
+/* ---------- .vmet-: OBR validation metric strip + notes ----------
+   Unified stat strip: no per-tile background boxes; four identical
+   stats separated by hairlines only. The numbers carry the contrast. */
+.vmet-strip {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin: var(--s-6) 0 var(--s-6);
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+}
+@media (min-width: 720px) { .vmet-strip { grid-template-columns: repeat(4, 1fr); } }
+
+.vmet-stat {
+  padding: 22px 4px 20px;
+  border-bottom: 1px solid var(--line-soft);
+  background: none;
+}
+.vmet-stat:last-child { border-bottom: none; }
+@media (min-width: 720px) {
+  .vmet-stat { padding: 24px 24px 22px; border-bottom: none; border-left: 1px solid var(--line-soft); }
+  .vmet-stat:first-child { border-left: none; padding-left: 4px; }
+}
+.vmet-label {
+  display: block;
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--paper-faint);
+  margin-bottom: 12px;
+}
+.vmet-val {
+  font-family: var(--display);
+  font-size: var(--fs-stat);
+  font-weight: 500;
+  color: var(--brand-strong);
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.vmet-unit { font-family: var(--mono); font-size: var(--fs-small); color: var(--paper-faint); font-weight: 400; }
+.vmet-note { display: block; font-family: var(--mono); font-size: var(--fs-label); color: var(--paper-faint); margin-top: 10px; line-height: 1.5; }
+
+/* compact definition/caveat block under the configurations table,
+   in the .meth-out-line idiom: keyed lines, no run-on paragraph */
+.vmet-notes {
+  max-width: 80ch;
+  margin: var(--s-4) auto var(--s-5);
+  font-size: var(--fs-label);
+  color: var(--paper-faint);
+}
+.vmet-notes-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 4px 0;
+  line-height: 1.6;
+}
+.vmet-notes-key {
+  flex: 0 0 auto;
+  min-width: 5.5ch;
+  color: var(--brand-strong);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: 600;
+}
+.vmet-notes-line a { color: var(--paper-dim); }
