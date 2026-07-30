@@ -182,18 +182,21 @@
       <h2>Tax system.</h2>
     </div>
     <div class="prose">
-      <p><strong>OG-UK</strong> estimates smooth tax functions from PolicyEngine UK microdata:</p>
-      <ul>
-        <li>Gouveia&ndash;Strauss, DEP or linear forms, folding in income tax and NICs</li>
-        <li>Consumption, wealth, corporate and bequest taxes modelled separately on top</li>
-        <li>Any PolicyEngine-representable reform — rate, threshold, allowance — flows through after re-estimating on post-reform microdata</li>
-      </ul>
-      <p><strong>OBR UK OLG</strong> hard-codes the statutory schedule:</p>
-      <ul>
-        <li>Income tax as explicit bands — PA £12,570, HRT £50,270, ART £125,140 at 20&nbsp;/&nbsp;40&nbsp;/&nbsp;45%</li>
-        <li>NICs separate (£12,570 / £50,270 at 8&nbsp;/&nbsp;2%); VAT effective 9.3%; explicit pension relief and drawdown taxation</li>
-        <li>"+1&nbsp;pp basic rate from 2027&ndash;28" is one parameter — at the cost of flexibility for reforms that reshape the schedule</li>
-      </ul>
+      <p>How each model represents the UK tax system.</p>
+      <div class="vs-grid">
+        <div class="vs-card">
+          <div class="vs-card-head">OG-UK — estimated tax functions</div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>Smooth Gouveia&ndash;Strauss, DEP or linear forms fitted to PolicyEngine UK microdata, folding in income tax and NICs</span></div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>Consumption, wealth, corporate and bequest taxes modelled separately on top</span></div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>Any PolicyEngine-representable reform — rate, threshold, allowance — flows through after re-estimating on post-reform microdata</span></div>
+        </div>
+        <div class="vs-card">
+          <div class="vs-card-head">OBR UK OLG — statutory schedule</div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>Income tax as explicit bands: PA £12,570, HRT £50,270, ART £125,140 at 20&nbsp;/&nbsp;40&nbsp;/&nbsp;45%</span></div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>NICs separate (£12,570 / £50,270 at 8&nbsp;/&nbsp;2%); VAT effective 9.3%; explicit pension relief and drawdown taxation</span></div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>"+1&nbsp;pp basic rate from 2027&ndash;28" is one parameter — less flexible for reforms that reshape the schedule</span></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -250,58 +253,43 @@
     </div>
     <div class="prose">
       <p>Both are rational-expectations dynamic general equilibrium; they solve different problems.</p>
-      <ul>
-        <li><strong>OG-UK</strong> — solves households' Euler equations directly; Time Path Iteration to a full year-by-year path; continuous state space, expectations over the whole path; ~17-minute solve</li>
-        <li><strong>OBR UK OLG</strong> — Value Function Iteration (Kirkby's VFI toolkit); assets and stochastic earnings on a grid; compares long-run steady states only, under two minutes — a difference in method, not ambition</li>
-      </ul>
+      <div class="vs-grid">
+        <div class="vs-card">
+          <div class="vs-card-head">OG-UK — Time Path Iteration</div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>Households' Euler equations solved directly</span></div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>Full year-by-year transition path; continuous state space, expectations over the whole path</span></div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>~17-minute solve</span></div>
+        </div>
+        <div class="vs-card">
+          <div class="vs-card-head">OBR UK OLG — Value Function Iteration</div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>Kirkby's VFI toolkit; assets and stochastic earnings on a grid</span></div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>Compares long-run steady states only — no adjustment path</span></div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>Under two minutes — a difference in method, not ambition</span></div>
+        </div>
+      </div>
       <p>Calibration differs mainly in data sources and anchors.</p>
-      <ul>
-        <li><strong>OG-UK</strong> — UN World Population Prospects demographics (country 826); age-earnings profiles via permanent ability types; tax functions from PolicyEngine-UK's Enhanced FRS (HMRC SPI, LCFS, WAS); ONS GDP anchors the aggregates; modeller-set fiscal targets and growth</li>
-        <li><strong>OBR UK OLG</strong> — ONS mortality; ASHE + HMRC earnings distribution; HMRC&nbsp;/&nbsp;GOV.UK tax parameters; pinned to the OBR March 2024 EFO — GDP per person £35,100 (S&nbsp;=&nbsp;19.81), n&nbsp;=&nbsp;0.75%, g&nbsp;=&nbsp;1.2%, debt&nbsp;/&nbsp;GDP at 100%</li>
-      </ul>
+      <div class="vs-grid">
+        <div class="vs-card">
+          <div class="vs-card-head">OG-UK</div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>UN World Population Prospects demographics (country 826)</span></div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>Age-earnings profiles via permanent ability types</span></div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>Tax functions from PolicyEngine-UK's Enhanced FRS (HMRC SPI, LCFS, WAS)</span></div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>ONS GDP anchors the aggregates; modeller-set fiscal targets and growth</span></div>
+        </div>
+        <div class="vs-card">
+          <div class="vs-card-head">OBR UK OLG</div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>ONS mortality; ASHE + HMRC earnings distribution</span></div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>HMRC&nbsp;/&nbsp;GOV.UK tax parameters directly</span></div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>Pinned to the OBR March 2024 EFO — GDP per person £35,100 (S&nbsp;=&nbsp;19.81)</span></div>
+          <div class="vs-line"><span class="icon">&rarr;</span><span>n&nbsp;=&nbsp;0.75%, g&nbsp;=&nbsp;1.2%, debt&nbsp;/&nbsp;GDP at 100%</span></div>
+        </div>
+      </div>
       <p class="chart-note">
         Source: <a href="/papers/obr-working-paper-22.pdf">OBR Working Paper No. 22, "A new UK
         overlapping generations model" (April 2025)</a>; OG-Core documentation and OG-UK
         calibration code.
       </p>
     </div>
-  </section>
-
-  <section id="trust" class="band band-result">
-    <div class="prose">
-      <p>
-        There is no published counterpart to replicate, so there is no headline
-        accuracy number — any page that gave you one would be misleading you.
-        What exists is three weaker but honest checks, set out in full in the
-        <a href="/papers/psl-og">working paper</a>:
-      </p>
-      <div class="table-scroll mo-tablecard"><table>
-        <caption>What each calibration check establishes</caption>
-        <thead><tr><th scope="col">check</th><th scope="col">what it establishes</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row"><strong>Calibration targets vs official UK aggregates</strong></th>
-            <td>The imposed and targeted quantities match by construction — that is anchoring, not validation, and <a href="/papers/psl-og">the paper's tables</a> label which is which. The over-identifying checks are the <em>emergent</em> quantities, the capital–output ratio and the steady-state interest rate, for which no published reconciliation yet exists.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Parameters vs OG-Core / OG-USA defaults</strong></th>
-            <td>Deployed choices are set against framework defaults and the published De Backer–Evans–Phillips tax-function estimates, including their fit statistics.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Against the OBR's own UK OLG model</strong></th>
-            <td>WP 22's headline experiment is the same 1pp basic-rate change used as the running example here. For the rise, WP 22 reports GDP per person −0.1%, hours −0.2%, productivity +0.1% through composition, and just over £8bn in real income tax (~0.3% of GDP) against HMRC's ~£6–8bn static yield. The structural side-by-side is above; a numerical side-by-side of matched experiments is on the roadmap, not done.</td>
-          </tr>
-        </tbody>
-      </table></div>
-    </div>
-    <p class="chart-note" style="max-width: 80ch;">
-      Read point estimates as model-consistent magnitudes and signs, not
-      forecasts: two defensible OLG models can disagree materially on the
-      long-run effect of the same reform. WP 22 solves by value-function
-      iteration in under two minutes where this model uses Newton root-finding
-      plus time-path iteration at ~17 minutes — a difference in method, not in
-      ambition. Wider suite evidence: <a href="/validation">validation</a>.
-    </p>
   </section>
 
   <section id="caveats" class="band">
