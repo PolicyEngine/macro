@@ -47,28 +47,26 @@ def check_public_model_inventory() -> None:
 def check_economy_navigation() -> None:
     failures: list[str] = []
     overview_routes = {
-        "economy/index.html": 'href="/economy/trends"',
-        "economy/us/index.html": 'href="/economy/us/trends"',
+        "economy/index.html": "economy-trends-figures",
+        "economy/us/index.html": "us-economy-trends-figures",
     }
-    for path, trends_href in overview_routes.items():
+    for path, trends_marker in overview_routes.items():
         page = _read(path)
         for href in ('href="/economy"', 'href="/economy/us"'):
             if href not in page:
                 failures.append(f"{path}: missing country link {href}")
-        if trends_href not in page:
-            failures.append(f"{path}: missing dedicated Trends link {trends_href}")
         if 'id="trends"' not in page:
             failures.append(f"{path}: missing in-page Trends section")
-        for country_href in (
-            'href="/economy/trends"',
-            'href="/economy/us/trends"',
-        ):
-            if country_href not in page:
-                failures.append(
-                    f"{path}: Trends section missing country link {country_href}"
-                )
-        if 'id="figures"' in page or "economy-figures:begin" in page:
-            failures.append(f"{path}: duplicates charts from its Trends page")
+        if f"<!-- {trends_marker}:begin -->" not in page:
+            failures.append(f"{path}: missing generated trends block {trends_marker}")
+        if page.count('class="economy-figure"') != 3:
+            failures.append(f"{path}: expected three generated trend figures")
+        for retired in ('href="/economy/trends"', 'href="/economy/us/trends"'):
+            if retired in page:
+                failures.append(f"{path}: links to retired Trends page {retired}")
+        for anchor in ('id="indicators"', 'id="markets"', 'id="releases"'):
+            if anchor not in page:
+                failures.append(f"{path}: missing merged-section anchor {anchor}")
         if 'src="/economy/economy-nav.js"' not in page:
             failures.append(f"{path}: missing scroll-aware topic navigation")
         if path == "economy/index.html" and "ons.gov.uk/" in page:
@@ -76,17 +74,6 @@ def check_economy_navigation() -> None:
                 failures.append(
                     f"{path}: displayed ONS source link points to a JSON endpoint"
                 )
-
-    for path in ("economy/trends/index.html", "economy/us/trends/index.html"):
-        page = _read(path)
-        for href in (
-            'href="/economy/trends"',
-            'href="/economy/us/trends"',
-        ):
-            if href not in page:
-                failures.append(f"{path}: missing country-preserving link {href}")
-        if page.count('class="economy-figure"') != 3:
-            failures.append(f"{path}: expected three generated trend figures")
 
     for path in MODEL_INVENTORY_PAGES:
         header = _read(path).split("</header>", 1)[0]

@@ -13,8 +13,6 @@ ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "economy" / "index.html"
 HOME_PAGE = ROOT / "index.html"
 US_PAGE = ROOT / "economy" / "us" / "index.html"
-TRENDS_PAGE = ROOT / "economy" / "trends" / "index.html"
-US_TRENDS_PAGE = ROOT / "economy" / "us" / "trends" / "index.html"
 
 PUBLIC_LABELS = {
     "ABMI": "Real gross domestic product",
@@ -746,16 +744,6 @@ def replace(html: str, name: str, value: str) -> str:
     return updated
 
 
-def remove_embedded_trends(html: str, marker: str) -> str:
-    """Migrate legacy overview charts to their dedicated Trends route."""
-    pattern = (
-        r'    <div id="figures" class="economy-subsection">.*?'
-        + re.escape(f"<!-- {marker}:end -->")
-        + r"\n    </div>\n    </div>\n"
-    )
-    return re.sub(pattern, "", html, count=1, flags=re.S)
-
-
 def home_uk_now() -> str:
     """Homepage 'UK at a glance' table: outturns beside next-open forecasts."""
     gdp = load("uk_gdp_cvm")
@@ -885,8 +873,8 @@ def render_home() -> str:
 
 def render_uk() -> str:
     html = PAGE.read_text()
-    html = remove_embedded_trends(html, "economy-figures")
     html = replace(html, "economy-cards", cards())
+    html = replace(html, "economy-trends-figures", uk_figures())
     html = replace(html, "economy-indicators", indicator_rows())
     html = replace(html, "economy-outlook", outlook_rows())
     html = replace(html, "economy-markets", market_rows())
@@ -897,24 +885,12 @@ def render_uk() -> str:
 
 def render_us() -> str:
     html = US_PAGE.read_text()
-    html = remove_embedded_trends(html, "us-economy-figures")
     html = replace(html, "us-economy-cards", us_cards())
+    html = replace(html, "us-economy-trends-figures", us_figures())
     html = replace(html, "us-economy-indicators", us_indicator_rows())
     html = replace(html, "us-economy-markets", us_market_rows())
     html = replace(html, "us-economy-releases", us_release_rows())
     return html
-
-
-def render_uk_trends() -> str:
-    return replace(
-        TRENDS_PAGE.read_text(), "economy-trends-figures", uk_figures()
-    )
-
-
-def render_us_trends() -> str:
-    return replace(
-        US_TRENDS_PAGE.read_text(), "us-economy-trends-figures", us_figures()
-    )
 
 
 def main() -> int:
@@ -924,30 +900,24 @@ def main() -> int:
     rendered_home = render_home()
     rendered_uk = render_uk()
     rendered_us = render_us()
-    rendered_uk_trends = render_uk_trends()
-    rendered_us_trends = render_us_trends()
     if args.check:
         stale = []
         for path, rendered in (
             (HOME_PAGE, rendered_home),
             (PAGE, rendered_uk),
             (US_PAGE, rendered_us),
-            (TRENDS_PAGE, rendered_uk_trends),
-            (US_TRENDS_PAGE, rendered_us_trends),
         ):
             if rendered != path.read_text():
                 stale.append(str(path.relative_to(ROOT)))
         if stale:
             print(f"{', '.join(stale)} stale; run python3 economy/build.py")
             return 1
-        print("UK and US Economy overview and Trends pages match committed data")
+        print("UK and US Economy pages match committed data")
         return 0
     HOME_PAGE.write_text(rendered_home)
     PAGE.write_text(rendered_uk)
     US_PAGE.write_text(rendered_us)
-    TRENDS_PAGE.write_text(rendered_uk_trends)
-    US_TRENDS_PAGE.write_text(rendered_us_trends)
-    print("updated UK and US Economy overview and Trends pages")
+    print("updated UK and US Economy pages")
     return 0
 
 

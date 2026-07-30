@@ -32,8 +32,6 @@ EVIDENCE_ROOTS = {"papers"}
 PAGE_NAMES = {
     "/economy": "Economy",
     "/economy/us": "United States",
-    "/economy/trends": "Trends",
-    "/economy/us/trends": "Trends",
     "/models": "Models",
     "/obr": "OBR emulator",
     "/svar": "BoE SVAR",
