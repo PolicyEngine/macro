@@ -63,10 +63,10 @@
         <a class="model-tabs-link" href="/economy/us">US</a>
       </div>
       <div class="economy-topics">
-        <a href="#now">At a glance</a>
+        <a href="#now">Overview</a>
         <a href="#outlook">Forecast</a>
         <a href="#trends">Trends</a>
-        <a href="#indicators">Activity &amp; markets</a>
+        <a href="#indicators">Indicators</a>
       </div>
     </div>
   </nav>
@@ -223,6 +223,12 @@
       <h2>Activity, prices, work, the public finances, and market rates.</h2>
     </div>
     <div class="prose">
+      <div class="glance-tabs model-tabs-set mono" role="tablist" aria-label="Indicator views">
+        <button type="button" id="ind-tab-1" role="tab" aria-selected="true" aria-controls="ind-p1" class="is-current">Indicators</button>
+        <button type="button" id="ind-tab-2" role="tab" aria-selected="false" aria-controls="ind-p2">Rates &amp; markets</button>
+        <button type="button" id="ind-tab-3" role="tab" aria-selected="false" aria-controls="ind-p3">Releases</button>
+      </div>
+      <div id="ind-p1" role="tabpanel" aria-labelledby="ind-tab-1">
       <div class="table-scroll">
         <table>
           <caption>Latest official indicators and transparent period comparisons.</caption>
@@ -244,7 +250,8 @@
         ONS publishes <code>J5II</code> as a negative balance; it is shown here
         as the positive amount borrowed.
       </p>
-      <h3 id="markets" class="economy-subhead">Rates &amp; markets — the policy rate and the gilt curve, from the source.</h3>
+      </div>
+      <div id="ind-p2" role="tabpanel" aria-labelledby="ind-tab-2" hidden><h3 id="markets" class="economy-subhead">Rates &amp; markets — the policy rate and the gilt curve, from the source.</h3>
       <p>
         Bank of England observations; five-observation changes use published
         business days.
@@ -263,7 +270,8 @@
           </tbody>
         </table>
       </div>
-      <h3 id="releases" class="economy-subhead">Upcoming and recent releases</h3>
+      </div>
+      <div id="ind-p3" role="tabpanel" aria-labelledby="ind-tab-3" hidden><h3 id="releases" class="economy-subhead">Upcoming and recent releases</h3>
       <p>Release dates come from stored ONS metadata, grouped by release.</p>
       <div id="calendar" class="table-scroll">
         <table>
@@ -306,7 +314,8 @@
           </tbody>
       </table>
       </div>
-      </details>
+      </details></div>
+    
     </div>
   </section>
 </main>
@@ -321,5 +330,29 @@
 </footer>
 <script src="/reveal.js?v=2" defer></script>
 <script src="/economy/economy-nav.js"></script>
+<script>
+(function () {
+  var tabs = [["ind-tab-1", "ind-p1"], ["ind-tab-2", "ind-p2"], ["ind-tab-3", "ind-p3"]];
+  function activate(panelId) {
+    tabs.forEach(function (pair) {
+      var active = pair[1] === panelId;
+      var btn = document.getElementById(pair[0]);
+      btn.setAttribute("aria-selected", active ? "true" : "false");
+      btn.classList.toggle("is-current", active);
+      document.getElementById(pair[1]).hidden = !active;
+    });
+  }
+  tabs.forEach(function (pair) {
+    document.getElementById(pair[0]).addEventListener("click", function () { activate(pair[1]); });
+  });
+  function applyHash() {
+    var h = location.hash.slice(1);
+    if (h === "markets") activate("ind-p2");
+    if (h === "releases" || h === "calendar") activate("ind-p3");
+  }
+  window.addEventListener("hashchange", applyHash);
+  applyHash();
+})();
+</script>
 </body>
 </html>
