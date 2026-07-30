@@ -435,6 +435,9 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
 
     svg = "\n".join(
         [
+            f'      <p class="chart-intro">The archived {spec["name"].replace("UK ", "UK ")} path '
+            "beside the official forecast for the overlapping quarters — the gap "
+            "between the two lines is where the views differ.</p>",
             '      <figure class="vchart-figure">',
             f'        <svg class="vchart" data-chart="{chart_id}" viewBox="0 0 {width} {height}" '
             f'role="img" aria-labelledby="{chart_id}-t {chart_id}-d">',
@@ -449,13 +452,11 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
             f'          <polyline class="vc-s1" points="{median}"/>',
             f'          <polyline class="vc-s2" points="{efo}"/>',
             *xticks,
-            f'          <text class="vc-lab" x="{left}" y="{top - 14}">boe-svar median '
-            "(68% band)</text>",
-            f'          <text class="vc-lab vc-lab2" x="{width - right}" y="{top - 14}" '
-            'text-anchor="end">OBR March 2026 EFO</text>',
             "        </svg>",
-            f"        <figcaption>{spec['series']}. boe-svar medians and 68% bands "
-            f"from the archived 2026-07-21 round; {spec['source_note']}.</figcaption>",
+            '        <div class="olg-legend">'
+            '<span class="li"><span class="ln ln-s1"></span>boe-svar median (68% band)</span>'
+            '<span class="li"><span class="ln ln-s2"></span>OBR March 2026 EFO</span>'
+            "</div>",
             "      </figure>",
         ]
     )
@@ -463,8 +464,8 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
     table = [
         '      <div class="table-scroll">',
         "        <table>",
-        f"          <caption>Model vs official forecast, {spec['name']}, year on "
-        "year. Same sources as the chart above.</caption>",
+        f"          <caption>Quarter by quarter: the archived boe-svar median and band "
+        "beside the OBR, Bank of England and consensus paths.</caption>",
         '          <thead><tr><th scope="col">Quarter</th><th scope="col">boe-svar '
         'median</th><th scope="col">68% band</th><th scope="col">OBR March 2026 EFO'
         '</th><th scope="col">BoE Feb 2026 MPR</th>'
@@ -476,8 +477,8 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
         sef = f"{r['sef']:.1f}%" if r["sef"] is not None else "—"
         table.append(
             f'          <tr><th scope="row">{esc(r["period"])}</th>'
-            f"<td>{r['median']:.1f}%</td>"
-            f"<td>{r['lo68']:.1f}% to {r['hi68']:.1f}%</td>"
+            f'<td class="vs-median"><strong>{r["median"]:.1f}%</strong></td>'
+            f'<td class="vs-band mono">{r["lo68"]:.1f}\u2013{r["hi68"]:.1f}%</td>'
             f"<td>{r['efo']:.1f}%</td>"
             f"<td>{boe}</td>"
             f"<td>{sef}</td></tr>"
