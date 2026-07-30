@@ -25,6 +25,10 @@
   targets.forEach(function (el) {
     if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
       el.classList.add("in-view", "reveal-initial");
+    } else if (el.offsetHeight > window.innerHeight * 0.7) {
+      // Tall blocks (long walkthroughs, scrollytelling wrappers) may never
+      // reach the 8% intersection threshold — show them without animation.
+      el.classList.add("in-view", "reveal-initial");
     } else {
       io.observe(el);
     }
