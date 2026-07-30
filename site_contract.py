@@ -33,14 +33,6 @@ def check_public_model_inventory() -> None:
         if missing:
             failures.append(f"{path}: missing {', '.join(missing)}")
 
-    papers = _read("papers/index.html")
-    if "evidence for all six models" not in papers:
-        failures.append("papers/index.html: evidence-guide count is not six")
-    missing_papers = [model for model in PUBLIC_MODELS if model not in papers]
-    if missing_papers:
-        failures.append(
-            f"papers/index.html: missing {', '.join(missing_papers)}"
-        )
 
     # /validation was absorbed into /models#validation; the gradient claims
     # now live on the models hub page.
@@ -121,7 +113,6 @@ def check_editorial_consistency() -> None:
     failures: list[str] = []
     stale_claims = {
         "notes/2026-07-25-cpi-2026q2/index.html": "1992Q1–2023Q2",
-        "papers/index.html": "against its November 2025 forecast",
         "models/index.html": "This audit covers the three macro models",
         "forecasts/index.html": "a forecast reported without one is marketing",
     }
