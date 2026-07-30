@@ -218,6 +218,11 @@
       <h2>How each model is validated.</h2>
     </div>
     <div class="prose">
+      <div class="glance-tabs model-tabs-set mono" role="tablist" aria-label="Validation views">
+        <button type="button" id="val-tab-1" role="tab" aria-selected="true" aria-controls="val-p1" class="is-current">By model</button>
+        <button type="button" id="val-tab-2" role="tab" aria-selected="false" aria-controls="val-p2">Vs other institutions</button>
+      </div>
+      <div id="val-p1" role="tabpanel" aria-labelledby="val-tab-1">
       <p>
         The six models support different kinds of checks; the gradient below
         groups them into three classes — open a model's validation page for the
@@ -269,7 +274,8 @@
         </tbody>
       </table>
       </div>
-      <h3 id="shops">The same questions, answered by other shops.</h3>
+      </div>
+      <div id="val-p2" role="tabpanel" aria-labelledby="val-tab-2" hidden><h3 id="shops">The same questions, answered by other shops.</h3>
       <p>
         Imposed matches are anchors, not validation — the stronger evidence is
         out-of-sample forecasts, independent costings, and solver residuals.
@@ -312,6 +318,7 @@
         </tbody>
       </table>
       </div>
+    </div>
     </div>
   </section>
   <section id="evidence" class="band">
@@ -406,6 +413,25 @@
     var clamped = wrap.classList.toggle("cmp-clamped");
     btn.textContent = clamped ? "Show the full comparison" : "Collapse the comparison";
   });
+})();
+</script>
+<script>
+(function () {
+  var tabs = [["val-tab-1", "val-p1"], ["val-tab-2", "val-p2"]];
+  tabs.forEach(function (pair) {
+    document.getElementById(pair[0]).addEventListener("click", function () {
+      tabs.forEach(function (other) {
+        var active = other[0] === pair[0];
+        var btn = document.getElementById(other[0]);
+        btn.setAttribute("aria-selected", active ? "true" : "false");
+        btn.classList.toggle("is-current", active);
+        document.getElementById(other[1]).hidden = !active;
+      });
+    });
+  });
+  if (location.hash === "#shops") {
+    document.getElementById("val-tab-2").click();
+  }
 })();
 </script>
 </body>
