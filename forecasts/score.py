@@ -514,11 +514,14 @@ def render_status(card: dict) -> str:
     lines = [
         '      <div class="forecast-summary" aria-label="Current forecast record">',
         f"        <article><strong>{rounds}</strong><span>Archived "
-        f"round{'' if rounds == 1 else 's'}</span></article>",
+        f"round{'' if rounds == 1 else 's'}</span>"
+        "<small>forecasts committed with a timestamp, before the outturns existed</small></article>",
         f"        <article><strong>{scored}</strong><span>Scored "
-        f"period{'' if scored == 1 else 's'}</span></article>",
+        f"period{'' if scored == 1 else 's'}</span>"
+        "<small>target quarters whose official outturn has since been published and scored</small></article>",
         f"        <article><strong>{latest_error}</strong><span>Latest absolute "
-        "error</span></article>",
+        "error</span>"
+        "<small>most recent forecast vs the outturn it targeted, in percentage points</small></article>",
         "      </div>",
         '      <p class="forecast-next">',
     ]
