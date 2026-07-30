@@ -30,3 +30,16 @@
     }
   });
 })();
+
+// Keep sticky subnavs flush under the fixed header: expose the header's
+// real height as --nav-h so sticky offsets never drift from it.
+(function () {
+  "use strict";
+  var nav = document.querySelector("header.nav");
+  if (!nav) return;
+  function set() {
+    document.documentElement.style.setProperty("--nav-h", nav.offsetHeight + "px");
+  }
+  window.addEventListener("resize", set, { passive: true });
+  set();
+})();

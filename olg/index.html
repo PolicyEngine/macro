@@ -78,15 +78,11 @@ window.MathJax = {
     <div class="model-tabs-row">
       <a class="model-tabs-link" href="#what">Overview</a>
       <div class="model-tabs-set mono" role="tablist" aria-label="Model page view">
-        <button type="button" id="olg-tab-showcase" role="tab" aria-selected="true" aria-controls="showcase">Showcase</button>
-        <button type="button" id="olg-tab-code" role="tab" aria-selected="false" aria-controls="code">Code</button>
+        <button type="button" id="olg-tab-code" role="tab" aria-selected="true" aria-controls="code">Code</button>
         <button type="button" id="olg-tab-methodology" role="tab" aria-selected="false" aria-controls="methodology">Methodology</button>
       </div>
       <a class="model-tabs-link" href="#trust">Validation</a>
-      <span class="model-tabs-spacer" aria-hidden="true"></span>
-      <a class="model-tabs-link" href="#run">Run it</a>
-      <a class="model-tabs-link" href="/papers/psl-og">Paper</a>
-      <a class="model-tabs-link" href="https://github.com/PSLmodels/OG-UK">GitHub ↗</a>
+      <a class="model-tabs-link" href="/papers/psl-og">Paper →</a>
     </div>
   </nav>
 
@@ -117,9 +113,7 @@ window.MathJax = {
         The rest of this page shows the model three ways: a worked
         <a href="#showcase">showcase</a> reform with charts, the
         <a href="#code">code</a> you would actually run, and the
-        <a href="#methodology">methodology</a> underneath — adapted from the
-        <a href="https://og-model-dashboard.vercel.app">OG-UK dashboard</a>
-        into this site's static, checkable form. OG-UK is the UK calibration of
+        <a href="#methodology">methodology</a> underneath. OG-UK is the UK calibration of
         <a href="https://github.com/PSLmodels/OG-Core">OG-Core</a>, the
         open-source overlapping-generations framework maintained by the
         <a href="https://pslmodels.org">Policy Simulation Library</a>.
@@ -127,7 +121,7 @@ window.MathJax = {
     </div>
   </section>
 
-  <section id="showcase" class="band" role="tabpanel" aria-labelledby="olg-tab-showcase">
+  <section id="showcase" class="band">
     <div class="band-head">
       <span class="kicker mono">02 — showcase</span>
       <h2>A worked example: 1pp on the basic rate.</h2>
@@ -152,8 +146,7 @@ window.MathJax = {
         illustration, not a forecast of any announced policy. The baseline is
         the OBR's November 2025 EFO (history plus forecast). Everything below
         is drawn from a committed transition-path result,
-        <code>olg/figures/tpi_data.json</code>, exported from the
-        <a href="https://og-model-dashboard.vercel.app">OG-UK dashboard's</a>
+        <code>olg/figures/tpi_data.json</code>, from the model's
         +1pp simulation; the committed file carries the
         <strong>first five years (2026–2030)</strong> of the model's 60-period
         solve, so that is what the charts show.
@@ -402,14 +395,12 @@ window.MathJax = {
       <p class="chart-note">
         Read these as model-consistent magnitudes and signs, not forecasts —
         the <a href="#trust">validation section</a> below explains why there
-        is no ground truth to score them against. The full interactive
-        version, with every sector × variable cell, is the
-        <a href="https://og-model-dashboard.vercel.app">OG-UK dashboard</a>.
+        is no ground truth to score them against.
       </p>
     </div>
   </section>
 
-  <section id="code" class="band" role="tabpanel" aria-labelledby="olg-tab-code" hidden>
+  <section id="code" class="band" role="tabpanel" aria-labelledby="olg-tab-code">
     <div class="band-head">
       <span class="kicker mono">03 — code</span>
       <h2>From a few lines of Python to a full UK transition path.</h2>
@@ -418,8 +409,7 @@ window.MathJax = {
       <p>
         OG-UK is open source, and every step below that carries logic ships as
         a runnable file under <a href="/olg/code/01_install.sh"><code>/olg/code/</code></a>
-        on this site (mirroring the dashboard's <code>python/</code> folder).
-        Pick a step, run it on its own, swap the reform. Full context lives in
+        on this site. Pick a step, run it on its own, swap the reform. Full context lives in
         <a href="https://github.com/PSLmodels/OG-UK">PSL's OG-UK repository</a>.
       </p>
       <div class="callout">
@@ -742,15 +732,19 @@ base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
         <a href="https://github.com/PSLmodels/OG-Core">OG-Core's</a>, documented
         in full at <a href="https://pslmodels.github.io/OG-Core/">pslmodels.github.io/OG-Core</a>.
       </p>
+    </div>
 
-      <h3 id="meth-1">Step 1 — The overlapping-generations idea</h3>
-      <h4>Many generations coexist</h4>
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="meth-1" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>The overlapping-generations idea</h3></div>
+        <h4>Many generations coexist</h4>
       <p>The central insight of an overlapping-generations model is that the economy is not populated by a single "representative agent." At any moment in time, many generations coexist: young people just entering the labour force, middle-aged workers at peak earnings, and retirees living off savings and pensions. Each generation has a different remaining lifespan, a different stock of accumulated wealth, and therefore a different response to any given policy change.</p>
       <h4>Age cohorts</h4>
       <p>OG-Core models S economically active age cohorts (typically 80, representing ages 21 to 100). Each period, a new cohort is born and the oldest cohort dies with some probability. The population distribution by age evolves over time with fertility, mortality, and immigration, and eventually reaches a stationary distribution in the long run.</p>
       <h4>Ability types</h4>
       <p>Within each age cohort, households split into J ability types, each with a distinct permanent labour productivity. High-ability types earn more per hour of work and typically save more. This heterogeneity captures how a tax reform affects the income distribution, not just average outcomes.</p>
-      <div class="callout formal">
+        <div class="callout formal meth-inline" aria-hidden="true">
         <p class="formal-label mono">formal structure — population</p>
         <p><span class="formal-eq-label mono">age cohorts</span> \(s = E+1, \ldots, E+S \quad \text{(economically active)}\)</p>
         <p><span class="formal-eq-label mono">ability types</span> \(j = 1, \ldots, J \quad \text{with probability } \lambda_j\)</p>
@@ -760,10 +754,12 @@ base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
           <li>Productivity \(e_{j,s}\) varies by age and type</li>
           <li>Type assigned at birth, permanent</li>
         </ul>
+        </div>
       </div>
 
-      <h3 id="meth-2">Step 2 — Household decisions</h3>
-      <h4>Three decisions each period</h4>
+      <div class="meth-step" id="meth-2" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Household decisions</h3></div>
+        <h4>Three decisions each period</h4>
       <p>Every period, each household makes three decisions: how much to <strong>consume</strong>, how many hours to <strong>work</strong>, and how much to <strong>save</strong> for the future. The household chooses these to maximise expected lifetime utility, subject to a budget constraint.</p>
       <h4>Consumption utility</h4>
       <p>Consumption utility follows a CRRA (constant relative risk aversion) function, where the risk aversion parameter governs how strongly households prefer smooth consumption over time. Before entering this function, a Stone-Geary Cobb-Douglas form aggregates the individual consumption goods, accounting for minimum subsistence levels.</p>
@@ -774,17 +770,19 @@ base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
       <h4>Budget constraint and Euler equations</h4>
       <p>The household's budget constraint says that each period, income from savings returns, labour earnings, bequests received, government transfers, and pensions must cover consumption (including consumption taxes), income and wealth taxes, and savings carried into the next period.</p>
       <p>Two Euler equations characterise the optimal decisions. The labour first-order condition says: work until the after-tax wage equals the marginal disutility. The savings Euler equation says: give up one unit of consumption today only if the discounted, after-tax return makes tomorrow's consumption sufficiently valuable.</p>
-      <div class="callout formal">
+        <div class="callout formal meth-inline" aria-hidden="true">
         <p class="formal-label mono">formal structure — utility and Euler equations</p>
         <p><span class="formal-eq-label mono">consumption</span> \(u(c) = \frac{c^{\,1-\sigma}}{1-\sigma}\)</p>
         <p><span class="formal-eq-label mono">labour disutility</span> \(\chi^n_s \cdot g(n) \quad \text{(elliptical)}\)</p>
         <p><span class="formal-eq-label mono">bequest motive</span> \(\chi^b_j \cdot \rho_s \cdot \frac{b'^{\,1-\sigma}}{1-\sigma}\)</p>
         <p><span class="formal-eq-label mono">labour FOC</span> \(\chi^n_s g'(n) = w\,e_{j,s}(1-\tau'_{\text{lab}})\,u'(c)\)</p>
         <p><span class="formal-eq-label mono">savings Euler</span> \(u'(c_t) = \beta_j(1-\rho_s)(1+r_{p,t+1}(1-\tau'_{\text{cap}}))\,u'(c_{t+1})\)</p>
+        </div>
       </div>
 
-      <h3 id="meth-3">Step 3 — Firms and production</h3>
-      <h4>CES technology</h4>
+      <div class="meth-step" id="meth-3" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Firms and production</h3></div>
+        <h4>CES technology</h4>
       <p>The production side of the economy consists of M industries, each populated by perfectly competitive firms. Each firm combines three inputs: <strong>private capital</strong>, <strong>public capital</strong> (government-provided infrastructure), and <strong>labour</strong>. A constant elasticity of substitution (CES) technology combines them.</p>
       <h4>Substitution and productivity</h4>
       <p>The elasticity parameter governs how easily firms substitute between capital and labour. When it equals one, the function reduces to the Cobb-Douglas form. Total factor productivity varies across industries and over time, so the model can capture sector-specific technological change.</p>
@@ -792,7 +790,7 @@ base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
       <p>Profit maximisation yields the standard first-order conditions: the <strong>wage equals the marginal product of labour</strong>, and the <strong>rental rate of capital</strong> equals the after-tax marginal product of capital, accounting for depreciation, tax deductions, and investment tax credits.</p>
       <h4>Public capital rents</h4>
       <p>One feature of OG-Core sets it apart: <strong>public capital generates economic rents</strong>. Since firms cannot deduct the cost of using government infrastructure, the returns from public capital flow to private capital owners through an augmented rate of return.</p>
-      <div class="callout formal">
+        <div class="callout formal meth-inline" aria-hidden="true">
         <p class="formal-label mono">formal structure — technology</p>
         <p><span class="formal-eq-label mono">CES production</span> \(Y_m = Z_m\bigl[\gamma K_m^\rho + \gamma_g K_{g,m}^\rho + (1\!-\!\gamma\!-\!\gamma_g)(e^{g_y t}L_m)^\rho\bigr]^{1/\rho}\)</p>
         <p><span class="formal-eq-label mono">wage</span> \(w = p_m \cdot \text{MPL}_m\)</p>
@@ -802,10 +800,12 @@ base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
           <li>Public capital \(K_g\) generates rents</li>
           <li>Nests Cobb-Douglas when \(\varepsilon \to 1\)</li>
         </ul>
+        </div>
       </div>
 
-      <h3 id="meth-4">Step 4 — Government</h3>
-      <h4>Revenue and spending</h4>
+      <div class="meth-step" id="meth-4" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Government</h3></div>
+        <h4>Revenue and spending</h4>
       <p>The government in OG-Core collects revenue from <strong>five tax instruments</strong>: individual income taxes, consumption taxes, wealth taxes, corporate income taxes, and bequest taxes. It spends on public goods, infrastructure, pensions, lump-sum transfers, and universal basic income. Issuing debt finances the difference.</p>
       <h4>Income tax: Gouveia-Strauss functions</h4>
       <p>The income tax carries the most structure. OG-Core supports several functional forms for effective and marginal tax rates, fitted to detailed tax-benefit calculations. For OG-UK, we use the <strong>Gouveia-Strauss</strong> specification, which estimates the effective tax rate as a smooth, monotonically increasing function of income and derives the marginal tax rate analytically. The estimation runs on PolicyEngine-UK output drawn from the <strong>Enhanced FRS</strong> — the Family Resources Survey enhanced with HMRC's Survey of Personal Incomes, the Living Costs and Food Survey, and the Wealth and Assets Survey.</p>
@@ -813,7 +813,7 @@ base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
       <p>The <strong>wealth tax</strong> uses a progressive three-parameter function that produces anything from zero taxation to smoothly increasing marginal rates. <strong>Consumption taxes</strong> take linear rates that vary by good, covering VAT and excise. <strong>Corporate income taxes</strong> take flat rates by industry.</p>
       <h4>Fiscal closure rule</h4>
       <p>Since debt cannot grow without bound, a <strong>fiscal closure rule</strong> activates after a specified period to bring the debt-to-GDP ratio gradually towards a target. The modeller chooses whether the adjustment falls on government spending, transfers, or a combination of both.</p>
-      <div class="callout formal">
+        <div class="callout formal meth-inline" aria-hidden="true">
         <p class="formal-label mono">formal structure — government budget</p>
         <p>\[ D_{t+1} + \text{Rev}_t = (1+r_{\text{gov}})D_t + G + I_g + \text{Pen} + TR + UBI \]</p>
         <ul>
@@ -823,10 +823,12 @@ base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
           <li>Corporate: flat rate by industry</li>
           <li>Bequest: on inherited wealth</li>
         </ul>
+        </div>
       </div>
 
-      <h3 id="meth-5">Step 5 — Market clearing and equilibrium</h3>
-      <h4>Supply equals demand</h4>
+      <div class="meth-step" id="meth-5" data-step="4">
+        <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Market clearing and equilibrium</h3></div>
+        <h4>Supply equals demand</h4>
       <p><strong>Market clearing conditions</strong> connect all the pieces above — household decisions, firm production, and government policy. For the economy to be in equilibrium, supply must equal demand in every market simultaneously.</p>
       <h4>Labour and capital markets</h4>
       <p>In the <strong>labour market</strong>, the total efficiency-weighted labour supply from all households across all ages and ability types must equal total firm demand across all industries. In the <strong>capital market</strong>, the total stock of savings (both domestic and foreign) must equal the capital firms demand plus government debt. The model runs as an <strong>open economy</strong>: parameters control foreign capital and foreign debt holdings, setting the degree of international capital mobility.</p>
@@ -834,37 +836,41 @@ base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
       <p>For each <strong>goods market</strong>, industry output must equal consumption demand. The final industry clears residually, absorbing investment, government purchases, and any remaining demand. The <strong>debt market</strong> splits government debt between domestic and foreign holders.</p>
       <h4>What defines an equilibrium</h4>
       <p>An equilibrium is a set of prices (the interest rate, wage, and goods prices) such that all households optimise, all firms optimise, the government budget constraint holds, and all four markets clear. Finding one is a large-scale nonlinear fixed-point problem.</p>
-      <div class="callout formal">
+        <div class="callout formal meth-inline" aria-hidden="true">
         <p class="formal-label mono">formal structure — equilibrium conditions</p>
         <p><span class="formal-eq-label mono">labour</span> \(\sum_{s,j} \omega_s \lambda_j e_{j,s} n_{j,s} = \sum_m L_m\)</p>
         <p><span class="formal-eq-label mono">capital</span> \(K = K^d + K^f \quad (\text{open economy: } \zeta_K)\)</p>
         <p><span class="formal-eq-label mono">goods</span> \(Y_m = C_m \;\; (m &lt; M)\)</p>
         <p><span class="formal-eq-label mono">debt</span> \(D = D^d + D^f \quad (\text{foreign share: } \zeta_D)\)</p>
+        </div>
       </div>
 
-      <h3 id="meth-6">Step 6 — How the model is solved</h3>
-      <h4>Two-stage approach</h4>
+      <div class="meth-step" id="meth-6" data-step="5">
+        <div class="meth-step-head"><span class="meth-step-num mono">6</span><h3>How the model is solved</h3></div>
+        <h4>Two-stage approach</h4>
       <p>Finding equilibrium is a two-stage computational problem. The model first solves for the long-run steady state, then computes the transition path from today's economy to that steady state.</p>
       <h4>Stage 1: Steady state</h4>
       <p>The model first finds the long-run equilibrium where all variables stay constant (after removing trend growth). It uses a nested fixed-point algorithm. The <em>outer loop</em> guesses a vector of aggregate prices and quantities. The <em>inner loop</em> takes these as given and solves the Euler equations for every combination of ability type and age. Because each type is independent, the inner loop solves them <strong>in parallel</strong>. After solving all households, the algorithm aggregates their decisions, computes firm demands, checks the government budget, and derives new guesses. It iterates until convergence.</p>
       <h4>Stage 2: Transition path (TPI)</h4>
       <p>Starting from today's economy, the model then solves for how the economy evolves towards the steady state over T periods. The <em>Time Path Iteration</em> (TPI) method guesses entire time paths for all prices and quantities, solves every cohort's lifetime decisions given those paths (with <strong>rational expectations</strong> about future prices), checks whether the implied paths match the guesses, and iterates. This step produces the year-by-year projections.</p>
-      <div class="callout formal">
+        <div class="callout formal meth-inline" aria-hidden="true">
         <p class="formal-label mono">formal structure — two-stage algorithm</p>
         <p><span class="formal-eq-label mono">outer loop</span> \(\mathbf{x} = \{\bar{r}_p, \bar{r}, \bar{w}, \{\bar{p}_m\}, \overline{BQ}, \overline{TR}, \text{factor}\}\)</p>
         <p><span class="formal-eq-label mono">inner loop</span> \(\text{Solve } 2JS \text{ Euler equations } \forall (j,s)\)</p>
         <p><span class="formal-eq-label mono">convergence</span> \(\|\mathbf{x}^{(i')} - \mathbf{x}^{(i)}\| \leq \text{toler}_{\text{ss}}\)</p>
         <p><span class="formal-eq-label mono">TPI</span> \(\text{Guess } \{\mathbf{x}_t\}_{t=1}^T \to \text{solve all cohorts} \to \text{iterate}\)</p>
+        </div>
       </div>
 
-      <h3 id="meth-7">Step 7 — Calibrating for the United Kingdom</h3>
-      <h4>From theory to UK data</h4>
+      <div class="meth-step" id="meth-7" data-step="6">
+        <div class="meth-step-head"><span class="meth-step-num mono">7</span><h3>Calibrating for the United Kingdom</h3></div>
+        <h4>From theory to UK data</h4>
       <p>OG-Core provides the theoretical framework. Turning it into a model of the <em>UK</em> economy means calibrating every parameter to UK data. The OG-UK calibration layer handles that step. The deployed calibration is anchored to official data: depreciation from ONS capital-stocks data (<strong>6.5%/yr</strong>), potential-output growth from the OBR EFO (<strong>1.1%/yr</strong>), the discount factor matched to the ONS household saving ratio, the world interest rate to Bank of England gilt-yield data, and a Frisch labour-supply elasticity of <strong>0.35–0.4</strong> (Blundell, MaCurdy &amp; Meghir). Demographics — population by age, mortality, immigration — come from UN data; the state pension age matches current UK rules.</p>
       <h4>Tax function estimation</h4>
       <p>Taxes are not stylized wedges. OG-UK runs <a href="/pe">PolicyEngine-UK</a> on household microdata under baseline and reform, computes marginal rates by perturbation — add £1 of employment (or dividend) income per adult, rerun, read the change in net income — and fits three-parameter <strong>Gouveia–Strauss</strong> schedules to the effective-rate microdata for each year of a three-year budget window. The marginal-rate schedules are the analytical derivatives of the same fitted parameters, so ETR and MTRs are consistent by construction, and the model sees the reform's true shape across the income and age distribution.</p>
       <h4>Real-world mapping</h4>
       <p>The model outputs values in abstract units. To translate them into pound-sterling figures, OG-UK anchors the model's steady-state GDP to the ONS figure and scales all other variables proportionally, against live ONS series with cached fallbacks. Results then read as changes in billions of pounds — a format that policymakers and the public can read directly.</p>
-      <div class="callout formal">
+        <div class="callout formal meth-inline" aria-hidden="true">
         <p class="formal-label mono">formal structure — Gouveia-Strauss tax function</p>
         <p><span class="formal-eq-label mono">effective rate</span> \(\text{ETR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-1/\phi_1}\Bigr]\)</p>
         <p><span class="formal-eq-label mono">marginal (analytical)</span> \(\text{MTR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-(1+\phi_1)/\phi_1}\Bigr]\)</p>
@@ -875,10 +881,12 @@ base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
           <li>UN WPP: demographics (country 826)</li>
           <li>PolicyEngine: tax function estimation</li>
         </ul>
+        </div>
       </div>
 
-      <h3 id="meth-8">Step 8 — What this enables</h3>
-      <h4>Two complementary views</h4>
+      <div class="meth-step" id="meth-8" data-step="7">
+        <div class="meth-step-head"><span class="meth-step-num mono">8</span><h3>What this enables</h3></div>
+        <h4>Two complementary views</h4>
       <p>Together with a static microsimulation engine, OG-UK supports two complementary views of any UK tax or benefit reform. Static analysis provides the detailed distributional picture: which households gain, which lose, and by how much. OG-UK provides the macroeconomic picture: what happens to GDP, investment, government revenue, interest rates, and wages as the economy adjusts over time.</p>
       <h4>Why both views matter</h4>
       <p>The two perspectives can tell different stories. A reform that raises revenue in a static analysis may raise less in practice, because higher tax rates reduce labour supply and investment and shrink the tax base. The reverse also holds: a reform that costs revenue upfront might pay for itself over time through extra economic activity. OG-UK captures these dynamics.</p>
@@ -894,6 +902,117 @@ base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
         <li><strong>Truncated horizon.</strong> The default 60-period transition assumes the steady state arrives by year 60. Effects that play out over longer horizons collapse into the steady-state anchor.</li>
       </ul>
       <p>None of these are model bugs — they are choices that make the macro accounting tractable. Worth knowing when reading the <a href="#showcase">Showcase</a> charts.</p>
+        <div class="callout formal meth-inline" aria-hidden="true">
+        <p class="formal-label mono">what OG-UK adds</p>
+        <ul>
+          <li>Endogenous GDP, wages, interest rates</li>
+          <li>Labour supply and savings responses</li>
+          <li>Year-by-year transition paths</li>
+          <li>Generational incidence (age-varying impacts)</li>
+          <li>Fiscal sustainability projections</li>
+        </ul>
+        <p class="formal-label mono">active development</p>
+        <ul>
+          <li>Multi-industry calibration</li>
+          <li>Tax function refinement</li>
+          <li>OBR-grounded transition charts</li>
+        </ul>
+        </div>
+      </div>
+      </div>
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel callout formal" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">The overlapping-generations idea</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <p class="formal-label mono">formal structure — population</p>
+        <p><span class="formal-eq-label mono">age cohorts</span> \(s = E+1, \ldots, E+S \quad \text{(economically active)}\)</p>
+        <p><span class="formal-eq-label mono">ability types</span> \(j = 1, \ldots, J \quad \text{with probability } \lambda_j\)</p>
+        <p><span class="formal-eq-label mono">population</span> \(\omega_{s,t}\) evolves with fertility, mortality, immigration</p>
+        <ul>
+          <li>Each type has its own \(\beta_j\), \(\chi^b_j\), \(e_{j,s}\)</li>
+          <li>Productivity \(e_{j,s}\) varies by age and type</li>
+          <li>Type assigned at birth, permanent</li>
+        </ul>
+        </div>
+        <div class="meth-panel callout formal" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Household decisions</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <p class="formal-label mono">formal structure — utility and Euler equations</p>
+        <p><span class="formal-eq-label mono">consumption</span> \(u(c) = \frac{c^{\,1-\sigma}}{1-\sigma}\)</p>
+        <p><span class="formal-eq-label mono">labour disutility</span> \(\chi^n_s \cdot g(n) \quad \text{(elliptical)}\)</p>
+        <p><span class="formal-eq-label mono">bequest motive</span> \(\chi^b_j \cdot \rho_s \cdot \frac{b'^{\,1-\sigma}}{1-\sigma}\)</p>
+        <p><span class="formal-eq-label mono">labour FOC</span> \(\chi^n_s g'(n) = w\,e_{j,s}(1-\tau'_{\text{lab}})\,u'(c)\)</p>
+        <p><span class="formal-eq-label mono">savings Euler</span> \(u'(c_t) = \beta_j(1-\rho_s)(1+r_{p,t+1}(1-\tau'_{\text{cap}}))\,u'(c_{t+1})\)</p>
+        </div>
+        <div class="meth-panel callout formal" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Firms and production</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <p class="formal-label mono">formal structure — technology</p>
+        <p><span class="formal-eq-label mono">CES production</span> \(Y_m = Z_m\bigl[\gamma K_m^\rho + \gamma_g K_{g,m}^\rho + (1\!-\!\gamma\!-\!\gamma_g)(e^{g_y t}L_m)^\rho\bigr]^{1/\rho}\)</p>
+        <p><span class="formal-eq-label mono">wage</span> \(w = p_m \cdot \text{MPL}_m\)</p>
+        <p><span class="formal-eq-label mono">rental rate</span> \(r = (1-\tau^{\text{corp}})\,p_m\,\text{MPK}_m - \delta + \tau^{\text{corp}}\delta^\tau + \tau^{\text{inv}}\delta\)</p>
+        <ul>
+          <li>\(M\) industries, perfect competition</li>
+          <li>Public capital \(K_g\) generates rents</li>
+          <li>Nests Cobb-Douglas when \(\varepsilon \to 1\)</li>
+        </ul>
+        </div>
+        <div class="meth-panel callout formal" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Government</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <p class="formal-label mono">formal structure — government budget</p>
+        <p>\[ D_{t+1} + \text{Rev}_t = (1+r_{\text{gov}})D_t + G + I_g + \text{Pen} + TR + UBI \]</p>
+        <ul>
+          <li>Income: Gouveia-Strauss from PolicyEngine</li>
+          <li>Consumption: VAT + excise</li>
+          <li>Wealth: progressive 3-parameter</li>
+          <li>Corporate: flat rate by industry</li>
+          <li>Bequest: on inherited wealth</li>
+        </ul>
+        </div>
+        <div class="meth-panel callout formal" data-step="4" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Market clearing and equilibrium</span><span class="meth-panel-badge mono">Step 5</span></div>
+          <p class="formal-label mono">formal structure — equilibrium conditions</p>
+        <p><span class="formal-eq-label mono">labour</span> \(\sum_{s,j} \omega_s \lambda_j e_{j,s} n_{j,s} = \sum_m L_m\)</p>
+        <p><span class="formal-eq-label mono">capital</span> \(K = K^d + K^f \quad (\text{open economy: } \zeta_K)\)</p>
+        <p><span class="formal-eq-label mono">goods</span> \(Y_m = C_m \;\; (m &lt; M)\)</p>
+        <p><span class="formal-eq-label mono">debt</span> \(D = D^d + D^f \quad (\text{foreign share: } \zeta_D)\)</p>
+        </div>
+        <div class="meth-panel callout formal" data-step="5" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">How the model is solved</span><span class="meth-panel-badge mono">Step 6</span></div>
+          <p class="formal-label mono">formal structure — two-stage algorithm</p>
+        <p><span class="formal-eq-label mono">outer loop</span> \(\mathbf{x} = \{\bar{r}_p, \bar{r}, \bar{w}, \{\bar{p}_m\}, \overline{BQ}, \overline{TR}, \text{factor}\}\)</p>
+        <p><span class="formal-eq-label mono">inner loop</span> \(\text{Solve } 2JS \text{ Euler equations } \forall (j,s)\)</p>
+        <p><span class="formal-eq-label mono">convergence</span> \(\|\mathbf{x}^{(i')} - \mathbf{x}^{(i)}\| \leq \text{toler}_{\text{ss}}\)</p>
+        <p><span class="formal-eq-label mono">TPI</span> \(\text{Guess } \{\mathbf{x}_t\}_{t=1}^T \to \text{solve all cohorts} \to \text{iterate}\)</p>
+        </div>
+        <div class="meth-panel callout formal" data-step="6" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Calibrating for the United Kingdom</span><span class="meth-panel-badge mono">Step 7</span></div>
+          <p class="formal-label mono">formal structure — Gouveia-Strauss tax function</p>
+        <p><span class="formal-eq-label mono">effective rate</span> \(\text{ETR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-1/\phi_1}\Bigr]\)</p>
+        <p><span class="formal-eq-label mono">marginal (analytical)</span> \(\text{MTR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-(1+\phi_1)/\phi_1}\Bigr]\)</p>
+        <ul>
+          <li>ONS: GDP, national accounts anchor</li>
+          <li>OBR: fiscal forecasts, debt target</li>
+          <li>HMRC/GOV.UK: tax rates, state pension age</li>
+          <li>UN WPP: demographics (country 826)</li>
+          <li>PolicyEngine: tax function estimation</li>
+        </ul>
+        </div>
+        <div class="meth-panel callout formal" data-step="7" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">What this enables</span><span class="meth-panel-badge mono">Step 8</span></div>
+          <p class="formal-label mono">what OG-UK adds</p>
+        <ul>
+          <li>Endogenous GDP, wages, interest rates</li>
+          <li>Labour supply and savings responses</li>
+          <li>Year-by-year transition paths</li>
+          <li>Generational incidence (age-varying impacts)</li>
+          <li>Fiscal sustainability projections</li>
+        </ul>
+        <p class="formal-label mono">active development</p>
+        <ul>
+          <li>Multi-industry calibration</li>
+          <li>Tax function refinement</li>
+          <li>OBR-grounded transition charts</li>
+        </ul>
+        </div>
+      </aside>
     </div>
   </section>
 
@@ -971,13 +1090,6 @@ base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
           </tr>
         </tbody>
       </table></div>
-      <p class="chart-note">
-        The Showcase, Code and Methodology tabs above are adapted from the
-        <a href="https://og-model-dashboard.vercel.app">OG-UK dashboard</a>,
-        which also carries a side-by-side comparison with the OBR's UK OLG
-        model (Working Paper No. 22) — summarised in
-        <a href="#trust">section 05</a> here rather than reproduced in full.
-      </p>
     </div>
   </section>
 
@@ -1009,7 +1121,6 @@ document.addEventListener("click", function (e) {
 <script>
 (function () {
   var tabs = [
-    ["olg-tab-showcase", "showcase"],
     ["olg-tab-code", "code"],
     ["olg-tab-methodology", "methodology"]
   ];
@@ -1050,6 +1161,94 @@ document.addEventListener("click", function (e) {
   }
   window.addEventListener("hashchange", applyHash);
   applyHash();
+})();
+</script>
+<script>
+// Highlight the bar's anchor links (Overview, Validation) while their
+// sections are in view; tab underlines are handled by the tab script.
+(function () {
+  "use strict";
+  // Each bar link owns one or more page sections; the link is highlighted
+  // while any of its sections occupies the reading line (33% down).
+  var ZONES = { "#what": ["what", "showcase"], "#trust": ["trust", "caveats"] };
+  var links = Array.from(
+    document.querySelectorAll('.model-tabs-link[href^="#"]')
+  );
+  var tabButtons = Array.from(
+    document.querySelectorAll('.model-tabs-set button[role="tab"]')
+  );
+  function covers(el, offset) {
+    if (!el) return false;
+    var r = el.getBoundingClientRect();
+    return r.top < offset && r.bottom > offset;
+  }
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = null;
+    links.forEach(function (link) {
+      var ids = ZONES[link.getAttribute("href")] || [link.getAttribute("href").slice(1)];
+      if (ids.some(function (id) { return covers(document.getElementById(id), offset); })) {
+        active = link;
+      }
+    });
+    // The visible tab's button owns its panel while reading it.
+    tabButtons.forEach(function (btn) {
+      var panel = document.getElementById(btn.getAttribute("aria-controls"));
+      if (panel && !panel.hidden && covers(panel, offset)) active = btn;
+    });
+    // Above the first section (hero), Overview owns the page.
+    var first = document.getElementById("what");
+    if (!active && first && first.getBoundingClientRect().top >= offset) {
+      active = links[0] || null;
+    }
+    links.forEach(function (link) {
+      if (link === active) link.setAttribute("aria-current", "location");
+      else link.removeAttribute("aria-current");
+    });
+    tabButtons.forEach(function (btn) {
+      btn.classList.toggle("is-current", btn === active);
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", update);
+  tabButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () { setTimeout(update, 0); });
+  });
+  update();
+})();
+</script>
+<script>
+// Methodology scrollytelling: highlight the step at the reading line and
+// show its formal-structure panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  document.querySelectorAll('[role="tab"]').forEach(function (btn) {
+    btn.addEventListener("click", function () { setTimeout(update, 0); });
+  });
+  update();
 })();
 </script>
 </body>

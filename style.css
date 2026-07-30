@@ -365,7 +365,7 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
    underline tabs on the right and scroll horizontally when cramped. */
 .economy-subnav {
   position: sticky;
-  top: 61px;
+  top: calc(var(--nav-h, 62px) - 1px);
   z-index: 8;
   border-top: 1px solid var(--line-soft);
   border-bottom: 1px solid var(--line-soft);
@@ -516,7 +516,7 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
    role=tabpanel toggled by a tiny inline script. */
 .model-tabs {
   position: sticky;
-  top: 61px;
+  top: calc(var(--nav-h, 62px) - 1px);
   z-index: 8;
   border-top: 1px solid var(--line-soft);
   border-bottom: 1px solid var(--line-soft);
@@ -534,6 +534,7 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
 .model-tabs-link {
   flex: 0 0 auto;
   padding: 9px 2px;
+  border-bottom: 2px solid transparent;
   color: var(--paper-dim);
   font-family: var(--mono);
   font-size: var(--fs-label);
@@ -541,6 +542,10 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   white-space: nowrap;
 }
 .model-tabs-link:hover { color: var(--brand-strong); }
+.model-tabs-link[aria-current="location"] {
+  color: var(--paper);
+  border-bottom-color: var(--brand-strong);
+}
 .model-tabs-set {
   display: inline-flex;
   gap: var(--s-5);
@@ -558,11 +563,66 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   cursor: pointer;
 }
 .model-tabs-set button:hover { color: var(--brand-strong); }
-.model-tabs-set button[aria-selected="true"] {
+.model-tabs-set button.is-current {
   color: var(--paper);
   border-bottom-color: var(--brand-strong);
 }
 .model-tabs-spacer { flex: 1 1 auto; }
+
+/* Methodology scrollytelling: narrative steps left, a sticky formal-
+   structure panel right that swaps content with the step in view. */
+.scrolly-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+  gap: var(--s-7);
+  align-items: start;
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+.scrolly-steps { min-width: 0; }
+.meth-step {
+  padding: var(--s-6) 0 var(--s-6) var(--s-5);
+  border-left: 2px solid var(--line-soft);
+  opacity: .55;
+  transition: opacity .25s ease, border-color .25s ease;
+}
+.meth-step.active { opacity: 1; border-left-color: var(--brand-strong); }
+.meth-step-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+.meth-step-num {
+  flex: 0 0 auto;
+  color: var(--brand-strong);
+  font-size: var(--fs-small);
+}
+.meth-step-head h3 { margin: 0; }
+.scrolly-sticky {
+  position: sticky;
+  top: calc(var(--nav-h, 62px) + 56px);
+  min-width: 0;
+}
+.meth-panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--line-soft);
+}
+.meth-panel-title { font-weight: 600; }
+.meth-panel-badge { color: var(--paper-faint); font-size: var(--fs-label); }
+.meth-inline { display: none; }
+@media (max-width: 899px) {
+  .scrolly-wrap { grid-template-columns: 1fr; }
+  .scrolly-sticky { display: none; }
+  .meth-inline { display: block; }
+  .meth-step { opacity: 1; }
+}
 @media (max-width: 720px) {
   .model-tabs-row { gap: var(--s-3); overflow-x: auto; scrollbar-width: none; }
   .model-tabs-row::-webkit-scrollbar { display: none; }
