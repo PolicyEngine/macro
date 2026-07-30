@@ -120,7 +120,7 @@
           </tr>
           <tr>
             <th scope="row"><strong>Held add-factors</strong></th>
-            <td>Add-factors fitted 2024Q1–2025Q4, held flat, projected to 2027Q4 — a genuine forecast. Scored over 2026Q1–2027Q4 on the March 2026 baseline.</td>
+            <td>Add-factors fitted 2024Q1–2025Q4, held flat, projected to 2027Q4. Scored over 2026Q1–2027Q4 on the March 2026 baseline (caveats in the notes below).</td>
             <td>GDP 0.37%, consumption 0.33%; 6 of 8 computed variables within band. (The working paper's November-2025-vintage scorecard, over its own longer window, reports GDP 2.2% and consumption 3.6%.)</td>
           </tr>
           <tr>
@@ -155,14 +155,10 @@
     </div>
     <div class="prose">
       <p>
-        Anchored to the March 2026 EFO with OBR add-factors, the emulator
-        reproduces GDP to <strong>0.15% MAPE</strong> (mean absolute
-        percentage error — the average percentage gap from the reference
-        path) and consumption to
-        <strong>0.25%</strong> over 2025Q1&ndash;2027Q4 (CI gate: 1%). GDP
-        remains within 0.29% through 2031Q1, but unemployment becomes
-        unreliable after 2027Q4. Because anchoring is by construction, the
-        independent HMRC costing below is the stronger test.
+        The chart below shows the anchored tracking error quarter by quarter
+        (headline MAPEs are in the strip and table above); because anchoring
+        is by construction, the independent HMRC costing further down is the
+        stronger test.
       </p>
       <figure class="vfig">
         <svg class="vchart" data-chart="obr-anchored" viewBox="0 0 760 326" role="img" aria-labelledby="obr-anchored-t obr-anchored-d">
@@ -216,15 +212,13 @@
         <figcaption>Current March 2026 EFO baseline. CI hard-fails at &#177;1.00% — off the top and bottom of this frame. MAPE: 0.15% for GDP and 0.25% for consumption over 2025Q1–2027Q4. Computed from <code>papers/obr-macro/figures/fig_anchored_data.csv</code>, regenerated from the March 2026 detailed forecast tables on 21 July 2026.</figcaption>
       </figure>
       <p>
-        The independent check is the reform costing. Raising the basic rate
-        of income tax by 1pp from April 2026 scores at <strong>£6.46bn</strong>
-        in 2026&ndash;27 through the PolicyEngine static-costing bridge,
-        against HMRC's ready-reckoner figure of <strong>£6.9bn</strong> — a
-        deviation of &minus;6.4%; the costing sits inside the £6&ndash;8bn
-        range spanned by recent published vintages. The gap widens in later years
-        (&minus;15.6% by 2028&ndash;29) where HMRC's figures embed
-        administrative-data fiscal drag that survey microdata capture less
-        fully.
+        The independent check: a 1pp basic-rate rise from April 2026 scores
+        <strong>£6.46bn</strong> in 2026&ndash;27 via the PolicyEngine
+        static-costing bridge, against HMRC's <strong>£6.9bn</strong>
+        (&minus;6.4%), inside the £6&ndash;8bn range of recent vintages. The
+        gap widens later (&minus;15.6% by 2028&ndash;29), where HMRC's figures
+        embed administrative-data fiscal drag that survey microdata capture
+        less fully.
       </p>
       <figure class="vfig">
         <svg class="vchart" data-chart="obr-reform" viewBox="0 0 760 304" role="img" aria-labelledby="obr-reform-t obr-reform-d">
@@ -273,10 +267,6 @@
           <tr><th scope="row">2026&ndash;27</th><td>6.46</td><td>6.9</td><td>&minus;6.4%</td></tr>
           <tr><th scope="row">2028&ndash;29 (interpolated)</th><td>6.92</td><td>8.2</td><td>&minus;15.6%</td></tr>
           <tr><th scope="row">2030 (end of window)</th><td>7.38</td><td>≈8.2</td><td>&minus;10.0%</td></tr>
-          <tr><th colspan="4" scope="colgroup"><strong>Tracking error vs the published March 2026 EFO path, MAPE 2025Q1&ndash;2027Q4</strong></th></tr>
-          <tr><th scope="row">Anchored (GDP / consumption)</th><td>0.15% / 0.25%</td><td colspan="2">CI gate &lt;1% — passes</td></tr>
-          <tr><th scope="row">Held add-factors (GDP / consumption), 2026Q1&ndash;2027Q4 window</th><td>0.37% / 0.33%</td><td colspan="2">6 of 8 computed within band (paper's Nov-2025-vintage scorecard, over its own longer window: 2.2% / 3.6%)</td></tr>
-          <tr><th class="vc-warn" scope="row">Free-running, raw (GDP / consumption)</th><td class="vc-warn">5.75% / 9.56%</td><td colspan="2" class="vc-warn">over band — report-only, and weak</td></tr>
         </tbody>
       </table>
       </div>
@@ -306,16 +296,16 @@
 </svg>
         <figcaption>Raw calibration against the March 2026 EFO. Two &ldquo;off&rdquo; variables depend on unpublished OBR constants and are regression-gated rather than tuned. Source: <code>docs/calibration_scorecard.md</code> in the obr-macroeconomic-model repository.</figcaption>
       </figure>
-      <p class="vc-warn">
+      <p class="vc-warn" id="multiplier">
         <strong>The spending multiplier is ~1.0 by construction, against the
         OBR's own published 0.6.</strong> Under the demand closure a spending
         shock lands directly in the GDP identity and the behavioural second
         round is largely inactive, so a &pound;5bn injection returns almost
-        exactly &pound;5bn of GDP. That is roughly a
-        <strong>two-thirds overstatement</strong> of the impact multiplier
-        relative to the institution being replicated, and it applies to every
-        spending-side figure this page reports. It is the single most
-        important number for anyone reading a policy score off this model.
+        exactly &pound;5bn of GDP — roughly a
+        <strong>two-thirds overstatement</strong> of the impact multiplier,
+        applying to every spending-side figure this page reports. It is the
+        single most important number for anyone reading a policy score off
+        this model.
       </p>
       <p>
         Why, and what it biases &rarr; <a href="/obr">obr-macro overview</a>.
@@ -490,7 +480,7 @@
           </tr>
           <tr>
             <th scope="row"><strong>Impact multiplier ~1 by construction</strong></th>
-            <td>Under the demand closure a spending shock lands directly in the GDP identity and the behavioural second round is largely inactive. The OBR's published impact multiplier for current spending is 0.6.</td>
+            <td>~1.0 vs the OBR's published 0.6 — <a href="#multiplier">the warning above</a> explains why and what it biases.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Corporation-tax closure is specialised</strong></th>
