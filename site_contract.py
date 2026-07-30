@@ -18,7 +18,6 @@ PUBLIC_MODELS = (
 MODEL_INVENTORY_PAGES = (
     "index.html",
     "models/index.html",
-    "validation/index.html",
 )
 
 
@@ -43,9 +42,11 @@ def check_public_model_inventory() -> None:
             f"papers/index.html: missing {', '.join(missing_papers)}"
         )
 
-    validation = _read("validation/index.html")
+    # /validation was absorbed into /models#validation; the gradient claims
+    # now live on the models hub page.
+    validation = _read("models/index.html")
     if "The six models support" not in validation:
-        failures.append("validation/index.html: model count is not six")
+        failures.append("models/index.html: model count is not six")
 
     if failures:
         raise SystemExit("\n".join(failures))
@@ -121,7 +122,7 @@ def check_editorial_consistency() -> None:
     stale_claims = {
         "notes/2026-07-25-cpi-2026q2/index.html": "1992Q1–2023Q2",
         "papers/index.html": "against its November 2025 forecast",
-        "validation/index.html": "This audit covers the three macro models",
+        "models/index.html": "This audit covers the three macro models",
         "forecasts/index.html": "a forecast reported without one is marketing",
     }
     for path, stale in stale_claims.items():

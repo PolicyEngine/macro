@@ -26,7 +26,7 @@ DESTINATIONS = (
 )
 
 MODEL_ROOTS = {"models", "obr", "svar", "frb-us", "us-hank", "olg", "pe"}
-EVIDENCE_ROOTS = {"validation", "papers"}
+EVIDENCE_ROOTS = {"papers"}
 
 # Display names used in the pathway line and the footer directory.
 PAGE_NAMES = {
@@ -59,7 +59,6 @@ PAGE_NAMES = {
     "/olg/methodology": "Methodology",
     "/olg/validation": "Validation",
     "/pe": "PolicyEngine microsim",
-    "/validation": "Validation",
     "/papers": "Papers",
     "/papers/obr-macro": "obr-macro",
     "/papers/boe-svar": "boe-svar",
@@ -82,7 +81,6 @@ CRUMB_PARENTS = {
     "/us-hank": "/models",
     "/olg": "/models",
     "/pe": "/models",
-    "/validation": "/models",
     "/papers": "/models",
     "/score": "/connect",
 }
@@ -146,7 +144,7 @@ def crumbs(path: Path) -> str:
 
 GITHUB = """    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>"""
 FOOTER_LINKS = """    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
-    <a class="footer-text" href="/validation">Validation</a>
+    <a class="footer-text" href="/models#validation">Validation</a>
     <a class="footer-text" href="/papers">Papers</a>
     <a class="footer-text" href="/notes">Notes</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
