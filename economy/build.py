@@ -798,7 +798,7 @@ def home_uk_now() -> str:
         return (
             '        <div class="glance-row">\n'
             f'          <span class="g-name">{name} <small>{unit}</small></span>\n'
-            f'          <span class="g-cell"><strong>{out_v}</strong> <span class="mono">{out_p}</span><small>latest outturn</small></span>\n'
+            f'          <span class="g-cell"><strong>{out_v}</strong> <span class="mono">{out_p}</span></span>\n'
             '          <span class="g-arrow">&rarr;</span>\n'
             f'          <span class="g-cell"><strong>{fc_v}</strong> <span class="mono">{fc_p}</span><small>{fc_extra}</small></span>\n'
             "        </div>"
@@ -810,6 +810,10 @@ def home_uk_now() -> str:
     return "\n".join(
         [
             '      <div class="glance-rows">',
+            '        <div class="glance-row glance-row-head mono">'
+            '<span class="g-name">indicator</span>'
+            '<span>latest outturn</span><span></span>'
+            '<span>model near-term forecast</span></div>',
             row("Real GDP growth", "y/y", f"{fmt(g_now['value'])}%", g_now["period"],
                 f"{fmt(g_fc['median'])}%", g_period, rng(g_fc)),
             row("CPI inflation", "y/y", f"{fmt(c_now['value'])}%", c_now["period"],
@@ -847,15 +851,19 @@ def home_us_now() -> str:
         return (
             '        <div class="glance-row">\n'
             f'          <span class="g-name">{name} <small>{unit}</small></span>\n'
-            f'          <span class="g-cell"><strong>{out_v}</strong> <span class="mono">{out_p}</span><small>latest outturn</small></span>\n'
+            f'          <span class="g-cell"><strong>{out_v}</strong> <span class="mono">{out_p}</span></span>\n'
             '          <span class="g-arrow">&rarr;</span>\n'
-            f'          <span class="g-cell"><strong>{base_v}</strong> <span class="mono">{base_p}</span><small>LONGBASE baseline</small></span>\n'
+            f'          <span class="g-cell"><strong>{base_v}</strong> <span class="mono">{base_p}</span></span>\n'
             "        </div>"
         )
 
     return "\n".join(
         [
             '      <div class="glance-rows">',
+            '        <div class="glance-row glance-row-head mono">'
+            '<span class="g-name">indicator</span>'
+            '<span>latest outturn</span><span></span>'
+            '<span>LONGBASE baseline</span></div>',
             row("Real GDP growth", "y/y", f"{fmt(g_now['value'])}%", g_now["period"],
                 f"{fmt(g_base['gdp_yoy_pct'])}%", g_base["quarter"]),
             row("CPI inflation", "y/y", f"{fmt(c_now['value'])}%", c_now["period"],
