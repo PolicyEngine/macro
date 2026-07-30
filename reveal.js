@@ -42,8 +42,12 @@
   var nav = document.querySelector("header.nav");
   if (!nav) return;
   function set() {
-    document.documentElement.style.setProperty("--nav-h", nav.offsetHeight + "px");
+    document.documentElement.style.setProperty(
+      "--nav-h", nav.getBoundingClientRect().height + "px"
+    );
   }
   window.addEventListener("resize", set, { passive: true });
+  window.addEventListener("load", set);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(set);
   set();
 })();
