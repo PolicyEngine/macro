@@ -123,12 +123,14 @@ def build() -> str:
         f'<circle class="hf-dot" cx="{n(xs[-1])}" cy="{n(ymap(med[-1]))}" r="4"/>'
     )
 
-    out.append(
-        f'<text class="hf-tick hf-q" x="{n(x0)}" y="366">{esc(quarters[0])}</text>'
-    )
-    out.append(
-        f'<text class="hf-tick hf-q" x="{n(x1)}" y="366" text-anchor="end">{esc(quarters[-1])}</text>'
-    )
+    # Year labels along the x-axis: the first quarter's year at the left edge,
+    # then each subsequent year at its Q1 boundary.
+    for i, q in enumerate(quarters):
+        year, qtr = q.split("Q")
+        if i == 0 or qtr == "1":
+            out.append(
+                f'<text class="hf-tick hf-q" x="{n(xs[i])}" y="366">{esc(year)}</text>'
+            )
     # No in-SVG caption: the <figcaption> next to this figure says the same thing
     # at real body size. Below 1000px the viewBox scales to roughly half, which
     # would render these 11px labels at ~6px, so style.css hides .hf-tick there

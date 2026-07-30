@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OBR emulator validation — PolicyEngine Macro</title>
+<meta name="description" content="How far to trust the OBR emulator: anchored, held-add-factor, and free-running scorecards against the March 2026 EFO, with known limits stated." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/obr/validation" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://policyengine-macro.vercel.app/obr/validation" />
+<meta property="og:site_name" content="PolicyEngine Macro" />
+<meta property="og:title" content="OBR emulator validation — PolicyEngine Macro" />
+<meta property="og:description" content="How far to trust the OBR emulator: anchored, held-add-factor, and free-running scorecards against the March 2026 EFO, with known limits stated." />
+<meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
+<meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css" />
+<style>
+/* page-specific: hero sizing only — shared component styles live in style.css */
+.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
+</style>
+</head>
+<body class="doc">
+<a class="skip-link" href="#top">Skip to main content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a class="nav-mobile" href="/">Home</a>
+    <a class="nav-mobile" href="/economy">Economy</a>
+    <a class="nav-mobile" href="/models" aria-current="true">Models</a>
+    <a class="nav-mobile" href="/forecasts">Forecasts</a>
+    <a class="nav-mobile nav-start" href="/connect">Use</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<nav class="crumbs mono" aria-label="You are here">
+    <a href="/">Home</a>
+    <a href="/models">Models</a>
+    <a href="/obr">OBR emulator</a>
+    <span aria-current="page">Validation</span>
+</nav>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <p class="eyebrow reveal" style="--d:0">model 01 — OBR macroeconometric model · obr-macro · UK · hosted</p>
+      <h1 class="reveal page-title" style="--d:1;">
+        UK fiscal reform, quarter by quarter.
+      </h1>
+      <p class="lede reveal" style="--d:2">
+        Run selected UK tax and spending scenarios and trace GDP, consumption,
+        and investment over 3–5 years against the March 2026 EFO baseline.
+        Borrowing is not yet returned by the PolicyEngine Macro adapter.
+      </p>
+      <div class="hero-cta reveal" style="--d:3">
+        <a class="btn btn-primary" href="/obr/code#run">Run it</a>
+        <a class="btn btn-ghost" href="https://github.com/PolicyEngine/obr-macroeconomic-model">Read the code</a>
+      </div>
+    </div>
+  </section>
+
+  <nav class="model-tabs" aria-label="OBR emulator pages">
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="/obr">Overview</a>
+      <a class="model-tabs-link" href="/obr/code">Code</a>
+      <a class="model-tabs-link" href="/obr/methodology">Methodology</a>
+      <a class="model-tabs-link" href="/obr/validation" aria-current="page">Validation</a>
+      <a class="model-tabs-link" href="/papers/obr-macro">Paper</a>
+    </div>
+  </nav>
+
+  <section id="trust" class="band band-result">
+    <div class="band-head">
+      <span class="kicker mono">how far to trust it</span>
+      <h2>Excellent anchored. Weak free-running. Both published.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        There are three configurations and they earn very different levels of
+        trust. Anchored is a by-construction invariant, not a forecast claim:
+        the add-factors absorb the tracking error, which is exactly what
+        anchoring means, and CI hard-fails the build if it slips. Errors below
+        are reported as MAPE — mean absolute percentage error, the average
+        percentage gap from the published path.
+      </p>
+    </div>
+    <div class="metrics">
+      <div class="metric">
+        <span class="metric-label mono">anchored — real GDP</span>
+        <span class="metric-val">0.15<span class="metric-vs">% MAPE</span></span>
+        <span class="metric-note">vs published EFO; CI fails at 1%</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label mono">anchored — consumption</span>
+        <span class="metric-val">0.25<span class="metric-vs">% MAPE</span></span>
+        <span class="metric-note">vs published EFO; CI fails at 1%</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label mono">held-add-factor forecast</span>
+        <span class="metric-val">0.37<span class="metric-vs">% MAPE</span></span>
+        <span class="metric-note">real GDP, 2026Q1–2027Q4 window; 6 of 8 computed in band</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label mono">free-running</span>
+        <span class="metric-val">5.75<span class="metric-vs">% MAPE</span></span>
+        <span class="metric-note">real GDP; 4 of 11 computed in band — report-only</span>
+      </div>
+    </div>
+    <div class="prose">
+      <div class="table-scroll"><table>
+        <caption>The three emulator configurations and how each one scores</caption>
+        <thead><tr><th scope="col">configuration</th><th scope="col">what it is</th><th scope="col">how it scores</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><strong>Anchored</strong></th>
+            <td>Add-factors on, matched to the March 2026 EFO. The configuration every reform score uses.</td>
+            <td>GDP 0.15% MAPE, consumption 0.25% over 2025Q1–2027Q4; the horizon extends to 2031Q1, where GDP is reproduced to 0.29% (anchored unemployment is unreliable beyond 2027Q4). Hard-gated in CI, alongside finiteness and a 0.5%-of-GDP expenditure-identity check. Structural sign invariants gated too.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Held add-factors</strong></th>
+            <td>Add-factors fitted 2024Q1–2025Q4, held flat, projected to 2027Q4 — a genuine forecast. Scored over 2026Q1–2027Q4 on the March 2026 baseline.</td>
+            <td>GDP 0.37%, consumption 0.33%; 6 of 8 computed variables within band. (The working paper's November-2025-vintage scorecard, over its own longer window, reports GDP 2.2% and consumption 3.6%.)</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Free-running</strong></th>
+            <td>De-seeded, add-factors off. The raw structural dynamics with no OBR judgement.</td>
+            <td><strong>Weak, and reported as such.</strong> GDP 5.75%, consumption 9.56%, household income 14.15%, business investment 16.12%, company profits 79.80%. The model contracts 1–2%/yr while the EFO grows.</td>
+          </tr>
+        </tbody>
+      </table></div>
+    </div>
+    <p class="chart-note" style="max-width: 80ch;">
+      "In band" collapses per-metric thresholds — rates within 1.0pp, net
+      balances within 1.5% of GDP, levels within 10% MAPE. Two caveats travel
+      with the forecast configuration: it is initialised at the EFO values it
+      is scored against, and its add-factor base window extends into quarters
+      that are themselves OBR forecast rather than outturn, so the held
+      add-factors partly encode "agree with the OBR". Full scorecards in the
+      <a href="/papers/obr-macro">working paper</a>; charts and source data
+      in <a href="/validation">validation</a>.
+    </p>
+    <div class="prose">
+      <p class="callout">
+        This is an independent implementation built from the OBR's published
+        model code and forecast data. It is not produced, maintained, or
+        endorsed by the Office for Budget Responsibility, and its results
+        should not be presented as official OBR estimates.
+      </p>
+    </div>
+  </section>
+
+  <section id="caveats" class="band">
+    <div class="band-head">
+      <span class="kicker mono">limits</span>
+      <h2>Known limitations.</h2>
+    </div>
+    <div class="prose">
+      <div class="table-scroll"><table>
+        <caption>Known limits of the OBR emulator</caption>
+        <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><strong>Two household-income equations never fire</strong></th>
+            <td>The listing's only bare <code>log()</code> left-hand sides — <code>log(HHTFA)</code> and <code>log(NDIVHH)</code> — do not execute, because their right-hand-side inputs <code>MAJGDP</code> and <code>CORP</code> are absent from the databank entirely. The profits → dividends → household-income channel therefore does not run: a 5pp corporation-tax rise moves <code>FYCPR</code> by −£1,780m while ΔNDIVHH is exactly zero. A parser fix landed and is numerically inert; reviving the channel needs a <code>CORP</code> series, a calibration decision we have not made. Every published figure is computed with these channels inert.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Impact multiplier ~1 by construction</strong></th>
+            <td>Under the demand closure a spending shock lands directly in the GDP identity and the behavioural second round is largely inactive. The OBR's published impact multiplier for current spending is 0.6.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Corporation-tax closure is specialised</strong></th>
+            <td>The investment closure activates the published <code>TCPRO</code> → cost-of-capital → investment chain and is available through <code>obr_shock</code>. It reconstructs the business-investment equation from the OBR's commented, truncated published line, anchors its level with held add-factors, and freezes <code>MSGVA</code>, <code>PIF</code>, and <code>PIRHH</code> to a shared tracking path to prevent uncalibrated feedback. CI hard-gates the expected sign and a £50bn-per-quarter bound; this is a controlled scenario closure, not a fully calibrated supply block.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Passthrough channels</strong></th>
+            <td>Exports, imports and CPI are exogenous in this setup, held at the OBR value. They score 0.00% error without being behavioural wins — 10 of 21 scorecard lines are passthroughs and are labelled as such.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Approximated add-factors</strong></th>
+            <td>Recent corrections are averaged and held flat. The OBR's judgemental, quarter-by-quarter add-factors are not reproduced.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Vintage</strong></th>
+            <td>October 2025 equation listing, March 2026 EFO, current-vintage ONS series. Where the ONS has revised history the identities don't close exactly, and that slack lands in the add-factors. The working paper's results remain a November 2025 EFO vintage study.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>No behavioural micro</strong></th>
+            <td>Aggregate equations only. Distributional questions belong to <a href="/pe">PolicyEngine</a>.</td>
+          </tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot foot-bar">
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/validation">Validation</a>
+    <a class="footer-text" href="/papers">Papers</a>
+    <a class="footer-text" href="/notes">Notes</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="/contact">Contact</a>
+  </nav>
+</footer>
+
+<script src="/reveal.js" defer></script>
+<script>
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest("[data-copy]"); if (!btn) return;
+  var code = btn.parentElement.querySelector("code");
+  navigator.clipboard.writeText(code.textContent).then(function () {
+    btn.textContent = "copied";
+    setTimeout(function () { btn.textContent = "copy"; }, 1400);
+  });
+});
+</script>
+</body>
+</html>

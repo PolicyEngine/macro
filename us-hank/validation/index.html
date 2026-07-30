@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The US HANK model — PolicyEngine Macro</title>
-<meta name="description" content="A validated replication of the two-asset heterogeneous-agent New Keynesian model of Auclert, Bardóczy, Rognlie and Straub (Econometrica 2021), solved in the sequence space at the paper's production grids — stylized US shocks with first-order distributional output. Not a forecaster; does not score reforms." />
-<link rel="canonical" href="https://policyengine-macro.vercel.app/us-hank" />
+<title>US HANK validation — PolicyEngine Macro</title>
+<meta name="description" content="How far to trust us-hank: an 18-test replication gate against the published Econometrica 2021 results, the steady-state calibration check, and the model's known limits." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/us-hank/validation" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://policyengine-macro.vercel.app/us-hank" />
+<meta property="og:url" content="https://policyengine-macro.vercel.app/us-hank/validation" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
-<meta property="og:title" content="us-hank — PolicyEngine Macro" />
+<meta property="og:title" content="US HANK validation — PolicyEngine Macro" />
 <meta property="og:description" content="A validated replication of the Auclert–Bardóczy–Rognlie–Straub (2021) two-asset HANK — stylized US shocks with first-order distributional output. Not a forecaster." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
@@ -46,7 +46,8 @@
 <nav class="crumbs mono" aria-label="You are here">
     <a href="/">Home</a>
     <a href="/models">Models</a>
-    <span aria-current="page">US HANK</span>
+    <a href="/us-hank">US HANK</a>
+    <span aria-current="page">Validation</span>
 </nav>
 
 <main id="top">
@@ -71,82 +72,84 @@
 
   <nav class="model-tabs" aria-label="US HANK pages">
     <div class="model-tabs-row">
-      <a class="model-tabs-link" href="/us-hank" aria-current="page">Overview</a>
+      <a class="model-tabs-link" href="/us-hank">Overview</a>
       <a class="model-tabs-link" href="/us-hank/code">Code</a>
       <a class="model-tabs-link" href="/us-hank/methodology">Methodology</a>
-      <a class="model-tabs-link" href="/us-hank/validation">Validation</a>
+      <a class="model-tabs-link" href="/us-hank/validation" aria-current="page">Validation</a>
       <a class="model-tabs-link" href="/reports/us-hank-open-source">Paper</a>
     </div>
   </nav>
 
-  <section id="what" class="band">
+  <section id="trust" class="band band-result">
     <div class="band-head">
-      <span class="kicker mono">01 — what it is</span>
-      <h2>The distributional member for the US.</h2>
+      <span class="kicker mono">01 — how far to trust it</span>
+      <h2>A replication gate, not a forecast-accuracy claim.</h2>
     </div>
     <div class="prose">
       <p>
-        This is a <strong>validated replication</strong> of the two-asset
-        heterogeneous-agent New Keynesian (HANK) model of Auclert, Bardóczy,
-        Rognlie and Straub — the model of their <em>Econometrica</em> 2021
-        paper, "Using the Sequence-Space Jacobian to Solve and Estimate
-        Heterogeneous-Agent Models" — built directly on the authors'
-        <code>sequence-jacobian</code> toolkit at the paper's production grid
-        sizes rather than the packaged demo grids.
+        The ground truth here is the published paper. The model repository's
+        <strong>18-test suite</strong> gates the steady-state calibration
+        targets, market clearing, and the signs and magnitudes of the shock
+        responses against the published Econometrica 2021 results, and the
+        implementation builds on the authors' own
+        <code>sequence-jacobian</code> toolkit rather than re-deriving the
+        model. That makes fidelity strong and the claim narrow: this is
+        evidence the replication is right, not evidence the model predicts
+        the US economy — no predictive validation exists or is claimed.
+        The hosted steady state is set against the paper's published
+        calibration targets, value by value, on the
+        <a href="/validation#hank">validation page</a>.
+      </p>
+      <p class="callout">
+        This is an independent replication of a published academic model. It
+        is not produced or endorsed by the paper's authors, and its results
+        are model counterfactuals, not official estimates or forecasts.
       </p>
       <p>
-        Where <a href="/frb-us">frb-us</a> answers "how much does US output
-        move after a shock", this model answers a question frb-us cannot:
-        <strong>who</strong> moves. Households differ in liquid and illiquid
-        wealth, so their marginal propensities to consume differ, and the
-        model carries that whole distribution through the general-equilibrium
-        response. It is a <strong>VAR-free, sequence-space HANK</strong>: no
-        estimated reduced form, no expectations shortcut — first-order
-        impulse responses computed from the model's own general-equilibrium
-        Jacobian.
-      </p>
-      <p>
-        It is <strong>not a forecaster</strong>, and it does not score
-        detailed tax reforms: it scores <strong>stylized shocks</strong> —
-        monetary, fiscal spending, and productivity — around a calibrated
-        steady state, and its distributional outputs are first-order
-        approximations from steady-state policies.
+        For how this model sits among other open-source HANK implementations
+        — code, data, and reach — see the
+        <a href="/reports/us-hank-open-source.html">open US HANK model
+        landscape report</a>. The <code>sequence-jacobian</code> toolkit it
+        builds on is at
+        <a href="https://github.com/shade-econ/sequence-jacobian">shade-econ/sequence-jacobian</a>.
       </p>
     </div>
   </section>
 
-  <section id="answers" class="band">
+  <section id="caveats" class="band">
     <div class="band-head">
-      <span class="kicker mono">02 — what it can answer</span>
-      <h2>Stylized US shocks, with the household distribution attached.</h2>
+      <span class="kicker mono">02 — limits</span>
+      <h2>Known limitations.</h2>
     </div>
     <div class="prose">
-      <p>
-        The model's designed job is the qualitative and quantitative
-        <em>transmission</em> of a stylized aggregate shock through a
-        realistic household wealth distribution: how a monetary easing raises
-        output, consumption, investment and inflation; how a tax-financed
-        spending expansion raises output while the endogenous labor tax leans
-        on consumption; and how the response concentrates among
-        <strong>high-MPC, low-liquid-wealth households</strong> — the economic
-        point of a HANK model, and the thing a representative-agent model
-        cannot say.
-      </p>
-      <div class="callout">
-        <strong>It cannot</strong> forecast — responses are deviations around
-        a calibrated steady state, not a projection of the US economy. It
-        cannot score a PolicyEngine reform: <code>score_reform</code> refuses
-        <code>model="hank"</code> outright, because the model has three
-        stylized instruments and an endogenous labor tax, so no mapping from
-        statute exists. Its responses are <strong>first-order</strong> —
-        linear in the shock, with no state dependence — and its
-        distributional cuts are first-order approximations from steady-state
-        policies, not full household-level dynamics.
-      </div>
+      <div class="table-scroll"><table>
+        <caption>Known limits of the us-hank implementation</caption>
+        <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><strong>Not a forecaster</strong></th>
+            <td>There is no data, no estimation, and no forecast origin: every result is an impulse response around the paper's calibrated steady state. Use <a href="/svar">boe-svar</a> (UK) for forecasts; nothing in this suite forecasts the US.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Stylized instruments only</strong></th>
+            <td>Three shock kinds — monetary, fiscal spending, productivity. The labor tax is endogenous (the fiscal block balances the budget), so there is no transfer or tax-rate instrument, and <code>score_reform</code> refuses <code>model="hank"</code> rather than inventing a reform mapping.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>First-order responses</strong></th>
+            <td>IRFs are linear in the shock size, with no state dependence, no zero-lower-bound, and no asymmetry between large and small or positive and negative shocks.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Approximate distributional output</strong></th>
+            <td>The by-quartile consumption response allocates the aggregate response in proportion to steady-state MPCs. It captures the MPC-heterogeneity channel, not full household-level dynamics along the transition.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Calibration, not vintage</strong></th>
+            <td>The parameterisation is the published paper's. There is no data vintage to refresh; revisiting the calibration would be a deliberate model change, not a data update.</td>
+          </tr>
+        </tbody>
+      </table></div>
     </div>
   </section>
-
-
 
 </main>
 
@@ -163,5 +166,6 @@
 </footer>
 
 <script src="/reveal.js" defer></script>
+
 </body>
 </html>

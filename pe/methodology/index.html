@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PolicyEngine tax-benefit microsimulation — PolicyEngine Macro</title>
-<meta name="description" content="PolicyEngine.py: the micro member of the PolicyEngine Macro suite — a tax-benefit microsimulation package for the UK and US. Compute a household's taxes, benefits, and net income under current law or a reform." />
-<link rel="canonical" href="https://policyengine-macro.vercel.app/pe" />
+<title>PolicyEngine microsim methodology — PolicyEngine Macro</title>
+<meta name="description" content="How the PolicyEngine tax-benefit microsimulation works: variables, entities and a dependency graph of statute, plus the enhanced survey microdata population runs rest on." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/pe/methodology" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://policyengine-macro.vercel.app/pe" />
+<meta property="og:url" content="https://policyengine-macro.vercel.app/pe/methodology" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
-<meta property="og:title" content="PolicyEngine tax-benefit microsimulation — PolicyEngine Macro" />
+<meta property="og:title" content="PolicyEngine microsim methodology — PolicyEngine Macro" />
 <meta property="og:description" content="The UK and US tax-benefit engine behind policyengine.org — deterministic household rule calculations and survey-based population scoring." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
@@ -46,7 +46,8 @@
 <nav class="crumbs mono" aria-label="You are here">
     <a href="/">Home</a>
     <a href="/models">Models</a>
-    <span aria-current="page">PolicyEngine microsim</span>
+    <a href="/pe">PolicyEngine microsim</a>
+    <span aria-current="page">Methodology</span>
 </nav>
 
 <main id="top">
@@ -70,58 +71,69 @@
 
   <nav class="model-tabs" aria-label="PolicyEngine microsim pages">
     <div class="model-tabs-row">
-      <a class="model-tabs-link" href="/pe" aria-current="page">Overview</a>
+      <a class="model-tabs-link" href="/pe">Overview</a>
       <a class="model-tabs-link" href="/pe/code">Code</a>
-      <a class="model-tabs-link" href="/pe/methodology">Methodology</a>
+      <a class="model-tabs-link" href="/pe/methodology" aria-current="page">Methodology</a>
       <a class="model-tabs-link" href="/pe/validation">Validation</a>
     </div>
   </nav>
 
-  <section id="what" class="band">
+  <section id="how" class="band">
     <div class="band-head">
-      <span class="kicker mono">01 — what it is</span>
-      <h2>Statute as code, at household resolution.</h2>
+      <span class="kicker mono">methodology</span>
+      <h2>Rules, entities, and a dependency graph.</h2>
     </div>
     <div class="prose">
       <p>
-        The package encodes UK and US tax-and-benefit rules as parameterised
-        statute and computes every variable for a household you describe —
-        for the UK: income tax, National Insurance, Universal Credit, Child
-        Benefit, Pension Credit; for the US: federal and state income tax,
-        payroll tax, SNAP, TANF, EITC, CTC, SSI and Social Security. A reform
-        is a flat dict of parameter path → new value, the same shape at
-        household and population level.
+        Every quantity in the system — an allowance, a taper, a means test —
+        is a variable with a formula and a set of dated parameters. Asking for
+        one variable resolves the graph beneath it, so a household net-income
+        figure is computed from the statutory chain rather than approximated
+        by a schedule. Variables are attached to <strong>entities</strong>,
+        and the entity structure differs by country: the UK has three
+        (person, benefit unit, household), the US six (person, tax unit, SPM
+        unit, family, marital unit, household), because US programmes are
+        assessed on differently drawn units.
       </p>
       <p>
-        Four layers: <code>policyengine-core</code> (the simulation framework,
-        originally forked from OpenFisca), <code>policyengine-uk</code> and
-        <code>policyengine-us</code> (the statutory rules per country), and
-        <code>policyengine</code> — the analyst-facing package this page
-        covers, which adds dataset management, reforms, structured outputs
-        and version-pinned release bundles for reproducibility.
-      </p>
-      <p>
-        Within the suite it is the complement to the macro engines, and it
-        feeds two of them: the <a href="/olg">OLG model</a> consumes its
-        effective and marginal rates to build tax functions, and the
-        <a href="/obr">OBR emulator</a> takes its static costing as the
-        direct effect and returns the second-round one. This page is the
-        direct route to the engine itself.
-      </p>
-      <p>
-        The rest of this model's pages show it three ways: the
-        <a href="/pe/code">code</a> you would actually run — install, a
-        household in one call, and population scoring — the
-        <a href="/pe/methodology">methodology</a> underneath, and
-        <a href="/pe/validation">how far to trust it</a>.
+        A reform re-dates a parameter and re-resolves the same graph, which is
+        why the household and population APIs take reforms in the identical
+        format. Each release pins the country-model and dataset versions it
+        certifies, so a published estimate can be traced to the exact bundle
+        that produced it.
       </p>
     </div>
   </section>
 
-
-
-
-
+  <section id="data" class="band">
+    <div class="band-head">
+      <span class="kicker mono">data enhancement</span>
+      <h2>Survey microdata, enhanced.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Household calculations need no data at all — the inputs are the ones
+        you type. Population results run the same rule graph over a
+        representative survey dataset: for the UK the <strong>enhanced Family
+        Resources Survey</strong> (currently the
+        <code>enhanced_frs_2023_24</code> vintage), for the US the
+        <strong>Current Population Survey</strong>. The UK enhancement imputes
+        under-reported incomes and reweights the survey so that aggregates
+        better match administrative totals, and the resulting microdata is
+        distributed through a gated Hugging Face repository
+        (<code>policyengine/policyengine-uk-data</code>).
+      </p>
+      <p>
+        Because population estimates rest on survey data, they inherit
+        sampling error and imputation and ageing assumptions in a way a
+        household calculation does not — the consequences are set out on the
+        <a href="/pe/validation">validation page</a>. Within the suite, this
+        same microdata is what the <a href="/olg">OLG model</a> consumes to
+        estimate its tax functions, and the static costings it produces are
+        what the <a href="/obr">OBR emulator</a> takes as the direct effect.
+      </p>
+    </div>
+  </section>
 
 </main>
 
@@ -138,15 +150,6 @@
 </footer>
 
 <script src="/reveal.js" defer></script>
-<script>
-document.addEventListener("click", function (e) {
-  var btn = e.target.closest("[data-copy]"); if (!btn) return;
-  var code = btn.parentElement.querySelector("code");
-  navigator.clipboard.writeText(code.textContent).then(function () {
-    btn.textContent = "copied";
-    setTimeout(function () { btn.textContent = "copy"; }, 1400);
-  });
-});
-</script>
+
 </body>
 </html>

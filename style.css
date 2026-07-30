@@ -2397,18 +2397,88 @@ h2 {
 .diagram-modal-close:hover { color: var(--brand-strong); border-color: var(--brand); }
 .diagram-modal-body svg { width: 100%; height: auto; }
 
-/* At a glance: UK and US side by side. */
+/* At a glance: UK and US side by side as cards; the source note sits
+   under each table rather than crowding the top. */
 .glance-both {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--s-6);
-  align-items: start;
+  align-items: stretch;
+}
+.glance-col {
+  display: flex;
+  flex-direction: column;
+  padding: var(--s-5);
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--surface);
+  min-width: 0;
 }
 .glance-title {
-  margin: 0 0 var(--s-3);
-  color: var(--paper-faint);
-  font-size: var(--fs-label);
+  margin: 0 0 var(--s-4);
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--paper);
+  font-size: var(--fs-small);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
 }
+.glance-col table { width: 100%; }
+.glance-col caption {
+  caption-side: bottom;
+  padding-top: var(--s-4);
+  text-align: left;
+  font-size: var(--fs-body-sm);
+  line-height: 1.55;
+  color: var(--paper-faint);
+}
 @media (max-width: 960px) { .glance-both { grid-template-columns: 1fr; } }
+
+/* ---------- OLG showcase runtime charts (/olg #showcase) ----------
+   Appended rules only: toolbar selects, per-chart legends and a panel-title
+   text class for the SVG charts drawn at runtime from tpi_data.json. */
+.olg-toolbar {
+  display: flex; flex-wrap: wrap; gap: 12px 22px; align-items: center;
+  margin: 18px 0 4px;
+}
+.olg-toolbar label {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-family: var(--mono); font-size: var(--fs-tick, 0.8rem);
+  color: var(--paper-dim); text-transform: uppercase; letter-spacing: 0.04em;
+}
+.olg-toolbar select {
+  font: inherit; font-family: var(--body); text-transform: none;
+  letter-spacing: normal; color: var(--text);
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 6px; padding: 6px 10px; min-width: 12ch; cursor: pointer;
+}
+.olg-toolbar select:hover { border-color: var(--brand); }
+.olg-toolbar select:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+.olg-chart svg { width: 100%; height: auto; display: block; }
+.olg-legend {
+  display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 8px 0 2px;
+  font-family: var(--mono); font-size: 0.76rem; color: var(--paper-dim);
+}
+.olg-legend .li { display: inline-flex; align-items: center; gap: 7px; }
+.olg-legend .ln {
+  display: inline-block; width: 24px; height: 0;
+  border-top: 2.4px solid var(--paper-dim);
+}
+.olg-legend .ln.dashed { border-top-style: dashed; }
+.olg-legend .ln.dotted { border-top-style: dotted; border-top-width: 2.8px; }
+.olg-legend .ln.grey { border-top-color: #95a5a6; }
+.olg-legend .ln.gold { border-top-color: #b8860b; }
+.vchart .vc-title { fill: var(--text); font-size: 12.5px; font-weight: 600; }
+
+/* ============================================================
+   papers/psl-og — paper page with the OG-UK subtab bar.
+   Header offset lives on .model-tabs-first below; these rules
+   cover the page's callouts only. Scoped to that page.
+   ============================================================ */
+.paper-viewer-tabbed .callout strong { color: var(--brand); font-weight: 600; }
+.cite-note { margin-top: var(--s-4); }
+
+/* Subtab bar as the first element of <main> (paper pages): clear the fixed
+   header instead of sliding under it. */
+.model-tabs-first { margin-top: calc(var(--nav-h, 62px) + 34px); }
+.model-tabs-first + .paper-viewer { padding-top: clamp(28px, 5vh, 48px); }

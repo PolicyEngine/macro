@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BoE SVAR validation — PolicyEngine Macro</title>
+<meta name="description" content="How far to trust the BoE SVAR replication: replication checks against Brignone &amp; Piffer (2025), a frozen-edge out-of-sample forecast score, and the known limits." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/svar/validation" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://policyengine-macro.vercel.app/svar/validation" />
+<meta property="og:site_name" content="PolicyEngine Macro" />
+<meta property="og:title" content="BoE SVAR validation — PolicyEngine Macro" />
+<meta property="og:description" content="Figures 2–6 replicate, 0.32pp out-of-sample RMSE from a frozen 2024Q2 edge, and every deviation from the Bank's model enumerated." />
+<meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
+<meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css" />
+<style>
+/* page-specific: hero sizing only — shared component styles live in style.css */
+.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
+</style>
+</head>
+<body class="doc">
+<a class="skip-link" href="#top">Skip to main content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a class="nav-mobile" href="/">Home</a>
+    <a class="nav-mobile" href="/economy">Economy</a>
+    <a class="nav-mobile" href="/models" aria-current="true">Models</a>
+    <a class="nav-mobile" href="/forecasts">Forecasts</a>
+    <a class="nav-mobile nav-start" href="/connect">Use</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<nav class="crumbs mono" aria-label="You are here">
+    <a href="/">Home</a>
+    <a href="/models">Models</a>
+    <a href="/svar">BoE SVAR</a>
+    <span aria-current="page">Validation</span>
+</nav>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <p class="eyebrow reveal" style="--d:0">model 02 — Bank of England structural VAR · boe-svar · UK · hosted</p>
+      <h1 class="reveal page-title" style="--d:1;">
+        Explain UK growth and inflation.
+      </h1>
+      <p class="lede reveal" style="--d:2">
+        Decompose UK GDP and inflation into six structural shocks, forecast
+        with credible bands, and explain revisions between quarters.
+      </p>
+      <div class="hero-cta reveal" style="--d:3">
+        <a class="btn btn-primary" href="/svar/code#run">Run it</a>
+        <a class="btn btn-ghost" href="https://github.com/PolicyEngine/boe-var-model">Read the code</a>
+        <a class="btn btn-ghost" href="/validation">Validation</a>
+      </div>
+    </div>
+  </section>
+
+  <nav class="model-tabs" aria-label="BoE SVAR pages">
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="/svar">Overview</a>
+      <a class="model-tabs-link" href="/svar/code">Code</a>
+      <a class="model-tabs-link" href="/svar/methodology">Methodology</a>
+      <a class="model-tabs-link" href="/svar/validation" aria-current="page">Validation</a>
+      <a class="model-tabs-link" href="/papers/boe-svar">Paper</a>
+    </div>
+  </nav>
+
+  <section id="trust" class="band band-result">
+    <div class="band-head">
+      <span class="kicker mono">how far to trust it</span>
+      <h2>Replicates the paper; forecast evidence remains limited.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Two independent checks. First, against the published paper: Figures
+        2–6 replicate and the headline variance decompositions land on the
+        paper's benchmarks. Second — and rarer — the 2024Q2-frozen forecast study
+        can be scored against ONS outturns that have arrived since, a genuine
+        out-of-sample test that only exists <em>because</em> the data edge is
+        frozen.
+      </p>
+      <div class="table-scroll"><table>
+        <caption>This replication against Brignone &amp; Piffer (2025), check by check</caption>
+        <thead><tr><th scope="col">check</th><th scope="col">this replication</th><th scope="col">the paper</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row">Global shocks' share of UK GDP variance (1 year)</th>
+            <td><strong>42.1%</strong></td>
+            <td>~40%</td>
+          </tr>
+          <tr>
+            <th scope="row">Global shocks' share of UK CPI variance (1 year)</th>
+            <td><strong>49.5%</strong></td>
+            <td>~50%</td>
+          </tr>
+          <tr>
+            <th scope="row">IRFs, FEVDs, shocks, historical decompositions</th>
+            <td>Figures 2–6 replicate</td>
+            <td>qualitative match</td>
+          </tr>
+          <tr>
+            <th scope="row">Out-of-sample forecast error, 2024Q3–2026Q1</th>
+            <td><strong>0.32pp RMSE</strong> for both GDP growth and CPI inflation</td>
+            <td>no published counterpart</td>
+          </tr>
+          <tr>
+            <th scope="row">68% band coverage over the same seven quarters</th>
+            <td><strong>14 of 14 outturns inside</strong></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <th scope="row">Forecast-revision adding-up identity</th>
+            <td>exact per draw (max abs error 5.23e-12)</td>
+            <td>holds by construction</td>
+          </tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="metrics">
+      <div class="metric">
+        <span class="metric-label mono">out-of-sample RMSE</span>
+        <span class="metric-val">0.32<span class="metric-vs">pp</span></span>
+        <span class="metric-note">GDP growth and CPI, 7 quarters from a frozen edge</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label mono">68% band coverage</span>
+        <span class="metric-val">14<span class="metric-vs">/14</span></span>
+        <span class="metric-note">no outturn escaped even the 68% band &mdash; though the <a href="/validation#forecasters">49-origin rolling evaluation</a> finds the bands under-cover on average</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label mono">tests</span>
+        <span class="metric-val">comprehensive</span>
+        <span class="metric-note">estimation, identification, and analysis coverage</span>
+      </div>
+    </div>
+    <p class="chart-note" style="max-width: 80ch;">
+      The honest reading of the forecast score: the model was right that the
+      2025 inflation hump would mean-revert and wrong about its peak, by up to
+      0.6 points — outturns of 3.5 and 3.8% against medians of 3.2%, inside
+      the 68% band but on its upper half. It never saw the Ofgem cap
+      increases, food inflation, or the April 2025 administered price rises.
+      Charts and source data in <a href="/validation">validation</a>; full
+      quarterly scorecard in the <a href="/papers/boe-svar">working paper</a>.
+    </p>
+      <p class="callout">
+        This is an independent replication built from Bank of England Macro
+        Technical Paper No. 3 and public data. It is not produced,
+        maintained, or endorsed by the Bank of England, and its results
+        should not be presented as Bank of England estimates.
+      </p>
+  </section>
+
+  <section id="caveats" class="band">
+    <div class="band-head">
+      <span class="kicker mono">limits</span>
+      <h2>Where this departs from the Bank's model.</h2>
+    </div>
+    <div class="prose">
+      <div class="table-scroll"><table>
+        <caption>Known limits of the structural VAR replication</caption>
+        <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><strong>Frozen data edge</strong></th>
+            <td>Coefficient estimation to 2025Q1; conditioning data to 2026Q1 (refreshed July 2026). Results shift with data revisions. The replication claims are scored on the extended 1992Q1&ndash;2025Q1 sample, not the paper's original 1992Q1&ndash;2023Q2 window.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Proxied world aggregates</strong></th>
+            <td>The Bank's internal UK-trade-weighted world GDP and CPI are unpublished, so they are rebuilt as chain-weighted US + euro-area + Japan + China aggregates with time-varying UK trade weights.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>One ranking does not replicate</strong></th>
+            <td>The paper ranks UK monetary policy as the largest domestic contributor to CPI variance; here UK supply (13.5%) exceeds monetary policy (10.1%). Attributed to the proxy world aggregates and the smaller accepted sample, and documented rather than tuned away.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Assumed lag length and simplified pandemic prior</strong></th>
+            <td>p&nbsp;=&nbsp;4 is assumed, not selected; the pandemic treatment is simplified to exogenous Covid dummies.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Sign-restriction critiques apply</strong></th>
+            <td>Pointwise medians mix structural models (Fry–Pagan); the Haar prior over rotations is informative about impulse responses (Baumeister–Hamilton). These apply to the Bank's own outputs identically.</td>
+          </tr>
+        </tbody>
+      </table></div>
+      <p class="opt-note">
+        every deviation is enumerated in the repository's
+        <code>docs/methodology.md</code>.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot foot-bar">
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/validation">Validation</a>
+    <a class="footer-text" href="/papers">Papers</a>
+    <a class="footer-text" href="/notes">Notes</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="/contact">Contact</a>
+  </nav>
+</footer>
+
+<script src="/reveal.js" defer></script>
+<script>
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest("[data-copy]"); if (!btn) return;
+  var code = btn.parentElement.querySelector("code");
+  navigator.clipboard.writeText(code.textContent).then(function () {
+    btn.textContent = "copied";
+    setTimeout(function () { btn.textContent = "copy"; }, 1400);
+  });
+});
+</script>
+</body>
+</html>

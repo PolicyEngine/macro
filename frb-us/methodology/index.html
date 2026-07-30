@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The FRB/US model — PolicyEngine Macro</title>
-<meta name="description" content="A from-scratch Python implementation of the Federal Reserve Board's FRB/US model — 284 equations solved under VAR expectations, reproducing the April 2026 LONGBASE database to machine precision and matching the Fed's own pyfrbus to its own version-to-version noise floor." />
-<link rel="canonical" href="https://policyengine-macro.vercel.app/frb-us" />
+<title>FRB/US methodology — PolicyEngine Macro</title>
+<meta name="description" content="How the FRB/US implementation works: parse the Board's model.xml, load LONGBASE, add-factor with init_trac, and solve by damped Newton with an analytic sparse Jacobian." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/frb-us/methodology" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://policyengine-macro.vercel.app/frb-us" />
+<meta property="og:url" content="https://policyengine-macro.vercel.app/frb-us/methodology" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
-<meta property="og:title" content="frb-us — PolicyEngine Macro" />
+<meta property="og:title" content="FRB/US methodology — PolicyEngine Macro" />
 <meta property="og:description" content="A from-scratch Python implementation of the Federal Reserve Board's FRB/US model — 284 equations under VAR expectations, reproducing LONGBASE to machine precision." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
@@ -46,7 +46,8 @@
 <nav class="crumbs mono" aria-label="You are here">
     <a href="/">Home</a>
     <a href="/models">Models</a>
-    <span aria-current="page">FRB-US</span>
+    <a href="/frb-us">FRB-US</a>
+    <span aria-current="page">Methodology</span>
 </nav>
 
 <main id="top">
@@ -70,84 +71,53 @@
 
   <nav class="model-tabs" aria-label="FRB-US pages">
     <div class="model-tabs-row">
-      <a class="model-tabs-link" href="/frb-us" aria-current="page">Overview</a>
+      <a class="model-tabs-link" href="/frb-us">Overview</a>
       <a class="model-tabs-link" href="/frb-us/code">Code</a>
-      <a class="model-tabs-link" href="/frb-us/methodology">Methodology</a>
+      <a class="model-tabs-link" href="/frb-us/methodology" aria-current="page">Methodology</a>
       <a class="model-tabs-link" href="/frb-us/validation">Validation</a>
       <a class="model-tabs-link" href="/papers/frb-us">Paper</a>
     </div>
   </nav>
 
-  <section id="what" class="band">
+  <section id="how" class="band">
     <div class="band-head">
-      <span class="kicker mono">01 — what it is</span>
-      <h2>The US counterpart to the OBR emulator.</h2>
+      <span class="kicker mono">methodology</span>
+      <h2>Parse, add-factor, solve by Newton.</h2>
     </div>
     <div class="prose">
+      <div class="table-scroll"><table>
+        <caption>The frb-us solve pipeline, stage by stage</caption>
+        <thead><tr><th scope="col">stage</th><th scope="col">what it does</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><strong>Parse</strong></th>
+            <td>Reads the Board's <code>model.xml</code> directly: variables, equations, per-equation coefficients, and the endogenous / exogenous classification for the VAR-expectations ("standard") equation set. Nothing is re-typed or re-specified.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Load</strong></th>
+            <td>Loads <code>LONGBASE.TXT</code> — the April 2026 vintage — into a pandas frame on a quarterly <code>PeriodIndex</code>.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Add-factor</strong> (<code>init_trac</code>)</th>
+            <td>Sets each equation's tracking residual so that solving the model reproduces the database exactly. This is the Fed's own device, used the Fed's own way — the direct analogue of the OBR emulator's anchoring.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Solve</strong></th>
+            <td>A per-period damped Newton iteration on the full simultaneous system, with an <strong>analytic sparse Jacobian</strong> — differentiated symbolically with sympy, factorised with <code>scipy.sparse.linalg.splu</code>. Defaults are <code>xtol=1e-8</code>, <code>rtol=5e-4</code>.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Shock &amp; compare</strong></th>
+            <td>A shock is an addition to an equation's error term — <code>rffintay_aerr</code> for the policy rule, for instance. Solve shocked and baseline paths over the same window and read the difference.</td>
+          </tr>
+        </tbody>
+      </table></div>
       <p>
-        This reimplements the large-scale macroeconometric model the Federal
-        Reserve Board has used for policy analysis and forecasting since 1996. The
-        Board publishes the whole thing — the equation system as
-        <code>model.xml</code>, the <code>LONGBASE</code> historical and
-        projection database, the model documentation, and a reference Python
-        solver called <code>pyfrbus</code> — in the public domain. What it does
-        not publish is a modern, readable, dependency-light implementation you
-        can drop into a research stack.
+        The reference implementation decomposes each period into recursive and
+        simultaneous blocks; this one solves the whole period at once. Both
+        approaches solve the same <em>F</em>(<em>x</em>) = 0, which is why the
+        two agree to solver tolerance rather than to some negotiated
+        threshold — see <a href="/frb-us/validation">how far to trust it</a>.
       </p>
-      <p>
-        This is that: a from-scratch build on numpy, scipy and sympy under
-        Python 3.10+, parsing the Board's own model file rather than
-        re-specifying it. It carries <strong>284 endogenous variables and
-        their equations</strong>, classified into behavioural and identity
-        blocks exactly as the Board's file declares them, and solves them as
-        one simultaneous system per quarter.
-      </p>
-      <p>
-        In the suite it plays the role for the United States that the
-        <a href="/obr">OBR emulator</a> plays for the United Kingdom:
-        reproducing the estimated equation system an official institution
-        actually relies on, rather than deriving behaviour from first
-        principles the way the <a href="/olg">overlapping-generations
-        model</a> does. The two diverge on one point that shapes everything
-        below: the OBR emulator has a bridge from statute, and this one does
-        not.
-      </p>
-    </div>
-  </section>
-
-  <section id="answers" class="band">
-    <div class="band-head">
-      <span class="kicker mono">02 — what it can answer</span>
-      <h2>US monetary and fiscal shocks, quarter by quarter.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        The model's designed job is the dynamic response of the US economy to
-        a policy impulse. A <strong>100bp funds-rate tightening</strong> in
-        2026Q1 moves the policy rate <strong>+1.000pp</strong> on impact, pushes
-        real GDP to a trough of <strong>&minus;0.55%</strong> in 2027Q4, raises
-        unemployment by a peak <strong>+0.26pp</strong>, and takes core
-        inflation down <strong>0.034pp</strong> at its trough — signs,
-        magnitudes and timing consistent with the simulation properties in the
-        Board's own frb-us documentation.
-      </p>
-      <p>
-        Fiscal impulses land in the published cross-model ranges. A
-        government-purchases shock worth 1% of GDP gives a year-one multiplier
-        of <strong>0.72</strong> under the inertial Taylor rule, inside the 0.7–1.0
-        no-accommodation range in Coenen et al. (2012); holding the funds rate
-        fixed, the year-two multiplier is <strong>0.99</strong>. A personal
-        tax cut worth 1% of GDP ex ante gives <strong>0.22 rising to
-        0.32</strong> over years one and two, inside both the 0.2–0.4
-        cross-model range and CBO's central estimate of about 0.3.
-      </p>
-      <div class="callout">
-        <strong>It cannot</strong> score a PolicyEngine reform — see the <a href="/frb-us/validation#caveats">known limits</a>.
-        It cannot do forward guidance or
-        any exercise needing model-consistent expectations. It cannot tell you
-        who wins and loses — that is <a href="/pe">PolicyEngine</a>. And it
-        says nothing about the UK.
-      </div>
     </div>
   </section>
 

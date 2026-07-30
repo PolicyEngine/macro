@@ -23,8 +23,6 @@
 <style>
 /* page-specific: hero sizing only — shared component styles live in style.css */
 .model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-/* additional vchart marks for the showcase charts on this page */
-.vchart .vc-edge { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 3; }
 </style>
 </head>
 <body class="doc">
@@ -403,6 +401,166 @@
   </nav>
 </footer>
 
+<script>
+/* OLG showcase: runtime line charts drawn from the committed transition-path
+   data. Vanilla JS + inline SVG (the site's CSP forbids CDN libraries);
+   styled with the site's vc-* chart classes so it rethemes with the page. */
+(function () {
+  'use strict';
+
+  var DASH = { dash: '6 4', dot: '2 3', dashdot: '8 3 2 3' };
+  var W = 760, H = 340, ML = 64, MR = 14, MT = 20, MB = 34;
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function slug(s) {
+    return String(s).toLowerCase().replace(/&/g, '').replace(/[^a-z]+/g, '_').replace(/^_|_$/g, '');
+  }
+  function niceStep(span, target) {
+    var raw = span / target, mag = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10));
+    var cands = [1, 2, 2.5, 5, 10], i;
+    for (i = 0; i < cands.length; i++) if (cands[i] * mag >= raw) return cands[i] * mag;
+    return 10 * mag;
+  }
+  function fmt(v) {
+    // Round away float drift from tick accumulation, then locale-format.
+    var r = Math.round(v * 1e6) / 1e6;
+    return (r === 0 ? 0 : r).toLocaleString('en-GB', { maximumFractionDigits: 6 });
+  }
+
+  // Render one panel {title, traces, shapes} into a container as SVG.
+  function render(container, panel) {
+    var xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
+    panel.traces.forEach(function (t) {
+      t.x.forEach(function (x) { if (x < xmin) xmin = x; if (x > xmax) xmax = x; });
+      t.y.forEach(function (y) { if (y < ymin) ymin = y; if (y > ymax) ymax = y; });
+    });
+    var pad = (ymax - ymin || Math.abs(ymax) || 1) * 0.08;
+    ymin -= pad; ymax += pad;
+    var ystep = niceStep(ymax - ymin, 5);
+    var y0 = Math.ceil(ymin / ystep) * ystep;
+    var xstep = (xmax - xmin) >= 15 ? 5 : ((xmax - xmin) >= 8 ? 2 : 1);
+    var x0 = Math.ceil(xmin / xstep) * xstep;
+
+    function X(x) { return ML + (x - xmin) * (W - ML - MR) / (xmax - xmin); }
+    function Y(y) { return H - MB - (y - ymin) * (H - MT - MB) / (ymax - ymin); }
+    function n(v) { return v.toFixed(1); }
+
+    var s = ['<svg class="vchart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' +
+             esc(panel.title) + ', baseline (solid) vs +1pp basic-rate reform (dashed)">'];
+    var v, x, y;
+    for (v = y0; v <= ymax + 1e-9; v += ystep) {
+      y = Y(v);
+      s.push('<line class="' + (Math.abs(v) < ystep * 1e-6 ? 'vc-axis' : 'vc-grid') +
+             '" x1="' + ML + '" y1="' + n(y) + '" x2="' + (W - MR) + '" y2="' + n(y) + '"/>');
+      s.push('<text class="vc-tick" x="' + (ML - 8) + '" y="' + n(y + 4) +
+             '" text-anchor="end">' + fmt(v) + '</text>');
+    }
+    for (v = x0; v <= xmax + 1e-9; v += xstep) {
+      x = X(v);
+      s.push('<line class="vc-grid" x1="' + n(x) + '" y1="' + MT + '" x2="' + n(x) + '" y2="' + (H - MB) + '"/>');
+      s.push('<text class="vc-tick" x="' + n(x) + '" y="' + (H - MB + 16) + '" text-anchor="middle">' + v + '</text>');
+    }
+    (panel.shapes || []).forEach(function (sh) {
+      if (sh.x0 < xmin || sh.x0 > xmax) return;
+      x = X(sh.x0);
+      s.push('<line x1="' + n(x) + '" y1="' + MT + '" x2="' + n(x) + '" y2="' + (H - MB) +
+             '" stroke="' + esc(sh.color || '#95a5a6') + '" stroke-width="' + (sh.width || 1) +
+             '"' + (DASH[sh.dash] ? ' stroke-dasharray="' + DASH[sh.dash] + '"' : '') + '/>');
+    });
+    panel.traces.forEach(function (t) {
+      var d = t.x.map(function (px, i) {
+        return (i ? 'L' : 'M') + n(X(px)) + ' ' + n(Y(t.y[i]));
+      }).join(' ');
+      s.push('<path fill="none" d="' + d + '" stroke="' + esc(t.color || 'currentColor') +
+             '" stroke-width="' + (t.width || 2) + '" stroke-linejoin="round"' +
+             (DASH[t.dash] ? ' stroke-dasharray="' + DASH[t.dash] + '"' : '') + '/>');
+    });
+    s.push('<text class="vc-title" x="' + ML + '" y="13">' + esc(panel.title) + '</text>');
+    s.push('</svg>');
+    container.innerHTML = s.join('\n');
+  }
+
+  // Panel tagging, ported from the dashboard's ExampleTab.jsx.
+  var MACRO_MAP = { 'consumption': 'consumption', 'investment': 'investment',
+    'gov. consumption': 'government', 'tax revenue': 'tax_revenue', 'debt': 'debt', 'gdp': 'gdp' };
+  function macroTag(p) {
+    var key = p.title.toLowerCase().split('(')[0].trim();
+    return MACRO_MAP[key] || slug(key);
+  }
+  function sector3Tag(p) {
+    var m = p.title.match(/Sector\s+([A-Za-z]+)/);
+    return m ? m[1].toLowerCase() : '';
+  }
+  function sector24Tags(p) {
+    var parts = p.title.split(/\s+[—–-]\s+/);
+    return { sector: slug(parts[0] || ''), variable: (parts[1] || '').toLowerCase().trim() };
+  }
+  function pick(panels, pred) {
+    for (var i = 0; i < panels.length; i++) if (pred(panels[i])) return panels[i];
+    return null;
+  }
+
+  function init(data) {
+    var macroSel = document.getElementById('olg-macro-select');
+    var sectorSel = document.getElementById('olg-sector-select');
+    var detailVar = document.getElementById('olg-detail-var');
+    var detailSector = document.getElementById('olg-detail-sector');
+    var macroBox = document.getElementById('olg-macro-chart');
+    var sectorBox = document.getElementById('olg-sector-chart');
+    var detailBox = document.getElementById('olg-detail-chart');
+
+    function drawMacro() {
+      var p = pick(data.macro6, function (q) { return macroTag(q) === macroSel.value; });
+      if (p) render(macroBox, p);
+    }
+    function drawSector() {
+      var p = pick(data.sector3, function (q) { return sector3Tag(q) === sectorSel.value; });
+      if (p) render(sectorBox, p);
+    }
+    function drawDetail() {
+      var p = pick(data.sector24, function (q) {
+        var t = sector24Tags(q);
+        return t.variable === detailVar.value && t.sector === detailSector.value;
+      });
+      if (!p) return;
+      render(detailBox, p);
+      var c = p.traces[0] && p.traces[0].color;
+      if (c) {
+        document.getElementById('olg-detail-ln-base').style.borderTopColor = c;
+        document.getElementById('olg-detail-ln-reform').style.borderTopColor = c;
+      }
+    }
+
+    // Sector-overlay legend: one swatch per sector, colours from the data.
+    var legend = document.getElementById('olg-sector-legend');
+    var lg = data.sector3[0].traces.map(function (t) {
+      return '<span class="li"><span class="ln" style="border-top-color:' +
+             esc(t.color) + '"></span>' + esc(t.name) + '</span>';
+    });
+    lg.push('<span class="li"><span class="ln dashed gold"></span>Reform start (2027)</span>');
+    legend.innerHTML = lg.join('');
+
+    macroSel.addEventListener('change', drawMacro);
+    sectorSel.addEventListener('change', drawSector);
+    detailVar.addEventListener('change', drawDetail);
+    detailSector.addEventListener('change', drawDetail);
+    drawMacro(); drawSector(); drawDetail();
+  }
+
+  fetch('/olg/figures/tpi_data.json')
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(init)
+    .catch(function () {
+      ['olg-macro-chart', 'olg-sector-chart', 'olg-detail-chart'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.innerHTML = '<p class="chart-note">Chart data failed to load — ' +
+          'the series are in <a href="/olg/figures/tpi_data.json">olg/figures/tpi_data.json</a>.</p>';
+      });
+    });
+})();
+</script>
 <script src="/reveal.js" defer></script>
 
 </body>

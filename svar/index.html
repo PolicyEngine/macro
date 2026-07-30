@@ -37,7 +37,7 @@
     <a class="nav-mobile" href="/">Home</a>
     <a class="nav-mobile" href="/economy">Economy</a>
     <a class="nav-mobile" href="/models" aria-current="true">Models</a>
-    <a class="nav-mobile" href="/forecasts">Track record</a>
+    <a class="nav-mobile" href="/forecasts">Forecasts</a>
     <a class="nav-mobile nav-start" href="/connect">Use</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
   </nav>
@@ -61,15 +61,21 @@
         with credible bands, and explain revisions between quarters.
       </p>
       <div class="hero-cta reveal" style="--d:3">
-        <a class="btn btn-primary" href="#run">Run it</a>
+        <a class="btn btn-primary" href="/svar/code#run">Run it</a>
         <a class="btn btn-ghost" href="https://github.com/PolicyEngine/boe-var-model">Read the code</a>
         <a class="btn btn-ghost" href="/validation">Validation</a>
       </div>
     </div>
   </section>
 
-  <nav class="model-local-nav" aria-label="On this model page">
-    <a href="#what">Overview</a><a href="#how">Method</a><a href="#run">Run</a><a href="#trust">Validation</a><a href="/papers/boe-svar">Paper</a>
+  <nav class="model-tabs" aria-label="BoE SVAR pages">
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="/svar" aria-current="page">Overview</a>
+      <a class="model-tabs-link" href="/svar/code">Code</a>
+      <a class="model-tabs-link" href="/svar/methodology">Methodology</a>
+      <a class="model-tabs-link" href="/svar/validation">Validation</a>
+      <a class="model-tabs-link" href="/papers/boe-svar">Paper</a>
+    </div>
   </nav>
 
   <section id="what" class="band">
@@ -94,6 +100,14 @@
         member</strong>. It imposes just enough structure to name the shocks
         hitting the economy and to say how uncertain the baseline is, before
         you simulate changing it with the structural members.
+      </p>
+      <p>
+        This page covers what the model is and what it can answer. The
+        commands you would run live on the <a href="/svar/code">code</a> page,
+        the estimation and identification choices on the
+        <a href="/svar/methodology">methodology</a> page, and the replication
+        checks, forecast scores, and limits on the
+        <a href="/svar/validation">validation</a> page.
       </p>
       <!-- boe-current-outlook:begin -->
 <figure class="vfig current-outlook">
@@ -127,110 +141,9 @@
     </div>
   </section>
 
-  <section id="how" class="band">
-    <div class="band-head">
-      <span class="kicker mono">02 — how it works</span>
-      <h2>Eight variables, six named shocks.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        A VAR in eight quarterly variables — three global, five UK — estimated
-        over the inflation-targeting era — <strong>1992Q1–2025Q1</strong> in
-        both the paper replication and the hosted adapter. The hosted forecast
-        conditions on observations through <strong>2026Q1</strong>, but does
-        not re-estimate its coefficients on those later observations. It is estimated in
-        levels, with <span class="mono">p&nbsp;=&nbsp;4</span> lags and Covid
-        dummies for 2020Q1–2021Q2.
-      </p>
-      <div class="table-scroll"><table>
-        <caption>The eight variables of the SVAR, by block</caption>
-        <thead><tr><th scope="col">block</th><th scope="col">variables</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row"><strong>Global</strong></th>
-            <td>World GDP · World CPI (both UK-trade-weighted) · real oil price in sterling</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>UK</strong></th>
-            <td>Bank Rate · sterling exchange-rate index · CPI · CPI energy · real GDP</td>
-          </tr>
-        </tbody>
-      </table></div>
-      <p>
-        Estimation is Bayesian with a Minnesota (normal-inverse-Wishart) prior
-        plus sum-of-coefficients and dummy-initial-observation priors.
-        Identification follows <strong>Arias–Rubio-Ramírez–Waggoner
-        (2018)</strong>: zero restrictions make the UK a small open economy
-        (UK shocks cannot move world variables on impact) and impact sign
-        restrictions name six structural shocks — <strong>world demand, world
-        energy, world supply, UK demand, UK supply, and UK monetary
-        policy</strong>. Two unidentified shocks absorb residual volatility.
-        Importance weights correct the sampler's non-uniformity and the
-        Chan–Matthes–Yu (2025) permutation search cuts rejections.
-      </p>
-      <p>
-        This is accept/reject sampling. The production run drew
-        <strong>10,000</strong> posterior (Π,&nbsp;Σ) draws, of which
-        <strong>751 passed</strong> the sign restrictions (7.5%), for an
-        importance-weighted effective sample size of <strong>355.9</strong> —
-        so medians and bands are correct but noisier than the paper's. The
-        hosted forecast conditions on the current vintage — data through
-        2026Q1 — with a 2,000-draw default (135 accepted, ESS 65.3), while retaining
-        the 2025Q1 coefficient-estimation endpoint.
-      </p>
-    </div>
-  </section>
-
-  <section id="run" class="band">
-    <div class="band-head">
-      <span class="kicker mono">03 — how to run it</span>
-      <h2>Estimate, identify, decompose.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        The quickest route is the <a href="/connect">hosted MCP server</a>,
-        where three tools reach this model: <code>forecast_uk</code>
-        (fan-chart forecast of YoY GDP growth and CPI inflation, with 68%/90%
-        bands), <code>latest_shocks</code> (the posterior sign probabilities
-        of each identified shock in the latest quarter), and
-        <code>model_summary</code> (headline replication results — instant,
-        no estimation). All run hosted — no install, no credentials. The CLI
-        mirrors them: <code>pe-macro forecast</code>,
-        <code>pe-macro shocks</code>, and <code>pe-macro summary</code>.
-      </p>
-      <p>
-        To run it locally, the package installs straight from GitHub with the prepared quarterly
-        dataset inside, so <code>boe_var.data.load_data()</code> works
-        immediately with no credentials. Every input series is public: ONS
-        (CPI, CPI energy, real GDP), Bank of England (Bank Rate, sterling
-        ERI), and FRED (oil, exchange rates, world components).
-      </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
-      <p>
-        The runner scripts are for development — clone the repository to
-        rebuild the dataset or regenerate the paper outputs:
-      </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>python scripts/download_data.py     <span class="cm"># reassemble the public data</span>
-
-<span class="cm"># the paper's core outputs: IRFs, FEVDs, shocks, historical decompositions</span>
-python scripts/run_replication.py
-
-<span class="cm"># the forecasting toolkit: fan charts, latest-quarter shock distributions,</span>
-<span class="cm"># composite IRFs, and the forecast-revision decomposition</span>
-python scripts/run_forecast_revision.py</code></pre></div>
-      <p class="opt-note">
-        outputs land in <code>results/</code> — the replication figures
-        (fig2–fig6) plus the forecast figures (fig1, fig7–fig9) and two
-        summary reports. runtime scales with draw count; the importance
-        weights are the expensive part, since each needs a numerical Jacobian
-        per accepted draw.
-      </p>
-    </div>
-  </section>
-
   <section id="answers" class="band">
     <div class="band-head">
-      <span class="kicker mono">04 — what it can answer</span>
+      <span class="kicker mono">02 — what it can answer</span>
       <h2>What's happening now, and why.</h2>
     </div>
     <div class="prose">
@@ -280,133 +193,9 @@ python scripts/run_forecast_revision.py</code></pre></div>
     </div>
   </section>
 
-  <section id="trust" class="band band-result">
-    <div class="band-head">
-      <span class="kicker mono">05 — how far to trust it</span>
-      <h2>Replicates the paper; forecast evidence remains limited.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        Two independent checks. First, against the published paper: Figures
-        2–6 replicate and the headline variance decompositions land on the
-        paper's benchmarks. Second — and rarer — the 2024Q2-frozen forecast study
-        can be scored against ONS outturns that have arrived since, a genuine
-        out-of-sample test that only exists <em>because</em> the data edge is
-        frozen.
-      </p>
-      <div class="table-scroll"><table>
-        <caption>This replication against Brignone &amp; Piffer (2025), check by check</caption>
-        <thead><tr><th scope="col">check</th><th scope="col">this replication</th><th scope="col">the paper</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row">Global shocks' share of UK GDP variance (1 year)</th>
-            <td><strong>42.1%</strong></td>
-            <td>~40%</td>
-          </tr>
-          <tr>
-            <th scope="row">Global shocks' share of UK CPI variance (1 year)</th>
-            <td><strong>49.5%</strong></td>
-            <td>~50%</td>
-          </tr>
-          <tr>
-            <th scope="row">IRFs, FEVDs, shocks, historical decompositions</th>
-            <td>Figures 2–6 replicate</td>
-            <td>qualitative match</td>
-          </tr>
-          <tr>
-            <th scope="row">Out-of-sample forecast error, 2024Q3–2026Q1</th>
-            <td><strong>0.32pp RMSE</strong> for both GDP growth and CPI inflation</td>
-            <td>no published counterpart</td>
-          </tr>
-          <tr>
-            <th scope="row">68% band coverage over the same seven quarters</th>
-            <td><strong>14 of 14 outturns inside</strong></td>
-            <td>—</td>
-          </tr>
-          <tr>
-            <th scope="row">Forecast-revision adding-up identity</th>
-            <td>exact per draw (max abs error 5.23e-12)</td>
-            <td>holds by construction</td>
-          </tr>
-        </tbody>
-      </table></div>
-    </div>
-    <div class="metrics">
-      <div class="metric">
-        <span class="metric-label mono">out-of-sample RMSE</span>
-        <span class="metric-val">0.32<span class="metric-vs">pp</span></span>
-        <span class="metric-note">GDP growth and CPI, 7 quarters from a frozen edge</span>
-      </div>
-      <div class="metric">
-        <span class="metric-label mono">68% band coverage</span>
-        <span class="metric-val">14<span class="metric-vs">/14</span></span>
-        <span class="metric-note">no outturn escaped even the 68% band &mdash; though the <a href="/validation#forecasters">49-origin rolling evaluation</a> finds the bands under-cover on average</span>
-      </div>
-      <div class="metric">
-        <span class="metric-label mono">tests</span>
-        <span class="metric-val">comprehensive</span>
-        <span class="metric-note">estimation, identification, and analysis coverage</span>
-      </div>
-    </div>
-    <p class="chart-note" style="max-width: 80ch;">
-      The honest reading of the forecast score: the model was right that the
-      2025 inflation hump would mean-revert and wrong about its peak, by up to
-      0.6 points — outturns of 3.5 and 3.8% against medians of 3.2%, inside
-      the 68% band but on its upper half. It never saw the Ofgem cap
-      increases, food inflation, or the April 2025 administered price rises.
-      Charts and source data in <a href="/validation">validation</a>; full
-      quarterly scorecard in the <a href="/papers/boe-svar">working paper</a>.
-    </p>
-      <p class="callout">
-        This is an independent replication built from Bank of England Macro
-        Technical Paper No. 3 and public data. It is not produced,
-        maintained, or endorsed by the Bank of England, and its results
-        should not be presented as Bank of England estimates.
-      </p>
-  </section>
-
-  <section id="caveats" class="band">
-    <div class="band-head">
-      <span class="kicker mono">06 — limits</span>
-      <h2>Where this departs from the Bank's model.</h2>
-    </div>
-    <div class="prose">
-      <div class="table-scroll"><table>
-        <caption>Known limits of the structural VAR replication</caption>
-        <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row"><strong>Frozen data edge</strong></th>
-            <td>Coefficient estimation to 2025Q1; conditioning data to 2026Q1 (refreshed July 2026). Results shift with data revisions. The replication claims are scored on the extended 1992Q1&ndash;2025Q1 sample, not the paper's original 1992Q1&ndash;2023Q2 window.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Proxied world aggregates</strong></th>
-            <td>The Bank's internal UK-trade-weighted world GDP and CPI are unpublished, so they are rebuilt as chain-weighted US + euro-area + Japan + China aggregates with time-varying UK trade weights.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>One ranking does not replicate</strong></th>
-            <td>The paper ranks UK monetary policy as the largest domestic contributor to CPI variance; here UK supply (13.5%) exceeds monetary policy (10.1%). Attributed to the proxy world aggregates and the smaller accepted sample, and documented rather than tuned away.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Assumed lag length and simplified pandemic prior</strong></th>
-            <td>p&nbsp;=&nbsp;4 is assumed, not selected; the pandemic treatment is simplified to exogenous Covid dummies.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Sign-restriction critiques apply</strong></th>
-            <td>Pointwise medians mix structural models (Fry–Pagan); the Haar prior over rotations is informative about impulse responses (Baumeister–Hamilton). These apply to the Bank's own outputs identically.</td>
-          </tr>
-        </tbody>
-      </table></div>
-      <p class="opt-note">
-        every deviation is enumerated in the repository's
-        <code>docs/methodology.md</code>.
-      </p>
-    </div>
-  </section>
-
   <section id="sources" class="band">
     <div class="band-head">
-      <span class="kicker mono">07 — sources</span>
+      <span class="kicker mono">03 — sources</span>
       <h2>The paper, the code, the method.</h2>
     </div>
     <div class="prose">
