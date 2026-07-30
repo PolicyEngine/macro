@@ -47,7 +47,7 @@ def obr_chart() -> str:
         f'<polyline class="vc-s2" points="{points(c, xs, ymap)}"/>',
         f'<circle class="vc-s1-dot" cx="{xs[-1]:.1f}" cy="{ymap(g[-1]):.1f}" r="3.5"/>',
         f'<circle class="vc-s2-dot" cx="{xs[-1]:.1f}" cy="{ymap(c[-1]):.1f}" r="3.5"/>',
-        '<text class="vc-lab" x="565" y="25">real GDP</text><text class="vc-lab vc-lab2" x="650" y="25">consumption</text>',
+
     ]
     for i in (0, 4, 8, 12, 16, 20):
         out.append(
@@ -55,7 +55,10 @@ def obr_chart() -> str:
         )
     out += [
         "</svg>",
-        "<figcaption>Latest official baseline available on 21 July 2026. Levels are indexed to 2026Q1 so the two series can share one honest scale. Source: OBR March 2026 detailed forecast tables; committed values in <code>papers/obr-macro/figures/current_outlook.csv</code>.</figcaption>",
+        '<div class="olg-legend">'
+        '<span class="li"><span class="ln ln-s1"></span>Real GDP</span>'
+        '<span class="li"><span class="ln ln-s2"></span>Household consumption</span>'
+        '</div>',
         "</figure>",
     ]
     return "\n".join(out)
