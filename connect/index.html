@@ -271,27 +271,6 @@
   .prompt-card button { justify-self: end; }
 }
 /* route cards: the page's shape, up front */
-.route-row {
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 0 clamp(20px, 5vw, 56px) 40px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-}
-.route-card {
-  display: flex; flex-direction: column; gap: 7px;
-  padding: 16px 18px; border: 1px solid var(--line-soft);
-  border-radius: 8px; background: var(--surface); text-decoration: none;
-}
-.route-card:hover { border-color: var(--brand); }
-.route-id {
-  font-family: var(--mono); font-size: var(--fs-label); font-weight: 600;
-  color: var(--brand-strong); letter-spacing: 0.06em; text-transform: uppercase;
-}
-.route-d { font-size: var(--fs-small); color: var(--paper-dim); line-height: 1.5; }
-.route-go { margin-top: auto; font-family: var(--mono); font-size: var(--fs-label); color: var(--paper-faint); }
-.route-card:hover .route-go { color: var(--brand-strong); }
 </style>
 </head>
 <body class="doc">
@@ -332,22 +311,12 @@
     </div>
   </section>
 
-  <nav class="route-row" aria-label="Ways to run the models">
-    <a class="route-card" href="#connect">
-      <span class="route-id">mcp · hosted</span>
-      <span class="route-d">Add the server to Claude, ChatGPT, or any MCP client and ask in plain English.</span>
-      <span class="route-go">Connect in three steps →</span>
-    </a>
-    <a class="route-card" href="#cli">
-      <span class="route-id">cli</span>
-      <span class="route-d">Install the shared command line once, then run any model from a terminal.</span>
-      <span class="route-go">Run the CLI →</span>
-    </a>
-    <a class="route-card" href="#code">
-      <span class="route-id">python</span>
-      <span class="route-d">Drive each model's Python package directly, with full control of the dials.</span>
-      <span class="route-go">Pick a model →</span>
-    </a>
+  <nav class="model-tabs" aria-label="Ways to run the models">
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="#connect">MCP · hosted</a>
+      <a class="model-tabs-link" href="#cli">CLI</a>
+      <a class="model-tabs-link" href="#code">Python</a>
+    </div>
   </nav>
 
   <div class="no-code-note">
@@ -581,6 +550,25 @@
       setTimeout(function () { btn.textContent = "copy"; }, 1400);
     });
   });
+})();
+</script>
+<script>
+(function () {
+  var links = Array.from(document.querySelectorAll('.model-tabs-link[href^="#"]'));
+  function update() {
+    var offset = window.innerHeight * 0.33, active = null;
+    links.forEach(function (l) {
+      var el = document.getElementById(l.getAttribute("href").slice(1));
+      if (el && el.getBoundingClientRect().top < offset) active = l;
+    });
+    links.forEach(function (l) {
+      if (l === active) l.setAttribute("aria-current", "location");
+      else l.removeAttribute("aria-current");
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  update();
 })();
 </script>
 </body>

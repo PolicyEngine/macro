@@ -644,7 +644,7 @@ def render_results(card: dict) -> str:
         )
     if notes:
         body.append(
-            '      <div class="meth-out">\n'
+            '      <div class="meth-out plain">\n'
             + "\n".join(
                 '        <div class="meth-out-line"><span class="icon">&rarr;</span>'
                 "<span>" + n + "</span></div>"
