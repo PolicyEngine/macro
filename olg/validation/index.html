@@ -182,21 +182,18 @@
       <h2>Tax system.</h2>
     </div>
     <div class="prose">
-      <p>
-        <strong>OG-UK</strong> estimates smooth parametric tax functions (Gouveia–Strauss, DEP
-        or linear) from microdata that <strong>PolicyEngine UK</strong> generates — an
-        open-source microsimulation of the UK income-tax and NICs rulebook; the estimated
-        functions fold in income tax and NICs, with consumption, wealth, corporate and
-        bequest taxes modelled separately on top, and any reform PolicyEngine can represent —
-        rate, threshold or allowance changes — flows straight through after re-estimating on
-        post-reform microdata. The <strong>OBR UK OLG</strong> model instead hard-codes the
-        statutory UK schedule directly: income tax as explicit bands (PA £12,570, HRT £50,270,
-        ART £125,140 at 20&nbsp;/&nbsp;40&nbsp;/&nbsp;45%); NICs as a separate instrument
-        (£12,570 / £50,270 at 8&nbsp;/&nbsp;2%); VAT as an effective 9.3%; and an explicit
-        treatment of pension relief and drawdown taxation. A lever like "+1&nbsp;pp basic rate
-        from 2027–28" then takes one parameter to simulate — at the cost of less flexibility
-        for reforms that reshape the schedule.
-      </p>
+      <p><strong>OG-UK</strong> estimates smooth tax functions from PolicyEngine UK microdata:</p>
+      <ul>
+        <li>Gouveia&ndash;Strauss, DEP or linear forms, folding in income tax and NICs</li>
+        <li>Consumption, wealth, corporate and bequest taxes modelled separately on top</li>
+        <li>Any PolicyEngine-representable reform — rate, threshold, allowance — flows through after re-estimating on post-reform microdata</li>
+      </ul>
+      <p><strong>OBR UK OLG</strong> hard-codes the statutory schedule:</p>
+      <ul>
+        <li>Income tax as explicit bands — PA £12,570, HRT £50,270, ART £125,140 at 20&nbsp;/&nbsp;40&nbsp;/&nbsp;45%</li>
+        <li>NICs separate (£12,570 / £50,270 at 8&nbsp;/&nbsp;2%); VAT effective 9.3%; explicit pension relief and drawdown taxation</li>
+        <li>"+1&nbsp;pp basic rate from 2027&ndash;28" is one parameter — at the cost of flexibility for reforms that reshape the schedule</li>
+      </ul>
     </div>
   </section>
 
@@ -252,27 +249,16 @@
       <h2>Solution method &amp; calibration.</h2>
     </div>
     <div class="prose">
-      <p>
-        Both are rational-expectations dynamic general equilibrium, but they solve different
-        problems. <strong>OG-UK</strong> solves households' Euler equations directly and
-        iterates to a full <strong>year-by-year transition path</strong> (Time Path
-        Iteration); its state space is continuous and expectations run over the whole path.
-        <strong>OBR UK OLG</strong> uses <strong>Value Function Iteration</strong> (Kirkby's
-        VFI toolkit), discretises assets and stochastic earnings on a grid, and compares
-        long-run steady states only — it does not trace the adjustment path between them.
-      </p>
-      <p>
-        Calibration differs mainly in data sources and anchors. <strong>OG-UK</strong>:
-        demographics from the UN World Population Prospects (country 826), age-earning
-        profiles from microdata via its permanent ability types, tax functions from
-        PolicyEngine-UK's Enhanced FRS (FRS enhanced with HMRC SPI, LCFS and WAS), ONS GDP
-        levels anchoring the macro aggregates, modeller-set fiscal targets and growth
-        assumptions. <strong>OBR UK OLG</strong>: ONS mortality statistics, ONS ASHE plus the
-        HMRC earnings distribution for age-earnings profiles, HMRC / GOV.UK tax parameters
-        directly, pinned to the OBR March 2024 EFO — GDP per person of £35,100 (scaling
-        parameter S&nbsp;=&nbsp;19.81), population growth n&nbsp;=&nbsp;0.75%, productivity
-        growth g&nbsp;=&nbsp;1.2%, and debt / GDP stabilised at 100%.
-      </p>
+      <p>Both are rational-expectations dynamic general equilibrium; they solve different problems.</p>
+      <ul>
+        <li><strong>OG-UK</strong> — solves households' Euler equations directly; Time Path Iteration to a full year-by-year path; continuous state space, expectations over the whole path; ~17-minute solve</li>
+        <li><strong>OBR UK OLG</strong> — Value Function Iteration (Kirkby's VFI toolkit); assets and stochastic earnings on a grid; compares long-run steady states only, under two minutes — a difference in method, not ambition</li>
+      </ul>
+      <p>Calibration differs mainly in data sources and anchors.</p>
+      <ul>
+        <li><strong>OG-UK</strong> — UN World Population Prospects demographics (country 826); age-earnings profiles via permanent ability types; tax functions from PolicyEngine-UK's Enhanced FRS (HMRC SPI, LCFS, WAS); ONS GDP anchors the aggregates; modeller-set fiscal targets and growth</li>
+        <li><strong>OBR UK OLG</strong> — ONS mortality; ASHE + HMRC earnings distribution; HMRC&nbsp;/&nbsp;GOV.UK tax parameters; pinned to the OBR March 2024 EFO — GDP per person £35,100 (S&nbsp;=&nbsp;19.81), n&nbsp;=&nbsp;0.75%, g&nbsp;=&nbsp;1.2%, debt&nbsp;/&nbsp;GDP at 100%</li>
+      </ul>
       <p class="chart-note">
         Source: <a href="/papers/obr-working-paper-22.pdf">OBR Working Paper No. 22, "A new UK
         overlapping generations model" (April 2025)</a>; OG-Core documentation and OG-UK
