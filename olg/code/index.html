@@ -219,27 +219,45 @@ ss = solve_steady_state(policy=reform,
           the fast configuration, budget ~17 minutes per steady state.
         </p>
         <p>The main configuration dials and their trade-offs:</p>
-        <div class="table-scroll"><table>
-          <caption>The main OLG configuration dials and their trade-offs</caption>
-          <thead><tr><th scope="col">dial</th><th scope="col">choices</th><th scope="col">trade-off</th></tr></thead>
-          <tbody>
-            <tr>
-              <th scope="row"><strong>mode</strong></th>
-              <td><code>solve_steady_state()</code> · <code>run_transition_path()</code></td>
-              <td>long-run answer, &gt;17 min per solve · full 60-year path, multiple hours for baseline + reform</td>
-            </tr>
-            <tr>
-              <th scope="row"><strong>age_specific</strong></th>
-              <td><code>"pooled"</code> · <code>"brackets"</code> · <code>"each"</code></td>
-              <td>one tax function for all ages (fastest, most stable) · one per age bracket (4 groups, split at state pension age) · one per single year of age (80 functions, slowest)</td>
-            </tr>
-            <tr>
-              <th scope="row"><strong>multi_sector</strong></th>
-              <td><code>False</code> · <code>True</code></td>
-              <td>one production sector · eight industries calibrated from ONS Blue Book supply-and-use tables by SIC section; needed for sector-level questions like energy price shocks</td>
-            </tr>
-          </tbody>
-        </table></div>
+        <div class="dial-cards" role="group" aria-label="The main OLG configuration dials and their trade-offs">
+          <div class="dial-card">
+            <div class="dial-name mono">mode</div>
+            <div class="dial-choice">
+              <code>solve_steady_state()</code>
+              <span class="dial-tradeoff">long-run answer, &gt;17 min per solve</span>
+            </div>
+            <div class="dial-choice">
+              <code>run_transition_path()</code>
+              <span class="dial-tradeoff">full 60-year path, multiple hours for baseline + reform</span>
+            </div>
+          </div>
+          <div class="dial-card">
+            <div class="dial-name mono">age_specific</div>
+            <div class="dial-choice">
+              <code>"pooled"</code>
+              <span class="dial-tradeoff">one tax function for all ages (fastest, most stable)</span>
+            </div>
+            <div class="dial-choice">
+              <code>"brackets"</code>
+              <span class="dial-tradeoff">one per age bracket (4 groups, split at state pension age)</span>
+            </div>
+            <div class="dial-choice">
+              <code>"each"</code>
+              <span class="dial-tradeoff">one per single year of age (80 functions, slowest)</span>
+            </div>
+          </div>
+          <div class="dial-card">
+            <div class="dial-name mono">multi_sector</div>
+            <div class="dial-choice">
+              <code>False</code>
+              <span class="dial-tradeoff">one production sector</span>
+            </div>
+            <div class="dial-choice">
+              <code>True</code>
+              <span class="dial-tradeoff">eight industries calibrated from ONS Blue Book supply-and-use tables by SIC section; needed for sector-level questions like energy price shocks</span>
+            </div>
+          </div>
+        </div>
         <p class="opt-note">
           start with <code>pooled</code> + single-sector and scale up only once
           the fast run answers your question. non-converging solve? raise

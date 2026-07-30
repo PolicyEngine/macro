@@ -2734,3 +2734,66 @@ h2 {
   font-size: var(--fs-code-inline);
 }
 .codeblock code, .code-window code, pre code { border: 0; background: none; padding: 0; }
+
+/* OLG configuration dial cards: one card per dial, one row per choice
+   (replaces the old three-column dials table on /olg/code/). */
+.dial-cards {
+  display: grid;
+  gap: 10px;
+  margin: var(--s-3) 0;
+}
+.dial-card {
+  padding: 10px 14px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: var(--fs-small);
+}
+.dial-name {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 2px 8px;
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  color: var(--brand-strong);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.dial-choice {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 5px 6px;
+  border-radius: 4px;
+}
+.dial-choice + .dial-choice { border-top: 1px solid var(--line-soft); }
+.dial-choice:hover { background: var(--brand-wash); }
+.dial-choice > code { flex: 0 0 auto; white-space: nowrap; }
+.dial-tradeoff { color: var(--paper-dim); }
+@media (max-width: 560px) {
+  .dial-choice { flex-direction: column; gap: 2px; }
+}
+
+/* ============================================================
+   .cmp- : /olg/validation comparison tables (OG-UK vs OBR)
+   Appended scannability polish on top of .mo-tablecard.
+   ============================================================ */
+.cmp-compare table th,
+.cmp-compare table td {
+  padding: var(--s-3) var(--s-4);
+  vertical-align: top;
+}
+/* row headers: quieter, small mono — the data columns lead */
+.cmp-compare table tbody th[scope="row"] {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--fs-body-sm);
+  font-weight: 500;
+  color: var(--paper-faint);
+}
+/* OG-UK column carries a subtle brand wash so the two model
+   columns read apart at a glance */
+.cmp-compare table thead th:nth-child(2),
+.cmp-compare table tbody td:nth-child(2) {
+  background: var(--brand-wash);
+}
