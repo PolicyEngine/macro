@@ -542,7 +542,8 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   white-space: nowrap;
 }
 .model-tabs-link:hover { color: var(--brand-strong); }
-.model-tabs-link[aria-current="location"] {
+.model-tabs-link[aria-current="location"],
+.model-tabs-link[aria-current="page"] {
   color: var(--paper);
   border-bottom-color: var(--brand-strong);
 }
@@ -2312,3 +2313,77 @@ h2 {
 /* Was --brand-strong: the same teal as links, series 1 and .metric-val, so
    "Weak" read in the site's affirmative accent. --brand-warning is AA-tested. */
 .vchart .vc-warn, td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
+
+/* Methodology step diagrams: dashboard schematics remapped to site tokens,
+   click to expand in a modal. */
+.step-diagram {
+  --accent: var(--brand-strong);
+  --text-light: var(--paper-faint);
+  --text-mid: var(--paper-dim);
+  position: relative;
+  margin: 0 0 var(--s-4);
+  padding: var(--s-4);
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: zoom-in;
+}
+.step-diagram rect[fill="#fff"] { fill: var(--surface); }
+.step-diagram svg { display: block; margin: 0 auto; }
+.step-diagram .expand-hint {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  margin: 0;
+  color: var(--paper-faint);
+  font-size: var(--fs-label);
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+.step-diagram:hover .expand-hint,
+.step-diagram:focus-visible .expand-hint { opacity: 1; }
+.step-diagram:hover { border-color: var(--brand); }
+.diagram-modal[hidden] { display: none; }
+.diagram-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-5);
+  background: color-mix(in srgb, var(--ink) 72%, transparent);
+  backdrop-filter: blur(6px);
+}
+.diagram-modal-box {
+  --accent: var(--brand-strong);
+  --text-light: var(--paper-faint);
+  --text-mid: var(--paper-dim);
+  max-width: min(940px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  padding: var(--s-5);
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--ink);
+}
+.diagram-modal-box rect[fill="#fff"] { fill: var(--surface); }
+.diagram-modal-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  margin-bottom: var(--s-4);
+}
+.diagram-modal-title { font-weight: 600; }
+.diagram-modal-close {
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  width: 30px; height: 30px;
+  background: none;
+  color: var(--paper-dim);
+  font-size: 16px;
+  cursor: pointer;
+}
+.diagram-modal-close:hover { color: var(--brand-strong); border-color: var(--brand); }
+.diagram-modal-body svg { width: 100%; height: auto; }

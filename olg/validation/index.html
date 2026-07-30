@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OG-UK validation — PolicyEngine Macro</title>
+<meta name="description" content="How far to trust OG-UK: a structural side-by-side with the OBR's UK OLG model (Working Paper No. 22), plus the model's own caveats and limits." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/olg/validation" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://policyengine-macro.vercel.app/olg/validation" />
+<meta property="og:site_name" content="PolicyEngine Macro" />
+<meta property="og:title" content="OG-UK validation — PolicyEngine Macro" />
+<meta property="og:description" content="A dynamic general-equilibrium model of 80 age cohorts built on OG-Core, with tax functions estimated from PolicyEngine microdata. A calibrated counterfactual with no published ground truth." />
+<meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
+<meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css" />
+<style>
+/* page-specific: hero sizing only — shared component styles live in style.css */
+.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
+/* additional vchart marks for the showcase charts on this page */
+.vchart .vc-edge { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 3; }
+</style>
+</head>
+<body class="doc">
+<a class="skip-link" href="#top">Skip to main content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a class="nav-mobile" href="/">Home</a>
+    <a class="nav-mobile" href="/economy">Economy</a>
+    <a class="nav-mobile" href="/models" aria-current="true">Models</a>
+    <a class="nav-mobile" href="/forecasts">Track record</a>
+    <a class="nav-mobile nav-start" href="/connect">Use</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<nav class="crumbs mono" aria-label="You are here">
+    <a href="/">Home</a>
+    <a href="/models">Models</a>
+    <a href="/olg">OG-UK</a>
+    <span aria-current="page">Validation</span>
+</nav>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <p class="eyebrow reveal" style="--d:0">model 05 — overlapping generations · psl-og · UK · local</p>
+      <h1 class="reveal page-title" style="--d:1;">How far to trust it.</h1>
+      <p class="lede reveal" style="--d:2">No published ground truth exists for this model — the closest external check is a structural comparison with the OBR's own UK OLG model.</p>
+    </div>
+  </section>
+
+  <nav class="model-tabs" aria-label="OG-UK pages">
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="/olg">Overview</a>
+      <a class="model-tabs-link" href="/olg/code">Code</a>
+      <a class="model-tabs-link" href="/olg/methodology">Methodology</a>
+      <a class="model-tabs-link" href="/olg/validation" aria-current="page">Validation</a>
+      <a class="model-tabs-link" href="/papers/psl-og">Paper</a>
+    </div>
+  </nav>
+
+  <section id="obr-overview" class="band">
+    <div class="band-head">
+      <span class="kicker mono">obr comparison — overview</span>
+      <h2>Two UK overlapping-generations models, side by side.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        This page compares <strong>OG-UK</strong> — the UK calibration of
+        <a href="https://github.com/PSLmodels/OG-Core">OG-Core</a>, maintained by the
+        <a href="https://pslmodels.org">Policy Simulation Library</a> — with the
+        <strong>OBR UK OLG</strong> model described in
+        <a href="/papers/obr-working-paper-22.pdf">OBR Working Paper No.&nbsp;22</a>
+        (Brzezinski, Hantzsche &amp; Watson, April&nbsp;2025). For a model with no published
+        ground truth, the closest available external check is a structural comparison with
+        the official model built to answer the same questions.
+      </p>
+      <p>
+        The sections below walk through production, households, bequests, the tax system,
+        government, the open economy, and the solution method &amp; calibration. The two
+        models occupy complementary niches: OG-UK carries more structural detail and traces
+        full year-by-year transition paths; OBR UK OLG calibrates tightly to UK fiscal
+        institutions and reports steady-state outcomes.
+      </p>
+      <div class="table-scroll"><table>
+        <thead><tr><th scope="col">Dimension</th><th scope="col">OG-UK strength</th><th scope="col">OBR UK OLG strength</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Transition dynamics</th><td>Full year-by-year paths</td><td>Steady-state only</td></tr>
+          <tr><th scope="row">UK institutional detail</th><td>Smooth approximations</td><td>Explicit bands and rates</td></tr>
+          <tr><th scope="row">Within-cohort inequality</th><td>Permanent types</td><td>Stochastic earnings</td></tr>
+          <tr><th scope="row">Production structure</th><td>Multi-sector CES</td><td>Single-sector Cobb-Douglas</td></tr>
+          <tr><th scope="row">Tax instruments</th><td>5 instruments</td><td>3 instruments (more detailed)</td></tr>
+          <tr><th scope="row">Fiscal policy levers</th><td>G, TR, UBI, I<sub>g</sub></td><td>RBI, age-dependent transfers</td></tr>
+          <tr><th scope="row">Openness</th><td>Open-source, Python</td><td>MATLAB, closed toolkit</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <section id="obr-1" class="band">
+    <div class="band-head">
+      <span class="kicker mono">obr comparison — 1</span>
+      <h2>Production technology.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        How each model represents firms — the technology for combining capital and labour,
+        and whether production is a single aggregate or split across multiple industries.
+      </p>
+      <div class="table-scroll"><table>
+        <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Production function</th><td>CES (nests Cobb-Douglas as special case)</td><td>Cobb-Douglas only</td></tr>
+          <tr><th scope="row">Industries</th><td>M industries (multi-sector)</td><td>Single sector</td></tr>
+          <tr><th scope="row">Public capital</th><td>Yes — generates rents to private capital</td><td>No</td></tr>
+          <tr><th scope="row">Capital share</th><td>Configurable per industry</td><td>α = 0.33</td></tr>
+          <tr><th scope="row">Labour input</th><td>Efficiency-weighted across permanent types</td><td>Efficiency-weighted by age + stochastic shocks</td></tr>
+          <tr><th scope="row">TFP</th><td>Varies by industry and over time</td><td>Normalised to 1, with labour-augmenting growth g = 1.2%</td></tr>
+          <tr><th scope="row">Depreciation</th><td>Configurable per industry</td><td>δ = 5%</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <section id="obr-2" class="band">
+    <div class="band-head">
+      <span class="kicker mono">obr comparison — 2</span>
+      <h2>Household heterogeneity.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        How households differ within each age cohort, and the utility function they maximise.
+        The core structural difference: OG-UK uses <strong>permanent ability types</strong>
+        assigned at birth, while the OBR model uses <strong>stochastic earnings shocks</strong>
+        each period — the latter generates precautionary savings and within-cohort inequality
+        that evolves over the lifecycle.
+      </p>
+      <div class="table-scroll"><table>
+        <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Within-cohort variation</th><td>J <strong>permanent ability types</strong> (deterministic)</td><td><strong>Stochastic earnings shocks</strong> (AR(1) persistent + i.i.d. transitory)</td></tr>
+          <tr><th scope="row">Income inequality driver</th><td>Fixed type assignment at birth</td><td>Random shocks each period (ρ<sup>z</sup> = 0.9, σ<sub>z</sub> = 0.05, σ<sub>e</sub> = 0.7)</td></tr>
+          <tr><th scope="row">Precautionary savings</th><td>Not a primary channel</td><td>Yes — driven by earnings uncertainty</td></tr>
+          <tr><th scope="row">Utility function</th><td>CRRA on consumption; elliptical labour disutility</td><td>Cobb-Douglas over consumption and leisure (non-separable)</td></tr>
+          <tr><th scope="row">Labour disutility</th><td><strong>Elliptical function</strong> — always interior solutions</td><td>Implicit in Cobb-Douglas composite — corner solutions possible</td></tr>
+          <tr><th scope="row">Risk aversion parameter</th><td>σ on consumption only</td><td>σ₂ = 2 on consumption-leisure composite</td></tr>
+          <tr><th scope="row">Consumption aggregation</th><td>Stone-Geary Cobb-Douglas (subsistence levels, I goods)</td><td>Single consumption good</td></tr>
+          <tr><th scope="row">Discount factor</th><td>β<sub>j</sub> varies by ability type</td><td>β = 0.99 (uniform)</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <section id="obr-3" class="band">
+    <div class="band-head">
+      <span class="kicker mono">obr comparison — 3</span>
+      <h2>Bequest motive.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        How each model handles wealth transfer across generations at death — whether bequests
+        reflect a deliberate utility-generating choice, an accident of mortality, or some
+        combination.
+      </p>
+      <div class="table-scroll"><table>
+        <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Motive</th><td>"Warm glow" weighted by mortality probability ρ<sub>s</sub></td><td>"Warm glow" with target level, kicks in at age j* = 91</td></tr>
+          <tr><th scope="row">Varies by type</th><td>Yes — χ<sup>b</sup><sub>j</sub> calibrated per ability type</td><td>Uniform (φ₁ = 10, φ₂ = 4.55)</td></tr>
+          <tr><th scope="row">Distribution</th><td>To surviving households</td><td>Equal distribution to ages 55–75</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <section id="obr-4" class="band">
+    <div class="band-head">
+      <span class="kicker mono">obr comparison — 4</span>
+      <h2>Tax system.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        <strong>OG-UK</strong> estimates smooth parametric tax functions (Gouveia–Strauss, DEP
+        or linear) from microdata that <strong>PolicyEngine UK</strong> generates — an
+        open-source microsimulation of the UK income-tax and NICs rulebook. The estimated
+        functions fold in income tax and NICs; OG-UK models consumption, wealth, corporate and
+        bequest taxes separately on top. Any reform PolicyEngine can represent — rate,
+        threshold or allowance changes — flows straight through after re-estimating on
+        post-reform microdata.
+      </p>
+      <p>
+        The <strong>OBR UK OLG</strong> model instead hard-codes the statutory UK schedule
+        directly: income tax as explicit bands (PA £12,570, HRT £50,270, ART £125,140 at
+        20&nbsp;/&nbsp;40&nbsp;/&nbsp;45%); NICs as a separate instrument (£12,570 / £50,270 at
+        8&nbsp;/&nbsp;2%); VAT as an effective 9.3%; and an explicit treatment of pension
+        relief and drawdown taxation. A lever like "+1&nbsp;pp basic rate from 2027–28" then
+        takes one parameter to simulate — at the cost of less flexibility for reforms that
+        reshape the schedule.
+      </p>
+    </div>
+  </section>
+
+  <section id="obr-5" class="band">
+    <div class="band-head">
+      <span class="kicker mono">obr comparison — 5</span>
+      <h2>Government &amp; fiscal policy.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        How the government collects revenue, spends, and closes its budget. The fiscal closure
+        rule — which item adjusts to keep debt sustainable — is the modelling choice that
+        determines who bears the long-run burden of any reform.
+      </p>
+      <div class="table-scroll"><table>
+        <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Budget constraint</th><td>Revenue + new debt = debt service + G + I<sub>g</sub> + pensions + TR + UBI</td><td>Revenue = welfare transfers + RBI + debt service (growth-adjusted)</td></tr>
+          <tr><th scope="row">Fiscal closure rule</th><td><strong>Configurable</strong>: adjust G, TR, or combination after period T<sub>G1</sub></td><td><strong>Residual Budgetary Item (RBI)</strong> adjusts to stabilise debt/GDP at 100%</td></tr>
+          <tr><th scope="row">Debt target</th><td>Configurable</td><td>Fixed at 100% of GDP</td></tr>
+          <tr><th scope="row">Public investment</th><td>Explicit (I<sub>g</sub> contributes to public capital stock)</td><td>Not modelled as productive</td></tr>
+          <tr><th scope="row">Welfare transfers</th><td>Lump-sum TR</td><td><strong>Age-dependent</strong> transfers (γ<sup>j</sup> scaling) calibrated to OBR welfare spending projections</td></tr>
+          <tr><th scope="row">State pension</th><td>Part of transfers</td><td><strong>Explicitly modelled</strong> as age-dependent welfare transfer from state pension age onwards</td></tr>
+          <tr><th scope="row">Spending categories</th><td>G (public goods) + I<sub>g</sub> (infrastructure) + pensions + TR + UBI</td><td>Welfare transfers + residual non-interest spending (G⁰)</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <section id="obr-6" class="band">
+    <div class="band-head">
+      <span class="kicker mono">obr comparison — 6</span>
+      <h2>Open economy.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        How foreign capital and foreign holdings of government debt enter each model, and
+        whether the interest rate that follows comes from a global or a domestic margin.
+      </p>
+      <div class="table-scroll"><table>
+        <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Approach</th><td><strong>Parameterised capital mobility</strong> (ζ<sub>K</sub> for capital, ζ<sub>D</sub> for debt)</td><td><strong>Binary switch</strong>: fully open (r = 5% exogenous) or fully closed (r endogenous)</td></tr>
+          <tr><th scope="row">Foreign capital</th><td>Continuous degree of openness</td><td>Either all or nothing</td></tr>
+          <tr><th scope="row">Net foreign assets</th><td>Derived from capital mobility parameters</td><td>NFA residually determined in open economy</td></tr>
+          <tr><th scope="row">Interest rate</th><td>Endogenous (influenced by openness parameters)</td><td>Either fixed at 5% (open) or MPK − δ (closed)</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <section id="obr-7" class="band">
+    <div class="band-head">
+      <span class="kicker mono">obr comparison — 7</span>
+      <h2>Solution method &amp; calibration.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Both models are rational-expectations dynamic general equilibrium, but they solve
+        different problems. <strong>OG-UK</strong> solves households' first-order conditions
+        directly via Euler equations and iterates to a full <strong>year-by-year transition
+        path</strong> (Time Path Iteration), so a reform shows up as a complete trajectory
+        rather than a long-run snapshot. <strong>OBR UK OLG</strong> uses <strong>Value
+        Function Iteration</strong> (Kirkby's VFI toolkit) and compares long-run steady states
+        only; it does not trace the adjustment path between them. As a consequence OG-UK's
+        state space is continuous and its expectations run over the whole path, while the OBR
+        model discretises assets and stochastic earnings on a grid and forms expectations
+        within each steady state.
+      </p>
+      <p>
+        Calibration differs mainly in data sources and anchors. <strong>OG-UK</strong> draws
+        demographics from the UN World Population Prospects (country 826), age-earning
+        profiles from microdata via its permanent ability types, and tax functions from
+        PolicyEngine-UK's Enhanced FRS (FRS enhanced with HMRC SPI, LCFS and WAS); ONS GDP
+        levels anchor the macro aggregates, and the modeller sets fiscal targets and growth
+        assumptions. <strong>OBR UK OLG</strong> uses ONS mortality statistics for
+        demographics, ONS ASHE plus the HMRC earnings distribution for age-earnings profiles,
+        and HMRC / GOV.UK parameters directly for taxes; the model pins to the OBR March 2024
+        EFO — GDP per person of £35,100 (scaling parameter S&nbsp;=&nbsp;19.81), population
+        growth n&nbsp;=&nbsp;0.75%, productivity growth g&nbsp;=&nbsp;1.2%, and debt / GDP
+        stabilised at 100%.
+      </p>
+      <p class="chart-note">
+        Source: <a href="/papers/obr-working-paper-22.pdf">OBR Working Paper No. 22, "A new UK
+        overlapping generations model" (April 2025)</a>; OG-Core documentation and OG-UK
+        calibration code.
+      </p>
+    </div>
+  </section>
+
+  <section id="trust" class="band band-result">
+    <div class="band-head">
+      <span class="kicker mono">how far to trust it</span>
+      <h2>No ground truth. Here is what can be checked instead.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        There is no published counterpart to replicate, so there is no
+        headline accuracy number, and any page that gave you one would be
+        misleading you. What exists instead is three weaker but honest checks,
+        set out in full in the <a href="/papers/psl-og">working paper</a>:
+      </p>
+      <div class="table-scroll"><table>
+        <caption>What each calibration check establishes</caption>
+        <thead><tr><th scope="col">check</th><th scope="col">what it establishes</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><strong>Calibration targets vs official UK aggregates</strong></th>
+            <td>The imposed and targeted quantities match by construction — that is anchoring, not validation, and <a href="/papers/psl-og">the paper's tables</a> label which is which. The over-identifying checks are the <em>emergent</em> quantities, the capital–output ratio and the steady-state interest rate, for which no published reconciliation yet exists.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Parameters vs OG-Core / OG-USA defaults</strong></th>
+            <td>Deployed choices are set against framework defaults and the published De Backer–Evans–Phillips tax-function estimates, including their fit statistics.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Against the OBR's own UK OLG model</strong></th>
+            <td>OBR Working Paper No. 22 (2025) is the closest available external check, and its headline experiment is the same 1pp basic-rate change used as the running example here. For the rise, WP 22 reports GDP per person −0.1%, hours −0.2%, productivity +0.1% through composition, and just over £8bn in real income tax (~0.3% of GDP) against HMRC's ~£6–8bn static yield. A structural side-by-side with WP 22 is on this page above; a numerical side-by-side of matched experiments is on the roadmap, not done.</td>
+          </tr>
+        </tbody>
+      </table></div>
+    </div>
+    <p class="chart-note" style="max-width: 80ch;">
+      Read point estimates as model-consistent magnitudes and signs, not
+      forecasts: two defensible OLG models can disagree materially on the
+      long-run effect of the same reform. Note also that WP 22 solves by
+      value-function iteration in under two minutes where this model uses
+      Newton root-finding plus time-path iteration at ~17 minutes — a
+      difference in method, not in ambition. Wider suite evidence:
+      <a href="/validation">validation</a>.
+    </p>
+  </section>
+
+  <section id="caveats" class="band">
+    <div class="band-head">
+      <span class="kicker mono">limits</span>
+      <h2>Experimental limitations.</h2>
+    </div>
+    <div class="prose">
+      <div class="table-scroll"><table>
+        <caption>Known limits of the overlapping-generations model</caption>
+        <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><strong>Version pin</strong></th>
+            <td>The integration installs <code>oguk</code> from GitHub (0.3.2), which pins <code>policyengine-uk==2.88.0</code>. Versions ≥ 2.89 renamed the microdata dataset keys (<code>enhanced_frs_2023_24_&lt;year&gt;</code> → <code>populace_uk_*</code>), so mixing them fails with a <code>KeyError</code> at calibration time. The adapter traps this and raises an actionable error. Upstream has moved on; lifting the pin is roadmap work, and until it lands the OLG member scores against a slightly older statute vintage than <a href="/pe">the microsimulation member</a>. A declared inconsistency, not a hidden one.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Gated data</strong></th>
+            <td>Calibration needs the private enhanced-FRS microdata, so a <code>HUGGING_FACE_TOKEN</code> with access is a hard prerequisite.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Thin CI</strong></th>
+            <td>CI cannot exercise a seventeen-minute solve on every commit, so regressions in solve behaviour are caught by scheduled runs and by hand, not continuously.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Steady-state-only in the CLI</strong></th>
+            <td>Because the CLI exposes steady-state solves only (<a href="/olg/code#code-next">Code, step 7</a>), the model cannot yet speak to fiscal-year profiles through the suite — the long-run destination is available through it, the path there is not.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Ability profiles not UK-estimated</strong></th>
+            <td>Lifetime-ability profiles are inherited rather than re-estimated on UK microdata. On the roadmap.</td>
+          </tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot foot-bar">
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/validation">Validation</a>
+    <a class="footer-text" href="/papers">Papers</a>
+    <a class="footer-text" href="/notes">Notes</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="/contact">Contact</a>
+  </nav>
+</footer>
+
+<script src="/reveal.js" defer></script>
+<script>
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest("[data-copy]"); if (!btn) return;
+  var code = btn.parentElement.querySelector("code");
+  navigator.clipboard.writeText(code.textContent).then(function () {
+    btn.textContent = "copied";
+    setTimeout(function () { btn.textContent = "copy"; }, 1400);
+  });
+});
+</script>
+</body>
+</html>
