@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>US HANK code — PolicyEngine Macro</title>
+<meta name="description" content="How to run the us-hank model: the hosted MCP tools, the pe-macro CLI, shock kinds and units, and the Python API you would actually run." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/us-hank/code" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://policyengine-macro.vercel.app/us-hank/code" />
+<meta property="og:site_name" content="PolicyEngine Macro" />
+<meta property="og:title" content="US HANK code — PolicyEngine Macro" />
+<meta property="og:description" content="A validated replication of the Auclert–Bardóczy–Rognlie–Straub (2021) two-asset HANK — stylized US shocks with first-order distributional output. Not a forecaster." />
+<meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
+<meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css?v=2" />
+<style>
+/* page-specific: hero sizing only — shared component styles live in style.css */
+.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
+</style>
+</head>
+<body class="doc">
+<a class="skip-link" href="#top">Skip to main content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a class="nav-mobile" href="/">Home</a>
+    <a class="nav-mobile" href="/economy">Economy</a>
+    <a class="nav-mobile" href="/models" aria-current="true">Models</a>
+    <a class="nav-mobile" href="/forecasts">Forecasts</a>
+    <a class="nav-mobile nav-start" href="/connect">Use</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<nav class="crumbs mono" aria-label="You are here">
+    <a href="/">Home</a>
+    <a href="/models">Models</a>
+    <a href="/us-hank">US HANK</a>
+    <span aria-current="page">Code</span>
+</nav>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <p class="eyebrow reveal" style="--d:0">model 04 — US heterogeneous-agent NK model · us-hank · US · hosted</p>
+      <h1 class="reveal page-title" style="--d:1;">
+        See who responds to a US shock, not just how much.
+      </h1>
+      <p class="lede reveal" style="--d:2">
+        Run stylized monetary, fiscal-spending, and productivity shocks through
+        a two-asset heterogeneous-agent New Keynesian model — aggregate
+        impulse responses plus first-order distributional output: MPCs by
+        wealth quartile and the hand-to-mouth share.
+      </p>
+    </div>
+  </section>
+
+  <nav class="model-tabs" aria-label="US HANK pages">
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="/us-hank">Overview</a>
+      <a class="model-tabs-link" href="/us-hank/methodology">Methodology</a>
+      <a class="model-tabs-link" href="/us-hank/validation">Validation</a>
+      <a class="model-tabs-link" href="/us-hank/code" aria-current="page">Code</a>
+      <a class="model-tabs-link" href="/reports/us-hank-open-source">Paper</a>
+    </div>
+  </nav>
+
+  <section id="run" class="band band-wide">
+    <div class="band-head">
+      <span class="kicker mono">code</span>
+      <h2>Ask the server, or install it.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Four steps from hosted call to local Python API; each step's code
+        follows its narrative.
+      </p>
+    </div>
+
+    <div class="scrolly-wrap scrolly-code">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="code-1" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Ask the hosted server</h3></div>
+        <h4>Two MCP tools</h4>
+        <p>Quickest is the <a href="/connect">hosted MCP server</a>: <code>hank_shock</code> runs a stylized shock, optionally with the distributional block; <code>hank_summary</code> lists shock kinds, units, variants, and scope limits — instant, no solve.</p>
+        <h4>Cold vs warm</h4>
+        <p>The first call per variant pays the steady-state and Jacobian solves, roughly <strong>18 seconds cold</strong>; both are cached, so warm calls are effectively instant.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">hosted MCP tools</div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>hank_shock</code> — run a stylized shock, optional distributional block</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>hank_summary</code> — shock kinds, units, variants, scope limits</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>~18s cold per variant, then cached and instant</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="code-2" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Or use the CLI</h3></div>
+        <h4>Same two calls</h4>
+        <p>The same two operations on the command line: <code>hank-summary</code> to see what the model accepts, <code>hank-shock</code> to run one — here a 25bp monetary easing with the distributional block on.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">pe-macro CLI</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro hank-summary
+pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6 --distribution</code></pre></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="code-3" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Know the units and variants</h3></div>
+        <h4>Units differ per kind</h4>
+        <p><code>monetary</code>: level change in the <em>quarterly</em> policy rate (&minus;0.0025 = a 25bp easing); <code>fiscal_spending</code>: level change in G (steady-state output is 1, so 0.01 = 1% of GDP); <code>productivity</code>: level change in TFP.</p>
+        <h4>Two variants</h4>
+        <p><code>variant</code> selects the paper's <code>two_asset</code> model (the default) or a fast <code>one_asset</code> textbook variant — no capital, so no investment response, and monetary/productivity shocks only.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">shock kinds and units</div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>monetary</code> — quarterly policy rate level (&minus;0.0025 = 25bp easing)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>fiscal_spending</code> — level change in G (0.01 = 1% of GDP)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>productivity</code> — level change in TFP</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>variant</code> — <code>two_asset</code> (default) or fast <code>one_asset</code></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>one_asset</code>: no capital, monetary/productivity only</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="code-4" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Install and script it</h3></div>
+        <h4>The Python API</h4>
+        <p>Beyond the hosted surface, install the package and use the Python API directly: solve the steady state once, solve the Jacobian once, then draw impulse responses and distributional summaries instantly.</p>
+        <h4>What sits behind it</h4>
+        <p>The solve behind these calls — steady state, Jacobian, then instant IRFs — is on the <a href="/us-hank/methodology">methodology page</a>; what to trust the results for, on the <a href="/us-hank/validation">validation page</a>.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">install</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/us-hank-model</code></pre></div>
+        <div class="meth-sec-title">python api</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> us_hank <span class="kw">import</span> model, distributional
+
+ss = model.solve_steady_state()          <span class="cm"># ~13s, cached</span>
+G = model.solve_jacobian(ss, T=<span class="kw">300</span>)      <span class="cm"># ~5s, cached</span>
+
+irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0025</span>, persistence=<span class="kw">0.6</span>, ss=ss, G_jac=G)
+<span class="kw">print</span>(irf[<span class="kw">"Y"</span>][:<span class="kw">8</span>])                      <span class="cm"># output, % deviation from steady state</span>
+<span class="kw">print</span>(distributional.summary(ss))        <span class="cm"># MPCs by quartile, hand-to-mouth share</span></code></pre></div>
+        </div>
+      </div>
+      </div>
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Ask the hosted server</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">hosted MCP tools</div>
+          <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>hank_shock</code> — run a stylized shock, optional distributional block</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>hank_summary</code> — shock kinds, units, variants, scope limits</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>~18s cold per variant, then cached and instant</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Or use the CLI</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">pe-macro CLI</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro hank-summary
+pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6 --distribution</code></pre></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Know the units and variants</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">shock kinds and units</div>
+          <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>monetary</code> — quarterly policy rate level (&minus;0.0025 = 25bp easing)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>fiscal_spending</code> — level change in G (0.01 = 1% of GDP)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>productivity</code> — level change in TFP</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>variant</code> — <code>two_asset</code> (default) or fast <code>one_asset</code></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>one_asset</code>: no capital, monetary/productivity only</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Install and script it</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <div class="meth-sec-title">install</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/us-hank-model</code></pre></div>
+          <div class="meth-sec-title">python api</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> us_hank <span class="kw">import</span> model, distributional
+
+ss = model.solve_steady_state()          <span class="cm"># ~13s, cached</span>
+G = model.solve_jacobian(ss, T=<span class="kw">300</span>)      <span class="cm"># ~5s, cached</span>
+
+irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0025</span>, persistence=<span class="kw">0.6</span>, ss=ss, G_jac=G)
+<span class="kw">print</span>(irf[<span class="kw">"Y"</span>][:<span class="kw">8</span>])                      <span class="cm"># output, % deviation from steady state</span>
+<span class="kw">print</span>(distributional.summary(ss))        <span class="cm"># MPCs by quartile, hand-to-mouth share</span></code></pre></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot foot-bar">
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="/contact">Contact</a>
+  </nav>
+</footer>
+
+<script src="/reveal.js?v=2" defer></script>
+<script>
+// Code scrollytelling: highlight the step at the reading line and
+// show its code panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  update();
+})();
+</script>
+<script>
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest("[data-copy]"); if (!btn) return;
+  var code = btn.parentElement.querySelector("code");
+  navigator.clipboard.writeText(code.textContent).then(function () {
+    btn.textContent = "copied";
+    setTimeout(function () { btn.textContent = "copy"; }, 1400);
+  });
+});
+</script>
+</body>
+</html>

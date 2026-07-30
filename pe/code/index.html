@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PolicyEngine microsim code — PolicyEngine Macro</title>
+<meta name="description" content="The Python you would actually run: install policyengine, calculate a UK or US household, apply a reform, and score a whole survey population — plus the hosted MCP tools and CLI commands." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/pe/code" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://policyengine-macro.vercel.app/pe/code" />
+<meta property="og:site_name" content="PolicyEngine Macro" />
+<meta property="og:title" content="PolicyEngine microsim code — PolicyEngine Macro" />
+<meta property="og:description" content="The UK and US tax-benefit engine behind policyengine.org — deterministic household rule calculations and survey-based population scoring." />
+<meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
+<meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css?v=2" />
+<style>
+/* page-specific: hero sizing only — shared component styles live in style.css */
+.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
+</style>
+</head>
+<body class="doc">
+<a class="skip-link" href="#top">Skip to main content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a class="nav-mobile" href="/">Home</a>
+    <a class="nav-mobile" href="/economy">Economy</a>
+    <a class="nav-mobile" href="/models" aria-current="true">Models</a>
+    <a class="nav-mobile" href="/forecasts">Forecasts</a>
+    <a class="nav-mobile nav-start" href="/connect">Use</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<nav class="crumbs mono" aria-label="You are here">
+    <a href="/">Home</a>
+    <a href="/models">Models</a>
+    <a href="/pe">PolicyEngine microsim</a>
+    <span aria-current="page">Code</span>
+</nav>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <p class="eyebrow reveal" style="--d:0">model 06 — tax-benefit microsimulation · pe-microsim · UK · US · hosted</p>
+      <h1 class="reveal page-title" style="--d:1;">
+        Calculate taxes and benefits.
+      </h1>
+      <p class="lede reveal" style="--d:2">
+        Compare current law with a reform for a UK or US household, or estimate
+        population-wide revenue and distributional effects.
+      </p>
+    </div>
+  </section>
+
+  <nav class="model-tabs" aria-label="PolicyEngine microsim pages">
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="/pe">Overview</a>
+      <a class="model-tabs-link" href="/pe/methodology">Methodology</a>
+      <a class="model-tabs-link" href="/pe/validation">Validation</a>
+      <a class="model-tabs-link" href="/pe/code" aria-current="page">Code</a>
+    </div>
+  </nav>
+
+  <section id="run" class="band band-wide">
+    <div class="band-head">
+      <span class="kicker mono">code</span>
+      <h2>A household in one call.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Four steps from nothing to a population-wide costing; each step's
+        code sits alongside its narrative.
+      </p>
+    </div>
+
+    <div class="scrolly-wrap scrolly-code">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="code-route" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Pick a route: hosted MCP, CLI, or Python</h3></div>
+        <h4>Hosted MCP server</h4>
+        <p>The quickest route is the <a href="/connect">hosted MCP server</a>, with five tools — <code>calculate_household</code>, <code>household_reform_impact</code>, <code>population_reform_impact</code>, <code>list_reform_parameters</code>, and <code>score_reform</code> with <code>model="microsim"</code>. The UK microdata credential is provisioned server-side.</p>
+        <h4>CLI and Python</h4>
+        <p>The <code>pe-macro</code> CLI mirrors the same tools; the Python package underneath is what the rest of this page walks through.</p>
+        <div class="callout">
+          <strong>Every number from this model is a static score.</strong>
+          Prices, wages and output do not move. For second-round effects on
+          GDP, route the same reform through the <a href="/obr">OBR
+          emulator</a>: <code>score_reform</code> with <code>model="obr"</code>
+          takes this package's static costing as the direct effect and returns
+          the economy-wide feedback.
+        </div>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">three routes in</div>
+          <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>MCP: <code>calculate_household</code>, <code>household_reform_impact</code></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>MCP: <code>population_reform_impact</code>, <code>list_reform_parameters</code></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>MCP: <code>score_reform</code> with <code>model="microsim"</code></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>CLI: <code>pe-macro household</code> / <code>household-impact</code></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>CLI: <code>pe-macro population-impact</code> / <code>parameters</code></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Python: <code>import policyengine</code> — below</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="code-install" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Install</h3></div>
+        <h4>From PyPI</h4>
+        <p>The base install is shared tooling only; add <code>[models]</code> for the pinned UK + US country models, or a single country extra.</p>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">install</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install policyengine            <span class="cm"># shared tooling, no country models</span>
+pip install "policyengine[models]"  <span class="cm"># + pinned UK and US models</span>
+pip install "policyengine[uk]"      <span class="cm"># UK model only</span>
+pip install "policyengine[us]"      <span class="cm"># US model only</span></code></pre></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="code-household" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Calculate a household</h3></div>
+        <h4>Describe, pick a year, read</h4>
+        <p>Describe the people, pick a year, read the results — no data access or credentials needed. Pass a <code>reform</code> dict to apply parameter changes.</p>
+        <h4>Household-level reform impact</h4>
+        <p class="opt-note">
+          differencing runs with and without <code>reform</code> gives the
+          household-level impact: for the UK earner opposite, a 25% basic rate
+          (<code>{"gov.hmrc.income_tax.rates.uk[0].rate": 0.25}</code>) adds
+          <strong>£1,872</strong> of income tax and cuts net income by the
+          same amount.
+        </p>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">household calculation</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
+
+<span class="cm"># UK: single adult earning £50,000 — current law</span>
+uk = pe.uk.calculate_household(
+    people=[{<span class="kw">"age"</span>: 35, <span class="kw">"employment_income"</span>: 50_000}],
+    year=2026,
+)
+<span class="kw">print</span>(uk.person[0].income_tax)                   <span class="cm"># £7,486</span>
+<span class="kw">print</span>(uk.person[0].national_insurance)           <span class="cm"># £2,994</span>
+<span class="kw">print</span>(uk.household.hbai_household_net_income)    <span class="cm"># £39,520</span>
+
+<span class="cm"># US: single filer in California, with a reform applied</span>
+us = pe.us.calculate_household(
+    people=[{<span class="kw">"age"</span>: 35, <span class="kw">"employment_income"</span>: 60_000}],
+    tax_unit={<span class="kw">"filing_status"</span>: <span class="kw">"SINGLE"</span>},
+    household={<span class="kw">"state_code"</span>: <span class="kw">"CA"</span>},
+    year=2026,
+    reform={<span class="kw">"gov.irs.credits.ctc.amount.adult_dependent"</span>: 1000},
+)
+<span class="kw">print</span>(us.tax_unit.income_tax, us.household.household_net_income)</code></pre></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="code-population" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Score a whole population</h3></div>
+        <h4>Representative datasets</h4>
+        <p>The same package runs whole representative datasets — the enhanced UK Family Resources Survey, the US CPS — aggregating any variable by decile, entity or demographic.</p>
+        <div class="callout">
+          UK population microdata is gated — set
+          <code>HUGGING_FACE_TOKEN</code> from an account with access to
+          <code>policyengine/policyengine-uk-data</code> before running UK
+          population examples locally. The hosted MCP server provisions this
+          credential server-side.
+        </div>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">population scoring</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
+<span class="kw">from</span> policyengine.core <span class="kw">import</span> Simulation
+<span class="kw">from</span> policyengine.outputs.aggregate <span class="kw">import</span> Aggregate, AggregateType
+
+datasets = pe.uk.ensure_datasets(datasets=[<span class="kw">"enhanced_frs_2023_24"</span>],
+                                 years=[2026], data_folder=<span class="kw">"./data"</span>)
+simulation = Simulation(dataset=datasets[<span class="kw">"enhanced_frs_2023_24_2026"</span>],
+                        tax_benefit_model_version=pe.uk.model)
+simulation.run()
+
+agg = Aggregate(simulation=simulation, variable=<span class="kw">"universal_credit"</span>,
+                aggregate_type=AggregateType.SUM, entity=<span class="kw">"benunit"</span>)
+agg.run()
+<span class="kw">print</span>(f<span class="kw">"Total UC spending: £{agg.result / 1e9:.1f}bn"</span>)</code></pre></div>
+        </div>
+      </div>
+      </div>
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Pick a route</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">three routes in</div>
+          <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>MCP: <code>calculate_household</code>, <code>household_reform_impact</code></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>MCP: <code>population_reform_impact</code>, <code>list_reform_parameters</code></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>MCP: <code>score_reform</code> with <code>model="microsim"</code></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>CLI: <code>pe-macro household</code> / <code>household-impact</code></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>CLI: <code>pe-macro population-impact</code> / <code>parameters</code></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Python: <code>import policyengine</code> — below</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Install</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">install</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install policyengine            <span class="cm"># shared tooling, no country models</span>
+pip install "policyengine[models]"  <span class="cm"># + pinned UK and US models</span>
+pip install "policyengine[uk]"      <span class="cm"># UK model only</span>
+pip install "policyengine[us]"      <span class="cm"># US model only</span></code></pre></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Calculate a household</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">household calculation</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
+
+<span class="cm"># UK: single adult earning £50,000 — current law</span>
+uk = pe.uk.calculate_household(
+    people=[{<span class="kw">"age"</span>: 35, <span class="kw">"employment_income"</span>: 50_000}],
+    year=2026,
+)
+<span class="kw">print</span>(uk.person[0].income_tax)                   <span class="cm"># £7,486</span>
+<span class="kw">print</span>(uk.person[0].national_insurance)           <span class="cm"># £2,994</span>
+<span class="kw">print</span>(uk.household.hbai_household_net_income)    <span class="cm"># £39,520</span>
+
+<span class="cm"># US: single filer in California, with a reform applied</span>
+us = pe.us.calculate_household(
+    people=[{<span class="kw">"age"</span>: 35, <span class="kw">"employment_income"</span>: 60_000}],
+    tax_unit={<span class="kw">"filing_status"</span>: <span class="kw">"SINGLE"</span>},
+    household={<span class="kw">"state_code"</span>: <span class="kw">"CA"</span>},
+    year=2026,
+    reform={<span class="kw">"gov.irs.credits.ctc.amount.adult_dependent"</span>: 1000},
+)
+<span class="kw">print</span>(us.tax_unit.income_tax, us.household.household_net_income)</code></pre></div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Score a whole population</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <div class="meth-sec-title">population scoring</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
+<span class="kw">from</span> policyengine.core <span class="kw">import</span> Simulation
+<span class="kw">from</span> policyengine.outputs.aggregate <span class="kw">import</span> Aggregate, AggregateType
+
+datasets = pe.uk.ensure_datasets(datasets=[<span class="kw">"enhanced_frs_2023_24"</span>],
+                                 years=[2026], data_folder=<span class="kw">"./data"</span>)
+simulation = Simulation(dataset=datasets[<span class="kw">"enhanced_frs_2023_24_2026"</span>],
+                        tax_benefit_model_version=pe.uk.model)
+simulation.run()
+
+agg = Aggregate(simulation=simulation, variable=<span class="kw">"universal_credit"</span>,
+                aggregate_type=AggregateType.SUM, entity=<span class="kw">"benunit"</span>)
+agg.run()
+<span class="kw">print</span>(f<span class="kw">"Total UC spending: £{agg.result / 1e9:.1f}bn"</span>)</code></pre></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="answers" class="band">
+    <div class="band-head">
+      <span class="kicker mono">what it can answer</span>
+      <h2>From one family to the whole distribution.</h2>
+    </div>
+    <div class="prose">
+      <div class="table-scroll"><table>
+        <caption>Common microsimulation questions and how to answer them</caption>
+        <thead><tr><th scope="col">question</th><th scope="col">how</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><strong>What does this reform do to this family?</strong></th>
+            <td><code>calculate_household</code> / <code>household_reform_impact</code> — every tax, benefit and income variable at person, benefit-unit/tax-unit and household level. On the hosted MCP server and the <code>pe-macro</code> CLI.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>What does it cost, and who wins?</strong></th>
+            <td><code>population_reform_impact</code> and <code>pe.uk.economic_impact_analysis</code> — budgetary impact, decile changes, winners and losers, poverty, inequality, regional impacts. Hosted, enhanced-FRS credential provisioned server-side.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>What levers exist?</strong></th>
+            <td><code>list_reform_parameters</code> — the parameter tree you can write reforms against.</td>
+          </tr>
+        </tbody>
+      </table></div>
+      <div class="callout">
+        <strong>It cannot</strong> tell you what a reform does to GDP,
+        interest rates, or the fiscal forecast. It is static and
+        partial-equilibrium by design: behavioural responses are optional
+        and post-hoc (e.g. labour-supply elasticities), with no general
+        equilibrium. That second act is what the macro members add —
+        <a href="/obr">short-run</a> and <a href="/olg">long-run</a>.
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot foot-bar">
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="/contact">Contact</a>
+  </nav>
+</footer>
+
+<script src="/reveal.js?v=2" defer></script>
+<script>
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest("[data-copy]"); if (!btn) return;
+  var code = btn.parentElement.querySelector("code");
+  navigator.clipboard.writeText(code.textContent).then(function () {
+    btn.textContent = "copied";
+    setTimeout(function () { btn.textContent = "copy"; }, 1400);
+  });
+});
+</script>
+<script>
+// Code scrollytelling: highlight the step at the reading line and
+// show its code panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  update();
+})();
+</script>
+</body>
+</html>

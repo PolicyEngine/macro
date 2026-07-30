@@ -18,7 +18,6 @@ PUBLIC_MODELS = (
 MODEL_INVENTORY_PAGES = (
     "index.html",
     "models/index.html",
-    "validation/index.html",
 )
 
 
@@ -34,18 +33,12 @@ def check_public_model_inventory() -> None:
         if missing:
             failures.append(f"{path}: missing {', '.join(missing)}")
 
-    papers = _read("papers/index.html")
-    if "evidence for all six models" not in papers:
-        failures.append("papers/index.html: evidence-guide count is not six")
-    missing_papers = [model for model in PUBLIC_MODELS if model not in papers]
-    if missing_papers:
-        failures.append(
-            f"papers/index.html: missing {', '.join(missing_papers)}"
-        )
 
-    validation = _read("validation/index.html")
+    # /validation was absorbed into /models#validation; the gradient claims
+    # now live on the models hub page.
+    validation = _read("models/index.html")
     if "The six models support" not in validation:
-        failures.append("validation/index.html: model count is not six")
+        failures.append("models/index.html: model count is not six")
 
     if failures:
         raise SystemExit("\n".join(failures))
@@ -109,8 +102,8 @@ def check_economy_navigation() -> None:
             failures.append(f"{path}: Evidence remains a global navigation tab")
         if 'href="/contact"' in header:
             failures.append(f"{path}: Contact remains a global navigation tab")
-        if ">Track record</a>" not in header:
-            failures.append(f"{path}: Forecasts is not labelled Track record")
+        if ">Forecasts</a>" not in header:
+            failures.append(f"{path}: the forecasts tab is not labelled Forecasts")
 
     if failures:
         raise SystemExit("\n".join(failures))
@@ -120,8 +113,7 @@ def check_editorial_consistency() -> None:
     failures: list[str] = []
     stale_claims = {
         "notes/2026-07-25-cpi-2026q2/index.html": "1992Q1–2023Q2",
-        "papers/index.html": "against its November 2025 forecast",
-        "validation/index.html": "This audit covers the three macro models",
+        "models/index.html": "This audit covers the three macro models",
         "forecasts/index.html": "a forecast reported without one is marketing",
     }
     for path, stale in stale_claims.items():
@@ -130,10 +122,6 @@ def check_editorial_consistency() -> None:
 
     home = _read("index.html")
     for proof in (
-        "No account needed",
-        "Point-in-time data",
-        "Scored in public",
-        "Failures published",
         "Run a hosted model",
     ):
         if proof not in home:

@@ -25,8 +25,29 @@
   targets.forEach(function (el) {
     if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
       el.classList.add("in-view", "reveal-initial");
+    } else if (el.offsetHeight > window.innerHeight * 0.7) {
+      // Tall blocks (long walkthroughs, scrollytelling wrappers) may never
+      // reach the 8% intersection threshold — show them without animation.
+      el.classList.add("in-view", "reveal-initial");
     } else {
       io.observe(el);
     }
   });
+})();
+
+// Keep sticky subnavs flush under the fixed header: expose the header's
+// real height as --nav-h so sticky offsets never drift from it.
+(function () {
+  "use strict";
+  var nav = document.querySelector("header.nav");
+  if (!nav) return;
+  function set() {
+    document.documentElement.style.setProperty(
+      "--nav-h", nav.getBoundingClientRect().height + "px"
+    );
+  }
+  window.addEventListener("resize", set, { passive: true });
+  window.addEventListener("load", set);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(set);
+  set();
 })();

@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BoE SVAR methodology — PolicyEngine Macro</title>
+<meta name="description" content="How the BoE SVAR replication works: eight quarterly variables, a Minnesota prior, and Arias–Rubio-Ramírez–Waggoner zero and sign restrictions naming six structural shocks." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/svar/methodology" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://policyengine-macro.vercel.app/svar/methodology" />
+<meta property="og:site_name" content="PolicyEngine Macro" />
+<meta property="og:title" content="BoE SVAR methodology — PolicyEngine Macro" />
+<meta property="og:description" content="Eight variables, six named shocks: Bayesian estimation over the inflation-targeting era, with zero and sign restrictions identifying world and UK demand, supply, energy, and monetary-policy shocks." />
+<meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
+<meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css?v=2" />
+<style>
+/* page-specific: hero sizing only — shared component styles live in style.css */
+.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
+</style>
+<script>
+/* Self-hosted MathJax (vendor/mathjax), used only on this page for the
+   methodology tab's formal panels. The CSP allows no CDN loads. */
+window.MathJax = {
+  chtml: { fontURL: "/vendor/mathjax/output/chtml/fonts/woff-v2" },
+  options: { enableMenu: false }
+};
+</script>
+<script src="/vendor/mathjax/tex-chtml-full.js" defer></script>
+</head>
+<body class="doc">
+<a class="skip-link" href="#top">Skip to main content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a class="nav-mobile" href="/">Home</a>
+    <a class="nav-mobile" href="/economy">Economy</a>
+    <a class="nav-mobile" href="/models" aria-current="true">Models</a>
+    <a class="nav-mobile" href="/forecasts">Forecasts</a>
+    <a class="nav-mobile nav-start" href="/connect">Use</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<nav class="crumbs mono" aria-label="You are here">
+    <a href="/">Home</a>
+    <a href="/models">Models</a>
+    <a href="/svar">BoE SVAR</a>
+    <span aria-current="page">Methodology</span>
+</nav>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <p class="eyebrow reveal" style="--d:0">model 02 — Bank of England structural VAR · boe-svar · UK · hosted</p>
+      <h1 class="reveal page-title" style="--d:1;">
+        Explain UK growth and inflation.
+      </h1>
+      <p class="lede reveal" style="--d:2">
+        Decompose UK GDP and inflation into six structural shocks, forecast
+        with credible bands, and explain revisions between quarters.
+      </p>
+    </div>
+  </section>
+
+  <nav class="model-tabs" aria-label="BoE SVAR pages">
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="/svar">Overview</a>
+      <a class="model-tabs-link" href="/svar/methodology" aria-current="page">Methodology</a>
+      <a class="model-tabs-link" href="/svar/validation">Validation</a>
+      <a class="model-tabs-link" href="/svar/code">Code</a>
+      <a class="model-tabs-link" href="/papers/boe-svar">Paper</a>
+    </div>
+  </nav>
+
+  <section id="methodology" class="band band-wide">
+    <div class="band-head">
+      <span class="kicker mono">methodology</span>
+      <h2>Eight variables, six named shocks.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Four steps from raw quarterly data to named structural shocks,
+        following Bank of England Macro Technical Paper No.&nbsp;3
+        (Brignone &amp; Piffer, 2025). Each step's formal elements sit
+        alongside its narrative.
+      </p>
+    </div>
+
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="meth-1" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>The data: eight quarterly variables</h3></div>
+        <figure class="step-diagram" data-title="Eight variables, two blocks" tabindex="0" role="button" aria-label="Expand diagram: Eight variables, two blocks">
+          <svg viewBox="0 0 580 230" width="580" style="max-width:100%;height:auto;">
+                <defs><marker id="arr-s1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+                <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Eight quarterly variables in two blocks</text>
+                <rect x="15" y="38" width="255" height="110" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="142" y="62" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">global block (3)</text>
+                <text x="142" y="84" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">world GDP</text>
+                <text x="142" y="102" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">world CPI (UK-trade-weighted)</text>
+                <text x="142" y="120" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">real oil price in sterling</text>
+                <rect x="310" y="38" width="255" height="110" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="437" y="62" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">UK block (5)</text>
+                <text x="437" y="84" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">Bank Rate &middot; sterling exchange-rate index</text>
+                <text x="437" y="102" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">CPI &middot; CPI energy</text>
+                <text x="437" y="120" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">real GDP</text>
+                <line x1="40" y1="180" x2="430" y2="180" stroke="var(--accent)" stroke-width="2"/>
+                <line x1="430" y1="180" x2="530" y2="180" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arr-s1)"/>
+                <circle cx="40" cy="180" r="4" fill="var(--accent)"/>
+                <circle cx="430" cy="180" r="4" fill="var(--accent)"/>
+                <text x="40" y="202" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">1992Q1</text>
+                <text x="430" y="202" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">2025Q1</text>
+                <text x="500" y="202" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">2026Q1</text>
+                <text x="235" y="168" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">estimation sample, levels, 4 lags &middot; Covid dummies 2020Q1&ndash;2021Q2</text>
+                <text x="480" y="168" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">conditioning only</text>
+                <text x="290" y="222" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-light)">time &rarr;</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>Two blocks</h4>
+      <p>Eight quarterly variables in two blocks: <strong>global</strong> — world GDP and world CPI (both UK-trade-weighted) plus the real oil price in sterling — and <strong>UK</strong> — Bank Rate, the sterling exchange-rate index, CPI, CPI energy, and real GDP.</p>
+        <h4>Sample and specification</h4>
+      <p>Estimation covers the inflation-targeting era, <strong>1992Q1–2025Q1</strong>, in both the paper replication and the hosted adapter — in levels, with \(p = 4\) lags and exogenous Covid dummies for 2020Q1–2021Q2.</p>
+        <h4>Conditioning versus estimation</h4>
+      <p>The hosted forecast conditions on observations through <strong>2026Q1</strong> without re-estimating coefficients on them.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">the eight variables</div>
+        <div class="meth-eq"><div class="meth-eq-label">global block</div><div class="meth-eq-body">World GDP · World CPI (both UK-trade-weighted) · real oil price in sterling</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">UK block</div><div class="meth-eq-body">Bank Rate · sterling exchange-rate index · CPI · CPI energy · real GDP</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sample</div><div class="meth-eq-body">1992Q1–2025Q1, in levels, \(p = 4\) lags</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">pandemic</div><div class="meth-eq-body">exogenous Covid dummies, 2020Q1–2021Q2</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Hosted forecast conditions on data through 2026Q1</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Coefficients keep the 2025Q1 estimation endpoint</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-2" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Bayesian estimation</h3></div>
+        <figure class="step-diagram" data-title="Bayesian estimation" tabindex="0" role="button" aria-label="Expand diagram: Bayesian estimation">
+          <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
+                <defs><marker id="arr-s2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+                <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Priors + data &rarr; a posterior, not point estimates</text>
+                <rect x="15" y="38" width="210" height="62" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="120" y="60" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">priors</text>
+                <text x="120" y="78" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">Minnesota (normal-inverse-Wishart)</text>
+                <text x="120" y="93" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">sum-of-coefficients &middot; dummy-initial-obs</text>
+                <rect x="15" y="116" width="210" height="62" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="120" y="138" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">data</text>
+                <text x="120" y="156" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">eight variables, 1992Q1&ndash;2025Q1</text>
+                <text x="120" y="171" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">levels, 4 lags</text>
+                <line x1="230" y1="69" x2="285" y2="100" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s2)"/>
+                <line x1="230" y1="147" x2="285" y2="116" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s2)"/>
+                <rect x="290" y="78" width="150" height="60" rx="10" fill="var(--accent)"/>
+                <text x="365" y="103" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">posterior over</text>
+                <text x="365" y="122" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">(&#928;, &#931;)</text>
+                <line x1="445" y1="108" x2="475" y2="108" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s2)"/>
+                <rect x="480" y="63" width="85" height="90" rx="10" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="522" y="88" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">IRFs</text>
+                <text x="522" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">decompositions</text>
+                <text x="522" y="124" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">fan charts</text>
+                <text x="522" y="142" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">all with bands</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>The prior</h4>
+      <p>Estimation is Bayesian with a <strong>Minnesota (normal-inverse-Wishart) prior</strong> plus sum-of-coefficients and dummy-initial-observation priors — the framework of <a href="https://doi.org/10.1162/REST_a_00483">Giannone, Lenza &amp; Primiceri (2015)</a>.</p>
+        <h4>The posterior</h4>
+      <p>The output is a posterior over the reduced-form coefficients \(\Pi\) and error covariance \(\Sigma\); every downstream object — impulse responses, decompositions, fan charts — is a posterior distribution, not a point estimate.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">priors</div>
+        <div class="meth-eq"><div class="meth-eq-label">reduced form</div><div class="meth-eq-body">\(y_t = c + \Pi_1 y_{t-1} + \cdots + \Pi_p y_{t-p} + u_t, \quad p = 4\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">main prior</div><div class="meth-eq-body">Minnesota (normal-inverse-Wishart) on \((\Pi, \Sigma)\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">additional priors</div><div class="meth-eq-body">sum-of-coefficients · dummy-initial-observation</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">framework</div><div class="meth-eq-body">Giannone, Lenza &amp; Primiceri (2015)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Posterior over \((\Pi, \Sigma)\), not point estimates</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>All outputs carry credible bands</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-3" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Identification: naming the shocks</h3></div>
+        <figure class="step-diagram" data-title="Zero and sign restrictions" tabindex="0" role="button" aria-label="Expand diagram: Zero and sign restrictions">
+          <svg viewBox="0 0 580 230" width="580" style="max-width:100%;height:auto;">
+                <defs><marker id="arr-s3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+                <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Restrictions turn residuals into named shocks</text>
+                <rect x="15" y="70" width="130" height="90" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="80" y="100" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">posterior</text>
+                <text x="80" y="118" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">draws</text>
+                <text x="80" y="140" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">unnamed residuals</text>
+                <line x1="150" y1="115" x2="180" y2="115" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s3)"/>
+                <rect x="185" y="42" width="180" height="66" rx="10" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="275" y="64" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">zero restrictions</text>
+                <text x="275" y="82" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">small open economy: UK shocks</text>
+                <text x="275" y="96" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">cannot move world variables on impact</text>
+                <rect x="185" y="122" width="180" height="66" rx="10" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="275" y="144" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">sign restrictions</text>
+                <text x="275" y="162" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">impact signs name the shocks</text>
+                <text x="275" y="176" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">(Arias et al. 2018)</text>
+                <line x1="370" y1="115" x2="400" y2="115" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s3)"/>
+                <rect x="405" y="42" width="160" height="120" rx="10" fill="var(--accent)"/>
+                <text x="485" y="64" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">six named shocks</text>
+                <text x="485" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#fff">world demand &middot; world energy</text>
+                <text x="485" y="102" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#fff">world supply &middot; UK demand</text>
+                <text x="485" y="118" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#fff">UK supply &middot; UK monetary policy</text>
+                <text x="485" y="146" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="rgba(255,255,255,0.85)">+ 2 unidentified (residual volatility)</text>
+                <text x="290" y="216" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">importance weights correct sampler non-uniformity &middot; Chan&ndash;Matthes&ndash;Yu (2025) permutation search cuts rejections</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>Zero and sign restrictions</h4>
+      <p>Identification follows <strong>Arias–Rubio-Ramírez–Waggoner (2018)</strong>: zero restrictions make the UK a small open economy (UK shocks cannot move world variables on impact), and impact sign restrictions name six structural shocks — <strong>world demand, world energy, world supply, UK demand, UK supply, and UK monetary policy</strong>. Two unidentified shocks absorb residual volatility.</p>
+        <h4>Corrections</h4>
+      <p>Importance weights correct the sampler's non-uniformity; the <strong>Chan–Matthes–Yu (2025)</strong> permutation search cuts rejections.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">zero and sign restrictions</div>
+        <div class="meth-eq"><div class="meth-eq-label">zero restrictions</div><div class="meth-eq-body">small open economy: UK shocks cannot move world variables on impact</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sign restrictions</div><div class="meth-eq-body">impact signs name the shocks (Arias et al. 2018)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">six named shocks</div><div class="meth-eq-body">world demand · world energy · world supply · UK demand · UK supply · UK monetary policy</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">residual</div><div class="meth-eq-body">two unidentified shocks absorb remaining volatility</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Importance weights correct sampler non-uniformity</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Chan–Matthes–Yu (2025) permutation search cuts rejections</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-4" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Sampling: draws and acceptance</h3></div>
+        <figure class="step-diagram" data-title="Accept/reject sampling" tabindex="0" role="button" aria-label="Expand diagram: Accept/reject sampling">
+          <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
+                <defs><marker id="arr-s4" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+                <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Production run: draws narrow at each stage</text>
+                <rect x="40" y="42" width="500" height="34" rx="6" fill="var(--accent)" opacity="0.25"/>
+                <text x="290" y="64" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--text-mid)" font-weight="600">10,000 posterior (&#928;, &#931;) draws</text>
+                <line x1="290" y1="80" x2="290" y2="98" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s4)"/>
+                <text x="380" y="94" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">pass the sign restrictions</text>
+                <rect x="220" y="102" width="140" height="34" rx="6" fill="var(--accent)" opacity="0.6"/>
+                <text x="290" y="124" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="600">751 accepted (7.5%)</text>
+                <line x1="290" y1="140" x2="290" y2="158" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s4)"/>
+                <text x="390" y="154" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">importance-weighted</text>
+                <rect x="240" y="162" width="100" height="34" rx="6" fill="var(--accent)"/>
+                <text x="290" y="184" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="600">ESS 355.9</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>Accept/reject sampling</h4>
+      <p>This is accept/reject sampling. The production run drew <strong>10,000</strong> posterior \((\Pi, \Sigma)\) draws, of which <strong>751 passed</strong> the sign restrictions (7.5%), for an importance-weighted effective sample size of <strong>355.9</strong> — so medians and bands are correct but noisier than the paper's.</p>
+        <h4>The hosted run</h4>
+      <p>The hosted forecast conditions on the current vintage — data through 2026Q1 — with a <strong>2,000-draw</strong> default (135 accepted, ESS 65.3), while retaining the 2025Q1 coefficient-estimation endpoint. The published current-outlook chart on the <a href="/svar">overview</a> comes from a larger 5,600-draw run of the same pipeline (385 accepted, ESS 176.3).</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">accept/reject sampling</div>
+        <div class="meth-eq"><div class="meth-eq-label">production run</div><div class="meth-eq-body">10,000 draws &rarr; 751 accepted (7.5%)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">effective sample size</div><div class="meth-eq-body">355.9 (importance-weighted)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">hosted default</div><div class="meth-eq-body">2,000 draws &rarr; 135 accepted, ESS 65.3</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">published chart</div><div class="meth-eq-body">5,600 draws &rarr; 385 accepted, ESS 176.3</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Medians and bands correct, noisier than the paper's</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Hosted run conditions on the 2026Q1 vintage</span></div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">The data: eight quarterly variables</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">the eight variables</div>
+        <div class="meth-eq"><div class="meth-eq-label">global block</div><div class="meth-eq-body">World GDP · World CPI (both UK-trade-weighted) · real oil price in sterling</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">UK block</div><div class="meth-eq-body">Bank Rate · sterling exchange-rate index · CPI · CPI energy · real GDP</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sample</div><div class="meth-eq-body">1992Q1–2025Q1, in levels, \(p = 4\) lags</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">pandemic</div><div class="meth-eq-body">exogenous Covid dummies, 2020Q1–2021Q2</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Hosted forecast conditions on data through 2026Q1</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Coefficients keep the 2025Q1 estimation endpoint</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Bayesian estimation</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">priors</div>
+        <div class="meth-eq"><div class="meth-eq-label">reduced form</div><div class="meth-eq-body">\(y_t = c + \Pi_1 y_{t-1} + \cdots + \Pi_p y_{t-p} + u_t, \quad p = 4\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">main prior</div><div class="meth-eq-body">Minnesota (normal-inverse-Wishart) on \((\Pi, \Sigma)\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">additional priors</div><div class="meth-eq-body">sum-of-coefficients · dummy-initial-observation</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">framework</div><div class="meth-eq-body">Giannone, Lenza &amp; Primiceri (2015)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Posterior over \((\Pi, \Sigma)\), not point estimates</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>All outputs carry credible bands</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Identification: naming the shocks</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">zero and sign restrictions</div>
+        <div class="meth-eq"><div class="meth-eq-label">zero restrictions</div><div class="meth-eq-body">small open economy: UK shocks cannot move world variables on impact</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sign restrictions</div><div class="meth-eq-body">impact signs name the shocks (Arias et al. 2018)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">six named shocks</div><div class="meth-eq-body">world demand · world energy · world supply · UK demand · UK supply · UK monetary policy</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">residual</div><div class="meth-eq-body">two unidentified shocks absorb remaining volatility</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Importance weights correct sampler non-uniformity</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Chan–Matthes–Yu (2025) permutation search cuts rejections</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Sampling: draws and acceptance</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <div class="meth-sec-title">accept/reject sampling</div>
+        <div class="meth-eq"><div class="meth-eq-label">production run</div><div class="meth-eq-body">10,000 draws &rarr; 751 accepted (7.5%)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">effective sample size</div><div class="meth-eq-body">355.9 (importance-weighted)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">hosted default</div><div class="meth-eq-body">2,000 draws &rarr; 135 accepted, ESS 65.3</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">published chart</div><div class="meth-eq-body">5,600 draws &rarr; 385 accepted, ESS 176.3</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Medians and bands correct, noisier than the paper's</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Hosted run conditions on the 2026Q1 vintage</span></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <div class="diagram-modal" hidden>
+    <div class="diagram-modal-box" role="dialog" aria-modal="true" aria-label="Diagram">
+      <div class="diagram-modal-head">
+        <span class="diagram-modal-title"></span>
+        <button type="button" class="diagram-modal-close" aria-label="Close">×</button>
+      </div>
+      <div class="diagram-modal-body"></div>
+    </div>
+  </div>
+
+  <section id="sources" class="band">
+    <div class="band-head">
+      <span class="kicker mono">sources</span>
+      <h2>Where the references live.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        The source and companion papers, the method papers behind each step
+        above, and the reference toolboxes are collected in one table on the
+        <a href="/svar#sources">overview's sources section</a>. How well the
+        pipeline reproduces the paper — and where it departs from the Bank's
+        model — is on the <a href="/svar/validation">validation</a> page.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot foot-bar">
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="/contact">Contact</a>
+  </nav>
+</footer>
+
+<script src="/reveal.js?v=2" defer></script>
+<script>
+// Methodology scrollytelling: highlight the step at the reading line and
+// show its formal-structure panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  update();
+})();
+</script>
+<script>
+// Diagram zoom: clicking a step diagram opens it enlarged in a modal.
+(function () {
+  "use strict";
+  var modal = document.querySelector(".diagram-modal");
+  if (!modal) return;
+  var body = modal.querySelector(".diagram-modal-body");
+  var title = modal.querySelector(".diagram-modal-title");
+  function open(fig) {
+    body.innerHTML = fig.querySelector("svg").outerHTML;
+    title.textContent = fig.getAttribute("data-title") || "";
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function close() {
+    modal.hidden = true;
+    body.innerHTML = "";
+    document.body.style.overflow = "";
+  }
+  document.querySelectorAll(".step-diagram").forEach(function (fig) {
+    fig.addEventListener("click", function () { open(fig); });
+    fig.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(fig); }
+    });
+  });
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal || e.target.closest(".diagram-modal-close")) close();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !modal.hidden) close();
+  });
+})();
+</script>
+</body>
+</html>

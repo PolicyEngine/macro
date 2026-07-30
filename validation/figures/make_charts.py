@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
-"""Regenerate the inline SVG charts in validation/index.html from the papers' sources.
+"""Regenerate the inline SVG evidence charts on the model validation pages.
 
-Run:  python3 validation/figures/make_charts.py          # rewrite validation/index.html
-      python3 validation/figures/make_charts.py --check  # exit 1 if the page is stale
+Each chart lives inline on the validation subtab of the model it belongs to
+(obr/validation, svar/validation, frb-us/validation, us-hank/validation) as an
+``<svg class="vchart" data-chart="...">`` block; this script rewrites each block
+in place on its owning page, keyed by the ``data-chart`` attribute.
+
+Run:  python3 validation/figures/make_charts.py          # rewrite the pages
+      python3 validation/figures/make_charts.py --check  # exit 1 if any page is stale
 
 Why hand-emitted SVG rather than matplotlib: the charts must stay *inline* in the
 HTML (the site ships no third-party JS and no external assets) and must inherit the
@@ -26,7 +31,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
-PAGE = ROOT / "validation" / "index.html"
 
 
 # ---------------------------------------------------------------- helpers
@@ -881,51 +885,81 @@ def chart_hank_targets():
     return "\n".join(out)
 
 
+# chart id -> (builder, page that owns it). Every chart lives on the
+# validation subtab of the model it provides evidence for.
 BUILDERS = [
-    ("obr-anchored", chart_obr_anchored),
-    ("obr-reform", chart_obr_reform),
-    ("obr-computed-share", chart_obr_computed_share),
-    ("obr-freerun", chart_obr_freerun),
-    ("obr-outturn", chart_obr_outturn),
-    ("svar-fevd", chart_svar_fevd),
-    ("svar-fan", chart_svar_fan),
-    ("svar-coverage", chart_svar_coverage),
-    ("frbus-residuals", chart_frbus_residuals),
-    ("hank-targets", chart_hank_targets),
-    ("svar-skill-all", chart_svar_skill_all),
-    ("svar-winrate", chart_svar_winrate),
+    ("obr-anchored", chart_obr_anchored, "obr/validation/index.html"),
+    ("obr-reform", chart_obr_reform, "obr/validation/index.html"),
+    ("obr-computed-share", chart_obr_computed_share, "obr/validation/index.html"),
+    ("obr-freerun", chart_obr_freerun, "obr/validation/index.html"),
+    ("obr-outturn", chart_obr_outturn, "obr/validation/index.html"),
+    ("svar-fevd", chart_svar_fevd, "svar/validation/index.html"),
+    ("svar-fan", chart_svar_fan, "svar/validation/index.html"),
+    ("svar-coverage", chart_svar_coverage, "svar/validation/index.html"),
+    ("svar-skill-all", chart_svar_skill_all, "svar/validation/index.html"),
+    ("svar-winrate", chart_svar_winrate, "svar/validation/index.html"),
+    ("frbus-residuals", chart_frbus_residuals, "frb-us/validation/index.html"),
+    ("hank-targets", chart_hank_targets, "us-hank/validation/index.html"),
 ]
 
-SVG_RE = re.compile(r'<svg class="vchart".*?</svg>', re.DOTALL)
+
+def chart_re(chart_id: str) -> re.Pattern:
+    return re.compile(
+        rf'<svg class="vchart" data-chart="{re.escape(chart_id)}".*?</svg>', re.DOTALL
+    )
 
 
-def render_page(html: str) -> str:
-    charts = [build() for _, build in BUILDERS]
-    found = SVG_RE.findall(html)
-    if len(found) != len(charts):
-        sys.exit(f"expected {len(charts)} .vchart SVGs in {PAGE}, found {len(found)}")
-    it = iter(charts)
-    return SVG_RE.sub(lambda _m: next(it).replace("\\", "\\\\"), html)
+def render_page(page: str, html: str) -> str:
+    for chart_id, build, target in BUILDERS:
+        if target != page:
+            continue
+        pattern = chart_re(chart_id)
+        matches = pattern.findall(html)
+        if len(matches) != 1:
+            sys.exit(
+                f'expected exactly one data-chart="{chart_id}" SVG in {page}, '
+                f"found {len(matches)}"
+            )
+        svg = build().replace("\\", "\\\\")
+        html = pattern.sub(lambda _m: svg, html)
+    return html
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--check", action="store_true", help="exit 1 if the page is out of date")
+    ap.add_argument("--check", action="store_true", help="exit 1 if any page is out of date")
     args = ap.parse_args()
 
-    html = PAGE.read_text()
-    new = render_page(html)
+    pages = []
+    for _, _, target in BUILDERS:
+        if target not in pages:
+            pages.append(target)
+
+    stale = []
+    written = 0
+    for page in pages:
+        path = ROOT / page
+        html = path.read_text()
+        new = render_page(page, html)
+        if new == html:
+            continue
+        if args.check:
+            stale.append(page)
+        else:
+            path.write_text(new)
+            written += 1
+            print(f"rewrote charts in {page}")
+
     if args.check:
-        if new != html:
-            print(f"{PAGE} is out of date; run: python3 validation/figures/make_charts.py")
+        if stale:
+            print("stale chart pages; run: python3 validation/figures/make_charts.py")
+            for page in stale:
+                print(f"  {page}")
             return 1
-        print("validation/index.html charts are up to date.")
+        print("validation charts are up to date on all model pages.")
         return 0
-    if new == html:
+    if not written:
         print("no change.")
-    else:
-        PAGE.write_text(new)
-        print(f"wrote {len(BUILDERS)} charts into {PAGE}")
     return 0
 
 

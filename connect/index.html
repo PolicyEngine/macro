@@ -19,7 +19,7 @@
 
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css" />
+<link rel="stylesheet" href="/style.css?v=2" />
 <style>
 /* ---------- connect page ---------- */
 .connect-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 24px; }
@@ -53,17 +53,7 @@
 .seg button[aria-selected="true"] { background: var(--text, #111); color: var(--background, #fff); }
 .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: clamp(18px, 3vw, 36px); }
 .step { min-width: 0; }
-.step-n {
-  font-family: var(--mono);
-  font-size: var(--fs-label);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px; height: 26px;
-  border: 1px solid var(--line-soft);
-  border-radius: 50%;
-  margin-bottom: 14px;
-}
+.step .meth-step-num { margin-bottom: 14px; }
 .step .step-h { font-size: var(--fs-h4); font-weight: 600; margin: 0 0 10px; letter-spacing: 0; }
 .step p { font-size: var(--fs-body-sm); line-height: 1.6; color: var(--paper-faint); margin: 0 0 14px; }
 .copyblock {
@@ -201,25 +191,18 @@
 .compact-more .copyblock { margin-top: 14px; }
 .command-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-top: 18px;
 }
 .command-grid > div {
   min-width: 0;
-  padding: 18px;
+  padding: 16px 18px 18px;
   border: 1px solid var(--line-soft);
   border-radius: var(--radius);
 }
-.command-grid code {
-  display: block;
-  margin-top: 10px;
-  overflow-wrap: anywhere;
-  color: var(--brand-strong);
-  font-family: var(--mono);
-  font-size: var(--fs-small);
-  line-height: 1.55;
-}
+.command-grid .copyblock { margin-top: 10px; }
+.command-grid .copyblock code { font-size: var(--fs-small); line-height: 1.55; }
 .model-picker { margin-top: var(--s-5); }
 .compact-pane {
   min-height: 210px;
@@ -239,29 +222,51 @@
   padding: 0 clamp(20px, 5vw, 56px) 28px;
 }
 .no-code-note p {
-  border: 1px solid var(--line-soft);
-  border-radius: 6px;
-  padding: 14px 18px;
-  font-size: var(--fs-body-sm);
-  line-height: 1.6;
-  color: var(--paper-faint);
-  margin: 0;
+  color: var(--paper-dim);
+  font-size: var(--fs-small);
+  text-align: center;
 }
 .no-code-note a { color: var(--text, #111); }
-.hosted-note {
-  margin-top: 26px;
+.connect-notes {
+  max-width: none;
+  margin: 26px 0 0;
   border-top: 1px solid var(--line-soft);
-  padding-top: 18px;
-  font-size: var(--fs-small);
-  line-height: 1.6;
-  color: var(--paper-faint);
+  padding-top: 14px;
 }
-.hosted-note .tag { margin-right: 8px; }
+.connect-notes .vmet-notes-key { min-width: 7ch; }
 .prompt-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
-.prompt-list li { margin: 0; }
-.prompt-list .copyblock { white-space: normal; }
-.prompt-list .copyblock code { white-space: normal; font-size: var(--fs-small); }
-.prompt-tool { display: block; font-family: var(--mono); font-size: var(--fs-label); color: var(--paper-faint); margin: 0 0 4px; }
+.prompt-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.prompt-card:hover { border-color: var(--brand); }
+.prompt-tool {
+  font-family: var(--mono); font-size: var(--fs-label); font-weight: 600;
+  color: var(--brand-strong); border: 1px solid var(--line-soft);
+  border-radius: 4px; padding: 2px 8px; white-space: nowrap;
+}
+.prompt-card > code {
+  font-family: inherit; font-size: var(--fs-small);
+  color: var(--paper-dim); line-height: 1.5; white-space: normal;
+}
+.prompt-card button {
+  border: 0; background: none; cursor: pointer; color: var(--paper-faint);
+  font-family: var(--mono); font-size: var(--fs-label);
+}
+.prompt-card button:hover { color: var(--text, #111); }
+@media (max-width: 560px) {
+  .prompt-card { grid-template-columns: auto auto; }
+  .prompt-card > code { grid-column: 1 / -1; }
+  .prompt-card button { justify-self: end; }
+}
+/* route cards: the page's shape, up front */
 </style>
 </head>
 <body class="doc">
@@ -276,7 +281,7 @@
     <a class="nav-mobile" href="/">Home</a>
     <a class="nav-mobile" href="/economy">Economy</a>
     <a class="nav-mobile" href="/models">Models</a>
-    <a class="nav-mobile" href="/forecasts">Track record</a>
+    <a class="nav-mobile" href="/forecasts">Forecasts</a>
     <a class="nav-mobile nav-start" href="/connect" aria-current="page">Use</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
   </nav>
@@ -295,20 +300,26 @@
         Run a model your way.
       </h1>
       <p class="lede reveal" style="--d:2;">
-        Run hosted models through MCP, install the shared CLI, or use the
-        Python packages. The public endpoint needs no PolicyEngine account or
-        API key. (Some clients gate custom connectors by plan — details per client below.)
+        Three routes to the same models. The public endpoint needs no
+        PolicyEngine account or API key — though some clients gate custom
+        connectors by plan.
       </p>
     </div>
   </section>
 
+  <nav class="model-tabs" aria-label="Ways to run the models">
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="#connect">MCP</a>
+      <a class="model-tabs-link" href="#cli">CLI</a>
+      <a class="model-tabs-link" href="#code">Python</a>
+    </div>
+  </nav>
+
   <div class="no-code-note">
-    <p><strong>No code?</strong> You don't need any of this to read the results:
-    browse the <a href="/economy">economy dashboards</a> or check the
-    <a href="/forecasts">forecast track record</a>.</p>
-    <p><strong>Score a reform?</strong> <a href="/score">Score a reform →</a>
-    walks through pricing a tax or benefit change with the hosted models — no
-    setup needed.</p>
+    <p><strong>No code?</strong> Browse the <a href="/economy">economy
+    dashboards</a> or the <a href="/forecasts">forecast track record</a> —
+    no setup at all. To price a tax or benefit change with the hosted models,
+    <a href="/score">score a reform →</a>.</p>
   </div>
 
   <section id="connect" class="connect-panel">
@@ -324,41 +335,41 @@
       </div>
       <div class="steps connect-steps">
         <div class="step">
-          <span class="step-n mono">1</span>
+          <span class="meth-step-num">1</span>
           <p class="step-h">Copy the server URL</p>
           <div class="copyblock"><code>https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
         </div>
         <div class="step" id="client-panel-claude" role="tabpanel" aria-labelledby="client-tab-claude" data-for="claude">
-          <span class="step-n mono">2</span>
+          <span class="meth-step-num">2</span>
           <p class="step-h">Add a Claude connector</p>
           <p>On claude.ai or in the Claude Desktop app, open Settings → Connectors, choose “Add custom connector”, and paste the URL.</p>
         </div>
         <div class="step" id="client-panel-chatgpt" role="tabpanel" aria-labelledby="client-tab-chatgpt" data-for="chatgpt" hidden>
-          <span class="step-n mono">2</span>
+          <span class="meth-step-num">2</span>
           <p class="step-h">Add a ChatGPT connector</p>
-          <p>On an eligible ChatGPT web plan, enable Developer mode in Settings → Apps → Advanced Settings, create a custom app, and paste the URL. Workspace administrators may need to grant or publish access.</p>
+          <p>On an eligible ChatGPT web plan, enable Developer mode in Settings → Apps → Advanced Settings, create a custom app, and paste the URL. Workspace admins may need to grant access.</p>
         </div>
         <div class="step" id="client-panel-other" role="tabpanel" aria-labelledby="client-tab-other" data-for="other" hidden>
-          <span class="step-n mono">2</span>
+          <span class="meth-step-num">2</span>
           <p class="step-h">Add a remote MCP server</p>
-          <p>Any MCP-capable client works: add the URL as a remote (HTTP) MCP server. That includes the Gemini CLI, Cursor, VS Code, Windsurf, and Mistral Le Chat — look for “MCP servers” or “connectors” in the client's settings.</p>
+          <p>Add the URL as a remote (HTTP) MCP server — Gemini CLI, Cursor, VS Code, Windsurf, Mistral Le Chat, and any other MCP-capable client. Look for “MCP servers” or “connectors” in its settings.</p>
         </div>
         <div class="step">
-          <span class="step-n mono">3</span>
+          <span class="meth-step-num">3</span>
           <p class="step-h">Ask a policy question</p>
-          <p>Try a US rate shock, a UK forecast, or a household reform in either country — copy an example prompt below.</p>
+          <p>A US rate shock, a UK forecast, a household reform — copy an example prompt below.</p>
         </div>
       </div>
       <details class="more compact-more" open>
         <summary>Example prompts</summary>
         <ul class="prompt-list">
-          <li><span class="prompt-tool">frbus_shock</span><div class="copyblock"><code>What happens to US GDP and unemployment if the Fed raises rates by 100 basis points?</code><button data-copy>copy</button></div></li>
-          <li><span class="prompt-tool">score_reform</span><div class="copyblock"><code>Score raising the UK basic rate of income tax to 21p.</code><button data-copy>copy</button></div></li>
-          <li><span class="prompt-tool">forecast_uk</span><div class="copyblock"><code>What is the UK GDP and inflation outlook for the next four quarters?</code><button data-copy>copy</button></div></li>
-          <li><span class="prompt-tool">hank_shock</span><div class="copyblock"><code>How does a 25 basis point US rate cut hit households across the wealth distribution?</code><button data-copy>copy</button></div></li>
-          <li><span class="prompt-tool">calculate_household</span><div class="copyblock"><code>How much tax would a single 35-year-old earning $50,000 pay in the US?</code><button data-copy>copy</button></div></li>
+          <li class="prompt-card"><span class="prompt-tool">frbus_shock</span><code>What happens to US GDP and unemployment if the Fed raises rates by 100 basis points?</code><button data-copy>copy</button></li>
+          <li class="prompt-card"><span class="prompt-tool">score_reform</span><code>Score raising the UK basic rate of income tax to 21p.</code><button data-copy>copy</button></li>
+          <li class="prompt-card"><span class="prompt-tool">forecast_uk</span><code>What is the UK GDP and inflation outlook for the next four quarters?</code><button data-copy>copy</button></li>
+          <li class="prompt-card"><span class="prompt-tool">hank_shock</span><code>How does a 25 basis point US rate cut hit households across the wealth distribution?</code><button data-copy>copy</button></li>
+          <li class="prompt-card"><span class="prompt-tool">calculate_household</span><code>How much tax would a single 35-year-old earning $50,000 pay in the US?</code><button data-copy>copy</button></li>
         </ul>
-        <p class="chart-note">Not sure which tool fits a question? Ask the model to call <code>recommend_model</code> or <code>list_model_capabilities</code> — the server describes what each tool answers.</p>
+        <p class="chart-note">Not sure which tool fits? Ask the model to call <code>recommend_model</code> or <code>list_model_capabilities</code> — the server describes what each tool answers.</p>
       </details>
       <details class="more compact-more">
         <summary>Terminal setup</summary>
@@ -372,24 +383,20 @@
           <div class="copyblock"><code>gemini mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
         </div>
       </details>
-      <div class="hosted-note">
-        <p>
-          <span class="tag tag-hosted">hosted</span>
-          No account or API key required. Capacity is shared on a fair-use
-          basis (a few concurrent runs). The first household or population
-          call in a fresh container can take around 20 seconds while the
-          tax-benefit models load — other tools respond faster — and forecast
-          tools take longer: a UK forecast runs a couple of minutes on
-          first call.
-        </p>
-        <p style="margin-top: 10px;">
-          <span class="tag tag-local">local</span>
-          OG-UK long-run scoring (<code>score_reform</code> with
-          <code>model='og'</code>) and <code>dynamic_reform_impact</code>
-          run locally only — they take tens of minutes, and the hosted
-          server will tell you so and point to the local CLI. Everything
-          else on this page is available hosted.
-        </p>
+      <div class="vmet-notes connect-notes">
+        <p class="vmet-notes-line"><span class="vmet-notes-key">access</span>
+          <span>No account or API key. Capacity is shared on a fair-use basis
+          — a few concurrent runs.</span></p>
+        <p class="vmet-notes-line"><span class="vmet-notes-key">cold start</span>
+          <span>The first household or population call in a fresh container
+          takes around 20 seconds while the tax-benefit models load; a UK
+          forecast runs a couple of minutes on first call. Other tools
+          respond faster.</span></p>
+        <p class="vmet-notes-line"><span class="vmet-notes-key">local only</span>
+          <span>OG-UK long-run scoring (<code>score_reform</code> with
+          <code>model='og'</code>) and <code>dynamic_reform_impact</code> take
+          tens of minutes — the hosted server points you to the local CLI.
+          Everything else here runs hosted.</span></p>
       </div>
     </div>
   </section>
@@ -402,10 +409,10 @@
     <div class="prose">
       <div class="copyblock"><code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code><button data-copy>copy</button></div>
       <div class="command-grid">
-        <div><span class="dial-name">US rate shock</span><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code></div>
-        <div><span class="dial-name">UK forecast</span><code>pe-macro forecast</code></div>
-        <div><span class="dial-name">US HANK shock</span><code>pe-macro hank-shock --kind monetary --size -0.0025</code></div>
-        <div><span class="dial-name">Household calculation</span><code>pe-macro household --country us --people '[{"age":35,"employment_income":50000}]'</code></div>
+        <div><span class="dial-name">US rate shock</span><div class="copyblock"><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code><button data-copy>copy</button></div></div>
+        <div><span class="dial-name">UK forecast</span><div class="copyblock"><code>pe-macro forecast</code><button data-copy>copy</button></div></div>
+        <div><span class="dial-name">US HANK shock</span><div class="copyblock"><code>pe-macro hank-shock --kind monetary --size -0.0025</code><button data-copy>copy</button></div></div>
+        <div><span class="dial-name">Household calculation</span><div class="copyblock"><code>pe-macro household --country us --people '[{"age":35,"employment_income":50000}]'</code><button data-copy>copy</button></div></div>
       </div>
       <p class="chooser-note"><a href="https://github.com/PolicyEngine/macro/tree/main/integration">View every CLI command →</a></p>
     </div>
@@ -428,32 +435,32 @@
       <div class="model-pane compact-pane" id="model-panel-oguk" role="tabpanel" aria-labelledby="model-tab-oguk" data-model="oguk" hidden>
         <span class="tag tag-local">local</span><h3>Long-run reform effects</h3>
         <p>Model work, saving, capital, and public finances over decades.</p>
-        <a class="btn btn-primary" href="/olg#run">Open OG-UK setup</a>
+        <a class="btn btn-primary" href="/olg/code#run">Open OG-UK setup</a>
       </div>
       <div class="model-pane compact-pane" id="model-panel-obr" role="tabpanel" aria-labelledby="model-tab-obr" data-model="obr">
         <span class="tag tag-hosted">hosted</span><h3>Near-term UK fiscal effects</h3>
         <p>Trace tax and spending changes against the OBR baseline.</p>
-        <a class="btn btn-primary" href="/obr#run">Open OBR setup</a>
+        <a class="btn btn-primary" href="/obr/code#run">Open OBR setup</a>
       </div>
       <div class="model-pane compact-pane" id="model-panel-frbus" role="tabpanel" aria-labelledby="model-tab-frbus" data-model="frbus" hidden>
         <span class="tag tag-hosted">hosted</span><h3>US monetary and fiscal shocks</h3>
         <p>Run frb-us impulse responses under a chosen policy rule.</p>
-        <a class="btn btn-primary" href="/frb-us#run">Open frb-us setup</a>
+        <a class="btn btn-primary" href="/frb-us/code#run">Open frb-us setup</a>
       </div>
       <div class="model-pane compact-pane" id="model-panel-svar" role="tabpanel" aria-labelledby="model-tab-svar" data-model="svar" hidden>
         <span class="tag tag-hosted">hosted</span><h3>UK forecasts and shock decomposition</h3>
         <p>Forecast GDP and inflation or explain what moved them.</p>
-        <a class="btn btn-primary" href="/svar#run">Open SVAR setup</a>
+        <a class="btn btn-primary" href="/svar/code#run">Open SVAR setup</a>
       </div>
       <div class="model-pane compact-pane" id="model-panel-hank" role="tabpanel" aria-labelledby="model-tab-hank" data-model="hank" hidden>
         <span class="tag tag-hosted">hosted</span><h3>US shocks across the wealth distribution</h3>
         <p>Run stylized HANK shocks with MPC and hand-to-mouth detail.</p>
-        <a class="btn btn-primary" href="/us-hank#run">Open us-hank setup</a>
+        <a class="btn btn-primary" href="/us-hank/code#run">Open us-hank setup</a>
       </div>
       <div class="model-pane compact-pane" id="model-panel-pe" role="tabpanel" aria-labelledby="model-tab-pe" data-model="pe" hidden>
         <span class="tag tag-hosted">hosted</span><h3>UK and US household impacts</h3>
         <p>Calculate taxes, benefits, and reform effects.</p>
-        <a class="btn btn-primary" href="/pe#run">Open PolicyEngine setup</a>
+        <a class="btn btn-primary" href="/pe/code#run">Open PolicyEngine setup</a>
       </div>
     </div>
   </section>
@@ -463,15 +470,12 @@
   <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
     <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
-    <a class="footer-text" href="/validation">Validation</a>
-    <a class="footer-text" href="/papers">Papers</a>
-    <a class="footer-text" href="/notes">Notes</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
     <a class="footer-text" href="/contact">Contact</a>
   </nav>
 </footer>
 
-<script src="/reveal.js" defer></script>
+<script src="/reveal.js?v=2" defer></script>
 <script>
 (function () {
   "use strict";
@@ -542,6 +546,25 @@
       setTimeout(function () { btn.textContent = "copy"; }, 1400);
     });
   });
+})();
+</script>
+<script>
+(function () {
+  var links = Array.from(document.querySelectorAll('.model-tabs-link[href^="#"]'));
+  function update() {
+    var offset = window.innerHeight * 0.33, active = null;
+    links.forEach(function (l) {
+      var el = document.getElementById(l.getAttribute("href").slice(1));
+      if (el && el.getBoundingClientRect().top < offset) active = l;
+    });
+    links.forEach(function (l) {
+      if (l === active) l.setAttribute("aria-current", "location");
+      else l.removeAttribute("aria-current");
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  update();
 })();
 </script>
 </body>

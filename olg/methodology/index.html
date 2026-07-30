@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OG-UK methodology — PolicyEngine Macro</title>
+<meta name="description" content="The eight core elements of OG-UK, from overlapping cohorts to UK calibration, with the formal structure alongside." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/olg/methodology" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://policyengine-macro.vercel.app/olg/methodology" />
+<meta property="og:site_name" content="PolicyEngine Macro" />
+<meta property="og:title" content="OG-UK methodology — PolicyEngine Macro" />
+<meta property="og:description" content="A dynamic general-equilibrium model of 80 age cohorts built on OG-Core, with tax functions estimated from PolicyEngine microdata. A calibrated counterfactual with no published ground truth." />
+<meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
+<meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css?v=2" />
+<style>
+/* page-specific: hero sizing only — shared component styles live in style.css */
+.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
+</style>
+<script>
+/* Self-hosted MathJax (vendor/mathjax), used only on this page for the
+   methodology tab's formal panels. The CSP allows no CDN loads. */
+window.MathJax = {
+  chtml: { fontURL: "/vendor/mathjax/output/chtml/fonts/woff-v2" },
+  options: { enableMenu: false }
+};
+</script>
+<script src="/vendor/mathjax/tex-chtml-full.js" defer></script>
+</head>
+<body class="doc">
+<a class="skip-link" href="#top">Skip to main content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a class="nav-mobile" href="/">Home</a>
+    <a class="nav-mobile" href="/economy">Economy</a>
+    <a class="nav-mobile" href="/models" aria-current="true">Models</a>
+    <a class="nav-mobile" href="/forecasts">Forecasts</a>
+    <a class="nav-mobile nav-start" href="/connect">Use</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<nav class="crumbs mono" aria-label="You are here">
+    <a href="/">Home</a>
+    <a href="/models">Models</a>
+    <a href="/olg">OG-UK</a>
+    <span aria-current="page">Methodology</span>
+</nav>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <p class="eyebrow reveal" style="--d:0">model 05 — overlapping generations · psl-og · UK · local</p>
+      <h1 class="reveal page-title" style="--d:1;">
+        Model long-run behavioural change.
+      </h1>
+      <p class="lede reveal" style="--d:2">
+        Estimate how reforms affect work, saving, investment, and public
+        finances over decades, for the UK.
+      </p>
+    </div>
+  </section>
+
+  <nav class="model-tabs" aria-label="OG-UK pages">
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="/olg">Overview</a>
+      <a class="model-tabs-link" href="/olg/methodology" aria-current="page">Methodology</a>
+      <a class="model-tabs-link" href="/olg/validation">Validation</a>
+      <a class="model-tabs-link" href="/olg/code">Code</a>
+      <a class="model-tabs-link" href="/papers/psl-og">Paper</a>
+    </div>
+  </nav>
+
+  <section id="methodology" class="band band-wide">
+    <div class="band-head">
+      <span class="kicker mono">methodology</span>
+      <h2>Core elements of OG-UK.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Eight building blocks, from overlapping cohorts to UK calibration; each
+        step's formal structure follows its narrative. The theory is
+        <a href="https://github.com/PSLmodels/OG-Core">OG-Core's</a>, documented
+        in full at <a href="https://pslmodels.github.io/OG-Core/">pslmodels.github.io/OG-Core</a>.
+      </p>
+    </div>
+
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="meth-1" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>The overlapping-generations idea</h3></div>
+        <figure class="step-diagram" data-title="Overlapping generations" tabindex="0" role="button" aria-label="Expand diagram: Overlapping generations">
+          <svg viewBox="0 0 580 260" width="580" style="max-width:100%;height:auto;">
+                <defs><marker id="arr-s1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+                <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Overlapping generations at a point in time</text>
+                <g transform="translate(30,40)"><rect x="0" y="10" width="30" height="120" rx="4" fill="var(--accent)" opacity="0.7"/><text x="15" y="155" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="600">young</text><text x="15" y="170" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">entering</text><text x="15" y="183" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">workforce</text></g>
+                <g transform="translate(75,40)"><rect x="0" y="5" width="30" height="125" rx="4" fill="var(--accent)" opacity="0.6"/></g>
+                <g transform="translate(120,40)"><rect x="0" y="0" width="30" height="130" rx="4" fill="var(--accent)" opacity="0.55"/></g>
+                <g transform="translate(165,40)"><rect x="0" y="5" width="30" height="125" rx="4" fill="var(--accent)" opacity="0.5"/></g>
+                <g transform="translate(210,40)"><rect x="0" y="10" width="30" height="120" rx="4" fill="var(--accent)" opacity="0.48"/><text x="15" y="155" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="600">mid-career</text><text x="15" y="170" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">peak</text><text x="15" y="183" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">earnings</text></g>
+                <g transform="translate(255,40)"><rect x="0" y="18" width="30" height="112" rx="4" fill="var(--accent)" opacity="0.43"/></g>
+                <g transform="translate(300,40)"><rect x="0" y="28" width="30" height="102" rx="4" fill="var(--accent)" opacity="0.38"/></g>
+                <g transform="translate(345,40)"><rect x="0" y="38" width="30" height="92" rx="4" fill="var(--accent)" opacity="0.33"/></g>
+                <g transform="translate(390,40)"><rect x="0" y="50" width="30" height="80" rx="4" fill="var(--accent)" opacity="0.3"/><text x="15" y="155" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="600">pre-retirement</text><text x="15" y="170" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">peak savings</text></g>
+                <g transform="translate(435,40)"><rect x="0" y="65" width="30" height="65" rx="4" fill="var(--accent)" opacity="0.25"/></g>
+                <g transform="translate(480,40)"><rect x="0" y="85" width="30" height="45" rx="4" fill="var(--accent)" opacity="0.2"/><text x="15" y="155" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="600">elderly</text><text x="15" y="170" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">drawing</text><text x="15" y="183" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">pensions</text></g>
+                <line x1="40" y1="230" x2="510" y2="230" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-s1)"/>
+                <text x="290" y="250" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--text-light)">age &rarr;</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>Many generations coexist</h4>
+      <p>The economy is not a single "representative agent." Many generations coexist — new labour-force entrants, workers at peak earnings, retirees drawing savings and pensions — each with a different remaining lifespan, accumulated wealth, and response to a policy change.</p>
+      <h4>Age cohorts</h4>
+      <p>OG-Core models S economically active age cohorts (typically 80, ages 21 to 100). Each period a new cohort is born and the oldest dies with some probability; the age distribution evolves with fertility, mortality, and immigration, reaching a stationary distribution in the long run.</p>
+      <h4>Ability types</h4>
+      <p>Each cohort splits into J ability types with distinct permanent labour productivity. High-ability types earn more per hour and typically save more, so reforms hit the income distribution, not just the average.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">population</div>
+        <div class="meth-eq"><div class="meth-eq-label">age cohorts</div><div class="meth-eq-body">\(s = E+1, \ldots, E+S \quad \text{(economically active)}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">ability types</div><div class="meth-eq-body">\(j = 1, \ldots, J \quad \text{with probability } \lambda_j\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">population</div><div class="meth-eq-body">\(\omega_{s,t}\) evolves with fertility, mortality, immigration</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Each type has its own \(\beta_j\), \(\chi^b_j\), \(e_{j,s}\)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Productivity \(e_{j,s}\) varies by age and type</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Type assigned at birth, permanent</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-2" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Household decisions</h3></div>
+        <figure class="step-diagram" data-title="Lifetime utility components" tabindex="0" role="button" aria-label="Expand diagram: Lifetime utility components">
+          <svg viewBox="0 0 580 190" width="580" style="max-width:100%;height:auto;">
+                <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Three components of lifetime utility</text>
+                <rect x="15" y="42" width="160" height="100" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="95" y="68" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--accent)" font-weight="700">consumption</text>
+                <text x="95" y="88" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">CRRA utility with</text>
+                <text x="95" y="104" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">risk aversion &sigma;</text>
+                <text x="95" y="130" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">composite of I goods</text>
+                <text x="192" y="92" text-anchor="middle" font-family="Roboto, sans-serif" font-size="20" fill="var(--text-light)">&minus;</text>
+                <rect x="210" y="42" width="160" height="100" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="290" y="68" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--accent)" font-weight="700">labour disutility</text>
+                <text x="290" y="88" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">elliptical function</text>
+                <text x="290" y="104" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">Inada at both bounds</text>
+                <text x="290" y="130" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">always interior solutions</text>
+                <text x="387" y="92" text-anchor="middle" font-family="Roboto, sans-serif" font-size="20" fill="var(--text-light)">+</text>
+                <rect x="404" y="42" width="160" height="100" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="484" y="68" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--accent)" font-weight="700">bequests</text>
+                <text x="484" y="88" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">&ldquo;Warm glow&rdquo;</text>
+                <text x="484" y="104" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">weighted by &rho;</text>
+                <text x="484" y="130" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">drives wealth distribution</text>
+                <text x="290" y="175" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-light)">maximise discounted sum over remaining lifetime</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>Three decisions each period</h4>
+      <p>Each period, every household chooses how much to <strong>consume</strong>, <strong>work</strong>, and <strong>save</strong> to maximise expected lifetime utility, subject to a budget constraint.</p>
+      <h4>Consumption utility</h4>
+      <p>Consumption utility is CRRA (constant relative risk aversion); the risk aversion parameter governs the preference for smooth consumption. A Stone-Geary Cobb-Douglas form first aggregates the individual goods, allowing for minimum subsistence levels.</p>
+      <h4>Labour disutility</h4>
+      <p>Labour disutility is elliptical rather than a standard power function: the marginal cost of work is zero at zero hours and infinite at the upper bound, so solutions stay interior without costly occasionally-binding constraint methods.</p>
+      <h4>Bequest utility</h4>
+      <p>Bequest utility is the "warm glow" of leaving wealth at death, weighted by age-specific mortality. Its strength varies by ability type, calibrated to match the observed wealth distribution.</p>
+      <h4>Budget constraint and Euler equations</h4>
+      <p>Each period, savings returns, labour earnings, bequests received, government transfers, and pensions must cover consumption (including consumption taxes), income and wealth taxes, and savings carried forward.</p>
+      <p>Two Euler equations characterise the optimum: work until the after-tax wage equals the marginal disutility of labour; save until the discounted, after-tax return justifies forgoing consumption today.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">utility and Euler equations</div>
+        <div class="meth-eq"><div class="meth-eq-label">consumption</div><div class="meth-eq-body">\(u(c) = \frac{c^{\,1-\sigma}}{1-\sigma}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">labour disutility</div><div class="meth-eq-body">\(\chi^n_s \cdot g(n) \quad \text{(elliptical)}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">bequest motive</div><div class="meth-eq-body">\(\chi^b_j \cdot \rho_s \cdot \frac{b'^{\,1-\sigma}}{1-\sigma}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">labour FOC</div><div class="meth-eq-body">\(\chi^n_s g'(n) = w\,e_{j,s}(1-\tau'_{\text{lab}})\,u'(c)\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">savings Euler</div><div class="meth-eq-body">\(u'(c_t) = \beta_j(1-\rho_s)(1+r_{p,t+1}(1-\tau'_{\text{cap}}))\,u'(c_{t+1})\)</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-3" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Firms and production</h3></div>
+        <figure class="step-diagram" data-title="CES production" tabindex="0" role="button" aria-label="Expand diagram: CES production">
+          <svg viewBox="0 0 560 200" width="560" style="max-width:100%;height:auto;">
+                <text x="280" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">CES production</text>
+                <rect x="20" y="42" width="120" height="60" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="80" y="68" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">capital K</text>
+                <text x="80" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">private + public</text>
+                <rect x="160" y="42" width="120" height="60" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="220" y="68" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">labour L</text>
+                <text x="220" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">efficiency-weighted</text>
+                <rect x="300" y="42" width="120" height="60" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="360" y="68" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">TFP Z</text>
+                <text x="360" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">by industry</text>
+                <line x1="80" y1="102" x2="80" y2="125" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr)"/>
+                <line x1="220" y1="102" x2="220" y2="125" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr)"/>
+                <line x1="360" y1="102" x2="360" y2="125" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr)"/>
+                <rect x="20" y="130" width="400" height="50" rx="10" fill="var(--accent)"/>
+                <text x="220" y="153" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">CES aggregator per industry m</text>
+                <text x="220" y="170" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">nests Cobb-Douglas when &epsilon; = 1</text>
+                <line x1="425" y1="155" x2="450" y2="155" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr)"/>
+                <rect x="455" y="130" width="90" height="50" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="500" y="153" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">output Y</text>
+                <text x="500" y="170" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">at price p</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>CES technology</h4>
+      <p>Production comprises M industries of perfectly competitive firms combining <strong>private capital</strong>, <strong>public capital</strong> (government infrastructure), and <strong>labour</strong> through a constant elasticity of substitution (CES) technology.</p>
+      <h4>Substitution and productivity</h4>
+      <p>The elasticity parameter sets how easily firms substitute capital for labour; at one, the function reduces to Cobb-Douglas. Total factor productivity varies by industry and over time, capturing sector-specific technological change.</p>
+      <h4>First-order conditions</h4>
+      <p>Profit maximisation yields the standard conditions: the <strong>wage equals the marginal product of labour</strong>; the <strong>rental rate</strong> equals the after-tax marginal product of capital, net of depreciation, tax deductions, and investment tax credits.</p>
+      <h4>Public capital rents</h4>
+      <p>A distinctive OG-Core feature: <strong>public capital generates economic rents</strong>. Firms cannot deduct the cost of government infrastructure, so its returns flow to private capital owners through an augmented rate of return.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">technology</div>
+        <div class="meth-eq"><div class="meth-eq-label">CES production</div><div class="meth-eq-body">\(Y_m = Z_m\bigl[\gamma K_m^\rho + \gamma_g K_{g,m}^\rho + (1\!-\!\gamma\!-\!\gamma_g)(e^{g_y t}L_m)^\rho\bigr]^{1/\rho}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">wage</div><div class="meth-eq-body">\(w = p_m \cdot \text{MPL}_m\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">rental rate</div><div class="meth-eq-body">\(r = (1-\tau^{\text{corp}})\,p_m\,\text{MPK}_m - \delta + \tau^{\text{corp}}\delta^\tau + \tau^{\text{inv}}\delta\)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>\(M\) industries, perfect competition</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Public capital \(K_g\) generates rents</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Nests Cobb-Douglas when \(\varepsilon \to 1\)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-4" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Government</h3></div>
+        <figure class="step-diagram" data-title="Government budget" tabindex="0" role="button" aria-label="Expand diagram: Government budget">
+          <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
+                <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Government budget constraint</text>
+                <rect x="15" y="42" width="180" height="85" rx="10" fill="rgba(16,185,129,0.08)" stroke="rgba(16,185,129,0.25)" stroke-width="1.5"/>
+                <text x="105" y="64" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#059669" font-weight="700">revenue</text>
+                <text x="105" y="84" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">Income + consumption +</text>
+                <text x="105" y="100" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">wealth + corporate + bequest</text>
+                <text x="105" y="118" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="#059669">+ new debt D(t+1)</text>
+                <text x="215" y="85" text-anchor="middle" font-family="Roboto, sans-serif" font-size="20" fill="var(--accent)" font-weight="700">=</text>
+                <rect x="235" y="42" width="330" height="85" rx="10" fill="rgba(239,146,68,0.06)" stroke="rgba(239,146,68,0.2)" stroke-width="1.5"/>
+                <text x="400" y="64" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#c2410c" font-weight="700">spending</text>
+                <text x="400" y="84" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">Debt service + public goods G</text>
+                <text x="400" y="100" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">+ infrastructure I + pensions</text>
+                <text x="400" y="116" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">+ transfers TR + UBI</text>
+                <rect x="80" y="145" width="420" height="50" rx="8" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5 3"/>
+                <text x="290" y="166" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">Fiscal closure rule</text>
+                <text x="290" y="184" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">After period T(G1): adjust G, TR, or both to stabilise debt/GDP</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>Revenue and spending</h4>
+      <p>The government taxes through <strong>five instruments</strong> — individual income, consumption, wealth, corporate income, and bequests — and spends on public goods, infrastructure, pensions, lump-sum transfers, and universal basic income. Debt finances the difference.</p>
+      <h4>Income tax: Gouveia-Strauss functions</h4>
+      <p>OG-UK uses the <strong>Gouveia-Strauss</strong> specification: the effective tax rate is a smooth, monotonically increasing function of income, the marginal rate its analytical derivative. Estimation runs on PolicyEngine-UK output from the <strong>Enhanced FRS</strong> — the Family Resources Survey enhanced with HMRC's Survey of Personal Incomes, the Living Costs and Food Survey, and the Wealth and Assets Survey.</p>
+      <h4>Other tax instruments</h4>
+      <p>The <strong>wealth tax</strong> is a progressive three-parameter function, spanning zero taxation to smoothly increasing marginal rates. <strong>Consumption taxes</strong> are linear rates by good, covering VAT and excise. <strong>Corporate income taxes</strong> are flat rates by industry.</p>
+      <h4>Fiscal closure rule</h4>
+      <p>Debt cannot grow without bound, so a <strong>fiscal closure rule</strong> activates after a specified period, bringing debt-to-GDP gradually to a target via government spending, transfers, or both — the modeller's choice.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">government budget</div>
+        <p>\[ D_{t+1} + \text{Rev}_t = (1+r_{\text{gov}})D_t + G + I_g + \text{Pen} + TR + UBI \]</p>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Income: Gouveia-Strauss from PolicyEngine</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Consumption: VAT + excise</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Wealth: progressive 3-parameter</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Corporate: flat rate by industry</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Bequest: on inherited wealth</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-5" data-step="4">
+        <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Market clearing and equilibrium</h3></div>
+        <figure class="step-diagram" data-title="Market clearing" tabindex="0" role="button" aria-label="Expand diagram: Market clearing">
+          <svg viewBox="0 0 560 190" width="560" style="max-width:100%;height:auto;">
+                <text x="280" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Four markets must clear simultaneously</text>
+                <rect x="15" y="42" width="255" height="60" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="142" y="67" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">Labour market</text>
+                <text x="142" y="87" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">household supply = firm demand</text>
+                <rect x="290" y="42" width="255" height="60" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="417" y="67" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">Capital market</text>
+                <text x="417" y="87" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">domestic + foreign savings = demand</text>
+                <rect x="15" y="118" width="255" height="60" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="142" y="143" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">Goods markets</text>
+                <text x="142" y="163" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">output = consumption per industry</text>
+                <rect x="290" y="118" width="255" height="60" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="417" y="143" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">Debt market</text>
+                <text x="417" y="163" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">domestic + foreign holdings = issuance</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>Supply equals demand</h4>
+      <p><strong>Market clearing conditions</strong> tie households, firms, and government together: in equilibrium, supply equals demand in every market simultaneously.</p>
+      <h4>Labour and capital markets</h4>
+      <p><strong>Labour</strong>: efficiency-weighted supply across ages and ability types must equal firm demand across industries. <strong>Capital</strong>: total domestic and foreign savings must equal firm capital demand plus government debt. The model is an <strong>open economy</strong>: parameters for foreign capital and foreign debt holdings set the degree of capital mobility.</p>
+      <h4>Goods and debt markets</h4>
+      <p>Each industry's output must equal consumption demand; the final industry clears residually, absorbing investment, government purchases, and remaining demand. Government debt splits between domestic and foreign holders.</p>
+      <h4>What defines an equilibrium</h4>
+      <p>An equilibrium is a set of prices — interest rate, wage, goods prices — at which households and firms optimise, the government budget holds, and all four markets clear: a large-scale nonlinear fixed-point problem.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">equilibrium conditions</div>
+        <div class="meth-eq"><div class="meth-eq-label">labour</div><div class="meth-eq-body">\(\sum_{s,j} \omega_s \lambda_j e_{j,s} n_{j,s} = \sum_m L_m\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">capital</div><div class="meth-eq-body">\(K = K^d + K^f \quad (\text{open economy: } \zeta_K)\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">goods</div><div class="meth-eq-body">\(Y_m = C_m \;\; (m &lt; M)\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">debt</div><div class="meth-eq-body">\(D = D^d + D^f \quad (\text{foreign share: } \zeta_D)\)</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-6" data-step="5">
+        <div class="meth-step-head"><span class="meth-step-num mono">6</span><h3>How the model is solved</h3></div>
+        <figure class="step-diagram" data-title="Two-stage solution" tabindex="0" role="button" aria-label="Expand diagram: Two-stage solution">
+          <svg viewBox="0 0 580 190" width="580" style="max-width:100%;height:auto;">
+                <text x="290" y="18" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Two-stage solution</text>
+                <rect x="15" y="35" width="220" height="120" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="125" y="58" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">Stage 1: steady state</text>
+                <text x="125" y="78" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">outer: guess prices</text>
+                <text x="125" y="95" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">inner: solve Euler equations</text>
+                <text x="125" y="112" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">aggregate and check</text>
+                <text x="125" y="129" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">iterate to convergence</text>
+                <path d="M55 155 Q55 172 125 172 Q195 172 195 155" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/>
+                <rect x="96" y="163" width="58" height="14" fill="#fff"/>
+                <text x="125" y="174" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--pe-color-gray-500)" font-weight="500">fixed-point</text>
+                <line x1="240" y1="95" x2="295" y2="95" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr)"/>
+                <text x="267" y="85" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--pe-color-gray-500)" font-weight="500">converged</text>
+                <rect x="305" y="35" width="210" height="120" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="410" y="58" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">Stage 2: transition</text>
+                <text x="410" y="78" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">guess time paths</text>
+                <text x="410" y="95" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">solve all cohorts</text>
+                <text x="410" y="112" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">update paths</text>
+                <text x="410" y="129" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">iterate for all t = 1..T</text>
+                <path d="M345 155 Q345 172 410 172 Q475 172 475 155" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/>
+                <rect x="378" y="163" width="64" height="14" fill="#fff"/>
+                <text x="410" y="174" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--pe-color-gray-500)" font-weight="500">TPI iteration</text>
+                <line x1="520" y1="95" x2="545" y2="95" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr)"/>
+                <rect x="550" y="60" width="28" height="70" rx="6" fill="var(--accent)"/>
+                <text x="564" y="92" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#fff" font-weight="600">OUT</text>
+                <text x="564" y="105" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#fff" font-weight="600">PUT</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>Two-stage approach</h4>
+      <p>The model solves in two stages: first the long-run steady state, then the transition path from today's economy to it.</p>
+      <h4>Stage 1: Steady state</h4>
+      <p>The steady state — all variables constant after removing trend growth — comes from a nested fixed-point algorithm. The <em>outer loop</em> guesses aggregate prices and quantities; the <em>inner loop</em> solves the Euler equations for every ability type and age, <strong>in parallel</strong> since types are independent. Aggregation, firm demands, and the government budget check yield new guesses; iterate to convergence.</p>
+      <h4>Stage 2: Transition path (TPI)</h4>
+      <p><em>Time Path Iteration</em> (TPI) then solves the economy's path to the steady state over T periods: guess entire time paths for prices and quantities, solve every cohort's lifetime decisions given those paths (with <strong>rational expectations</strong> about future prices), check the implied paths against the guesses, iterate. This produces the year-by-year projections.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">two-stage algorithm</div>
+        <div class="meth-eq"><div class="meth-eq-label">outer loop</div><div class="meth-eq-body">\(\mathbf{x} = \{\bar{r}_p, \bar{r}, \bar{w}, \{\bar{p}_m\}, \overline{BQ}, \overline{TR}, \text{factor}\}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">inner loop</div><div class="meth-eq-body">\(\text{Solve } 2JS \text{ Euler equations } \forall (j,s)\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">convergence</div><div class="meth-eq-body">\(\|\mathbf{x}^{(i')} - \mathbf{x}^{(i)}\| \leq \text{toler}_{\text{ss}}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">TPI</div><div class="meth-eq-body">\(\text{Guess } \{\mathbf{x}_t\}_{t=1}^T \to \text{solve all cohorts} \to \text{iterate}\)</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-7" data-step="6">
+        <div class="meth-step-head"><span class="meth-step-num mono">7</span><h3>Calibrating for the United Kingdom</h3></div>
+        <figure class="step-diagram" data-title="UK data sources" tabindex="0" role="button" aria-label="Expand diagram: UK data sources">
+          <svg viewBox="0 0 580 195" width="580" style="max-width:100%;height:auto;">
+                <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Data sources for OG-UK</text>
+                <rect x="15" y="42" width="125" height="60" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="77" y="68" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">ONS</text>
+                <text x="77" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">national accounts</text>
+                <rect x="155" y="42" width="125" height="60" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="217" y="68" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">OBR</text>
+                <text x="217" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">fiscal forecasts</text>
+                <rect x="295" y="42" width="125" height="60" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="357" y="68" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">HMRC / GOV.UK</text>
+                <text x="357" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">tax parameters</text>
+                <rect x="435" y="42" width="130" height="60" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="500" y="68" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">PolicyEngine</text>
+                <text x="500" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">tax functions</text>
+                <line x1="77" y1="102" x2="77" y2="125" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr)"/>
+                <line x1="217" y1="102" x2="217" y2="125" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr)"/>
+                <line x1="357" y1="102" x2="357" y2="125" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr)"/>
+                <line x1="500" y1="102" x2="500" y2="125" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr)"/>
+                <rect x="15" y="130" width="550" height="50" rx="10" fill="var(--accent)"/>
+                <text x="290" y="153" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">OG-UK calibration</text>
+                <text x="290" y="170" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">UK demographics, fiscal parameters, tax functions, institutional structure</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>From theory to UK data</h4>
+      <p>OG-Core supplies the theory; the OG-UK calibration layer anchors every parameter to official UK data: depreciation from ONS capital-stocks data (<strong>6.5%/yr</strong>), potential-output growth from the OBR EFO (<strong>1.1%/yr</strong>), the discount factor matched to the ONS household saving ratio, the world interest rate to Bank of England gilt yields, and a Frisch labour-supply elasticity of <strong>0.35–0.4</strong> (Blundell, MaCurdy &amp; Meghir). Demographics — population by age, mortality, immigration — come from UN data; the state pension age matches current UK rules.</p>
+      <h4>Tax function estimation</h4>
+      <p>Taxes are not stylized wedges. OG-UK runs <a href="/pe">PolicyEngine-UK</a> on household microdata under baseline and reform, computes marginal rates by perturbation — add £1 of employment (or dividend) income per adult, rerun, read the change in net income — and fits three-parameter <strong>Gouveia–Strauss</strong> schedules to the effective-rate microdata for each year of a three-year budget window. Marginal-rate schedules are analytical derivatives of the same fitted parameters, so ETRs and MTRs are consistent by construction; the model sees the reform's true shape across the income and age distribution.</p>
+      <h4>Real-world mapping</h4>
+      <p>The model works in abstract units. OG-UK anchors steady-state GDP to the ONS figure — live series with cached fallbacks — and scales all other variables proportionally, so results read as changes in billions of pounds.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">Gouveia-Strauss tax function</div>
+        <div class="meth-eq"><div class="meth-eq-label">effective rate</div><div class="meth-eq-body">\(\text{ETR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-1/\phi_1}\Bigr]\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">marginal (analytical)</div><div class="meth-eq-body">\(\text{MTR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-(1+\phi_1)/\phi_1}\Bigr]\)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>ONS: GDP, national accounts anchor</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>OBR: fiscal forecasts, debt target</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>HMRC/GOV.UK: tax rates, state pension age</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>UN WPP: demographics (country 826)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>PolicyEngine: tax function estimation</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-8" data-step="7">
+        <div class="meth-step-head"><span class="meth-step-num mono">8</span><h3>What this enables</h3></div>
+        <figure class="step-diagram" data-title="Static vs dynamic analysis" tabindex="0" role="button" aria-label="Expand diagram: Static vs dynamic analysis">
+          <svg viewBox="0 0 580 190" width="580" style="max-width:100%;height:auto;">
+                <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Static vs dynamic analysis</text>
+                <rect x="15" y="42" width="240" height="135" rx="10" fill="var(--bg-diagram)" stroke="var(--border)" stroke-width="1.5"/>
+                <text x="135" y="66" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--text-light)" font-weight="700">static (before)</text>
+                <text x="135" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">household-level impacts</text>
+                <text x="135" y="104" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">fixed wages, prices, GDP</text>
+                <text x="135" y="122" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">no behavioural response</text>
+                <text x="135" y="140" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">immediate effects only</text>
+                <text x="135" y="165" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">PolicyEngine static analysis</text>
+                <line x1="260" y1="110" x2="295" y2="110" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr)"/>
+                <text x="277" y="100" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)">+OG-UK</text>
+                <rect x="300" y="42" width="265" height="135" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+                <text x="432" y="66" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">dynamic (now)</text>
+                <text x="432" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">economy-wide effects</text>
+                <text x="432" y="104" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">endogenous wages, r, GDP</text>
+                <text x="432" y="122" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">labour + savings responses</text>
+                <text x="432" y="140" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">multi-decade transition paths</text>
+                <text x="432" y="165" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">PolicyEngine + OG-UK</text>
+              </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>Two complementary views</h4>
+      <p>Paired with a static microsimulation engine, OG-UK gives two views of a UK tax or benefit reform. Static analysis shows which households gain or lose, and by how much. OG-UK shows GDP, investment, government revenue, interest rates, and wages as the economy adjusts over time.</p>
+      <h4>Why both views matter</h4>
+      <p>The two can tell different stories. A reform that raises revenue statically may raise less in practice as higher rates reduce labour supply and investment; one that costs revenue upfront might pay for itself through extra activity. OG-UK captures both dynamics.</p>
+      <h4>Year-by-year transition paths</h4>
+      <p>Rather than comparing two steady states, the transition path shows the <strong>year-by-year adjustment</strong> — how GDP dips in the first years, how interest rates respond, when revenue stabilises — on paths that map onto OBR forecast horizons.</p>
+      <h4>What the model does not capture</h4>
+      <p>OG-UK inherits the simplifications of structural macro models. Caveats for reading its outputs:</p>
+      <ul>
+        <li><strong>Smoothed tax functions, not statutory bands.</strong> A single Gouveia–Strauss function fitted to PolicyEngine-UK output folds income tax and National Insurance together. Reforms changing <em>average</em> liability flow through cleanly; reforms whose mechanism is the kink itself (a new threshold, an allowance taper change) register only as far as the smoothed function shifts.</li>
+        <li><strong>Permanent ability types, no earnings risk.</strong> With J&nbsp;=&nbsp;7 deterministic ability types and no idiosyncratic earnings shock within a type, precautionary savings and earnings-risk-driven inequality are not channels here — the same deliberate trade-off the OBR's own UK OLG model (compared on the <a href="/olg/validation">Validation</a> tab) makes.</li>
+        <li><strong>UK as a single entity.</strong> Calibration is to UK-wide aggregates, with no England / Scotland / Wales / Northern&nbsp;Ireland breakdown; devolved tax differentials and explicitly regional reforms sit below the model's granularity.</li>
+        <li><strong>Reforms are step changes.</strong> A PolicyEngine reform sets parameter values from a start date, holding thereafter; phased introductions, sunset clauses or year-on-year indexation changes need explicit scripting.</li>
+        <li><strong>Truncated horizon.</strong> The default 60-period transition assumes the steady state arrives by year 60; longer-run effects collapse into the steady-state anchor.</li>
+      </ul>
+      <p>These are tractability choices, not bugs — worth knowing when reading the <a href="/olg#showcase">Showcase</a> charts.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">what OG-UK adds</div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Endogenous GDP, wages, interest rates</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Labour supply and savings responses</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Year-by-year transition paths</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Generational incidence (age-varying impacts)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Fiscal sustainability projections</span></div>
+          </div>
+        <div class="meth-sec-title">active development</div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Multi-industry calibration</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Tax function refinement</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>OBR-grounded transition charts</span></div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">The overlapping-generations idea</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">population</div>
+        <div class="meth-eq"><div class="meth-eq-label">age cohorts</div><div class="meth-eq-body">\(s = E+1, \ldots, E+S \quad \text{(economically active)}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">ability types</div><div class="meth-eq-body">\(j = 1, \ldots, J \quad \text{with probability } \lambda_j\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">population</div><div class="meth-eq-body">\(\omega_{s,t}\) evolves with fertility, mortality, immigration</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Each type has its own \(\beta_j\), \(\chi^b_j\), \(e_{j,s}\)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Productivity \(e_{j,s}\) varies by age and type</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Type assigned at birth, permanent</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Household decisions</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">utility and Euler equations</div>
+        <div class="meth-eq"><div class="meth-eq-label">consumption</div><div class="meth-eq-body">\(u(c) = \frac{c^{\,1-\sigma}}{1-\sigma}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">labour disutility</div><div class="meth-eq-body">\(\chi^n_s \cdot g(n) \quad \text{(elliptical)}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">bequest motive</div><div class="meth-eq-body">\(\chi^b_j \cdot \rho_s \cdot \frac{b'^{\,1-\sigma}}{1-\sigma}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">labour FOC</div><div class="meth-eq-body">\(\chi^n_s g'(n) = w\,e_{j,s}(1-\tau'_{\text{lab}})\,u'(c)\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">savings Euler</div><div class="meth-eq-body">\(u'(c_t) = \beta_j(1-\rho_s)(1+r_{p,t+1}(1-\tau'_{\text{cap}}))\,u'(c_{t+1})\)</div></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Firms and production</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">technology</div>
+        <div class="meth-eq"><div class="meth-eq-label">CES production</div><div class="meth-eq-body">\(Y_m = Z_m\bigl[\gamma K_m^\rho + \gamma_g K_{g,m}^\rho + (1\!-\!\gamma\!-\!\gamma_g)(e^{g_y t}L_m)^\rho\bigr]^{1/\rho}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">wage</div><div class="meth-eq-body">\(w = p_m \cdot \text{MPL}_m\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">rental rate</div><div class="meth-eq-body">\(r = (1-\tau^{\text{corp}})\,p_m\,\text{MPK}_m - \delta + \tau^{\text{corp}}\delta^\tau + \tau^{\text{inv}}\delta\)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>\(M\) industries, perfect competition</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Public capital \(K_g\) generates rents</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Nests Cobb-Douglas when \(\varepsilon \to 1\)</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Government</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <div class="meth-sec-title">government budget</div>
+        <p>\[ D_{t+1} + \text{Rev}_t = (1+r_{\text{gov}})D_t + G + I_g + \text{Pen} + TR + UBI \]</p>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Income: Gouveia-Strauss from PolicyEngine</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Consumption: VAT + excise</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Wealth: progressive 3-parameter</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Corporate: flat rate by industry</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Bequest: on inherited wealth</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="4" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Market clearing and equilibrium</span><span class="meth-panel-badge mono">Step 5</span></div>
+          <div class="meth-sec-title">equilibrium conditions</div>
+        <div class="meth-eq"><div class="meth-eq-label">labour</div><div class="meth-eq-body">\(\sum_{s,j} \omega_s \lambda_j e_{j,s} n_{j,s} = \sum_m L_m\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">capital</div><div class="meth-eq-body">\(K = K^d + K^f \quad (\text{open economy: } \zeta_K)\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">goods</div><div class="meth-eq-body">\(Y_m = C_m \;\; (m &lt; M)\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">debt</div><div class="meth-eq-body">\(D = D^d + D^f \quad (\text{foreign share: } \zeta_D)\)</div></div>
+        </div>
+        <div class="meth-panel" data-step="5" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">How the model is solved</span><span class="meth-panel-badge mono">Step 6</span></div>
+          <div class="meth-sec-title">two-stage algorithm</div>
+        <div class="meth-eq"><div class="meth-eq-label">outer loop</div><div class="meth-eq-body">\(\mathbf{x} = \{\bar{r}_p, \bar{r}, \bar{w}, \{\bar{p}_m\}, \overline{BQ}, \overline{TR}, \text{factor}\}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">inner loop</div><div class="meth-eq-body">\(\text{Solve } 2JS \text{ Euler equations } \forall (j,s)\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">convergence</div><div class="meth-eq-body">\(\|\mathbf{x}^{(i')} - \mathbf{x}^{(i)}\| \leq \text{toler}_{\text{ss}}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">TPI</div><div class="meth-eq-body">\(\text{Guess } \{\mathbf{x}_t\}_{t=1}^T \to \text{solve all cohorts} \to \text{iterate}\)</div></div>
+        </div>
+        <div class="meth-panel" data-step="6" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Calibrating for the United Kingdom</span><span class="meth-panel-badge mono">Step 7</span></div>
+          <div class="meth-sec-title">Gouveia-Strauss tax function</div>
+        <div class="meth-eq"><div class="meth-eq-label">effective rate</div><div class="meth-eq-body">\(\text{ETR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-1/\phi_1}\Bigr]\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">marginal (analytical)</div><div class="meth-eq-body">\(\text{MTR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-(1+\phi_1)/\phi_1}\Bigr]\)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>ONS: GDP, national accounts anchor</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>OBR: fiscal forecasts, debt target</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>HMRC/GOV.UK: tax rates, state pension age</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>UN WPP: demographics (country 826)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>PolicyEngine: tax function estimation</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="7" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">What this enables</span><span class="meth-panel-badge mono">Step 8</span></div>
+          <div class="meth-sec-title">what OG-UK adds</div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Endogenous GDP, wages, interest rates</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Labour supply and savings responses</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Year-by-year transition paths</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Generational incidence (age-varying impacts)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Fiscal sustainability projections</span></div>
+          </div>
+        <div class="meth-sec-title">active development</div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Multi-industry calibration</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Tax function refinement</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>OBR-grounded transition charts</span></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+
+  <div class="diagram-modal" hidden>
+    <div class="diagram-modal-box" role="dialog" aria-modal="true" aria-label="Diagram">
+      <div class="diagram-modal-head">
+        <span class="diagram-modal-title"></span>
+        <button type="button" class="diagram-modal-close" aria-label="Close">×</button>
+      </div>
+      <div class="diagram-modal-body"></div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="foot foot-bar">
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="/contact">Contact</a>
+  </nav>
+</footer>
+
+<script src="/reveal.js?v=2" defer></script>
+<script>
+// Methodology scrollytelling: highlight the step at the reading line and
+// show its formal-structure panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  document.querySelectorAll('[role="tab"]').forEach(function (btn) {
+    btn.addEventListener("click", function () { setTimeout(update, 0); });
+  });
+  update();
+})();
+</script>
+<script>
+// Diagram zoom: clicking a step diagram opens it enlarged in a modal.
+(function () {
+  "use strict";
+  var modal = document.querySelector(".diagram-modal");
+  if (!modal) return;
+  var body = modal.querySelector(".diagram-modal-body");
+  var title = modal.querySelector(".diagram-modal-title");
+  function open(fig) {
+    body.innerHTML = fig.querySelector("svg").outerHTML;
+    title.textContent = fig.getAttribute("data-title") || "";
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function close() {
+    modal.hidden = true;
+    body.innerHTML = "";
+    document.body.style.overflow = "";
+  }
+  document.querySelectorAll(".step-diagram").forEach(function (fig) {
+    fig.addEventListener("click", function () { open(fig); });
+    fig.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(fig); }
+    });
+  });
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal || e.target.closest(".diagram-modal-close")) close();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !modal.hidden) close();
+  });
+})();
+</script>
+</body>
+</html>

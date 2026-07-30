@@ -4,16 +4,16 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Models — PolicyEngine Macro</title>
-<meta name="description" content="Choose from six open UK and US economic models by question, country, method, and run surface." />
+<meta name="description" content="Choose from six open UK and US economic models by question, country, method, and run surface — with side-by-side assumptions, the validation evidence, and the source literature on one page." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/models" />
 <meta property="og:title" content="Models — PolicyEngine Macro" />
-<meta property="og:description" content="Choose from six open UK and US economic models by question, country, method, and run surface." />
+<meta property="og:description" content="Choose from six open UK and US economic models by question, country, method, and run surface — with side-by-side assumptions, the validation evidence, and the source literature on one page." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <meta name="theme-color" content="#FFFFFF" />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css" />
+<link rel="stylesheet" href="/style.css?v=2" />
 </head>
 <body class="doc models-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -26,7 +26,7 @@
     <a class="nav-mobile" href="/">Home</a>
     <a class="nav-mobile" href="/economy">Economy</a>
     <a class="nav-mobile" href="/models" aria-current="page">Models</a>
-    <a class="nav-mobile" href="/forecasts">Track record</a>
+    <a class="nav-mobile" href="/forecasts">Forecasts</a>
     <a class="nav-mobile nav-start" href="/connect">Use</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
   </nav>
@@ -45,28 +45,125 @@
       <p class="lede reveal" style="--d:2">Six open UK and US models cover household policy, fiscal and monetary shocks, near-term forecasts, and long-run structural change.</p>
     </div>
   </section>
-  <nav class="model-evidence-links model-evidence-links-top" aria-label="Model evidence and comparison">
-    <a href="/validation"><strong>Validation</strong><span>Compare independent checks, forecast tests, and known failures.</span></a>
-    <a href="#compare"><strong>Assumptions</strong><span>Compare model scope, horizons, inputs, and outputs side by side.</span></a>
-    <a href="/papers"><strong>Evidence guides</strong><span>Read the source literature and replication notes for each model.</span></a>
+  <nav class="model-tabs" aria-label="Model catalog sections" data-models-subnav>
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="#choose">Pick a model</a>
+      <a class="model-tabs-link" href="#compare">Side by side</a>
+      <a class="model-tabs-link" href="#validation">Validation</a>
+      <a class="model-tabs-link" href="#evidence">Papers</a>
+    </div>
   </nav>
   <section id="journeys" class="band band-stack">
     <div class="band-head"><span class="kicker mono">start with the question</span><h2>Three questions, three routes.</h2></div>
-    <div class="question-list">
-      <a href="/score"><span>What would a reform cost — and what would it do to the economy?</span><strong>Score a reform →</strong></a>
-      <a href="/economy"><span>What is the outlook for the UK or US economy?</span><strong>Economy →</strong></a>
-      <a href="#choose"><span>What does a specific shock or policy lever do?</span><strong>Pick a model below ↓</strong></a>
+    <div class="qa-list">
+      <details class="qa">
+        <summary><span>What would a reform cost — and what would it do to the economy?</span><strong>score a reform</strong></summary>
+        <div class="qa-body">
+          <p>The scoring pipeline chains two members: PolicyEngine's microsimulation produces the static costing from the actual tax-benefit rules, then the OBR emulator feeds it through the macro model for the second-round effects — the OBR's own "static costing in, second-round effects out" workflow.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Worked example: 1p on the basic rate — £6.46bn (2026) &rarr; £7.38bn (2030), GDP &minus;0.02% on impact building to &minus;0.06%</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Static costing sits within HMRC's published ready-reckoner range</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Hosted — MCP tools or one CLI command</span></div>
+          </div>
+          <p class="qa-link"><a href="/score">Score a reform &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>What is the outlook for the UK or US economy?</span><strong>economy</strong></summary>
+        <div class="qa-body">
+          <p>The economy pages put the latest official outturns beside the models' near-term view, every number tied to the data vintage it was published with: the UK forecast comes from the boe-svar model (with credible bands, archived and scored in public), the US path from the FRB/US conditioning baseline.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>UK: GDP, CPI and unemployment with 68% ranges, quarterly</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>US: outturns beside the LONGBASE baseline — a conditioning path, not a forecast</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Every forecast archived before outturns exist; scored on the <a href="/forecasts">Forecasts</a> page</span></div>
+          </div>
+          <p class="qa-link"><a href="/economy">Economy &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>What does a specific shock or policy lever do?</span><strong>pick a model</strong></summary>
+        <div class="qa-body">
+          <p>That depends on the country, the horizon, and the mechanism you care about — the chooser below matches the question to the right model.</p>
+          <p class="qa-link"><a href="#choose">Pick a model below &darr;</a></p>
+        </div>
+      </details>
     </div>
   </section>
   <section id="choose" class="band band-stack">
     <div class="band-head"><span class="kicker mono">choose a model</span><h2>What do you need to understand?</h2></div>
-    <div class="question-list">
-      <a href="/pe"><span>Taxes and benefits for a household or population</span><strong>UK + US · PolicyEngine</strong></a>
-      <a href="/frb-us"><span>A monetary or fiscal shock in the US over coming quarters</span><strong>US · frb-us</strong></a>
-      <a href="/us-hank"><span>How US shock responses differ across the household wealth distribution</span><strong>US · us-hank</strong></a>
-      <a href="/obr"><span>A selected UK fiscal or macro scenario over 3–5 years</span><strong>UK · obr-macro</strong></a>
-      <a href="/olg"><span>Work, saving, and capital effects over decades</span><strong>UK · psl-og</strong></a>
-      <a href="/svar"><span>What drove UK GDP and inflation at the latest model-data vintage</span><strong>UK · boe-svar</strong></a>
+    <div class="qa-list">
+      <details class="qa">
+        <summary><span>Taxes and benefits for a household or population</span><strong>UK + US · PolicyEngine</strong></summary>
+        <div class="qa-body">
+          <p>The microsimulation runs the actual tax-benefit rules as code over enhanced survey microdata (Enhanced FRS for the UK, CPS for the US), so it answers at both levels: one household’s net income under a reform, or the population-wide revenue and distributional effect.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Hosted — MCP tools and a CLI, no account needed</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Household answers are exact rule arithmetic; population answers inherit survey-data error</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Static by design: no behavioural or macro feedback (the macro members add that)</span></div>
+          </div>
+          <p class="qa-link"><a href="/pe">Open PolicyEngine microsim &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>A monetary or fiscal shock in the US over coming quarters</span><strong>US · frb-us</strong></summary>
+        <div class="qa-body">
+          <p>The Federal Reserve’s FRB/US model — 284 behavioural equations parsed from the Board’s own model file — is solved by damped Newton around the April 2026 LONGBASE baseline; you pick the lever and the policy rule, and read the deviation path quarter by quarter.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Levers: federal funds rate, government spending, transfers, taxes — each in its own units</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Replicates the Board’s dynamics to machine precision (residuals ~1e-8 or better)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>VAR expectations only; a conditioning baseline, not a forecast</span></div>
+          </div>
+          <p class="qa-link"><a href="/frb-us">Open FRB/US &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>How US shock responses differ across the household wealth distribution</span><strong>US · us-hank</strong></summary>
+        <div class="qa-body">
+          <p>A two-asset heterogeneous-agent New Keynesian model (an ABRS 2021 replication) solves the same monetary, fiscal or productivity shock for the whole distribution of households, then reports consumption responses by liquid-wealth quartile and the hand-to-mouth share.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>MPCs by wealth quartile alongside the aggregate response</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Warm shock in seconds via a cached sequence-space Jacobian</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Stylized replication — not a forecaster, no reform scoring</span></div>
+          </div>
+          <p class="qa-link"><a href="/us-hank">Open US HANK &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>A selected UK fiscal or macro scenario over 3–5 years</span><strong>UK · obr-macro</strong></summary>
+        <div class="qa-body">
+          <p>A transpiled, solvable copy of the OBR’s published macroeconometric model, anchored to the latest EFO with held add-factors: shock a lever, re-solve, and read GDP, consumption and investment deviations against the official forecast path.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Worked example: 1p on the basic rate — £6.46bn (2026) rising to £7.38bn (2030) with the macro feedback</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Emulator tracks the published forecast within 0.15% (GDP) / 0.25% (consumption)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Impact multiplier ~1 by construction vs the OBR’s published 0.6 — read magnitudes, not point estimates</span></div>
+          </div>
+          <p class="qa-link"><a href="/obr">Open the OBR emulator &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>Work, saving, and capital effects over decades</span><strong>UK · psl-og</strong></summary>
+        <div class="qa-body">
+          <p>80 overlapping cohorts choose work and saving over their lifetimes; firms and the government close the economy. Solve the steady state or the full 60-period transition path and read where a reform takes GDP, investment and revenue in the long run.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Worked example: +1pp basic rate → GDP −£5.0bn (−0.14%) and tax revenue +0.29pp of GDP by 2030</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Tax functions estimated from PolicyEngine microdata; ONS/OBR-calibrated</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Local-only and experimental: calibrated, with no published ground truth</span></div>
+          </div>
+          <p class="qa-link"><a href="/olg">Open OG-UK &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>What drove UK GDP and inflation at the latest model-data vintage</span><strong>UK · boe-svar</strong></summary>
+        <div class="qa-body">
+          <p>An eight-variable Bayesian structural VAR identifies named shocks (demand, supply, policy…) with sign and zero restrictions, then decomposes recent GDP and inflation into their contributions — and projects forward with credible bands.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Frozen-edge check: 14 of 14 outturns inside the 68% bands (bands run wide)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Forecasts are archived before outturns exist and scored in public</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Hosted — same model behind the site’s UK forecast</span></div>
+          </div>
+          <p class="qa-link"><a href="/svar">Open BoE SVAR &rarr;</a></p>
+        </div>
+      </details>
     </div>
     <p class="chooser-note">Already have two candidates? <a href="#compare">Compare their assumptions and tradeoffs</a>.</p>
   </section>
@@ -77,7 +174,7 @@
       <a class="strategy-card" href="/svar"><header><span class="card-id mono">boe-svar</span><span class="tag-row"><span class="tag tag-country">UK</span><span class="tag tag-hosted">hosted</span></span></header><h3>Bank of England structural VAR</h3><p>Identify shocks and forecast GDP and inflation with uncertainty ranges. Estimated through 2025Q1; conditioned through 2026Q1.</p><span class="strategy-paper-link mono">open model →</span></a>
       <a class="strategy-card" href="/frb-us"><header><span class="card-id mono">frb-us</span><span class="tag-row"><span class="tag tag-country">US</span><span class="tag tag-hosted">hosted</span></span></header><h3>Federal Reserve macroeconomic model</h3><p>Run selected monetary and fiscal levers under VAR expectations. No reform bridge or model-consistent expectations.</p><span class="strategy-paper-link mono">open model →</span></a>
       <a class="strategy-card" href="/us-hank"><header><span class="card-id mono">us-hank</span><span class="tag-row"><span class="tag tag-country">US</span><span class="tag tag-hosted">hosted</span></span></header><h3>US heterogeneous-agent NK model</h3><p>Run stylized shocks in a two-asset HANK replication with MPC-by-quartile output. Not a forecaster; no reform scoring.</p><span class="strategy-paper-link mono">open model →</span></a>
-      <a class="strategy-card" href="/olg"><header><span class="card-id mono">psl-og</span><span class="tag-row"><span class="tag tag-country">UK</span><span class="tag tag-local">local</span><span class="tag tag-experimental">experimental</span></span></header><h3>PSL overlapping generations</h3><p>Run local long-run reform analysis; transition paths are available from the package. Calibrated, not outcome-validated.</p><span class="strategy-paper-link mono">open model →</span></a>
+      <a class="strategy-card" href="/olg"><header><span class="card-id mono">psl-og</span><span class="tag-row"><span class="tag tag-country">UK</span><span class="tag tag-local">local</span></span></header><h3>PSL overlapping generations</h3><p>Run local long-run reform analysis; transition paths are available from the package. Calibrated, not outcome-validated.</p><span class="strategy-paper-link mono">open model →</span></a>
       <a class="strategy-card" href="/pe"><header><span class="card-id mono">pe-microsim</span><span class="tag-row"><span class="tag tag-country">UK</span><span class="tag tag-country">US</span><span class="tag tag-hosted">hosted</span></span></header><h3>PolicyEngine microsimulation</h3><p>Calculate taxes, benefits, net income, and population impacts. Population results depend on survey data; no macro feedback.</p><span class="strategy-paper-link mono">open model →</span></a>
     </div>
   </section>
@@ -87,7 +184,7 @@
       <h2>Six model classes, side by side.</h2>
     </div>
     <div class="prose comparison-prose">
-      <div class="table-scroll desktop-comparison comparison-table-wrap">
+      <div class="table-scroll desktop-comparison comparison-table-wrap cmp-clamped" id="cmp-wrap">
       <table class="comparison-table">
         <caption>The six models compared across question class, method, country, vintage, verification and run surface</caption>
         <thead><tr><td></td><th scope="col"><a href="/obr">OBR macroeconometric<br><span>obr-macro</span></a></th><th scope="col"><a href="/svar">Bank of England structural VAR<br><span>boe-svar</span></a></th><th scope="col"><a href="/frb-us">Federal Reserve model<br><span>frb-us</span></a></th><th scope="col"><a href="/us-hank">US heterogeneous-agent NK<br><span>us-hank</span></a></th><th scope="col"><a href="/olg">Overlapping generations<br><span>psl-og</span></a></th><th scope="col"><a href="/pe">PolicyEngine microsimulation<br><span>pe-microsim</span></a></th></tr></thead>
@@ -96,20 +193,13 @@
           <tr><th scope="row"><strong>Method</strong></th><td>Structural macroeconometric emulator — Gauss–Seidel over 372 equations per quarter</td><td>Bayesian structural VAR — posterior sampling with zero + sign restrictions naming the shocks</td><td>Large-scale macroeconometric model — 284 equations solved under VAR expectations</td><td>Two-asset HANK (Auclert et al. 2021) — first-order sequence-space impulse responses</td><td>Dynamic general equilibrium (OLG) — steady-state root-find and transition-path iteration</td><td>Static tax-benefit microsimulation — direct rule evaluation, no behavioural response</td></tr>
           <tr><th scope="row"><strong>Country</strong></th><td>UK</td><td>UK</td><td>US</td><td>US</td><td>UK (OG-UK)</td><td>UK &amp; US</td></tr>
           <tr><th scope="row"><strong>Data vintage</strong></th><td>OBR <em>Economic and Fiscal Outlook</em>, March 2026</td><td>ONS, BoE and FRED series — coefficients estimated through 2025Q1; conditioned through the 2026Q1 data edge</td><td>The Fed's <code>model.xml</code> and LONGBASE database, April 2026</td><td>The published Econometrica 2021 calibration; no data vintage</td><td>ONS, OBR and BoE national accounts as calibration targets; OG-UK 0.3.2 (from GitHub)</td><td>UK &amp; US statute; enhanced FRS 2023–24 microdata for UK population runs</td></tr>
-          <tr><th scope="row"><strong>Evidence class</strong> (<a href="/validation">numbers →</a>)</th><td>Validated for selected scenarios; published anchor is not out-of-sample validation</td><td>Validated replication for selected outputs</td><td>Validated software replication; substantive comparisons are approximate</td><td>Validated replication of published results; not a forecaster; distributional outputs are first-order approximations</td><td>Research prototype; calibrated counterfactual with no ground truth</td><td>Deterministic rule calculation; population estimates add survey uncertainty</td></tr>
+          <tr><th scope="row"><strong>Evidence class</strong> (<a href="#validation">numbers →</a>)</th><td>Validated for selected scenarios; published anchor is not out-of-sample validation</td><td>Validated replication for selected outputs</td><td>Validated software replication; substantive comparisons are approximate</td><td>Validated replication of published results; not a forecaster; distributional outputs are first-order approximations</td><td>Research prototype; calibrated counterfactual with no ground truth</td><td>Deterministic rule calculation; population estimates add survey uncertainty</td></tr>
           <tr><th scope="row"><strong>Reform scoring</strong></th><td>Yes — shocks to exogenous model variables; static-costing bridge from PolicyEngine reforms</td><td>No — the baseline/conditioning member: it reads the economy reforms are scored against</td><td>No — shock experiments only (funds-rate or fiscal shocks under VAR expectations); <code>score_reform</code> refuses <code>model="frbus"</code>, as no PolicyEngine reform bridge exists</td><td>No — stylized shocks only (monetary, fiscal spending, productivity); the labor tax is endogenous, so <code>score_reform</code> refuses <code>model="hank"</code></td><td>Yes — a PolicyEngine policy translated into estimated tax functions</td><td>Yes — a PolicyEngine parameter + a new value, applied directly to households</td></tr>
           <tr><th scope="row"><strong>Out of scope</strong></th><td>Arbitrary reform incidence or borrowing through the current adapter</td><td>The causal effect of a specific statutory reform</td><td>PolicyEngine reform effects, anticipated-policy paths, or MCE scenarios</td><td>Forecasts, detailed tax reforms, or nonlinear/state-dependent dynamics</td><td>A short-run forecast or independently validated reform effect</td><td>GDP, inflation, interest rates, or macro feedback</td></tr>
           <tr><th scope="row"><strong>Run surface</strong></th><td>Hosted (CLI, MCP, Python API)</td><td>Hosted (CLI, MCP, Python API)</td><td>Hosted (CLI, MCP, Python API) — raw shocks only</td><td>Hosted (CLI, MCP, Python API) — stylized shocks only</td><td>Local only</td><td>Hosted</td></tr>
           <tr><th scope="row"><strong>Typical runtime</strong></th><td>Seconds to minutes per scenario</td><td>Minutes per full estimation + identification run</td><td>Seconds to minutes per simulation</td><td>~18s cold per variant (cached); instant warm</td><td>~17+ min per steady-state solve (two per score); hours for transition paths</td><td>Sub-second per household; minutes for population runs</td></tr>
         </tbody>
       </table>
-      </div>
-      <div class="callout">
-        <strong>Comparison rule.</strong> These models use different horizons,
-        baselines, mechanisms, and output definitions. Related results should
-        be interpreted together, not added, averaged, or ranked. The CLI and
-        JSON result schema retain units, time basis, provenance, and an explicit
-        comparability label for this reason.
       </div>
       <div class="mobile-compare" data-mobile-compare aria-labelledby="mobile-compare-title">
         <h3 id="mobile-compare-title">Compare two models</h3>
@@ -119,6 +209,123 @@
         </div>
         <div data-comparison-output aria-live="polite"></div>
       </div>
+      <p class="qa-link"><button type="button" id="cmp-toggle" class="cmp-toggle">Show the full comparison</button></p>
+    </div>
+  </section>
+  <section id="validation" class="band">
+    <div class="band-head">
+      <span class="kicker mono">validation</span>
+      <h2>How each model is validated.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        The six models support different kinds of checks; the gradient below
+        groups them into three classes — open a model's validation page for the
+        full evidence. In plain English: the OBR emulator tracks the published
+        forecast within 0.15% on GDP, the SVAR's frozen-edge test put 14 of 14
+        outturns inside its 68% bands (single-origin, suggestive), and frb-us
+        reproduces the Fed's database to machine precision.
+      </p>
+      <div class="table-scroll mo-tablecard cmp-compare">
+      <table>
+        <thead><tr><th scope="col">Model</th><th scope="col">Verification class</th><th scope="col">What it is checked against</th><th scope="col">Headline result</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><a href="/obr/validation"><strong>obr-macro</strong></a></th>
+            <td>Replication with a published anchor</td>
+            <td>March 2026 EFO; HMRC ready reckoner; ONS outturns</td>
+            <td>Anchored GDP MAPE 0.15%, consumption 0.25%</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="/svar/validation"><strong>boe-svar</strong></a></th>
+            <td>Replication with a published anchor</td>
+            <td>Brignone &amp; Piffer (2025); ONS outturns</td>
+            <td>FEVD shares 42.1% / 49.5% vs the paper's ~40% / ~50%</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="/frb-us/validation"><strong>frb-us</strong></a></th>
+            <td>Replication with a published anchor</td>
+            <td>The Fed's LONGBASE and <code>pyfrbus</code>; published multiplier ranges</td>
+            <td>Tracks LONGBASE to machine precision (5.6&times;10<sup>&minus;17</sup>)</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="/us-hank/validation"><strong>us-hank</strong></a></th>
+            <td>Replication with a published anchor</td>
+            <td>Auclert et al. (2021), via the authors' toolkit</td>
+            <td>18 gated tests: targets, market clearing, shock responses</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="/pe/validation"><strong>pe-microsim</strong></a></th>
+            <td>Checked against implemented legislation</td>
+            <td>Implemented UK and US legislation, rule by rule</td>
+            <td>Household maths exact; population adds survey error</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="/olg/validation"><strong>psl-og</strong></a></th>
+            <td>Calibrated counterfactual — no ground truth</td>
+            <td>ONS/OBR aggregates as <em>targets</em>, not a validation set</td>
+            <td>Targets met by construction; no ground truth</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <h3 id="shops">The same questions, answered by other shops.</h3>
+      <p>
+        Imposed matches are anchors, not validation — the stronger evidence is
+        out-of-sample forecasts, independent costings, and solver residuals.
+        Below, published institutional answers sit beside ours.
+      </p>
+      <div class="table-scroll mo-tablecard cmp-compare">
+      <table>
+        <thead><tr><th scope="col">Question</th><th scope="col">Ours</th><th scope="col">Theirs</th><th scope="col">How comparable</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row">Long-run effect of a 1pp basic-rate rise (psl-og)</th>
+            <td>Not yet produced — open validation work</td>
+            <td><a href="https://obr.uk/docs/dlm_uploads/Working_paper_22_A_new_UK_overlapping_generations_model.pdf">OBR Working Paper 22</a>, Table 5.1: GDP/person &minus;0.1%, labour supply &minus;0.2%, productivity +0.1%</td>
+            <td><strong>Future benchmark</strong> — same scenario; the target we will be judged against, not a match claimed today</td>
+          </tr>
+          <tr>
+            <th scope="row">Cost of cutting the basic rate 1p, 2026&ndash;27 (obr-macro + pe)</th>
+            <td>£6.46bn static</td>
+            <td><a href="https://www.gov.uk/government/statistics/direct-effects-of-illustrative-tax-changes/direct-effects-of-illustrative-tax-changes-bulletin-january-2025">HMRC ready reckoner</a> (June 2025): £6.9bn, rising to £8.2bn by 2028&ndash;29</td>
+            <td>Direct — &minus;6.4% in year one; HMRC's figure embeds behavioural response</td>
+          </tr>
+          <tr>
+            <th scope="row">Government-purchases multiplier, year one (frb-us)</th>
+            <td>0.72 (inertial Taylor rule); 0.99 in year two with the funds rate fixed</td>
+            <td><a href="https://econweb.ucsd.edu/~vramey/research/Ramey_Fiscal_JEP.pdf">Ramey (JEP 2019)</a>: the literature sits "in a surprisingly narrow range of 0.6 to 1"</td>
+            <td>Direct — both estimates fall inside the survey range</td>
+          </tr>
+          <tr>
+            <th scope="row">Income-tax multiplier (frb-us, US)</th>
+            <td>0.22 &rarr; 0.32 over years 1&ndash;2</td>
+            <td><a href="https://obr.uk/box/fiscal-multipliers/">OBR's published UK assumption</a>: 0.3 for income tax and NICs</td>
+            <td>Loose — different country and model class</td>
+          </tr>
+          <tr>
+            <th scope="row">Forecast error, 2024Q3 onward (boe-svar)</th>
+            <td>RMSE 0.32pp (GDP growth, CPI), frozen at 2024Q2; the 2025 CPI hump missed by up to 0.6pp</td>
+            <td><a href="https://obr.uk/fer/forecast-evaluation-report-july-2025/">OBR FER (July 2025)</a>: one-year GDP growth under by 0.4pp on average; <a href="https://www.bankofengland.co.uk/-/media/boe/files/monetary-policy-report/2024/august/monetary-policy-report-august-2024.pdf">BoE MPR (Aug 2024)</a>: late-2025 CPI ~2.4% modal vs a 3.8% outturn (~1.4pp miss)</td>
+            <td>Adjusted — different statistics, matched vintages; full diagnostics: <a href="/svar/validation#forecasters">boe-svar validation</a></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+  <section id="evidence" class="band">
+    <div class="band-head">
+      <span class="kicker mono">evidence guides</span>
+      <h2>Read the source literature and replication notes.</h2>
+      <p class="section-intro">Working papers and replication reports for each model. The full library, with abstracts and PDFs, lives on the <a href="/models#evidence">Papers</a> page.</p>
+    </div>
+    <div class="strategy-grid evidence-grid">
+      <a class="strategy-card" href="/papers/obr-macro"><header><span class="card-id mono">obr-macro</span><span class="tag-row"><span class="tag">working paper</span></span></header><p>How the OBR's macroeconometric model was transpiled, anchored, and checked against the published forecast and HMRC costings.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
+      <a class="strategy-card" href="/papers/boe-svar"><header><span class="card-id mono">boe-svar</span><span class="tag-row"><span class="tag">working paper</span></span></header><p>The Bayesian structural VAR replication of Brignone &amp; Piffer (2025), its identification, and its forecast diagnostics.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
+      <a class="strategy-card" href="/papers/frb-us"><header><span class="card-id mono">frb-us</span><span class="tag-row"><span class="tag">working paper</span></span></header><p>Parsing and solving the Fed's FRB/US model, with the machine-precision tracking evidence.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
+      <a class="strategy-card" href="/papers/psl-og"><header><span class="card-id mono">psl-og</span><span class="tag-row"><span class="tag">working paper</span></span></header><p>The OG-UK calibration, tax-function estimation, and the limits of a model with no ground truth.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
+      <a class="strategy-card" href="/reports/us-hank-open-source"><header><span class="card-id mono">us-hank</span><span class="tag-row"><span class="tag">replication report</span></span></header><p>The open-model landscape and the Auclert et al. (2021) two-asset HANK replication.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
     </div>
   </section>
 </main>
@@ -126,14 +333,11 @@
   <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
     <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
-    <a class="footer-text" href="/validation">Validation</a>
-    <a class="footer-text" href="/papers">Papers</a>
-    <a class="footer-text" href="/notes">Notes</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
     <a class="footer-text" href="/contact">Contact</a>
   </nav>
 </footer>
-<script src="/reveal.js" defer></script>
+<script src="/reveal.js?v=2" defer></script>
 <script>
 (function () {
   var root = document.querySelector('[data-mobile-compare]');
@@ -167,6 +371,42 @@
   second.addEventListener('change', render);
   render();
 }());
+(function () {
+  var bar = document.querySelector('[data-models-subnav]');
+  if (!bar || !('IntersectionObserver' in window)) return;
+  var links = Array.from(bar.querySelectorAll('.model-tabs-link'));
+  var sections = links.map(function (link) {
+    return document.getElementById(link.getAttribute('href').slice(1));
+  }).filter(Boolean);
+  function mark(id) {
+    links.forEach(function (link) {
+      if (link.getAttribute('href') === '#' + id) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+  var visible = new Set();
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) visible.add(entry.target.id);
+      else visible.delete(entry.target.id);
+    });
+    var current = sections.find(function (section) { return visible.has(section.id); });
+    if (current) mark(current.id);
+    else links.forEach(function (link) { link.removeAttribute('aria-current'); });
+  }, { rootMargin: '-25% 0px -60% 0px' });
+  sections.forEach(function (section) { observer.observe(section); });
+}());
+</script>
+<script>
+(function () {
+  var btn = document.getElementById("cmp-toggle");
+  var wrap = document.getElementById("cmp-wrap");
+  if (!btn || !wrap) return;
+  btn.addEventListener("click", function () {
+    var clamped = wrap.classList.toggle("cmp-clamped");
+    btn.textContent = clamped ? "Show the full comparison" : "Collapse the comparison";
+  });
+})();
 </script>
 </body>
 </html>

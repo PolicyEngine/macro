@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BoE SVAR code — PolicyEngine Macro</title>
+<meta name="description" content="Run the BoE SVAR replication: hosted MCP tools and CLI commands, pip install from GitHub, and the development scripts that rebuild the data and regenerate the paper outputs." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/svar/code" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://policyengine-macro.vercel.app/svar/code" />
+<meta property="og:site_name" content="PolicyEngine Macro" />
+<meta property="og:title" content="BoE SVAR code — PolicyEngine Macro" />
+<meta property="og:description" content="Hosted MCP tools, CLI mirrors, and local install for the Python replication of the Bank of England's eight-variable Bayesian structural VAR." />
+<meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
+<meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css?v=2" />
+<style>
+/* page-specific: hero sizing only — shared component styles live in style.css */
+.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
+</style>
+</head>
+<body class="doc">
+<a class="skip-link" href="#top">Skip to main content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a class="nav-mobile" href="/">Home</a>
+    <a class="nav-mobile" href="/economy">Economy</a>
+    <a class="nav-mobile" href="/models" aria-current="true">Models</a>
+    <a class="nav-mobile" href="/forecasts">Forecasts</a>
+    <a class="nav-mobile nav-start" href="/connect">Use</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<nav class="crumbs mono" aria-label="You are here">
+    <a href="/">Home</a>
+    <a href="/models">Models</a>
+    <a href="/svar">BoE SVAR</a>
+    <span aria-current="page">Code</span>
+</nav>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <p class="eyebrow reveal" style="--d:0">model 02 — Bank of England structural VAR · boe-svar · UK · hosted</p>
+      <h1 class="reveal page-title" style="--d:1;">
+        Explain UK growth and inflation.
+      </h1>
+      <p class="lede reveal" style="--d:2">
+        Decompose UK GDP and inflation into six structural shocks, forecast
+        with credible bands, and explain revisions between quarters.
+      </p>
+    </div>
+  </section>
+
+  <nav class="model-tabs" aria-label="BoE SVAR pages">
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="/svar">Overview</a>
+      <a class="model-tabs-link" href="/svar/methodology">Methodology</a>
+      <a class="model-tabs-link" href="/svar/validation">Validation</a>
+      <a class="model-tabs-link" href="/svar/code" aria-current="page">Code</a>
+      <a class="model-tabs-link" href="/papers/boe-svar">Paper</a>
+    </div>
+  </nav>
+
+  <section id="run" class="band band-wide">
+    <div class="band-head">
+      <span class="kicker mono">how to run it</span>
+      <h2>Estimate, identify, decompose.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Four routes into the model, hosted to local: MCP tools, CLI mirrors,
+        a pip install, and the development runner scripts. Each step's code
+        follows its narrative.
+      </p>
+    </div>
+
+    <div class="scrolly-wrap scrolly-code">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="run-1" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Hosted MCP tools</h3></div>
+        <h4>No install, no credentials</h4>
+        <p>The quickest route is the <a href="/connect">hosted MCP server</a>. Three tools reach this model: <code>forecast_uk</code> (YoY GDP-growth and CPI-inflation fan charts with 68%/90% bands), <code>latest_shocks</code> (posterior sign probabilities of each identified shock in the latest quarter), and <code>model_summary</code> (headline replication results — instant, no estimation).</p>
+        <h4>Where to read the results</h4>
+        <p>What each tool tells you is on the <a href="/svar">overview</a>; the estimation and identification choices behind them are on the <a href="/svar/methodology">methodology</a> page.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">MCP tools</div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>forecast_uk</code> — fan charts, 68%/90% bands</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>latest_shocks</code> — posterior sign probabilities</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>model_summary</code> — replication headlines, instant</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="run-2" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>CLI mirrors</h3></div>
+        <h4>Same tools from the terminal</h4>
+        <p>The CLI mirrors the three MCP tools one for one: <code>pe-macro forecast</code>, <code>pe-macro shocks</code>, and <code>pe-macro summary</code>. Same outputs, no MCP client required.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">CLI commands</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro forecast   <span class="cm"># fan charts</span>
+pe-macro shocks     <span class="cm"># latest-quarter shocks</span>
+pe-macro summary    <span class="cm"># replication headlines</span></code></pre></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="run-3" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Install locally</h3></div>
+        <h4>One pip install</h4>
+        <p>The package installs straight from GitHub with the prepared quarterly dataset inside, so <code>boe_var.data.load_data()</code> works immediately.</p>
+        <h4>All inputs are public</h4>
+        <p>Every input series is public: ONS (CPI, CPI energy, real GDP), Bank of England (Bank Rate, sterling ERI), and FRED (oil, exchange rates, world components).</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">install</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="run-4" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Development runner scripts</h3></div>
+        <h4>Clone to rebuild everything</h4>
+        <p>The runner scripts are for development — clone the repository to rebuild the dataset or regenerate the paper outputs.</p>
+        <h4>What lands where</h4>
+        <p class="opt-note">outputs land in <code>results/</code> — the replication figures (fig2–fig6), the forecast figures (fig1, fig7–fig9), and two summary reports. runtime scales with draw count; the importance weights are the expensive part — one numerical Jacobian per accepted draw.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">runner scripts</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>python scripts/download_data.py     <span class="cm"># reassemble the public data</span>
+
+<span class="cm"># the paper's core outputs: IRFs, FEVDs, shocks, historical decompositions</span>
+python scripts/run_replication.py
+
+<span class="cm"># the forecasting toolkit: fan charts, latest-quarter shock distributions,</span>
+<span class="cm"># composite IRFs, and the forecast-revision decomposition</span>
+python scripts/run_forecast_revision.py</code></pre></div>
+        </div>
+      </div>
+      </div>
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Hosted MCP tools</span><span class="meth-panel-badge mono">Code 1</span></div>
+          <div class="meth-sec-title">MCP tools</div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>forecast_uk</code> — fan charts, 68%/90% bands</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>latest_shocks</code> — posterior sign probabilities</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>model_summary</code> — replication headlines, instant</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">CLI mirrors</span><span class="meth-panel-badge mono">Code 2</span></div>
+          <div class="meth-sec-title">CLI commands</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro forecast   <span class="cm"># fan charts</span>
+pe-macro shocks     <span class="cm"># latest-quarter shocks</span>
+pe-macro summary    <span class="cm"># replication headlines</span></code></pre></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Install locally</span><span class="meth-panel-badge mono">Code 3</span></div>
+          <div class="meth-sec-title">install</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Development runner scripts</span><span class="meth-panel-badge mono">Code 4</span></div>
+          <div class="meth-sec-title">runner scripts</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>python scripts/download_data.py     <span class="cm"># reassemble the public data</span>
+
+<span class="cm"># the paper's core outputs: IRFs, FEVDs, shocks, historical decompositions</span>
+python scripts/run_replication.py
+
+<span class="cm"># the forecasting toolkit: fan charts, latest-quarter shock distributions,</span>
+<span class="cm"># composite IRFs, and the forecast-revision decomposition</span>
+python scripts/run_forecast_revision.py</code></pre></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot foot-bar">
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="/contact">Contact</a>
+  </nav>
+</footer>
+
+<script src="/reveal.js?v=2" defer></script>
+<script>
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest("[data-copy]"); if (!btn) return;
+  var code = btn.parentElement.querySelector("code");
+  navigator.clipboard.writeText(code.textContent).then(function () {
+    btn.textContent = "copied";
+    setTimeout(function () { btn.textContent = "copy"; }, 1400);
+  });
+});
+</script>
+<script>
+// Code scrollytelling: highlight the step at the reading line and
+// show its code panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  update();
+})();
+</script>
+</body>
+</html>
