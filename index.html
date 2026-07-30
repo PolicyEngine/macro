@@ -33,7 +33,7 @@
     <a class="nav-mobile" href="/" aria-current="page">Home</a>
     <a class="nav-mobile" href="/economy">Economy</a>
     <a class="nav-mobile" href="/models">Models</a>
-    <a class="nav-mobile" href="/forecasts">Track record</a>
+    <a class="nav-mobile" href="/forecasts">Forecasts</a>
     <a class="nav-mobile nav-start" href="/connect">Use</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
   </nav>
@@ -93,17 +93,13 @@
         <span class="kicker mono">00 — at a glance</span>
         <h2>Latest outturns beside the model's near-term view.</h2>
       </div>
-      <div class="glance-switch mono" role="tablist" aria-label="Country">
-        <button type="button" id="glance-tab-uk" role="tab" aria-selected="true" aria-controls="glance-uk">United Kingdom</button>
-        <button type="button" id="glance-tab-us" role="tab" aria-selected="false" aria-controls="glance-us">United States</button>
-      </div>
-    </div>
-    <div class="prose">
-      <div id="glance-uk" role="tabpanel" aria-labelledby="glance-tab-uk">
+      <div class="glance-both">
+        <div class="glance-col">
+          <h3 class="glance-title mono">United Kingdom</h3>
 <!-- home-uk-now:begin -->
       <div class="table-scroll">
         <table>
-          <caption>UK headline indicators: latest official outturn and the model near-term forecast. Outturn vintages as of 2026-07-26; GDP and CPI from the boe-svar forecast generated 2026-07-29 (conditioned on data through 2026Q1); unemployment from the 2026-07-28 Okun-satellite round.</caption>
+          <caption>Latest ONS outturns (vintages as of 2026-07-26) beside the model near-term forecast from the archived <a href="/forecasts">boe-svar and Okun-satellite rounds</a>. Full sources and the complete horizon are on the <a href="/economy">economy page</a>.</caption>
           <thead><tr><th scope="col">Indicator</th><th scope="col">Latest outturn</th><th scope="col">Model near-term forecast</th></tr></thead>
           <tbody>
           <tr><th scope="row">Real GDP growth, y/y</th><td>0.9% <span class="mono">2026Q1</span></td><td>1.1% <span class="mono">2026Q2</span> · 68% range 0.6%–1.7%</td></tr>
@@ -113,18 +109,13 @@
         </table>
       </div>
 <!-- home-uk-now:end -->
-      <p>
-        Outturns are ONS series (ABMI, D7G7, MGSX) from the committed vintage
-        store; forecasts come from the archived
-        <a href="/forecasts">boe-svar round</a>. Full sources and the complete
-        horizon are on the <a href="/economy">economy page</a>.
-      </p>
-      </div>
-      <div id="glance-us" role="tabpanel" aria-labelledby="glance-tab-us" hidden>
+        </div>
+        <div class="glance-col">
+          <h3 class="glance-title mono">United States</h3>
 <!-- home-us-now:begin -->
       <div class="table-scroll">
         <table>
-          <caption>US headline indicators beside the FRB/US April 2026 LONGBASE baseline. Outturn vintages as of 2026-07-27.</caption>
+          <caption>US headline indicators beside the FRB/US April 2026 LONGBASE conditioning baseline — not a forecast. Outturns are FRED series (GDPC1, CPIAUCSL, UNRATE), vintages as of 2026-07-27. Full sources are on the <a href="/economy/us">US economy page</a>.</caption>
           <thead><tr><th scope="col">Indicator</th><th scope="col">Latest outturn</th><th scope="col">LONGBASE baseline path</th></tr></thead>
           <tbody>
           <tr><th scope="row">Real GDP growth, y/y</th><td>2.7% <span class="mono">2026Q1</span></td><td>2.5% <span class="mono">2026Q2</span></td></tr>
@@ -134,28 +125,8 @@
         </table>
       </div>
 <!-- home-us-now:end -->
-      <p>
-        Outturns are FRED series (GDPC1 from the BEA, CPIAUCSL and UNRATE from
-        the BLS) from the committed vintage store; the right column is the
-        FRB/US LONGBASE conditioning baseline, not a forecast. Full sources
-        are on the <a href="/economy/us">US economy page</a>.
-      </p>
+        </div>
       </div>
-    </div>
-    <script>
-      (function () {
-        var tabs = [["glance-tab-uk", "glance-uk"], ["glance-tab-us", "glance-us"]];
-        tabs.forEach(function (pair) {
-          document.getElementById(pair[0]).addEventListener("click", function () {
-            tabs.forEach(function (other) {
-              var active = other[0] === pair[0];
-              document.getElementById(other[0]).setAttribute("aria-selected", active ? "true" : "false");
-              document.getElementById(other[1]).hidden = !active;
-            });
-          });
-        });
-      })();
-    </script>
   </section>
 
 
@@ -185,13 +156,6 @@
       </a>
     </div>
     <p class="chooser-note"><a href="/models">Explore all six models</a> or <a href="/models#compare">compare their assumptions side by side</a>.</p>
-  </section>
-
-  <section class="home-proof" aria-label="Why PolicyEngine Macro">
-    <div><strong>No account needed</strong><span>Public hosted tools, no API key</span></div>
-    <div><strong>Point-in-time data</strong><span>Every official vintage preserved as published</span></div>
-    <div><strong>Scored in public</strong><span>Forecasts archived before outturns exist</span></div>
-    <div><strong>Failures published</strong><span>Under-performance reported beside wins</span></div>
   </section>
 
   <section id="validation" class="band">

@@ -788,12 +788,11 @@ def home_uk_now() -> str:
         return f"68% range {fmt(fc['lo68'])}%–{fmt(fc['hi68'])}%"
 
     caption = (
-        "UK headline indicators: latest official outturn and the model "
-        "near-term forecast. Outturn vintages as of "
-        f"{max(gdp['vintage'], cpi['vintage'], unemployment['vintage'])}; "
-        f"GDP and CPI from the boe-svar forecast generated {forecast['generated']} "
-        f"(conditioned on data through {forecast['data_edge']}); unemployment "
-        f"from the {okun['round_id']} Okun-satellite round."
+        "Latest ONS outturns (vintages as of "
+        f"{max(gdp['vintage'], cpi['vintage'], unemployment['vintage'])}) beside the "
+        f"model near-term forecast from the archived "
+        '<a href="/forecasts">boe-svar and Okun-satellite rounds</a>. '
+        'Full sources and the complete horizon are on the <a href="/economy">economy page</a>.'
     )
     return "\n".join(
         [
@@ -838,8 +837,10 @@ def home_us_now() -> str:
 
     caption = (
         "US headline indicators beside the FRB/US April 2026 LONGBASE "
-        "baseline. Outturn vintages as of "
-        f"{max(gdp['vintage'], cpi['vintage'], unemployment['vintage'])}."
+        "conditioning baseline — not a forecast. Outturns are FRED series "
+        "(GDPC1, CPIAUCSL, UNRATE), vintages as of "
+        f"{max(gdp['vintage'], cpi['vintage'], unemployment['vintage'])}. "
+        'Full sources are on the <a href="/economy/us">US economy page</a>.'
     )
     return "\n".join(
         [

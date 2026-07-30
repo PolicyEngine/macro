@@ -109,8 +109,8 @@ def check_economy_navigation() -> None:
             failures.append(f"{path}: Evidence remains a global navigation tab")
         if 'href="/contact"' in header:
             failures.append(f"{path}: Contact remains a global navigation tab")
-        if ">Track record</a>" not in header:
-            failures.append(f"{path}: Forecasts is not labelled Track record")
+        if ">Forecasts</a>" not in header:
+            failures.append(f"{path}: the forecasts tab is not labelled Forecasts")
 
     if failures:
         raise SystemExit("\n".join(failures))
@@ -130,10 +130,6 @@ def check_editorial_consistency() -> None:
 
     home = _read("index.html")
     for proof in (
-        "No account needed",
-        "Point-in-time data",
-        "Scored in public",
-        "Failures published",
         "Run a hosted model",
     ):
         if proof not in home:
