@@ -184,9 +184,7 @@
       <h2>Six model classes, side by side.</h2>
     </div>
     <div class="prose comparison-prose">
-      <details class="more">
-        <summary>Show the full six-model comparison</summary>
-      <div class="table-scroll desktop-comparison comparison-table-wrap">
+      <div class="table-scroll desktop-comparison comparison-table-wrap cmp-clamped" id="cmp-wrap">
       <table class="comparison-table">
         <caption>The six models compared across question class, method, country, vintage, verification and run surface</caption>
         <thead><tr><td></td><th scope="col"><a href="/obr">OBR macroeconometric<br><span>obr-macro</span></a></th><th scope="col"><a href="/svar">Bank of England structural VAR<br><span>boe-svar</span></a></th><th scope="col"><a href="/frb-us">Federal Reserve model<br><span>frb-us</span></a></th><th scope="col"><a href="/us-hank">US heterogeneous-agent NK<br><span>us-hank</span></a></th><th scope="col"><a href="/olg">Overlapping generations<br><span>psl-og</span></a></th><th scope="col"><a href="/pe">PolicyEngine microsimulation<br><span>pe-microsim</span></a></th></tr></thead>
@@ -218,7 +216,7 @@
         </div>
         <div data-comparison-output aria-live="polite"></div>
       </div>
-      </details>
+      <p class="qa-link"><button type="button" id="cmp-toggle" class="cmp-toggle">Show the full comparison</button></p>
     </div>
   </section>
   <section id="validation" class="band">
@@ -428,6 +426,17 @@
   }, { rootMargin: '-25% 0px -60% 0px' });
   sections.forEach(function (section) { observer.observe(section); });
 }());
+</script>
+<script>
+(function () {
+  var btn = document.getElementById("cmp-toggle");
+  var wrap = document.getElementById("cmp-wrap");
+  if (!btn || !wrap) return;
+  btn.addEventListener("click", function () {
+    var clamped = wrap.classList.toggle("cmp-clamped");
+    btn.textContent = clamped ? "Show the full comparison" : "Collapse the comparison";
+  });
+})();
 </script>
 </body>
 </html>
