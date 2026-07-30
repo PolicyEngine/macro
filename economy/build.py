@@ -794,27 +794,30 @@ def home_uk_now() -> str:
         'archived <a href="/forecasts">forecast rounds</a>. '
         '<a href="/economy">Full horizon &rarr;</a>'
     )
+    def row(name, unit, out_v, out_p, fc_v, fc_p, fc_extra):
+        return (
+            '        <div class="glance-row">\n'
+            f'          <span class="g-name">{name} <small>{unit}</small></span>\n'
+            f'          <span class="g-cell"><strong>{out_v}</strong> <span class="mono">{out_p}</span><small>latest outturn</small></span>\n'
+            '          <span class="g-arrow">&rarr;</span>\n'
+            f'          <span class="g-cell"><strong>{fc_v}</strong> <span class="mono">{fc_p}</span><small>{fc_extra}</small></span>\n'
+            "        </div>"
+        )
+
+    def rng(fc: dict) -> str:
+        return f"68% range {fmt(fc['lo68'])}%\u2013{fmt(fc['hi68'])}%"
+
     return "\n".join(
         [
-            '      <div class="table-scroll">',
-            "        <table>",
-            f"          <caption>{caption}</caption>",
-            '          <thead><tr><th scope="col">Indicator</th><th scope="col">'
-            'Latest outturn</th><th scope="col">Model near-term forecast</th>'
-            "</tr></thead>",
-            "          <tbody>",
-            f'          <tr><th scope="row">Real GDP growth, y/y</th>'
-            f'<td>{fmt(g_now["value"])}% <span class="mono">{g_now["period"]}</span></td>'
-            f'<td>{fmt(g_fc["median"])}% <span class="mono">{g_period}</span>{rng(g_fc)}</td></tr>',
-            f'          <tr><th scope="row">CPI inflation, y/y</th>'
-            f'<td>{fmt(c_now["value"])}% <span class="mono">{c_now["period"]}</span></td>'
-            f'<td>{fmt(c_fc["median"])}% <span class="mono">{c_period}</span>{rng(c_fc)}</td></tr>',
-            f'          <tr><th scope="row">Unemployment rate</th>'
-            f'<td>{fmt(u_now["value"])}% <span class="mono">{u_now["period"]}</span></td>'
-            f'<td>{fmt(u_fc["median"])}% <span class="mono">{u_period}</span>{rng(u_fc)}</td></tr>',
-            "          </tbody>",
-            "        </table>",
+            '      <div class="glance-rows">',
+            row("Real GDP growth", "y/y", f"{fmt(g_now['value'])}%", g_now["period"],
+                f"{fmt(g_fc['median'])}%", g_period, rng(g_fc)),
+            row("CPI inflation", "y/y", f"{fmt(c_now['value'])}%", c_now["period"],
+                f"{fmt(c_fc['median'])}%", c_period, rng(c_fc)),
+            row("Unemployment rate", "", f"{fmt(u_now['value'])}%", u_now["period"],
+                f"{fmt(u_fc['median'])}%", u_period, rng(u_fc)),
             "      </div>",
+            f'      <p class="glance-caption">{caption}</p>',
         ]
     )
 
@@ -840,27 +843,27 @@ def home_us_now() -> str:
         "the FRB/US LONGBASE conditioning baseline — not a forecast. "
         '<a href="/economy/us">Full sources &rarr;</a>'
     )
+    def row(name, unit, out_v, out_p, base_v, base_p):
+        return (
+            '        <div class="glance-row">\n'
+            f'          <span class="g-name">{name} <small>{unit}</small></span>\n'
+            f'          <span class="g-cell"><strong>{out_v}</strong> <span class="mono">{out_p}</span><small>latest outturn</small></span>\n'
+            '          <span class="g-arrow">&rarr;</span>\n'
+            f'          <span class="g-cell"><strong>{base_v}</strong> <span class="mono">{base_p}</span><small>LONGBASE baseline</small></span>\n'
+            "        </div>"
+        )
+
     return "\n".join(
         [
-            '      <div class="table-scroll">',
-            "        <table>",
-            f"          <caption>{caption}</caption>",
-            '          <thead><tr><th scope="col">Indicator</th><th scope="col">'
-            'Latest outturn</th><th scope="col">LONGBASE baseline path</th>'
-            "</tr></thead>",
-            "          <tbody>",
-            f'          <tr><th scope="row">Real GDP growth, y/y</th>'
-            f'<td>{fmt(g_now["value"])}% <span class="mono">{g_now["period"]}</span></td>'
-            f'<td>{fmt(g_base["gdp_yoy_pct"])}% <span class="mono">{g_base["quarter"]}</span></td></tr>',
-            f'          <tr><th scope="row">CPI inflation, y/y</th>'
-            f'<td>{fmt(c_now["value"])}% <span class="mono">{c_now["period"]}</span></td>'
-            f'<td>{fmt(c_base["cpi_yoy_pct"])}% <span class="mono">{c_base["quarter"]}</span></td></tr>',
-            f'          <tr><th scope="row">Unemployment rate</th>'
-            f'<td>{fmt(u_now["value"])}% <span class="mono">{u_now["period"]}</span></td>'
-            f'<td>{fmt(u_base["unemployment_pct"])}% <span class="mono">{u_base["quarter"]}</span></td></tr>',
-            "          </tbody>",
-            "        </table>",
+            '      <div class="glance-rows">',
+            row("Real GDP growth", "y/y", f"{fmt(g_now['value'])}%", g_now["period"],
+                f"{fmt(g_base['gdp_yoy_pct'])}%", g_base["quarter"]),
+            row("CPI inflation", "y/y", f"{fmt(c_now['value'])}%", c_now["period"],
+                f"{fmt(c_base['cpi_yoy_pct'])}%", c_base["quarter"]),
+            row("Unemployment rate", "", f"{fmt(u_now['value'])}%", u_now["period"],
+                f"{fmt(u_base['unemployment_pct'])}%", u_base["quarter"]),
             "      </div>",
+            f'      <p class="glance-caption">{caption}</p>',
         ]
     )
 
