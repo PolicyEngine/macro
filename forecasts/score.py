@@ -464,8 +464,7 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
         '      <div class="table-scroll">',
         "        <table>",
         f"          <caption>Model vs official forecast, {spec['name']}, year on "
-        f"year. {spec['source_note']}; the boe-svar medians are from the archived "
-        "2026-07-21 round.</caption>",
+        "year. Same sources as the chart above.</caption>",
         '          <thead><tr><th scope="col">Quarter</th><th scope="col">boe-svar '
         'median</th><th scope="col">68% band</th><th scope="col">OBR March 2026 EFO'
         '</th><th scope="col">BoE Feb 2026 MPR</th>'
@@ -488,21 +487,6 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
         "        </table>",
         "      </div>",
     ]
-    if include_note:
-        # Emitted once, after the last table, so the two variables share a
-        # single sourcing footnote.
-        table.append(
-            '      <p class="forecast-note">BoE column is the February 2026 MPR '
-            "central projection (the April 2026 Report published scenarios rather "
-            "than a central path), from the Bank's published projections databank "
-            "(<code>forecasts/official/boe_mpr_feb_2026_central.csv</code>). "
-            "Consensus is the average of outside forecasters' central projections "
-            "in the Bank's Survey of External Forecasters as of 16 April 2026, "
-            "published at fixed one-, two- and three-year-ahead quarters only "
-            "(<code>forecasts/official/boe_sef_april_2026.csv</code>). "
-            "The columns were fixed at different dates on different information "
-            "sets. This note applies to both the GDP and CPI tables above.</p>"
-        )
     return svg + "\n" + "\n".join(table)
 
 
@@ -649,16 +633,24 @@ def render_results(card: dict) -> str:
             "        </article>"
         )
     body.append("      </div>")
+    notes = []
     if any(e.get("naive_rw") is not None for _, e in rows):
-        body.append(
-            f'      <p class="forecast-note">{esc(NAIVE_NOTE)}</p>'
-        )
+        notes.append(esc(NAIVE_NOTE))
     if any(e.get("official") is not None for _, e in rows):
+        notes.append(
+            "The official number is the OBR March 2026 EFO — fixed months "
+            "earlier on less data, so its larger error partly reflects the "
+            "information gap."
+        )
+    if notes:
         body.append(
-            '      <p class="forecast-note">The official number is the OBR '
-            "March 2026 EFO. It was fixed months before these rounds, on less "
-            "data, so its larger error here reflects an information gap as "
-            "much as forecasting skill.</p>"
+            '      <div class="meth-out">\n'
+            + "\n".join(
+                '        <div class="meth-out-line"><span class="icon">&rarr;</span>'
+                "<span>" + n + "</span></div>"
+                for n in notes
+            )
+            + "\n      </div>"
         )
     return "\n".join(body)
 

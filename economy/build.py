@@ -788,11 +788,10 @@ def home_uk_now() -> str:
         return f"68% range {fmt(fc['lo68'])}%–{fmt(fc['hi68'])}%"
 
     caption = (
-        "Latest ONS outturns (vintages as of "
-        f"{max(gdp['vintage'], cpi['vintage'], unemployment['vintage'])}) beside the "
-        f"model near-term forecast from the archived "
-        '<a href="/forecasts">boe-svar and Okun-satellite rounds</a>. '
-        'Full sources and the complete horizon are on the <a href="/economy">economy page</a>.'
+        "ONS outturns (as of "
+        f"{max(gdp['vintage'], cpi['vintage'], unemployment['vintage'])}) beside "
+        'archived <a href="/forecasts">forecast rounds</a>. '
+        '<a href="/economy">Full horizon &rarr;</a>'
     )
     return "\n".join(
         [
@@ -836,11 +835,10 @@ def home_us_now() -> str:
     u_base = baseline_next_open(baseline, u_now["period"])
 
     caption = (
-        "US headline indicators beside the FRB/US April 2026 LONGBASE "
-        "conditioning baseline — not a forecast. Outturns are FRED series "
-        "(GDPC1, CPIAUCSL, UNRATE), vintages as of "
-        f"{max(gdp['vintage'], cpi['vintage'], unemployment['vintage'])}. "
-        'Full sources are on the <a href="/economy/us">US economy page</a>.'
+        "FRED outturns (as of "
+        f"{max(gdp['vintage'], cpi['vintage'], unemployment['vintage'])}) beside "
+        "the FRB/US LONGBASE conditioning baseline — not a forecast. "
+        '<a href="/economy/us">Full sources &rarr;</a>'
     )
     return "\n".join(
         [
