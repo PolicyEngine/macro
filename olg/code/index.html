@@ -89,21 +89,19 @@
         <a href="https://github.com/PSLmodels/OG-UK">PSL's OG-UK repository</a>.
       </p>
       <div class="callout">
-        <strong>Local-only.</strong> OG-UK is deliberately excluded from the
-        <a href="/connect">hosted MCP server</a> — a solve cannot fit its
-        request timeout — so the MCP tools that reach it,
-        <code>score_reform</code> with <code>model="og"</code> and
-        <code>dynamic_reform_impact</code>, return install/CLI instructions
-        rather than results when called hosted. Locally it is a
-        <strong>two-environment pipeline</strong> until
-        <a href="https://github.com/PSLmodels/OG-UK/issues/68">PSLmodels/OG-UK#68</a>
-        lands: <code>oguk</code> pins <code>policyengine-uk==2.88.0</code>, so
-        it needs its own environment. There, run
-        <code>pe-macro og-score --reform '...' --json &gt; og.json</code>;
-        then, in the main environment,
-        <code>pe-macro dynamic-score --reform '...' --og-payload og.json</code>.
-        A <code>HUGGING_FACE_TOKEN</code> with access to the gated UK
-        microdata is a hard prerequisite in both.
+        <strong>Local-only.</strong> A solve cannot fit the
+        <a href="/connect">hosted MCP server's</a> timeout, so hosted calls
+        (<code>score_reform</code> with <code>model="og"</code>,
+        <code>dynamic_reform_impact</code>) return install/CLI instructions
+        instead of results. Locally, until
+        <a href="https://github.com/PSLmodels/OG-UK/issues/68">OG-UK#68</a>
+        lands, <code>oguk</code> pins <code>policyengine-uk==2.88.0</code> and
+        needs its own environment:
+        <code>pe-macro og-score --reform '...' --json &gt; og.json</code>
+        there, then
+        <code>pe-macro dynamic-score --reform '...' --og-payload og.json</code>
+        in the main one. Both need a <code>HUGGING_FACE_TOKEN</code> with
+        access to the gated UK microdata.
       </div>
     </div>
 
