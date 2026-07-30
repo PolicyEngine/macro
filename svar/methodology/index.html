@@ -79,57 +79,146 @@
     </div>
   </nav>
 
-  <section id="how" class="band">
+  <section id="methodology" class="band band-wide">
     <div class="band-head">
-      <span class="kicker mono">how it works</span>
+      <span class="kicker mono">methodology</span>
       <h2>Eight variables, six named shocks.</h2>
     </div>
     <div class="prose">
       <p>
-        A VAR in eight quarterly variables — three global, five UK — estimated
-        over the inflation-targeting era — <strong>1992Q1–2025Q1</strong> in
-        both the paper replication and the hosted adapter. The hosted forecast
-        conditions on observations through <strong>2026Q1</strong>, but does
-        not re-estimate its coefficients on those later observations. It is estimated in
-        levels, with <span class="mono">p&nbsp;=&nbsp;4</span> lags and Covid
-        dummies for 2020Q1–2021Q2.
+        Four steps from raw quarterly data to named structural shocks,
+        following Bank of England Macro Technical Paper No.&nbsp;3
+        (Brignone &amp; Piffer, 2025). Each step's formal elements sit
+        alongside its narrative.
       </p>
-      <div class="table-scroll"><table>
-        <caption>The eight variables of the SVAR, by block</caption>
-        <thead><tr><th scope="col">block</th><th scope="col">variables</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row"><strong>Global</strong></th>
-            <td>World GDP · World CPI (both UK-trade-weighted) · real oil price in sterling</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>UK</strong></th>
-            <td>Bank Rate · sterling exchange-rate index · CPI · CPI energy · real GDP</td>
-          </tr>
-        </tbody>
-      </table></div>
-      <p>
-        Estimation is Bayesian with a Minnesota (normal-inverse-Wishart) prior
-        plus sum-of-coefficients and dummy-initial-observation priors.
-        Identification follows <strong>Arias–Rubio-Ramírez–Waggoner
-        (2018)</strong>: zero restrictions make the UK a small open economy
-        (UK shocks cannot move world variables on impact) and impact sign
-        restrictions name six structural shocks — <strong>world demand, world
-        energy, world supply, UK demand, UK supply, and UK monetary
-        policy</strong>. Two unidentified shocks absorb residual volatility.
-        Importance weights correct the sampler's non-uniformity and the
-        Chan–Matthes–Yu (2025) permutation search cuts rejections.
-      </p>
-      <p>
-        This is accept/reject sampling. The production run drew
-        <strong>10,000</strong> posterior (Π,&nbsp;Σ) draws, of which
-        <strong>751 passed</strong> the sign restrictions (7.5%), for an
-        importance-weighted effective sample size of <strong>355.9</strong> —
-        so medians and bands are correct but noisier than the paper's. The
-        hosted forecast conditions on the current vintage — data through
-        2026Q1 — with a 2,000-draw default (135 accepted, ESS 65.3), while retaining
-        the 2025Q1 coefficient-estimation endpoint.
-      </p>
+    </div>
+
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="meth-1" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>The data: eight quarterly variables</h3></div>
+        <h4>Two blocks</h4>
+      <p>Eight quarterly variables in two blocks: <strong>global</strong> — world GDP and world CPI (both UK-trade-weighted) plus the real oil price in sterling — and <strong>UK</strong> — Bank Rate, the sterling exchange-rate index, CPI, CPI energy, and real GDP.</p>
+        <h4>Sample and specification</h4>
+      <p>Estimation covers the inflation-targeting era, <strong>1992Q1–2025Q1</strong>, in both the paper replication and the hosted adapter — in levels, with <span class="mono">p&nbsp;=&nbsp;4</span> lags and exogenous Covid dummies for 2020Q1–2021Q2.</p>
+        <h4>Conditioning versus estimation</h4>
+      <p>The hosted forecast conditions on observations through <strong>2026Q1</strong> without re-estimating coefficients on them.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">the eight variables</div>
+        <div class="meth-eq"><div class="meth-eq-label">global block</div><div class="meth-eq-body">World GDP · World CPI (both UK-trade-weighted) · real oil price in sterling</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">UK block</div><div class="meth-eq-body">Bank Rate · sterling exchange-rate index · CPI · CPI energy · real GDP</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sample</div><div class="meth-eq-body">1992Q1–2025Q1, in levels, p&nbsp;=&nbsp;4 lags</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">pandemic</div><div class="meth-eq-body">exogenous Covid dummies, 2020Q1–2021Q2</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Hosted forecast conditions on data through 2026Q1</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Coefficients keep the 2025Q1 estimation endpoint</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-2" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Bayesian estimation</h3></div>
+        <h4>The prior</h4>
+      <p>Estimation is Bayesian with a <strong>Minnesota (normal-inverse-Wishart) prior</strong> plus sum-of-coefficients and dummy-initial-observation priors — the framework of <a href="https://doi.org/10.1162/REST_a_00483">Giannone, Lenza &amp; Primiceri (2015)</a>.</p>
+        <h4>The posterior</h4>
+      <p>The output is a posterior over the reduced-form coefficients Π and error covariance Σ; every downstream object — impulse responses, decompositions, fan charts — is a posterior distribution, not a point estimate.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">priors</div>
+        <div class="meth-eq"><div class="meth-eq-label">main prior</div><div class="meth-eq-body">Minnesota (normal-inverse-Wishart) on (Π,&nbsp;Σ)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">additional priors</div><div class="meth-eq-body">sum-of-coefficients · dummy-initial-observation</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">framework</div><div class="meth-eq-body">Giannone, Lenza &amp; Primiceri (2015)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Posterior over (Π,&nbsp;Σ), not point estimates</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>All outputs carry credible bands</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-3" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Identification: naming the shocks</h3></div>
+        <h4>Zero and sign restrictions</h4>
+      <p>Identification follows <strong>Arias–Rubio-Ramírez–Waggoner (2018)</strong>: zero restrictions make the UK a small open economy (UK shocks cannot move world variables on impact), and impact sign restrictions name six structural shocks — <strong>world demand, world energy, world supply, UK demand, UK supply, and UK monetary policy</strong>. Two unidentified shocks absorb residual volatility.</p>
+        <h4>Corrections</h4>
+      <p>Importance weights correct the sampler's non-uniformity; the <strong>Chan–Matthes–Yu (2025)</strong> permutation search cuts rejections.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">zero and sign restrictions</div>
+        <div class="meth-eq"><div class="meth-eq-label">zero restrictions</div><div class="meth-eq-body">small open economy: UK shocks cannot move world variables on impact</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sign restrictions</div><div class="meth-eq-body">impact signs name the shocks (Arias et al. 2018)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">six named shocks</div><div class="meth-eq-body">world demand · world energy · world supply · UK demand · UK supply · UK monetary policy</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">residual</div><div class="meth-eq-body">two unidentified shocks absorb remaining volatility</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Importance weights correct sampler non-uniformity</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Chan–Matthes–Yu (2025) permutation search cuts rejections</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-4" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Sampling: draws and acceptance</h3></div>
+        <h4>Accept/reject sampling</h4>
+      <p>This is accept/reject sampling. The production run drew <strong>10,000</strong> posterior (Π,&nbsp;Σ) draws, of which <strong>751 passed</strong> the sign restrictions (7.5%), for an importance-weighted effective sample size of <strong>355.9</strong> — so medians and bands are correct but noisier than the paper's.</p>
+        <h4>The hosted run</h4>
+      <p>The hosted forecast conditions on the current vintage — data through 2026Q1 — with a <strong>2,000-draw</strong> default (135 accepted, ESS 65.3), while retaining the 2025Q1 coefficient-estimation endpoint.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">accept/reject sampling</div>
+        <div class="meth-eq"><div class="meth-eq-label">production run</div><div class="meth-eq-body">10,000 draws &rarr; 751 accepted (7.5%)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">effective sample size</div><div class="meth-eq-body">355.9 (importance-weighted)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">hosted default</div><div class="meth-eq-body">2,000 draws &rarr; 135 accepted, ESS 65.3</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Medians and bands correct, noisier than the paper's</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Hosted run conditions on the 2026Q1 vintage</span></div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">The data: eight quarterly variables</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">the eight variables</div>
+        <div class="meth-eq"><div class="meth-eq-label">global block</div><div class="meth-eq-body">World GDP · World CPI (both UK-trade-weighted) · real oil price in sterling</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">UK block</div><div class="meth-eq-body">Bank Rate · sterling exchange-rate index · CPI · CPI energy · real GDP</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sample</div><div class="meth-eq-body">1992Q1–2025Q1, in levels, p&nbsp;=&nbsp;4 lags</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">pandemic</div><div class="meth-eq-body">exogenous Covid dummies, 2020Q1–2021Q2</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Hosted forecast conditions on data through 2026Q1</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Coefficients keep the 2025Q1 estimation endpoint</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Bayesian estimation</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">priors</div>
+        <div class="meth-eq"><div class="meth-eq-label">main prior</div><div class="meth-eq-body">Minnesota (normal-inverse-Wishart) on (Π,&nbsp;Σ)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">additional priors</div><div class="meth-eq-body">sum-of-coefficients · dummy-initial-observation</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">framework</div><div class="meth-eq-body">Giannone, Lenza &amp; Primiceri (2015)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Posterior over (Π,&nbsp;Σ), not point estimates</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>All outputs carry credible bands</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Identification: naming the shocks</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">zero and sign restrictions</div>
+        <div class="meth-eq"><div class="meth-eq-label">zero restrictions</div><div class="meth-eq-body">small open economy: UK shocks cannot move world variables on impact</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sign restrictions</div><div class="meth-eq-body">impact signs name the shocks (Arias et al. 2018)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">six named shocks</div><div class="meth-eq-body">world demand · world energy · world supply · UK demand · UK supply · UK monetary policy</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">residual</div><div class="meth-eq-body">two unidentified shocks absorb remaining volatility</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Importance weights correct sampler non-uniformity</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Chan–Matthes–Yu (2025) permutation search cuts rejections</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Sampling: draws and acceptance</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <div class="meth-sec-title">accept/reject sampling</div>
+        <div class="meth-eq"><div class="meth-eq-label">production run</div><div class="meth-eq-body">10,000 draws &rarr; 751 accepted (7.5%)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">effective sample size</div><div class="meth-eq-body">355.9 (importance-weighted)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">hosted default</div><div class="meth-eq-body">2,000 draws &rarr; 135 accepted, ESS 65.3</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Medians and bands correct, noisier than the paper's</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Hosted run conditions on the 2026Q1 vintage</span></div>
+          </div>
+        </div>
+      </aside>
     </div>
   </section>
 
@@ -193,14 +282,34 @@
 
 <script src="/reveal.js" defer></script>
 <script>
-document.addEventListener("click", function (e) {
-  var btn = e.target.closest("[data-copy]"); if (!btn) return;
-  var code = btn.parentElement.querySelector("code");
-  navigator.clipboard.writeText(code.textContent).then(function () {
-    btn.textContent = "copied";
-    setTimeout(function () { btn.textContent = "copy"; }, 1400);
-  });
-});
+// Methodology scrollytelling: highlight the step at the reading line and
+// show its formal-structure panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  update();
+})();
 </script>
 </body>
 </html>

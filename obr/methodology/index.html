@@ -79,61 +79,164 @@
     </div>
   </nav>
 
-  <section id="how" class="band">
+  <section id="how" class="band band-wide">
     <div class="band-head">
       <span class="kicker mono">methodology</span>
       <h2>Transpile, solve, swap the closure.</h2>
     </div>
     <div class="prose">
       <p>
-        In outline: the OBR's published EViews equation listing is rewritten
-        in Python, solved quarter by quarter until the equations agree,
-        anchored so the baseline reproduces the published EFO, and shocked
-        against an identical baseline so the difference is the policy effect.
+        The pipeline in five steps: the OBR's published EViews equation
+        listing is rewritten in Python, initialised from official data,
+        solved quarter by quarter until the equations agree, anchored so the
+        baseline reproduces the published EFO, and shocked against an
+        identical baseline so the difference is the policy effect.
       </p>
-      <details class="economy-source-detail">
-      <summary>Technical detail: solver and translation</summary>
-      <div class="table-scroll"><table>
-        <caption>The transpile–solve–shock pipeline, stage by stage</caption>
-        <thead><tr><th scope="col">stage</th><th scope="col">what it does</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row"><strong>Transpile</strong></th>
-            <td>Rewrites every EViews line — <code>dlog()</code>, <code>@elem</code>, lags like <code>X(-1)</code>, error-correction terms — into an equivalent Python expression, compiled once per solve.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Initialise</strong></th>
-            <td>Loads history from the OBR's detailed forecast tables. Of the 261 endogenous variables the listing referenced but the outlook did not print, <strong>199 had ONS series codes</strong>; a vendored 348-series ONS snapshot supplies them, giving the circular fiscal and financial sub-blocks real balancing data.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Gauss–Seidel solve</strong></th>
-            <td>The equations depend on each other, so each quarter is solved simultaneously: cycle, update, repeat to convergence. Quarters then solve sequentially forward. A twelve-quarter anchored solve takes roughly <strong>30–40 seconds</strong> single-threaded; a reform run is two such solves.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Anchor</strong></th>
-            <td>Add-factors — the residuals reconciling each behavioural equation to data — are set so the baseline reproduces the published EFO. This is the OBR's own device, used the OBR's own way.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Closure swap</strong></th>
-            <td>The GDP identity is switched off in the OBR file, so for a shock <code>GDPM</code> is swapped in and inventories (<code>DINV</code>) become the residual — output responds to the policy instead of being fixed.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Shock &amp; compare</strong></th>
-            <td>Solves shocked and baseline paths with identical structure and reports the difference, isolating the policy effect from the underlying forecast.</td>
-          </tr>
-        </tbody>
-      </table></div>
-      <p>
-        For forecasting rather than one-off shocks, the emulator fits
-        add-factors over a base window of <strong>2024Q1–2025Q4</strong>,
-        <strong>holds them constant</strong>, and projects to
-        <strong>2027Q4</strong> with exogenous inputs extrapolated
-        (seasonal cash series at their trailing annual mean). Scenario solves run twelve quarters, 2025Q1–2027Q4.
-        The anchored horizon extends to <strong>2031Q1</strong> (GDP reproduced
-        to 0.29% at 2031Q1); anchored unemployment (<code>LFSUR</code>) is
-        unreliable beyond 2027Q4, drifting to 0.9% against the EFO's 4.1% by 2031Q1.
-      </p>
-      </details>
+    </div>
+
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="meth-1" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Transpile the published listing</h3></div>
+        <h4>From EViews to Python</h4>
+      <p>The OBR publishes its full equation listing, but as EViews source that few can run. The transpiler rewrites every EViews line — <code>dlog()</code>, <code>@elem</code>, lags like <code>X(-1)</code>, error-correction terms — into an equivalent Python expression, compiled once per solve.</p>
+      <h4>What comes out</h4>
+      <p>The result is the model itself in open code: the same behavioural equations, identities, and technical relationships the official forecaster relies on, runnable without an EViews licence.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">translation</div>
+        <div class="meth-eq"><div class="meth-eq-label">growth rates</div><div class="meth-eq-body"><code>dlog(X)</code> &rarr; <code>log(X) - log(X[-1])</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">lags &amp; elements</div><div class="meth-eq-body"><code>X(-1)</code>, <code>@elem</code> &rarr; indexed array reads</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Error-correction terms preserved as written</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Expressions compiled once per solve</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-2" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Initialise from official data</h3></div>
+        <h4>Loading history</h4>
+      <p>History loads from the OBR's detailed forecast tables. Of the 261 endogenous variables the listing referenced but the outlook did not print, <strong>199 had ONS series codes</strong>; a vendored 348-series ONS snapshot supplies them.</p>
+      <h4>Why it matters</h4>
+      <p>That snapshot gives the circular fiscal and financial sub-blocks real balancing data rather than guessed starting values.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">data sources</div>
+        <div class="meth-eq"><div class="meth-eq-label">forecast tables</div><div class="meth-eq-body">OBR detailed forecast tables, March 2026 EFO</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">ONS snapshot</div><div class="meth-eq-body">348 vendored series; 199 of 261 unprinted variables matched</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Fiscal and financial sub-blocks get real balancing data</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Data ships in the package — no download step</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-3" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Solve by Gauss–Seidel iteration</h3></div>
+        <h4>Simultaneous within a quarter</h4>
+      <p>The equations depend on each other, so each quarter is solved simultaneously: cycle through the equations, update, repeat to convergence. Quarters then solve sequentially forward.</p>
+      <h4>Runtime</h4>
+      <p>A twelve-quarter anchored solve takes roughly <strong>30–40 seconds</strong> single-threaded; a reform run is two such solves.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">solver</div>
+        <div class="meth-eq"><div class="meth-eq-label">within quarter</div><div class="meth-eq-body">cycle &rarr; update &rarr; repeat to convergence</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">across quarters</div><div class="meth-eq-body">sequential forward solve</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>12-quarter anchored solve: ~30–40 s, single-threaded</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Reform run = two solves (shocked + baseline)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-4" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Anchor to the published EFO</h3></div>
+        <h4>Add-factors, the OBR's own device</h4>
+      <p>Add-factors — the residuals reconciling each behavioural equation to data — are set so the baseline reproduces the published EFO. This is the OBR's own device, used the OBR's own way.</p>
+      <h4>Forecasting with held add-factors</h4>
+      <p>For forecasting rather than one-off shocks, the emulator fits add-factors over a base window of <strong>2024Q1–2025Q4</strong>, <strong>holds them constant</strong>, and projects to <strong>2027Q4</strong>, with exogenous inputs extrapolated (seasonal cash series at their trailing annual mean). Scenario solves run twelve quarters, 2025Q1–2027Q4.</p>
+      <h4>Horizon limits</h4>
+      <p>The anchored horizon extends to <strong>2031Q1</strong>, where GDP is reproduced to 0.29%. Anchored unemployment (<code>LFSUR</code>) is unreliable beyond 2027Q4, drifting to 0.9% against the EFO's 4.1% by 2031Q1.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">anchoring</div>
+        <div class="meth-eq"><div class="meth-eq-label">add-factor window</div><div class="meth-eq-body">fit 2024Q1–2025Q4, hold constant, project to 2027Q4</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">scenario solves</div><div class="meth-eq-body">12 quarters, 2025Q1–2027Q4</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">anchored horizon</div><div class="meth-eq-body">to 2031Q1; GDP reproduced to 0.29%</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Exogenous inputs extrapolated (seasonal cash series at trailing annual mean)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>LFSUR</code> unreliable past 2027Q4: 0.9% vs EFO's 4.1% by 2031Q1</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-5" data-step="4">
+        <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Swap the closure, shock, compare</h3></div>
+        <h4>Closure swap</h4>
+      <p>The GDP identity is switched off in the OBR file, so for a shock <code>GDPM</code> is swapped in and inventories (<code>DINV</code>) become the residual — output responds to the policy instead of being fixed.</p>
+      <h4>Shock against an identical baseline</h4>
+      <p>The emulator solves shocked and baseline paths with identical structure and reports the difference, isolating the policy effect from the underlying forecast.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">closure and shock</div>
+        <div class="meth-eq"><div class="meth-eq-label">closure swap</div><div class="meth-eq-body"><code>GDPM</code> endogenised; <code>DINV</code> becomes the residual</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">policy effect</div><div class="meth-eq-body">shocked path &minus; baseline path, identical structure</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>GDP identity is off in the OBR file by default</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Difference isolates the policy effect from the forecast</span></div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Transpile the published listing</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">translation</div>
+        <div class="meth-eq"><div class="meth-eq-label">growth rates</div><div class="meth-eq-body"><code>dlog(X)</code> &rarr; <code>log(X) - log(X[-1])</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">lags &amp; elements</div><div class="meth-eq-body"><code>X(-1)</code>, <code>@elem</code> &rarr; indexed array reads</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Error-correction terms preserved as written</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Expressions compiled once per solve</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Initialise from official data</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">data sources</div>
+        <div class="meth-eq"><div class="meth-eq-label">forecast tables</div><div class="meth-eq-body">OBR detailed forecast tables, March 2026 EFO</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">ONS snapshot</div><div class="meth-eq-body">348 vendored series; 199 of 261 unprinted variables matched</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Fiscal and financial sub-blocks get real balancing data</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Data ships in the package — no download step</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Solve by Gauss–Seidel iteration</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">solver</div>
+        <div class="meth-eq"><div class="meth-eq-label">within quarter</div><div class="meth-eq-body">cycle &rarr; update &rarr; repeat to convergence</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">across quarters</div><div class="meth-eq-body">sequential forward solve</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>12-quarter anchored solve: ~30–40 s, single-threaded</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Reform run = two solves (shocked + baseline)</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Anchor to the published EFO</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <div class="meth-sec-title">anchoring</div>
+        <div class="meth-eq"><div class="meth-eq-label">add-factor window</div><div class="meth-eq-body">fit 2024Q1–2025Q4, hold constant, project to 2027Q4</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">scenario solves</div><div class="meth-eq-body">12 quarters, 2025Q1–2027Q4</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">anchored horizon</div><div class="meth-eq-body">to 2031Q1; GDP reproduced to 0.29%</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Exogenous inputs extrapolated (seasonal cash series at trailing annual mean)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>LFSUR</code> unreliable past 2027Q4: 0.9% vs EFO's 4.1% by 2031Q1</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="4" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Swap the closure, shock, compare</span><span class="meth-panel-badge mono">Step 5</span></div>
+          <div class="meth-sec-title">closure and shock</div>
+        <div class="meth-eq"><div class="meth-eq-label">closure swap</div><div class="meth-eq-body"><code>GDPM</code> endogenised; <code>DINV</code> becomes the residual</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">policy effect</div><div class="meth-eq-body">shocked path &minus; baseline path, identical structure</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>GDP identity is off in the OBR file by default</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Difference isolates the policy effect from the forecast</span></div>
+          </div>
+        </div>
+      </aside>
     </div>
   </section>
 </main>
@@ -152,14 +255,34 @@
 
 <script src="/reveal.js" defer></script>
 <script>
-document.addEventListener("click", function (e) {
-  var btn = e.target.closest("[data-copy]"); if (!btn) return;
-  var code = btn.parentElement.querySelector("code");
-  navigator.clipboard.writeText(code.textContent).then(function () {
-    btn.textContent = "copied";
-    setTimeout(function () { btn.textContent = "copy"; }, 1400);
-  });
-});
+// Methodology scrollytelling: highlight the step at the reading line and
+// show its formal-structure panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  update();
+})();
 </script>
 </body>
 </html>

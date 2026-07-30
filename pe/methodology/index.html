@@ -78,60 +78,138 @@
     </div>
   </nav>
 
-  <section id="how" class="band">
+  <section id="methodology" class="band band-wide">
     <div class="band-head">
       <span class="kicker mono">methodology</span>
       <h2>Rules, entities, and a dependency graph.</h2>
     </div>
     <div class="prose">
       <p>
-        Every quantity in the system — an allowance, a taper, a means test —
-        is a variable with a formula and a set of dated parameters. Asking for
-        one variable resolves the graph beneath it, so a household net-income
-        figure is computed from the statutory chain rather than approximated
-        by a schedule. Variables are attached to <strong>entities</strong>,
-        and the entity structure differs by country: the UK has three
-        (person, benefit unit, household), the US six (person, tax unit, SPM
-        unit, family, marital unit, household), because US programmes are
-        assessed on differently drawn units.
-      </p>
-      <p>
-        A reform re-dates a parameter and re-resolves the same graph, which is
-        why the household and population APIs take reforms in the identical
-        format. Each release pins the country-model and dataset versions it
-        certifies, so a published estimate can be traced to the exact bundle
-        that produced it.
+        Four steps, from statute encoded as a variable graph to the survey
+        microdata population runs rest on.
       </p>
     </div>
-  </section>
 
-  <section id="data" class="band">
-    <div class="band-head">
-      <span class="kicker mono">data enhancement</span>
-      <h2>Survey microdata, enhanced.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        Household calculations need no data at all — the inputs are the ones
-        you type. Population results run the same rule graph over a
-        representative survey dataset: for the UK the <strong>enhanced Family
-        Resources Survey</strong> (currently the
-        <code>enhanced_frs_2023_24</code> vintage), for the US the
-        <strong>Current Population Survey</strong>. The UK enhancement imputes
-        under-reported incomes and reweights the survey so that aggregates
-        better match administrative totals, and the resulting microdata is
-        distributed through a gated Hugging Face repository
-        (<code>policyengine/policyengine-uk-data</code>).
-      </p>
-      <p>
-        Because population estimates rest on survey data, they inherit
-        sampling error and imputation and ageing assumptions in a way a
-        household calculation does not — the consequences are set out on the
-        <a href="/pe/validation">validation page</a>. Within the suite, this
-        same microdata is what the <a href="/olg">OLG model</a> consumes to
-        estimate its tax functions, and the static costings it produces are
-        what the <a href="/obr">OBR emulator</a> takes as the direct effect.
-      </p>
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="meth-1" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Statute as a dependency graph</h3></div>
+        <h4>Variables and parameters</h4>
+      <p>Every quantity — an allowance, a taper, a means test — is a variable with a formula and dated parameters. Asking for one variable resolves the graph beneath it, so a net-income figure comes from the statutory chain, not an approximating schedule.</p>
+      <h4>Entities</h4>
+      <p>Variables attach to <strong>entities</strong>, which differ by country — UK: three (person, benefit unit, household); US: six (person, tax unit, SPM unit, family, marital unit, household) — because US programmes are assessed on differently drawn units.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">rules, entities, dependency graph</div>
+        <div class="meth-eq"><div class="meth-eq-label">variable</div><div class="meth-eq-body">formula + dated parameters</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">resolution</div><div class="meth-eq-body">request a variable &rarr; resolve the graph beneath it</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">entities</div><div class="meth-eq-body">UK: 3 &middot; US: 6</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>UK: person, benefit unit, household</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>US: person, tax unit, SPM unit, family, marital unit, household</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Statutory chain, not an approximating schedule</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-2" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Reforms and reproducibility</h3></div>
+        <h4>One reform format</h4>
+      <p>A reform re-dates a parameter and re-resolves the same graph, so the household and population APIs take reforms in the identical format — a flat dict of parameter path &rarr; new value.</p>
+      <h4>Version-pinned releases</h4>
+      <p>Each release pins the country-model and dataset versions it certifies, so a published estimate traces to the exact bundle that produced it.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">reform mechanics</div>
+        <div class="meth-eq"><div class="meth-eq-label">reform</div><div class="meth-eq-body">{parameter path &rarr; new value}</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">evaluation</div><div class="meth-eq-body">re-date parameter &rarr; re-resolve same graph</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Identical format at household and population level</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Releases pin country-model + dataset versions</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Estimates traceable to the exact bundle</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-3" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Survey microdata, enhanced</h3></div>
+        <h4>Two modes, two data needs</h4>
+      <p>Household calculations need no data — the inputs are the ones you type. Population results run the same rule graph over a representative survey: for the UK the <strong>enhanced Family Resources Survey</strong> (currently the <code>enhanced_frs_2023_24</code> vintage), for the US the <strong>Current Population Survey</strong>.</p>
+      <h4>Imputation and reweighting</h4>
+      <p>The UK enhancement imputes under-reported incomes and reweights the survey so aggregates better match administrative totals; the resulting microdata is distributed via a gated Hugging Face repository (<code>policyengine/policyengine-uk-data</code>).</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">data enhancement</div>
+        <div class="meth-eq"><div class="meth-eq-label">UK dataset</div><div class="meth-eq-body">enhanced FRS &middot; <code>enhanced_frs_2023_24</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">US dataset</div><div class="meth-eq-body">Current Population Survey (CPS)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">enhancement</div><div class="meth-eq-body">impute under-reported incomes + reweight to administrative totals</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Household calculations need no data or credentials</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Gated repo: policyengine/policyengine-uk-data</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-4" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>What rests on the data, and who consumes it</h3></div>
+        <h4>Inherited error</h4>
+      <p>Population estimates rest on survey data, so they inherit sampling error and imputation and ageing assumptions in a way a household calculation does not — consequences set out on the <a href="/pe/validation">validation page</a>.</p>
+      <h4>Feeding the suite</h4>
+      <p>This same microdata is what the <a href="/olg">OLG model</a> consumes to estimate its tax functions, and the static costings it produces are what the <a href="/obr">OBR emulator</a> takes as the direct effect.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">downstream</div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Population aggregates inherit sampling, imputation, ageing error</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Household calculations are deterministic</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>OLG model: tax functions from this microdata</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>OBR emulator: static costing as direct effect</span></div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Statute as a dependency graph</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">rules, entities, dependency graph</div>
+        <div class="meth-eq"><div class="meth-eq-label">variable</div><div class="meth-eq-body">formula + dated parameters</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">resolution</div><div class="meth-eq-body">request a variable &rarr; resolve the graph beneath it</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">entities</div><div class="meth-eq-body">UK: 3 &middot; US: 6</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>UK: person, benefit unit, household</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>US: person, tax unit, SPM unit, family, marital unit, household</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Statutory chain, not an approximating schedule</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Reforms and reproducibility</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">reform mechanics</div>
+        <div class="meth-eq"><div class="meth-eq-label">reform</div><div class="meth-eq-body">{parameter path &rarr; new value}</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">evaluation</div><div class="meth-eq-body">re-date parameter &rarr; re-resolve same graph</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Identical format at household and population level</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Releases pin country-model + dataset versions</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Estimates traceable to the exact bundle</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Survey microdata, enhanced</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">data enhancement</div>
+        <div class="meth-eq"><div class="meth-eq-label">UK dataset</div><div class="meth-eq-body">enhanced FRS &middot; <code>enhanced_frs_2023_24</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">US dataset</div><div class="meth-eq-body">Current Population Survey (CPS)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">enhancement</div><div class="meth-eq-body">impute under-reported incomes + reweight to administrative totals</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Household calculations need no data or credentials</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Gated repo: policyengine/policyengine-uk-data</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">What rests on the data, and who consumes it</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <div class="meth-sec-title">downstream</div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Population aggregates inherit sampling, imputation, ageing error</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Household calculations are deterministic</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>OLG model: tax functions from this microdata</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>OBR emulator: static costing as direct effect</span></div>
+          </div>
+        </div>
+      </aside>
     </div>
   </section>
 
@@ -150,6 +228,35 @@
 </footer>
 
 <script src="/reveal.js" defer></script>
-
+<script>
+// Methodology scrollytelling: highlight the step at the reading line and
+// show its formal-structure panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  update();
+})();
+</script>
 </body>
 </html>

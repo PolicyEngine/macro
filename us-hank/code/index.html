@@ -59,9 +59,9 @@
       </h1>
       <p class="lede reveal" style="--d:2">
         Run stylized monetary, fiscal-spending, and productivity shocks through
-        a two-asset heterogeneous-agent New Keynesian model and read the
-        aggregate impulse responses alongside first-order distributional
-        output — MPCs by wealth quartile and the hand-to-mouth share.
+        a two-asset heterogeneous-agent New Keynesian model — aggregate
+        impulse responses plus first-order distributional output: MPCs by
+        wealth quartile and the hand-to-mouth share.
       </p>
       <div class="hero-cta reveal" style="--d:3">
         <a class="btn btn-primary" href="/us-hank/code#run">Run it</a>
@@ -87,31 +87,30 @@
     </div>
     <div class="prose">
       <p>
-        The quickest route is the <a href="/connect">hosted MCP server</a>,
-        where two tools reach this model: <code>hank_shock</code> (run a
-        stylized shock, optionally with the distributional block) and
-        <code>hank_summary</code> (the shock catalogue, units, variants, and
-        scope limits — instant, no solve). The first call per variant pays the
-        steady-state and Jacobian solves, roughly <strong>18 seconds
-        cold</strong>; both are cached, so warm calls are effectively instant.
-        The same two are on the CLI:
+        Quickest is the <a href="/connect">hosted MCP server</a>:
+        <code>hank_shock</code> runs a stylized shock, optionally with the
+        distributional block; <code>hank_summary</code> lists shock kinds,
+        units, variants, and scope limits — instant, no solve. The first call
+        per variant pays the steady-state and Jacobian solves, roughly
+        <strong>18 seconds cold</strong>; both are cached, so warm calls are
+        effectively instant. The same two on the CLI:
       </p>
       <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro hank-summary
 pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6 --distribution</code></pre></div>
       <p>
-        <strong>Units differ per kind.</strong> <code>monetary</code> is a
-        level change in the <em>quarterly</em> policy rate (&minus;0.0025 = a
-        25bp easing); <code>fiscal_spending</code> is a level change in
-        G (steady-state output is 1, so 0.01 = 1% of GDP);
-        <code>productivity</code> is a level change in TFP. A
-        <code>variant</code> option selects the paper's
-        <code>two_asset</code> model (the default) or a fast
-        <code>one_asset</code> textbook variant — no capital, so no investment
-        response, and monetary/productivity shocks only.
+        <strong>Units differ per kind.</strong> <code>monetary</code>: level
+        change in the <em>quarterly</em> policy rate (&minus;0.0025 = a 25bp
+        easing); <code>fiscal_spending</code>: level change in G
+        (steady-state output is 1, so 0.01 = 1% of GDP);
+        <code>productivity</code>: level change in TFP.
+        <code>variant</code> selects the paper's <code>two_asset</code> model
+        (the default) or a fast <code>one_asset</code> textbook variant — no
+        capital, so no investment response, and monetary/productivity shocks
+        only.
       </p>
       <p>
-        For anything beyond the hosted surface, install the package and use
-        its Python API directly:
+        Beyond the hosted surface, install the package and use the Python API
+        directly:
       </p>
       <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/us-hank-model</code></pre></div>
       <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> us_hank <span class="kw">import</span> model, distributional
@@ -123,10 +122,9 @@ irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0
 <span class="kw">print</span>(irf[<span class="kw">"Y"</span>][:<span class="kw">8</span>])                      <span class="cm"># output, % deviation from steady state</span>
 <span class="kw">print</span>(distributional.summary(ss))        <span class="cm"># MPCs by quartile, hand-to-mouth share</span></code></pre></div>
       <p>
-        How the solve behind these calls works — steady state, Jacobian, then
-        instant IRFs — is on the
-        <a href="/us-hank/methodology">methodology page</a>; what the results
-        can and cannot be trusted for is on the
+        The solve behind these calls — steady state, Jacobian, then instant
+        IRFs — is on the <a href="/us-hank/methodology">methodology page</a>;
+        what to trust the results for, on the
         <a href="/us-hank/validation">validation page</a>.
       </p>
     </div>

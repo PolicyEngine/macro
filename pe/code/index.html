@@ -86,31 +86,30 @@
     <div class="prose">
       <p>
         The quickest route is the <a href="/connect">hosted MCP server</a>,
-        where five tools reach this model: <code>calculate_household</code>,
+        with five tools: <code>calculate_household</code>,
         <code>household_reform_impact</code>,
         <code>population_reform_impact</code>,
         <code>list_reform_parameters</code>, and <code>score_reform</code>
-        with <code>model="microsim"</code>. All run hosted, with the UK
-        microdata credential provisioned server-side. The CLI mirrors them:
+        with <code>model="microsim"</code> — the UK microdata credential is
+        provisioned server-side. The CLI mirrors them:
         <code>pe-macro household</code>, <code>pe-macro household-impact</code>,
         <code>pe-macro population-impact</code>, and
         <code>pe-macro parameters</code>.
       </p>
       <div class="callout">
         <strong>Every number from this model is a static score.</strong>
-        Prices, wages and output do not move — there is no macro feedback in
-        these results. For the second-round effects on GDP, route the same
-        reform through the <a href="/obr">OBR emulator</a>:
-        <code>score_reform</code> with <code>model="obr"</code> takes this
-        package's static costing as the direct effect and returns the
-        economy-wide feedback.
+        Prices, wages and output do not move. For second-round effects on
+        GDP, route the same reform through the <a href="/obr">OBR
+        emulator</a>: <code>score_reform</code> with <code>model="obr"</code>
+        takes this package's static costing as the direct effect and returns
+        the economy-wide feedback.
       </div>
 
       <h3 id="code-install">Step 1 — Install</h3>
       <p>
-        To run it locally, it is published on PyPI. The base install is shared tooling only; add
-        <code>[models]</code> for the pinned UK + US country models, or a
-        single country extra.
+        Locally, it installs from PyPI. The base install is shared tooling
+        only; add <code>[models]</code> for the pinned UK + US country
+        models, or a single country extra.
       </p>
       <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install policyengine            <span class="cm"># shared tooling, no country models</span>
 pip install "policyengine[models]"  <span class="cm"># + pinned UK and US models</span>
@@ -119,8 +118,8 @@ pip install "policyengine[us]"      <span class="cm"># US model only</span></cod
 
       <h3 id="code-household">Step 2 — Calculate a household</h3>
       <p>
-        Describe the people, pick a year, read the results. Household
-        calculations need no data access and no credentials.
+        Describe the people, pick a year, read the results — no data access
+        or credentials needed.
       </p>
       <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
 
@@ -143,19 +142,18 @@ us = pe.us.calculate_household(
 )
 <span class="kw">print</span>(us.tax_unit.income_tax, us.household.household_net_income)</code></pre></div>
       <p class="opt-note">
-        run the same household with and without <code>reform</code> and
-        difference the results — that is the household-level reform impact.
-        For the UK earner above, raising the basic rate to 25%
+        differencing runs with and without <code>reform</code> gives the
+        household-level impact: for the UK earner above, a 25% basic rate
         (<code>{"gov.hmrc.income_tax.rates.uk[0].rate": 0.25}</code>) adds
-        <strong>£1,872</strong> of income tax and cuts net income by the same
-        amount.
+        <strong>£1,872</strong> of income tax and cuts net income by the
+        same amount.
       </p>
 
       <h3 id="code-population">Step 3 — Score a whole population</h3>
       <p>
-        The same package runs whole representative datasets — the enhanced UK
-        Family Resources Survey, the US CPS — so any variable can be
-        aggregated by decile, entity or demographic:
+        The same package runs whole representative datasets — the enhanced
+        UK Family Resources Survey, the US CPS — aggregating any variable by
+        decile, entity or demographic:
       </p>
       <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
 <span class="kw">from</span> policyengine.core <span class="kw">import</span> Simulation
@@ -172,12 +170,11 @@ agg = Aggregate(simulation=simulation, variable=<span class="kw">"universal_cred
 agg.run()
 <span class="kw">print</span>(f<span class="kw">"Total UC spending: £{agg.result / 1e9:.1f}bn"</span>)</code></pre></div>
       <div class="callout">
-        UK population microdata is in a gated Hugging Face repository — set
+        UK population microdata is gated — set
         <code>HUGGING_FACE_TOKEN</code> from an account with access to
         <code>policyengine/policyengine-uk-data</code> before running UK
-        population examples. On the hosted MCP server this credential is
-        provisioned server-side, so hosted population scoring needs nothing
-        from you.
+        population examples locally. The hosted MCP server provisions this
+        credential server-side.
       </div>
     </div>
   </section>
@@ -194,11 +191,11 @@ agg.run()
         <tbody>
           <tr>
             <th scope="row"><strong>What does this reform do to this family?</strong></th>
-            <td><code>calculate_household</code> / <code>household_reform_impact</code> — every tax, benefit and income variable at person, benefit-unit/tax-unit and household level. Live on the hosted MCP server and the <code>pe-macro</code> CLI.</td>
+            <td><code>calculate_household</code> / <code>household_reform_impact</code> — every tax, benefit and income variable at person, benefit-unit/tax-unit and household level. On the hosted MCP server and the <code>pe-macro</code> CLI.</td>
           </tr>
           <tr>
             <th scope="row"><strong>What does it cost, and who wins?</strong></th>
-            <td><code>population_reform_impact</code> and <code>pe.uk.economic_impact_analysis</code> — budgetary impact, decile changes, winners and losers, poverty, inequality, regional impacts. Hosted, with the enhanced-FRS credential provisioned server-side.</td>
+            <td><code>population_reform_impact</code> and <code>pe.uk.economic_impact_analysis</code> — budgetary impact, decile changes, winners and losers, poverty, inequality, regional impacts. Hosted, enhanced-FRS credential provisioned server-side.</td>
           </tr>
           <tr>
             <th scope="row"><strong>What levers exist?</strong></th>
@@ -209,11 +206,10 @@ agg.run()
       <div class="callout">
         <strong>It cannot</strong> tell you what a reform does to GDP,
         interest rates, or the fiscal forecast. It is static and
-        partial-equilibrium by design: behavioural responses are optional and
-        post-hoc (e.g. labour-supply elasticities), and there is no general
-        equilibrium at all. That second act is precisely what the macro
-        members add — <a href="/obr">short-run</a> and
-        <a href="/olg">long-run</a>.
+        partial-equilibrium by design: behavioural responses are optional
+        and post-hoc (e.g. labour-supply elasticities), with no general
+        equilibrium. That second act is what the macro members add —
+        <a href="/obr">short-run</a> and <a href="/olg">long-run</a>.
       </div>
     </div>
   </section>

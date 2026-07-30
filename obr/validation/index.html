@@ -86,12 +86,11 @@
     </div>
     <div class="prose">
       <p>
-        There are three configurations and they earn very different levels of
-        trust. Anchored is a by-construction invariant, not a forecast claim:
-        the add-factors absorb the tracking error, which is exactly what
-        anchoring means, and CI hard-fails the build if it slips. Errors below
-        are reported as MAPE — mean absolute percentage error, the average
-        percentage gap from the published path.
+        Three configurations, three very different levels of trust. Anchored
+        is a by-construction invariant, not a forecast claim: the add-factors
+        absorb the tracking error — exactly what anchoring means — and CI
+        hard-fails the build if it slips. Errors below are MAPE — mean
+        absolute percentage error against the published path.
       </p>
     </div>
     <div class="metrics">
@@ -124,7 +123,7 @@
           <tr>
             <th scope="row"><strong>Anchored</strong></th>
             <td>Add-factors on, matched to the March 2026 EFO. The configuration every reform score uses.</td>
-            <td>GDP 0.15% MAPE, consumption 0.25% over 2025Q1–2027Q4; the horizon extends to 2031Q1, where GDP is reproduced to 0.29% (anchored unemployment is unreliable beyond 2027Q4). Hard-gated in CI, alongside finiteness and a 0.5%-of-GDP expenditure-identity check. Structural sign invariants gated too.</td>
+            <td>GDP 0.15% MAPE, consumption 0.25% over 2025Q1–2027Q4; horizon extends to 2031Q1, where GDP is reproduced to 0.29% (anchored unemployment unreliable beyond 2027Q4). Hard-gated in CI, with finiteness, a 0.5%-of-GDP expenditure-identity check, and structural sign invariants.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Held add-factors</strong></th>
@@ -141,20 +140,20 @@
     </div>
     <p class="chart-note" style="max-width: 80ch;">
       "In band" collapses per-metric thresholds — rates within 1.0pp, net
-      balances within 1.5% of GDP, levels within 10% MAPE. Two caveats travel
-      with the forecast configuration: it is initialised at the EFO values it
-      is scored against, and its add-factor base window extends into quarters
-      that are themselves OBR forecast rather than outturn, so the held
-      add-factors partly encode "agree with the OBR". Full scorecards in the
+      balances within 1.5% of GDP, levels within 10% MAPE. Two caveats on the
+      forecast configuration: it is initialised at the EFO values it is
+      scored against, and its add-factor base window extends into quarters
+      that are OBR forecast rather than outturn, so the held add-factors
+      partly encode "agree with the OBR". Full scorecards in the
       <a href="/papers/obr-macro">working paper</a>; charts and source data
       in <a href="/validation">validation</a>.
     </p>
     <div class="prose">
       <p class="callout">
-        This is an independent implementation built from the OBR's published
-        model code and forecast data. It is not produced, maintained, or
-        endorsed by the Office for Budget Responsibility, and its results
-        should not be presented as official OBR estimates.
+        An independent implementation built from the OBR's published model
+        code and forecast data — not produced, maintained, or endorsed by the
+        Office for Budget Responsibility. Its results should not be presented
+        as official OBR estimates.
       </p>
     </div>
   </section>
@@ -171,7 +170,7 @@
         <tbody>
           <tr>
             <th scope="row"><strong>Two household-income equations never fire</strong></th>
-            <td>The listing's only bare <code>log()</code> left-hand sides — <code>log(HHTFA)</code> and <code>log(NDIVHH)</code> — do not execute, because their right-hand-side inputs <code>MAJGDP</code> and <code>CORP</code> are absent from the databank entirely. The profits → dividends → household-income channel therefore does not run: a 5pp corporation-tax rise moves <code>FYCPR</code> by −£1,780m while ΔNDIVHH is exactly zero. A parser fix landed and is numerically inert; reviving the channel needs a <code>CORP</code> series, a calibration decision we have not made. Every published figure is computed with these channels inert.</td>
+            <td>The listing's only bare <code>log()</code> left-hand sides — <code>log(HHTFA)</code> and <code>log(NDIVHH)</code> — never execute: their inputs <code>MAJGDP</code> and <code>CORP</code> are absent from the databank. The profits → dividends → household-income channel therefore does not run: a 5pp corporation-tax rise moves <code>FYCPR</code> by −£1,780m while ΔNDIVHH is exactly zero. A parser fix landed and is numerically inert; reviving the channel needs a <code>CORP</code> series — a calibration decision not yet made. Every published figure is computed with these channels inert.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Impact multiplier ~1 by construction</strong></th>
@@ -179,11 +178,11 @@
           </tr>
           <tr>
             <th scope="row"><strong>Corporation-tax closure is specialised</strong></th>
-            <td>The investment closure activates the published <code>TCPRO</code> → cost-of-capital → investment chain and is available through <code>obr_shock</code>. It reconstructs the business-investment equation from the OBR's commented, truncated published line, anchors its level with held add-factors, and freezes <code>MSGVA</code>, <code>PIF</code>, and <code>PIRHH</code> to a shared tracking path to prevent uncalibrated feedback. CI hard-gates the expected sign and a £50bn-per-quarter bound; this is a controlled scenario closure, not a fully calibrated supply block.</td>
+            <td>The investment closure activates the published <code>TCPRO</code> → cost-of-capital → investment chain, available through <code>obr_shock</code>. It reconstructs the business-investment equation from the OBR's commented, truncated published line, anchors its level with held add-factors, and freezes <code>MSGVA</code>, <code>PIF</code>, and <code>PIRHH</code> to a shared tracking path to prevent uncalibrated feedback. CI hard-gates the expected sign and a £50bn-per-quarter bound — a controlled scenario closure, not a fully calibrated supply block.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Passthrough channels</strong></th>
-            <td>Exports, imports and CPI are exogenous in this setup, held at the OBR value. They score 0.00% error without being behavioural wins — 10 of 21 scorecard lines are passthroughs and are labelled as such.</td>
+            <td>Exports, imports and CPI are exogenous here, held at the OBR value. They score 0.00% error without being behavioural wins — 10 of 21 scorecard lines are passthroughs, labelled as such.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Approximated add-factors</strong></th>
@@ -191,7 +190,7 @@
           </tr>
           <tr>
             <th scope="row"><strong>Vintage</strong></th>
-            <td>October 2025 equation listing, March 2026 EFO, current-vintage ONS series. Where the ONS has revised history the identities don't close exactly, and that slack lands in the add-factors. The working paper's results remain a November 2025 EFO vintage study.</td>
+            <td>October 2025 equation listing, March 2026 EFO, current-vintage ONS series. Where the ONS has revised history the identities don't close exactly; that slack lands in the add-factors. The working paper remains a November 2025 EFO vintage study.</td>
           </tr>
           <tr>
             <th scope="row"><strong>No behavioural micro</strong></th>

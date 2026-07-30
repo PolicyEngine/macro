@@ -24,6 +24,15 @@
 /* page-specific: hero sizing only — shared component styles live in style.css */
 .model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
 </style>
+<script>
+/* Self-hosted MathJax (vendor/mathjax), used only on this page for the
+   methodology steps' formal panels. The CSP allows no CDN loads. */
+window.MathJax = {
+  chtml: { fontURL: "/vendor/mathjax/output/chtml/fonts/woff-v2" },
+  options: { enableMenu: false }
+};
+</script>
+<script src="/vendor/mathjax/tex-chtml-full.js" defer></script>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -79,45 +88,179 @@
     </div>
   </nav>
 
-  <section id="how" class="band">
+  <section id="how" class="band band-wide">
     <div class="band-head">
       <span class="kicker mono">methodology</span>
       <h2>Parse, add-factor, solve by Newton.</h2>
     </div>
     <div class="prose">
-      <div class="table-scroll"><table>
-        <caption>The frb-us solve pipeline, stage by stage</caption>
-        <thead><tr><th scope="col">stage</th><th scope="col">what it does</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row"><strong>Parse</strong></th>
-            <td>Reads the Board's <code>model.xml</code> directly: variables, equations, per-equation coefficients, and the endogenous / exogenous classification for the VAR-expectations ("standard") equation set. Nothing is re-typed or re-specified.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Load</strong></th>
-            <td>Loads <code>LONGBASE.TXT</code> — the April 2026 vintage — into a pandas frame on a quarterly <code>PeriodIndex</code>.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Add-factor</strong> (<code>init_trac</code>)</th>
-            <td>Sets each equation's tracking residual so that solving the model reproduces the database exactly. This is the Fed's own device, used the Fed's own way — the direct analogue of the OBR emulator's anchoring.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Solve</strong></th>
-            <td>A per-period damped Newton iteration on the full simultaneous system, with an <strong>analytic sparse Jacobian</strong> — differentiated symbolically with sympy, factorised with <code>scipy.sparse.linalg.splu</code>. Defaults are <code>xtol=1e-8</code>, <code>rtol=5e-4</code>.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Shock &amp; compare</strong></th>
-            <td>A shock is an addition to an equation's error term — <code>rffintay_aerr</code> for the policy rule, for instance. Solve shocked and baseline paths over the same window and read the difference.</td>
-          </tr>
-        </tbody>
-      </table></div>
       <p>
-        The reference implementation decomposes each period into recursive and
-        simultaneous blocks; this one solves the whole period at once. Both
-        approaches solve the same <em>F</em>(<em>x</em>) = 0, which is why the
-        two agree to solver tolerance rather than to some negotiated
-        threshold — see <a href="/frb-us/validation">how far to trust it</a>.
+        The five stages of the frb-us pipeline, from the Board's published
+        artefacts to an impulse response. Each step's formal structure follows
+        its narrative; equations render locally (no CDN). The full derivations
+        are in the <a href="/papers/frb-us">working paper</a>.
       </p>
+    </div>
+
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="meth-1" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Parse the Board's model file</h3></div>
+        <h4>The published artefacts</h4>
+      <p>The Federal Reserve Board publishes FRB/US whole: the equation system as <code>model.xml</code>, the <code>LONGBASE</code> historical and projection database, the documentation, and a reference Python solver, <code>pyfrbus</code> — all in the public domain.</p>
+      <h4>One source of truth</h4>
+      <p>The parse stage reads <code>model.xml</code> directly: variables, equations, per-equation coefficients, and the endogenous / exogenous classification for the VAR-expectations ("standard") equation set. Nothing is re-typed or re-specified — the XML file is the single source of truth for the model's semantics. That yields <strong>284 endogenous variables and their equations</strong>, classified into behavioural and identity blocks exactly as the Board's file declares them.</p>
+      <h4>Residual form</h4>
+      <p>Each equation is normalised — EViews lag and difference notation rewritten, coefficient references substituted by their published values — flipped to residual form <em>F</em><sub>i</sub>(·) = 0, and augmented with its additive shock term (<code>_aerr</code>) and a tracking residual (<code>_trac</code>).</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">parse</div>
+        <div class="meth-eq"><div class="meth-eq-label">system</div><div class="meth-eq-body">\(284\) endogenous eqs (behavioural + identities), from <code>model.xml</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">residual form</div><div class="meth-eq-body">\(F_i(x,\,\text{data}) + \text{aerr}_i + \text{trac}_i = 0\)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Coefficients read from the XML, never re-typed</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>VAR ("standard") equation set only</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Behavioural / identity split as the Board declares it</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-2" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Load LONGBASE, then add-factor</h3></div>
+        <h4>The baseline database</h4>
+      <p>The load stage brings <code>LONGBASE.TXT</code> — the April 2026 vintage — into a pandas frame on a quarterly <code>PeriodIndex</code>. This is the Board's own historical and projection database, and it conditions everything that follows: every simulation is read as a deviation from this baseline.</p>
+      <h4>Tracking residuals (<code>init_trac</code>)</h4>
+      <p><code>init_trac</code> sets each equation's tracking residual so that solving the model reproduces the database exactly. This is the Fed's own device, used the Fed's own way — the direct analogue of the OBR emulator's anchoring. Shocks are then imposed on top of the add-factored baseline.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">LONGBASE conditioning</div>
+        <div class="meth-eq"><div class="meth-eq-label">tracking residual</div><div class="meth-eq-body">\(\text{trac}_i = -F_i(\text{baseline})\) per equation, per quarter</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">invariant</div><div class="meth-eq-body">\(\text{solve}(\text{baseline} + \text{trac}) = \text{LONGBASE}\) exactly</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>April 2026 vintage, quarterly PeriodIndex</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Reproduced to machine precision — <a href="/frb-us/validation">validation</a></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Same role as the OBR emulator's anchoring</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-3" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Solve by damped Newton</h3></div>
+        <h4>Period by period</h4>
+      <p>Under VAR expectations every expectations term depends only on current and lagged observables, so the model is simultaneous <em>within</em> each quarter but recursive <em>across</em> quarters. The solver therefore works period by period, starting each quarter from the previous quarter's solution.</p>
+      <h4>Analytic sparse Jacobian</h4>
+      <p>Each quarter, a damped Newton iteration solves the full simultaneous system with an <strong>analytic sparse Jacobian</strong> — differentiated symbolically with sympy, factorised with <code>scipy.sparse.linalg.splu</code>. Damping backtracks the step only to stay inside the domain of definition (no logs of non-positive arguments, no NaNs). Defaults are <code>xtol=1e-8</code>, <code>rtol=5e-4</code>.</p>
+      <h4>One block, not many</h4>
+      <p>The reference implementation decomposes each period into recursive and simultaneous blocks; this one solves the whole period at once. Both approaches solve the same <em>F</em>(<em>x</em>) = 0, which is why the two agree to solver tolerance rather than to some negotiated threshold — see <a href="/frb-us/validation">how far to trust it</a>.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">Newton iteration</div>
+        <div class="meth-eq"><div class="meth-eq-label">step</div><div class="meth-eq-body">\(J(x^{(k)})\,\Delta x = -F(x^{(k)})\), sparse LU (SuperLU)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">damping</div><div class="meth-eq-body">halve \(\Delta x\) until \(F, J\) evaluate cleanly</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">convergence</div><div class="meth-eq-body">\(\|\Delta x\| \le 10^{-8}\), then \(\|F\| \le 5\times 10^{-4}\)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Jacobian differentiated symbolically (sympy)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Whole period at once vs pyfrbus block ordering</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Same \(F(x)=0\) — agreement at solver tolerance</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-4" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Policy rules</h3></div>
+        <h4>A modular funds rate</h4>
+      <p>Monetary policy is modular: exogenous 0/1 switches in the model file select which rule sets the funds rate. Three are exposed through <code>frbus_shock</code>: <code>inertial_taylor</code> (the default, the LONGBASE rule and the one the validation numbers use), <code>taylor</code>, and <code>fixed_funds_rate</code>, which holds the funds rate on its baseline path so there is no endogenous monetary offset.</p>
+      <h4>The rule choice is the exercise</h4>
+      <p>The choice is usually the economic point of the exercise. A government-purchases shock worth 1% of GDP gives a year-one multiplier of <strong>0.72</strong> under the inertial Taylor rule; holding the funds rate fixed, the year-two multiplier is <strong>0.99</strong> — and the price-level response is larger still without the monetary offset.</p>
+      <h4>Each rule reads its own error term</h4>
+      <p>Each policy rule reads its <em>own</em> add-error, so <code>rffintay_aerr</code> works only under <code>inertial_taylor</code>; asking for it under <code>taylor</code> is rejected with a pointer to <code>rfftay_aerr</code> rather than silently returning all-zero responses.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">policy rules</div>
+        <div class="meth-eq"><div class="meth-eq-label">inertial Taylor</div><div class="meth-eq-body">\(r_t = 0.85\,r_{t-1} + 0.15\bigl[r^{*}_t + \bar\pi_t + 0.5(\bar\pi_t - \pi^{\text{targ}}) + 1.0\,\tilde x_t\bigr] + \varepsilon_t\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">effective rate</div><div class="meth-eq-body">\(\texttt{rff}_t = \max(\texttt{rffrule}_t,\ \texttt{rffmin}_t)\)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>\(\varepsilon_t\) is <code>rffintay_aerr</code> — the shock instrument</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>taylor</code>: same bracket, no inertia — <code>rfftay_aerr</code></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>fixed_funds_rate</code>: baseline path, no monetary offset</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-5" data-step="4">
+        <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Shock and compare</h3></div>
+        <h4>Shocks are error-term additions</h4>
+      <p>A shock is an addition to an equation's error term — <code>rffintay_aerr</code> for the policy rule, for instance. Solve shocked and baseline paths over the same window and read the difference. Shock sizes are <em>per-lever</em> and not interchangeable: <code>rffintay_aerr</code> is in percentage points (1.0 = a 100bp tightening), but the spending levers such as <code>egfe_aerr</code> are in log points of quarterly growth, not billions of dollars.</p>
+      <h4>What comes out</h4>
+      <p>A <strong>100bp funds-rate tightening</strong> in 2026Q1 moves the policy rate <strong>+1.000pp</strong> on impact, pushes real GDP to a trough of <strong>&minus;0.55%</strong> in 2027Q4, raises unemployment by a peak <strong>+0.26pp</strong>, and takes core inflation down <strong>0.034pp</strong> at its trough — consistent with the Board's own documented simulation properties.</p>
+      <h4>What stays out of scope</h4>
+      <p>The pipeline covers the VAR-expectations model only: the model-consistent-expectations variants, forward guidance, and the reference implementation's <code>mcontrol</code> trajectory-targeting routine are not implemented, and there is no bridge from a PolicyEngine reform to model variables — see the <a href="/frb-us/validation#caveats">known limits</a>.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">impulse responses</div>
+        <div class="meth-eq"><div class="meth-eq-label">shock</div><div class="meth-eq-body">\(\text{aerr} \mathrel{+}= \text{shock}\) on the add-factored baseline</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">response</div><div class="meth-eq-body">\(\text{IRF}_t = \text{sim}_t - \text{baseline}_t\) over the same window</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Units are per-lever: pp vs log points of growth</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>100bp: GDP &minus;0.55%, lur +0.26pp, picxfe &minus;0.034pp</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>VAR expectations only — no MCE, no mcontrol</span></div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Parse the Board's model file</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">parse</div>
+        <div class="meth-eq"><div class="meth-eq-label">system</div><div class="meth-eq-body">\(284\) endogenous eqs (behavioural + identities), from <code>model.xml</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">residual form</div><div class="meth-eq-body">\(F_i(x,\,\text{data}) + \text{aerr}_i + \text{trac}_i = 0\)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Coefficients read from the XML, never re-typed</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>VAR ("standard") equation set only</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Behavioural / identity split as the Board declares it</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Load LONGBASE, then add-factor</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">LONGBASE conditioning</div>
+        <div class="meth-eq"><div class="meth-eq-label">tracking residual</div><div class="meth-eq-body">\(\text{trac}_i = -F_i(\text{baseline})\) per equation, per quarter</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">invariant</div><div class="meth-eq-body">\(\text{solve}(\text{baseline} + \text{trac}) = \text{LONGBASE}\) exactly</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>April 2026 vintage, quarterly PeriodIndex</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Reproduced to machine precision</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Same role as the OBR emulator's anchoring</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Solve by damped Newton</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">Newton iteration</div>
+        <div class="meth-eq"><div class="meth-eq-label">step</div><div class="meth-eq-body">\(J(x^{(k)})\,\Delta x = -F(x^{(k)})\), sparse LU (SuperLU)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">damping</div><div class="meth-eq-body">halve \(\Delta x\) until \(F, J\) evaluate cleanly</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">convergence</div><div class="meth-eq-body">\(\|\Delta x\| \le 10^{-8}\), then \(\|F\| \le 5\times 10^{-4}\)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Jacobian differentiated symbolically (sympy)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Whole period at once vs pyfrbus block ordering</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Same \(F(x)=0\) — agreement at solver tolerance</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Policy rules</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <div class="meth-sec-title">policy rules</div>
+        <div class="meth-eq"><div class="meth-eq-label">inertial Taylor</div><div class="meth-eq-body">\(r_t = 0.85\,r_{t-1} + 0.15\bigl[r^{*}_t + \bar\pi_t + 0.5(\bar\pi_t - \pi^{\text{targ}}) + 1.0\,\tilde x_t\bigr] + \varepsilon_t\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">effective rate</div><div class="meth-eq-body">\(\texttt{rff}_t = \max(\texttt{rffrule}_t,\ \texttt{rffmin}_t)\)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>\(\varepsilon_t\) is <code>rffintay_aerr</code> — the shock instrument</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>taylor</code>: same bracket, no inertia — <code>rfftay_aerr</code></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>fixed_funds_rate</code>: baseline path, no monetary offset</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="4" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Shock and compare</span><span class="meth-panel-badge mono">Step 5</span></div>
+          <div class="meth-sec-title">impulse responses</div>
+        <div class="meth-eq"><div class="meth-eq-label">shock</div><div class="meth-eq-body">\(\text{aerr} \mathrel{+}= \text{shock}\) on the add-factored baseline</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">response</div><div class="meth-eq-body">\(\text{IRF}_t = \text{sim}_t - \text{baseline}_t\) over the same window</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Units are per-lever: pp vs log points of growth</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>100bp: GDP &minus;0.55%, lur +0.26pp, picxfe &minus;0.034pp</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>VAR expectations only — no MCE, no mcontrol</span></div>
+          </div>
+        </div>
+      </aside>
     </div>
   </section>
 
@@ -137,14 +280,37 @@
 
 <script src="/reveal.js" defer></script>
 <script>
-document.addEventListener("click", function (e) {
-  var btn = e.target.closest("[data-copy]"); if (!btn) return;
-  var code = btn.parentElement.querySelector("code");
-  navigator.clipboard.writeText(code.textContent).then(function () {
-    btn.textContent = "copied";
-    setTimeout(function () { btn.textContent = "copy"; }, 1400);
+// Methodology scrollytelling: highlight the step at the reading line and
+// show its formal-structure panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  document.querySelectorAll('[role="tab"]').forEach(function (btn) {
+    btn.addEventListener("click", function () { setTimeout(update, 0); });
   });
-});
+  update();
+})();
 </script>
 </body>
 </html>

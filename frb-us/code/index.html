@@ -87,48 +87,44 @@
     <div class="prose">
       <p>
         The quickest route is the <a href="/connect">hosted MCP server</a>,
-        where three tools reach this model:
-        <code>frbus_list_variables</code> (the shockable levers, with their
-        units), <code>frbus_shock</code> (solve and return impulse responses),
-        and <code>frbus_summary</code> (vintage and validation provenance).
-        A solve takes about <strong>3 seconds cold and well under a second
-        warm</strong> — the fastest member of the suite. The same three are on
-        the CLI:
+        with three tools: <code>frbus_list_variables</code> (the shockable
+        levers, with units), <code>frbus_shock</code> (solve and return
+        impulse responses), and <code>frbus_summary</code> (vintage and
+        validation provenance). A solve takes about <strong>3 seconds cold
+        and well under a second warm</strong> — the fastest member of the
+        suite. The same three are on the CLI:
       </p>
       <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-variables
 pe-macro frbus-shock --var rffintay_aerr --shock 1.0
 pe-macro frbus-summary</code></pre></div>
       <p>
-        <strong>Two traps.</strong> Shock sizes are <em>per-lever</em> and not
-        interchangeable: <code>rffintay_aerr</code> is in percentage points
-        (1.0 = a 100bp tightening), but the spending levers such as
-        <code>egfe_aerr</code> are in <strong>log points of quarterly
-        growth</strong>, not billions of dollars — a dollar-sized number there
-        diverges the solver. And each policy rule reads its <em>own</em>
-        add-error, so <code>rffintay_aerr</code> works only under
-        <code>inertial_taylor</code>; asking for it under
-        <code>taylor</code> is rejected with a pointer to
+        <strong>Two traps.</strong> Shock sizes are <em>per-lever</em>:
+        <code>rffintay_aerr</code> is in percentage points (1.0 = a 100bp
+        tightening), but spending levers such as <code>egfe_aerr</code> are in
+        <strong>log points of quarterly growth</strong>, not billions of
+        dollars — a dollar-sized number there diverges the solver. And each
+        policy rule reads its <em>own</em> add-error: <code>rffintay_aerr</code>
+        works only under <code>inertial_taylor</code>; under
+        <code>taylor</code> it is rejected with a pointer to
         <code>rfftay_aerr</code> rather than silently returning all-zero
         responses.
       </p>
       <p>
-        <code>frbus_shock</code> takes a <code>policy_rule</code>, and the
-        choice is usually the economic point of the exercise:
-        <code>inertial_taylor</code> (the default, the LONGBASE rule and the
-        one the validation numbers use), <code>taylor</code>, or
-        <code>fixed_funds_rate</code>, which holds the funds rate on its
-        baseline path so there is no endogenous monetary offset. A four-quarter
-        federal-purchases shock of 0.01 log points peaks higher on real GDP
-        with the funds rate fixed than under the inertial rule — and the
-        price-level response is larger still without the monetary offset.
+        <code>frbus_shock</code> takes a <code>policy_rule</code> — usually
+        the economic point of the exercise: <code>inertial_taylor</code> (the
+        default, the LONGBASE rule and the one the validation numbers use),
+        <code>taylor</code>, or <code>fixed_funds_rate</code>, which holds the
+        funds rate on its baseline path so there is no endogenous monetary
+        offset. A four-quarter federal-purchases shock of 0.01 log points
+        peaks higher on real GDP with the funds rate fixed — and the
+        price-level response is larger still.
       </p>
       <p>
         For the full 284-variable model, the Board's own demo scripts, or
-        anything the three tools do not expose, install the package. It is
-        separate from the rest of the suite, with its own Python API. The
-        Board's raw materials are vendored unmodified in the repository, so
-        there is no data-download step, but you do clone rather than
-        pip-install from an index.
+        anything the three tools do not expose, install the package — separate
+        from the rest of the suite, with its own Python API. The Board's raw
+        materials are vendored unmodified, so there is no data-download step,
+        but you clone rather than pip-install from an index.
       </p>
       <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/us-frb-model
 cd us-frb-model
@@ -155,11 +151,11 @@ sim = model.solve(start, end, with_adds)
 <span class="kw">print</span>((sim.loc[start:end, <span class="kw">"xgdp"</span>] / with_adds.loc[start:end, <span class="kw">"xgdp"</span>] - 1) * 100)</code></pre></div>
       <p class="opt-note">
         a runnable copy of exactly this is
-        <code>examples/monetary_policy_shock.py</code>. The API surface mirrors
-        the essentials of <code>pyfrbus</code>'s <code>Frbus</code> class:
+        <code>examples/monetary_policy_shock.py</code>. The API mirrors the
+        essentials of <code>pyfrbus</code>'s <code>Frbus</code> class —
         <code>Frbus(path)</code>, <code>.init_trac()</code>,
-        <code>.solve()</code>, <code>.exogenize()</code> — so the Board's own
-        demo scripts port across with minimal change.
+        <code>.solve()</code>, <code>.exogenize()</code> — so the Board's demo
+        scripts port across with minimal change.
       </p>
       <div class="table-scroll"><table>
         <caption>Frequently used frb-us series</caption>

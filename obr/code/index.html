@@ -86,22 +86,23 @@
     </div>
     <div class="prose">
       <p>
-        The quickest route is the <a href="/connect">hosted MCP server</a>,
-        where two tools reach this model: <code>obr_shock</code> (shock one
-        variable in model units and read the per-quarter GDP deviation) and
-        <code>list_reform_variables</code> (the shockable levers, with their
-        units); <code>score_reform</code> with <code>model="obr"</code> scores
-        a PolicyEngine reform end to end through the static-costing bridge.
-        All run hosted — no install, no credentials. The CLI mirrors them:
+        The quickest route is the <a href="/connect">hosted MCP server</a>:
+        <code>obr_shock</code> shocks one variable in model units and reads
+        the per-quarter GDP deviation, <code>list_reform_variables</code>
+        lists the shockable levers with units, and <code>score_reform</code>
+        with <code>model="obr"</code> scores a PolicyEngine reform end to end
+        through the static-costing bridge. All run hosted — no install, no
+        credentials. The CLI mirrors them:
         <code>pe-macro obr-shock --var CGG --shock 1250</code>,
         <code>pe-macro variables</code>, and
         <code>pe-macro score --reform '{...}' --model obr</code>.
       </p>
       <p>
-        To run it locally, the package installs straight from GitHub — the equation listing, the
-        March 2026 EFO forecast tables, and the ONS snapshot ship inside
-        it, so there is no data step. A reform is one call: pick an exogenous
-        variable, apply a shock, read the deviation from baseline.
+        Locally, the package installs straight from GitHub — the equation
+        listing, the March 2026 EFO forecast tables, and the ONS snapshot
+        ship inside it, so there is no data step. A reform is one call: pick
+        an exogenous variable, apply a shock, read the deviation from
+        baseline.
       </p>
       <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/obr-macroeconomic-model</code></pre></div>
       <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> obr_macro <span class="kw">import</span> run_reform
@@ -117,15 +118,16 @@ results = run_reform(
 <span class="cm"># ΔGDP ≈ £1.25bn in the impact quarter, near-flat thereafter —</span>
 <span class="cm"># under the demand closure the impact multiplier is ~1 by construction</span></code></pre></div>
       <p class="opt-note">
-        Two solves, so about a minute. Run the five bundled scenarios with
-        charts via <code>python -m obr_macro.reform_analysis</code> — a £5bn
-        spending rise, a 5pp corporation-tax cut and rise, £10bn public
-        real investment (~£3bn nominal <code>CGIPS</code> per quarter), and a £10bn
-        austerity cut. Charts land in <code>outputs/</code>.
+        Two solves, so about a minute.
+        <code>python -m obr_macro.reform_analysis</code> runs the five
+        bundled scenarios — a £5bn spending rise, a 5pp corporation-tax cut
+        and rise, £10bn public real investment (~£3bn nominal
+        <code>CGIPS</code> per quarter), and a £10bn austerity cut — with
+        charts landing in <code>outputs/</code>.
       </p>
       <p>
         Reforms enter through the 253 exogenous inputs; results come out of
-        the 383 the model solves. The test is simply whether a variable has
+        the 383 the model solves — the test is simply whether a variable has
         its own equation. The most useful levers:
       </p>
       <div class="table-scroll"><table>
@@ -144,9 +146,8 @@ results = run_reform(
         </tbody>
       </table></div>
       <p class="opt-note">
-        The full searchable glossary — all 636 codes with descriptions, ONS
-        series and equations — is the
-        model package's variable and equation references.
+        The full glossary — all 636 codes with descriptions, ONS series and
+        equations — is the model package's variable and equation references.
       </p>
     </div>
   </section>

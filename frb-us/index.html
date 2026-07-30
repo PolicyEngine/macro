@@ -85,32 +85,29 @@
     </div>
     <div class="prose">
       <p>
-        This reimplements the large-scale macroeconometric model the Federal
-        Reserve Board has used for policy analysis and forecasting since 1996. The
-        Board publishes the whole thing — the equation system as
+        The Federal Reserve Board has used this large-scale macroeconometric
+        model for policy analysis and forecasting since 1996, and publishes it
+        whole in the public domain — the equation system as
         <code>model.xml</code>, the <code>LONGBASE</code> historical and
-        projection database, the model documentation, and a reference Python
-        solver called <code>pyfrbus</code> — in the public domain. What it does
-        not publish is a modern, readable, dependency-light implementation you
-        can drop into a research stack.
+        projection database, the documentation, and a reference Python solver,
+        <code>pyfrbus</code> — but no modern, readable, dependency-light
+        implementation.
       </p>
       <p>
         This is that: a from-scratch build on numpy, scipy and sympy under
         Python 3.10+, parsing the Board's own model file rather than
-        re-specifying it. It carries <strong>284 endogenous variables and
-        their equations</strong>, classified into behavioural and identity
-        blocks exactly as the Board's file declares them, and solves them as
-        one simultaneous system per quarter.
+        re-specifying it — <strong>284 endogenous variables and their
+        equations</strong>, split into behavioural and identity blocks exactly
+        as the Board's file declares them, solved as one simultaneous system
+        per quarter.
       </p>
       <p>
-        In the suite it plays the role for the United States that the
-        <a href="/obr">OBR emulator</a> plays for the United Kingdom:
-        reproducing the estimated equation system an official institution
-        actually relies on, rather than deriving behaviour from first
-        principles the way the <a href="/olg">overlapping-generations
-        model</a> does. The two diverge on one point that shapes everything
-        below: the OBR emulator has a bridge from statute, and this one does
-        not.
+        In the suite it is the US counterpart of the <a href="/obr">OBR
+        emulator</a>: it reproduces the estimated equation system an official
+        institution actually relies on, rather than deriving behaviour from
+        first principles like the <a href="/olg">overlapping-generations
+        model</a>. One divergence shapes everything below: the OBR emulator
+        has a bridge from statute; this one does not.
       </p>
     </div>
   </section>
@@ -122,31 +119,30 @@
     </div>
     <div class="prose">
       <p>
-        The model's designed job is the dynamic response of the US economy to
-        a policy impulse. A <strong>100bp funds-rate tightening</strong> in
+        The model's designed job is the US economy's dynamic response to a
+        policy impulse. A <strong>100bp funds-rate tightening</strong> in
         2026Q1 moves the policy rate <strong>+1.000pp</strong> on impact, pushes
         real GDP to a trough of <strong>&minus;0.55%</strong> in 2027Q4, raises
         unemployment by a peak <strong>+0.26pp</strong>, and takes core
         inflation down <strong>0.034pp</strong> at its trough — signs,
-        magnitudes and timing consistent with the simulation properties in the
-        Board's own frb-us documentation.
+        magnitudes and timing consistent with the Board's own documented
+        simulation properties.
       </p>
       <p>
         Fiscal impulses land in the published cross-model ranges. A
         government-purchases shock worth 1% of GDP gives a year-one multiplier
-        of <strong>0.72</strong> under the inertial Taylor rule, inside the 0.7–1.0
-        no-accommodation range in Coenen et al. (2012); holding the funds rate
-        fixed, the year-two multiplier is <strong>0.99</strong>. A personal
-        tax cut worth 1% of GDP ex ante gives <strong>0.22 rising to
+        of <strong>0.72</strong> under the inertial Taylor rule, inside the
+        0.7–1.0 no-accommodation range in Coenen et al. (2012); with the funds
+        rate fixed, the year-two multiplier is <strong>0.99</strong>. A
+        personal tax cut worth 1% of GDP ex ante gives <strong>0.22 rising to
         0.32</strong> over years one and two, inside both the 0.2–0.4
         cross-model range and CBO's central estimate of about 0.3.
       </p>
       <div class="callout">
         <strong>It cannot</strong> score a PolicyEngine reform — see the <a href="/frb-us/validation#caveats">known limits</a>.
-        It cannot do forward guidance or
-        any exercise needing model-consistent expectations. It cannot tell you
-        who wins and loses — that is <a href="/pe">PolicyEngine</a>. And it
-        says nothing about the UK.
+        It cannot do forward guidance or anything needing model-consistent
+        expectations. It cannot tell you who wins and loses — that is
+        <a href="/pe">PolicyEngine</a>. And it says nothing about the UK.
       </div>
     </div>
   </section>

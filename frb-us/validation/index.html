@@ -86,11 +86,11 @@
     </div>
     <div class="prose">
       <p>
-        This is a <strong>replication with a published anchor</strong>, and it
-        is the sharpest-tested member of the suite — because for once the
-        ground truth is exact rather than statistical. Three invariants carry
-        the weight, and all are enforced in continuous integration &mdash; including
-        four like-for-like scenarios gated against vendor-generated references.
+        This is a <strong>replication with a published anchor</strong> — the
+        sharpest-tested member of the suite, because for once the ground truth
+        is exact rather than statistical. Three invariants carry the weight,
+        all enforced in continuous integration, including four like-for-like
+        scenarios gated against vendor-generated references.
       </p>
     </div>
     <div class="metrics">
@@ -117,13 +117,13 @@
     </div>
     <div class="prose">
       <p>
-        The last figure is the one that frames the other three. The Board's
-        two releases ship a <em>byte-identical</em> <code>model.xml</code> and
-        LONGBASE and differ only in how the Newton routine reuses its LU
-        factorisation — yet they <strong>disagree with each other by
+        The last figure frames the other three. The Board's two releases ship
+        a <em>byte-identical</em> <code>model.xml</code> and LONGBASE and
+        differ only in how the Newton routine reuses its LU factorisation —
+        yet they <strong>disagree with each other by
         1.3&times;10<sup>&minus;8</sup></strong>, as much as this
-        implementation disagrees with either. Agreement here therefore sits at
-        the reference implementation's own numerical noise, not at a tolerance
+        implementation disagrees with either. Agreement therefore sits at the
+        reference implementation's own numerical noise, not at a tolerance
         anyone chose. All three residuals concentrate in the same near-zero
         expectational-gap series (<code>wpsn</code>, <code>zgap05</code>).
       </p>
@@ -151,11 +151,11 @@
     </div>
     <p class="chart-note" style="max-width: 80ch;">
       The committed reference stays pinned to pyfrbus 1.0.0 so the gate has a
-      fixed anchor; the 1.1.1 comparison is a recorded cross-check. CI does not
-      merely re-check a committed CSV — a dedicated job re-runs the Board's
+      fixed anchor; the 1.1.1 comparison is a recorded cross-check. CI goes
+      beyond re-checking a committed CSV: a dedicated job re-runs the Board's
       pyfrbus from source in a throwaway environment and gates against that
-      freshly generated solution, and a weekly scheduled run repeats the whole
-      suite across Python 3.10–3.12 so dependency drift surfaces without a pull
+      freshly generated solution, and a weekly scheduled run repeats the suite
+      across Python 3.10–3.12 so dependency drift surfaces without a pull
       request. Full tables in
       <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md">VALIDATION.md</a>,
       the <a href="/papers/frb-us">working paper</a>, and
@@ -181,23 +181,23 @@
         <tbody>
           <tr>
             <th scope="row"><strong>VAR expectations only</strong></th>
-            <td>The model-consistent-expectations (MCE) equation variants are not implemented — <code>Frbus(path, mce=...)</code> raises <code>NotImplementedError</code>. Anything that turns on agents anticipating announced future policy, forward guidance most obviously, is out of scope.</td>
+            <td>The model-consistent-expectations (MCE) equation variants are not implemented — <code>Frbus(path, mce=...)</code> raises <code>NotImplementedError</code> — so anything that turns on agents anticipating announced future policy, forward guidance most obviously, is out of scope.</td>
           </tr>
           <tr>
             <th scope="row"><strong>No <code>mcontrol</code></strong></th>
-            <td>The reference implementation's trajectory-targeting routine is out of scope. Stochastic simulation <em>is</em> implemented &mdash; <code>stochsim_bands()</code> produces seeded residual-bootstrap percentile bands &mdash; but the hosted <code>frbus_shock</code> path still returns a single deterministic projection, so bands are not available through the MCP surface.</td>
+            <td>The reference implementation's trajectory-targeting routine is out of scope. Stochastic simulation <em>is</em> implemented &mdash; <code>stochsim_bands()</code> produces seeded residual-bootstrap percentile bands &mdash; but the hosted <code>frbus_shock</code> path returns a single deterministic projection, so bands are not available over MCP.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Hosted, but only as raw shocks</strong></th>
-            <td>The hosted tools and their <code>pe-macro</code> mirrors expose one lever, one shock size, a policy rule and a headline set of responses — not the full 284-variable model. Anything beyond that (the Board's demo scripts, <code>exogenize</code>, arbitrary variable sets) still means installing the package and using its Python API.</td>
+            <td>The hosted tools and their <code>pe-macro</code> mirrors expose one lever, one shock size, a policy rule and a headline set of responses — not the full 284-variable model. Anything beyond that (the Board's demo scripts, <code>exogenize</code>, arbitrary variable sets) means installing the package and using its Python API.</td>
           </tr>
           <tr>
             <th scope="row"><strong>No PolicyEngine reform bridge</strong></th>
-            <td>Reforms enter as shocks to model variables, not as statute. There is no equivalent of the OBR emulator's static-costing bridge from a PolicyEngine reform dict — <code>score_reform</code> refuses <code>model="frbus"</code> outright and points at <code>frbus_shock</code> — so US reform scoring stops at <a href="/pe">pe-microsim</a>'s static answer. Hosting the model did not change this.</td>
+            <td>Reforms enter as shocks to model variables, not as statute. There is no equivalent of the OBR emulator's static-costing bridge from a PolicyEngine reform dict — <code>score_reform</code> refuses <code>model="frbus"</code> outright and points at <code>frbus_shock</code> — so US reform scoring stops at <a href="/pe">pe-microsim</a>'s static answer. Hosting did not change this.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Approximate published comparisons</strong></th>
-            <td>The 100bp funds-rate responses in the Board's 2014 FEDS Note are read off charts, so those comparisons are approximate by nature: our output-gap trough of &minus;0.50pp against the Note's roughly &minus;0.4pp reflects vintage and shock-design differences, and is not claimed as a match.</td>
+            <td>The 100bp funds-rate responses in the Board's 2014 FEDS Note are read off charts, so those comparisons are approximate by nature: our output-gap trough of &minus;0.50pp against the Note's roughly &minus;0.4pp reflects vintage and shock-design differences, not a claimed match.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Vintage</strong></th>
