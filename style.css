@@ -2341,6 +2341,13 @@ h2 {
   cursor: zoom-in;
 }
 .step-diagram rect[fill="#fff"] { fill: var(--surface); }
+.step-diagram {
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--paper-faint) 24%, transparent) 1px, transparent 1px);
+  background-size: 20px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .step-diagram svg { display: block; margin: 0 auto; }
 .step-diagram .expand-hint {
   position: absolute;
@@ -2488,3 +2495,93 @@ h2 {
    header instead of sliding under it. */
 .model-tabs-first { margin-top: calc(var(--nav-h, 62px) + 34px); }
 .model-tabs-first + .paper-viewer { padding-top: clamp(28px, 5vh, 48px); }
+
+/* Methodology freeze-box, structured like the dashboard: bordered card,
+   header strip with a filled step badge, scrollable body; inside it,
+   uppercase section titles with a trailing rule, one white sub-card per
+   labelled equation, and arrow output-lines. */
+.meth-panel, .meth-inline {
+  border: 2px solid var(--brand-strong);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.meth-inline { margin-top: var(--s-4); }
+.meth-panel .meth-panel-head, .meth-inline .meth-panel-head {
+  margin: 0;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line-soft);
+  background: color-mix(in srgb, var(--brand-wash) 60%, transparent);
+}
+.meth-panel-body-pad { padding: 16px 18px 18px; }
+.meth-panel > :not(.meth-panel-head), .meth-inline > :not(.meth-panel-head) {
+  margin-left: 18px;
+  margin-right: 18px;
+}
+.meth-panel > :last-child, .meth-inline > :last-child { margin-bottom: 18px; }
+.meth-panel-badge {
+  padding: 4px 11px;
+  border-radius: 6px;
+  background: var(--brand-strong);
+  color: var(--ink);
+  font-size: var(--fs-label);
+  font-weight: 600;
+}
+.meth-sec-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: var(--s-4);
+  color: var(--brand-strong);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.meth-sec-title::after { content: ""; flex: 1; height: 1px; background: var(--line-soft); }
+.meth-eq {
+  margin: 8px 0;
+  padding: 12px 16px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--ink);
+  overflow-x: auto;
+}
+.meth-eq-label {
+  margin-bottom: 6px;
+  color: var(--brand-strong);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.meth-eq-body { text-align: center; }
+.meth-out {
+  margin: 8px 0;
+  padding: 10px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--ink);
+  font-size: var(--fs-small);
+}
+.meth-out-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  color: var(--paper-dim);
+}
+.meth-out-line:hover { background: var(--brand-wash); }
+.meth-out-line .icon { flex: 0 0 auto; color: var(--brand-strong); font-weight: 600; }
+/* Narrative sub-headings: bold sentence case, not uppercase micro-labels. */
+.meth-step h4 {
+  margin: var(--s-5) 0 var(--s-2);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--paper);
+}
