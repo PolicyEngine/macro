@@ -60,13 +60,67 @@
   </section>
   <section id="choose" class="band band-stack">
     <div class="band-head"><span class="kicker mono">choose a model</span><h2>What do you need to understand?</h2></div>
-    <div class="question-list">
-      <a href="/pe"><span>Taxes and benefits for a household or population</span><strong>UK + US · PolicyEngine</strong></a>
-      <a href="/frb-us"><span>A monetary or fiscal shock in the US over coming quarters</span><strong>US · frb-us</strong></a>
-      <a href="/us-hank"><span>How US shock responses differ across the household wealth distribution</span><strong>US · us-hank</strong></a>
-      <a href="/obr"><span>A selected UK fiscal or macro scenario over 3–5 years</span><strong>UK · obr-macro</strong></a>
-      <a href="/olg"><span>Work, saving, and capital effects over decades</span><strong>UK · psl-og</strong></a>
-      <a href="/svar"><span>What drove UK GDP and inflation at the latest model-data vintage</span><strong>UK · boe-svar</strong></a>
+    <div class="question-list qa-list">
+      <details class="qa">
+        <summary><span>Taxes and benefits for a household or population</span><strong>UK + US · PolicyEngine</strong></summary>
+        <div class="qa-body">
+          <p>The microsimulation runs the actual tax-benefit rules as code over enhanced survey microdata (Enhanced FRS for the UK, CPS for the US), so it answers at both levels: one household’s net income under a reform, or the population-wide revenue and distributional effect.</p>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Hosted — MCP tools and a CLI, no account needed</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Household answers are exact rule arithmetic; population answers inherit survey-data error</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Static by design: no behavioural or macro feedback (the macro members add that)</span></div>
+          <p class="qa-link"><a href="/pe">Open PolicyEngine microsim &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>A monetary or fiscal shock in the US over coming quarters</span><strong>US · frb-us</strong></summary>
+        <div class="qa-body">
+          <p>The Federal Reserve’s FRB/US model — 284 behavioural equations parsed from the Board’s own model file — is solved by damped Newton around the April 2026 LONGBASE baseline; you pick the lever and the policy rule, and read the deviation path quarter by quarter.</p>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Levers: federal funds rate, government spending, transfers, taxes — each in its own units</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Replicates the Board’s dynamics to machine precision (residuals ~1e-8 or better)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>VAR expectations only; a conditioning baseline, not a forecast</span></div>
+          <p class="qa-link"><a href="/frb-us">Open FRB/US &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>How US shock responses differ across the household wealth distribution</span><strong>US · us-hank</strong></summary>
+        <div class="qa-body">
+          <p>A two-asset heterogeneous-agent New Keynesian model (an ABRS 2021 replication) solves the same monetary, fiscal or productivity shock for the whole distribution of households, then reports consumption responses by liquid-wealth quartile and the hand-to-mouth share.</p>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>MPCs by wealth quartile alongside the aggregate response</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Warm shock in seconds via a cached sequence-space Jacobian</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Stylized replication — not a forecaster, no reform scoring</span></div>
+          <p class="qa-link"><a href="/us-hank">Open US HANK &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>A selected UK fiscal or macro scenario over 3–5 years</span><strong>UK · obr-macro</strong></summary>
+        <div class="qa-body">
+          <p>A transpiled, solvable copy of the OBR’s published macroeconometric model, anchored to the latest EFO with held add-factors: shock a lever, re-solve, and read GDP, consumption and investment deviations against the official forecast path.</p>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Worked example: 1p on the basic rate — £6.46bn (2026) rising to £7.38bn (2030) with the macro feedback</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Emulator tracks the published forecast within 0.15% (GDP) / 0.25% (consumption)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Impact multiplier ~1 by construction vs the OBR’s published 0.6 — read magnitudes, not point estimates</span></div>
+          <p class="qa-link"><a href="/obr">Open the OBR emulator &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>Work, saving, and capital effects over decades</span><strong>UK · psl-og</strong></summary>
+        <div class="qa-body">
+          <p>80 overlapping cohorts choose work and saving over their lifetimes; firms and the government close the economy. Solve the steady state or the full 60-period transition path and read where a reform takes GDP, investment and revenue in the long run.</p>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Worked example: +1pp basic rate → GDP −£5.0bn (−0.14%) and tax revenue +0.29pp of GDP by 2030</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Tax functions estimated from PolicyEngine microdata; ONS/OBR-calibrated</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Local-only and experimental: calibrated, with no published ground truth</span></div>
+          <p class="qa-link"><a href="/olg">Open OG-UK &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>What drove UK GDP and inflation at the latest model-data vintage</span><strong>UK · boe-svar</strong></summary>
+        <div class="qa-body">
+          <p>An eight-variable Bayesian structural VAR identifies named shocks (demand, supply, policy…) with sign and zero restrictions, then decomposes recent GDP and inflation into their contributions — and projects forward with credible bands.</p>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Frozen-edge check: 14 of 14 outturns inside the 68% bands (bands run wide)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Forecasts are archived before outturns exist and scored in public</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Hosted — same model behind the site’s UK forecast</span></div>
+          <p class="qa-link"><a href="/svar">Open BoE SVAR &rarr;</a></p>
+        </div>
+      </details>
     </div>
     <p class="chooser-note">Already have two candidates? <a href="#compare">Compare their assumptions and tradeoffs</a>.</p>
   </section>
