@@ -79,57 +79,112 @@
     </div>
   </nav>
 
-  <section id="run" class="band">
+  <section id="run" class="band band-wide">
     <div class="band-head">
       <span class="kicker mono">code</span>
       <h2>Ask the server, or install it.</h2>
     </div>
     <div class="prose">
       <p>
-        The quickest route is the <a href="/connect">hosted MCP server</a>,
-        with three tools: <code>frbus_list_variables</code> (the shockable
-        levers, with units), <code>frbus_shock</code> (solve and return
-        impulse responses), and <code>frbus_summary</code> (vintage and
-        validation provenance). A solve takes about <strong>3 seconds cold
-        and well under a second warm</strong> — the fastest member of the
-        suite. The same three are on the CLI:
+        Five steps from a hosted one-liner to the full 284-variable model in
+        Python; each step's code sits alongside its narrative.
       </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-variables
+    </div>
+
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="code-1" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Ask the hosted server</h3></div>
+        <h4>Three MCP tools</h4>
+        <p>The quickest route is the <a href="/connect">hosted MCP server</a>, with three tools: <code>frbus_list_variables</code> (the shockable levers, with units), <code>frbus_shock</code> (solve and return impulse responses), and <code>frbus_summary</code> (vintage and validation provenance).</p>
+        <h4>Speed</h4>
+        <p>A solve takes about <strong>3 seconds cold and well under a second warm</strong> — the fastest member of the suite.</p>
+        <h4>CLI mirrors</h4>
+        <p>The same three tools are on the CLI, no server round-trip required.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">the three tools on the CLI</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-variables
 pe-macro frbus-shock --var rffintay_aerr --shock 1.0
 pe-macro frbus-summary</code></pre></div>
-      <p>
-        <strong>Two traps.</strong> Shock sizes are <em>per-lever</em>:
-        <code>rffintay_aerr</code> is in percentage points (1.0 = a 100bp
-        tightening), but spending levers such as <code>egfe_aerr</code> are in
-        <strong>log points of quarterly growth</strong>, not billions of
-        dollars — a dollar-sized number there diverges the solver. And each
-        policy rule reads its <em>own</em> add-error: <code>rffintay_aerr</code>
-        works only under <code>inertial_taylor</code>; under
-        <code>taylor</code> it is rejected with a pointer to
-        <code>rfftay_aerr</code> rather than silently returning all-zero
-        responses.
-      </p>
-      <p>
-        <code>frbus_shock</code> takes a <code>policy_rule</code> — usually
-        the economic point of the exercise: <code>inertial_taylor</code> (the
-        default, the LONGBASE rule and the one the validation numbers use),
-        <code>taylor</code>, or <code>fixed_funds_rate</code>, which holds the
-        funds rate on its baseline path so there is no endogenous monetary
-        offset. A four-quarter federal-purchases shock of 0.01 log points
-        peaks higher on real GDP with the funds rate fixed — and the
-        price-level response is larger still.
-      </p>
-      <p>
-        For the full 284-variable model, the Board's own demo scripts, or
-        anything the three tools do not expose, install the package — separate
-        from the rest of the suite, with its own Python API. The Board's raw
-        materials are vendored unmodified, so there is no data-download step,
-        but you clone rather than pip-install from an index.
-      </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/us-frb-model
+        </div>
+      </div>
+
+      <div class="meth-step" id="code-2" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Two traps</h3></div>
+        <h4>Units are per-lever</h4>
+        <p><code>rffintay_aerr</code> is in percentage points (1.0 = a 100bp tightening), but spending levers such as <code>egfe_aerr</code> are in <strong>log points of quarterly growth</strong>, not billions of dollars — a dollar-sized number there diverges the solver.</p>
+        <h4>Each rule reads its own add-error</h4>
+        <p><code>rffintay_aerr</code> works only under <code>inertial_taylor</code>; under <code>taylor</code> it is rejected with a pointer to <code>rfftay_aerr</code> rather than silently returning all-zero responses.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">before you shock</div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>rffintay_aerr</code>: percentage points — 1.0 = 100bp</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>egfe_aerr</code>: log points of quarterly growth, never dollars</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>rffintay_aerr</code> pairs with <code>inertial_taylor</code> only</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>under <code>taylor</code>, use <code>rfftay_aerr</code> — mismatch is rejected, not zeroed</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="code-3" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Choose the policy rule</h3></div>
+        <h4>Usually the point of the exercise</h4>
+        <p><code>frbus_shock</code> takes a <code>policy_rule</code>: <code>inertial_taylor</code> (the default, the LONGBASE rule and the one the validation numbers use), <code>taylor</code>, or <code>fixed_funds_rate</code>, which holds the funds rate on its baseline path so there is no endogenous monetary offset.</p>
+        <h4>Why it matters</h4>
+        <p>A four-quarter federal-purchases shock of 0.01 log points peaks higher on real GDP with the funds rate fixed — and the price-level response is larger still.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">policy_rule options</div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>inertial_taylor</code> — default, LONGBASE rule, validation baseline</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>taylor</code> — non-inertial variant</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>fixed_funds_rate</code> — no endogenous monetary offset</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>fiscal shocks peak higher with the funds rate fixed</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="code-4" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Install the package</h3></div>
+        <h4>When to install</h4>
+        <p>For the full 284-variable model, the Board's own demo scripts, or anything the three tools do not expose — separate from the rest of the suite, with its own Python API.</p>
+        <h4>No data step</h4>
+        <p>The Board's raw materials are vendored unmodified, so there is no data-download step, but you clone rather than pip-install from an index.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">clone and install</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/us-frb-model
 cd us-frb-model
 uv venv &amp;&amp; uv pip install -e ".[dev]"</code></pre></div>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
+        </div>
+      </div>
+
+      <div class="meth-step" id="code-5" data-step="4">
+        <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Run a 100bp shock in Python</h3></div>
+        <h4>The workflow</h4>
+        <p>Load LONGBASE, set the Board's demo fiscal configuration, add-factor with <code>init_trac</code> so the baseline reproduces LONGBASE exactly, add the shock, solve.</p>
+        <p class="opt-note">
+          a runnable copy of exactly this is
+          <code>examples/monetary_policy_shock.py</code>. The API mirrors the
+          essentials of <code>pyfrbus</code>'s <code>Frbus</code> class —
+          <code>Frbus(path)</code>, <code>.init_trac()</code>,
+          <code>.solve()</code>, <code>.exogenize()</code> — so the Board's
+          demo scripts port across with minimal change.
+        </p>
+        <h4>Series you will reach for</h4>
+        <div class="table-scroll"><table>
+          <caption>Frequently used frb-us series</caption>
+          <thead><tr><th scope="col">code</th><th scope="col">variable</th><th scope="col">role</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>rffintay_aerr</code></th><td>Taylor-rule policy-rate error term</td><td>shock instrument — +1 for a 100bp tightening</td></tr>
+            <tr><th scope="row"><code>dfpdbt</code> / <code>dfpsrp</code></th><td>Fiscal policy switches</td><td>exogenous — set the debt / surplus closure</td></tr>
+            <tr><th scope="row"><code>xgdp</code></th><td>Real GDP</td><td>endogenous — headline output</td></tr>
+            <tr><th scope="row"><code>lur</code></th><td>Unemployment rate</td><td>endogenous — rate, pp</td></tr>
+            <tr><th scope="row"><code>picxfe</code></th><td>Core PCE inflation</td><td>endogenous — rate, pp</td></tr>
+            <tr><th scope="row"><code>rff</code></th><td>Federal funds rate</td><td>endogenous under the rule, pp</td></tr>
+          </tbody>
+        </table></div>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">monetary_policy_shock.py</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
 <span class="kw">from</span> frbus <span class="kw">import</span> Frbus, load_data
 
 data = load_data(<span class="kw">"vendor/data_only_package/LONGBASE.TXT"</span>)
@@ -149,26 +204,70 @@ with_adds.loc[start, <span class="kw">"rffintay_aerr"</span>] += 1
 sim = model.solve(start, end, with_adds)
 
 <span class="kw">print</span>((sim.loc[start:end, <span class="kw">"xgdp"</span>] / with_adds.loc[start:end, <span class="kw">"xgdp"</span>] - 1) * 100)</code></pre></div>
-      <p class="opt-note">
-        a runnable copy of exactly this is
-        <code>examples/monetary_policy_shock.py</code>. The API mirrors the
-        essentials of <code>pyfrbus</code>'s <code>Frbus</code> class —
-        <code>Frbus(path)</code>, <code>.init_trac()</code>,
-        <code>.solve()</code>, <code>.exogenize()</code> — so the Board's demo
-        scripts port across with minimal change.
-      </p>
-      <div class="table-scroll"><table>
-        <caption>Frequently used frb-us series</caption>
-        <thead><tr><th scope="col">code</th><th scope="col">variable</th><th scope="col">role</th></tr></thead>
-        <tbody>
-          <tr><th scope="row"><code>rffintay_aerr</code></th><td>Taylor-rule policy-rate error term</td><td>shock instrument — +1 for a 100bp tightening</td></tr>
-          <tr><th scope="row"><code>dfpdbt</code> / <code>dfpsrp</code></th><td>Fiscal policy switches</td><td>exogenous — set the debt / surplus closure</td></tr>
-          <tr><th scope="row"><code>xgdp</code></th><td>Real GDP</td><td>endogenous — headline output</td></tr>
-          <tr><th scope="row"><code>lur</code></th><td>Unemployment rate</td><td>endogenous — rate, pp</td></tr>
-          <tr><th scope="row"><code>picxfe</code></th><td>Core PCE inflation</td><td>endogenous — rate, pp</td></tr>
-          <tr><th scope="row"><code>rff</code></th><td>Federal funds rate</td><td>endogenous under the rule, pp</td></tr>
-        </tbody>
-      </table></div>
+        </div>
+      </div>
+      </div>
+
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Ask the hosted server</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">the three tools on the CLI</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-variables
+pe-macro frbus-shock --var rffintay_aerr --shock 1.0
+pe-macro frbus-summary</code></pre></div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Two traps</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">before you shock</div>
+          <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>rffintay_aerr</code>: percentage points — 1.0 = 100bp</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>egfe_aerr</code>: log points of quarterly growth, never dollars</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>rffintay_aerr</code> pairs with <code>inertial_taylor</code> only</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>under <code>taylor</code>, use <code>rfftay_aerr</code> — mismatch is rejected, not zeroed</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Choose the policy rule</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">policy_rule options</div>
+          <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>inertial_taylor</code> — default, LONGBASE rule, validation baseline</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>taylor</code> — non-inertial variant</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>fixed_funds_rate</code> — no endogenous monetary offset</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>fiscal shocks peak higher with the funds rate fixed</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Install the package</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <div class="meth-sec-title">clone and install</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/us-frb-model
+cd us-frb-model
+uv venv &amp;&amp; uv pip install -e ".[dev]"</code></pre></div>
+        </div>
+        <div class="meth-panel" data-step="4" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Run a 100bp shock in Python</span><span class="meth-panel-badge mono">Step 5</span></div>
+          <div class="meth-sec-title">monetary_policy_shock.py</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">from</span> frbus <span class="kw">import</span> Frbus, load_data
+
+data = load_data(<span class="kw">"vendor/data_only_package/LONGBASE.TXT"</span>)
+model = Frbus(<span class="kw">"vendor/pyfrbus_package/models/model.xml"</span>)
+
+start, end = pd.Period(<span class="kw">"2026Q1"</span>), pd.Period(<span class="kw">"2030Q4"</span>)
+
+<span class="cm"># the fiscal-policy configuration the Board's own demos use</span>
+data.loc[start:end, <span class="kw">"dfpdbt"</span>] = 0
+data.loc[start:end, <span class="kw">"dfpsrp"</span>] = 1
+
+<span class="cm"># add-factor the model so the baseline reproduces LONGBASE exactly</span>
+with_adds = model.init_trac(start, end, data)
+
+<span class="cm"># 100bp monetary policy shock in the first quarter</span>
+with_adds.loc[start, <span class="kw">"rffintay_aerr"</span>] += 1
+sim = model.solve(start, end, with_adds)
+
+<span class="kw">print</span>((sim.loc[start:end, <span class="kw">"xgdp"</span>] / with_adds.loc[start:end, <span class="kw">"xgdp"</span>] - 1) * 100)</code></pre></div>
+        </div>
+      </aside>
     </div>
   </section>
 
@@ -196,6 +295,36 @@ document.addEventListener("click", function (e) {
     setTimeout(function () { btn.textContent = "copy"; }, 1400);
   });
 });
+</script>
+<script>
+// Code scrollytelling: highlight the step at the reading line and
+// show its code panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  update();
+})();
 </script>
 </body>
 </html>

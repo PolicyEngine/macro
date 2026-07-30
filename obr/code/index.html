@@ -79,33 +79,78 @@
     </div>
   </nav>
 
-  <section id="run" class="band">
+  <section id="run" class="band band-wide">
     <div class="band-head">
       <span class="kicker mono">code</span>
       <h2>Shock a variable, read the deviation.</h2>
     </div>
     <div class="prose">
       <p>
-        The quickest route is the <a href="/connect">hosted MCP server</a>:
-        <code>obr_shock</code> shocks one variable in model units and reads
-        the per-quarter GDP deviation, <code>list_reform_variables</code>
-        lists the shockable levers with units, and <code>score_reform</code>
-        with <code>model="obr"</code> scores a PolicyEngine reform end to end
-        through the static-costing bridge. All run hosted — no install, no
-        credentials. The CLI mirrors them:
-        <code>pe-macro obr-shock --var CGG --shock 1250</code>,
-        <code>pe-macro variables</code>, and
-        <code>pe-macro score --reform '{...}' --model obr</code>.
+        Four steps, from hosted tools to a local run: each step's commands
+        appear alongside as you read.
       </p>
-      <p>
-        Locally, the package installs straight from GitHub — the equation
-        listing, the March 2026 EFO forecast tables, and the ONS snapshot
-        ship inside it, so there is no data step. A reform is one call: pick
-        an exogenous variable, apply a shock, read the deviation from
-        baseline.
-      </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/obr-macroeconomic-model</code></pre></div>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> obr_macro <span class="kw">import</span> run_reform
+    </div>
+
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="code-1" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Start hosted: the MCP server</h3></div>
+        <p>
+          The quickest route is the <a href="/connect">hosted MCP server</a> —
+          no install, no credentials. <code>obr_shock</code> shocks one
+          variable in model units and reads the per-quarter GDP deviation;
+          <code>list_reform_variables</code> lists the shockable levers with
+          units; <code>score_reform</code> with <code>model="obr"</code>
+          scores a PolicyEngine reform end to end through the static-costing
+          bridge.
+        </p>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">hosted tools</div>
+          <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>obr_shock</code> — shock a variable, read ΔGDP per quarter</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>list_reform_variables</code> — shockable levers with units</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>score_reform</code> (<code>model="obr"</code>) — PolicyEngine reform, end to end</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>All hosted — no install, no credentials</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="code-2" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Or from the CLI</h3></div>
+        <p>
+          The <code>pe-macro</code> CLI mirrors the hosted tools one for one:
+          shock a variable, list the levers, or score a reform from the
+          terminal.
+        </p>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">CLI equivalents</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro obr-shock --var CGG --shock 1250
+pe-macro variables
+pe-macro score --reform '{...}' --model obr</code></pre></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="code-3" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Install and run locally</h3></div>
+        <p>
+          Locally, the package installs straight from GitHub — the equation
+          listing, the March 2026 EFO forecast tables, and the ONS snapshot
+          ship inside it, so there is no data step. A reform is one call:
+          pick an exogenous variable, apply a shock, read the deviation from
+          baseline.
+        </p>
+        <p class="opt-note">
+          Two solves, so about a minute.
+          <code>python -m obr_macro.reform_analysis</code> runs the five
+          bundled scenarios — a £5bn spending rise, a 5pp corporation-tax cut
+          and rise, £10bn public real investment (~£3bn nominal
+          <code>CGIPS</code> per quarter), and a £10bn austerity cut — with
+          charts landing in <code>outputs/</code>.
+        </p>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">install and run</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/obr-macroeconomic-model</code></pre></div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> obr_macro <span class="kw">import</span> run_reform
 
 <span class="cm"># £5bn/yr government spending shock (£1.25bn per quarter)</span>
 results = run_reform(
@@ -117,38 +162,96 @@ results = run_reform(
 <span class="kw">print</span>(results[[<span class="kw">"period"</span>, <span class="kw">"delta_gdp_bn"</span>, <span class="kw">"pct_gdp"</span>]])
 <span class="cm"># ΔGDP ≈ £1.25bn in the impact quarter, near-flat thereafter —</span>
 <span class="cm"># under the demand closure the impact multiplier is ~1 by construction</span></code></pre></div>
-      <p class="opt-note">
-        Two solves, so about a minute.
-        <code>python -m obr_macro.reform_analysis</code> runs the five
-        bundled scenarios — a £5bn spending rise, a 5pp corporation-tax cut
-        and rise, £10bn public real investment (~£3bn nominal
-        <code>CGIPS</code> per quarter), and a £10bn austerity cut — with
-        charts landing in <code>outputs/</code>.
-      </p>
-      <p>
-        Reforms enter through the 253 exogenous inputs; results come out of
-        the 383 the model solves — the test is simply whether a variable has
-        its own equation. The most useful levers:
-      </p>
-      <div class="table-scroll"><table>
-        <caption>The most useful OBR model levers and readouts, with units</caption>
-        <thead><tr><th scope="col">code</th><th scope="col">variable</th><th scope="col">role &amp; units</th></tr></thead>
-        <tbody>
-          <tr><th scope="row"><code>CGG</code></th><td>Government consumption</td><td>exogenous — spending shocks, £m per quarter</td></tr>
-          <tr><th scope="row"><code>CGIPS</code></th><td>Central government investment (nominal)</td><td>exogenous — public investment, £m per quarter</td></tr>
-          <tr><th scope="row"><code>TCPRO</code></th><td>Corporation tax rate</td><td>exogenous — rate, e.g. −0.05 for a 5pp cut</td></tr>
-          <tr><th scope="row"><code>HHDI_ADDFACTOR</code></th><td>Externally costed household reform</td><td>virtual instrument — quarterly £m; positive revenue raised lowers HHDI through a held add-factor</td></tr>
-          <tr><th scope="row"><code>R</code> / <code>GILT</code> / <code>RX</code></th><td>Bank Rate · gilt yields · exchange rate</td><td>exogenous — monetary &amp; market assumptions</td></tr>
-          <tr><th scope="row"><code>GDPM</code></th><td>GDP at market prices</td><td>endogenous — headline output</td></tr>
-          <tr><th scope="row"><code>CONS</code></th><td>Private consumption</td><td>endogenous</td></tr>
-          <tr><th scope="row"><code>IBUS</code> / <code>IF</code></th><td>Business / total investment</td><td>endogenous</td></tr>
-          <tr><th scope="row"><code>LFSUR</code></th><td>Unemployment rate</td><td>endogenous — rate, pp</td></tr>
-        </tbody>
-      </table></div>
-      <p class="opt-note">
-        The full glossary — all 636 codes with descriptions, ONS series and
-        equations — is the model package's variable and equation references.
-      </p>
+        </div>
+      </div>
+
+      <div class="meth-step" id="code-4" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Pick a lever</h3></div>
+        <p>
+          Reforms enter through the 253 exogenous inputs; results come out of
+          the 383 the model solves — the test is simply whether a variable
+          has its own equation. The most useful levers and readouts are in
+          the table alongside.
+        </p>
+        <p class="opt-note">
+          The full glossary — all 636 codes with descriptions, ONS series and
+          equations — is the model package's variable and equation references.
+        </p>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">levers and readouts</div>
+          <div class="table-scroll"><table>
+            <caption>The most useful OBR model levers and readouts, with units</caption>
+            <thead><tr><th scope="col">code</th><th scope="col">variable</th><th scope="col">role &amp; units</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>CGG</code></th><td>Government consumption</td><td>exogenous — spending shocks, £m per quarter</td></tr>
+              <tr><th scope="row"><code>CGIPS</code></th><td>Central government investment (nominal)</td><td>exogenous — public investment, £m per quarter</td></tr>
+              <tr><th scope="row"><code>TCPRO</code></th><td>Corporation tax rate</td><td>exogenous — rate, e.g. −0.05 for a 5pp cut</td></tr>
+              <tr><th scope="row"><code>HHDI_ADDFACTOR</code></th><td>Externally costed household reform</td><td>virtual instrument — quarterly £m; positive revenue raised lowers HHDI through a held add-factor</td></tr>
+              <tr><th scope="row"><code>R</code> / <code>GILT</code> / <code>RX</code></th><td>Bank Rate · gilt yields · exchange rate</td><td>exogenous — monetary &amp; market assumptions</td></tr>
+              <tr><th scope="row"><code>GDPM</code></th><td>GDP at market prices</td><td>endogenous — headline output</td></tr>
+              <tr><th scope="row"><code>CONS</code></th><td>Private consumption</td><td>endogenous</td></tr>
+              <tr><th scope="row"><code>IBUS</code> / <code>IF</code></th><td>Business / total investment</td><td>endogenous</td></tr>
+              <tr><th scope="row"><code>LFSUR</code></th><td>Unemployment rate</td><td>endogenous — rate, pp</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      </div>
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">hosted tools</div>
+          <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>obr_shock</code> — shock a variable, read ΔGDP per quarter</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>list_reform_variables</code> — shockable levers with units</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>score_reform</code> (<code>model="obr"</code>) — PolicyEngine reform, end to end</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>All hosted — no install, no credentials</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">CLI equivalents</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro obr-shock --var CGG --shock 1250
+pe-macro variables
+pe-macro score --reform '{...}' --model obr</code></pre></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">install and run</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/obr-macroeconomic-model</code></pre></div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> obr_macro <span class="kw">import</span> run_reform
+
+<span class="cm"># £5bn/yr government spending shock (£1.25bn per quarter)</span>
+results = run_reform(
+    name=<span class="kw">"Fiscal Stimulus"</span>,
+    var=<span class="kw">"CGG"</span>,        <span class="cm"># government consumption (exogenous)</span>
+    shock=1250,        <span class="cm"># £1.25bn per quarter, in £m</span>
+    periods=12,
+)
+<span class="kw">print</span>(results[[<span class="kw">"period"</span>, <span class="kw">"delta_gdp_bn"</span>, <span class="kw">"pct_gdp"</span>]])
+<span class="cm"># ΔGDP ≈ £1.25bn in the impact quarter, near-flat thereafter —</span>
+<span class="cm"># under the demand closure the impact multiplier is ~1 by construction</span></code></pre></div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <div class="meth-sec-title">levers and readouts</div>
+          <div class="table-scroll"><table>
+            <caption>The most useful OBR model levers and readouts, with units</caption>
+            <thead><tr><th scope="col">code</th><th scope="col">variable</th><th scope="col">role &amp; units</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>CGG</code></th><td>Government consumption</td><td>exogenous — spending shocks, £m per quarter</td></tr>
+              <tr><th scope="row"><code>CGIPS</code></th><td>Central government investment (nominal)</td><td>exogenous — public investment, £m per quarter</td></tr>
+              <tr><th scope="row"><code>TCPRO</code></th><td>Corporation tax rate</td><td>exogenous — rate, e.g. −0.05 for a 5pp cut</td></tr>
+              <tr><th scope="row"><code>HHDI_ADDFACTOR</code></th><td>Externally costed household reform</td><td>virtual instrument — quarterly £m; positive revenue raised lowers HHDI through a held add-factor</td></tr>
+              <tr><th scope="row"><code>R</code> / <code>GILT</code> / <code>RX</code></th><td>Bank Rate · gilt yields · exchange rate</td><td>exogenous — monetary &amp; market assumptions</td></tr>
+              <tr><th scope="row"><code>GDPM</code></th><td>GDP at market prices</td><td>endogenous — headline output</td></tr>
+              <tr><th scope="row"><code>CONS</code></th><td>Private consumption</td><td>endogenous</td></tr>
+              <tr><th scope="row"><code>IBUS</code> / <code>IF</code></th><td>Business / total investment</td><td>endogenous</td></tr>
+              <tr><th scope="row"><code>LFSUR</code></th><td>Unemployment rate</td><td>endogenous — rate, pp</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </aside>
     </div>
   </section>
 </main>
@@ -166,6 +269,36 @@ results = run_reform(
 </footer>
 
 <script src="/reveal.js" defer></script>
+<script>
+// Code scrollytelling: highlight the step at the reading line and
+// show its code panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  update();
+})();
+</script>
 <script>
 document.addEventListener("click", function (e) {
   var btn = e.target.closest("[data-copy]"); if (!btn) return;

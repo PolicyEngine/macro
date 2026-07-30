@@ -76,7 +76,7 @@
     </div>
   </nav>
 
-  <section id="code" class="band">
+  <section id="code" class="band band-wide">
     <div class="band-head">
       <span class="kicker mono">code</span>
       <h2>From a few lines of Python to a full UK transition path.</h2>
@@ -105,36 +105,73 @@
         A <code>HUGGING_FACE_TOKEN</code> with access to the gated UK
         microdata is a hard prerequisite in both.
       </div>
+    </div>
 
-      <h3 id="run">Step 1 — Install</h3>
-      <p>
-        A Python package (3.11+); the recommended setup uses
-        <a href="https://docs.astral.sh/uv/">uv</a>. The PolicyEngine
-        enhanced-FRS microdata is downloaded on first run and is gated: you
-        need a <code>HUGGING_FACE_TOKEN</code> with read access to
-        <code>policyengine/policyengine-uk-data</code>.
-      </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PSLmodels/OG-UK.git
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="run" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Install</h3></div>
+        <p>
+          A Python package (3.11+); the recommended setup uses
+          <a href="https://docs.astral.sh/uv/">uv</a>. The PolicyEngine
+          enhanced-FRS microdata downloads on first run and is gated: you need
+          a <code>HUGGING_FACE_TOKEN</code> with read access to
+          <code>policyengine/policyengine-uk-data</code>.
+        </p>
+        <p class="opt-note">
+          runnable file: <a href="/olg/code/01_install.sh">01_install.sh</a>.
+          prefer conda?
+          <code>conda env create -f environment.yml &amp;&amp; conda activate oguk-dev &amp;&amp; pip install -e .</code>
+          works too.
+        </p>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">code</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PSLmodels/OG-UK.git
 cd OG-UK
 uv sync
 export HUGGING_FACE_TOKEN=hf_your_token_here</code></pre></div>
-      <p class="opt-note">
-        runnable file: <a href="/olg/code/01_install.sh">01_install.sh</a>.
-        prefer conda?
-        <code>conda env create -f environment.yml &amp;&amp; conda activate oguk-dev &amp;&amp; pip install -e .</code>
-        works too.
-      </p>
+          <p class="opt-note mono"><a href="/olg/code/01_install.sh">01_install.sh</a></p>
+        </div>
+      </div>
 
-      <h3 id="code-reform">Step 2 — Define a reform</h3>
-      <p>
-        Reforms use the <a href="/pe">PolicyEngine</a> API: pick a parameter
-        from the UK tax-and-benefit rule book, give it a new value and a start
-        date. Anything PolicyEngine can represent — rates, thresholds,
-        allowance tapers, new benefits — flows straight through. To simulate a
-        different reform, swap the parameter path and value; the rest of the
-        pipeline does not change.
-      </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>from datetime import datetime
+      <div class="meth-step" id="code-reform" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Define a reform</h3></div>
+        <p>
+          Reforms use the <a href="/pe">PolicyEngine</a> API: pick a parameter
+          from the UK tax-and-benefit rule book, give it a new value and a
+          start date. Anything PolicyEngine can represent — rates, thresholds,
+          allowance tapers, new benefits — flows straight through. To simulate
+          a different reform, swap the parameter path and value; the rest of
+          the pipeline does not change.
+        </p>
+        <p class="opt-note">
+          runnable file: <a href="/olg/code/02_reform.py">02_reform.py</a> —
+          every later script imports <code>REFORM</code> from it.
+        </p>
+        <p>
+          Stack several <code>ParameterValue</code>s in one <code>Policy</code>
+          to score a package. Common parameter paths:
+          <code>gov.hmrc.income_tax.rates.uk[0..2].rate</code> (basic 20%,
+          higher 40%, additional 45%),
+          <code>gov.hmrc.income_tax.allowances.personal_allowance.amount</code>
+          (£12,570), and
+          <code>gov.hmrc.national_insurance.class_1.rates.employee.main</code>
+          / <code>.higher</code>.
+        </p>
+        <p>
+          Shocks that are <em>not</em> tax-and-benefit statute go through
+          <code>param_overrides</code>, a dict of OG-Core parameters applied on
+          top of everything else. Corporation tax lives here, not in
+          PolicyEngine — it is a structural parameter of the macro model.
+        </p>
+        <div class="callout">
+          Use <code>Z</code> (TFP) for productivity shocks — never
+          <code>g_y_annual</code>, which is the balanced-growth normalisation
+          the model detrends by, not a productivity lever.
+        </div>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">code</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>from datetime import datetime
 from policyengine.core import ParameterValue, Policy
 from policyengine.tax_benefit_models.uk import uk_latest
 
@@ -151,27 +188,8 @@ REFORM = Policy(
         )
     ],
 )</code></pre></div>
-      <p class="opt-note">
-        runnable file: <a href="/olg/code/02_reform.py">02_reform.py</a> —
-        every later script imports <code>REFORM</code> from it.
-      </p>
-      <p>
-        Stack several <code>ParameterValue</code>s in one <code>Policy</code>
-        to score a package. Common parameter paths:
-        <code>gov.hmrc.income_tax.rates.uk[0..2].rate</code> (basic 20%,
-        higher 40%, additional 45%),
-        <code>gov.hmrc.income_tax.allowances.personal_allowance.amount</code>
-        (£12,570), and
-        <code>gov.hmrc.national_insurance.class_1.rates.employee.main</code>
-        / <code>.higher</code>.
-      </p>
-      <p>
-        Shocks that are <em>not</em> tax-and-benefit statute go through
-        <code>param_overrides</code>, a dict of OG-Core parameters applied on
-        top of everything else. Corporation tax lives here, not in
-        PolicyEngine — it is a structural parameter of the macro model:
-      </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code># corporation tax cut to 25%
+          <div class="meth-sec-title">structural shocks via param_overrides</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code># corporation tax cut to 25%
 ss = solve_steady_state(param_overrides={"cit_rate": [[0.25]]})
 
 # productivity: +0.4% TFP level shock
@@ -181,22 +199,57 @@ ss = solve_steady_state(param_overrides={"Z": [[1.004]]})
 ss = solve_steady_state(policy=reform,
                         param_overrides={"cit_rate": [[0.25]]},
                         age_specific="brackets", multi_sector=True)</code></pre></div>
-      <div class="callout">
-        Use <code>Z</code> (TFP) for productivity shocks — never
-        <code>g_y_annual</code>, which is the balanced-growth normalisation
-        the model detrends by, not a productivity lever.
+          <p class="opt-note mono"><a href="/olg/code/02_reform.py">02_reform.py</a></p>
+        </div>
       </div>
 
-      <h3 id="code-steady-state">Step 3 — Solve the long-run steady state</h3>
-      <p>
-        The fastest way to see what a reform does.
-        <code>solve_steady_state</code> finds the long-run equilibrium of the
-        UK economy under a given policy: the prices, quantities and tax
-        revenues that emerge once the economy has fully adjusted. Run it once
-        for the baseline, once for the reform; the difference gives the
-        answer.
-      </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>from oguk import solve_steady_state, map_to_real_world
+      <div class="meth-step" id="code-steady-state" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Solve the long-run steady state</h3></div>
+        <p>
+          The fastest way to see what a reform does.
+          <code>solve_steady_state</code> finds the long-run equilibrium of the
+          UK economy under a given policy: the prices, quantities and tax
+          revenues that emerge once the economy has fully adjusted. Run it once
+          for the baseline, once for the reform; the difference is the answer.
+        </p>
+        <p>
+          The output shown is <em>illustrative</em> — the format matches
+          <a href="/olg/code/03_steady_state.py">03_steady_state.py</a>, but
+          the numbers depend on the calibration date and your data release. On
+          the fast configuration, budget ~17 minutes per steady state.
+        </p>
+        <p>The main configuration dials and their trade-offs:</p>
+        <div class="table-scroll"><table>
+          <caption>The main OLG configuration dials and their trade-offs</caption>
+          <thead><tr><th scope="col">dial</th><th scope="col">choices</th><th scope="col">trade-off</th></tr></thead>
+          <tbody>
+            <tr>
+              <th scope="row"><strong>mode</strong></th>
+              <td><code>solve_steady_state()</code> · <code>run_transition_path()</code></td>
+              <td>long-run answer, &gt;17 min per solve · full 60-year path, multiple hours for baseline + reform</td>
+            </tr>
+            <tr>
+              <th scope="row"><strong>age_specific</strong></th>
+              <td><code>"pooled"</code> · <code>"brackets"</code> · <code>"each"</code></td>
+              <td>one tax function for all ages (fastest, most stable) · one per age bracket (4 groups, split at state pension age) · one per single year of age (80 functions, slowest)</td>
+            </tr>
+            <tr>
+              <th scope="row"><strong>multi_sector</strong></th>
+              <td><code>False</code> · <code>True</code></td>
+              <td>one production sector · eight industries calibrated from ONS Blue Book supply-and-use tables by SIC section; needed for sector-level questions like energy price shocks</td>
+            </tr>
+          </tbody>
+        </table></div>
+        <p class="opt-note">
+          start with <code>pooled</code> + single-sector and scale up only once
+          the fast run answers your question. non-converging solve? raise
+          <code>max_iter</code> (default 250), fall back to <code>pooled</code>,
+          and check whether the reform is extreme — OLG models can diverge on
+          very large shocks.
+        </p>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">code</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>from oguk import solve_steady_state, map_to_real_world
 
 from og_dashboard.reform import REFORM
 
@@ -209,13 +262,8 @@ print(f"GDP:         £{impact.gdp:,.1f}bn  ({impact.gdp_pct:+.3f}%)")
 print(f"Tax revenue: £{impact.tax_revenue:,.1f}bn  ({impact.tax_revenue_pct:+.3f}%)")
 print(f"Investment:  £{impact.investment:,.1f}bn  ({impact.investment_pct:+.3f}%)")
 print(f"Interest:    {impact.r_baseline:.2%} -&gt; {impact.r_reform:.2%}")</code></pre></div>
-      <p>
-        The output below is <em>illustrative</em> — the format matches
-        <a href="/olg/code/03_steady_state.py">03_steady_state.py</a>, but the
-        numbers depend on the calibration date and your data release. On the
-        fast configuration a fresh solve budgets ~17 minutes per steady state.
-      </p>
-      <div class="codeblock"><pre><code>Solving baseline steady state (age_specific='pooled', 1-sector)...
+          <div class="meth-sec-title">illustrative output</div>
+          <div class="codeblock"><pre><code>Solving baseline steady state (age_specific='pooled', 1-sector)...
 Solving reform steady state (age_specific='pooled', 1-sector)...
 
 Steady state impact (£bn, current prices)
@@ -230,48 +278,31 @@ Tax revenue        1036.4       1051.7      +15.3   +1.473%
 Debt               2691.4       2691.0       -0.4   -0.014%
 
 Interest rate:  3.84% -&gt; 3.87%</code></pre></div>
-      <p>The main configuration dials and their trade-offs:</p>
-      <div class="table-scroll"><table>
-        <caption>The main OLG configuration dials and their trade-offs</caption>
-        <thead><tr><th scope="col">dial</th><th scope="col">choices</th><th scope="col">trade-off</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row"><strong>mode</strong></th>
-            <td><code>solve_steady_state()</code> · <code>run_transition_path()</code></td>
-            <td>long-run answer, &gt;17 min per solve · full 60-year path, multiple hours for baseline + reform</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>age_specific</strong></th>
-            <td><code>"pooled"</code> · <code>"brackets"</code> · <code>"each"</code></td>
-            <td>one tax function for all ages (fastest, most stable) · one per age bracket (4 groups, split at state pension age) · one per single year of age (80 functions, slowest)</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>multi_sector</strong></th>
-            <td><code>False</code> · <code>True</code></td>
-            <td>one production sector · eight industries calibrated from ONS Blue Book supply-and-use tables by SIC section; needed for sector-level questions like energy price shocks</td>
-          </tr>
-        </tbody>
-      </table></div>
-      <p class="opt-note">
-        start with <code>pooled</code> + single-sector and scale up only once
-        the fast run answers your question. non-converging solve? raise
-        <code>max_iter</code> (default 250), fall back to <code>pooled</code>,
-        and check whether the reform is extreme — OLG models can diverge on
-        very large shocks.
-      </p>
+          <p class="opt-note mono"><a href="/olg/code/03_steady_state.py">03_steady_state.py</a></p>
+        </div>
+      </div>
 
-      <h3 id="code-transition">Step 4 — Run the year-by-year transition path</h3>
-      <p>
-        The steady state tells you where the economy ends up. The
-        <strong>transition path</strong> tells you how it gets there — year by
-        year, 60 periods by default (configurable). This is what produced the
-        reform paths in the <a href="/olg#showcase">Showcase</a> tab. The
-        transition costs more compute — the model solves every cohort's
-        lifetime under rational expectations — so OG-UK uses
-        <a href="https://www.dask.org/">Dask</a> to parallelise across CPU
-        cores.
-      </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>from dask.distributed import Client
+      <div class="meth-step" id="code-transition" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Run the year-by-year transition path</h3></div>
+        <p>
+          The steady state tells you where the economy ends up. The
+          <strong>transition path</strong> tells you how it gets there — year
+          by year, 60 periods by default (configurable). This is what produced
+          the reform paths in the <a href="/olg#showcase">Showcase</a> tab.
+          The transition costs more compute — the model solves every cohort's
+          lifetime under rational expectations — so OG-UK uses
+          <a href="https://www.dask.org/">Dask</a> to parallelise across CPU
+          cores.
+        </p>
+        <p class="opt-note">
+          runnable file: <a href="/olg/code/04_transition.py">04_transition.py</a>.
+          transition paths are available through the <code>oguk</code> API but
+          are <strong>not</strong> wired into the PolicyEngine Macro CLI yet —
+          the CLI is steady-state only (see step 7).
+        </p>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">code</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>from dask.distributed import Client
 from oguk import run_transition_path, map_transition_to_real_world
 
 from og_dashboard.reform import REFORM
@@ -295,36 +326,44 @@ for i in range(10):
         f"ΔGDP {impact.gdp_change[i]:+6.2f}  "
         f"ΔRevenue {impact.tax_revenue_change[i]:+6.2f}"
     )</code></pre></div>
-      <p class="opt-note">
-        runnable file: <a href="/olg/code/04_transition.py">04_transition.py</a>.
-        transition paths are available through the <code>oguk</code> API but
-        are <strong>not</strong> wired into the PolicyEngine Macro CLI yet —
-        the CLI is steady-state only (see step 7).
-      </p>
+          <p class="opt-note mono"><a href="/olg/code/04_transition.py">04_transition.py</a></p>
+        </div>
+      </div>
 
-      <h3 id="code-answers">Step 5 — From abstract units to pounds</h3>
-      <p>
-        OG-UK solves in dimensionless model units. To translate them into
-        figures a policymaker can read, <code>map_to_real_world()</code>
-        returns a <code>MacroImpact</code> carrying, for each aggregate, the
-        reform level, the change from baseline, and the percent change — all
-        current-price £bn — plus baseline and reform interest rates:
-      </p>
-      <ul>
-        <li><code>.gdp</code> / <code>.gdp_change</code> / <code>.gdp_pct</code></li>
-        <li><code>.consumption</code>, <code>.investment</code>, <code>.government</code> — same triple each</li>
-        <li><code>.tax_revenue</code>, <code>.debt</code> — same triple each</li>
-        <li><code>.r_baseline</code>, <code>.r_reform</code> — steady-state interest rates</li>
-      </ul>
-      <p>
-        The £bn mapping is GDP-anchored: one scale factor (real-world GDP ÷
-        model GDP) converts model-unit changes, with levels anchored to live
-        ONS series (GDP, consumption, investment, government, debt ratio) and
-        HMRC total receipts, falling back to cached values if ONS is
-        unreachable. The transition-path variant returns NumPy arrays indexed
-        by year:
-      </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>impact = map_transition_to_real_world(base_tp, reform_tp)
+      <div class="meth-step" id="code-answers" data-step="4">
+        <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>From abstract units to pounds</h3></div>
+        <p>
+          OG-UK solves in dimensionless model units. To translate them into
+          figures a policymaker can read, <code>map_to_real_world()</code>
+          returns a <code>MacroImpact</code> carrying, for each aggregate, the
+          reform level, the change from baseline, and the percent change — all
+          current-price £bn — plus baseline and reform interest rates:
+        </p>
+        <ul>
+          <li><code>.gdp</code> / <code>.gdp_change</code> / <code>.gdp_pct</code></li>
+          <li><code>.consumption</code>, <code>.investment</code>, <code>.government</code> — same triple each</li>
+          <li><code>.tax_revenue</code>, <code>.debt</code> — same triple each</li>
+          <li><code>.r_baseline</code>, <code>.r_reform</code> — steady-state interest rates</li>
+        </ul>
+        <p>
+          The £bn mapping is GDP-anchored: one scale factor (real-world GDP ÷
+          model GDP) converts model-unit changes, with levels anchored to live
+          ONS series (GDP, consumption, investment, government, debt ratio)
+          and HMRC total receipts, falling back to cached values if ONS is
+          unreachable. The transition-path variant returns NumPy arrays
+          indexed by year.
+        </p>
+        <div class="callout">
+          <strong>It cannot</strong> give you a quarterly path, a costing on
+          the OBR's forecast basis, or a distributional table. Those are the
+          <a href="/obr">OBR emulator</a> and
+          <a href="/pe">PolicyEngine</a> respectively. And it should not be
+          read as a forecast of anything — see
+          <a href="/olg/validation">how far to trust it</a>.
+        </div>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">code</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>impact = map_transition_to_real_world(base_tp, reform_tp)
 
 impact.years              # fiscal-year strings: ["2026-27", ..., "2085-86"]
 impact.gdp                # reform GDP path (£bn, per year)
@@ -337,61 +376,212 @@ impact.debt_change
 
 # Interest-rate paths live on the TPI results themselves
 base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
-      <p class="opt-note">
-        reference file: <a href="/olg/code/05_map_to_gbp.py">05_map_to_gbp.py</a>.
-      </p>
-      <div class="callout">
-        <strong>It cannot</strong> give you a quarterly path, a costing on the
-        OBR's forecast basis, or a distributional table. Those are the
-        <a href="/obr">OBR emulator</a> and
-        <a href="/pe">PolicyEngine</a> respectively. And it should not be
-        read as a forecast of anything — see
-        <a href="/olg/validation">how far to trust it</a>.
+          <p class="opt-note mono"><a href="/olg/code/05_map_to_gbp.py">05_map_to_gbp.py</a></p>
+        </div>
       </div>
 
-      <h3 id="code-multi-sector">Step 6 — Bring in the eight industry sectors</h3>
-      <p>
-        Pass <code>multi_sector=True</code> and the same call returns the
-        breakdown across the eight UK industry sectors (energy, manufacturing,
-        construction, trade &amp; transport, info &amp; finance, real estate,
-        business services, public &amp; other) — sector-level output, capital
-        and labour alongside the macro aggregates, and the basis for the
-        industry charts in the <a href="/olg#showcase">Showcase</a> tab.
-      </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>base_tp, reform_tp = run_transition_path(
+      <div class="meth-step" id="code-multi-sector" data-step="5">
+        <div class="meth-step-head"><span class="meth-step-num mono">6</span><h3>Bring in the eight industry sectors</h3></div>
+        <p>
+          Pass <code>multi_sector=True</code> and the same call returns the
+          breakdown across the eight UK industry sectors (energy,
+          manufacturing, construction, trade &amp; transport, info &amp;
+          finance, real estate, business services, public &amp; other) —
+          sector-level output, capital and labour alongside the macro
+          aggregates, and the basis for the industry charts in the
+          <a href="/olg#showcase">Showcase</a> tab.
+        </p>
+        <p class="opt-note">
+          runnable file: <a href="/olg/code/06_multi_sector.py">06_multi_sector.py</a>.
+        </p>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">code</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>base_tp, reform_tp = run_transition_path(
     start_year=2026,
     policy=REFORM,
     client=client,
     multi_sector=True,    # 8-sector CES production
 )</code></pre></div>
-      <p class="opt-note">
-        runnable file: <a href="/olg/code/06_multi_sector.py">06_multi_sector.py</a>.
-      </p>
+          <p class="opt-note mono"><a href="/olg/code/06_multi_sector.py">06_multi_sector.py</a></p>
+        </div>
+      </div>
 
-      <h3 id="code-next">Step 7 — Where to go next</h3>
-      <p>
-        Every step above ships as a file you can download and run on its own:
-      </p>
-      <ul>
-        <li><a href="/olg/code/01_install.sh">01_install.sh</a> — install and token setup.</li>
-        <li><a href="/olg/code/02_reform.py">02_reform.py</a> — the shared <code>REFORM</code>; edit the parameter, value or start date here and every other script picks it up.</li>
-        <li><a href="/olg/code/03_steady_state.py">03_steady_state.py</a> — fastest, prints a one-line £bn impact summary.</li>
-        <li><a href="/olg/code/04_transition.py">04_transition.py</a> — heavier, produces the full year-by-year path.</li>
-        <li><a href="/olg/code/05_map_to_gbp.py">05_map_to_gbp.py</a> — the £bn-mapping field reference.</li>
-        <li><a href="/olg/code/06_multi_sector.py">06_multi_sector.py</a> — the 8-sector calibration behind the Showcase industry views.</li>
-      </ul>
-      <p>
-        Through this suite, two CLI commands are wired:
-        <code>pe-macro og-baseline</code> and
-        <code>pe-macro og-score --reform '{"gov.hmrc.income_tax.rates.uk[0].rate": 0.21}'</code>,
-        both on the fast configuration (pooled tax functions, single sector,
-        steady state). For more variations, the upstream
-        <a href="https://github.com/PSLmodels/OG-UK/tree/main/examples">OG-UK examples</a>
-        directory carries additional pipelines
-        (<code>run_oguk_fast_tpi.py</code>, <code>run_oguk_fast_sector.py</code>,
-        <code>plot.py</code>). Full API reference and theory documentation:
-        <a href="https://pslmodels.github.io/OG-UK">pslmodels.github.io/OG-UK</a>.
-      </p>
+      <div class="meth-step" id="code-next" data-step="6">
+        <div class="meth-step-head"><span class="meth-step-num mono">7</span><h3>Where to go next</h3></div>
+        <p>
+          Every step above ships as a file you can download and run on its own:
+        </p>
+        <ul>
+          <li><a href="/olg/code/01_install.sh">01_install.sh</a> — install and token setup.</li>
+          <li><a href="/olg/code/02_reform.py">02_reform.py</a> — the shared <code>REFORM</code>; edit the parameter, value or start date here and every other script picks it up.</li>
+          <li><a href="/olg/code/03_steady_state.py">03_steady_state.py</a> — fastest, prints a one-line £bn impact summary.</li>
+          <li><a href="/olg/code/04_transition.py">04_transition.py</a> — heavier, produces the full year-by-year path.</li>
+          <li><a href="/olg/code/05_map_to_gbp.py">05_map_to_gbp.py</a> — the £bn-mapping field reference.</li>
+          <li><a href="/olg/code/06_multi_sector.py">06_multi_sector.py</a> — the 8-sector calibration behind the Showcase industry views.</li>
+        </ul>
+        <p>
+          Through this suite, two CLI commands are wired:
+          <code>pe-macro og-baseline</code> and
+          <code>pe-macro og-score --reform '{"gov.hmrc.income_tax.rates.uk[0].rate": 0.21}'</code>,
+          both on the fast configuration (pooled tax functions, single sector,
+          steady state). For more variations, the upstream
+          <a href="https://github.com/PSLmodels/OG-UK/tree/main/examples">OG-UK examples</a>
+          directory carries additional pipelines
+          (<code>run_oguk_fast_tpi.py</code>, <code>run_oguk_fast_sector.py</code>,
+          <code>plot.py</code>). Full API reference and theory documentation:
+          <a href="https://pslmodels.github.io/OG-UK">pslmodels.github.io/OG-UK</a>.
+        </p>
+        <div class="meth-inline" aria-hidden="true">
+          <div class="meth-sec-title">where the code lives</div>
+          <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Six runnable files under <a href="/olg/code/01_install.sh">/olg/code/</a></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>CLI: <code>pe-macro og-baseline</code>, <code>pe-macro og-score</code> (steady state only)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Upstream examples: <a href="https://github.com/PSLmodels/OG-UK/tree/main/examples">OG-UK/examples</a></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Docs: <a href="https://pslmodels.github.io/OG-UK">pslmodels.github.io/OG-UK</a></span></div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PSLmodels/OG-UK.git
+cd OG-UK
+uv sync
+export HUGGING_FACE_TOKEN=hf_your_token_here</code></pre></div>
+          <p class="opt-note mono"><a href="/olg/code/01_install.sh">01_install.sh</a></p>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>from datetime import datetime
+from policyengine.core import ParameterValue, Policy
+from policyengine.tax_benefit_models.uk import uk_latest
+
+# Reform: raise the basic rate of income tax from 20% to 21%
+basic_rate = uk_latest.get_parameter("gov.hmrc.income_tax.rates.uk[0].rate")
+
+REFORM = Policy(
+    name="Basic rate 21%",
+    parameter_values=[
+        ParameterValue(
+            parameter=basic_rate,
+            value=0.21,
+            start_date=datetime(2026, 1, 1),
+        )
+    ],
+)</code></pre></div>
+          <div class="meth-sec-title">structural shocks via param_overrides</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code># corporation tax cut to 25%
+ss = solve_steady_state(param_overrides={"cit_rate": [[0.25]]})
+
+# productivity: +0.4% TFP level shock
+ss = solve_steady_state(param_overrides={"Z": [[1.004]]})
+
+# statutory reform, structural shock, and finer tax functions in one run
+ss = solve_steady_state(policy=reform,
+                        param_overrides={"cit_rate": [[0.25]]},
+                        age_specific="brackets", multi_sector=True)</code></pre></div>
+          <p class="opt-note mono"><a href="/olg/code/02_reform.py">02_reform.py</a></p>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>from oguk import solve_steady_state, map_to_real_world
+
+from og_dashboard.reform import REFORM
+
+baseline = solve_steady_state(start_year=2026)
+reform   = solve_steady_state(start_year=2026, policy=REFORM)
+
+impact = map_to_real_world(baseline, reform)
+
+print(f"GDP:         £{impact.gdp:,.1f}bn  ({impact.gdp_pct:+.3f}%)")
+print(f"Tax revenue: £{impact.tax_revenue:,.1f}bn  ({impact.tax_revenue_pct:+.3f}%)")
+print(f"Investment:  £{impact.investment:,.1f}bn  ({impact.investment_pct:+.3f}%)")
+print(f"Interest:    {impact.r_baseline:.2%} -&gt; {impact.r_reform:.2%}")</code></pre></div>
+          <div class="meth-sec-title">illustrative output</div>
+          <div class="codeblock"><pre><code>Solving baseline steady state (age_specific='pooled', 1-sector)...
+Solving reform steady state (age_specific='pooled', 1-sector)...
+
+Steady state impact (£bn, current prices)
+============================================================
+Variable          Baseline       Reform     Change        %
+------------------------------------------------------------
+GDP                2853.8       2852.6       -1.2   -0.043%
+Consumption        1819.4       1817.2       -2.2   -0.121%
+Investment          469.1        466.2       -2.9   -0.612%
+Government          564.4        565.5       +1.1   +0.198%
+Tax revenue        1036.4       1051.7      +15.3   +1.473%
+Debt               2691.4       2691.0       -0.4   -0.014%
+
+Interest rate:  3.84% -&gt; 3.87%</code></pre></div>
+          <p class="opt-note mono"><a href="/olg/code/03_steady_state.py">03_steady_state.py</a></p>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>from dask.distributed import Client
+from oguk import run_transition_path, map_transition_to_real_world
+
+from og_dashboard.reform import REFORM
+
+client = Client(n_workers=2, threads_per_worker=1, memory_limit="2GB")
+
+base_tp, reform_tp = run_transition_path(
+    start_year=2026,
+    policy=REFORM,
+    client=client,
+)
+
+client.close()
+
+impact = map_transition_to_real_world(base_tp, reform_tp)
+
+# First ten years of GDP and tax-revenue impacts
+for i in range(10):
+    print(
+        f"{impact.years[i]}  "
+        f"ΔGDP {impact.gdp_change[i]:+6.2f}  "
+        f"ΔRevenue {impact.tax_revenue_change[i]:+6.2f}"
+    )</code></pre></div>
+          <p class="opt-note mono"><a href="/olg/code/04_transition.py">04_transition.py</a></p>
+        </div>
+        <div class="meth-panel" data-step="4" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 5</span></div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>impact = map_transition_to_real_world(base_tp, reform_tp)
+
+impact.years              # fiscal-year strings: ["2026-27", ..., "2085-86"]
+impact.gdp                # reform GDP path (£bn, per year)
+impact.gdp_change         # £bn change vs baseline, per year
+impact.tax_revenue_change
+impact.consumption_change
+impact.investment_change
+impact.government_change
+impact.debt_change
+
+# Interest-rate paths live on the TPI results themselves
+base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
+          <p class="opt-note mono"><a href="/olg/code/05_map_to_gbp.py">05_map_to_gbp.py</a></p>
+        </div>
+        <div class="meth-panel" data-step="5" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 6</span></div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>base_tp, reform_tp = run_transition_path(
+    start_year=2026,
+    policy=REFORM,
+    client=client,
+    multi_sector=True,    # 8-sector CES production
+)</code></pre></div>
+          <p class="opt-note mono"><a href="/olg/code/06_multi_sector.py">06_multi_sector.py</a></p>
+        </div>
+        <div class="meth-panel" data-step="6" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Where to go next</span><span class="meth-panel-badge mono">Step 7</span></div>
+          <div class="meth-sec-title">where the code lives</div>
+          <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Six runnable files under <a href="/olg/code/01_install.sh">/olg/code/</a></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>CLI: <code>pe-macro og-baseline</code>, <code>pe-macro og-score</code> (steady state only)</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Upstream examples: <a href="https://github.com/PSLmodels/OG-UK/tree/main/examples">OG-UK/examples</a></span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Docs: <a href="https://pslmodels.github.io/OG-UK">pslmodels.github.io/OG-UK</a></span></div>
+          </div>
+        </div>
+      </aside>
     </div>
   </section>
 
@@ -419,6 +609,36 @@ document.addEventListener("click", function (e) {
     setTimeout(function () { btn.textContent = "copy"; }, 1400);
   });
 });
+</script>
+<script>
+// Code scrollytelling: highlight the step at the reading line and
+// show its code panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  update();
+})();
 </script>
 </body>
 </html>
