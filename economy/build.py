@@ -785,7 +785,8 @@ def home_uk_now() -> str:
     u_period, u_fc = next_open(okun["forecast"], "unemployment", u_now["period"])
 
     def rng(fc: dict) -> str:
-        return f"68% range {fmt(fc['lo68'])}%–{fmt(fc['hi68'])}%"
+        return (f'<br><small class="glance-range">68% range '
+                f"{fmt(fc['lo68'])}%–{fmt(fc['hi68'])}%</small>")
 
     caption = (
         "ONS outturns (as of "
@@ -804,14 +805,13 @@ def home_uk_now() -> str:
             "          <tbody>",
             f'          <tr><th scope="row">Real GDP growth, y/y</th>'
             f'<td>{fmt(g_now["value"])}% <span class="mono">{g_now["period"]}</span></td>'
-            f'<td>{fmt(g_fc["median"])}% <span class="mono">{g_period}</span> · {rng(g_fc)}</td></tr>',
+            f'<td>{fmt(g_fc["median"])}% <span class="mono">{g_period}</span>{rng(g_fc)}</td></tr>',
             f'          <tr><th scope="row">CPI inflation, y/y</th>'
             f'<td>{fmt(c_now["value"])}% <span class="mono">{c_now["period"]}</span></td>'
-            f'<td>{fmt(c_fc["median"])}% <span class="mono">{c_period}</span> · {rng(c_fc)}</td></tr>',
+            f'<td>{fmt(c_fc["median"])}% <span class="mono">{c_period}</span>{rng(c_fc)}</td></tr>',
             f'          <tr><th scope="row">Unemployment rate</th>'
             f'<td>{fmt(u_now["value"])}% <span class="mono">{u_now["period"]}</span></td>'
-            f'<td>{fmt(u_fc["median"])}% <span class="mono">{u_period}</span> · {rng(u_fc)}'
-            ' · <a href="/forecasts">Okun satellite</a></td></tr>',
+            f'<td>{fmt(u_fc["median"])}% <span class="mono">{u_period}</span>{rng(u_fc)}</td></tr>',
             "          </tbody>",
             "        </table>",
             "      </div>",
