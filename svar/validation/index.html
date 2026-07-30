@@ -81,12 +81,10 @@
     </div>
     <div class="prose">
       <p>
-        Two independent checks: against the published paper, Figures 2–6
-        replicate and the headline variance decompositions land on the
-        paper's benchmarks; and — rarer — the 2024Q2-frozen forecast study is
-        scored against ONS outturns that arrived since, a genuine
-        out-of-sample test that exists <em>because</em> the data edge is
-        frozen.
+        Two independent checks: replication against the published paper, and
+        — rarer — a 2024Q2-frozen forecast study scored against ONS outturns
+        that arrived since, a genuine out-of-sample test that exists
+        <em>because</em> the data edge is frozen.
       </p>
       <div class="table-scroll mo-tablecard"><table>
         <caption>This replication against Brignone &amp; Piffer (2025), check by check</caption>
@@ -166,10 +164,9 @@
     </div>
     <div class="prose">
       <p>
-        Against Brignone &amp; Piffer (2025), the one-year share of UK
-        forecast-error variance from global shocks is
-        <strong>42.1%</strong> for GDP and <strong>49.5%</strong> for CPI.
-        The paper reports roughly 40% and 50%.
+        Against Brignone &amp; Piffer (2025), the one-year global-shock
+        shares of UK forecast-error variance land within about a point of the
+        paper's benchmarks.
       </p>
       <figure class="vfig">
         <svg class="vchart" data-chart="svar-fevd" viewBox="0 0 760 304" role="img" aria-labelledby="svar-fevd-t svar-fevd-d">
@@ -228,28 +225,20 @@
       <p>
         <strong>Out-of-sample.</strong> Forecasting seven quarters ahead from
         a frozen 2024Q2 edge, RMSE (root-mean-square error) is
-        <strong>0.3pp</strong> for both GDP
-        growth and CPI inflation. Activity tracks well; the median misses the
-        2025 inflation peak by up to 0.6pp but captures its reversal.
+        <strong>0.32pp</strong> for both GDP growth and CPI inflation
+        (what the median got right and wrong is in the
+        <a href="#trust">honest reading above</a>).
       </p>
       <p>
         <strong>Fourteen of fourteen outturns inside the 68% band is a
-        calibration failure, not a pass.</strong> A correctly calibrated 68%
-        interval should contain roughly <strong>9.5 of 14</strong>. Containing
-        all of them means the bands are too wide &mdash; the intervals are
-        roughly &plusmn;0.95pp around a forecast whose RMSE is 0.3pp, about
-        three times wider than the errors warrant. The model is under-confident
-        here, and this figure was previously presented as a validation win. It
-        is reported now as what it is: evidence of over-dispersion.
-      </p>
-      <p class="vc-note">
-        Neither reading is strong evidence either way. The fourteen points are
-        seven quarters &times; two variables from a <em>single</em> forecast
-        origin, so they are heavily correlated across horizon and across
-        variables; the effective number of independent observations is perhaps
-        two or three. Coverage cannot be established from one origin in either
-        direction. The genuine test is below: empirical coverage across all
-        49 rolling origins and eight horizons.
+        calibration failure, not a pass</strong> &mdash; a correct 68% interval
+        should contain roughly 9.5 of 14, and the bands are about three times
+        wider than the errors warrant, so this is evidence of over-dispersion,
+        not the validation win it was once presented as. But one frozen origin
+        yields perhaps two or three effectively independent observations, so
+        neither reading carries much weight; the test to weight is the
+        empirical coverage across all 49 rolling origins and eight horizons
+        below.
       </p>
       <figure class="vfig">
         <svg class="vchart" data-chart="svar-fan" viewBox="0 0 760 340" role="img" aria-labelledby="svar-fan-t svar-fan-d">
@@ -311,32 +300,25 @@
       </figure>
       <p>
         <strong>Rolling-origin audit.</strong> A stricter expanding-window test
-        now evaluates 49 historical origins without future-data leakage. Against
-        a no-change benchmark, CPI-level relative RMSE is 0.63 at one quarter
-        and 0.67 at eight quarters (lower is better), while UK GDP sits at
-        1.06. But a no-change benchmark is too weak for a trending price
-        level: against a random walk with drift the CPI figures become 0.83
-        and 1.03, and the GDP gap is not statistically significant at any
-        horizon. See <a href="#forecasters">the benchmark comparison below</a>.
-        The defensible forecasting claim is Bank Rate, not
-        inflation, and the single frozen-edge result must not be read as broad
-        GDP forecast superiority.
+        evaluates 49 historical origins without future-data leakage; the full
+        benchmark treatment is in the
+        <a href="#forecasters">forecast-accuracy section below</a>. The short
+        version: Bank Rate is the only defensible forecasting claim, and the
+        single frozen-edge result must not be read as broad forecast
+        superiority.
       </p>
       <p>
-        <strong>Unemployment satellite.</strong> The unemployment rate is not
-        one of the eight VAR variables; the published unemployment outlook is
-        an Okun's-law satellite — a small regression of the quarterly change
-        in the ONS unemployment rate on year-on-year GDP growth (fit
-        1992Q1&ndash;2025Q1 with the furlough quarters 2020Q1&ndash;2021Q2
-        dummied out, since they decouple unemployment from GDP and attenuate
-        the coefficient about threefold). In a 73-origin rolling test fed by
-        the VAR's own GDP forecasts, it beats a no-change benchmark at
-        horizons 1&ndash;4 excluding furlough targets (relative RMSE
-        0.82&ndash;0.99) and is clearly worse beyond four quarters, so the
-        published path is capped at four quarters. The improvement is not
-        statistically significant at 73 overlapping origins, and the bands
-        carry GDP-forecast uncertainty only. Specification, code, and the
-        full skill table:
+        <strong>Unemployment satellite.</strong> Unemployment is not a VAR
+        variable; its published outlook is an Okun's-law regression of the
+        quarterly change in the ONS unemployment rate on year-on-year GDP
+        growth, fit 1992Q1&ndash;2025Q1 with furlough dummies for
+        2020Q1&ndash;2021Q2 (which otherwise attenuate the coefficient about
+        threefold). In a 73-origin rolling test fed by the VAR's own GDP
+        forecasts it beats no-change at horizons 1&ndash;4 (relative RMSE
+        0.82&ndash;0.99, excluding furlough targets, not statistically
+        significant) and is clearly worse beyond, so the published path is
+        capped at four quarters; the bands carry GDP-forecast uncertainty
+        only. Full specification and skill table:
         <a href="https://github.com/PolicyEngine/boe-var-model/blob/main/results/okun_validation.json">okun_validation.json</a>
         in the model repository.
       </p>
@@ -685,25 +667,21 @@
       </table>
       </div>
       <p>
-        Our own frozen-edge experiment is the nearest in-house analogue: the
-        boe-svar RMSE of <strong>0.32pp</strong> on quarterly year-on-year GDP
-        growth and CPI inflation over seven quarters from a 2024Q2 data edge
-        (above). Different statistic (RMSE vs median absolute
-        error), different frequency (quarterly vs annual), one origin against
-        many &mdash; so it sits beside the OBR's numbers, not against them.
-        For the Bank of England, the single matched-vintage episode cited on
-        the <a href="/models#validation">validation index</a> &mdash; the August 2024 MPR modal CPI path of
-        about 2.4% for late 2025 against an outturn peak of 3.8% &mdash; is
-        the only comparison we can source precisely; the Bank does not
-        publish an RMSE-by-horizon table in the MPR.
+        The nearest in-house analogue is the frozen-edge experiment above:
+        <strong>0.32pp</strong> RMSE on quarterly year-on-year GDP growth and
+        CPI inflation over seven quarters. Different statistic, frequency,
+        and origin count, so it sits beside the OBR's numbers, not against
+        them. For the Bank of England, the only precisely sourceable
+        comparison is the matched-vintage episode on the
+        <a href="/models#validation">validation index</a> (August 2024 MPR
+        modal CPI of ~2.4% for late 2025 vs an outturn peak of 3.8%); the MPR
+        publishes no RMSE-by-horizon table.
       </p>
       <div class="callout">
-        Omitted for lack of a defensible source: a NIESR or consensus RMSE
-        table by horizon (NIESR does not publish one in a fetchable form we
-        could verify), a Bank of England RMSE-by-horizon table (not published
-        in the MPR), and an AR(1) benchmark for the SVAR exercise (our stored
-        evaluation includes only the random walk). Each would need a new
-        computation or source before it can appear here.
+        Omitted for lack of a defensible source: NIESR or consensus RMSE
+        tables by horizon, a Bank of England RMSE-by-horizon table, and an
+        AR(1) benchmark for the SVAR exercise. Each needs a new computation
+        or source before it can appear here.
       </div>
     </div>
   </section>
