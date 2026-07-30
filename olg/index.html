@@ -23,7 +23,18 @@
 <style>
 /* page-specific: hero sizing only — shared component styles live in style.css */
 .model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
+/* additional vchart marks for the showcase charts on this page */
+.vchart .vc-edge { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 3; }
 </style>
+<script>
+/* Self-hosted MathJax (vendor/mathjax), used only on this page for the
+   methodology tab's formal panels. The CSP allows no CDN loads. */
+window.MathJax = {
+  chtml: { fontURL: "/vendor/mathjax/output/chtml/fonts/woff-v2" },
+  options: { enableMenu: false }
+};
+</script>
+<script src="/vendor/mathjax/tex-chtml-full.js" defer></script>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -69,7 +80,7 @@
   </section>
 
   <nav class="model-local-nav" aria-label="On this model page">
-    <a href="#what">Overview</a><a href="#how">Method</a><a href="#run">Run</a><a href="#answers">Answers</a><a href="#trust">Validation</a><a href="/papers/psl-og">Paper</a>
+    <a href="#what">Overview</a><a href="#showcase">Showcase</a><a href="#code">Code</a><a href="#methodology">Methodology</a><a href="#trust">Validation</a><a href="/papers/psl-og">Paper</a>
   </nav>
 
   <section id="what" class="band">
@@ -95,38 +106,469 @@
         "where does the economy end up, and why?" — with the behavioural
         mechanism visible rather than estimated.
       </p>
+      <p>
+        The rest of this page shows the model three ways: a worked
+        <a href="#showcase">showcase</a> reform with charts, the
+        <a href="#code">code</a> you would actually run, and the
+        <a href="#methodology">methodology</a> underneath — adapted from the
+        <a href="https://og-model-dashboard.vercel.app">OG-UK dashboard</a>
+        into this site's static, checkable form. OG-UK is the UK calibration of
+        <a href="https://github.com/PSLmodels/OG-Core">OG-Core</a>, the
+        open-source overlapping-generations framework maintained by the
+        <a href="https://pslmodels.org">Policy Simulation Library</a>.
+      </p>
     </div>
   </section>
 
-  <section id="how" class="band">
+  <div class="model-tabs" role="presentation">
+    <div class="model-tabs-row">
+      <span class="model-tabs-label mono">this model, three ways</span>
+      <div class="glance-switch mono" role="tablist" aria-label="Model page view">
+        <button type="button" id="olg-tab-showcase" role="tab" aria-selected="true" aria-controls="showcase">Showcase</button>
+        <button type="button" id="olg-tab-code" role="tab" aria-selected="false" aria-controls="code">Code</button>
+        <button type="button" id="olg-tab-methodology" role="tab" aria-selected="false" aria-controls="methodology">Methodology</button>
+      </div>
+    </div>
+  </div>
+
+  <section id="showcase" class="band" role="tabpanel" aria-labelledby="olg-tab-showcase">
     <div class="band-head">
-      <span class="kicker mono">02 — how it works</span>
-      <h2>Calibrated to the UK, taxed by statute.</h2>
+      <span class="kicker mono">02 — showcase</span>
+      <h2>A worked example: 1pp on the basic rate.</h2>
     </div>
     <div class="prose">
       <p>
-        The UK calibration is anchored to official data: depreciation from ONS
-        capital-stocks data (<strong>6.5%/yr</strong>), potential-output growth
-        from the OBR EFO (<strong>1.1%/yr</strong>), the discount factor
-        matched to the ONS household saving ratio, the world interest rate to
-        Bank of England gilt-yield data, and a Frisch labour-supply elasticity
-        of <strong>0.35–0.4</strong> (Blundell, MaCurdy &amp; Meghir).
-        Demographics — population by age, mortality, immigration — come from
-        UN data. Outputs map back to current-price £bn against live ONS
-        series, falling back to cached values if ONS is unreachable.
+        A static tax model holds the economy fixed and totals up who pays more
+        or less under a reform. It answers part of the question, but ignores
+        how people and firms respond. When after-tax wages fall, households
+        work less and save less. When the cost of capital rises, firms invest
+        less. Tax revenues, GDP and the public finances move over years as
+        those adjustments work through. An overlapping-generations model
+        captures those responses: it returns a year-by-year path for GDP,
+        wages, interest rates, investment, debt and tax revenue under the
+        reform, alongside the same path without it. The difference between the
+        two paths is the reform's macroeconomic effect.
       </p>
       <p>
-        Taxes are not stylized wedges. OG-UK runs
-        <a href="/pe">PolicyEngine-UK</a> on household microdata under
-        baseline and reform, computes marginal rates by perturbation — add £1
-        of employment (or dividend) income per adult, rerun, read the change
-        in net income — and fits three-parameter <strong>Gouveia–Strauss</strong>
-        schedules to the effective-rate microdata for each year of a
-        three-year budget window. The marginal-rate schedules are the
-        analytical derivatives of the same fitted parameters, so ETR and MTRs
-        are consistent by construction, and the model sees the reform's true
-        shape across the income and age distribution.
+        The worked reform raises the basic rate of UK income tax by one
+        percentage point, from 20% to 21%, starting in tax year
+        <strong>2027–28</strong> and holding thereafter — a stylised
+        illustration, not a forecast of any announced policy. The baseline is
+        the OBR's November 2025 EFO (history plus forecast). Everything below
+        is drawn from a committed transition-path result,
+        <code>olg/figures/tpi_data.json</code>, exported from the
+        <a href="https://og-model-dashboard.vercel.app">OG-UK dashboard's</a>
+        +1pp simulation; the committed file carries the
+        <strong>first five years (2026–2030)</strong> of the model's 60-period
+        solve, so that is what the charts show.
       </p>
+      <div class="table-scroll"><table>
+        <caption>Reform vs baseline in 2030, the last committed transition year. Values from olg/figures/tpi_data.json; the table is regenerated (and CI-checked) by olg/figures/make_showcase.py.</caption>
+        <thead><tr><th scope="col">aggregate</th><th scope="col">baseline 2030</th><th scope="col">reform 2030</th><th scope="col">change</th></tr></thead>
+        <tbody>
+<!-- olg-stats:begin -->
+<tr><th scope="row">GDP (£bn, current prices)</th><td>3,627.9</td><td>3,622.8</td><td>-5.0 (-0.14%)</td></tr>
+<tr><th scope="row">Tax revenue (% of GDP)</th><td>32.06%</td><td>32.35%</td><td>+0.29pp</td></tr>
+<tr><th scope="row">Consumption (% of GDP)</th><td>61.33%</td><td>61.10%</td><td>-0.23pp</td></tr>
+<tr><th scope="row">Investment (% of GDP)</th><td>18.50%</td><td>18.28%</td><td>-0.23pp</td></tr>
+<tr><th scope="row">Government consumption (% of GDP)</th><td>44.28%</td><td>44.67%</td><td>+0.38pp</td></tr>
+<tr><th scope="row">Debt (% of GDP)</th><td>94.50%</td><td>94.42%</td><td>-0.08pp</td></tr>
+<!-- olg-stats:end -->
+        </tbody>
+      </table></div>
+      <p>
+        The pattern is the classic dynamic-scoring one: revenue rises by less
+        than a static costing would suggest because investment, consumption
+        and — with a lag — GDP all drift below baseline as households and
+        firms adjust.
+      </p>
+      <figure class="vfig">
+<!-- olg-fig-macro:begin -->
+<svg class="vchart" data-chart="olg-macro" viewBox="0 0 760 420" role="img" aria-labelledby="olg-macro-t olg-macro-d">
+<title id="olg-macro-t">OG-UK +1pp basic rate: macro aggregates, % deviation from baseline</title>
+<desc id="olg-macro-d">Six small-multiple line charts, one per macro aggregate, showing the % deviation of the reform path from the OBR November 2025 baseline over 2026 to 2030 under a +1pp basic-rate reform starting fiscal 2027-28. For GDP the series is the % change in the £bn level; for the other five it is the % change in the aggregate's share of GDP. Consumption: 2026 +0.00%, 2027 -0.27%, 2028 -0.33%, 2029 -0.38%, 2030 -0.38%; Investment: 2026 +0.00%, 2027 -1.68%, 2028 -1.05%, 2029 -0.97%, 2030 -1.22%; Government: 2026 +0.00%, 2027 +1.01%, 2028 +0.81%, 2029 +0.81%, 2030 +0.86%; Tax revenue: 2026 +0.00%, 2027 +1.40%, 2028 +0.97%, 2029 +0.95%, 2030 +0.91%; Debt: 2026 +0.00%, 2027 +0.27%, 2028 +0.11%, 2029 +0.02%, 2030 -0.08%; GDP: 2026 +0.00%, 2027 +0.07%, 2028 -0.13%, 2029 -0.14%, 2030 -0.14%. Source: olg/figures/tpi_data.json.</desc>
+<line class="vc-s1" x1="58" y1="26" x2="84" y2="26"/><circle class="vc-s1-dot" cx="71" cy="26" r="3"/>
+<text class="vc-lab" x="92" y="30">reform vs baseline, %</text>
+<line class="vc-edge" x1="288" y1="20" x2="288" y2="32"/>
+<text class="vc-note" x="296" y="30">reform start (2027)</text>
+<text class="vc-lab" x="58.0" y="46.0">Consumption</text>
+<line class="vc-grid" x1="58.0" y1="178.0" x2="258.0" y2="178.0"/>
+<text class="vc-tick" x="50.0" y="182.0" text-anchor="end">-2%</text>
+<line class="vc-grid" x1="58.0" y1="143.1" x2="258.0" y2="143.1"/>
+<text class="vc-tick" x="50.0" y="147.1" text-anchor="end">-1%</text>
+<line class="vc-axis" x1="58.0" y1="108.3" x2="258.0" y2="108.3"/>
+<text class="vc-tick" x="50.0" y="112.3" text-anchor="end">0</text>
+<line class="vc-grid" x1="58.0" y1="73.4" x2="258.0" y2="73.4"/>
+<text class="vc-tick" x="50.0" y="77.4" text-anchor="end">+1%</text>
+<line class="vc-edge" x1="108.0" y1="56.0" x2="108.0" y2="178.0"/>
+<path class="vc-s1" d="M58.0 108.3 L108.0 117.7 L158.0 119.6 L208.0 121.5 L258.0 121.5"/>
+<circle class="vc-s1-dot" cx="58.0" cy="108.3" r="2.6"/>
+<circle class="vc-s1-dot" cx="108.0" cy="117.7" r="2.6"/>
+<circle class="vc-s1-dot" cx="158.0" cy="119.6" r="2.6"/>
+<circle class="vc-s1-dot" cx="208.0" cy="121.5" r="2.6"/>
+<circle class="vc-s1-dot" cx="258.0" cy="121.5" r="2.6"/>
+<text class="vc-tick" x="58.0" y="194.0" text-anchor="middle">2026</text>
+<text class="vc-tick" x="258.0" y="194.0" text-anchor="middle">2030</text>
+<text class="vc-lab" x="292.0" y="46.0">Investment</text>
+<line class="vc-grid" x1="292.0" y1="178.0" x2="492.0" y2="178.0"/>
+<line class="vc-grid" x1="292.0" y1="143.1" x2="492.0" y2="143.1"/>
+<line class="vc-axis" x1="292.0" y1="108.3" x2="492.0" y2="108.3"/>
+<line class="vc-grid" x1="292.0" y1="73.4" x2="492.0" y2="73.4"/>
+<line class="vc-edge" x1="342.0" y1="56.0" x2="342.0" y2="178.0"/>
+<path class="vc-s1" d="M292.0 108.3 L342.0 166.8 L392.0 144.7 L442.0 142.1 L492.0 150.7"/>
+<circle class="vc-s1-dot" cx="292.0" cy="108.3" r="2.6"/>
+<circle class="vc-s1-dot" cx="342.0" cy="166.8" r="2.6"/>
+<circle class="vc-s1-dot" cx="392.0" cy="144.7" r="2.6"/>
+<circle class="vc-s1-dot" cx="442.0" cy="142.1" r="2.6"/>
+<circle class="vc-s1-dot" cx="492.0" cy="150.7" r="2.6"/>
+<text class="vc-tick" x="292.0" y="194.0" text-anchor="middle">2026</text>
+<text class="vc-tick" x="492.0" y="194.0" text-anchor="middle">2030</text>
+<text class="vc-lab" x="526.0" y="46.0">Government</text>
+<line class="vc-grid" x1="526.0" y1="178.0" x2="726.0" y2="178.0"/>
+<line class="vc-grid" x1="526.0" y1="143.1" x2="726.0" y2="143.1"/>
+<line class="vc-axis" x1="526.0" y1="108.3" x2="726.0" y2="108.3"/>
+<line class="vc-grid" x1="526.0" y1="73.4" x2="726.0" y2="73.4"/>
+<line class="vc-edge" x1="576.0" y1="56.0" x2="576.0" y2="178.0"/>
+<path class="vc-s1" d="M526.0 108.3 L576.0 73.1 L626.0 80.0 L676.0 80.0 L726.0 78.1"/>
+<circle class="vc-s1-dot" cx="526.0" cy="108.3" r="2.6"/>
+<circle class="vc-s1-dot" cx="576.0" cy="73.1" r="2.6"/>
+<circle class="vc-s1-dot" cx="626.0" cy="80.0" r="2.6"/>
+<circle class="vc-s1-dot" cx="676.0" cy="80.0" r="2.6"/>
+<circle class="vc-s1-dot" cx="726.0" cy="78.1" r="2.6"/>
+<text class="vc-tick" x="526.0" y="194.0" text-anchor="middle">2026</text>
+<text class="vc-tick" x="726.0" y="194.0" text-anchor="middle">2030</text>
+<text class="vc-lab" x="58.0" y="234.0">Tax revenue</text>
+<line class="vc-grid" x1="58.0" y1="366.0" x2="258.0" y2="366.0"/>
+<text class="vc-tick" x="50.0" y="370.0" text-anchor="end">-2%</text>
+<line class="vc-grid" x1="58.0" y1="331.1" x2="258.0" y2="331.1"/>
+<text class="vc-tick" x="50.0" y="335.1" text-anchor="end">-1%</text>
+<line class="vc-axis" x1="58.0" y1="296.3" x2="258.0" y2="296.3"/>
+<text class="vc-tick" x="50.0" y="300.3" text-anchor="end">0</text>
+<line class="vc-grid" x1="58.0" y1="261.4" x2="258.0" y2="261.4"/>
+<text class="vc-tick" x="50.0" y="265.4" text-anchor="end">+1%</text>
+<line class="vc-edge" x1="108.0" y1="244.0" x2="108.0" y2="366.0"/>
+<path class="vc-s1" d="M58.0 296.3 L108.0 247.5 L158.0 262.5 L208.0 263.3 L258.0 264.5"/>
+<circle class="vc-s1-dot" cx="58.0" cy="296.3" r="2.6"/>
+<circle class="vc-s1-dot" cx="108.0" cy="247.5" r="2.6"/>
+<circle class="vc-s1-dot" cx="158.0" cy="262.5" r="2.6"/>
+<circle class="vc-s1-dot" cx="208.0" cy="263.3" r="2.6"/>
+<circle class="vc-s1-dot" cx="258.0" cy="264.5" r="2.6"/>
+<text class="vc-tick" x="58.0" y="382.0" text-anchor="middle">2026</text>
+<text class="vc-tick" x="258.0" y="382.0" text-anchor="middle">2030</text>
+<text class="vc-lab" x="292.0" y="234.0">Debt</text>
+<line class="vc-grid" x1="292.0" y1="366.0" x2="492.0" y2="366.0"/>
+<line class="vc-grid" x1="292.0" y1="331.1" x2="492.0" y2="331.1"/>
+<line class="vc-axis" x1="292.0" y1="296.3" x2="492.0" y2="296.3"/>
+<line class="vc-grid" x1="292.0" y1="261.4" x2="492.0" y2="261.4"/>
+<line class="vc-edge" x1="342.0" y1="244.0" x2="342.0" y2="366.0"/>
+<path class="vc-s1" d="M292.0 296.3 L342.0 287.0 L392.0 292.3 L442.0 295.8 L492.0 299.1"/>
+<circle class="vc-s1-dot" cx="292.0" cy="296.3" r="2.6"/>
+<circle class="vc-s1-dot" cx="342.0" cy="287.0" r="2.6"/>
+<circle class="vc-s1-dot" cx="392.0" cy="292.3" r="2.6"/>
+<circle class="vc-s1-dot" cx="442.0" cy="295.8" r="2.6"/>
+<circle class="vc-s1-dot" cx="492.0" cy="299.1" r="2.6"/>
+<text class="vc-tick" x="292.0" y="382.0" text-anchor="middle">2026</text>
+<text class="vc-tick" x="492.0" y="382.0" text-anchor="middle">2030</text>
+<text class="vc-lab" x="526.0" y="234.0">GDP</text>
+<line class="vc-grid" x1="526.0" y1="366.0" x2="726.0" y2="366.0"/>
+<line class="vc-grid" x1="526.0" y1="331.1" x2="726.0" y2="331.1"/>
+<line class="vc-axis" x1="526.0" y1="296.3" x2="726.0" y2="296.3"/>
+<line class="vc-grid" x1="526.0" y1="261.4" x2="726.0" y2="261.4"/>
+<line class="vc-edge" x1="576.0" y1="244.0" x2="576.0" y2="366.0"/>
+<path class="vc-s1" d="M526.0 296.3 L576.0 293.9 L626.0 300.8 L676.0 301.0 L726.0 301.1"/>
+<circle class="vc-s1-dot" cx="526.0" cy="296.3" r="2.6"/>
+<circle class="vc-s1-dot" cx="576.0" cy="293.9" r="2.6"/>
+<circle class="vc-s1-dot" cx="626.0" cy="300.8" r="2.6"/>
+<circle class="vc-s1-dot" cx="676.0" cy="301.0" r="2.6"/>
+<circle class="vc-s1-dot" cx="726.0" cy="301.1" r="2.6"/>
+<text class="vc-tick" x="526.0" y="382.0" text-anchor="middle">2026</text>
+<text class="vc-tick" x="726.0" y="382.0" text-anchor="middle">2030</text>
+</svg>
+<!-- olg-fig-macro:end -->
+        <figcaption>% deviation of the reform path from the OBR November 2025
+        baseline, 2026–2030. GDP is the % change in the current-price £bn
+        level; the other five panels are the % change in each aggregate's
+        share of GDP (the scale on which the source data stores them). Source:
+        <code>olg/figures/tpi_data.json</code>, first five years of the
+        60-period transition path.</figcaption>
+      </figure>
+      <p>
+        With <code>multi_sector=True</code> the same solve reports the eight
+        UK industry sectors. The incidence is close to uniform: seven of the
+        eight contract by roughly 0.3–0.4% as private demand falls, while
+        <strong>public &amp; other</strong> alone expands, tracking the extra
+        government consumption the revenue finances.
+      </p>
+      <figure class="vfig">
+<!-- olg-fig-sectors:begin -->
+<svg class="vchart" data-chart="olg-sectors" viewBox="0 0 760 348" role="img" aria-labelledby="olg-sectors-t olg-sectors-d">
+<title id="olg-sectors-t">OG-UK +1pp basic rate: sector output, capital and labour, % change from baseline in 2030</title>
+<desc id="olg-sectors-d">Grouped bar chart. % change from baseline in 2030 for output, capital and labour across the eight UK industry sectors under the +1pp basic-rate reform. Energy: output -0.33%, capital -0.35%, labour -0.32%; Manufacturing: output -0.39%, capital -0.41%, labour -0.38%; Construction: output -0.39%, capital -0.41%, labour -0.38%; Trade &amp; Transport: output -0.39%, capital -0.41%, labour -0.38%; Info &amp; Finance: output -0.39%, capital -0.41%, labour -0.38%; Real Estate: output -0.39%, capital -0.40%, labour -0.37%; Business Services: output -0.39%, capital -0.41%, labour -0.38%; Public &amp; Other: output +0.07%, capital +0.05%, labour +0.08%. Seven of the eight sectors contract by roughly 0.3 to 0.4 per cent; public &amp; other alone expands. Source: olg/figures/tpi_data.json.</desc>
+<rect class="vc-b1" x="70" y="8" width="14" height="10"/><text class="vc-lab" x="90" y="17">output</text>
+<rect class="vc-b2" x="180" y="8" width="14" height="10"/><text class="vc-lab" x="200" y="17">capital</text>
+<rect class="vc-b3" x="290" y="8" width="14" height="10"/><text class="vc-lab" x="310" y="17">labour</text>
+<line class="vc-grid" x1="70.0" y1="262.0" x2="724.0" y2="262.0"/>
+<text class="vc-tick" x="62.0" y="266.0" text-anchor="end">-0.4%</text>
+<line class="vc-grid" x1="70.0" y1="214.0" x2="724.0" y2="214.0"/>
+<text class="vc-tick" x="62.0" y="218.0" text-anchor="end">-0.2%</text>
+<line class="vc-axis" x1="70.0" y1="166.0" x2="724.0" y2="166.0"/>
+<text class="vc-tick" x="62.0" y="170.0" text-anchor="end">0</text>
+<line class="vc-grid" x1="70.0" y1="118.0" x2="724.0" y2="118.0"/>
+<text class="vc-tick" x="62.0" y="122.0" text-anchor="end">+0.2%</text>
+<line class="vc-grid" x1="70.0" y1="70.0" x2="724.0" y2="70.0"/>
+<text class="vc-tick" x="62.0" y="74.0" text-anchor="end">+0.4%</text>
+<rect class="vc-b1" x="76.4" y="166.0" width="21" height="79.9"/>
+<rect class="vc-b2" x="100.4" y="166.0" width="21" height="83.8"/>
+<rect class="vc-b3" x="124.4" y="166.0" width="21" height="76.6"/>
+<text class="vc-tick" x="110.9" y="306" text-anchor="middle">Energy</text>
+<rect class="vc-b1" x="158.1" y="166.0" width="21" height="93.6"/>
+<rect class="vc-b2" x="182.1" y="166.0" width="21" height="98.2"/>
+<rect class="vc-b3" x="206.1" y="166.0" width="21" height="91.0"/>
+<text class="vc-tick" x="192.6" y="306" text-anchor="middle">Manuf.</text>
+<rect class="vc-b1" x="239.9" y="166.0" width="21" height="94.3"/>
+<rect class="vc-b2" x="263.9" y="166.0" width="21" height="98.6"/>
+<rect class="vc-b3" x="287.9" y="166.0" width="21" height="91.7"/>
+<text class="vc-tick" x="274.4" y="306" text-anchor="middle">Constr.</text>
+<rect class="vc-b1" x="321.6" y="166.0" width="21" height="93.6"/>
+<rect class="vc-b2" x="345.6" y="166.0" width="21" height="98.2"/>
+<rect class="vc-b3" x="369.6" y="166.0" width="21" height="91.0"/>
+<text class="vc-tick" x="356.1" y="306" text-anchor="middle">Trade</text>
+<rect class="vc-b1" x="403.4" y="166.0" width="21" height="94.6"/>
+<rect class="vc-b2" x="427.4" y="166.0" width="21" height="98.6"/>
+<rect class="vc-b3" x="451.4" y="166.0" width="21" height="91.7"/>
+<text class="vc-tick" x="437.9" y="306" text-anchor="middle">Info/Fin</text>
+<rect class="vc-b1" x="485.1" y="166.0" width="21" height="92.9"/>
+<rect class="vc-b2" x="509.1" y="166.0" width="21" height="96.5"/>
+<rect class="vc-b3" x="533.1" y="166.0" width="21" height="89.5"/>
+<text class="vc-tick" x="519.6" y="306" text-anchor="middle">Real est.</text>
+<rect class="vc-b1" x="566.9" y="166.0" width="21" height="94.1"/>
+<rect class="vc-b2" x="590.9" y="166.0" width="21" height="98.6"/>
+<rect class="vc-b3" x="614.9" y="166.0" width="21" height="91.4"/>
+<text class="vc-tick" x="601.4" y="306" text-anchor="middle">Bus. serv.</text>
+<rect class="vc-b1" x="648.6" y="150.2" width="21" height="15.8"/>
+<rect class="vc-b2" x="672.6" y="155.0" width="21" height="11.0"/>
+<rect class="vc-b3" x="696.6" y="147.8" width="21" height="18.2"/>
+<text class="vc-tick" x="683.1" y="306" text-anchor="middle">Public</text>
+<text class="vc-note" x="70" y="332">Committed reform path ends 2030; values are the last transition year available.</text>
+</svg>
+<!-- olg-fig-sectors:end -->
+        <figcaption>Sector output, capital and labour, % change from baseline
+        in 2030 (the last committed transition year), eight-sector CES
+        production calibrated from ONS Blue Book supply-and-use tables.
+        Source: <code>olg/figures/tpi_data.json</code>.</figcaption>
+      </figure>
+      <p>
+        The finest-grained view is a single sector × variable cell with its
+        history for context — here, energy output, indexed to 2000. The
+        reform's dent is barely visible at this scale, which is itself the
+        honest reading: a 1pp basic-rate rise is a small shock to any one
+        industry.
+      </p>
+      <figure class="vfig">
+<!-- olg-fig-energy:begin -->
+<svg class="vchart" data-chart="olg-energy" viewBox="0 0 760 330" role="img" aria-labelledby="olg-energy-t olg-energy-d">
+<title id="olg-energy-t">OG-UK +1pp basic rate: energy sector output, baseline vs reform (index)</title>
+<desc id="olg-energy-d">Line chart of the energy sector's output index (2000 = 100 basis, chained ONS outturn stitched to the OBR November 2025 baseline), 2000 to 2030. The baseline runs from 21.5 to 62.7; the dashed reform path covers 2026 to 2030 and ends at 62.5, -0.33% from baseline. Vertical markers at 2023 (outturn/forecast boundary) and 2027 (reform start). Source: olg/figures/tpi_data.json.</desc>
+<line class="vc-s1" x1="58" y1="26" x2="84" y2="26"/><text class="vc-lab" x="92" y="30">ONS outturn / OBR baseline</text>
+<line class="vc-s2" x1="300" y1="26" x2="326" y2="26"/><text class="vc-lab vc-lab2" x="334" y="30">reform +1pp basic rate</text>
+<line class="vc-grid" x1="58.0" y1="282.0" x2="724.0" y2="282.0"/>
+<text class="vc-tick" x="50.0" y="286.0" text-anchor="end">20</text>
+<line class="vc-grid" x1="58.0" y1="234.8" x2="724.0" y2="234.8"/>
+<text class="vc-tick" x="50.0" y="238.8" text-anchor="end">30</text>
+<line class="vc-grid" x1="58.0" y1="187.6" x2="724.0" y2="187.6"/>
+<text class="vc-tick" x="50.0" y="191.6" text-anchor="end">40</text>
+<line class="vc-grid" x1="58.0" y1="140.4" x2="724.0" y2="140.4"/>
+<text class="vc-tick" x="50.0" y="144.4" text-anchor="end">50</text>
+<line class="vc-grid" x1="58.0" y1="93.2" x2="724.0" y2="93.2"/>
+<text class="vc-tick" x="50.0" y="97.2" text-anchor="end">60</text>
+<line class="vc-grid" x1="58.0" y1="46.0" x2="724.0" y2="46.0"/>
+<text class="vc-tick" x="50.0" y="50.0" text-anchor="end">70</text>
+<line class="vc-edge" x1="568.6" y1="46.0" x2="568.6" y2="282.0"/>
+<text class="vc-note" x="573.6" y="58.0">outturn | forecast</text>
+<line class="vc-edge" x1="657.4" y1="46.0" x2="657.4" y2="282.0"/>
+<text class="vc-note" x="662.4" y="58.0">reform start</text>
+<path class="vc-s1" d="M58.0 274.9 L80.2 276.3 L102.4 279.2 L124.6 277.8 L146.8 271.1 L169.0 255.6 L191.2 249.0 L213.4 235.7 L235.6 213.6 L257.8 244.2 L280.0 229.1 L302.2 211.2 L324.4 218.3 L346.6 220.6 L368.8 243.3 L391.0 272.1 L413.2 179.1 L435.4 168.7 L457.6 148.4 L479.8 184.3 L502.0 234.3 L524.2 155.0 L546.4 117.7 L568.6 148.9 L635.2 118.2 L657.4 109.0 L679.6 100.0 L701.8 90.6 L724.0 80.5"/>
+<path class="vc-s2" d="M635.2 118.2 L657.4 109.7 L679.6 100.7 L701.8 91.4 L724.0 81.5"/>
+<text class="vc-tick" x="58.0" y="302" text-anchor="middle">2000</text>
+<text class="vc-tick" x="169.0" y="302" text-anchor="middle">2005</text>
+<text class="vc-tick" x="280.0" y="302" text-anchor="middle">2010</text>
+<text class="vc-tick" x="391.0" y="302" text-anchor="middle">2015</text>
+<text class="vc-tick" x="502.0" y="302" text-anchor="middle">2020</text>
+<text class="vc-tick" x="613.0" y="302" text-anchor="middle">2025</text>
+<text class="vc-tick" x="724.0" y="302" text-anchor="middle">2030</text>
+</svg>
+<!-- olg-fig-energy:end -->
+        <figcaption>Energy sector output index: ONS outturn stitched to the
+        OBR November 2025 baseline (solid), OG-UK reform path (dashed).
+        Markers at the 2023 outturn/forecast boundary and the 2027 reform
+        start. Source: <code>olg/figures/tpi_data.json</code>.</figcaption>
+      </figure>
+      <p class="chart-note">
+        Read these as model-consistent magnitudes and signs, not forecasts —
+        the <a href="#trust">validation section</a> below explains why there
+        is no ground truth to score them against. The full interactive
+        version, with every sector × variable cell, is the
+        <a href="https://og-model-dashboard.vercel.app">OG-UK dashboard</a>.
+      </p>
+    </div>
+  </section>
+
+  <section id="code" class="band" role="tabpanel" aria-labelledby="olg-tab-code" hidden>
+    <div class="band-head">
+      <span class="kicker mono">03 — code</span>
+      <h2>From a few lines of Python to a full UK transition path.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        OG-UK is open source, and every step below that carries logic ships as
+        a runnable file under <a href="/olg/code/01_install.sh"><code>/olg/code/</code></a>
+        on this site (mirroring the dashboard's <code>python/</code> folder).
+        Pick a step, run it on its own, swap the reform. Full context lives in
+        <a href="https://github.com/PSLmodels/OG-UK">PSL's OG-UK repository</a>.
+      </p>
+      <div class="callout">
+        <strong>Local-only.</strong> OG-UK is deliberately excluded from the
+        <a href="/connect">hosted MCP server</a> — a solve cannot fit its
+        request timeout — so the MCP tools that reach it,
+        <code>score_reform</code> with <code>model="og"</code> and
+        <code>dynamic_reform_impact</code>, return install/CLI instructions
+        rather than results when called hosted. Locally it is a
+        <strong>two-environment pipeline</strong> until
+        <a href="https://github.com/PSLmodels/OG-UK/issues/68">PSLmodels/OG-UK#68</a>
+        lands: <code>oguk</code> pins <code>policyengine-uk==2.88.0</code>, so
+        it needs its own environment. There, run
+        <code>pe-macro og-score --reform '...' --json &gt; og.json</code>;
+        then, in the main environment,
+        <code>pe-macro dynamic-score --reform '...' --og-payload og.json</code>.
+        A <code>HUGGING_FACE_TOKEN</code> with access to the gated UK
+        microdata is a hard prerequisite in both.
+      </div>
+
+      <h3 id="run">Step 1 — Install</h3>
+      <p>
+        A Python package (3.11+); the recommended setup uses
+        <a href="https://docs.astral.sh/uv/">uv</a>. The PolicyEngine
+        enhanced-FRS microdata is downloaded on first run and is gated: you
+        need a <code>HUGGING_FACE_TOKEN</code> with read access to
+        <code>policyengine/policyengine-uk-data</code>.
+      </p>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PSLmodels/OG-UK.git
+cd OG-UK
+uv sync
+export HUGGING_FACE_TOKEN=hf_your_token_here</code></pre></div>
+      <p class="opt-note">
+        runnable file: <a href="/olg/code/01_install.sh">01_install.sh</a>.
+        prefer conda?
+        <code>conda env create -f environment.yml &amp;&amp; conda activate oguk-dev &amp;&amp; pip install -e .</code>
+        works too.
+      </p>
+
+      <h3 id="code-reform">Step 2 — Define a reform</h3>
+      <p>
+        Reforms use the <a href="/pe">PolicyEngine</a> API: pick a parameter
+        from the UK tax-and-benefit rule book, give it a new value and a start
+        date. Anything PolicyEngine can represent — rates, thresholds,
+        allowance tapers, new benefits — flows straight through. To simulate a
+        different reform, swap the parameter path and value; the rest of the
+        pipeline does not change.
+      </p>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>from datetime import datetime
+from policyengine.core import ParameterValue, Policy
+from policyengine.tax_benefit_models.uk import uk_latest
+
+# Reform: raise the basic rate of income tax from 20% to 21%
+basic_rate = uk_latest.get_parameter("gov.hmrc.income_tax.rates.uk[0].rate")
+
+REFORM = Policy(
+    name="Basic rate 21%",
+    parameter_values=[
+        ParameterValue(
+            parameter=basic_rate,
+            value=0.21,
+            start_date=datetime(2026, 1, 1),
+        )
+    ],
+)</code></pre></div>
+      <p class="opt-note">
+        runnable file: <a href="/olg/code/02_reform.py">02_reform.py</a> —
+        every later script imports <code>REFORM</code> from it.
+      </p>
+      <p>
+        Stack several <code>ParameterValue</code>s in one <code>Policy</code>
+        to score a package. Common parameter paths:
+        <code>gov.hmrc.income_tax.rates.uk[0..2].rate</code> (basic 20%,
+        higher 40%, additional 45%),
+        <code>gov.hmrc.income_tax.allowances.personal_allowance.amount</code>
+        (£12,570), and
+        <code>gov.hmrc.national_insurance.class_1.rates.employee.main</code>
+        / <code>.higher</code>.
+      </p>
+      <p>
+        Shocks that are <em>not</em> tax-and-benefit statute go through
+        <code>param_overrides</code>, a dict of OG-Core parameters applied on
+        top of everything else. Corporation tax lives here, not in
+        PolicyEngine — it is a structural parameter of the macro model:
+      </p>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code># corporation tax cut to 25%
+ss = solve_steady_state(param_overrides={"cit_rate": [[0.25]]})
+
+# productivity: +0.4% TFP level shock
+ss = solve_steady_state(param_overrides={"Z": [[1.004]]})
+
+# statutory reform, structural shock, and finer tax functions in one run
+ss = solve_steady_state(policy=reform,
+                        param_overrides={"cit_rate": [[0.25]]},
+                        age_specific="brackets", multi_sector=True)</code></pre></div>
+      <div class="callout">
+        Use <code>Z</code> (TFP) for productivity shocks — never
+        <code>g_y_annual</code>, which is the balanced-growth normalisation
+        the model detrends by, not a productivity lever.
+      </div>
+
+      <h3 id="code-steady-state">Step 3 — Solve the long-run steady state</h3>
+      <p>
+        The fastest way to see what a reform does.
+        <code>solve_steady_state</code> finds the long-run equilibrium of the
+        UK economy under a given policy: the prices, quantities and tax
+        revenues that emerge once the economy has fully adjusted. Run it once
+        for the baseline, once for the reform; the difference gives the
+        answer.
+      </p>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>from oguk import solve_steady_state, map_to_real_world
+
+from og_dashboard.reform import REFORM
+
+baseline = solve_steady_state(start_year=2026)
+reform   = solve_steady_state(start_year=2026, policy=REFORM)
+
+impact = map_to_real_world(baseline, reform)
+
+print(f"GDP:         £{impact.gdp:,.1f}bn  ({impact.gdp_pct:+.3f}%)")
+print(f"Tax revenue: £{impact.tax_revenue:,.1f}bn  ({impact.tax_revenue_pct:+.3f}%)")
+print(f"Investment:  £{impact.investment:,.1f}bn  ({impact.investment_pct:+.3f}%)")
+print(f"Interest:    {impact.r_baseline:.2%} -&gt; {impact.r_reform:.2%}")</code></pre></div>
+      <p>
+        The output below is <em>illustrative</em> — the format matches
+        <a href="/olg/code/03_steady_state.py">03_steady_state.py</a>, but the
+        numbers depend on the calibration date and your data release. On the
+        fast configuration a fresh solve budgets ~17 minutes per steady state.
+      </p>
+      <div class="codeblock"><pre><code>Solving baseline steady state (age_specific='pooled', 1-sector)...
+Solving reform steady state (age_specific='pooled', 1-sector)...
+
+Steady state impact (£bn, current prices)
+============================================================
+Variable          Baseline       Reform     Change        %
+------------------------------------------------------------
+GDP                2853.8       2852.6       -1.2   -0.043%
+Consumption        1819.4       1817.2       -2.2   -0.121%
+Investment          469.1        466.2       -2.9   -0.612%
+Government          564.4        565.5       +1.1   +0.198%
+Tax revenue        1036.4       1051.7      +15.3   +1.473%
+Debt               2691.4       2691.0       -0.4   -0.014%
+
+Interest rate:  3.84% -&gt; 3.87%</code></pre></div>
+      <p>The main configuration dials and their trade-offs:</p>
       <div class="table-scroll"><table>
         <caption>The main OLG configuration dials and their trade-offs</caption>
         <thead><tr><th scope="col">dial</th><th scope="col">choices</th><th scope="col">trade-off</th></tr></thead>
@@ -155,150 +597,56 @@
         and check whether the reform is extreme — OLG models can diverge on
         very large shocks.
       </p>
-    </div>
-  </section>
 
-  <section id="run" class="band">
-    <div class="band-head">
-      <span class="kicker mono">03 — how to run it</span>
-      <h2>Clone, sync, score.</h2>
-    </div>
-    <div class="prose">
+      <h3 id="code-transition">Step 4 — Run the year-by-year transition path</h3>
       <p>
-        A Python package (3.11+); the recommended setup uses
-        <a href="https://docs.astral.sh/uv/">uv</a>. The PolicyEngine
-        enhanced-FRS microdata is downloaded on first run and is gated: you
-        need a <code>HUGGING_FACE_TOKEN</code> with read access to
-        <code>policyengine/policyengine-uk-data</code>.
+        The steady state tells you where the economy ends up. The
+        <strong>transition path</strong> tells you how it gets there — year by
+        year, 60 periods by default (configurable). This is what produced the
+        reform paths in the <a href="#showcase">Showcase</a> tab. The
+        transition costs more compute — the model solves every cohort's
+        lifetime under rational expectations — so OG-UK uses
+        <a href="https://www.dask.org/">Dask</a> to parallelise across CPU
+        cores.
       </p>
-      <div class="callout">
-        <strong>Local-only.</strong> OG-UK is deliberately excluded from the
-        <a href="/connect">hosted MCP server</a> — a solve cannot fit its
-        request timeout — so the MCP tools that reach it,
-        <code>score_reform</code> with <code>model="og"</code> and
-        <code>dynamic_reform_impact</code>, return install/CLI instructions
-        rather than results when called hosted. Locally it is a
-        <strong>two-environment pipeline</strong> until
-        <a href="https://github.com/PSLmodels/OG-UK/issues/68">PSLmodels/OG-UK#68</a>
-        lands: <code>oguk</code> pins <code>policyengine-uk==2.88.0</code>, so
-        it needs its own environment. There, run
-        <code>pe-macro og-score --reform '...' --json &gt; og.json</code>;
-        then, in the main environment,
-        <code>pe-macro dynamic-score --reform '...' --og-payload og.json</code>.
-        A <code>HUGGING_FACE_TOKEN</code> with access to the gated UK
-        microdata is a hard prerequisite in both.
-      </div>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PSLmodels/OG-UK.git
-cd OG-UK
-uv sync
-export HUGGING_FACE_TOKEN=hf_your_token_here
-uv run python examples/run_oguk.py</code></pre></div>
-      <p class="opt-note">
-        the example script solves baseline and reform (a 1pp basic-rate rise)
-        and prints £bn impacts — budget half an hour. prefer conda?
-        <code>conda env create -f environment.yml &amp;&amp; conda activate oguk-dev &amp;&amp; pip install -e .</code>
-        works too.
-      </p>
-      <p>
-        The whole scoring loop in one program — raising the basic rate of
-        income tax from 20% to 21%:
-      </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> datetime <span class="kw">import</span> datetime
-<span class="kw">from</span> policyengine.core <span class="kw">import</span> ParameterValue, Policy
-<span class="kw">from</span> policyengine.tax_benefit_models.uk <span class="kw">import</span> uk_latest
-<span class="kw">from</span> oguk <span class="kw">import</span> solve_steady_state, map_to_real_world
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>from dask.distributed import Client
+from oguk import run_transition_path, map_transition_to_real_world
 
-<span class="cm"># 1. build a reform from PolicyEngine parameters</span>
-param = uk_latest.get_parameter(<span class="kw">"gov.hmrc.income_tax.rates.uk[0].rate"</span>)
-reform = Policy(
-    name=<span class="kw">"Basic rate 21%"</span>,
-    parameter_values=[
-        ParameterValue(parameter=param, value=0.21,
-                       start_date=datetime(2026, 1, 1))
-    ],
+from og_dashboard.reform import REFORM
+
+client = Client(n_workers=2, threads_per_worker=1, memory_limit="2GB")
+
+base_tp, reform_tp = run_transition_path(
+    start_year=2026,
+    policy=REFORM,
+    client=client,
 )
 
-<span class="cm"># 2. solve baseline and reform steady states — ~17 min each</span>
-baseline  = solve_steady_state(start_year=2026)          <span class="cm"># no policy = baseline</span>
-reform_ss = solve_steady_state(start_year=2026, policy=reform)
-
-<span class="cm"># 3. map model units to real-world £bn</span>
-impact = map_to_real_world(baseline, reform_ss)
-
-<span class="cm"># 4. read the results</span>
-<span class="kw">print</span>(f<span class="kw">"GDP change: {impact.gdp_change:+.1f}bn ({impact.gdp_pct:+.3f}%)"</span>)
-<span class="kw">print</span>(f<span class="kw">"Tax revenue change: {impact.tax_revenue_change:+.1f}bn"</span>)
-<span class="kw">print</span>(f<span class="kw">"Interest rate: {impact.r_baseline:.2%} → {impact.r_reform:.2%}"</span>)</code></pre></div>
-      <p>
-        Stack several <code>ParameterValue</code>s in one <code>Policy</code>
-        to score a package. Common parameter paths:
-        <code>gov.hmrc.income_tax.rates.uk[0..2].rate</code> (basic 20%,
-        higher 40%, additional 45%),
-        <code>gov.hmrc.income_tax.allowances.personal_allowance.amount</code>
-        (£12,570), and
-        <code>gov.hmrc.national_insurance.class_1.rates.employee.main</code>
-        / <code>.higher</code>.
-      </p>
-      <p>
-        Shocks that are <em>not</em> tax-and-benefit statute go through
-        <code>param_overrides</code>, a dict of OG-Core parameters applied on
-        top of everything else. Corporation tax lives here, not in
-        PolicyEngine — it is a structural parameter of the macro model:
-      </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="cm"># corporation tax cut to 25%</span>
-ss = solve_steady_state(param_overrides={<span class="kw">"cit_rate"</span>: [[0.25]]})
-
-<span class="cm"># productivity: +0.4% TFP level shock</span>
-ss = solve_steady_state(param_overrides={<span class="kw">"Z"</span>: [[1.004]]})
-
-<span class="cm"># statutory reform, structural shock, and finer tax functions in one run</span>
-ss = solve_steady_state(policy=reform,
-                        param_overrides={<span class="kw">"cit_rate"</span>: [[0.25]]},
-                        age_specific=<span class="kw">"brackets"</span>, multi_sector=<span class="kw">True</span>)</code></pre></div>
-      <div class="callout">
-        Use <code>Z</code> (TFP) for productivity shocks — never
-        <code>g_y_annual</code>, which is the balanced-growth normalisation
-        the model detrends by, not a productivity lever.
-      </div>
-      <p>
-        The transition path answers "what happens each year on the way
-        there" — decade by decade, baseline and reform in one call, on Dask workers:
-      </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> dask.distributed <span class="kw">import</span> Client
-<span class="kw">from</span> oguk <span class="kw">import</span> run_transition_path, map_transition_to_real_world
-
-client = Client(n_workers=4, threads_per_worker=1)
-base_tp, reform_tp = run_transition_path(start_year=2026, policy=reform,
-                                         client=client)
 client.close()
 
 impact = map_transition_to_real_world(base_tp, reform_tp)
-<span class="cm"># impact.years            → ["2026-27", "2027-28", ...]</span>
-<span class="cm"># impact.gdp_change[t]    → £bn change from baseline in year t</span>
-<span class="cm"># same arrays for consumption, investment, revenue, debt</span></code></pre></div>
+
+# First ten years of GDP and tax-revenue impacts
+for i in range(10):
+    print(
+        f"{impact.years[i]}  "
+        f"ΔGDP {impact.gdp_change[i]:+6.2f}  "
+        f"ΔRevenue {impact.tax_revenue_change[i]:+6.2f}"
+    )</code></pre></div>
       <p class="opt-note">
+        runnable file: <a href="/olg/code/04_transition.py">04_transition.py</a>.
         transition paths are available through the <code>oguk</code> API but
         are <strong>not</strong> wired into the PolicyEngine Macro CLI yet —
-        the CLI is steady-state only. Two commands are wired:
-        <code>pe-macro og-baseline</code> and
-        <code>pe-macro og-score --reform '{"gov.hmrc.income_tax.rates.uk[0].rate": 0.21}'</code>,
-        both on the fast configuration (pooled tax functions, single sector,
-        steady state).
+        the CLI is steady-state only (see step 7).
       </p>
-    </div>
-  </section>
 
-  <section id="answers" class="band">
-    <div class="band-head">
-      <span class="kicker mono">04 — what it can answer</span>
-      <h2>Results are reported in economic units.</h2>
-    </div>
-    <div class="prose">
+      <h3 id="code-answers">Step 5 — From abstract units to pounds</h3>
       <p>
-        <code>map_to_real_world()</code> returns a <code>MacroImpact</code>
-        carrying, for each aggregate, the reform level, the change from
-        baseline, and the percent change — all current-price £bn — plus
-        baseline and reform interest rates:
+        OG-UK solves in dimensionless model units. To translate them into
+        figures a policymaker can read, <code>map_to_real_world()</code>
+        returns a <code>MacroImpact</code> carrying, for each aggregate, the
+        reform level, the change from baseline, and the percent change — all
+        current-price £bn — plus baseline and reform interest rates:
       </p>
       <ul>
         <li><code>.gdp</code> / <code>.gdp_change</code> / <code>.gdp_pct</code></li>
@@ -310,15 +658,246 @@ impact = map_transition_to_real_world(base_tp, reform_tp)
         The £bn mapping is GDP-anchored: one scale factor (real-world GDP ÷
         model GDP) converts model-unit changes, with levels anchored to live
         ONS series (GDP, consumption, investment, government, debt ratio) and
-        HMRC total receipts.
+        HMRC total receipts, falling back to cached values if ONS is
+        unreachable. The transition-path variant returns NumPy arrays indexed
+        by year:
+      </p>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>impact = map_transition_to_real_world(base_tp, reform_tp)
+
+impact.years              # fiscal-year strings: ["2026-27", ..., "2085-86"]
+impact.gdp                # reform GDP path (£bn, per year)
+impact.gdp_change         # £bn change vs baseline, per year
+impact.tax_revenue_change
+impact.consumption_change
+impact.investment_change
+impact.government_change
+impact.debt_change
+
+# Interest-rate paths live on the TPI results themselves
+base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
+      <p class="opt-note">
+        reference file: <a href="/olg/code/05_map_to_gbp.py">05_map_to_gbp.py</a>.
       </p>
       <div class="callout">
         <strong>It cannot</strong> give you a quarterly path, a costing on the
         OBR's forecast basis, or a distributional table. Those are the
         <a href="/obr">OBR emulator</a> and
         <a href="/pe">PolicyEngine</a> respectively. And it should not be
-        read as a forecast of anything — see below.
+        read as a forecast of anything — see
+        <a href="#trust">how far to trust it</a>.
       </div>
+
+      <h3 id="code-multi-sector">Step 6 — Bring in the eight industry sectors</h3>
+      <p>
+        Pass <code>multi_sector=True</code> and the same call returns the
+        breakdown across the eight UK industry sectors (energy, manufacturing,
+        construction, trade &amp; transport, info &amp; finance, real estate,
+        business services, public &amp; other) — sector-level output, capital
+        and labour alongside the macro aggregates, and the basis for the
+        industry charts in the <a href="#showcase">Showcase</a> tab.
+      </p>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>base_tp, reform_tp = run_transition_path(
+    start_year=2026,
+    policy=REFORM,
+    client=client,
+    multi_sector=True,    # 8-sector CES production
+)</code></pre></div>
+      <p class="opt-note">
+        runnable file: <a href="/olg/code/06_multi_sector.py">06_multi_sector.py</a>.
+      </p>
+
+      <h3 id="code-next">Step 7 — Where to go next</h3>
+      <p>
+        Every step above ships as a file you can download and run on its own:
+      </p>
+      <ul>
+        <li><a href="/olg/code/01_install.sh">01_install.sh</a> — install and token setup.</li>
+        <li><a href="/olg/code/02_reform.py">02_reform.py</a> — the shared <code>REFORM</code>; edit the parameter, value or start date here and every other script picks it up.</li>
+        <li><a href="/olg/code/03_steady_state.py">03_steady_state.py</a> — fastest, prints a one-line £bn impact summary.</li>
+        <li><a href="/olg/code/04_transition.py">04_transition.py</a> — heavier, produces the full year-by-year path.</li>
+        <li><a href="/olg/code/05_map_to_gbp.py">05_map_to_gbp.py</a> — the £bn-mapping field reference.</li>
+        <li><a href="/olg/code/06_multi_sector.py">06_multi_sector.py</a> — the 8-sector calibration behind the Showcase industry views.</li>
+      </ul>
+      <p>
+        Through this suite, two CLI commands are wired:
+        <code>pe-macro og-baseline</code> and
+        <code>pe-macro og-score --reform '{"gov.hmrc.income_tax.rates.uk[0].rate": 0.21}'</code>,
+        both on the fast configuration (pooled tax functions, single sector,
+        steady state). For more variations, the upstream
+        <a href="https://github.com/PSLmodels/OG-UK/tree/main/examples">OG-UK examples</a>
+        directory carries additional pipelines
+        (<code>run_oguk_fast_tpi.py</code>, <code>run_oguk_fast_sector.py</code>,
+        <code>plot.py</code>). Full API reference and theory documentation:
+        <a href="https://pslmodels.github.io/OG-UK">pslmodels.github.io/OG-UK</a>.
+      </p>
+    </div>
+  </section>
+
+  <section id="methodology" class="band" role="tabpanel" aria-labelledby="olg-tab-methodology" hidden>
+    <div class="band-head">
+      <span class="kicker mono">04 — methodology</span>
+      <h2>Core elements of OG-UK.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        The eight building blocks of the model, from overlapping cohorts to UK
+        calibration. Each step's formal structure follows its narrative;
+        equations render locally (no CDN). The theory is
+        <a href="https://github.com/PSLmodels/OG-Core">OG-Core's</a>, documented
+        in full at <a href="https://pslmodels.github.io/OG-Core/">pslmodels.github.io/OG-Core</a>.
+      </p>
+
+      <h3 id="meth-1">Step 1 — The overlapping-generations idea</h3>
+      <h4>Many generations coexist</h4>
+      <p>The central insight of an overlapping-generations model is that the economy is not populated by a single "representative agent." At any moment in time, many generations coexist: young people just entering the labour force, middle-aged workers at peak earnings, and retirees living off savings and pensions. Each generation has a different remaining lifespan, a different stock of accumulated wealth, and therefore a different response to any given policy change.</p>
+      <h4>Age cohorts</h4>
+      <p>OG-Core models S economically active age cohorts (typically 80, representing ages 21 to 100). Each period, a new cohort is born and the oldest cohort dies with some probability. The population distribution by age evolves over time with fertility, mortality, and immigration, and eventually reaches a stationary distribution in the long run.</p>
+      <h4>Ability types</h4>
+      <p>Within each age cohort, households split into J ability types, each with a distinct permanent labour productivity. High-ability types earn more per hour of work and typically save more. This heterogeneity captures how a tax reform affects the income distribution, not just average outcomes.</p>
+      <div class="callout formal">
+        <p class="formal-label mono">formal structure — population</p>
+        <p><span class="formal-eq-label mono">age cohorts</span> \(s = E+1, \ldots, E+S \quad \text{(economically active)}\)</p>
+        <p><span class="formal-eq-label mono">ability types</span> \(j = 1, \ldots, J \quad \text{with probability } \lambda_j\)</p>
+        <p><span class="formal-eq-label mono">population</span> \(\omega_{s,t}\) evolves with fertility, mortality, immigration</p>
+        <ul>
+          <li>Each type has its own \(\beta_j\), \(\chi^b_j\), \(e_{j,s}\)</li>
+          <li>Productivity \(e_{j,s}\) varies by age and type</li>
+          <li>Type assigned at birth, permanent</li>
+        </ul>
+      </div>
+
+      <h3 id="meth-2">Step 2 — Household decisions</h3>
+      <h4>Three decisions each period</h4>
+      <p>Every period, each household makes three decisions: how much to <strong>consume</strong>, how many hours to <strong>work</strong>, and how much to <strong>save</strong> for the future. The household chooses these to maximise expected lifetime utility, subject to a budget constraint.</p>
+      <h4>Consumption utility</h4>
+      <p>Consumption utility follows a CRRA (constant relative risk aversion) function, where the risk aversion parameter governs how strongly households prefer smooth consumption over time. Before entering this function, a Stone-Geary Cobb-Douglas form aggregates the individual consumption goods, accounting for minimum subsistence levels.</p>
+      <h4>Labour disutility</h4>
+      <p>Labour disutility uses an elliptical function rather than a standard power function. This ensures that the marginal cost of working goes to zero when hours are zero (so households always choose to work at least a little) and goes to infinity at the upper bound (so they never hit the ceiling). This avoids computationally expensive occasionally-binding constraint methods.</p>
+      <h4>Bequest utility</h4>
+      <p>Bequest utility captures the "warm glow" from leaving wealth behind upon death. The age-specific mortality probability weights it, so it matters most for older households. The strength of the bequest motive varies by ability type and is calibrated to match the observed wealth distribution.</p>
+      <h4>Budget constraint and Euler equations</h4>
+      <p>The household's budget constraint says that each period, income from savings returns, labour earnings, bequests received, government transfers, and pensions must cover consumption (including consumption taxes), income and wealth taxes, and savings carried into the next period.</p>
+      <p>Two Euler equations characterise the optimal decisions. The labour first-order condition says: work until the after-tax wage equals the marginal disutility. The savings Euler equation says: give up one unit of consumption today only if the discounted, after-tax return makes tomorrow's consumption sufficiently valuable.</p>
+      <div class="callout formal">
+        <p class="formal-label mono">formal structure — utility and Euler equations</p>
+        <p><span class="formal-eq-label mono">consumption</span> \(u(c) = \frac{c^{\,1-\sigma}}{1-\sigma}\)</p>
+        <p><span class="formal-eq-label mono">labour disutility</span> \(\chi^n_s \cdot g(n) \quad \text{(elliptical)}\)</p>
+        <p><span class="formal-eq-label mono">bequest motive</span> \(\chi^b_j \cdot \rho_s \cdot \frac{b'^{\,1-\sigma}}{1-\sigma}\)</p>
+        <p><span class="formal-eq-label mono">labour FOC</span> \(\chi^n_s g'(n) = w\,e_{j,s}(1-\tau'_{\text{lab}})\,u'(c)\)</p>
+        <p><span class="formal-eq-label mono">savings Euler</span> \(u'(c_t) = \beta_j(1-\rho_s)(1+r_{p,t+1}(1-\tau'_{\text{cap}}))\,u'(c_{t+1})\)</p>
+      </div>
+
+      <h3 id="meth-3">Step 3 — Firms and production</h3>
+      <h4>CES technology</h4>
+      <p>The production side of the economy consists of M industries, each populated by perfectly competitive firms. Each firm combines three inputs: <strong>private capital</strong>, <strong>public capital</strong> (government-provided infrastructure), and <strong>labour</strong>. A constant elasticity of substitution (CES) technology combines them.</p>
+      <h4>Substitution and productivity</h4>
+      <p>The elasticity parameter governs how easily firms substitute between capital and labour. When it equals one, the function reduces to the Cobb-Douglas form. Total factor productivity varies across industries and over time, so the model can capture sector-specific technological change.</p>
+      <h4>First-order conditions</h4>
+      <p>Profit maximisation yields the standard first-order conditions: the <strong>wage equals the marginal product of labour</strong>, and the <strong>rental rate of capital</strong> equals the after-tax marginal product of capital, accounting for depreciation, tax deductions, and investment tax credits.</p>
+      <h4>Public capital rents</h4>
+      <p>One feature of OG-Core sets it apart: <strong>public capital generates economic rents</strong>. Since firms cannot deduct the cost of using government infrastructure, the returns from public capital flow to private capital owners through an augmented rate of return.</p>
+      <div class="callout formal">
+        <p class="formal-label mono">formal structure — technology</p>
+        <p><span class="formal-eq-label mono">CES production</span> \(Y_m = Z_m\bigl[\gamma K_m^\rho + \gamma_g K_{g,m}^\rho + (1\!-\!\gamma\!-\!\gamma_g)(e^{g_y t}L_m)^\rho\bigr]^{1/\rho}\)</p>
+        <p><span class="formal-eq-label mono">wage</span> \(w = p_m \cdot \text{MPL}_m\)</p>
+        <p><span class="formal-eq-label mono">rental rate</span> \(r = (1-\tau^{\text{corp}})\,p_m\,\text{MPK}_m - \delta + \tau^{\text{corp}}\delta^\tau + \tau^{\text{inv}}\delta\)</p>
+        <ul>
+          <li>\(M\) industries, perfect competition</li>
+          <li>Public capital \(K_g\) generates rents</li>
+          <li>Nests Cobb-Douglas when \(\varepsilon \to 1\)</li>
+        </ul>
+      </div>
+
+      <h3 id="meth-4">Step 4 — Government</h3>
+      <h4>Revenue and spending</h4>
+      <p>The government in OG-Core collects revenue from <strong>five tax instruments</strong>: individual income taxes, consumption taxes, wealth taxes, corporate income taxes, and bequest taxes. It spends on public goods, infrastructure, pensions, lump-sum transfers, and universal basic income. Issuing debt finances the difference.</p>
+      <h4>Income tax: Gouveia-Strauss functions</h4>
+      <p>The income tax carries the most structure. OG-Core supports several functional forms for effective and marginal tax rates, fitted to detailed tax-benefit calculations. For OG-UK, we use the <strong>Gouveia-Strauss</strong> specification, which estimates the effective tax rate as a smooth, monotonically increasing function of income and derives the marginal tax rate analytically. The estimation runs on PolicyEngine-UK output drawn from the <strong>Enhanced FRS</strong> — the Family Resources Survey enhanced with HMRC's Survey of Personal Incomes, the Living Costs and Food Survey, and the Wealth and Assets Survey.</p>
+      <h4>Other tax instruments</h4>
+      <p>The <strong>wealth tax</strong> uses a progressive three-parameter function that produces anything from zero taxation to smoothly increasing marginal rates. <strong>Consumption taxes</strong> take linear rates that vary by good, covering VAT and excise. <strong>Corporate income taxes</strong> take flat rates by industry.</p>
+      <h4>Fiscal closure rule</h4>
+      <p>Since debt cannot grow without bound, a <strong>fiscal closure rule</strong> activates after a specified period to bring the debt-to-GDP ratio gradually towards a target. The modeller chooses whether the adjustment falls on government spending, transfers, or a combination of both.</p>
+      <div class="callout formal">
+        <p class="formal-label mono">formal structure — government budget</p>
+        <p>\[ D_{t+1} + \text{Rev}_t = (1+r_{\text{gov}})D_t + G + I_g + \text{Pen} + TR + UBI \]</p>
+        <ul>
+          <li>Income: Gouveia-Strauss from PolicyEngine</li>
+          <li>Consumption: VAT + excise</li>
+          <li>Wealth: progressive 3-parameter</li>
+          <li>Corporate: flat rate by industry</li>
+          <li>Bequest: on inherited wealth</li>
+        </ul>
+      </div>
+
+      <h3 id="meth-5">Step 5 — Market clearing and equilibrium</h3>
+      <h4>Supply equals demand</h4>
+      <p><strong>Market clearing conditions</strong> connect all the pieces above — household decisions, firm production, and government policy. For the economy to be in equilibrium, supply must equal demand in every market simultaneously.</p>
+      <h4>Labour and capital markets</h4>
+      <p>In the <strong>labour market</strong>, the total efficiency-weighted labour supply from all households across all ages and ability types must equal total firm demand across all industries. In the <strong>capital market</strong>, the total stock of savings (both domestic and foreign) must equal the capital firms demand plus government debt. The model runs as an <strong>open economy</strong>: parameters control foreign capital and foreign debt holdings, setting the degree of international capital mobility.</p>
+      <h4>Goods and debt markets</h4>
+      <p>For each <strong>goods market</strong>, industry output must equal consumption demand. The final industry clears residually, absorbing investment, government purchases, and any remaining demand. The <strong>debt market</strong> splits government debt between domestic and foreign holders.</p>
+      <h4>What defines an equilibrium</h4>
+      <p>An equilibrium is a set of prices (the interest rate, wage, and goods prices) such that all households optimise, all firms optimise, the government budget constraint holds, and all four markets clear. Finding one is a large-scale nonlinear fixed-point problem.</p>
+      <div class="callout formal">
+        <p class="formal-label mono">formal structure — equilibrium conditions</p>
+        <p><span class="formal-eq-label mono">labour</span> \(\sum_{s,j} \omega_s \lambda_j e_{j,s} n_{j,s} = \sum_m L_m\)</p>
+        <p><span class="formal-eq-label mono">capital</span> \(K = K^d + K^f \quad (\text{open economy: } \zeta_K)\)</p>
+        <p><span class="formal-eq-label mono">goods</span> \(Y_m = C_m \;\; (m &lt; M)\)</p>
+        <p><span class="formal-eq-label mono">debt</span> \(D = D^d + D^f \quad (\text{foreign share: } \zeta_D)\)</p>
+      </div>
+
+      <h3 id="meth-6">Step 6 — How the model is solved</h3>
+      <h4>Two-stage approach</h4>
+      <p>Finding equilibrium is a two-stage computational problem. The model first solves for the long-run steady state, then computes the transition path from today's economy to that steady state.</p>
+      <h4>Stage 1: Steady state</h4>
+      <p>The model first finds the long-run equilibrium where all variables stay constant (after removing trend growth). It uses a nested fixed-point algorithm. The <em>outer loop</em> guesses a vector of aggregate prices and quantities. The <em>inner loop</em> takes these as given and solves the Euler equations for every combination of ability type and age. Because each type is independent, the inner loop solves them <strong>in parallel</strong>. After solving all households, the algorithm aggregates their decisions, computes firm demands, checks the government budget, and derives new guesses. It iterates until convergence.</p>
+      <h4>Stage 2: Transition path (TPI)</h4>
+      <p>Starting from today's economy, the model then solves for how the economy evolves towards the steady state over T periods. The <em>Time Path Iteration</em> (TPI) method guesses entire time paths for all prices and quantities, solves every cohort's lifetime decisions given those paths (with <strong>rational expectations</strong> about future prices), checks whether the implied paths match the guesses, and iterates. This step produces the year-by-year projections.</p>
+      <div class="callout formal">
+        <p class="formal-label mono">formal structure — two-stage algorithm</p>
+        <p><span class="formal-eq-label mono">outer loop</span> \(\mathbf{x} = \{\bar{r}_p, \bar{r}, \bar{w}, \{\bar{p}_m\}, \overline{BQ}, \overline{TR}, \text{factor}\}\)</p>
+        <p><span class="formal-eq-label mono">inner loop</span> \(\text{Solve } 2JS \text{ Euler equations } \forall (j,s)\)</p>
+        <p><span class="formal-eq-label mono">convergence</span> \(\|\mathbf{x}^{(i')} - \mathbf{x}^{(i)}\| \leq \text{toler}_{\text{ss}}\)</p>
+        <p><span class="formal-eq-label mono">TPI</span> \(\text{Guess } \{\mathbf{x}_t\}_{t=1}^T \to \text{solve all cohorts} \to \text{iterate}\)</p>
+      </div>
+
+      <h3 id="meth-7">Step 7 — Calibrating for the United Kingdom</h3>
+      <h4>From theory to UK data</h4>
+      <p>OG-Core provides the theoretical framework. Turning it into a model of the <em>UK</em> economy means calibrating every parameter to UK data. The OG-UK calibration layer handles that step. The deployed calibration is anchored to official data: depreciation from ONS capital-stocks data (<strong>6.5%/yr</strong>), potential-output growth from the OBR EFO (<strong>1.1%/yr</strong>), the discount factor matched to the ONS household saving ratio, the world interest rate to Bank of England gilt-yield data, and a Frisch labour-supply elasticity of <strong>0.35–0.4</strong> (Blundell, MaCurdy &amp; Meghir). Demographics — population by age, mortality, immigration — come from UN data; the state pension age matches current UK rules.</p>
+      <h4>Tax function estimation</h4>
+      <p>Taxes are not stylized wedges. OG-UK runs <a href="/pe">PolicyEngine-UK</a> on household microdata under baseline and reform, computes marginal rates by perturbation — add £1 of employment (or dividend) income per adult, rerun, read the change in net income — and fits three-parameter <strong>Gouveia–Strauss</strong> schedules to the effective-rate microdata for each year of a three-year budget window. The marginal-rate schedules are the analytical derivatives of the same fitted parameters, so ETR and MTRs are consistent by construction, and the model sees the reform's true shape across the income and age distribution.</p>
+      <h4>Real-world mapping</h4>
+      <p>The model outputs values in abstract units. To translate them into pound-sterling figures, OG-UK anchors the model's steady-state GDP to the ONS figure and scales all other variables proportionally, against live ONS series with cached fallbacks. Results then read as changes in billions of pounds — a format that policymakers and the public can read directly.</p>
+      <div class="callout formal">
+        <p class="formal-label mono">formal structure — Gouveia-Strauss tax function</p>
+        <p><span class="formal-eq-label mono">effective rate</span> \(\text{ETR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-1/\phi_1}\Bigr]\)</p>
+        <p><span class="formal-eq-label mono">marginal (analytical)</span> \(\text{MTR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-(1+\phi_1)/\phi_1}\Bigr]\)</p>
+        <ul>
+          <li>ONS: GDP, national accounts anchor</li>
+          <li>OBR: fiscal forecasts, debt target</li>
+          <li>HMRC/GOV.UK: tax rates, state pension age</li>
+          <li>UN WPP: demographics (country 826)</li>
+          <li>PolicyEngine: tax function estimation</li>
+        </ul>
+      </div>
+
+      <h3 id="meth-8">Step 8 — What this enables</h3>
+      <h4>Two complementary views</h4>
+      <p>Together with a static microsimulation engine, OG-UK supports two complementary views of any UK tax or benefit reform. Static analysis provides the detailed distributional picture: which households gain, which lose, and by how much. OG-UK provides the macroeconomic picture: what happens to GDP, investment, government revenue, interest rates, and wages as the economy adjusts over time.</p>
+      <h4>Why both views matter</h4>
+      <p>The two perspectives can tell different stories. A reform that raises revenue in a static analysis may raise less in practice, because higher tax rates reduce labour supply and investment and shrink the tax base. The reverse also holds: a reform that costs revenue upfront might pay for itself over time through extra economic activity. OG-UK captures these dynamics.</p>
+      <h4>Year-by-year transition paths</h4>
+      <p>The transition path carries the bulk of the answer. Rather than comparing two long-run steady states, it shows the <strong>year-by-year adjustment</strong>: how GDP dips in the first few years, how interest rates respond, when revenue stabilises. These time paths map onto OBR forecast horizons.</p>
+      <h4>What the model does not capture</h4>
+      <p>OG-UK is a structural macro model and inherits the simplifications of that class. The caveats for reading its outputs:</p>
+      <ul>
+        <li><strong>Smoothed tax functions, not statutory bands.</strong> A single Gouveia–Strauss function, fitted to PolicyEngine-UK output, folds in income tax and National Insurance. Reforms that change <em>average</em> liability across the income distribution flow through cleanly; reforms whose mechanism is the kink itself (a new threshold, an allowance taper change) come through only to the extent the smoothed function shifts.</li>
+        <li><strong>Permanent ability types, no earnings risk.</strong> OG-UK uses J&nbsp;=&nbsp;7 deterministic ability types. There is no idiosyncratic earnings shock within a type, so precautionary savings and earnings-risk-driven inequality are not a channel here. This is a deliberate trade-off — the OBR's own UK OLG model (<a href="#trust">below</a>) makes the same one.</li>
+        <li><strong>UK as a single entity.</strong> The model calibrates to UK-wide aggregates; there is no England / Scotland / Wales / Northern&nbsp;Ireland breakdown. Devolved tax differentials and reforms with explicit regional incidence sit below the model's granularity.</li>
+        <li><strong>Reforms are step changes.</strong> A PolicyEngine reform sets parameter values from a start date and they hold thereafter. Phased introductions, sunset clauses or year-on-year indexation changes need explicit scripting; they are not the default.</li>
+        <li><strong>Truncated horizon.</strong> The default 60-period transition assumes the steady state arrives by year 60. Effects that play out over longer horizons collapse into the steady-state anchor.</li>
+      </ul>
+      <p>None of these are model bugs — they are choices that make the macro accounting tractable. Worth knowing when reading the <a href="#showcase">Showcase</a> charts.</p>
     </div>
   </section>
 
@@ -388,7 +967,7 @@ impact = map_transition_to_real_world(base_tp, reform_tp)
           </tr>
           <tr>
             <th scope="row"><strong>Steady-state-only in the CLI</strong></th>
-            <td>Because the CLI exposes steady-state solves only (section 03), the model cannot yet speak to fiscal-year profiles through the suite — the long-run destination is available through it, the path there is not.</td>
+            <td>Because the CLI exposes steady-state solves only (<a href="#code-next">Code, step 7</a>), the model cannot yet speak to fiscal-year profiles through the suite — the long-run destination is available through it, the path there is not.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Ability profiles not UK-estimated</strong></th>
@@ -396,13 +975,13 @@ impact = map_transition_to_real_world(base_tp, reform_tp)
           </tr>
         </tbody>
       </table></div>
-      <div class="callout">
-        Want to see the model before running it? The
-        <a href="https://og-model-dashboard.vercel.app">OG-UK dashboard</a> is
-        a live explainer with a worked +1pp basic-rate simulation, a
-        scrollytelling methodology walk-through, runnable code for every step,
-        and a side-by-side with the OBR's UK OLG model.
-      </div>
+      <p class="chart-note">
+        The Showcase, Code and Methodology tabs above are adapted from the
+        <a href="https://og-model-dashboard.vercel.app">OG-UK dashboard</a>,
+        which also carries a side-by-side comparison with the OBR's UK OLG
+        model (Working Paper No. 22) — summarised in
+        <a href="#trust">section 05</a> here rather than reproduced in full.
+      </p>
     </div>
   </section>
 
@@ -430,6 +1009,52 @@ document.addEventListener("click", function (e) {
     setTimeout(function () { btn.textContent = "copy"; }, 1400);
   });
 });
+</script>
+<script>
+(function () {
+  var tabs = [
+    ["olg-tab-showcase", "showcase"],
+    ["olg-tab-code", "code"],
+    ["olg-tab-methodology", "methodology"]
+  ];
+  function activate(panelId, updateHash) {
+    tabs.forEach(function (pair) {
+      var active = pair[1] === panelId;
+      document.getElementById(pair[0]).setAttribute("aria-selected", active ? "true" : "false");
+      document.getElementById(pair[1]).hidden = !active;
+    });
+    if (updateHash) {
+      // Update the hash without scrolling the page.
+      history.replaceState(null, "", "#" + panelId);
+    }
+  }
+  tabs.forEach(function (pair) {
+    document.getElementById(pair[0]).addEventListener("click", function () {
+      activate(pair[1], true);
+    });
+  });
+  function applyHash() {
+    var h = location.hash.slice(1);
+    if (!h) return;
+    var panelIds = tabs.map(function (p) { return p[1]; });
+    if (panelIds.indexOf(h) !== -1) {
+      activate(h, false);
+      document.getElementById(h).scrollIntoView();
+      return;
+    }
+    // Deep link to an id inside a hidden tab panel (e.g. /olg#run):
+    // activate its tab, then scroll to it.
+    var el = document.getElementById(h);
+    if (!el) return;
+    var panel = el.closest('[role="tabpanel"]');
+    if (panel && panelIds.indexOf(panel.id) !== -1) {
+      activate(panel.id, false);
+      el.scrollIntoView();
+    }
+  }
+  window.addEventListener("hashchange", applyHash);
+  applyHash();
+})();
 </script>
 </body>
 </html>
