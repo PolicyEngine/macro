@@ -292,71 +292,7 @@
         evidence comes from out-of-sample forecasts, independent reform
         costings, and solver residuals.
       </div>
-      <h3>Software fidelity and economic validity are separate.</h3>
-      <p>
-        The dimensional audit below covers obr-macro, boe-svar, and frb-us. Levels are categorical
-        evidence judgements, not a synthetic score: a model can reproduce its
-        reference code perfectly while still lacking independent forecast or
-        counterfactual validation.
-      </p>
-      <div class="table-scroll">
-      <table>
-        <caption>Independent model-quality audit by evidence dimension</caption>
-        <thead><tr><th scope="col">Evidence dimension</th><th scope="col">obr-macro</th><th scope="col">boe-svar</th><th scope="col">frb-us</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Implementation fidelity</th><td>Moderate — incomplete channels</td><td>Strong — restrictions and identities gated</td><td>Strong — four gated scenarios at the reference-solver noise floor</td></tr>
-          <tr><th scope="row">Predictive validation</th><td class="vc-warn">Weak — raw GDP 5.75%, consumption 9.56% MAPE</td><td class="vc-warn">Weak — the CPI win does not survive a drift benchmark; Bank Rate is the only defensible claim</td><td>Not assessed — LONGBASE is not a Fed forecast</td></tr>
-          <tr><th scope="row">Identification robustness</th><td>Not applicable</td><td>Moderate — proxy data and specification matter</td><td>Not applicable</td></tr>
-          <tr><th scope="row">Policy-counterfactual validity</th><td class="vc-warn">Weak — one independent tax benchmark; spending multiplier ~1.0 vs the OBR's 0.6</td><td>Not applicable — reform scoring refused</td><td>Moderate — published ranges, VAR expectations only</td></tr>
-          <tr><th scope="row">Uncertainty calibration</th><td class="vc-warn">Weak — sensitivity envelopes pending</td><td class="vc-warn">Weak-to-moderate — measured 49-origin coverage runs below nominal (68% band covers 57–71%)</td><td class="vc-warn">Weak — bootstrap engine exists, public runs remain deterministic</td></tr>
-          <tr><th scope="row">Vintage reproducibility</th><td>Moderate — multi-EFO archive pending</td><td>Moderate — public proxies replace internal series</td><td>Moderate — artifacts hashed; multi-vintage tests pending</td></tr>
-        </tbody>
-      </table>
-      </div>
-      <h3>The strongest claim, the weakest point, the full evidence.</h3>
-      <p>
-        One card per model: the strongest validated claim with its headline
-        number, the weakest point stated as plainly, and the page where the
-        charts, tables, and caveats live.
-      </p>
-      <div class="vs-grid">
-        <div class="vs-card" id="obr-evidence">
-          <div class="vs-card-head">obr-macro — OBR emulator</div>
-          <div class="vs-line"><span class="icon">&#10003;</span><span><strong>Strongest:</strong> anchored GDP within <strong>0.15% MAPE</strong> of the March 2026 EFO; the independent 1pp basic-rate costing lands <strong>&minus;6.4%</strong> from HMRC's ready reckoner.</span></div>
-          <div class="vs-line"><span class="icon">&#33;</span><span><strong>Weakest:</strong> free-running GDP misses by 5.75%, and the spending multiplier is ~1.0 by construction against the OBR's published 0.6.</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span><a href="/obr/validation">obr-macro validation →</a></span></div>
-        </div>
-        <div class="vs-card" id="svar-evidence">
-          <div class="vs-card-head">boe-svar — Bank of England SVAR</div>
-          <div class="vs-line"><span class="icon">&#10003;</span><span><strong>Strongest:</strong> FEVD shares of <strong>42.1% / 49.5%</strong> against the paper's ~40% / ~50%; Bank Rate beats a drifting random walk (<strong>0.79</strong> at one quarter, significant).</span></div>
-          <div class="vs-line"><span class="icon">&#33;</span><span><strong>Weakest:</strong> the CPI forecasting win does not survive a drift benchmark, and the 49-origin bands under-cover (68% band contains 57&ndash;71%).</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span><a href="/svar/validation">boe-svar validation →</a></span></div>
-        </div>
-        <div class="vs-card" id="frbus-evidence">
-          <div class="vs-card-head">frb-us — Fed macro model</div>
-          <div class="vs-line"><span class="icon">&#10003;</span><span><strong>Strongest:</strong> reproduces LONGBASE to <strong>5.6&times;10<sup>&minus;17</sup></strong> — machine precision; shock responses sit at the Fed's own inter-release noise floor.</span></div>
-          <div class="vs-line"><span class="icon">&#33;</span><span><strong>Weakest:</strong> no predictive validation is possible (LONGBASE is not a forecast), and model-consistent expectations are not implemented.</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span><a href="/frb-us/validation">frb-us validation →</a></span></div>
-        </div>
-        <div class="vs-card" id="hank-evidence">
-          <div class="vs-card-head">us-hank — two-asset HANK</div>
-          <div class="vs-line"><span class="icon">&#10003;</span><span><strong>Strongest:</strong> an <strong>18-test suite</strong> gates the Auclert et al. (2021) steady state, market clearing, and published shock responses; wealth targets hit to ~10<sup>&minus;13</sup>.</span></div>
-          <div class="vs-line"><span class="icon">&#33;</span><span><strong>Weakest:</strong> replication fidelity only — it does not forecast the US economy and maps no detailed tax reforms.</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span><a href="/us-hank/validation">us-hank validation →</a></span></div>
-        </div>
-        <div class="vs-card" id="pe-evidence">
-          <div class="vs-card-head">pe-microsim — tax-benefit rules</div>
-          <div class="vs-line"><span class="icon">&#10003;</span><span><strong>Strongest:</strong> household calculations are <strong>deterministic</strong> applications of implemented legislation — checkable by hand, rule by rule.</span></div>
-          <div class="vs-line"><span class="icon">&#33;</span><span><strong>Weakest:</strong> population aggregates inherit survey error — the 1pp basic-rate costing runs 6.4% below HMRC in year one.</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span><a href="/pe/validation">pe-microsim validation →</a></span></div>
-        </div>
-        <div class="vs-card" id="olg-evidence">
-          <div class="vs-card-head">psl-og — overlapping generations</div>
-          <div class="vs-line"><span class="icon">&#10003;</span><span><strong>Strongest:</strong> calibration targets sit on official UK aggregates (debt-to-GDP within <strong>0.1pp</strong> of the latest ONS print) with every imposed match labelled as imposed.</span></div>
-          <div class="vs-line"><span class="icon">&#33;</span><span><strong>Weakest:</strong> no published replication ground truth exists; targets met by construction are anchors, not validation.</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span><a href="/olg/validation">psl-og validation →</a></span></div>
-        </div>
-      </div>
+
       <h3 id="shops">The same questions, answered by other shops.</h3>
       <p>
         Published institutional answers sit beside ours; each row states how
@@ -413,14 +349,12 @@
       <h2>Read the source literature and replication notes.</h2>
       <p class="section-intro">Working papers and replication reports for each model. The full library, with abstracts and PDFs, lives on the <a href="/papers">Papers</a> page.</p>
     </div>
-    <div class="prose">
-      <ul>
-        <li><a href="/papers/obr-macro">obr-macro working paper</a> — how the OBR's macroeconometric model was transpiled, anchored, and checked against the published forecast and HMRC costings.</li>
-        <li><a href="/papers/boe-svar">boe-svar working paper</a> — the Bayesian structural VAR replication of Brignone &amp; Piffer (2025), its identification, and its forecast diagnostics.</li>
-        <li><a href="/papers/frb-us">frb-us working paper</a> — parsing and solving the Fed's FRB/US model, with the machine-precision tracking evidence.</li>
-        <li><a href="/papers/psl-og">psl-og working paper</a> — the OG-UK calibration, tax-function estimation, and the limits of a model with no ground truth.</li>
-        <li><a href="/reports/us-hank-open-source">us-hank replication report</a> — the open-model landscape and the Auclert et al. (2021) two-asset HANK replication.</li>
-      </ul>
+    <div class="strategy-grid">
+      <a class="strategy-card" href="/papers/obr-macro"><header><span class="card-id mono">obr-macro</span><span class="tag-row"><span class="tag">working paper</span></span></header><p>How the OBR's macroeconometric model was transpiled, anchored, and checked against the published forecast and HMRC costings.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
+      <a class="strategy-card" href="/papers/boe-svar"><header><span class="card-id mono">boe-svar</span><span class="tag-row"><span class="tag">working paper</span></span></header><p>The Bayesian structural VAR replication of Brignone &amp; Piffer (2025), its identification, and its forecast diagnostics.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
+      <a class="strategy-card" href="/papers/frb-us"><header><span class="card-id mono">frb-us</span><span class="tag-row"><span class="tag">working paper</span></span></header><p>Parsing and solving the Fed's FRB/US model, with the machine-precision tracking evidence.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
+      <a class="strategy-card" href="/papers/psl-og"><header><span class="card-id mono">psl-og</span><span class="tag-row"><span class="tag">working paper</span></span></header><p>The OG-UK calibration, tax-function estimation, and the limits of a model with no ground truth.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
+      <a class="strategy-card" href="/reports/us-hank-open-source"><header><span class="card-id mono">us-hank</span><span class="tag-row"><span class="tag">replication report</span></span></header><p>The open-model landscape and the Auclert et al. (2021) two-asset HANK replication.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
     </div>
   </section>
 </main>
