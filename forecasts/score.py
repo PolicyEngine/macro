@@ -249,7 +249,25 @@ def build() -> dict:
 
 EFO_CSV = ROOT / "papers" / "obr-macro" / "figures" / "fig_anchored_data.csv"
 EFO_CPI_CSV = ROOT / "papers" / "obr-macro" / "figures" / "efo_march_2026_cpi.csv"
-SVAR_ROUND = ROUNDS / "2026-07-21" / "boe-svar.json"
+def _latest_svar_round() -> Path:
+    """Newest dated round with a boe-svar artifact, for the §03 display.
+
+    Scoring (§02) is unaffected: it walks every archived round and scores each
+    against outturns, so the scored-example card keeps using whichever round
+    was actually scored. Only the model-vs-official comparison tracks the
+    latest archived view.
+    """
+    candidates = sorted(
+        p
+        for p in ROUNDS.glob("*/boe-svar.json")
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.parent.name)
+    )
+    if not candidates:
+        raise SystemExit("no rounds/<date>/boe-svar.json artifact found")
+    return candidates[-1]
+
+
+SVAR_ROUND = _latest_svar_round()
 
 OFFICIAL_LABEL = "OBR March 2026 EFO"
 
@@ -367,8 +385,8 @@ VS_OFFICIAL_SPECS = {
             "in <code>papers/obr-macro/figures/fig_anchored_data.csv</code>"
         ),
         "intro": (
-            "The archived GDP-growth path beside the official forecast — the "
-            "gap between the lines is where the views differ."
+            "The GDP-growth path from the {round_id} round beside the official "
+            "forecast — the gap between the lines is where the views differ."
         ),
     },
     "cpi": {
@@ -381,8 +399,14 @@ VS_OFFICIAL_SPECS = {
             "<code>papers/obr-macro/figures/efo_march_2026_cpi.csv</code>"
         ),
         "intro": (
-            "Same comparison for CPI — the archived rounds see a stickier "
-            "inflation path than the EFO's return to target."
+            "Same comparison for CPI, from the {round_id} round: the model "
+            "sees a stickier inflation path than the EFO's return to target. "
+            "That gap has a mechanical cause — a stationary VAR estimated on "
+            "a sample that includes the 2021–23 inflation surge "
+            "mean-reverts toward a higher sample mean. Re-estimating the "
+            "coefficients through 2025Q1 (this round) lowered the "
+            "long-horizon CPI medians by roughly 0.3pp relative to the "
+            "July 21 round."
         ),
     },
 }
@@ -443,7 +467,8 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
 
     svg = "\n".join(
         [
-            f'      <p class="chart-intro">{spec["intro"]}</p>',
+            '      <p class="chart-intro">'
+            f'{spec["intro"].format(round_id=SVAR_ROUND.parent.name)}</p>',
             '      <figure class="vchart-figure">',
             f'        <svg class="vchart" data-chart="{chart_id}" viewBox="0 0 {width} {height}" '
             f'role="img" aria-labelledby="{chart_id}-t {chart_id}-d">',
@@ -643,7 +668,10 @@ def render_results(card: dict) -> str:
             "        </article>"
         )
     body.append("      </div>")
-    notes = []
+    notes = [
+        "Errors are signed as forecast − outturn: a positive error means "
+        "the forecast was too high, a negative one too low."
+    ]
     if any(e.get("naive_rw") is not None for _, e in rows):
         notes.append(esc(NAIVE_NOTE))
     if any(e.get("official") is not None for _, e in rows):
