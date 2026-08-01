@@ -369,6 +369,171 @@ def hank_summary() -> dict:
 
 
 @mcp.tool()
+def frbus_shock_incidence(
+    var: str,
+    shock: float,
+    year: int = 2027,
+    start: str = "2026Q1",
+    periods: int = 1,
+    horizon: int = 20,
+    policy_rule: str = "inertial_taylor",
+    income_concept: str = "wage_bill",
+    dataset: str | None = None,
+) -> dict:
+    """Who bears a FRB/US shock, at household resolution (EXPERIMENTAL) —
+    the macro-to-micro incidence layer, NOT reform scoring (FRB/US still
+    has no PolicyEngine-reform bridge; score_reform keeps refusing
+    model='frbus').
+
+    Pipeline: frbus_shock with the real labour-market series (pl
+    compensation per hour, lhp hours, leh employment; % deviations from
+    baseline) -> the annual mean of the `year` quarters becomes a pre-tax
+    earnings factor -> the factor scales the US population microsim's
+    employment-income inputs with policy IDENTICAL on both sides. The
+    result is the shock's incidence through the AUTOMATIC STABILIZERS:
+    a negative earnings shock reduces tax revenue and raises means-tested
+    benefits (budgetary_impact_bn in $bn/year, positive = the shock
+    improves the government balance), with decile impacts and
+    winner/loser counts.
+
+    Args:
+        var: FRB/US lever, e.g. 'rffintay_aerr' — see frbus_list_variables;
+            units differ per lever.
+        shock: Shock size in the lever's model units.
+        year: Calendar year averaged into the overlay and scored by the
+            microsim (default 2027; its four quarters must fall inside
+            start+horizon).
+        start / periods / horizon / policy_rule: As in frbus_shock.
+        income_concept: 'wage_bill' (default: pl+lhp — the aggregate
+            labour-income change, applied uniformly) or 'wage' (pl alone).
+        dataset: Optional microdata dataset name override.
+
+    What this tool CANNOT do: score a tax reform (no reform bridge);
+    allocate job losses to individual households (uniform scaling
+    understates the concentration of real incidence in job losers —
+    stated in caveats). US only. Runtime: seconds for the FRB/US solve
+    plus a US microsim run (~tens of seconds warm; the first-ever call
+    downloads microdata).
+
+    Returns the frbus payload, the economic_assumptions factors, an
+    `application` block, the microsim incidence block, and a common
+    `score` block (model 'frbus+microsim', result_type 'illustration').
+    """
+    return core.frbus_shock_incidence(
+        var=var, shock=shock, year=year, start=start, periods=periods,
+        horizon=horizon, policy_rule=policy_rule,
+        income_concept=income_concept, dataset=dataset,
+    )
+
+
+@mcp.tool()
+def hank_shock_incidence(
+    kind: str,
+    size: float,
+    year: int = 2026,
+    persistence: float = 0.9,
+    horizon: int = 20,
+    variant: str = "two_asset",
+    income_concept: str = "wage_bill",
+    start_year: int = 2026,
+    dataset: str | None = None,
+) -> dict:
+    """Who bears a US HANK shock, at household resolution (EXPERIMENTAL) —
+    the macro-to-micro incidence layer, NOT reform scoring (HANK still has
+    no PolicyEngine-reform bridge; score_reform keeps refusing
+    model='hank').
+
+    Pipeline: hank_shock — which surfaces the model's pre-tax real wage
+    (w) and labor (N) IRFs, % deviations from steady state, computed from
+    the GE sequence-space Jacobian — then the annual mean of the `year`
+    quarters becomes a pre-tax earnings factor scaling the US population
+    microsim's employment-income inputs, policy identical on both sides.
+    Reports the automatic-stabilizer budget change (budgetary_impact_bn,
+    $bn/year), decile impacts and winner/loser counts.
+
+    Args:
+        kind / size / persistence / horizon / variant: As in hank_shock
+            (units differ per kind; see hank_summary). horizon must cover
+            the incidence year's quarters.
+        year: Calendar year averaged into the overlay and scored by the
+            microsim (default 2026).
+        income_concept: 'wage_bill' (default: w+N, applied uniformly) or
+            'wage' (w alone).
+        start_year: Calendar year the shock's quarter 0 maps to (HANK
+            quarters are offsets from the shock start; default 2026).
+        dataset: Optional microdata dataset name override.
+
+    What this tool CANNOT do: score a tax reform; forecast (HANK is a
+    stylized model around the Auclert-Bardóczy-Rognlie-Straub 2021
+    calibrated steady state, not a US forecast baseline); allocate job
+    losses to individual households (uniform scaling — stated in
+    caveats). US only.
+
+    Returns the hank payload, the economic_assumptions factors, an
+    `application` block, the microsim incidence block, and a common
+    `score` block (model 'hank+microsim', result_type 'illustration').
+    """
+    return core.hank_shock_incidence(
+        kind=kind, size=size, year=year, persistence=persistence,
+        horizon=horizon, variant=variant, income_concept=income_concept,
+        start_year=start_year, dataset=dataset,
+    )
+
+
+@mcp.tool()
+def svar_inflation_incidence(
+    year: int = 2027,
+    horizons: Annotated[int, Field(ge=1, le=40)] = 12,
+    draws: Annotated[int, Field(ge=50, le=10_000)] = 2000,
+    reference: str = "obr",
+    dataset: str | None = None,
+) -> dict:
+    """Cost and household incidence of the UK SVAR's CPI gap through
+    statutory benefit uprating (EXPERIMENTAL) — a price-side incidence
+    mechanism, unlike the earnings-overlay tools.
+
+    Computes the CPI gap = the SVAR's median YoY CPI inflation for `year`
+    (annual mean of its four quarters, in %) minus the reference path,
+    then builds a REAL PolicyEngine reform: a short curated list of
+    statutorily CPI-uprated UK parameters (Universal Credit standard
+    allowances and child element, Child Benefit rates) each scaled by
+    (1 + gap/100) from 6 April `year+1` against its baseline value in
+    force then, scored with the UK population microsim for `year+1`.
+    budgetary_impact_bn is in £bn/year; a positive gap costs money
+    (negative budgetary impact) and lands in the deciles shown.
+
+    Args:
+        year: Forecast year whose CPI gap drives the following April's
+            uprating (default 2027; must be within the SVAR horizon).
+        horizons: SVAR forecast horizon in quarters (1-40; default 12 —
+            must cover the year's four quarters).
+        draws: SVAR posterior draws (50-10,000; default 2000). The first
+            call estimates the SVAR — a couple of minutes cold, like
+            forecast_uk; results are cached in-process.
+        reference: 'obr' (default) — the March 2026 EFO CPI path packaged
+            with obr_macro — or 'target' — a flat 2.0%.
+        dataset: Optional microdata dataset name override.
+
+    What this tool CANNOT do (stated in caveats): the state pension
+    (triple lock is not a pure CPI link), income tax and NI thresholds
+    (frozen by statute), Local Housing Allowance, and the benefit cap are
+    NOT included, so the true fiscal sensitivity to inflation is larger
+    than this curated slice; only the SVAR median is propagated, not its
+    uncertainty bands; the statutory September-CPI reference month is
+    approximated by the annual average. UK only.
+
+    Returns the gap arithmetic, the curated parameters with baseline and
+    counterfactual values, the reform dict, the microsim result, and a
+    common `score` block (model 'svar+microsim', result_type
+    'illustration').
+    """
+    return core.svar_inflation_incidence(
+        year=year, horizons=horizons, draws=draws, reference=reference,
+        dataset=dataset,
+    )
+
+
+@mcp.tool()
 def forecast_uk(
     horizons: Annotated[int, Field(ge=1, le=40)] = 12,
     draws: Annotated[int, Field(ge=50, le=10_000)] = 2000,

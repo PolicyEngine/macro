@@ -144,11 +144,18 @@ def test_monetary_easing_is_expansionary_with_the_documented_shape():
     assert "warning" not in res, res.get("warning")
     assert len(res["results"]) == core.HANK_DEFAULT_HORIZON
     assert res["shock_input"] == "rstar"
-    assert set(res["series_meaning"]) == {"Y", "C", "I", "pi", "r"}
+    assert set(res["series_meaning"]) == {"Y", "C", "I", "pi", "r", "w", "N"}
 
     first = res["results"][0]
     assert first["Y"] > 0, "an easing must be expansionary on impact"
     assert first["pi"] > 0, "an easing must raise inflation on impact"
+    # Ground-truth direction checks for the w/N series feeding the incidence
+    # bridge: higher demand raises labor and the real wage on impact, and
+    # under a standard production function the labor response must not be
+    # dwarfed by output (N moves with Y, not orders of magnitude below it).
+    assert first["N"] > 0, "an easing must raise labor on impact"
+    assert first["w"] > 0, "an easing must raise the real wage on impact"
+    assert first["N"] > 0.1 * first["Y"]
     assert res["peaks"]["Y"]["value"] > 0
     assert res["peaks"]["C"]["value"] > 0
     assert res["peaks"]["I"]["value"] > 0
@@ -199,7 +206,7 @@ def test_one_asset_variant_reports_no_investment_series():
     res = core.hank_shock(kind="monetary", size=-0.0025, variant="one_asset",
                           horizon=8)
     assert "I" not in res["results"][0]
-    assert set(res["series_meaning"]) == {"Y", "C", "pi", "r"}
+    assert set(res["series_meaning"]) == {"Y", "C", "pi", "r", "w", "N"}
     assert len(res["results"]) == 8
 
 
