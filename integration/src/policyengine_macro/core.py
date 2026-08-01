@@ -936,9 +936,16 @@ def hank_shock(
                 extra not in G
                 or irf["shock_input"] not in G[extra]
                 or extra not in ss
-                or not float(ss[extra])
             ):
                 continue
+            if not float(ss[extra]):
+                # Present but zero is a calibration anomaly, not an absent
+                # series — surface it rather than masking it as "omitted".
+                raise RuntimeError(
+                    f"HANK steady state has {extra} == 0; refusing to "
+                    "divide a wage/labor IRF by a degenerate steady state — "
+                    "inspect the calibration"
+                )
             irf[extra] = (
                 100.0 * (G[extra][irf["shock_input"]] @ irf["shock"])
                 / float(ss[extra])
@@ -3143,7 +3150,10 @@ def frbus_shock_incidence(
     can run in separate processes — the combined process peaks well past
     small-machine memory (observed: an 8GB host jetsam-kills it), the same
     two-step reality as ``og_payload`` in dynamic scoring. The payload's
-    var/shock must match the arguments; mixing is refused.
+    var/shock must match the arguments; mixing is refused. When a payload
+    is given, ``start``/``periods``/``horizon``/``policy_rule`` are ignored
+    — the payload's own solve parameters govern the shock, not these
+    arguments.
 
     Pipeline:
       1. frbus_shock with the real labour-market series requested
@@ -3264,7 +3274,9 @@ def hank_shock_incidence(
     solve and the microsim can run in separate processes on
     memory-constrained machines (same two-step escape hatch as
     ``frbus_payload`` / ``og_payload``). The payload's kind/size must match
-    the arguments; mixing is refused.
+    the arguments; mixing is refused. When a payload is given,
+    ``persistence``/``horizon``/``variant`` are ignored — the payload's own
+    solve parameters govern the shock, not these arguments.
 
     Same pattern as frbus_shock_incidence: hank_shock (which surfaces the
     pre-tax real wage w and labor N IRFs, % deviations from steady state)
