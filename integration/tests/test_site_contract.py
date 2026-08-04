@@ -36,12 +36,12 @@ def test_svar_site_uses_runtime_estimation_endpoint():
 
 
 def test_og_is_not_labelled_as_us_model():
+    # /papers was retired; /models is now the hub listing every model and paper.
     pages = "".join(
         _read(path)
         for path in (
             "index.html",
             "models/index.html",
-            "papers/index.html",
         )
     )
     assert "psl-og · UK + US" not in pages
@@ -54,10 +54,12 @@ def test_site_does_not_promise_obr_borrowing_output():
 
 
 def test_obr_site_uses_declared_household_costing_injection_point():
-    page = _read("obr/index.html")
-    assert "HHDI_ADDFACTOR" in page
-    assert "Corporation-tax channel unstable" not in page
-    assert "corporation-tax scenarios are excluded" not in page
+    # The OBR pages are now a hub (/obr) with subpages; the injection-point
+    # disclosure lives on the code page.
+    pages = _read("obr/index.html") + _read("obr/code/index.html")
+    assert "HHDI_ADDFACTOR" in pages
+    assert "Corporation-tax channel unstable" not in pages
+    assert "corporation-tax scenarios are excluded" not in pages
 
 
 def test_connect_page_matches_current_clients_and_switches_both_views():
@@ -92,25 +94,27 @@ def test_current_obr_outlook_uses_latest_official_efo_window():
     )
     assert rows[0]["quarter"] == "2026Q1"
     assert rows[-1]["quarter"] == "2031Q1"
-    page = _read("obr/index.html")
-    assert "Latest official baseline available on 21 July 2026" in page
-    assert "OBR March 2026 detailed forecast tables" in page
+    page = _read("obr/index.html") + _read("obr/validation/index.html")
+    assert "March 2026 EFO" in page
+    assert "March 2026 detailed forecast tables on 21 July 2026" in page
 
 
 def test_frozen_validation_vintages_are_not_relabelled_as_current_forecasts():
-    page = _read("validation/index.html")
-    assert "frozen 2024Q2 data edge" in page
-    assert "outturn backtest above retains November 2025" in page
+    # /validation was folded into per-model validation subpages.
+    assert "frozen 2024Q2 data edge" in _read("svar/validation/index.html")
+    assert "outturn backtest above retains November 2025" in _read(
+        "obr/validation/index.html"
+    )
 
 
 def test_validation_and_paper_landings_lead_with_current_uk_vintages():
-    validation = _read("validation/index.html")
+    validation = _read("obr/validation/index.html")
     assert "anchored baseline vs March 2026 EFO" in validation
     assert "Current March 2026 EFO baseline" in validation
     assert "anchored baseline vs November 2025 EFO" not in validation
 
     obr_paper = _read("papers/obr-macro/index.html")
-    assert "Current baseline: March 2026 EFO" in obr_paper
+    assert "March 2026 EFO baseline" in obr_paper
     boe_paper = _read("papers/boe-svar/index.html")
     assert "Current forecast: data through" in boe_paper
     assert "2026Q2&ndash;2029Q2" in boe_paper
@@ -123,8 +127,10 @@ def test_paper_page_counts_match_embedded_pdfs():
         "frb-us": 36,
         "psl-og": 34,
     }
-    listing = _read("papers/index.html")
+    # The /papers listing was retired; each landing carries its own
+    # "slug · … · N pages" line, and /models links every paper landing.
+    hub = _read("models/index.html")
     for slug, pages in expected.items():
         landing = _read(f"papers/{slug}/index.html")
-        assert f"{pages} pages" in landing
-        assert re.search(rf"{re.escape(slug)} · [^<]* · {pages} pages", listing)
+        assert re.search(rf"{re.escape(slug)} · [^<]* · {pages} pages", landing)
+        assert f'href="/papers/{slug}"' in hub
