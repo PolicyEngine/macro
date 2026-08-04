@@ -134,6 +134,29 @@ MODELS = {
         "status": "research prototype; calibrated counterfactual",
         "data_vintage": "OG-UK packaged calibration inputs",
     },
+    "define-uk": {
+        "display_name": "DEFINE-UK ecological stock-flow consistent model",
+        "model_class": "ecological stock-flow consistent (E-SFC)",
+        "geography": ["uk"],
+        "question_types": ["climate_policy_scenario"],
+        "inputs": ["curated scenario name from the upstream scenario set"],
+        "outputs": ["scenario deltas vs baseline: real GDP, emissions, unemployment, real consumption"],
+        "cannot_answer": [
+            "reform scoring (no statute mapping; score_reform refuses it)",
+            "forecasts or baseline levels (deltas only — the baseline is not validated against outturns)",
+            "microsimulation incidence (planned, post-validation)",
+        ],
+        "horizon": "annual scenario deltas, 2023-2037",
+        "access": ["local CLI scenarios", "Python package"],
+        "runtime": "instant from the cached upstream run; a fresh run needs local R (full notebook)",
+        "uncertainty": "none quantified; deterministic scenario deltas from one calibration",
+        "status": (
+            "experimental; scenario deltas gated against the pinned upstream "
+            "run (oracle) — published-figure comparison pending; unlicensed "
+            "upstream is never hosted, so hosted calls return run instructions"
+        ),
+        "data_vintage": "DEFINE-UK 1.1 upstream at pinned commit 846081a (April 2026 manual)",
+    },
 }
 
 # Evidence is deliberately split into dimensions. A model can reproduce its

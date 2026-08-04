@@ -794,3 +794,38 @@ def dynamic_reform_impact(
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
+
+
+@mcp.tool()
+def define_list_scenarios() -> dict:
+    """List DEFINE-UK climate-policy scenarios (ecological stock-flow
+    consistent model, UK; experimental).
+
+    DEFINE-UK is LOCAL-ONLY: the upstream code is unlicensed and never
+    hosted, so on the hosted server this returns installation and run
+    instructions rather than results. Locally (adapter installed + cached
+    run present) it returns the 22 curated scenarios across four blocks:
+    power-sector regulation, housing regulation, green public investment,
+    and mixed policy packages.
+    """
+    return core.define_list_scenarios()
+
+
+@mcp.tool()
+def define_scenario(name: str, horizon_years: int = 15) -> dict:
+    """Run a DEFINE-UK climate-policy scenario and return annual DELTAS vs
+    baseline (real GDP, emissions, unemployment, real consumption), 2023-2037.
+
+    Deltas only, by design: the model's baseline levels are not validated
+    against outturns, and every result carries mandatory caveats (demand-led
+    closure; emissions vintage divergence; experimental, oracle-gated).
+    LOCAL-ONLY like the OG model — hosted calls return run instructions.
+    score_reform does not accept this model: no statute mapping exists.
+
+    Args:
+        name: Scenario name from define_list_scenarios (e.g.
+            "green_public_investment", "fossil_fuel_ban",
+            "housing_regulation_subsidy").
+        horizon_years: Annual delta horizon (default 15 = 2023-2037).
+    """
+    return core.define_scenario(name, horizon_years=horizon_years)

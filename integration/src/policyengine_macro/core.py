@@ -3847,3 +3847,55 @@ def svar_summary() -> dict:
     else:
         out["forecast_revision"] = {"error": f"missing {fsummary_path}"}
     return out
+
+
+# ---------------------------------------------------------------------------
+# DEFINE-UK (local-only): curated climate-policy scenario deltas.
+# The upstream R code is unlicensed and never hosted; the adapter package
+# `define_uk` reads a locally cached run at a pinned commit. On the hosted
+# server (or any environment without the package/cache) these functions
+# return run instructions instead of raising — the same local-only contract
+# as the OG model.
+
+_DEFINE_INSTRUCTIONS = {
+    "model": "define-uk",
+    "available": False,
+    "how_to_run": (
+        "DEFINE-UK is local-only (unlicensed upstream; never hosted). "
+        "Install the adapter: pip install "
+        "git+https://github.com/PolicyEngine/define-uk-model — then produce "
+        "the cached run once with `python -c \"import define_uk.runner as r; "
+        "r.run()\"` (needs R >= 4.0 with the upstream packages) and rerun "
+        "this command. Results are scenario DELTAS vs baseline, experimental."
+    ),
+}
+
+
+def define_list_scenarios() -> dict:
+    """Curated DEFINE-UK scenario registry, or run instructions if the
+    local adapter/cache is unavailable."""
+    try:
+        from define_uk import scenarios as _sc
+        return {"model": "define-uk", "available": True,
+                "scenarios": _sc.list_scenarios()}
+    except ImportError:
+        return dict(_DEFINE_INSTRUCTIONS)
+
+
+def define_scenario(name: str, horizon_years: int = 15) -> dict:
+    """Annualised scenario deltas vs baseline from the cached pinned
+    upstream run, with mandatory deltas-only framing; or run instructions
+    if the local adapter/cache is unavailable."""
+    try:
+        from define_uk import scenarios as _sc
+    except ImportError:
+        return dict(_DEFINE_INSTRUCTIONS)
+    try:
+        result = _sc.run_scenario(name, horizon_years=horizon_years)
+    except FileNotFoundError as e:
+        out = dict(_DEFINE_INSTRUCTIONS)
+        out["error"] = str(e)
+        return out
+    result["model"] = "define-uk"
+    result["available"] = True
+    return result

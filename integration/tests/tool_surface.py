@@ -16,6 +16,8 @@ from __future__ import annotations
 GOLDEN_TOOLS = frozenset(
     {
         "calculate_household",
+        "define_list_scenarios",
+        "define_scenario",
         "dynamic_reform_impact",
         "forecast_uk",
         "format_score_report",
@@ -41,7 +43,7 @@ GOLDEN_TOOLS = frozenset(
     }
 )
 
-GOLDEN_TOOL_COUNT = 23
+GOLDEN_TOOL_COUNT = 25
 
 assert len(GOLDEN_TOOLS) == GOLDEN_TOOL_COUNT
 
