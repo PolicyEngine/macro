@@ -21,7 +21,6 @@ DESTINATIONS = (
     ("home", "/", "Home", "nav-mobile"),
     ("economy", "/economy", "Economy", "nav-mobile"),
     ("models", "/models", "Models", "nav-mobile"),
-    ("score", "/score", "Score", "nav-mobile"),
     ("forecasts", "/forecasts", "Forecasts", "nav-mobile"),
     ("use", "/connect", "Use", "nav-mobile nav-start"),
 )
@@ -66,7 +65,6 @@ PAGE_NAMES = {
     "/forecasts": "Forecasts",
     "/notes/releases": "Releases",
     "/connect": "Use",
-    "/score": "Score a reform",
     "/contact": "Contact",
 }
 
@@ -84,7 +82,6 @@ CRUMB_PARENTS = {
     "/papers/boe-svar": "/models",
     "/papers/frb-us": "/models",
     "/papers/psl-og": "/models",
-    "/score": "/",
     # /notes was folded into /forecasts#notes; the surviving note pages hang
     # off Forecasts so no crumb links to the retired /notes page.
     "/notes/releases": "/forecasts",
@@ -171,8 +168,6 @@ def section(path: Path) -> str | None:
         return "economy"
     if root == "forecasts":
         return "forecasts"
-    if root == "score":
-        return "score"
     if root == "connect":
         return "use"
     return None
