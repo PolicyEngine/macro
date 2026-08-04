@@ -21,6 +21,7 @@ DESTINATIONS = (
     ("home", "/", "Home", "nav-mobile"),
     ("economy", "/economy", "Economy", "nav-mobile"),
     ("models", "/models", "Models", "nav-mobile"),
+    ("score", "/score", "Score", "nav-mobile"),
     ("forecasts", "/forecasts", "Forecasts", "nav-mobile"),
     ("use", "/connect", "Use", "nav-mobile nav-start"),
 )
@@ -70,7 +71,7 @@ PAGE_NAMES = {
 }
 
 # Parent chain overrides where the URL hierarchy is not the reading hierarchy:
-# model and evidence pages live under Models, /score under Use.
+# model and evidence pages live under Models; /score is a top-level section.
 CRUMB_PARENTS = {
     "/obr": "/models",
     "/svar": "/models",
@@ -83,7 +84,7 @@ CRUMB_PARENTS = {
     "/papers/boe-svar": "/models",
     "/papers/frb-us": "/models",
     "/papers/psl-og": "/models",
-    "/score": "/connect",
+    "/score": "/",
     # /notes was folded into /forecasts#notes; the surviving note pages hang
     # off Forecasts so no crumb links to the retired /notes page.
     "/notes/releases": "/forecasts",
@@ -170,7 +171,9 @@ def section(path: Path) -> str | None:
         return "economy"
     if root == "forecasts":
         return "forecasts"
-    if root in {"connect", "score"}:
+    if root == "score":
+        return "score"
+    if root == "connect":
         return "use"
     return None
 
