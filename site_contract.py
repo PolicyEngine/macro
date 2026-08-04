@@ -12,6 +12,7 @@ PUBLIC_MODELS = (
     "us-hank",
     "pe-microsim",
     "psl-og",
+    "define-uk",
 )
 # /docs is a permanent redirect to /models#compare in vercel.json; the model
 # inventory lives on the pages below.
@@ -37,8 +38,8 @@ def check_public_model_inventory() -> None:
     # /validation was absorbed into /models#validation; the gradient claims
     # now live on the models hub page.
     validation = _read("models/index.html")
-    if "The six models support" not in validation:
-        failures.append("models/index.html: model count is not six")
+    if "The seven models support" not in validation:
+        failures.append("models/index.html: model count is not seven")
 
     if failures:
         raise SystemExit("\n".join(failures))

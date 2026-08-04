@@ -212,8 +212,10 @@ benefits the MCP server).
 ## MCP server
 
 Runs over stdio via `python -m policyengine_macro.mcp_server`, exposing
-twenty tools:
+twenty-three tools:
 `score_reform` (a PolicyEngine reform through a chosen macro model),
+`frbus_shock_incidence`, `hank_shock_incidence` and
+`svar_inflation_incidence` (macro-to-microsimulation incidence overlays),
 `dynamic_reform_impact` (the OG-UK overlay dynamic score; local-only —
 the hosted server returns a "run locally" error),
 `format_score_report` (stable JSON or Markdown reports),

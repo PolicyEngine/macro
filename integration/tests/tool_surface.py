@@ -21,9 +21,12 @@ GOLDEN_TOOLS = frozenset(
         "format_score_report",
         "frbus_list_variables",
         "frbus_shock",
+        "frbus_shock_incidence",
         "frbus_summary",
         "hank_shock",
+        "hank_shock_incidence",
         "hank_summary",
+        "svar_inflation_incidence",
         "household_reform_impact",
         "latest_shocks",
         "list_model_capabilities",
@@ -38,7 +41,7 @@ GOLDEN_TOOLS = frozenset(
     }
 )
 
-GOLDEN_TOOL_COUNT = 20
+GOLDEN_TOOL_COUNT = 23
 
 assert len(GOLDEN_TOOLS) == GOLDEN_TOOL_COUNT
 

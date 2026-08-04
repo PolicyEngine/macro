@@ -784,14 +784,20 @@ HANK_SHOCK_KINDS = [
 
 _HANK_KIND_INDEX = {k["kind"]: k for k in HANK_SHOCK_KINDS}
 
-# Series meaning per variant. Y/C/I are % deviations from steady state; pi/r
-# are level deviations of QUARTERLY rates in percentage points.
+# Series meaning per variant. Y/C/I/w/N are % deviations from steady state;
+# pi/r are level deviations of QUARTERLY rates in percentage points. w and N
+# are not in the model package's shock() output; hank_shock computes them
+# from the same GE sequence-space Jacobian (they are solved unknowns/outputs
+# in both variants) so the macro->micro incidence layer has a pre-tax wage
+# and labor path to build on.
 HANK_HEADLINE = {
     "Y": "Output, % deviation from steady state",
     "C": "Aggregate consumption, % deviation from steady state",
     "I": "Investment, % deviation from steady state (two_asset only)",
     "pi": "Inflation (quarterly rate), pp deviation from steady state",
     "r": "Real interest rate (quarterly rate), pp deviation from steady state",
+    "w": "Pre-tax real wage, % deviation from steady state",
+    "N": "Labor, % deviation from steady state",
 }
 
 # Cache the steady state + GE jacobian per (variant, T). The steady state
@@ -886,6 +892,11 @@ def hank_shock(
     first-order approximation from steady-state policies, capturing the
     MPC-heterogeneity channel only, not full household-level dynamics.
 
+    Alongside the package's Y/C/I/pi/r, the result surfaces the pre-tax
+    real wage ``w`` and labor ``N`` IRFs (% deviations from steady state),
+    computed from the same GE Jacobian — the inputs hank_shock_incidence
+    builds its household-level overlay on.
+
     First call per variant pays the steady-state (~13s) + jacobian (~5s)
     solves; both are cached, so every later call is effectively instant.
     """
@@ -909,6 +920,36 @@ def hank_shock(
     mod = _hank_module(variant)
     ss, G = _hank_solved(variant)
     irf = mod.shock(kind, float(size), persistence, T=HANK_T, ss=ss, G_jac=G)
+
+    # The package's shock() returns Y/C/I/pi/r only; surface the pre-tax
+    # real wage w and labor N the same way it computes the others — from
+    # the GE Jacobian and the exogenous path — as % deviations from steady
+    # state. Both variants expose w and N (w is a solved unknown; N is a
+    # block output); if an upstream change ever drops one, the series is
+    # omitted rather than invented, and from_hank_result errors clearly.
+    for extra in ("w", "N"):
+        if extra not in irf:
+            # Membership checks, not a broad try/except: a genuine
+            # computation bug (shape mismatch, degenerate steady state) must
+            # raise here, not surface later as a confusing "series missing".
+            if (
+                extra not in G
+                or irf["shock_input"] not in G[extra]
+                or extra not in ss
+            ):
+                continue
+            if not float(ss[extra]):
+                # Present but zero is a calibration anomaly, not an absent
+                # series — surface it rather than masking it as "omitted".
+                raise RuntimeError(
+                    f"HANK steady state has {extra} == 0; refusing to "
+                    "divide a wage/labor IRF by a degenerate steady state — "
+                    "inspect the calibration"
+                )
+            irf[extra] = (
+                100.0 * (G[extra][irf["shock_input"]] @ irf["shock"])
+                / float(ss[extra])
+            )
 
     series_names = [v for v in HANK_HEADLINE if v in irf]
     series = {
@@ -1426,14 +1467,20 @@ def _pe_current_value(param):
     """
     from datetime import date
 
+    return _pe_value_at(param, date.today())
+
+
+def _pe_value_at(param, on_date):
+    """The parameter value in force on ``on_date`` (same rules as
+    _pe_current_value: latest start_date <= on_date, end_date ignored)."""
+
     def _d(v):
         return v.date() if hasattr(v, "date") else v
 
-    today = date.today()
     best_start, current = None, None
     for pv in param.parameter_values:
         start = _d(pv.start_date) if pv.start_date else None
-        if start is not None and start <= today and (
+        if start is not None and start <= on_date and (
             best_start is None or start > best_start
         ):
             best_start, current = start, pv.value
@@ -1934,63 +1981,14 @@ def _pe_pop_sum(sim, variable: str) -> float:
     return float(agg.result)
 
 
-def pe_population_impact(
-    country: str = "uk",
-    reform: dict | None = None,
-    year: int = 2026,
-    dataset: str | None = None,
-    reform_modifier=None,
-) -> dict:
-    """Score a reform against the whole population with PolicyEngine.
+def _pe_pop_outcomes(country: str, base, ref) -> dict:
+    """Budget, net-income and decile deltas of a counterfactual vs baseline.
 
-    Runs baseline and reform microsimulations over representative household
-    microdata (UK: enhanced FRS; US: CPS-based) and returns the budgetary
-    impact — the change in government revenue net of spending, in £bn/$bn
-    per year (positive = the reform raises revenue) — plus income-decile
-    impacts and winner/loser counts.
-
-    reform is a flat {parameter_path: value} dict, e.g. equalising CGT with
-    income tax rates: {"gov.hmrc.cgt.basic_rate": 0.20,
-    "gov.hmrc.cgt.higher_rate": 0.40, "gov.hmrc.cgt.additional_rate": 0.45}.
-
-    The baseline simulation is cached in-process per (country, year,
-    dataset). UK data needs HUGGING_FACE_TOKEN on first download.
-
-    ``reform_modifier`` (internal; used by dynamic_population_reform_impact)
-    is an optional callable applied to the underlying engine simulation of
-    the REFORM run only, attached via the engine's supported
-    ``Dynamic(simulation_modifier=...)`` hook. The baseline — cached and
-    shared with static scores — NEVER sees it, which is the structural
-    guarantee that a macro overlay is applied exactly once, to the reform
-    side only.
+    Shared measurement core of pe_population_impact (reform runs) and
+    _pe_population_incidence (macro-shock runs): everything here is
+    counterfactual-minus-baseline, whatever produced the counterfactual.
     """
-    reform = validate_reform(reform)
-    country = _validate_country(country)
-
-    ds, base = _pe_pop_baseline(country, year, dataset)
-    pe = _import_pe()
-    from policyengine.core import Simulation
     from policyengine.outputs.decile_impact import calculate_decile_impacts
-
-    ref_kwargs = {}
-    if reform_modifier is not None:
-        from policyengine.core import Dynamic
-
-        ref_kwargs["dynamic"] = Dynamic(
-            name="policyengine-macro EconomicAssumptions overlay",
-            simulation_modifier=reform_modifier,
-            # Exogenous macro input scaling, not a behavioural response:
-            # do not trigger the engine's labour-supply-response outputs.
-            affects_labor_supply_response=False,
-        )
-    ref = Simulation(
-        dataset=ds,
-        tax_benefit_model_version=getattr(pe, country).model,
-        policy=dict(reform),
-        extra_variables=_pe_pop_extra_variables(country),
-        **ref_kwargs,
-    )
-    ref.run()
 
     if country == "uk":
         budget_bn = (
@@ -2050,6 +2048,76 @@ def pe_population_impact(
         winners += int(d.count_better_off)
         losers += int(d.count_worse_off)
 
+    return {
+        "budgetary_impact_bn": round(budget_bn, 3),
+        "budgetary_impact_basis": budget_basis,
+        "household_net_income_change_bn": round(net_income_change_bn, 3),
+        "decile_impacts": decile_rows,
+        "winners": int(winners),
+        "losers": int(losers),
+    }
+
+
+def pe_population_impact(
+    country: str = "uk",
+    reform: dict | None = None,
+    year: int = 2026,
+    dataset: str | None = None,
+    reform_modifier=None,
+) -> dict:
+    """Score a reform against the whole population with PolicyEngine.
+
+    Runs baseline and reform microsimulations over representative household
+    microdata (UK: enhanced FRS; US: CPS-based) and returns the budgetary
+    impact — the change in government revenue net of spending, in £bn/$bn
+    per year (positive = the reform raises revenue) — plus income-decile
+    impacts and winner/loser counts.
+
+    reform is a flat {parameter_path: value} dict, e.g. equalising CGT with
+    income tax rates: {"gov.hmrc.cgt.basic_rate": 0.20,
+    "gov.hmrc.cgt.higher_rate": 0.40, "gov.hmrc.cgt.additional_rate": 0.45}.
+
+    The baseline simulation is cached in-process per (country, year,
+    dataset). UK data needs HUGGING_FACE_TOKEN on first download.
+
+    ``reform_modifier`` (internal; used by dynamic_population_reform_impact)
+    is an optional callable applied to the underlying engine simulation of
+    the REFORM run only, attached via the engine's supported
+    ``Dynamic(simulation_modifier=...)`` hook. The baseline — cached and
+    shared with static scores — NEVER sees it, which is the structural
+    guarantee that a macro overlay is applied exactly once, to the reform
+    side only.
+    """
+    reform = validate_reform(reform)
+    country = _validate_country(country)
+
+    ds, base = _pe_pop_baseline(country, year, dataset)
+    pe = _import_pe()
+    from policyengine.core import Simulation
+
+    ref_kwargs = {}
+    if reform_modifier is not None:
+        from policyengine.core import Dynamic
+
+        ref_kwargs["dynamic"] = Dynamic(
+            name="policyengine-macro EconomicAssumptions overlay",
+            simulation_modifier=reform_modifier,
+            # Exogenous macro input scaling, not a behavioural response:
+            # do not trigger the engine's labour-supply-response outputs.
+            affects_labor_supply_response=False,
+        )
+    ref = Simulation(
+        dataset=ds,
+        tax_benefit_model_version=getattr(pe, country).model,
+        policy=dict(reform),
+        extra_variables=_pe_pop_extra_variables(country),
+        **ref_kwargs,
+    )
+    ref.run()
+
+    outcomes = _pe_pop_outcomes(country, base, ref)
+    budget_bn = outcomes["budgetary_impact_bn"]
+
     sym = "£" if country == "uk" else "$"
     out = {
         "model": "PolicyEngine population microsimulation",
@@ -2065,19 +2133,87 @@ def pe_population_impact(
         "n_households": int(len(ds.data.household)),
         "currency": "GBP" if country == "uk" else "USD",
         "reform": dict(reform),
-        "budgetary_impact_bn": round(budget_bn, 3),
-        "budgetary_impact_basis": budget_basis,
+        **outcomes,
         "headline": (
             f"The reform {'raises' if budget_bn >= 0 else 'costs'} "
             f"{sym}{abs(budget_bn):.1f}bn/year in {year}."
         ),
-        "household_net_income_change_bn": round(net_income_change_bn, 3),
-        "decile_impacts": decile_rows,
-        "winners": int(winners),
-        "losers": int(losers),
     }
     out["score"] = _pop_score_block(out)
     return out
+
+
+def _pe_population_incidence(
+    country: str,
+    year: int,
+    dataset: str | None,
+    modifier,
+    label: str,
+) -> dict:
+    """Population-level incidence of a macro shock: NO reform involved.
+
+    Runs the cached stock baseline against a second simulation that differs
+    ONLY by the macro overlay — a ``Dynamic(simulation_modifier=...)``
+    scaling the employment-income inputs (assumptions.py) — and measures
+    the same outcomes as pe_population_impact. budgetary_impact_bn is the
+    change in the government balance caused by the macro shock through the
+    automatic stabilizers (a negative earnings shock reduces tax revenue
+    and raises means-tested benefits), NOT the cost of any reform: policy
+    is identical on both sides.
+
+    ``modifier`` may be None (a no-op macro result): the shocked simulation
+    is then construction-identical to the baseline and every delta is zero
+    by design — callers surface that as the honest null, not an error.
+    Deliberately NOT routed through validate_reform: there is no reform.
+    """
+    country = _validate_country(country)
+    ds, base = _pe_pop_baseline(country, year, dataset)
+    pe = _import_pe()
+    from policyengine.core import Simulation
+
+    kwargs = {}
+    if modifier is not None:
+        from policyengine.core import Dynamic
+
+        kwargs["dynamic"] = Dynamic(
+            name=label,
+            simulation_modifier=modifier,
+            # Exogenous macro input scaling, not a behavioural response.
+            affects_labor_supply_response=False,
+        )
+    shocked = Simulation(
+        dataset=ds,
+        tax_benefit_model_version=getattr(pe, country).model,
+        extra_variables=_pe_pop_extra_variables(country),
+        **kwargs,
+    )
+    shocked.run()
+
+    outcomes = _pe_pop_outcomes(country, base, shocked)
+    budget_bn = outcomes["budgetary_impact_bn"]
+    sym = "£" if country == "uk" else "$"
+    return {
+        "model": "PolicyEngine population microsimulation (macro-shock incidence)",
+        "provenance": _provenance(
+            model_id="pe-microsim",
+            distribution="policyengine",
+            data_vintage=ds.name,
+            baseline=f"baseline policy for {year}",
+        ),
+        "country": country,
+        "year": int(year),
+        "dataset": ds.name,
+        "n_households": int(len(ds.data.household)),
+        "currency": "GBP" if country == "uk" else "USD",
+        "shock_label": label,
+        **outcomes,
+        "headline": (
+            f"Through the automatic stabilizers, the macro shock "
+            f"{'improves' if budget_bn >= 0 else 'worsens'} the government "
+            f"balance by {sym}{abs(budget_bn):.1f}bn/year in {year} "
+            "(policy unchanged)."
+        ),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -2919,6 +3055,579 @@ def dynamic_population_reform_impact(
 
 
 # ---------------------------------------------------------------------------
+# Macro -> micro shock incidence: who bears a macro shock, at household
+# resolution. NOT reform scoring — there is still no reform bridge for
+# FRB/US or HANK (SCORE_MODELS_WITHOUT_REFORM_BRIDGE stands). These tools
+# answer the opposite question: given a raw macro shock, what do its
+# labour-market (or price) deviations do to household incomes and the
+# government balance through the automatic stabilizers?
+# ---------------------------------------------------------------------------
+
+# The real labour-market series the FRB/US incidence overlay is built on.
+FRBUS_INCIDENCE_VARIABLES = ("pl", "lhp", "leh")
+
+
+def _incidence_score_block(
+    *,
+    model_id: str,
+    model_class: str,
+    analysis_type: str,
+    country: str,
+    year: int,
+    reform: dict,
+    micro: dict,
+    assumptions: list[str],
+    caveats: list[str],
+    baseline: str,
+    data_vintage: str,
+    horizon: str,
+    basis_suffix: str,
+) -> dict:
+    """Common ScoreResult for the shock-incidence tools (illustrations)."""
+    return ScoreResult(
+        model=model_id,
+        model_class=model_class,
+        analysis_type=analysis_type,
+        result_type="illustration",
+        country=country,
+        reform=reform,
+        baseline=baseline,
+        provenance=_provenance(
+            model_id=model_id,
+            distribution="policyengine-macro",
+            data_vintage=data_vintage,
+            baseline=baseline,
+        ),
+        horizon=horizon,
+        quantities={
+            "revenue": ScoreQuantity(
+                delta_bn=micro["budgetary_impact_bn"],
+                units=f"{micro['currency']} bn per year",
+                unit_code=f"{micro['currency']}_BN",
+                basis=f"{micro['budgetary_impact_basis']}, {basis_suffix}",
+                time_basis=f"annual {year}",
+                price_basis=(
+                    "nominal microsimulation result with real "
+                    "macro-deviation overlay"
+                ),
+                geography=country,
+                baseline_definition=(
+                    f"PolicyEngine baseline policy for {year}"
+                ),
+                uncertainty="not estimated; experimental incidence overlay",
+            ),
+        },
+        assumptions=assumptions,
+        caveats=caveats,
+        validation=[
+            "input-scaling mechanism empirically gated; the shock-incidence "
+            "overlay itself is experimental"
+        ],
+        distributional=ScoreDistribution(
+            decile_impacts=micro["decile_impacts"],
+            winners=micro["winners"],
+            losers=micro["losers"],
+        ),
+    ).model_dump(mode="json")
+
+
+def frbus_shock_incidence(
+    var: str,
+    shock: float,
+    year: int = 2027,
+    start: str = FRBUS_DEFAULT_START,
+    periods: int = 1,
+    horizon: int = FRBUS_DEFAULT_HORIZON,
+    policy_rule: str = "inertial_taylor",
+    income_concept: str = "wage_bill",
+    dataset: str | None = None,
+    frbus_payload: dict | None = None,
+) -> dict:
+    """Household-level incidence of a FRB/US shock (experimental).
+
+    ``frbus_payload`` accepts a pre-computed frbus_shock result (run with
+    ``variables=["pl", "lhp", "leh"]``) so the FRB/US solve and the microsim
+    can run in separate processes — the combined process peaks well past
+    small-machine memory (observed: an 8GB host jetsam-kills it), the same
+    two-step reality as ``og_payload`` in dynamic scoring. The payload's
+    var/shock must match the arguments; mixing is refused. When a payload
+    is given, ``start``/``periods``/``horizon``/``policy_rule`` are ignored
+    — the payload's own solve parameters govern the shock, not these
+    arguments.
+
+    Pipeline:
+      1. frbus_shock with the real labour-market series requested
+         (pl compensation per hour, lhp hours, leh employment — all
+         % deviations from baseline);
+      2. EconomicAssumptions.from_frbus_result — the annual mean of the
+         ``year`` quarters becomes a pre-tax earnings factor
+         (income_concept: 'wage_bill' = pl+lhp, 'wage' = pl alone);
+      3. the factor scales the US population microsimulation's
+         employment-income inputs (reform-free: policy is identical on
+         both sides), so the deciles/winners/losers and the budget change
+         are the shock's incidence THROUGH THE AUTOMATIC STABILIZERS —
+         a negative earnings shock reduces tax revenue and raises
+         means-tested benefits.
+
+    NOT reform scoring: FRB/US still has no PolicyEngine-reform bridge
+    (score_reform keeps refusing model='frbus'). Uniform scaling
+    understates the concentration of real incidence in job losers; the
+    caveats say so. US only. Runtime: one FRB/US solve (~seconds) plus
+    one microsim run (~tens of seconds warm; first-ever call downloads
+    microdata).
+    """
+    from policyengine_macro.assumptions import (
+        SCALED_INPUT_VARIABLES, EconomicAssumptions,
+    )
+
+    if frbus_payload is not None:
+        got = (frbus_payload.get("var"), frbus_payload.get("shock"))
+        if got != (var, float(shock)):
+            raise ValueError(
+                f"frbus_payload was produced for {got[0]!r} shock {got[1]!r}, "
+                f"not for {var!r} shock {shock!r}; refusing to mix them — "
+                "pass the unmodified output of frbus_shock run with "
+                "variables=['pl', 'lhp', 'leh']"
+            )
+        payload = frbus_payload
+    else:
+        payload = frbus_shock(
+            var=var, shock=shock, start=start, periods=periods,
+            horizon=horizon, policy_rule=policy_rule,
+            variables=list(FRBUS_INCIDENCE_VARIABLES),
+        )
+    ea = EconomicAssumptions.from_frbus_result(
+        payload, year=year, income_concept=income_concept,
+    )
+    modifier = ea.input_scaling_modifier()
+    micro = _pe_population_incidence(
+        country="us", year=year, dataset=dataset, modifier=modifier,
+        label=f"FRB/US {var} {shock:+g} earnings incidence ({year})",
+    )
+
+    assumptions = ea.assumption_strings()
+    caveats = ea.caveat_strings() + [
+        "automatic-stabilizer incidence of a raw macro shock, not a reform "
+        "score: FRB/US has no PolicyEngine-reform bridge, and policy is "
+        "identical on both sides of this comparison",
+    ]
+    out = {
+        "model": "FRB/US shock + PolicyEngine population microsimulation",
+        "country": "us",
+        "year": int(year),
+        "income_concept": income_concept,
+        "frbus": payload,
+        "economic_assumptions": ea.model_dump(),
+        "application": {
+            "method": "input-scaling",
+            "variables_tried": list(SCALED_INPUT_VARIABLES),
+            "earnings_factor": ea.earnings_factor,
+            "applied": modifier is not None,
+        },
+        "microsim": micro,
+        "assumptions": assumptions,
+        "caveats": caveats,
+    }
+    out["score"] = _incidence_score_block(
+        model_id="frbus+microsim",
+        model_class="semi-structural overlay on microsim",
+        analysis_type="shock incidence (experimental)",
+        country="us",
+        year=year,
+        reform={},
+        micro=micro,
+        assumptions=assumptions,
+        caveats=caveats,
+        baseline=(
+            f"PolicyEngine baseline policy for {year}, with FRB/US "
+            f"{var} {shock:+g} labour-market deviations applied as a "
+            "pre-tax earnings overlay"
+        ),
+        data_vintage=(
+            f"PolicyEngine dataset {micro.get('dataset', dataset or 'default')}; "
+            "FRB/US April 2026 LONGBASE"
+        ),
+        horizon=f"annual {year}, transition-quarter average deviations",
+        basis_suffix=(
+            "from the macro shock through the automatic stabilizers "
+            "(no reform)"
+        ),
+    )
+    return out
+
+
+def hank_shock_incidence(
+    kind: str,
+    size: float,
+    year: int = 2026,
+    persistence: float = 0.9,
+    horizon: int = HANK_DEFAULT_HORIZON,
+    variant: str = "two_asset",
+    income_concept: str = "wage_bill",
+    start_year: int = 2026,
+    dataset: str | None = None,
+    hank_payload: dict | None = None,
+) -> dict:
+    """Household-level incidence of a US HANK shock (experimental).
+
+    ``hank_payload`` accepts a pre-computed hank_shock result so the HANK
+    solve and the microsim can run in separate processes on
+    memory-constrained machines (same two-step escape hatch as
+    ``frbus_payload`` / ``og_payload``). The payload's kind/size must match
+    the arguments; mixing is refused. When a payload is given,
+    ``persistence``/``horizon``/``variant`` are ignored — the payload's own
+    solve parameters govern the shock, not these arguments.
+
+    Same pattern as frbus_shock_incidence: hank_shock (which surfaces the
+    pre-tax real wage w and labor N IRFs, % deviations from steady state)
+    -> EconomicAssumptions.from_hank_result (annual mean over ``year``'s
+    quarters; HANK quarters are offsets from the shock start, which
+    ``start_year`` maps to that calendar year's Q1) -> a pre-tax earnings
+    factor scaling the US microsim's employment-income inputs, reform-free.
+
+    The result is the shock's incidence through the automatic stabilizers
+    around the model's CALIBRATED steady state — HANK is a stylized model,
+    not a forecaster, and it still has no PolicyEngine-reform bridge
+    (score_reform keeps refusing model='hank'). US only.
+    """
+    from policyengine_macro.assumptions import (
+        SCALED_INPUT_VARIABLES, EconomicAssumptions,
+    )
+
+    if hank_payload is not None:
+        got = (hank_payload.get("kind"), hank_payload.get("size"))
+        if got != (kind, float(size)):
+            raise ValueError(
+                f"hank_payload was produced for kind {got[0]!r} size "
+                f"{got[1]!r}, not for {kind!r} size {size!r}; refusing to "
+                "mix them — pass the unmodified output of hank_shock"
+            )
+        payload = hank_payload
+    else:
+        payload = hank_shock(
+            kind=kind, size=size, persistence=persistence, horizon=horizon,
+            variant=variant,
+        )
+    ea = EconomicAssumptions.from_hank_result(
+        payload, year=year, income_concept=income_concept,
+        start_year=start_year,
+    )
+    modifier = ea.input_scaling_modifier()
+    micro = _pe_population_incidence(
+        country="us", year=year, dataset=dataset, modifier=modifier,
+        label=f"HANK {kind} {size:+g} earnings incidence ({year})",
+    )
+
+    assumptions = ea.assumption_strings()
+    caveats = ea.caveat_strings() + [
+        "automatic-stabilizer incidence of a stylized macro shock, not a "
+        "reform score: HANK has no PolicyEngine-reform bridge, and policy "
+        "is identical on both sides of this comparison",
+    ]
+    out = {
+        "model": "US HANK shock + PolicyEngine population microsimulation",
+        "country": "us",
+        "year": int(year),
+        "income_concept": income_concept,
+        "start_year": int(start_year),
+        "hank": payload,
+        "economic_assumptions": ea.model_dump(),
+        "application": {
+            "method": "input-scaling",
+            "variables_tried": list(SCALED_INPUT_VARIABLES),
+            "earnings_factor": ea.earnings_factor,
+            "applied": modifier is not None,
+        },
+        "microsim": micro,
+        "assumptions": assumptions,
+        "caveats": caveats,
+    }
+    out["score"] = _incidence_score_block(
+        model_id="hank+microsim",
+        model_class="hank overlay on microsim",
+        analysis_type="shock incidence (experimental)",
+        country="us",
+        year=year,
+        reform={},
+        micro=micro,
+        assumptions=assumptions,
+        caveats=caveats,
+        baseline=(
+            f"PolicyEngine baseline policy for {year}, with US HANK "
+            f"{kind} {size:+g} wage/labor deviations applied as a "
+            "pre-tax earnings overlay"
+        ),
+        data_vintage=(
+            f"PolicyEngine dataset {micro.get('dataset', dataset or 'default')}; "
+            "Auclert-Bardóczy-Rognlie-Straub (2021) calibration"
+        ),
+        horizon=f"annual {year}, transition-quarter average deviations",
+        basis_suffix=(
+            "from the macro shock through the automatic stabilizers "
+            "(no reform)"
+        ),
+    )
+    return out
+
+
+# The SHORT curated list of UK parameters that CPI inflation uprates by
+# statute: working-age benefit and Child Benefit rates are uprated each
+# April by the previous September's CPI (Social Security Administration Act
+# 1992 s.150, as amended; annual Benefits Up-rating Orders). Deliberately
+# EXCLUDED, and stated in caveats: the state pension (triple lock — highest
+# of CPI, earnings, 2.5%, not a pure CPI link), income tax and NI
+# thresholds (frozen by statute through the current freeze), Local Housing
+# Allowance rates (frozen/periodically reset), and the benefit cap (not
+# routinely uprated). Paths must resolve through pe.uk.model.get_parameter;
+# svar_inflation_incidence errors clearly on any that do not.
+SVAR_CPI_UPRATED_PARAMETERS = [
+    {
+        "path": "gov.dwp.universal_credit.standard_allowance.amount.SINGLE_OLD",
+        "description": "Universal Credit standard allowance, single 25+",
+        "unit": "GBP per month",
+    },
+    {
+        "path": "gov.dwp.universal_credit.standard_allowance.amount.COUPLE_OLD",
+        "description": "Universal Credit standard allowance, couple 25+",
+        "unit": "GBP per month",
+    },
+    {
+        "path": "gov.dwp.universal_credit.elements.child.amount",
+        "description": "Universal Credit child element",
+        "unit": "GBP per month",
+    },
+    {
+        "path": "gov.hmrc.child_benefit.amount.eldest",
+        "description": "Child Benefit, eldest or only child",
+        "unit": "GBP per week",
+    },
+    {
+        "path": "gov.hmrc.child_benefit.amount.additional",
+        "description": "Child Benefit, additional children",
+        "unit": "GBP per week",
+    },
+]
+
+_SVAR_INCIDENCE_REFERENCES = ("obr", "target")
+
+
+def _obr_efo_cpi_annual(year: int) -> float:
+    """Annual mean of the OBR EFO YoY CPI inflation path (CPIGR) for a year.
+
+    Reads the March 2026 EFO economy tables packaged with the obr_macro
+    distribution. Raises with the reference='target' fallback named when the
+    package or the year is unavailable.
+    """
+    try:
+        from obr_macro import load_obr_data
+    except ImportError as e:
+        raise ImportError(
+            "reference='obr' needs the obr_macro package for the EFO CPI "
+            f"path ({e}). Install it with: pip install "
+            "git+https://github.com/PolicyEngine/obr-macroeconomic-model — "
+            "or use reference='target' (a flat 2.0% path)."
+        ) from e
+    import pandas as pd
+
+    series = load_obr_data()["CPIGR"].dropna()
+    quarters = [pd.Period(f"{year}Q{q}") for q in (1, 2, 3, 4)]
+    missing = [str(q) for q in quarters if q not in series.index]
+    if missing:
+        raise ValueError(
+            f"the packaged OBR EFO CPI path does not cover {missing} "
+            f"(available {series.index[0]}-{series.index[-1]}); use a year "
+            "inside that window or reference='target'."
+        )
+    return float(sum(float(series.loc[q]) for q in quarters) / 4.0)
+
+
+def svar_inflation_incidence(
+    year: int = 2027,
+    horizons: int = 12,
+    draws: int = _SVAR_DEFAULT_DRAWS,
+    reference: str = "obr",
+    dataset: str | None = None,
+) -> dict:
+    """Household incidence of the SVAR-vs-reference CPI gap via uprating.
+
+    A price-side mechanism, unlike the earnings-overlay incidence tools:
+    if the UK SVAR's median CPI inflation for ``year`` runs above (below)
+    the reference path, the statutory CPI uprating of working-age benefits
+    the following April is higher (lower). This tool builds that as a REAL
+    PolicyEngine reform — each parameter in SVAR_CPI_UPRATED_PARAMETERS is
+    scaled by (1 + gap/100) from 6 April ``year+1`` against its baseline
+    value in force then — and scores it with the UK population microsim
+    for ``year+1``.
+
+    ``reference``: 'obr' (default) compares against the March 2026 EFO CPI
+    path packaged with obr_macro; 'target' against a flat 2.0%. The gap is
+    an annual-average approximation of the statutory September-CPI
+    reference month (stated in caveats).
+
+    Deliberately NOT covered (see SVAR_CPI_UPRATED_PARAMETERS): the state
+    pension triple lock, frozen tax/NI thresholds, LHA, the benefit cap.
+    Runtime: svar_forecast takes a couple of minutes cold (cached
+    in-process, like forecast_uk on the hosted server) plus one microsim
+    run. UK only.
+    """
+    year = int(year)
+    if reference not in _SVAR_INCIDENCE_REFERENCES:
+        raise ValueError(
+            f"reference must be one of {_SVAR_INCIDENCE_REFERENCES}, got "
+            f"{reference!r}: 'obr' is the March 2026 EFO CPI path, "
+            "'target' a flat 2.0%."
+        )
+
+    fc = svar_forecast(horizons=horizons, draws=draws)
+    quarters = [f"{year}Q{q}" for q in (1, 2, 3, 4)]
+    cpi_rows = {r["quarter"]: r for r in fc["cpi_inflation_yoy"]}
+    absent = [q for q in quarters if q not in cpi_rows]
+    if absent:
+        origin_year, origin_q = fc["forecast_origin"].split("Q")
+        needed = (year - int(origin_year)) * 4 + (4 - int(origin_q))
+        raise ValueError(
+            f"the SVAR forecast (origin {fc['forecast_origin']}, horizons="
+            f"{horizons}) does not cover {absent}; re-run with horizons>="
+            f"{needed} (max {_SVAR_MAX_HORIZONS})."
+        )
+    svar_cpi = sum(float(cpi_rows[q]["median"]) for q in quarters) / 4.0
+
+    if reference == "obr":
+        ref_cpi = _obr_efo_cpi_annual(year)
+        ref_desc = ("OBR March 2026 EFO CPI inflation path (CPIGR, annual "
+                    f"mean of the {year} quarters)")
+    else:
+        ref_cpi = 2.0
+        ref_desc = "flat 2.0% inflation target"
+    gap_pp = svar_cpi - ref_cpi
+
+    pe = _import_pe()
+    from datetime import date
+
+    if getattr(pe, "uk", None) is None or pe.uk.model is None:
+        raise RuntimeError(
+            "policyengine imported without its UK country model; install "
+            "policyengine[models] to resolve the uprated parameters."
+        )
+    apply_date = f"{year + 1}-04-06"
+    factor = 1.0 + gap_pp / 100.0
+    reform: dict[str, dict] = {}
+    parameters = []
+    for entry in SVAR_CPI_UPRATED_PARAMETERS:
+        path = entry["path"]
+        try:
+            param = pe.uk.model.get_parameter(path)
+        except Exception as e:
+            raise ValueError(
+                f"could not resolve the curated uprating parameter {path!r} "
+                f"in the policyengine-uk parameter tree ({type(e).__name__}: "
+                f"{e}). The curated list (SVAR_CPI_UPRATED_PARAMETERS) has "
+                "gone stale against upstream — fix the list; refusing to "
+                "skip it silently."
+            ) from e
+        baseline_value = _pe_value_at(param, date(year + 1, 4, 6))
+        if baseline_value is None:
+            raise ValueError(
+                f"the parameter {path!r} has no value in force on "
+                f"{apply_date}; cannot build the uprating counterfactual."
+            )
+        baseline_value = float(baseline_value)
+        new_value = baseline_value * factor
+        reform[path] = {apply_date: new_value}
+        parameters.append({
+            **entry,
+            "baseline_value": round(baseline_value, 6),
+            "counterfactual_value": round(new_value, 6),
+        })
+
+    micro = pe_population_impact(
+        country="uk", reform=reform, year=year + 1, dataset=dataset,
+    )
+    # One authoritative score: drop the nested static-microsim score block,
+    # as dynamic_population_reform_impact does.
+    micro = dict(micro)
+    micro.pop("score", None)
+
+    budget_bn = micro["budgetary_impact_bn"]
+    assumptions = [
+        f"CPI gap: SVAR median YoY CPI for {year} "
+        f"({svar_cpi:+.2f}%) minus the reference ({ref_desc}: "
+        f"{ref_cpi:+.2f}%) = {gap_pp:+.2f}pp",
+        "statutory pass-through: working-age benefit and Child Benefit "
+        "rates are CPI-uprated each April (SSAA 1992 s.150 as amended), so "
+        f"the gap scales each curated parameter's {apply_date} baseline "
+        f"value by {factor:.5f}",
+        "annual-average approximation: the statute references September "
+        "CPI, this tool the annual mean of the year's four quarters",
+    ]
+    caveats = [
+        "NOT included: the state pension (triple lock, not a pure CPI "
+        "link), income tax and NI thresholds (frozen by statute), Local "
+        "Housing Allowance, and the benefit cap — the true fiscal "
+        "sensitivity to inflation is larger than this curated slice",
+        "SVAR median only: the forecast's 68/90% bands are reported in the "
+        "embedded svar block but not propagated to the costing",
+        "price side only: no earnings or debt-interest channel is applied",
+    ]
+    out = {
+        "model": "UK SVAR CPI gap + PolicyEngine population microsimulation",
+        "country": "uk",
+        "year": int(year),
+        "uprating_year": year + 1,
+        "reference": reference,
+        "reference_description": ref_desc,
+        "svar_cpi_yoy_pct": round(svar_cpi, 3),
+        "reference_cpi_yoy_pct": round(ref_cpi, 3),
+        "cpi_gap_pp": round(gap_pp, 3),
+        "svar": {
+            "forecast_origin": fc["forecast_origin"],
+            "provenance": fc["provenance"],
+            "draws": fc["draws"],
+            "accepted_draws": fc["accepted_draws"],
+            "ess": fc["ess"],
+            "warnings": fc["warnings"],
+            "cpi_inflation_yoy": [cpi_rows[q] for q in quarters],
+        },
+        "parameters": parameters,
+        "reform": reform,
+        "microsim": micro,
+        "assumptions": assumptions,
+        "caveats": caveats,
+        "headline": (
+            f"If CPI inflation runs {gap_pp:+.2f}pp against the reference "
+            f"in {year}, the April {year + 1} uprating of these benefits "
+            f"{'saves' if budget_bn >= 0 else 'costs'} "
+            f"£{abs(budget_bn):.1f}bn/year."
+        ),
+    }
+    out["score"] = _incidence_score_block(
+        model_id="svar+microsim",
+        model_class="svar overlay on microsim",
+        analysis_type="inflation uprating incidence (experimental)",
+        country="uk",
+        year=year + 1,
+        reform=reform,
+        micro=micro,
+        assumptions=assumptions,
+        caveats=caveats,
+        baseline=(
+            f"PolicyEngine baseline policy for {year + 1}, uprating gap "
+            f"referenced to {ref_desc}"
+        ),
+        data_vintage=(
+            f"PolicyEngine dataset {micro.get('dataset', dataset or 'default')}; "
+            f"UK SVAR conditioned through {fc['forecast_origin']}"
+        ),
+        horizon=f"annual {year + 1} (April uprating of the {year} CPI gap)",
+        basis_suffix=(
+            "from CPI-gap-scaled statutory uprating of the curated "
+            "benefit parameters"
+        ),
+    )
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Unified reform scoring across the suite
 # ---------------------------------------------------------------------------
 
@@ -2937,7 +3646,9 @@ SCORE_MODELS_WITHOUT_REFORM_BRIDGE = {
         "variable shocks are the supported entry point — use the frbus_shock "
         "tool (or `pe-macro frbus-shock`) with a lever and shock size in model "
         "units, and frbus_list_variables to discover the levers and their "
-        "units."
+        "units. For who bears a FRB/US shock at household resolution "
+        "(deciles, winners/losers through the automatic stabilizers), use "
+        "frbus_shock_incidence (`pe-macro frbus-shock-incidence`)."
     ),
     "hank": (
         "The US HANK member has no PolicyEngine-reform bridge, by design: it "
@@ -2947,7 +3658,10 @@ SCORE_MODELS_WITHOUT_REFORM_BRIDGE = {
         "inventing one would produce plausible-looking wrong numbers. Use the "
         "hank_shock tool (or `pe-macro hank-shock`) with a shock kind, size "
         "and persistence in model units; hank_summary documents the kinds "
-        "and their units."
+        "and their units. For who bears a HANK shock at household "
+        "resolution (deciles, winners/losers through the automatic "
+        "stabilizers), use hank_shock_incidence "
+        "(`pe-macro hank-shock-incidence`)."
     ),
 }
 SCORE_MODELS_WITHOUT_REFORM_BRIDGE["us-hank"] = (

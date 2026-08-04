@@ -102,8 +102,8 @@
 }
 .steps.dimmed { opacity: 0.55; }
 /* Every model stays visible: no horizontal tab scrolling. */
-.model-seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); max-width: 100%; margin: 6px 0 22px; border: 0; padding: 0; gap: 8px; }
-.model-seg button { min-width: 0; min-height: 68px; border: 1px solid var(--line-soft); border-radius: 6px; padding: 11px 13px; text-align: left; transition: all 0.15s ease; }
+.model-seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); max-width: 100%; margin: 6px 0 12px; border: 0; padding: 0; gap: 6px; }
+.model-seg button { min-width: 0; min-height: 0; border: 1px solid var(--line-soft); border-radius: 6px; padding: 8px 11px; text-align: left; transition: all 0.15s ease; }
 .model-seg button strong,
 .model-seg button span { display: block; }
 .model-seg button strong { color: inherit; font-family: var(--mono); font-size: var(--fs-small); font-weight: 600; }
@@ -205,13 +205,18 @@
 .command-grid .copyblock code { font-size: var(--fs-small); line-height: 1.55; }
 .model-picker { margin-top: var(--s-5); }
 .compact-pane {
-  min-height: 210px;
-  padding: clamp(22px, 4vw, 36px);
+  min-height: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 14px;
+  padding: 16px clamp(16px, 3vw, 24px);
   border: 1px solid var(--line-soft);
   border-radius: var(--radius);
 }
-.compact-pane h3 { margin: 18px 0 8px; font-family: var(--display); font-size: var(--fs-h3); font-weight: 500; }
-.compact-pane p { max-width: 58ch; margin-bottom: 24px; color: var(--paper-dim); line-height: 1.6; }
+.compact-pane h3 { margin: 0; font-family: var(--display); font-size: var(--fs-h3); font-weight: 500; }
+.compact-pane p { flex-basis: 100%; max-width: 58ch; margin: 6px 0 0; color: var(--paper-dim); line-height: 1.6; }
+.compact-pane .btn { margin-top: 14px; }
 @media (max-width: 760px) {
   .command-grid { grid-template-columns: 1fr; }
   .compact-pane { min-height: 0; }
@@ -396,8 +401,9 @@
         <div><span class="dial-name">UK forecast</span><div class="copyblock"><code>pe-macro forecast</code><button data-copy>copy</button></div></div>
         <div><span class="dial-name">US HANK shock</span><div class="copyblock"><code>pe-macro hank-shock --kind monetary --size -0.0025</code><button data-copy>copy</button></div></div>
         <div><span class="dial-name">Household calculation</span><div class="copyblock"><code>pe-macro household --country us --people '[{"age":35,"employment_income":50000}]'</code><button data-copy>copy</button></div></div>
+        <div><span class="dial-name">Score a UK reform</span><div class="copyblock"><code>pe-macro score --country uk --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --model obr</code><button data-copy>copy</button></div></div>
       </div>
-      <p class="chooser-note"><a href="https://github.com/PolicyEngine/macro/tree/main/integration">View every CLI command →</a></p>
+      <p class="chooser-note"><a href="https://github.com/PolicyEngine/macro/tree/main/integration">View every CLI command →</a> · How the micro-to-macro scoring pipeline works: <a href="/models#score">score a reform</a>.</p>
     </div>
   </section>
   <section id="code" class="band">
@@ -510,7 +516,9 @@
     applyClient();
   });
 
-  // model selector in the code section (six model tabs)
+  // model selector in the code section (one tab per model with a Python
+  // surface; define-uk is deliberately absent — no hosted/CLI/Python
+  // surface until its replication is validated)
   var modelSeg = document.getElementById("model-seg");
   if (modelSeg) {
     bindTabs(modelSeg, function (btn) {

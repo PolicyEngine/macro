@@ -16,6 +16,20 @@ def _emit_json(obj) -> None:
     click.echo(json.dumps(obj, indent=2))
 
 
+def _load_payload_file(path: str | None, option: str) -> dict | None:
+    """Load a pre-computed macro payload JSON for a two-process pipeline."""
+    if path is None:
+        return None
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        raise click.ClickException(
+            f"{option} {path}: not readable JSON ({e}); pass the unmodified "
+            "--json output of the corresponding shock command"
+        ) from e
+
+
 def _table(rows: list[dict], columns: list[str]) -> str:
     widths = {c: max(len(c), *(len(str(r.get(c, ""))) for r in rows)) for c in columns}
     head = "  ".join(c.ljust(widths[c]) for c in columns)
@@ -282,6 +296,205 @@ def frbus_shock(var, shock, start, periods, horizon, policy_rule, variables,
                    f"   ({res['series_meaning'][v]})")
     if res.get("warning"):
         click.echo(f"\nWARNING: {res['warning']}")
+
+
+def _echo_incidence(res: dict, shock_line: str) -> None:
+    ea = res["economic_assumptions"]
+    click.echo(shock_line)
+    click.echo(f"Earnings factor: {ea['earnings_factor']}   "
+               f"Labour-supply factor: {ea['labour_supply_factor']}   "
+               f"applied: {res['application']['applied']}\n")
+    micro = res["microsim"]
+    click.echo(micro["headline"])
+    sym = "£" if micro["country"] == "uk" else "$"
+    click.echo(f"Budget change: {sym}{micro['budgetary_impact_bn']}bn/year "
+               f"({micro['budgetary_impact_basis']})")
+    click.echo(f"Household net income change: "
+               f"{sym}{micro['household_net_income_change_bn']}bn/year")
+    click.echo(f"Winners: {micro['winners']:,}   Losers: {micro['losers']:,}\n")
+    click.echo(_table(micro["decile_impacts"],
+                      ["decile", "avg_income_change", "relative_change_pct",
+                       "count_better_off", "count_worse_off"]))
+    for label, items in (("Assumptions", res.get("assumptions") or []),
+                         ("Caveats", res.get("caveats") or [])):
+        click.echo(f"\n{label}:")
+        for it in items:
+            click.echo(f"  - {it}")
+
+
+@main.command("frbus-shock-incidence")
+@click.option("--var", required=True,
+              help="FRB/US lever to shock (see `pe-macro frbus-variables`).")
+@click.option("--shock", required=True, type=float,
+              help="Shock size in the lever's model units (units differ "
+                   "per lever; see `pe-macro frbus-variables`).")
+@click.option("--year", default=2027, show_default=True,
+              help="Calendar year whose four quarters are averaged into the "
+                   "earnings overlay and scored by the microsim.")
+@click.option("--start", default=core.FRBUS_DEFAULT_START, show_default=True,
+              help="First shocked quarter, e.g. 2026Q1.")
+@click.option("--periods", default=1, show_default=True,
+              help="Quarters the shock is held.")
+@click.option("--horizon", default=core.FRBUS_DEFAULT_HORIZON,
+              show_default=True,
+              help="Quarters simulated (must cover the incidence year).")
+@click.option("--policy-rule", default="inertial_taylor", show_default=True,
+              type=click.Choice(sorted(core.FRBUS_POLICY_RULES)),
+              help="Monetary policy reaction.")
+@click.option("--income-concept", default="wage_bill", show_default=True,
+              type=click.Choice(["wage", "wage_bill"]),
+              help="wage = compensation per hour only; wage_bill also "
+                   "carries the hours change (applied uniformly).")
+@click.option("--dataset", default=None,
+              help="Microdata dataset name override.")
+@click.option("--frbus-payload", "frbus_payload_path", default=None,
+              help="Path to a pre-computed `pe-macro frbus-shock --json` "
+                   "result (run with pl/lhp/leh in --variables), so the "
+                   "FRB/US solve and the microsim run in separate processes "
+                   "on memory-constrained machines.")
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
+def frbus_shock_incidence(var, shock, year, start, periods, horizon,
+                          policy_rule, income_concept, dataset,
+                          frbus_payload_path, as_json):
+    """Who bears a FRB/US shock, at household resolution (experimental).
+
+    Runs frbus_shock, turns the year's mean pl/lhp deviations into a
+    pre-tax earnings factor, scales the US microsim's employment-income
+    inputs (no reform on either side), and reports the automatic-stabilizer
+    budget change plus decile impacts. NOT reform scoring.
+    """
+    frbus_payload = _load_payload_file(frbus_payload_path, "--frbus-payload")
+    try:
+        res = core.frbus_shock_incidence(
+            var=var, shock=shock, year=year, start=start, periods=periods,
+            horizon=horizon, policy_rule=policy_rule,
+            income_concept=income_concept, dataset=dataset,
+            frbus_payload=frbus_payload,
+        )
+    except (ValueError, ImportError, RuntimeError) as e:
+        raise click.ClickException(str(e)) from e
+    if as_json:
+        _emit_json(res)
+        return
+    _echo_incidence(res, (
+        f"FRB/US shock incidence: {res['frbus']['name']} "
+        f"(year {res['year']}, income_concept={res['income_concept']})"
+    ))
+
+
+@main.command("hank-shock-incidence")
+@click.option("--kind", required=True,
+              type=click.Choice([k["kind"] for k in core.HANK_SHOCK_KINDS]),
+              help="Shock kind (see `pe-macro hank-summary` for units).")
+@click.option("--size", required=True, type=float,
+              help="Impact size in model units (units differ per kind).")
+@click.option("--year", default=2026, show_default=True,
+              help="Calendar year whose four quarters are averaged into the "
+                   "earnings overlay and scored by the microsim.")
+@click.option("--persistence", default=0.9, show_default=True, type=float,
+              help="AR(1) decay of the shock path (in [0, 1)).")
+@click.option("--horizon", default=core.HANK_DEFAULT_HORIZON,
+              show_default=True,
+              help="Quarters simulated (must cover the incidence year).")
+@click.option("--variant", default="two_asset", show_default=True,
+              type=click.Choice(list(core.HANK_VARIANTS)))
+@click.option("--income-concept", default="wage_bill", show_default=True,
+              type=click.Choice(["wage", "wage_bill"]),
+              help="wage = real wage w only; wage_bill also carries the "
+                   "labor N change (applied uniformly).")
+@click.option("--start-year", "start_year", default=2026, show_default=True,
+              help="Calendar year the shock's quarter 0 maps to.")
+@click.option("--dataset", default=None,
+              help="Microdata dataset name override.")
+@click.option("--hank-payload", "hank_payload_path", default=None,
+              help="Path to a pre-computed `pe-macro hank-shock --json` "
+                   "result, so the HANK solve and the microsim run in "
+                   "separate processes on memory-constrained machines.")
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
+def hank_shock_incidence(kind, size, year, persistence, horizon, variant,
+                         income_concept, start_year, dataset,
+                         hank_payload_path, as_json):
+    """Who bears a US HANK shock, at household resolution (experimental).
+
+    Runs hank_shock (which surfaces the pre-tax real wage w and labor N
+    IRFs), turns the year's mean deviations into a pre-tax earnings factor,
+    scales the US microsim's employment-income inputs (no reform), and
+    reports the automatic-stabilizer budget change plus decile impacts.
+    Stylized calibrated model; NOT a forecaster, NOT reform scoring.
+    """
+    hank_payload = _load_payload_file(hank_payload_path, "--hank-payload")
+    try:
+        res = core.hank_shock_incidence(
+            kind=kind, size=size, year=year, persistence=persistence,
+            horizon=horizon, variant=variant, income_concept=income_concept,
+            start_year=start_year, dataset=dataset,
+            hank_payload=hank_payload,
+        )
+    except (ValueError, ImportError, RuntimeError) as e:
+        raise click.ClickException(str(e)) from e
+    if as_json:
+        _emit_json(res)
+        return
+    _echo_incidence(res, (
+        f"US HANK shock incidence: {res['hank']['name']} "
+        f"(year {res['year']}, income_concept={res['income_concept']})"
+    ))
+
+
+@main.command("svar-inflation-incidence")
+@click.option("--year", default=2027, show_default=True,
+              help="Forecast year whose CPI gap drives the following "
+                   "April's uprating.")
+@click.option("--horizons", default=12, show_default=True,
+              help="SVAR forecast horizon in quarters (must cover the year).")
+@click.option("--draws", default=2000, show_default=True,
+              help="SVAR posterior draws (first call takes minutes).")
+@click.option("--reference", default="obr", show_default=True,
+              type=click.Choice(["obr", "target"]),
+              help="CPI reference path: the March 2026 EFO (obr) or a flat "
+                   "2.0% (target).")
+@click.option("--dataset", default=None,
+              help="Microdata dataset name override.")
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
+def svar_inflation_incidence(year, horizons, draws, reference, dataset,
+                             as_json):
+    """Cost and incidence of the SVAR-vs-reference CPI gap via uprating.
+
+    Compares the UK SVAR's median CPI path for the year against the
+    reference, scales a short curated list of statutorily CPI-uprated
+    benefit parameters by the gap from the following 6 April, and scores
+    that real reform with the UK population microsim. Excludes the state
+    pension triple lock and frozen tax thresholds (stated in caveats).
+    """
+    try:
+        res = core.svar_inflation_incidence(
+            year=year, horizons=horizons, draws=draws, reference=reference,
+            dataset=dataset,
+        )
+    except (ValueError, ImportError, RuntimeError) as e:
+        raise click.ClickException(str(e)) from e
+    if as_json:
+        _emit_json(res)
+        return
+    click.echo(f"UK SVAR inflation-uprating incidence, {res['year']} gap -> "
+               f"April {res['uprating_year']} uprating")
+    click.echo(f"SVAR CPI {res['svar_cpi_yoy_pct']}% vs reference "
+               f"{res['reference_cpi_yoy_pct']}% ({res['reference_description']}): "
+               f"gap {res['cpi_gap_pp']:+}pp\n")
+    click.echo(_table(res["parameters"],
+                      ["path", "description", "unit", "baseline_value",
+                       "counterfactual_value"]))
+    micro = res["microsim"]
+    click.echo(f"\n{res['headline']}")
+    click.echo(f"Winners: {micro['winners']:,}   Losers: {micro['losers']:,}\n")
+    click.echo(_table(micro["decile_impacts"],
+                      ["decile", "avg_income_change", "relative_change_pct",
+                       "count_better_off", "count_worse_off"]))
+    for label, items in (("Assumptions", res["assumptions"]),
+                         ("Caveats", res["caveats"])):
+        click.echo(f"\n{label}:")
+        for it in items:
+            click.echo(f"  - {it}")
 
 
 @main.command("frbus-variables")

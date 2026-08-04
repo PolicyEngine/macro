@@ -25,7 +25,7 @@ DESTINATIONS = (
     ("use", "/connect", "Use", "nav-mobile nav-start"),
 )
 
-MODEL_ROOTS = {"models", "obr", "svar", "frb-us", "us-hank", "olg", "pe"}
+MODEL_ROOTS = {"models", "obr", "svar", "frb-us", "us-hank", "olg", "pe", "define"}
 EVIDENCE_ROOTS = {"papers"}
 
 # Display names used in the pathway line and the footer directory.
@@ -38,6 +38,7 @@ PAGE_NAMES = {
     "/frb-us": "FRB-US",
     "/us-hank": "US HANK",
     "/olg": "OG-UK",
+    "/define": "DEFINE-UK",
     "/obr/code": "Code",
     "/obr/methodology": "Methodology",
     "/obr/validation": "Validation",
@@ -64,12 +65,11 @@ PAGE_NAMES = {
     "/forecasts": "Forecasts",
     "/notes/releases": "Releases",
     "/connect": "Use",
-    "/score": "Score a reform",
     "/contact": "Contact",
 }
 
 # Parent chain overrides where the URL hierarchy is not the reading hierarchy:
-# model and evidence pages live under Models, /score under Use.
+# model and evidence pages live under Models; /score is a top-level section.
 CRUMB_PARENTS = {
     "/obr": "/models",
     "/svar": "/models",
@@ -77,11 +77,11 @@ CRUMB_PARENTS = {
     "/us-hank": "/models",
     "/olg": "/models",
     "/pe": "/models",
+    "/define": "/models",
     "/papers/obr-macro": "/models",
     "/papers/boe-svar": "/models",
     "/papers/frb-us": "/models",
     "/papers/psl-og": "/models",
-    "/score": "/connect",
     # /notes was folded into /forecasts#notes; the surviving note pages hang
     # off Forecasts so no crumb links to the retired /notes page.
     "/notes/releases": "/forecasts",
@@ -168,7 +168,7 @@ def section(path: Path) -> str | None:
         return "economy"
     if root == "forecasts":
         return "forecasts"
-    if root in {"connect", "score"}:
+    if root == "connect":
         return "use"
     return None
 
