@@ -341,7 +341,28 @@ def serve():
         allowed_hosts=["policyengine--policyengine-macro-mcp-serve.modal.run"],
         allowed_origins=["*"],
     )
-    return mcp.streamable_http_app()
+    app = mcp.streamable_http_app()
+
+    # Reject the standalone GET SSE stream with 405 (allowed by the MCP spec;
+    # clients skip the stream and carry on with POSTs). The SDK still accepts
+    # GET in stateless mode, and the resulting idle stream is pure harm here:
+    # it pins a container until Modal's 600s input timeout kills it, which
+    # clients report as a server failure (the /mcp "failed" flap), and the
+    # kill/reconnect loop keeps one container busy 24/7 despite
+    # min_containers=0. Nothing is ever sent on that stream in stateless mode.
+    async def reject_standalone_get(scope, receive, send):
+        if scope["type"] == "http" and scope.get("method") == "GET" \
+                and scope.get("path", "").rstrip("/") == "/mcp":
+            await send({
+                "type": "http.response.start",
+                "status": 405,
+                "headers": [(b"allow", b"POST, DELETE")],
+            })
+            await send({"type": "http.response.body", "body": b""})
+            return
+        await app(scope, receive, send)
+
+    return reject_standalone_get
 
 
 @app.function(
