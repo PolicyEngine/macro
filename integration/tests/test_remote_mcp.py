@@ -112,6 +112,23 @@ async def test_hosted_tools_have_no_duplicate_names():
     assert len(names) == len(set(names)), sorted(names)
 
 
+@pytest.mark.anyio
+async def test_standalone_get_stream_is_rejected_with_405():
+    """The stateless server must refuse the standalone GET SSE stream.
+
+    If it is accepted, every connected client parks an idle stream that
+    Modal kills at the 600s input timeout — clients then flap to "failed"
+    and one container stays busy 24/7 despite min_containers=0.
+    """
+    import httpx
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            URL, headers={"Accept": "text/event-stream"}, timeout=30
+        )
+    assert resp.status_code == 405, (resp.status_code, resp.text[:200])
+
+
 # --- DEFINE-UK local-only contract, as served -------------------------------
 # The hosted server must NEVER return DEFINE-UK results (unlicensed upstream);
 # both tools are advertised but answer with install/run instructions.
