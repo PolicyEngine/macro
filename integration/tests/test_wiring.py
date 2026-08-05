@@ -141,7 +141,7 @@ def test_cli_help_lists_all_commands(runner):
     for cmd in [
         "score", "compare", "obr-shock", "variables", "forecast", "shocks", "summary",
         "parameters", "household", "household-impact", "population-impact",
-        "og-score", "og-baseline",
+        "og-score", "og-baseline", "define-scenarios", "define-scenario",
     ]:
         assert cmd in out, f"CLI help missing subcommand {cmd!r}"
 
@@ -279,6 +279,43 @@ def test_cli_household_json_end_to_end(runner):
     ]))
     assert data["currency"] == "GBP"
     assert data["summary"]["income_tax_by_person"][0] > 0
+
+
+def test_cli_define_scenarios_json_end_to_end(runner):
+    # Works in BOTH environments the local-only contract defines: with the
+    # define_uk adapter + cached run it returns the scenario registry, and
+    # without it (CI, hosted) it returns run instructions — never a crash.
+    data = _json_ok(runner.invoke(main, ["define-scenarios", "--json"]))
+    assert data["model"] == "define-uk"
+    if data["available"]:
+        names = {s["name"] for s in data["scenarios"]}
+        assert {"fossil_fuel_ban", "green_public_investment"} <= names
+    else:
+        assert "never hosted" in data["how_to_run"]
+
+
+def test_cli_define_scenario_json_end_to_end(runner):
+    data = _json_ok(runner.invoke(
+        main, ["define-scenario", "green_public_investment", "--json"]
+    ))
+    assert data["model"] == "define-uk"
+    if data["available"]:
+        assert data["caveats"], "mandatory caveats missing"
+        assert "GDP_R" in data["variables"]
+        paths = data["variables"]["GDP_R"]
+        assert len(data["years"]) == len(paths["delta_level"])
+    else:
+        assert "how_to_run" in data
+
+
+def test_cli_define_unknown_scenario_is_clean_error(runner):
+    # With the adapter installed, a bogus name must point at the listing
+    # command, not traceback; without it, the instructions path serves.
+    res = runner.invoke(main, ["define-scenario", "not_a_real_scenario", "--json"])
+    assert res.exit_code == 0, res.output
+    data = json.loads(res.output)
+    assert data["available"] is False
+    assert "how_to_run" in data
 
 
 @pytest.mark.slow

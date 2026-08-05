@@ -3896,6 +3896,19 @@ def define_scenario(name: str, horizon_years: int = 15) -> dict:
         out = dict(_DEFINE_INSTRUCTIONS)
         out["error"] = str(e)
         return out
+    except (KeyError, ValueError) as e:
+        # Unknown scenario name (or bad horizon): the adapter IS installed,
+        # so install instructions would mislead — point at the listing tool.
+        return {
+            "model": "define-uk",
+            "available": False,
+            "error": f"Unknown DEFINE-UK scenario {name!r}: {e}",
+            "how_to_run": (
+                "Run `pe-macro define-scenarios` (or the "
+                "define_list_scenarios tool) to list the valid scenario "
+                "names, then retry with one of them."
+            ),
+        }
     result["model"] = "define-uk"
     result["available"] = True
     return result

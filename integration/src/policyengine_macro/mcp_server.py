@@ -792,10 +792,6 @@ def dynamic_reform_impact(
     )
 
 
-if __name__ == "__main__":
-    mcp.run(transport="stdio")
-
-
 @mcp.tool()
 def define_list_scenarios() -> dict:
     """List DEFINE-UK climate-policy scenarios (ecological stock-flow
@@ -829,3 +825,7 @@ def define_scenario(name: str, horizon_years: int = 15) -> dict:
         horizon_years: Annual delta horizon (default 15 = 2023-2037).
     """
     return core.define_scenario(name, horizon_years=horizon_years)
+
+
+if __name__ == "__main__":
+    mcp.run(transport="stdio")

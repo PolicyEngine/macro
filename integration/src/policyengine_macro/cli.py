@@ -1023,4 +1023,3 @@ def define_scenario(name, horizon_years, as_json):
 
 if __name__ == "__main__":
     main()
-
