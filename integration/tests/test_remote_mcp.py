@@ -112,6 +112,27 @@ async def test_hosted_tools_have_no_duplicate_names():
     assert len(names) == len(set(names)), sorted(names)
 
 
+# --- DEFINE-UK local-only contract, as served -------------------------------
+# The hosted server must NEVER return DEFINE-UK results (unlicensed upstream);
+# both tools are advertised but answer with install/run instructions.
+
+
+@pytest.mark.anyio
+async def test_hosted_define_tools_serve_instructions_not_results():
+    for tool, args in [
+        ("define_list_scenarios", {}),
+        ("define_scenario", {"name": "green_public_investment"}),
+    ]:
+        out = await _call(tool, args)
+        assert out["model"] == "define-uk", (tool, out)
+        assert out["available"] is False, (
+            f"{tool}: hosted server returned DEFINE-UK results — the "
+            "unlicensed upstream must never be hosted"
+        )
+        assert "never hosted" in out["how_to_run"], (tool, out)
+        assert "define-uk-model" in out["how_to_run"], (tool, out)
+
+
 # --- reform-input validation, as served (#38) ------------------------------
 
 

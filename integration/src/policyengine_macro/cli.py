@@ -975,5 +975,51 @@ def og_baseline(year, max_iter, as_json):
         click.echo(f"  {k:12} {v}")
 
 
+@main.command("define-scenarios")
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
+def define_scenarios(as_json):
+    """List DEFINE-UK climate-policy scenarios (local-only, experimental)."""
+    res = core.define_list_scenarios()
+    if as_json:
+        _emit_json(res)
+        return
+    if not res.get("available"):
+        click.echo(res["how_to_run"])
+        return
+    click.echo(_table(res["scenarios"], ["name", "block", "description"]))
+
+
+@main.command("define-scenario")
+@click.argument("name")
+@click.option("--horizon-years", default=15, show_default=True,
+              help="Annual delta horizon.")
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
+def define_scenario(name, horizon_years, as_json):
+    """DEFINE-UK scenario deltas vs baseline (local-only, experimental).
+
+    Returns annualised DELTAS only — baseline levels are deliberately not
+    reported; read the caveats in the output.
+    """
+    res = core.define_scenario(name, horizon_years=horizon_years)
+    if as_json:
+        _emit_json(res)
+        return
+    if not res.get("available"):
+        click.echo(res["how_to_run"])
+        if "error" in res:
+            click.echo(f"\n{res['error']}")
+        return
+    click.echo(f"DEFINE-UK scenario deltas vs baseline: {res['scenario']} "
+               f"({res['block']})")
+    click.echo(res["description"])
+    for c in res["caveats"]:
+        click.echo(f"  ! {c}")
+    years = res["years"]
+    for var, paths in res["variables"].items():
+        click.echo(f"\n{var} (delta level / delta %):")
+        for y, lv, pc in zip(years, paths["delta_level"], paths["delta_pct"]):
+            click.echo(f"  {y}  {lv:+.3f}  {pc:+.3f}%")
+
+
 if __name__ == "__main__":
     main()

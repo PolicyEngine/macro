@@ -212,7 +212,7 @@ benefits the MCP server).
 ## MCP server
 
 Runs over stdio via `python -m policyengine_macro.mcp_server`, exposing
-twenty-three tools:
+25 tools:
 `score_reform` (a PolicyEngine reform through a chosen macro model),
 `frbus_shock_incidence`, `hank_shock_incidence` and
 `svar_inflation_incidence` (macro-to-microsimulation incidence overlays),
@@ -222,7 +222,8 @@ the hosted server returns a "run locally" error),
 `obr_shock` and `list_reform_variables` (raw OBR variable shocks),
 `frbus_shock`, `frbus_list_variables` and `frbus_summary` (FRB/US),
 `hank_shock` and `hank_summary` (US HANK),
-`forecast_uk`, `latest_shocks`, `model_summary` (SVAR), the PolicyEngine
+`forecast_uk`, `latest_shocks`, `model_summary` (SVAR),
+`define_list_scenarios` and `define_scenario` (DEFINE-UK), the PolicyEngine
 tools `calculate_household`, `household_reform_impact`,
 `list_reform_parameters`, `population_reform_impact`, and the discovery
 tools `list_model_capabilities`, `get_model_status`, `recommend_model`
