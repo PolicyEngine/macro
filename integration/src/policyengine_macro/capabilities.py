@@ -151,9 +151,12 @@ MODELS = {
         "runtime": "instant from the cached upstream run; a fresh run needs local R (full notebook)",
         "uncertainty": "none quantified; deterministic scenario deltas from one calibration",
         "status": (
-            "experimental; scenario deltas gated against the pinned upstream "
-            "run (oracle) — published-figure comparison pending; unlicensed "
-            "upstream is never hosted, so hosted calls return run instructions"
+            "experimental; partial replication — baseline macro block "
+            "replicates manual Table 4; scenario deltas gated on the pinned "
+            "oracle run, the published scenario definitions, and two paper "
+            "anchors (no numeric v1.1 scenario results are published); "
+            "unlicensed upstream is never hosted, so hosted calls return "
+            "run instructions"
         ),
         "data_vintage": "DEFINE-UK 1.1 upstream at pinned commit 846081a (April 2026 manual)",
     },
