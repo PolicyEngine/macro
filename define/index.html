@@ -4,13 +4,13 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>DEFINE-UK ecological stock-flow model — PolicyEngine Macro</title>
-<meta name="description" content="An adapter for DEFINE-UK, the ecological stock-flow consistent model of the UK by Dafermos, Nikolaidi et al. Experimental and pre-validation: it runs the upstream code end to end; replication of published results is pending." />
+<meta name="description" content="An adapter for DEFINE-UK, the ecological stock-flow consistent model of the UK by Dafermos, Nikolaidi et al. Experimental: the baseline macro block replicates the manual; scenario deltas are design-gated and anchored to the paper — deltas only, never levels." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/define" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://policyengine-macro.vercel.app/define" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
 <meta property="og:title" content="DEFINE-UK ecological stock-flow model — PolicyEngine Macro" />
-<meta property="og:description" content="An adapter for DEFINE-UK, the ecological stock-flow consistent model of the UK. Experimental and pre-validation: runs the upstream code end to end; replication of published results pending." />
+<meta property="og:description" content="An adapter for DEFINE-UK, the ecological stock-flow consistent model of the UK. Experimental: baseline macro block replicates the manual; scenario deltas design-gated and anchored — deltas only, never levels." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -58,22 +58,23 @@
       </h1>
       <p class="lede reveal" style="--d:2">
         An adapter for DEFINE-UK, the ecological stock-flow consistent model
-        of the UK macrofinancial system. Pre-validation: it runs the
-        upstream code end to end; replication of published results is pending.
+        of the UK macrofinancial system. Experimental: the baseline macro
+        block replicates the manual, and scenario deltas are gated on the
+        published scenario definitions — deltas only, never levels.
       </p>
     </div>
   </section>
   <section id="pe-bridge" class="band">
     <div class="band-head">
       <span class="kicker mono">with the microsimulation</span>
-      <h2>No connection yet — and none until the replication gate passes.</h2>
+      <h2>No connection yet. The replication gate has closed at its ceiling; the bridge is a design decision now.</h2>
     </div>
     <div class="prose">
       <div class="qa-facts">
         <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Connection.</strong> None today. Planned: scenario income and energy-price paths feed <a href="/pe">PolicyEngine</a>'s incidence overlay through <code>EconomicAssumptions</code> once replication is validated. <code>score_reform</code> will not accept it.</span></div>
         <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Worked example.</strong> None yet — the intended product is <em>who bears a climate-policy scenario, household by household</em>, a question no other model in the suite answers.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Validation.</strong> <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/VALIDATION.md">External comparators recorded</a>: the manual's macro block replicates almost exactly; its emissions path diverges from the published table (&minus;3.5% in 2025 to &minus;23% by 2040) — queried with the authors.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Results.</strong> Scenario deltas run locally via <code>pe-macro define-scenario</code> (experimental, oracle-gated); none are shown on this site until the published-figure replication completes.</span></div>
+        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Validation.</strong> <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/VALIDATION.md">Recorded in VALIDATION.md</a>: the manual's macro block replicates (Table&nbsp;4 passes); the emissions path diverges from the published table (&minus;3.5% in 2025 to &minus;23% by 2040) — pinned and queried with the authors; each scenario is verified to toggle exactly its published policy switches; the calibration gap to ONS/DESNZ/OBR is computed and regression-tested, which is why deltas, never levels, are served.</span></div>
+        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Results.</strong> Scenario deltas run locally via <code>pe-macro define-scenario</code> (experimental; oracle-, design- and anchor-gated). No numeric scenario results are published for v1.1, so a full published-figure replication is not possible — the two figures the paper's open 2023 vintage states in text both anchor: green public investment peaks at +0.92% of GDP (published &asymp;+1%) and the 2030 current-policies baseline emits 343 MtCO2e/yr (published &ldquo;just under 350&rdquo;).</span></div>
       </div>
     </div>
   </section>
@@ -126,22 +127,28 @@
   <section id="status" class="band">
     <div class="band-head">
       <span class="kicker mono">02 — status and limits</span>
-      <h2>Runs end to end. Not yet validated.</h2>
+      <h2>Validated to the ceiling the publications allow. Deltas only.</h2>
     </div>
     <div class="prose">
       <div class="callout">
-        <strong>Pre-validation — execution is not validation.</strong> The
-        adapter runs the upstream code end to end, but none of its outputs
-        have been compared against the published figures yet, so no numerical
-        result from this model should be treated as meaningful. The status
-        label is: experimental; pre-validation — runs upstream code end to
-        end, replication of published results pending.
+        <strong>What is validated, and what cannot be.</strong> The baseline
+        macro block replicates the manual's Table&nbsp;4 (population and
+        labour force exact to 0.01m; growth and unemployment within stated
+        tolerances). No numeric <em>scenario</em> results are published for
+        v1.1 — the manual stops at the baseline and the accompanying paper
+        is paywalled with figure-only results — so scenario outputs are
+        gated at the achievable ceiling: each scenario is verified to toggle
+        exactly its published policy switches, and the two figures stated in
+        text in the paper's open 2023 vintage both anchor. The status label
+        is: experimental; partial replication — scenario deltas only, never
+        levels.
       </div>
       <p>
         The limits today, stated plainly:
       </p>
       <div class="qa-facts">
-        <div class="qa-fact"><span class="icon">&rarr;</span><span>No replication check yet — outputs have not been compared to the paper's published figures. External comparators are <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/VALIDATION.md">recorded</a>: the baseline's 2025 growth (4.96%) and emissions (407 MtCO2e) sit well above ONS/DESNZ actuals, so scenario deltas, never levels, are the eventual product</span></div>
+        <div class="qa-fact"><span class="icon">&rarr;</span><span>Calibration gap computed, not prose — the baseline's 2025 growth (4.66% annual-mean; Table&nbsp;4 prints 4.96%) and 2024 emissions (401 MtCO2e) sit well above ONS/DESNZ actuals (≈1% and 371); the full comparison table is <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/validation/baseline_vs_external.csv">committed and regression-tested</a>, so scenario deltas, never levels, are the product</span></div>
+        <div class="qa-fact"><span class="icon">&rarr;</span><span>Fiscal multiplier stated honestly — our own computation gives a cumulative green-public-investment multiplier of 1.78 (IMF green-spending range 1.1&ndash;1.5; OBR capital ≈1.0); the upstream summary table's multiplier columns are unusable (identical across all eight scenarios) and are never quoted</span></div>
         <div class="qa-fact"><span class="icon">&rarr;</span><span>Unlicensed upstream — nothing is vendored or hosted; the code is fetched at a pinned commit and run unmodified</span></div>
         <div class="qa-fact"><span class="icon">&rarr;</span><span>Local CLI only — <code>pe-macro define-scenarios</code> and <code>pe-macro define-scenario</code> run from the cached pinned run (deltas vs baseline, mandatory caveats); the hosted MCP tools return run instructions instead of results, because the unlicensed upstream is never hosted. The path to hosting is a <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">clean-room Python implementation</a> of the published Model Manual, validated against the upstream run — the same adapted-model approach as the OBR emulator</span></div>
         <div class="qa-fact"><span class="icon">&rarr;</span><span>No reform bridge — <code>score_reform</code> will not accept it</span></div>
