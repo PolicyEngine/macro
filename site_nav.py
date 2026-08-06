@@ -26,7 +26,7 @@ DESTINATIONS = (
 )
 
 MODEL_ROOTS = {"models", "obr", "svar", "frb-us", "us-hank", "olg", "pe", "define"}
-EVIDENCE_ROOTS = {"papers"}
+EVIDENCE_ROOTS = {"papers", "reports"}
 
 # Display names used in the pathway line and the footer directory.
 PAGE_NAMES = {
@@ -64,6 +64,7 @@ PAGE_NAMES = {
     "/papers/boe-svar": "boe-svar",
     "/papers/frb-us": "frb-us",
     "/papers/psl-og": "psl-og",
+    "/reports/define-uk-replication": "define-uk",
     "/forecasts": "Forecasts",
     "/notes/releases": "Releases",
     "/connect": "Use",
@@ -84,6 +85,7 @@ CRUMB_PARENTS = {
     "/papers/boe-svar": "/models",
     "/papers/frb-us": "/models",
     "/papers/psl-og": "/models",
+    "/reports/define-uk-replication": "/models",
     # /notes was folded into /forecasts#notes; the surviving note pages hang
     # off Forecasts so no crumb links to the retired /notes page.
     "/notes/releases": "/forecasts",
