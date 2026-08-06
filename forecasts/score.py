@@ -47,6 +47,14 @@ NAIVE_SERIES = {
     "unemployment": ("uk_unemployment_rate.json", "level"),
 }
 
+# Display names for internal model identifiers. Round artifacts under
+# forecasts/rounds/ are immutable, so the internal name recorded in an
+# archived round is kept as-is in the scorecard; the label is what the
+# page shows.
+MODEL_LABELS = {
+    "okun-unemployment": "svar-unemployment satellite",
+}
+
 NAIVE_NOTE = (
     "Naive baseline is a random walk: the last outturn available at the "
     "round's data edge, held flat. Read from the current data vintage, not "
@@ -185,6 +193,7 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
     return {
         "round_id": rnd["round_id"],
         "model": rnd["model"]["name"],
+        "label": MODEL_LABELS.get(rnd["model"]["name"], rnd["model"]["name"]),
         "data_edge": rnd["information_set"]["data_edge"],
         "archived_utc": rnd.get("archived_utc"),
         "path": rnd["_path"],
@@ -555,7 +564,7 @@ def render_rounds(card: dict) -> str:
         rows.append(
             "        <article class=\"forecast-round\">\n"
             f"          <div><span class=\"mono\">{esc(detail['round_id'])}</span>"
-            f"<strong>{esc(detail['model'])}</strong></div>\n"
+            f"<strong>{esc(detail.get('label', detail['model']))}</strong></div>\n"
             "          <dl>\n"
             f"            <div><dt>Data edge</dt><dd>{esc(detail['data_edge'])}</dd></div>\n"
             f"            <div><dt>Periods</dt><dd>{detail['periods_forecast']}</dd></div>\n"

@@ -216,7 +216,9 @@ def cards() -> str:
     forecast = json.loads(
         (ROOT / "papers" / "boe-svar" / "figures" / "current_forecast.json").read_text()
     )
-    okun = json.loads(
+    # Archived round file keeps its original name; the satellite's display
+    # name is "svar-unemployment satellite".
+    unemp_round = json.loads(
         (ROOT / "forecasts" / "rounds" / "2026-07-28" / "okun-unemployment.json").read_text()
     )
 
@@ -236,7 +238,7 @@ def cards() -> str:
 
     g_period, g_fc = next_open(forecast["forecast"], "gdp", g_now["period"])
     c_period, c_fc = next_open(forecast["forecast"], "cpi", c_now["period"])
-    u_period, u_fc = next_open(okun["forecast"], "unemployment", u_now["period"])
+    u_period, u_fc = next_open(unemp_round["forecast"], "unemployment", u_now["period"])
 
     def model_line(fc: dict, period: str) -> str:
         return (
@@ -245,10 +247,10 @@ def cards() -> str:
         )
 
     svar_source = ("boe-svar", "/svar", f"generated {forecast['generated']}")
-    okun_source = (
-        "Okun satellite",
+    usat_source = (
+        "svar-unemployment satellite",
         "/forecasts",
-        f"round {okun['round_id']}",
+        f"round {unemp_round['round_id']}",
     )
 
     return "\n".join(
@@ -284,7 +286,7 @@ def cards() -> str:
                 unemployment["vintage"],
                 unemployment["url"],
                 model_line(u_fc, u_period),
-                okun_source,
+                usat_source,
             ),
         ]
     )
@@ -752,7 +754,9 @@ def home_uk_now() -> str:
     forecast = json.loads(
         (ROOT / "papers" / "boe-svar" / "figures" / "current_forecast.json").read_text()
     )
-    okun = json.loads(
+    # Archived round file keeps its original name; the satellite's display
+    # name is "svar-unemployment satellite".
+    unemp_round = json.loads(
         (ROOT / "forecasts" / "rounds" / "2026-07-28" / "okun-unemployment.json").read_text()
     )
 
@@ -770,7 +774,7 @@ def home_uk_now() -> str:
 
     g_period, g_fc = next_open(forecast["forecast"], "gdp", g_now["period"])
     c_period, c_fc = next_open(forecast["forecast"], "cpi", c_now["period"])
-    u_period, u_fc = next_open(okun["forecast"], "unemployment", u_now["period"])
+    u_period, u_fc = next_open(unemp_round["forecast"], "unemployment", u_now["period"])
 
     def rng(fc: dict) -> str:
         return (f'<br><small class="glance-range">68% range '
