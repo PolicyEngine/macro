@@ -19,8 +19,8 @@ FOOTER_DIR = re.compile(r'<nav class="footer-dir".*?</nav>\s*', re.DOTALL)
 
 DESTINATIONS = (
     ("home", "/", "Home", "nav-mobile"),
-    ("economy", "/economy", "Economy", "nav-mobile"),
     ("models", "/models", "Models", "nav-mobile"),
+    ("economy", "/economy", "Economy", "nav-mobile"),
     ("forecasts", "/forecasts", "Forecasts", "nav-mobile"),
     ("use", "/connect", "Use", "nav-mobile nav-start"),
 )
