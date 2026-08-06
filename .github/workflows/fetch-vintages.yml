@@ -38,6 +38,15 @@ jobs:
       - name: Validate generated-note indexes
         run: python3 notes/generate_release_notes.py --check
 
+      # The economy pages render data/latest, so a refreshed vintage makes
+      # them stale; regenerate on the same branch or the merged PR fails the
+      # Site provenance gate on main (issue #147, first hit by #145).
+      - name: Regenerate pages that read data/latest
+        run: python3 economy/build.py
+
+      - name: Validate regenerated pages
+        run: python3 economy/build.py --check
+
       - name: Open a PR if anything changed
         uses: peter-evans/create-pull-request@v7
         with:
