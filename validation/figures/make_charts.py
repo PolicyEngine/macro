@@ -116,6 +116,23 @@ def load_transcribed():
     return json.loads((HERE / "chart_data.json").read_text())
 
 
+def load_define_emissions():
+    """S1 baseline total emissions at the manual's benchmark years.
+
+    Source: validation/figures/data/define_emissions_divergence.csv — the
+    cached pinned run of upstream commit 846081a against the manual's
+    published Table 4, MtCO2e/yr, as recorded in the define-uk-model
+    repository's VALIDATION.md (target 1b).
+    """
+    path = HERE / "data" / "define_emissions_divergence.csv"
+    rows = []
+    with path.open() as fh:
+        for row in csv.DictReader(fh):
+            rows.append((row["year"], float(row["pinned_run_mtco2e"]),
+                         float(row["manual_table4_mtco2e"])))
+    return rows
+
+
 def load_rolling_eval():
     """Expanding-window forecast skill against a random walk with drift.
 
@@ -885,6 +902,57 @@ def chart_hank_targets():
     return "\n".join(out)
 
 
+def chart_define_emissions():
+    rows = load_define_emissions()
+    W, H = 760, 304
+    base_y, top_y = 258.0, 26.0
+    y_max = 450.0
+    scale = (base_y - top_y) / y_max
+    bar_w, bar_gap = 79.2, 11.9
+    group_step = 220.0
+    first_centre = 174.0
+
+    parts = "; ".join(f"{yr}: pinned run {p:g}, published table {m:g}, "
+                      f"a gap of {(p / m - 1) * 100:.0f} per cent"
+                      for yr, p, m in rows)
+    desc = (
+        "Grouped bar chart of S1 baseline total UK emissions in MtCO2e per year, "
+        "the cached pinned run of upstream commit 846081a against the manual's "
+        f"published Table 4. {parts}. The pinned code runs below the published "
+        "table and the gap widens with horizon; the divergence is gated at the "
+        "observed ratios so any further drift fails loudly. Data from "
+        "validation/figures/data/define_emissions_divergence.csv."
+    )
+    out = svg_open(W, H, "define-emissions",
+                   "define-uk: S1 baseline total emissions — pinned run vs manual Table 4 (MtCO2e/yr)",
+                   desc)
+
+    t = 0.0
+    while t <= 400 + 1e-9:
+        y = base_y - t * scale
+        cls = "vc-axis" if t == 0 else "vc-grid"
+        out.append(f'<line class="{cls}" x1="64" y1="{n(y)}" x2="724" y2="{n(y)}"/>')
+        out.append(f'<text class="vc-tick" x="54" y="{n(y + 4)}" text-anchor="end">{t:g}</text>')
+        t += 100
+
+    for g, (yr, p, m) in enumerate(rows):
+        centre = first_centre + g * group_step
+        for k, (name, cls, v) in enumerate((("pinned run", "vc-b1", p),
+                                            ("published", "vc-b2", m))):
+            x = centre - bar_w - bar_gap / 2 + k * (bar_w + bar_gap)
+            h = v * scale
+            y = base_y - h
+            out.append(f'<rect class="{cls}" x="{n(x)}" y="{n(y)}" width="{bar_w:g}" height="{n(h)}"/>')
+            cx = x + bar_w / 2
+            out.append(f'<text class="vc-val" x="{n(cx)}" y="{n(y - 8)}" text-anchor="middle">{v:g}</text>')
+            out.append(f'<text class="vc-tick" x="{n(cx)}" y="276" text-anchor="middle">{name}</text>')
+        out.append(f'<text class="vc-lab" x="{n(centre)}" y="296" text-anchor="middle">'
+                   f'{esc(yr)} ({(p / m - 1) * 100:.0f}%)</text>')
+
+    out.append("</svg>")
+    return "\n".join(out)
+
+
 # chart id -> (builder, page that owns it). Every chart lives on the
 # validation subtab of the model it provides evidence for.
 BUILDERS = [
@@ -900,6 +968,7 @@ BUILDERS = [
     ("svar-winrate", chart_svar_winrate, "svar/validation/index.html"),
     ("frbus-residuals", chart_frbus_residuals, "frb-us/validation/index.html"),
     ("hank-targets", chart_hank_targets, "us-hank/validation/index.html"),
+    ("define-emissions", chart_define_emissions, "define/validation/index.html"),
 ]
 
 

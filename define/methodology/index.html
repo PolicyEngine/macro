@@ -24,6 +24,15 @@
 /* page-specific: hero sizing only — shared component styles live in style.css */
 .model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
 </style>
+<script>
+/* Self-hosted MathJax (vendor/mathjax), used only on this page for the
+   methodology tab's formal panels. The CSP allows no CDN loads. */
+window.MathJax = {
+  chtml: { fontURL: "/vendor/mathjax/output/chtml/fonts/woff-v2" },
+  options: { enableMenu: false }
+};
+</script>
+<script src="/vendor/mathjax/tex-chtml-full.js" defer></script>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -75,159 +84,373 @@
     </div>
   </nav>
 
-  <section id="sfc" class="band">
+  <section id="methodology" class="band band-wide">
     <div class="band-head">
-      <span class="kicker mono">01 — the framework</span>
-      <h2>Every flow comes from somewhere and goes somewhere.</h2>
+      <span class="kicker mono">methodology</span>
+      <h2>Closed accounting, demand-led economy, pinned adapter.</h2>
     </div>
     <div class="prose">
-      <p class="mo-lead">
-        DEFINE-UK is an ecological stock-flow consistent (E-SFC) model:
-        DEFINE-UK 1.1, April 2026, by George, Dafermos, Nikolaidi and
-        co-authors (<a href="https://define-model.org/define-uk">define-model.org</a>).
-        Stock-flow consistency is an accounting discipline before it is an
-        economic theory. Every monetary flow in the model — wages, taxes,
-        interest, dividends, lending — leaves one sector's account and enters
-        another's, so a transactions matrix sums to zero in every row and
-        column; and every flow accumulates into a stock, so sector balance
-        sheets close each period. Nothing appears from nowhere and nothing
-        leaks out. The <em>ecological</em> part couples that closed monetary
-        accounting to an emissions and energy block, so climate policy and
-        the financial system move together in one system.
+      <p>
+        Six steps from the accounting discipline to the running system:
+        what stock-flow consistency requires, the sectors and balance
+        sheets that satisfy it, the two UK-specific structural blocks, the
+        demand-led closure and its multipliers, scenarios as verified
+        policy switches, and the adapter that runs the unlicensed upstream
+        at a pinned commit. Each step's formal elements sit alongside its
+        narrative.
       </p>
-      <div class="qa-facts">
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Sectors.</strong> Households, firms, monetary financial institutions (MFIs), non-monetary financial institutions, government, the central bank, and the rest of the world — each with a full balance sheet.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>UK detail.</strong> The housing stock is modelled with energy-efficiency detail, and the power sector distinguishes fossil from renewable capital — the two blocks where UK climate policy actually bites.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Calibration.</strong> Calibrated to UK national accounting data (ONS Blue Book / UKEA), with the manual's §5 tables giving parameters and initial values.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Emissions.</strong> An emissions block splits electricity from non-electricity emissions; the components sum exactly to the total in the model's output.</span></div>
+    </div>
+
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="meth-1" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>What stock-flow consistency means</h3></div>
+        <figure class="step-diagram" data-title="The transactions matrix closes" tabindex="0" role="button" aria-label="Expand diagram: The transactions matrix closes">
+          <svg viewBox="0 0 580 220" width="580" style="max-width:100%;height:auto;">
+            <defs><marker id="arr-d1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+            <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Every row and every column of the transactions matrix closes</text>
+            <rect x="80" y="40" width="330" height="130" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="245" y="60" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">transactions matrix (manual §2.2 Table 1)</text>
+            <text x="130" y="86" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">wages</text>
+            <text x="130" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">taxes</text>
+            <text x="130" y="126" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">interest</text>
+            <text x="130" y="146" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">dividends &middot; lending</text>
+            <text x="280" y="86" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--text-light)">+ &nbsp; &minus; &nbsp; &middot; &nbsp; +</text>
+            <text x="280" y="106" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--text-light)">&minus; &nbsp; + &nbsp; &middot; &nbsp; &minus;</text>
+            <text x="280" y="126" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--text-light)">&middot; &nbsp; &minus; &nbsp; + &nbsp; &middot;</text>
+            <text x="280" y="146" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--text-light)">+ &nbsp; &middot; &nbsp; &minus; &nbsp; +</text>
+            <line x1="415" y1="86" x2="450" y2="86" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-d1)"/>
+            <line x1="415" y1="126" x2="450" y2="126" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-d1)"/>
+            <text x="510" y="90" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">each row &#8721; = 0</text>
+            <text x="510" y="130" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">each row &#8721; = 0</text>
+            <line x1="245" y1="172" x2="245" y2="192" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-d1)"/>
+            <text x="245" y="210" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">each sector column &#8721; = that sector's net lending</text>
+          </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>Accounting before theory</h4>
+      <p>DEFINE-UK is an ecological stock-flow consistent (E-SFC) model: DEFINE-UK 1.1, April 2026, by George, Dafermos, Nikolaidi and co-authors (<a href="https://define-model.org/define-uk">define-model.org</a>). Stock-flow consistency is an accounting discipline before it is an economic theory. Every monetary flow in the model — wages, taxes, interest, dividends, lending — leaves one sector's account and enters another's, so a transactions matrix sums to zero in every row and column; and every flow accumulates into a stock, so sector balance sheets close each period. Nothing appears from nowhere and nothing leaks out.</p>
+        <h4>The ecological coupling</h4>
+      <p>The <em>ecological</em> part couples that closed monetary accounting to an emissions and energy block, so climate policy and the financial system move together in one system. An emissions block splits electricity from non-electricity emissions; the components sum exactly to the total in the model's output.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">matrix identities (manual §2.2)</div>
+        <div class="meth-eq"><div class="meth-eq-label">flow rows</div><div class="meth-eq-body">\(\sum_{s} T_{f,s} = 0\) — every flow leaves one sector and enters another</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sector columns</div><div class="meth-eq-body">\(\sum_{f} T_{f,s} = \mathrm{LEND}_s\) — column sums give net lending</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">final demand</div><div class="meth-eq-body">\(Y = C + I + G + X - M\) — the GDP identity holds in the matrix rows</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">emissions</div><div class="meth-eq-body">\(\mathrm{EMIS} = \mathrm{EMIS}_{\mathrm{ELEC}} + \mathrm{EMIS}_{\mathrm{NELEC}}\)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Nothing appears from nowhere; nothing leaks out</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Emissions components sum exactly to the total in the model's output</span></div>
+          </div>
+        </div>
       </div>
-    </div>
-  </section>
 
-  <section id="closure" class="band">
-    <div class="band-head">
-      <span class="kicker mono">02 — the closure</span>
-      <h2>Demand-led, which is why its multipliers run high.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        DEFINE-UK is closed demand-led: output adjusts to aggregate demand
-        rather than being pinned to a supply-side potential path. That is the
-        standard post-Keynesian SFC closure, and it has a direct, observable
-        consequence — fiscal expansions are not crowded out by an assumed
-        return to potential, so fiscal multipliers come out larger than in
-        supply-constrained models like the
-        <a href="/obr">OBR emulator</a>.
-      </p>
-      <p>
-        We measure this rather than assert it: our own computation of the
-        model's cumulative green-public-investment multiplier is
-        <strong>1.78</strong>, against IMF green-spending estimates of
-        1.1&ndash;1.5 and an OBR capital-spending impact multiplier of
-        &asymp;1.0. Above the official range, but explicably so given the
-        closure — and every surface that quotes a DEFINE-UK delta carries the
-        demand-led caveat. The full comparison is on the
-        <a href="/define/validation">validation page</a>.
-      </p>
-    </div>
-  </section>
-
-  <section id="blocks" class="band">
-    <div class="band-head">
-      <span class="kicker mono">03 — housing and power</span>
-      <h2>The two blocks built for UK climate policy.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        Two structural blocks distinguish DEFINE-UK from a generic E-SFC
-        model. The <strong>housing block</strong> tracks the UK housing stock
-        by energy efficiency, so retrofit policy — subsidies and regulation —
-        changes household energy demand and emissions through the stock, not
-        through a reduced-form elasticity. The <strong>power-sector
-        block</strong> carries separate fossil and renewable capital stocks:
-        government renewable investment is triggered when non-fossil capacity
-        falls short of a utilisation threshold relative to electricity
-        demand, and regulation policies (new in version 1.1) can directly
-        depreciate fossil capital — stranded assets as an explicit balance-sheet
-        event, felt by the financial institutions that hold the claims.
-      </p>
-      <p>
-        Version 1.1 (April 2026) added regulatory policies, limited
-        forward-looking behaviour to policy announcements, direct government
-        ownership of non-fossil power capital, and a green sovereign bond
-        instrument.
-      </p>
-    </div>
-  </section>
-
-  <section id="scenarios" class="band">
-    <div class="band-head">
-      <span class="kicker mono">04 — scenarios</span>
-      <h2>Policies are switches, and we verify the switches.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        Each of the 22 published scenarios is implemented as a set of policy
-        switches on the baseline: a fossil-fuel ban toggles the ban flag with
-        its capacity and investment timings; the power subsidy toggles
-        <code>POWER_SUB</code> alone; green public investment toggles
-        <code>GVT_INVEST</code>, <code>GREEN_BONDS</code> and
-        <code>GREEN_POWER</code>; the housing-subsidy variant pins the
-        published 40% subsidy rate (<code>HOUSING_SUB_RATE=0.4</code>). The
-        scenario blocks cover power-sector regulation under five expectation
-        regimes, housing regulation, green public investment, and mixed
-        packages.
-      </p>
-      <p>
-        Because no numeric scenario results are published for v1.1, the
-        switch sets themselves are part of our validation surface: a design
-        gate verifies that each cached scenario toggles <em>exactly</em> the
-        policy switches its published description claims — no more, no fewer.
-        What that gate does and does not establish is spelled out on the
-        <a href="/define/validation">validation page</a>.
-      </p>
-    </div>
-  </section>
-
-  <section id="adapter" class="band">
-    <div class="band-head">
-      <span class="kicker mono">05 — our adapter</span>
-      <h2>Unlicensed upstream, so nothing is vendored or hosted.</h2>
-    </div>
-    <div class="prose">
-      <p class="mo-lead">
-        The upstream repository
-        (<a href="https://github.com/DEFINE-model/DEFINE_UK_1.1">github.com/DEFINE-model/DEFINE_UK_1.1</a>)
-        is public but carries no licence. That constraint shapes the entire
-        architecture:
-      </p>
-      <div class="qa-facts">
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Runtime fetch at a pinned commit.</strong> The adapter fetches the upstream R code at commit <code>846081a</code> at run time and executes it unmodified, in R. Nothing upstream is vendored, redistributed, or hosted.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Cached outputs.</strong> A full notebook run (R&nbsp;4.3.0, 151 output files across all four scenario blocks) is cached; the scenario surface reads from that pinned run rather than re-running the model per query.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Deltas-only surface.</strong> <code>pe-macro define-scenarios</code> and <code>pe-macro define-scenario</code> return annualised scenario-minus-baseline delta paths only, framed with mandatory caveats — never levels, because the baseline's calibration gap to ONS/DESNZ/OBR actuals is computed and material.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Local only.</strong> The hosted MCP tools return run instructions instead of results, because the unlicensed upstream is never hosted. <code>score_reform</code> will not accept this model.</span></div>
+      <div class="meth-step" id="meth-2" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Sectors and balance sheets</h3></div>
+        <figure class="step-diagram" data-title="Seven sectors, closed balance sheets" tabindex="0" role="button" aria-label="Expand diagram: Seven sectors, closed balance sheets">
+          <svg viewBox="0 0 580 220" width="580" style="max-width:100%;height:auto;">
+            <defs><marker id="arr-d2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+            <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Seven sectors, each with a full balance sheet</text>
+            <rect x="15" y="38" width="128" height="44" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="79" y="64" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">households</text>
+            <rect x="155" y="38" width="128" height="44" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="219" y="64" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">firms</text>
+            <rect x="295" y="38" width="128" height="44" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="359" y="64" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">MFIs</text>
+            <rect x="435" y="38" width="128" height="44" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="499" y="58" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">non-monetary</text>
+            <text x="499" y="72" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">financial insts</text>
+            <rect x="85" y="96" width="128" height="44" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="149" y="122" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">government</text>
+            <rect x="225" y="96" width="128" height="44" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="289" y="122" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">central bank</text>
+            <rect x="365" y="96" width="128" height="44" rx="8" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="429" y="122" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">rest of world</text>
+            <line x1="289" y1="144" x2="289" y2="164" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-d2)"/>
+            <rect x="110" y="168" width="360" height="38" rx="8" fill="var(--accent)"/>
+            <text x="290" y="187" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="#fff" font-weight="700">every instrument someone holds, someone else owes</text>
+            <text x="290" y="201" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="rgba(255,255,255,0.85)">financial net worth sums to zero across sectors</text>
+          </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>The sectors</h4>
+      <p>Households, firms, monetary financial institutions (MFIs), non-monetary financial institutions, government, the central bank, and the rest of the world — each with a full balance sheet. The balance-sheet matrix (manual §2.2 Table 2) mirrors the transactions matrix: every financial instrument row sums to zero — one sector's asset is another's liability — and each sector's column sums to its net worth.</p>
+        <h4>Calibration</h4>
+      <p>The model is calibrated to UK national accounting data (ONS Blue Book / UKEA), with the manual's §5 tables giving parameters and initial values.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">balance-sheet identities (manual §2.2 Table 2)</div>
+        <div class="meth-eq"><div class="meth-eq-label">instrument rows</div><div class="meth-eq-body">\(\sum_{s} B_{i,s} = 0\) — one sector's asset is another's liability</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sector columns</div><div class="meth-eq-body">financial rows sum to \(\mathrm{FNW}_s\); adding real assets gives \(\mathrm{NW}_s\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">economy-wide closure</div><div class="meth-eq-body">\(\sum_{s} \mathrm{FNW}_s = 0\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">calibration</div><div class="meth-eq-body">UK national accounts (ONS Blue Book / UKEA); manual §5 tables</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Seven sectors, each with a full balance sheet</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Balance sheets close each period as flows accumulate into stocks</span></div>
+          </div>
+        </div>
       </div>
+
+      <div class="meth-step" id="meth-3" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>The housing and power blocks</h3></div>
+        <figure class="step-diagram" data-title="Housing and power blocks" tabindex="0" role="button" aria-label="Expand diagram: Housing and power blocks">
+          <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
+            <defs><marker id="arr-d3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+            <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Two blocks where UK climate policy actually bites</text>
+            <rect x="15" y="38" width="255" height="120" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="142" y="62" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">housing block</text>
+            <text x="142" y="84" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">housing stock by energy efficiency</text>
+            <text x="142" y="102" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">retrofit subsidies &amp; regulation</text>
+            <text x="142" y="120" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">&rarr; energy demand &amp; emissions</text>
+            <text x="142" y="141" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">through the stock, not an elasticity</text>
+            <rect x="310" y="38" width="255" height="120" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="437" y="62" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">power-sector block</text>
+            <text x="437" y="84" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">fossil capital &middot; renewable capital</text>
+            <text x="437" y="102" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">utilisation threshold triggers investment</text>
+            <text x="437" y="120" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">regulation depreciates fossil capital</text>
+            <text x="437" y="141" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">stranded assets as a balance-sheet event</text>
+            <line x1="142" y1="158" x2="230" y2="188" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-d3)"/>
+            <line x1="437" y1="158" x2="350" y2="188" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-d3)"/>
+            <text x="290" y="203" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700">felt by the financial institutions that hold the claims</text>
+          </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>Housing</h4>
+      <p>Two structural blocks distinguish DEFINE-UK from a generic E-SFC model. The <strong>housing block</strong> tracks the UK housing stock by energy efficiency, so retrofit policy — subsidies and regulation — changes household energy demand and emissions through the stock, not through a reduced-form elasticity.</p>
+        <h4>Power</h4>
+      <p>The <strong>power-sector block</strong> carries separate fossil and renewable capital stocks: government renewable investment is triggered when non-fossil capacity falls short of a utilisation threshold relative to electricity demand, and regulation policies (new in version 1.1) can directly depreciate fossil capital — stranded assets as an explicit balance-sheet event, felt by the financial institutions that hold the claims.</p>
+        <h4>What version 1.1 added</h4>
+      <p>Version 1.1 (April 2026) added regulatory policies, limited forward-looking behaviour to policy announcements, direct government ownership of non-fossil power capital, and a green sovereign bond instrument.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">the two UK blocks</div>
+        <div class="meth-eq"><div class="meth-eq-label">housing</div><div class="meth-eq-body">stock tracked by energy efficiency; retrofit policy works through the stock</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">power</div><div class="meth-eq-body">separate fossil and renewable capital stocks; utilisation threshold triggers renewable investment</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">regulation (v1.1)</div><div class="meth-eq-body">can directly depreciate fossil capital — stranded assets on balance sheets</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">new in v1.1</div><div class="meth-eq-body">regulatory policies · announcement-limited expectations · government non-fossil capital · green sovereign bonds</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>The two blocks where UK climate policy actually bites</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Stranded assets are felt by the institutions holding the claims</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-4" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Demand-led closure and multipliers</h3></div>
+        <figure class="step-diagram" data-title="Demand-led closure and multipliers" tabindex="0" role="button" aria-label="Expand diagram: Demand-led closure and multipliers">
+          <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
+            <defs><marker id="arr-d4" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+            <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Output follows demand, so multipliers run high</text>
+            <text x="150" y="52" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)" font-weight="600">cumulative green-public-investment multiplier</text>
+            <rect x="40" y="66" width="356" height="24" rx="4" fill="var(--accent)"/>
+            <text x="404" y="83" font-family="Roboto, sans-serif" font-size="11" fill="var(--accent)" font-weight="700" text-anchor="start">DEFINE-UK 1.78 (our computation)</text>
+            <rect x="40" y="100" width="220" height="24" rx="4" fill="var(--accent)" opacity="0.55"/>
+            <rect x="260" y="100" width="80" height="24" rx="4" fill="var(--accent)" opacity="0.25"/>
+            <text x="348" y="117" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)" text-anchor="start">IMF green spending 1.1&ndash;1.5</text>
+            <rect x="40" y="134" width="200" height="24" rx="4" fill="var(--text-light)" opacity="0.5"/>
+            <text x="248" y="151" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)" text-anchor="start">OBR capital spending &asymp; 1.0</text>
+            <line x1="40" y1="176" x2="540" y2="176" stroke="var(--text-light)" stroke-width="1.5" marker-end="url(#arr-d4)"/>
+            <text x="290" y="198" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">demand-led closure: no assumed return to potential, so no crowding-out &middot; every quoted delta carries the caveat</text>
+          </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>The closure</h4>
+      <p>DEFINE-UK is closed demand-led: output adjusts to aggregate demand rather than being pinned to a supply-side potential path. That is the standard post-Keynesian SFC closure, and it has a direct, observable consequence — fiscal expansions are not crowded out by an assumed return to potential, so fiscal multipliers come out larger than in supply-constrained models like the <a href="/obr">OBR emulator</a>.</p>
+        <h4>Measured, not asserted</h4>
+      <p>We measure this rather than assert it: our own computation of the model's cumulative green-public-investment multiplier is <strong>1.78</strong>, against IMF green-spending estimates of 1.1&ndash;1.5 and an OBR capital-spending impact multiplier of &asymp;1.0. Above the official range, but explicably so given the closure — and every surface that quotes a DEFINE-UK delta carries the demand-led caveat. The full comparison is on the <a href="/define/validation">validation page</a>.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">closure and multipliers</div>
+        <div class="meth-eq"><div class="meth-eq-label">closure</div><div class="meth-eq-body">demand-led: \(Y\) adjusts to aggregate demand, not a potential path</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">our computation</div><div class="meth-eq-body">cumulative green-public-investment multiplier <strong>1.78</strong></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">comparators</div><div class="meth-eq-body">IMF green spending 1.1&ndash;1.5 · OBR capital-spending impact &asymp; 1.0</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Above the official range, but explicably so given the closure</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Every quoted DEFINE-UK delta carries the demand-led caveat</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-5" data-step="4">
+        <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Scenarios as policy switches</h3></div>
+        <h4>Switch sets on the baseline</h4>
+        <p>
+          Each of the 22 published scenarios is implemented as a set of policy
+          switches on the baseline: a fossil-fuel ban toggles the ban flag with
+          its capacity and investment timings; the power subsidy toggles
+          <code>POWER_SUB</code> alone; green public investment toggles
+          <code>GVT_INVEST</code>, <code>GREEN_BONDS</code> and
+          <code>GREEN_POWER</code>; the housing-subsidy variant pins the
+          published 40% subsidy rate (<code>HOUSING_SUB_RATE=0.4</code>). The
+          scenario blocks cover power-sector regulation under five expectation
+          regimes, housing regulation, green public investment, and mixed
+          packages.
+        </p>
+        <h4>Verifying the switches</h4>
+        <p>
+          Because no numeric scenario results are published for v1.1, the
+          switch sets themselves are part of our validation surface: a design
+          gate verifies that each cached scenario toggles <em>exactly</em> the
+          policy switches its published description claims — no more, no fewer.
+          What that gate does and does not establish is spelled out on the
+          <a href="/define/validation">validation page</a>.
+        </p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">the switch sets</div>
+        <div class="meth-eq"><div class="meth-eq-label">fossil-fuel ban</div><div class="meth-eq-body">ban flag + its capacity and investment timings</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">power subsidy</div><div class="meth-eq-body"><code>POWER_SUB</code> alone</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">green public investment</div><div class="meth-eq-body"><code>GVT_INVEST</code> · <code>GREEN_BONDS</code> · <code>GREEN_POWER</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">housing subsidy</div><div class="meth-eq-body"><code>HOUSING_SUB_RATE=0.4</code> — the published 40% rate</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>22 scenarios: power regulation under five expectation regimes, housing regulation, green investment, mixed packages</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Design gate: each scenario toggles exactly the claimed switches — no more, no fewer</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="meth-6" data-step="5">
+        <div class="meth-step-head"><span class="meth-step-num mono">6</span><h3>The adapter and the clean-room path</h3></div>
+        <figure class="step-diagram" data-title="Pinned adapter and clean-room path" tabindex="0" role="button" aria-label="Expand diagram: Pinned adapter and clean-room path">
+          <svg viewBox="0 0 580 220" width="580" style="max-width:100%;height:auto;">
+            <defs><marker id="arr-d6" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+            <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Unlicensed upstream: fetched at a pinned commit, never vendored or hosted</text>
+            <rect x="15" y="42" width="160" height="70" rx="10" fill="var(--bg-diagram)" stroke="var(--text-light)" stroke-width="1.5"/>
+            <text x="95" y="66" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--text-light)" font-weight="700">upstream R code</text>
+            <text x="95" y="84" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--text-mid)">commit 846081a</text>
+            <text x="95" y="100" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">no licence</text>
+            <line x1="180" y1="77" x2="215" y2="77" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-d6)"/>
+            <rect x="220" y="47" width="130" height="60" rx="10" fill="var(--accent)"/>
+            <text x="285" y="72" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">adapter</text>
+            <text x="285" y="90" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="rgba(255,255,255,0.85)">runtime fetch, runs in R</text>
+            <line x1="355" y1="77" x2="390" y2="77" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-d6)"/>
+            <rect x="395" y="42" width="170" height="70" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="480" y="64" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">cached run</text>
+            <text x="480" y="82" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">R 4.3.0 &middot; 151 output files</text>
+            <text x="480" y="98" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">deltas only, local only</text>
+            <line x1="95" y1="112" x2="95" y2="140" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr-d6)"/>
+            <text x="150" y="132" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">numerical oracle only</text>
+            <rect x="15" y="145" width="550" height="60" rx="10" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5 3"/>
+            <text x="290" y="167" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">clean-room Python reimplementation: the manual is the specification</text>
+            <text x="290" y="186" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">upstream source never read to write equations &middot; 5 milestones &middot; milestone 1 passed with 27 identity tests</text>
+          </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>The constraint</h4>
+      <p>The upstream repository (<a href="https://github.com/DEFINE-model/DEFINE_UK_1.1">github.com/DEFINE-model/DEFINE_UK_1.1</a>) is public but carries no licence. That constraint shapes the entire architecture. The adapter fetches the upstream R code at commit <code>846081a</code> at run time and executes it unmodified, in R. Nothing upstream is vendored, redistributed, or hosted. A full notebook run (R&nbsp;4.3.0, 151 output files across all four scenario blocks) is cached; the scenario surface reads from that pinned run rather than re-running the model per query.</p>
+        <h4>Deltas only, local only</h4>
+      <p><code>pe-macro define-scenarios</code> and <code>pe-macro define-scenario</code> return annualised scenario-minus-baseline delta paths only, framed with mandatory caveats — never levels, because the baseline's calibration gap to ONS/DESNZ/OBR actuals is computed and material. The hosted MCP tools return run instructions instead of results, because the unlicensed upstream is never hosted. <code>score_reform</code> will not accept this model.</p>
+        <h4>The clean-room path to hosting</h4>
+      <p>The path to hosting is a <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">clean-room Python reimplementation</a> of the published Model Manual — the same adapted-model approach as the OBR emulator. The protocol: the manual is the specification, and the upstream run is a numerical oracle only — its outputs are compared against ours, but its source code is never read to write equations, and every equation must carry a reference to the manual section and equation number it implements. Five milestones run from the accounting core to the full policy scenarios; milestone 1 — the §2.2 transactions and balance-sheet matrices on the §5 initial values — passed with 27 identity tests, including one documented inconsistency in the manual itself (Table 6 omits a dividend term of Eq. 383 from the interbank-lending row, which the tests pin exactly rather than paper over).</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">adapter architecture</div>
+        <div class="meth-eq"><div class="meth-eq-label">pinned commit</div><div class="meth-eq-body">runtime fetch at <code>846081a</code>; executed unmodified, in R; nothing vendored or hosted</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">cached run</div><div class="meth-eq-body">R 4.3.0 · 151 output files across all four scenario blocks</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">surface</div><div class="meth-eq-body">scenario &minus; baseline deltas only, annualised, with mandatory caveats — never levels</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">clean room</div><div class="meth-eq-body">manual = specification; upstream run = numerical oracle only</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Local only: hosted MCP tools return run instructions; <code>score_reform</code> refuses this model</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Milestone 1 passed with 27 identity tests, pinning one documented manual inconsistency</span></div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">What stock-flow consistency means</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">matrix identities (manual §2.2)</div>
+        <div class="meth-eq"><div class="meth-eq-label">flow rows</div><div class="meth-eq-body">\(\sum_{s} T_{f,s} = 0\) — every flow leaves one sector and enters another</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sector columns</div><div class="meth-eq-body">\(\sum_{f} T_{f,s} = \mathrm{LEND}_s\) — column sums give net lending</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">final demand</div><div class="meth-eq-body">\(Y = C + I + G + X - M\) — the GDP identity holds in the matrix rows</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">emissions</div><div class="meth-eq-body">\(\mathrm{EMIS} = \mathrm{EMIS}_{\mathrm{ELEC}} + \mathrm{EMIS}_{\mathrm{NELEC}}\)</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Nothing appears from nowhere; nothing leaks out</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Emissions components sum exactly to the total in the model's output</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Sectors and balance sheets</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">balance-sheet identities (manual §2.2 Table 2)</div>
+        <div class="meth-eq"><div class="meth-eq-label">instrument rows</div><div class="meth-eq-body">\(\sum_{s} B_{i,s} = 0\) — one sector's asset is another's liability</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sector columns</div><div class="meth-eq-body">financial rows sum to \(\mathrm{FNW}_s\); adding real assets gives \(\mathrm{NW}_s\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">economy-wide closure</div><div class="meth-eq-body">\(\sum_{s} \mathrm{FNW}_s = 0\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">calibration</div><div class="meth-eq-body">UK national accounts (ONS Blue Book / UKEA); manual §5 tables</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Seven sectors, each with a full balance sheet</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Balance sheets close each period as flows accumulate into stocks</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">The housing and power blocks</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">the two UK blocks</div>
+        <div class="meth-eq"><div class="meth-eq-label">housing</div><div class="meth-eq-body">stock tracked by energy efficiency; retrofit policy works through the stock</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">power</div><div class="meth-eq-body">separate fossil and renewable capital stocks; utilisation threshold triggers renewable investment</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">regulation (v1.1)</div><div class="meth-eq-body">can directly depreciate fossil capital — stranded assets on balance sheets</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">new in v1.1</div><div class="meth-eq-body">regulatory policies · announcement-limited expectations · government non-fossil capital · green sovereign bonds</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>The two blocks where UK climate policy actually bites</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Stranded assets are felt by the institutions holding the claims</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Demand-led closure and multipliers</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <div class="meth-sec-title">closure and multipliers</div>
+        <div class="meth-eq"><div class="meth-eq-label">closure</div><div class="meth-eq-body">demand-led: \(Y\) adjusts to aggregate demand, not a potential path</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">our computation</div><div class="meth-eq-body">cumulative green-public-investment multiplier <strong>1.78</strong></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">comparators</div><div class="meth-eq-body">IMF green spending 1.1&ndash;1.5 · OBR capital-spending impact &asymp; 1.0</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Above the official range, but explicably so given the closure</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Every quoted DEFINE-UK delta carries the demand-led caveat</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="4" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Scenarios as policy switches</span><span class="meth-panel-badge mono">Step 5</span></div>
+          <div class="meth-sec-title">the switch sets</div>
+        <div class="meth-eq"><div class="meth-eq-label">fossil-fuel ban</div><div class="meth-eq-body">ban flag + its capacity and investment timings</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">power subsidy</div><div class="meth-eq-body"><code>POWER_SUB</code> alone</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">green public investment</div><div class="meth-eq-body"><code>GVT_INVEST</code> · <code>GREEN_BONDS</code> · <code>GREEN_POWER</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">housing subsidy</div><div class="meth-eq-body"><code>HOUSING_SUB_RATE=0.4</code> — the published 40% rate</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>22 scenarios: power regulation under five expectation regimes, housing regulation, green investment, mixed packages</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Design gate: each scenario toggles exactly the claimed switches — no more, no fewer</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="5" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">The adapter and the clean-room path</span><span class="meth-panel-badge mono">Step 6</span></div>
+          <div class="meth-sec-title">adapter architecture</div>
+        <div class="meth-eq"><div class="meth-eq-label">pinned commit</div><div class="meth-eq-body">runtime fetch at <code>846081a</code>; executed unmodified, in R; nothing vendored or hosted</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">cached run</div><div class="meth-eq-body">R 4.3.0 · 151 output files across all four scenario blocks</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">surface</div><div class="meth-eq-body">scenario &minus; baseline deltas only, annualised, with mandatory caveats — never levels</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">clean room</div><div class="meth-eq-body">manual = specification; upstream run = numerical oracle only</div></div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Local only: hosted MCP tools return run instructions; <code>score_reform</code> refuses this model</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Milestone 1 passed with 27 identity tests, pinning one documented manual inconsistency</span></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <div class="diagram-modal" hidden>
+    <div class="diagram-modal-box" role="dialog" aria-modal="true" aria-label="Diagram">
+      <div class="diagram-modal-head">
+        <span class="diagram-modal-title"></span>
+        <button type="button" class="diagram-modal-close" aria-label="Close">×</button>
+      </div>
+      <div class="diagram-modal-body"></div>
+    </div>
+  </div>
+
+  <section id="sources" class="band">
+    <div class="band-head">
+      <span class="kicker mono">sources</span>
+      <h2>Where the references live.</h2>
+    </div>
+    <div class="prose">
       <p>
-        The path to hosting is a
-        <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">clean-room
-        Python reimplementation</a> of the published Model Manual — the same
-        adapted-model approach as the OBR emulator. The protocol: the manual
-        is the specification, and the upstream run is a numerical oracle
-        only — its outputs are compared against ours, but its source code is
-        never read to write equations, and every equation must carry a
-        reference to the manual section and equation number it implements.
-        Five milestones run from the accounting core to the full policy
-        scenarios; milestone 1 — the §2.2 transactions and balance-sheet
-        matrices on the §5 initial values — passed with 27 identity tests,
-        including one documented inconsistency in the manual itself (Table 6
-        omits a dividend term of Eq. 383 from the interbank-lending row,
-        which the tests pin exactly rather than paper over).
-      </p>
-      <p class="opt-note">
-        sources: the <a href="https://define-model.org/wp-content/uploads/2026/04/define_uk_1.1.pdf">DEFINE-UK 1.1 Model Manual</a> (George &amp; Dafermos, April 2026)
-        and our <a href="https://github.com/PolicyEngine/define-uk-model">adapter repository</a>.
+        Sources: the <a href="https://define-model.org/wp-content/uploads/2026/04/define_uk_1.1.pdf">DEFINE-UK 1.1 Model Manual</a>
+        (George &amp; Dafermos, April 2026) and our
+        <a href="https://github.com/PolicyEngine/define-uk-model">adapter repository</a>.
         The model design belongs to its authors; the adapter and the
-        reimplementation are ours, and neither is endorsed by them.
+        reimplementation are ours, and neither is endorsed by them. What the
+        validation gates do and do not establish is on the
+        <a href="/define/validation">validation</a> page.
       </p>
     </div>
   </section>
@@ -244,5 +467,68 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
+<script>
+// Methodology scrollytelling: highlight the step at the reading line and
+// show its formal-structure panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  update();
+})();
+</script>
+<script>
+// Diagram zoom: clicking a step diagram opens it enlarged in a modal.
+(function () {
+  "use strict";
+  var modal = document.querySelector(".diagram-modal");
+  if (!modal) return;
+  var body = modal.querySelector(".diagram-modal-body");
+  var title = modal.querySelector(".diagram-modal-title");
+  function open(fig) {
+    body.innerHTML = fig.querySelector("svg").outerHTML;
+    title.textContent = fig.getAttribute("data-title") || "";
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function close() {
+    modal.hidden = true;
+    body.innerHTML = "";
+    document.body.style.overflow = "";
+  }
+  document.querySelectorAll(".step-diagram").forEach(function (fig) {
+    fig.addEventListener("click", function () { open(fig); });
+    fig.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(fig); }
+    });
+  });
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal || e.target.closest(".diagram-modal-close")) close();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !modal.hidden) close();
+  });
+})();
+</script>
 </body>
 </html>
