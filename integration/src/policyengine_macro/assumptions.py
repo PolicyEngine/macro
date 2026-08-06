@@ -439,6 +439,127 @@ class EconomicAssumptions(BaseModel):
             caveats=caveats,
         )
 
+    @classmethod
+    def from_define_scenario(
+        cls,
+        payload: dict,
+        year: int,
+        income_concept: str = "disposable_income",
+    ) -> "EconomicAssumptions":
+        """Construct from an (unmodified) define_scenario payload.
+
+        DEFINE-UK is local-only, so this constructor takes the scenario's
+        DELTAS (the ``define_scenario`` result run with the incidence
+        variables) rather than running the model — only numbers travel,
+        never the unlicensed upstream code. The payload must carry the
+        annual ``delta_pct`` paths for YD_HH (nominal household disposable
+        income), P (price level) and WR (real wage).
+
+        income_concept:
+        - "disposable_income" (default): earnings % = YD_HH% − P% at
+          ``year`` — the scenario's real household disposable-income
+          deviation, applied as a pre-tax earnings factor. An aggregate
+          post-tax concept applied pre-tax: an explicit, stated
+          approximation (the microsim re-applies statutory taxes and
+          benefits to the scaled inputs).
+        - "real_wage": earnings % = WR% at ``year`` — narrower and cleaner,
+          but misses employment and non-wage income channels.
+        """
+        concepts = ("disposable_income", "real_wage")
+        if income_concept not in concepts:
+            raise ValueError(
+                f"income_concept must be one of {concepts}, got "
+                f"{income_concept!r}"
+            )
+        year = int(year)
+        try:
+            years = [int(y) for y in payload["years"]]
+            variables = payload["variables"]
+            scenario = payload["scenario"]
+        except (KeyError, TypeError) as e:
+            raise ValueError(
+                "payload is not a define_scenario result (missing field "
+                f"{e}); pass the unmodified output of `pe-macro "
+                "define-scenario <name> --incidence --json`"
+            ) from e
+        needed = ("YD_HH", "P") if income_concept == "disposable_income" \
+            else ("WR",)
+        missing = [v for v in needed if v not in variables]
+        if missing:
+            raise ValueError(
+                f"define_scenario payload lacks the series {missing}: "
+                "re-run `pe-macro define-scenario <name> --incidence "
+                "--json` so the incidence variables are included"
+            )
+        if year not in years:
+            raise ValueError(
+                f"year {year} is outside the payload's horizon "
+                f"({years[0]}-{years[-1]}); re-run define_scenario with a "
+                "horizon covering it"
+            )
+        idx = years.index(year)
+
+        def _pct(var: str) -> float:
+            v = variables[var]["delta_pct"][idx]
+            if v is None:
+                raise ValueError(
+                    f"{var} delta_pct is null at {year}; the cached run has "
+                    "no complete annual observation there"
+                )
+            return float(v)
+
+        if income_concept == "disposable_income":
+            earnings_pct = _pct("YD_HH") - _pct("P")
+            concept_note = (
+                f"income_concept='disposable_income': earnings factor is "
+                f"the real household disposable-income deviation at {year} "
+                f"(YD_HH {_pct('YD_HH'):+.3f}% minus P {_pct('P'):+.3f}%), "
+                "an aggregate post-tax concept applied as a pre-tax "
+                "scaling — a stated approximation"
+            )
+        else:
+            earnings_pct = _pct("WR")
+            concept_note = (
+                f"income_concept='real_wage': earnings factor is the real "
+                f"wage deviation at {year} ({earnings_pct:+.3f}%); "
+                "employment and non-wage channels are not carried"
+            )
+        earnings_factor = 1.0 + earnings_pct / 100.0
+        src = f"define_scenario payload {scenario!r}, {year}"
+        _check_factor("earnings", earnings_factor, src)
+
+        return cls(
+            source=(
+                f"DEFINE-UK scenario {scenario!r} annual deltas vs "
+                f"baseline at {year}, income_concept={income_concept!r}"
+            ),
+            start_year=year,
+            earnings_factor=earnings_factor,
+            labour_supply_factor=1.0,
+            interest_rate_baseline=0.0,
+            interest_rate_reform=0.0,
+            notes=[
+                concept_note,
+                "annual-mean overlay: one calendar year of the scenario's "
+                "delta path, applied flat; no transition dynamics inside "
+                "the year",
+                "labour_supply_factor and interest_rate fields are neutral "
+                "(1.0 / 0.0): no employment or rate channel is allocated",
+            ],
+            caveats=[
+                "experimental scenario incidence, not a reform score: "
+                "score_reform does not accept model='define', and policy "
+                "is identical on both sides of this comparison",
+                "DEFINE-UK deltas are experimental (partial replication; "
+                "demand-led closure; emissions vintage divergence) — see "
+                "the model's VALIDATION.md; deltas only, never levels",
+                "uniform scaling understates distributional incidence: the "
+                "aggregate deviation is spread evenly over employment "
+                "income; self-employment and capital income are not "
+                "adjusted",
+            ],
+        )
+
     def input_scaling_modifier(self):
         """The overlay as a simulation modifier, or None for a null result.
 

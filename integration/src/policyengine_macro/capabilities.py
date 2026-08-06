@@ -144,10 +144,14 @@ MODELS = {
         "cannot_answer": [
             "reform scoring (no statute mapping; score_reform refuses it)",
             "forecasts or baseline levels (deltas only — the baseline is not validated against outturns)",
-            "microsimulation incidence (planned, post-validation)",
         ],
         "horizon": "annual scenario deltas, 2023-2037",
-        "access": ["local CLI scenarios", "Python package"],
+        "access": [
+            "local CLI scenarios", "Python package",
+            "microsim incidence overlay (define_scenario_incidence, "
+            "experimental; hosted with a define_payload of locally "
+            "produced deltas)",
+        ],
         "runtime": "instant from the cached upstream run; a fresh run needs local R (full notebook)",
         "uncertainty": "none quantified; deterministic scenario deltas from one calibration",
         "status": (

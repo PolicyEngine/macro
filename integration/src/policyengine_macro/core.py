@@ -3882,16 +3882,31 @@ def define_list_scenarios() -> dict:
         return dict(_DEFINE_INSTRUCTIONS)
 
 
-def define_scenario(name: str, horizon_years: int = 15) -> dict:
+# Extra series the microsim incidence overlay needs on top of the default
+# reporting variables: nominal household disposable income, the price
+# level, and the real wage.
+DEFINE_INCIDENCE_VARIABLES = ("YD_HH", "P", "WR")
+
+
+def define_scenario(
+    name: str, horizon_years: int = 15, incidence: bool = False
+) -> dict:
     """Annualised scenario deltas vs baseline from the cached pinned
     upstream run, with mandatory deltas-only framing; or run instructions
-    if the local adapter/cache is unavailable."""
+    if the local adapter/cache is unavailable.
+
+    ``incidence=True`` adds DEFINE_INCIDENCE_VARIABLES to the returned
+    series, producing a payload define_scenario_incidence accepts."""
     try:
         from define_uk import scenarios as _sc
     except ImportError:
         return dict(_DEFINE_INSTRUCTIONS)
+    variables = _sc.DEFAULT_VARIABLES + DEFINE_INCIDENCE_VARIABLES \
+        if incidence else _sc.DEFAULT_VARIABLES
     try:
-        result = _sc.run_scenario(name, horizon_years=horizon_years)
+        result = _sc.run_scenario(
+            name, variables=variables, horizon_years=horizon_years,
+        )
     except FileNotFoundError as e:
         out = dict(_DEFINE_INSTRUCTIONS)
         out["error"] = str(e)
@@ -3912,3 +3927,124 @@ def define_scenario(name: str, horizon_years: int = 15) -> dict:
     result["model"] = "define-uk"
     result["available"] = True
     return result
+
+
+def define_scenario_incidence(
+    scenario: str,
+    year: int = 2030,
+    income_concept: str = "disposable_income",
+    dataset: str | None = None,
+    define_payload: dict | None = None,
+) -> dict:
+    """Household-level incidence of a DEFINE-UK climate-policy scenario
+    (experimental): who bears the scenario, household by household.
+
+    ``define_payload`` accepts a pre-computed define_scenario result (run
+    with ``incidence=True`` / `pe-macro define-scenario <name> --incidence
+    --json`) so the DEFINE deltas and the microsim can run in separate
+    environments — the SAME local-only contract as everything DEFINE: the
+    unlicensed upstream never runs hosted, but its numeric deltas may
+    travel. On a host without the adapter and without a payload, this
+    returns run instructions instead of results. The payload's scenario
+    must match the argument; mixing is refused.
+
+    Pipeline (mirrors frbus_shock_incidence / hank_shock_incidence):
+      1. define_scenario with the incidence variables (YD_HH, P, WR —
+         annual % deltas vs baseline);
+      2. EconomicAssumptions.from_define_scenario — the ``year`` delta
+         becomes a pre-tax earnings factor ('disposable_income' =
+         YD_HH% − P%, 'real_wage' = WR%);
+      3. the factor scales the UK population microsimulation's
+         employment-income inputs (reform-free: policy is identical on
+         both sides), so deciles/winners/losers and the budget change are
+         the scenario's incidence THROUGH THE AUTOMATIC STABILIZERS.
+
+    NOT reform scoring: score_reform keeps refusing model='define' (no
+    statute mapping). UK only. Deltas only, never levels.
+    """
+    from policyengine_macro.assumptions import (
+        SCALED_INPUT_VARIABLES, EconomicAssumptions,
+    )
+
+    if define_payload is not None:
+        got = define_payload.get("scenario")
+        if got != scenario:
+            raise ValueError(
+                f"define_payload was produced for scenario {got!r}, not "
+                f"{scenario!r}; refusing to mix them — pass the unmodified "
+                "output of `pe-macro define-scenario "
+                f"{scenario} --incidence --json`"
+            )
+        payload = define_payload
+    else:
+        payload = define_scenario(scenario, incidence=True)
+        if not payload.get("available"):
+            out = dict(payload)
+            out["how_to_run"] = (
+                "DEFINE-UK incidence needs the scenario deltas. Either run "
+                "locally with the adapter installed, or produce the deltas "
+                "on a machine that has it — `pe-macro define-scenario "
+                f"{scenario} --incidence --json > deltas.json` — and pass "
+                "them via define_payload (MCP) / --define-payload (CLI): "
+                "only numbers travel, never the unlicensed upstream code. "
+                + out.get("how_to_run", "")
+            )
+            return out
+
+    ea = EconomicAssumptions.from_define_scenario(
+        payload, year=year, income_concept=income_concept,
+    )
+    modifier = ea.input_scaling_modifier()
+    micro = _pe_population_incidence(
+        country="uk", year=year, dataset=dataset, modifier=modifier,
+        label=f"DEFINE-UK {scenario} earnings incidence ({year})",
+    )
+
+    assumptions = ea.assumption_strings()
+    caveats = ea.caveat_strings() + list(payload.get("caveats", []))
+    out = {
+        "model": "DEFINE-UK scenario + PolicyEngine population "
+                 "microsimulation",
+        "available": True,
+        "country": "uk",
+        "scenario": scenario,
+        "year": int(year),
+        "income_concept": income_concept,
+        "define": payload,
+        "economic_assumptions": ea.model_dump(),
+        "application": {
+            "method": "input-scaling",
+            "variables_tried": list(SCALED_INPUT_VARIABLES),
+            "earnings_factor": ea.earnings_factor,
+            "applied": modifier is not None,
+        },
+        "microsim": micro,
+        "assumptions": assumptions,
+        "caveats": caveats,
+    }
+    out["score"] = _incidence_score_block(
+        model_id="define+microsim",
+        model_class="ecological SFC overlay on microsim",
+        analysis_type="scenario incidence (experimental)",
+        country="uk",
+        year=year,
+        reform={},
+        micro=micro,
+        assumptions=assumptions,
+        caveats=caveats,
+        baseline=(
+            f"PolicyEngine baseline policy for {year}, with the DEFINE-UK "
+            f"{scenario} scenario's {year} deltas applied as a pre-tax "
+            "earnings overlay"
+        ),
+        data_vintage=(
+            f"PolicyEngine dataset {micro.get('dataset', dataset or 'default')}; "
+            "DEFINE-UK 1.1 upstream at pinned commit 846081a"
+        ),
+        horizon=f"annual {year}, one calendar year of the delta path",
+        basis_suffix=(
+            "from the climate-policy scenario through the automatic "
+            "stabilizers (no reform)"
+        ),
+    )
+    return out

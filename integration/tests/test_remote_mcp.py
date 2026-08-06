@@ -150,6 +150,14 @@ async def test_hosted_define_tools_serve_instructions_not_results():
         assert "define-uk-model" in out["how_to_run"], (tool, out)
 
 
+@pytest.mark.anyio
+async def test_hosted_define_incidence_without_payload_serves_instructions():
+    out = await _call("define_scenario_incidence",
+                      {"scenario": "green_public_investment"})
+    assert out["available"] is False, out
+    assert "define_payload" in out["how_to_run"], out
+
+
 # --- reform-input validation, as served (#38) ------------------------------
 
 
