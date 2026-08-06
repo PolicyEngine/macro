@@ -8,8 +8,9 @@ Same contract as forecasts/score.py and validation/figures/make_charts.py: the
 page is committed, the figure between the ``open-fan-unemployment`` markers is
 generated from the committed round artifact, and --check fails if they drift
 apart. GDP and CPI fans for the open boe-svar round are rendered by
-forecasts/score.py (the model-vs-official block); this script covers the Okun
-satellite's unemployment round, which has no official path to overlay.
+forecasts/score.py (the model-vs-official block); this script covers the
+svar-unemployment satellite's round, which has no official path to overlay.
+The archived round artifact keeps its original filename.
 """
 
 from __future__ import annotations
@@ -100,7 +101,7 @@ def render() -> str:
 
     desc = (
         f"Fan chart of the UK unemployment rate, percent, from the "
-        f"okun-unemployment round of {src.parent.name}: the archived median "
+        f"svar-unemployment satellite round of {src.parent.name}: the archived median "
         f"with its 68 and 90 percent bands, {rows[0]['period']} to "
         f"{rows[-1]['period']}. The median runs from {rows[0]['median']:.2f}% "
         f"to {rows[-1]['median']:.2f}%."
@@ -109,13 +110,14 @@ def render() -> str:
     return "\n".join(
         [
             '      <p class="chart-intro">Unemployment, from the '
-            f"{src.parent.name} okun-unemployment round — no official quarterly "
+            f"{src.parent.name} svar-unemployment satellite round (archived as "
+            "okun-unemployment.json) — no official quarterly "
             "path is stored to overlay, so the fan stands alone.</p>",
             '      <figure class="vchart-figure">',
             f'        <svg class="vchart" data-chart="{CHART_ID}" '
             f'viewBox="0 0 {width} {height}" role="img" '
             f'aria-labelledby="{CHART_ID}-t {CHART_ID}-d">',
-            f'          <title id="{CHART_ID}-t">okun-unemployment UK '
+            f'          <title id="{CHART_ID}-t">svar-unemployment satellite UK '
             "unemployment rate forecast, median with 68% and 90% bands</title>",
             f'          <desc id="{CHART_ID}-d">{desc}</desc>',
             *gridlines,
@@ -127,7 +129,7 @@ def render() -> str:
             "        </svg>",
             '        <div class="olg-legend">'
             '<span class="li"><span class="ln ln-s1"></span>'
-            "okun-unemployment median (68% and 90% bands)</span></div>",
+            "svar-unemployment median (68% and 90% bands)</span></div>",
             "      </figure>",
         ]
     )
