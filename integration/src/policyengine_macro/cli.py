@@ -993,14 +993,19 @@ def define_scenarios(as_json):
 @click.argument("name")
 @click.option("--horizon-years", default=15, show_default=True,
               help="Annual delta horizon.")
+@click.option("--incidence", is_flag=True,
+              help="Include the incidence variables (YD_HH, P, WR) so the "
+                   "output is a valid --define-payload for define-incidence.")
 @click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
-def define_scenario(name, horizon_years, as_json):
+def define_scenario(name, horizon_years, incidence, as_json):
     """DEFINE-UK scenario deltas vs baseline (local-only, experimental).
 
     Returns annualised DELTAS only — baseline levels are deliberately not
     reported; read the caveats in the output.
     """
-    res = core.define_scenario(name, horizon_years=horizon_years)
+    res = core.define_scenario(
+        name, horizon_years=horizon_years, incidence=incidence,
+    )
     if as_json:
         _emit_json(res)
         return
@@ -1019,6 +1024,68 @@ def define_scenario(name, horizon_years, as_json):
         click.echo(f"\n{var} (delta level / delta %):")
         for y, lv, pc in zip(years, paths["delta_level"], paths["delta_pct"]):
             click.echo(f"  {y}  {lv:+.3f}  {pc:+.3f}%")
+
+
+@main.command("define-incidence")
+@click.argument("scenario")
+@click.option("--year", default=2030, show_default=True,
+              help="Calendar year of the delta path to apply.")
+@click.option("--income-concept", default="disposable_income",
+              show_default=True,
+              type=click.Choice(["disposable_income", "real_wage"]),
+              help="Which DEFINE series drives the earnings factor.")
+@click.option("--dataset", default=None,
+              help="Microdata dataset name override.")
+@click.option("--define-payload", "payload_path", default=None,
+              type=click.Path(exists=True, dir_okay=False),
+              help="Path to a `pe-macro define-scenario <name> --incidence "
+                   "--json` output produced where the adapter is installed "
+                   "(two-env pipeline: only numbers travel).")
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
+def define_incidence(scenario, year, income_concept, dataset, payload_path,
+                     as_json):
+    """Household incidence of a DEFINE-UK scenario (experimental).
+
+    Who bears the climate-policy scenario, household by household: the
+    scenario's income deltas scale the microsim's employment-income inputs
+    and the change flows through the automatic stabilizers. NOT a reform
+    score.
+    """
+    payload = None
+    if payload_path:
+        with open(payload_path) as fh:
+            try:
+                payload = json.load(fh)
+            except json.JSONDecodeError as e:
+                raise click.ClickException(
+                    f"--define-payload is not valid JSON ({e}); pass the "
+                    "unmodified output of `pe-macro define-scenario "
+                    f"{scenario} --incidence --json`"
+                ) from e
+    try:
+        res = core.define_scenario_incidence(
+            scenario, year=year, income_concept=income_concept,
+            dataset=dataset, define_payload=payload,
+        )
+    except ValueError as e:
+        raise click.ClickException(str(e)) from e
+    if as_json:
+        _emit_json(res)
+        return
+    if not res.get("available", True):
+        click.echo(res["how_to_run"])
+        return
+    click.echo(f"DEFINE-UK scenario incidence: {scenario} ({year}, "
+               f"{income_concept})")
+    for c in res["caveats"]:
+        click.echo(f"  ! {c}")
+    app = res["application"]
+    click.echo(f"earnings factor: {app['earnings_factor']:.5f} "
+               f"(applied: {app['applied']})")
+    micro = res["microsim"]
+    for k in ("budgetary_impact_bn", "winners_share", "losers_share"):
+        if k in micro:
+            click.echo(f"  {k:22} {micro[k]}")
 
 
 if __name__ == "__main__":

@@ -827,5 +827,44 @@ def define_scenario(name: str, horizon_years: int = 15) -> dict:
     return core.define_scenario(name, horizon_years=horizon_years)
 
 
+@mcp.tool()
+def define_scenario_incidence(
+    scenario: str,
+    year: int = 2030,
+    income_concept: str = "disposable_income",
+    define_payload: dict | None = None,
+) -> dict:
+    """Household-level incidence of a DEFINE-UK climate-policy scenario
+    (experimental): who bears the scenario, household by household, through
+    the automatic stabilizers.
+
+    The scenario's income deltas (real household disposable income by
+    default, or the real wage with income_concept="real_wage") become a
+    pre-tax earnings factor at `year`, which scales the UK population
+    microsimulation's employment-income inputs — same overlay pattern as
+    frbus_shock_incidence / hank_shock_incidence. NOT reform scoring:
+    score_reform does not accept model='define'.
+
+    DEFINE-UK's local-only contract applies to the DELTAS: on the hosted
+    server, pass define_payload — the unmodified output of `pe-macro
+    define-scenario <name> --incidence --json` produced on a machine with
+    the adapter — and the microsim leg runs hosted (only numbers travel,
+    never the unlicensed upstream code). Without a payload on a host
+    without the adapter, run instructions are returned.
+
+    Args:
+        scenario: Scenario name from define_list_scenarios.
+        year: Calendar year of the delta path to apply (default 2030).
+        income_concept: "disposable_income" (YD_HH% − P%) or "real_wage"
+            (WR%).
+        define_payload: Pre-computed define_scenario result with the
+            incidence variables; must match `scenario`.
+    """
+    return core.define_scenario_incidence(
+        scenario, year=year, income_concept=income_concept,
+        define_payload=define_payload,
+    )
+
+
 if __name__ == "__main__":
     mcp.run(transport="stdio")
