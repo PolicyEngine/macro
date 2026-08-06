@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Forecast track record — PolicyEngine Macro</title>
-<meta name="description" content="Every PolicyEngine Macro forecast, archived with a timestamp before its outturn exists, then scored against realised data and against random-walk, drift and AR(1) baselines. Point error, directional bias and band coverage, round by round — including the rounds that have not been scored yet." />
+<meta name="description" content="Every PolicyEngine Macro forecast, archived with a timestamp before its outturn exists, then scored in public against realised data and naive baselines." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/forecasts" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://policyengine-macro.vercel.app/forecasts" />
@@ -20,20 +20,6 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=3" />
-<style>
-/* page-local, no JS, CSP-safe */
-.more { border-top: 1px solid var(--line-soft); margin: 26px 0 0; padding-top: 4px; }
-.more > summary {
-  cursor: pointer; list-style: none; padding: 14px 0;
-  font-family: var(--mono); font-size: var(--fs-small);
-  color: var(--paper-faint);
-}
-.more > summary::-webkit-details-marker { display: none; }
-.more > summary::before { content: "+ "; }
-.more[open] > summary::before { content: "\2212 "; }
-.more > summary:hover, .more > summary:focus-visible { color: var(--text, #111); }
-.more > :last-child { margin-bottom: 8px; }
-</style>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -66,9 +52,9 @@
         Every forecast, archived before the answer exists.
       </h1>
       <p class="lede reveal" style="--d:2">
-        A forecast is only evidence if it was fixed in public before the outturn
-        was published. Each round below was committed with a timestamp, and is
-        scored here against realised data — whatever that shows.
+        Each round is committed to Git with a timestamp before the outturn is
+        published, kept immutable, and scored here against realised data —
+        whatever that shows.
       </p>
     </div>
   </section>
@@ -101,8 +87,8 @@
 
   <section id="scored" class="band">
     <div class="band-head">
-      <span class="kicker mono">02 — scored results</span>
-      <h2>Forecast, outturn, and the two benchmarks.</h2>
+      <span class="kicker mono">02 — the proof by example</span>
+      <h2>The one round scored so far.</h2>
     </div>
     <div class="prose">
 <!-- scorecard-results:begin -->
@@ -130,34 +116,41 @@
     </div>
   </section>
 
-  <section id="vs-official" class="band">
+  <section id="open" class="band">
     <div class="band-head">
-      <span class="kicker mono">03 — model vs official</span>
-      <h2>Where the archived view differs from the OBR's.</h2>
+      <span class="kicker mono">03 — the open rounds</span>
+      <h2>What is on the record now, waiting to be scored.</h2>
     </div>
     <div class="prose">
 <div class="fc-vs-cards">
 <!-- scorecard-vs-official:begin -->
-      <p class="chart-intro">The GDP-growth path from the 2026-07-29 round beside the official forecast — the gap between the lines is where the views differ.</p>
+      <p class="chart-intro">GDP growth from the 2026-07-29 round — median and bands beside the official forecast. The gap between the lines is where the views differ.</p>
       <figure class="vchart-figure">
         <svg class="vchart" data-chart="svar-vs-efo" viewBox="0 0 760 300" role="img" aria-labelledby="svar-vs-efo-t svar-vs-efo-d">
           <title id="svar-vs-efo-t">boe-svar UK real GDP growth forecast vs OBR March 2026 EFO</title>
-          <desc id="svar-vs-efo-d">Line chart of UK real GDP, year-on-year growth, percent. The boe-svar archived median with its 68 percent band is shown beside the OBR March 2026 EFO path over the overlapping quarters.</desc>
-          <line class="vc-grid" x1="56" y1="244.4" x2="744" y2="244.4"/>
-          <line class="vc-grid" x1="56" y1="208.9" x2="744" y2="208.9"/>
-          <line class="vc-grid" x1="56" y1="173.4" x2="744" y2="173.4"/>
-          <line class="vc-grid" x1="56" y1="138.0" x2="744" y2="138.0"/>
-          <line class="vc-grid" x1="56" y1="102.5" x2="744" y2="102.5"/>
-          <line class="vc-grid" x1="56" y1="67.0" x2="744" y2="67.0"/>
-          <text class="vc-tick" x="48" y="248.4" text-anchor="end">0</text>
-          <text class="vc-tick" x="48" y="212.9" text-anchor="end">0.5</text>
-          <text class="vc-tick" x="48" y="177.4" text-anchor="end">1</text>
-          <text class="vc-tick" x="48" y="142.0" text-anchor="end">1.5</text>
-          <text class="vc-tick" x="48" y="106.5" text-anchor="end">2</text>
-          <text class="vc-tick" x="48" y="71.0" text-anchor="end">2.5</text>
-          <polygon class="vc-band68" points="56.0,124.9 170.7,83.7 285.3,49.6 400.0,57.4 514.7,59.4 629.3,63.5 744.0,58.4 744.0,232.2 629.3,229.4 514.7,224.6 400.0,223.2 285.3,191.1 170.7,201.0 56.0,202.3"/>
-          <polyline class="vc-s1" points="56.0,163.9 170.7,140.6 285.3,119.6 400.0,135.8 514.7,138.9 629.3,148.2 744.0,144.2"/>
-          <polyline class="vc-s2" points="56.0,179.0 170.7,158.2 285.3,141.3 400.0,134.5 514.7,130.7 629.3,130.0 744.0,131.4"/>
+          <desc id="svar-vs-efo-d">Fan chart of UK real GDP, year-on-year growth, percent. The boe-svar archived median with its 68 and 90 percent bands is shown beside the OBR March 2026 EFO path over the overlapping quarters.</desc>
+          <line class="vc-grid" x1="56" y1="237.4" x2="744" y2="237.4"/>
+          <line class="vc-grid" x1="56" y1="214.2" x2="744" y2="214.2"/>
+          <line class="vc-grid" x1="56" y1="190.9" x2="744" y2="190.9"/>
+          <line class="vc-grid" x1="56" y1="167.7" x2="744" y2="167.7"/>
+          <line class="vc-grid" x1="56" y1="144.4" x2="744" y2="144.4"/>
+          <line class="vc-grid" x1="56" y1="121.2" x2="744" y2="121.2"/>
+          <line class="vc-grid" x1="56" y1="97.9" x2="744" y2="97.9"/>
+          <line class="vc-grid" x1="56" y1="74.7" x2="744" y2="74.7"/>
+          <line class="vc-grid" x1="56" y1="51.4" x2="744" y2="51.4"/>
+          <text class="vc-tick" x="48" y="241.4" text-anchor="end">-0.5</text>
+          <text class="vc-tick" x="48" y="218.2" text-anchor="end">0</text>
+          <text class="vc-tick" x="48" y="194.9" text-anchor="end">0.5</text>
+          <text class="vc-tick" x="48" y="171.7" text-anchor="end">1</text>
+          <text class="vc-tick" x="48" y="148.4" text-anchor="end">1.5</text>
+          <text class="vc-tick" x="48" y="125.2" text-anchor="end">2</text>
+          <text class="vc-tick" x="48" y="101.9" text-anchor="end">2.5</text>
+          <text class="vc-tick" x="48" y="78.7" text-anchor="end">3</text>
+          <text class="vc-tick" x="48" y="55.4" text-anchor="end">3.5</text>
+          <polygon class="vc-band90" points="56.0,122.4 170.7,84.0 285.3,54.6 400.0,54.3 514.7,56.2 629.3,54.0 744.0,49.6 744.0,244.4 629.3,241.0 514.7,241.0 400.0,238.0 285.3,208.4 170.7,209.0 56.0,205.5"/>
+          <polygon class="vc-band68" points="56.0,135.9 170.7,108.9 285.3,86.5 400.0,91.7 514.7,93.0 629.3,95.7 744.0,92.3 744.0,206.2 629.3,204.3 514.7,201.2 400.0,200.3 285.3,179.2 170.7,185.7 56.0,186.6"/>
+          <polyline class="vc-s1" points="56.0,161.4 170.7,146.2 285.3,132.4 400.0,143.0 514.7,145.1 629.3,151.2 744.0,148.5"/>
+          <polyline class="vc-s2" points="56.0,171.3 170.7,157.7 285.3,146.6 400.0,142.1 514.7,139.7 629.3,139.2 744.0,140.1"/>
           <text class="vc-tick" x="56.0" y="286" text-anchor="middle">2026Q2</text>
           <text class="vc-tick" x="170.7" y="286" text-anchor="middle">2026Q3</text>
           <text class="vc-tick" x="285.3" y="286" text-anchor="middle">2026Q4</text>
@@ -166,51 +159,41 @@
           <text class="vc-tick" x="629.3" y="286" text-anchor="middle">2027Q3</text>
           <text class="vc-tick" x="744.0" y="286" text-anchor="middle">2027Q4</text>
         </svg>
-        <div class="olg-legend"><span class="li"><span class="ln ln-s1"></span>boe-svar median (68% band)</span><span class="li"><span class="ln ln-s2"></span>OBR March 2026 EFO</span></div>
+        <div class="olg-legend"><span class="li"><span class="ln ln-s1"></span>boe-svar median (68% and 90% bands)</span><span class="li"><span class="ln ln-s2"></span>OBR March 2026 EFO</span></div>
       </figure>
-      <div class="table-scroll">
-        <table>
-          <caption>UK real GDP growth, quarter by quarter: the archived median and band beside the OBR, Bank of England and consensus paths.</caption>
-          <thead><tr><th scope="col">Quarter</th><th scope="col">boe-svar median</th><th scope="col">68% band</th><th scope="col">OBR March 2026 EFO</th><th scope="col">BoE Feb 2026 MPR</th><th scope="col">Consensus (SEF, Apr 2026)</th></tr></thead>
-          <tbody>
-          <tr><th scope="row">2026Q2</th><td class="vs-median"><strong>1.1%</strong></td><td class="vs-band mono">0.6–1.7%</td><td>0.9%</td><td>0.8%</td><td>—</td></tr>
-          <tr><th scope="row">2026Q3</th><td class="vs-median"><strong>1.5%</strong></td><td class="vs-band mono">0.6–2.3%</td><td>1.2%</td><td>1.0%</td><td>—</td></tr>
-          <tr><th scope="row">2026Q4</th><td class="vs-median"><strong>1.8%</strong></td><td class="vs-band mono">0.8–2.7%</td><td>1.5%</td><td>1.1%</td><td>—</td></tr>
-          <tr><th scope="row">2027Q1</th><td class="vs-median"><strong>1.5%</strong></td><td class="vs-band mono">0.3–2.6%</td><td>1.5%</td><td>1.2%</td><td>—</td></tr>
-          <tr><th scope="row">2027Q2</th><td class="vs-median"><strong>1.5%</strong></td><td class="vs-band mono">0.3–2.6%</td><td>1.6%</td><td>1.4%</td><td>1.1%</td></tr>
-          <tr><th scope="row">2027Q3</th><td class="vs-median"><strong>1.4%</strong></td><td class="vs-band mono">0.2–2.5%</td><td>1.6%</td><td>1.6%</td><td>—</td></tr>
-          <tr><th scope="row">2027Q4</th><td class="vs-median"><strong>1.4%</strong></td><td class="vs-band mono">0.2–2.6%</td><td>1.6%</td><td>1.8%</td><td>—</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="chart-intro">Same comparison for CPI, from the 2026-07-29 round: the model sees a stickier inflation path than the EFO's return to target. That gap has a mechanical cause — a stationary VAR estimated on a sample that includes the 2021–23 inflation surge mean-reverts toward a higher sample mean. Re-estimating the coefficients through 2025Q1 (this round) lowered the long-horizon CPI medians by roughly 0.3pp relative to the July 21 round.</p>
+      <p class="chart-intro">Same round, CPI: the model sees a stickier inflation path than the EFO's return to target — partly mechanical, since a stationary VAR estimated through the 2021–23 surge mean-reverts toward a higher sample mean.</p>
       <figure class="vchart-figure">
         <svg class="vchart" data-chart="svar-vs-efo-cpi" viewBox="0 0 760 300" role="img" aria-labelledby="svar-vs-efo-cpi-t svar-vs-efo-cpi-d">
           <title id="svar-vs-efo-cpi-t">boe-svar UK CPI inflation forecast vs OBR March 2026 EFO</title>
-          <desc id="svar-vs-efo-cpi-d">Line chart of UK CPI, year-on-year inflation, percent. The boe-svar archived median with its 68 percent band is shown beside the OBR March 2026 EFO path over the overlapping quarters.</desc>
+          <desc id="svar-vs-efo-cpi-d">Fan chart of UK CPI, year-on-year inflation, percent. The boe-svar archived median with its 68 and 90 percent bands is shown beside the OBR March 2026 EFO path over the overlapping quarters.</desc>
           <line class="vc-grid" x1="56" y1="244.4" x2="744" y2="244.4"/>
-          <line class="vc-grid" x1="56" y1="222.3" x2="744" y2="222.3"/>
-          <line class="vc-grid" x1="56" y1="200.2" x2="744" y2="200.2"/>
-          <line class="vc-grid" x1="56" y1="178.0" x2="744" y2="178.0"/>
-          <line class="vc-grid" x1="56" y1="155.9" x2="744" y2="155.9"/>
-          <line class="vc-grid" x1="56" y1="133.8" x2="744" y2="133.8"/>
-          <line class="vc-grid" x1="56" y1="111.7" x2="744" y2="111.7"/>
-          <line class="vc-grid" x1="56" y1="89.5" x2="744" y2="89.5"/>
-          <line class="vc-grid" x1="56" y1="67.4" x2="744" y2="67.4"/>
-          <line class="vc-grid" x1="56" y1="45.3" x2="744" y2="45.3"/>
+          <line class="vc-grid" x1="56" y1="226.4" x2="744" y2="226.4"/>
+          <line class="vc-grid" x1="56" y1="208.3" x2="744" y2="208.3"/>
+          <line class="vc-grid" x1="56" y1="190.3" x2="744" y2="190.3"/>
+          <line class="vc-grid" x1="56" y1="172.2" x2="744" y2="172.2"/>
+          <line class="vc-grid" x1="56" y1="154.2" x2="744" y2="154.2"/>
+          <line class="vc-grid" x1="56" y1="136.1" x2="744" y2="136.1"/>
+          <line class="vc-grid" x1="56" y1="118.1" x2="744" y2="118.1"/>
+          <line class="vc-grid" x1="56" y1="100.0" x2="744" y2="100.0"/>
+          <line class="vc-grid" x1="56" y1="82.0" x2="744" y2="82.0"/>
+          <line class="vc-grid" x1="56" y1="63.9" x2="744" y2="63.9"/>
+          <line class="vc-grid" x1="56" y1="45.9" x2="744" y2="45.9"/>
           <text class="vc-tick" x="48" y="248.4" text-anchor="end">0</text>
-          <text class="vc-tick" x="48" y="226.3" text-anchor="end">0.5</text>
-          <text class="vc-tick" x="48" y="204.2" text-anchor="end">1</text>
-          <text class="vc-tick" x="48" y="182.0" text-anchor="end">1.5</text>
-          <text class="vc-tick" x="48" y="159.9" text-anchor="end">2</text>
-          <text class="vc-tick" x="48" y="137.8" text-anchor="end">2.5</text>
-          <text class="vc-tick" x="48" y="115.7" text-anchor="end">3</text>
-          <text class="vc-tick" x="48" y="93.5" text-anchor="end">3.5</text>
-          <text class="vc-tick" x="48" y="71.4" text-anchor="end">4</text>
-          <text class="vc-tick" x="48" y="49.3" text-anchor="end">4.5</text>
-          <polygon class="vc-band68" points="56.0,107.6 113.3,98.8 170.7,68.8 228.0,58.7 285.3,55.2 342.7,49.6 400.0,54.0 457.3,52.5 514.7,50.9 572.0,55.8 629.3,54.9 686.7,52.7 744.0,51.0 744.0,173.8 686.7,176.5 629.3,176.0 572.0,178.4 514.7,176.4 457.3,175.7 400.0,173.3 342.7,169.2 285.3,168.3 228.0,167.3 170.7,157.3 113.3,163.6 56.0,146.3"/>
-          <polyline class="vc-s1" points="56.0,127.4 113.3,132.1 170.7,114.5 228.0,113.2 285.3,108.8 342.7,107.1 400.0,110.2 457.3,115.3 514.7,116.5 572.0,115.7 629.3,117.2 686.7,112.6 744.0,116.1"/>
-          <polyline class="vc-s2" points="56.0,149.9 113.3,152.2 170.7,159.2 228.0,159.7 285.3,154.4 342.7,155.3 400.0,159.7 457.3,163.0 514.7,156.9 572.0,155.0 629.3,153.1 686.7,152.3 744.0,155.9"/>
+          <text class="vc-tick" x="48" y="230.4" text-anchor="end">0.5</text>
+          <text class="vc-tick" x="48" y="212.3" text-anchor="end">1</text>
+          <text class="vc-tick" x="48" y="194.3" text-anchor="end">1.5</text>
+          <text class="vc-tick" x="48" y="176.2" text-anchor="end">2</text>
+          <text class="vc-tick" x="48" y="158.2" text-anchor="end">2.5</text>
+          <text class="vc-tick" x="48" y="140.1" text-anchor="end">3</text>
+          <text class="vc-tick" x="48" y="122.1" text-anchor="end">3.5</text>
+          <text class="vc-tick" x="48" y="104.0" text-anchor="end">4</text>
+          <text class="vc-tick" x="48" y="86.0" text-anchor="end">4.5</text>
+          <text class="vc-tick" x="48" y="67.9" text-anchor="end">5</text>
+          <text class="vc-tick" x="48" y="49.9" text-anchor="end">5.5</text>
+          <polygon class="vc-band90" points="56.0,123.9 113.3,105.5 170.7,73.4 228.0,60.1 285.3,57.0 342.7,58.0 400.0,57.1 457.3,57.5 514.7,58.1 572.0,51.2 629.3,49.6 686.7,51.9 744.0,51.5 744.0,220.4 686.7,220.6 629.3,223.9 572.0,219.0 514.7,224.1 457.3,221.6 400.0,222.6 342.7,218.6 285.3,215.6 228.0,211.9 170.7,194.7 113.3,193.8 56.0,174.3"/>
+          <polygon class="vc-band68" points="56.0,132.8 113.3,125.6 170.7,101.1 228.0,92.9 285.3,90.0 342.7,85.5 400.0,89.0 457.3,87.8 514.7,86.5 572.0,90.6 629.3,89.8 686.7,88.0 744.0,86.6 744.0,186.8 686.7,189.0 629.3,188.6 572.0,190.6 514.7,188.9 457.3,188.4 400.0,186.4 342.7,183.0 285.3,182.3 228.0,181.5 170.7,173.3 113.3,178.5 56.0,164.4"/>
+          <polyline class="vc-s1" points="56.0,149.0 113.3,152.8 170.7,138.4 228.0,137.3 285.3,133.8 342.7,132.4 400.0,134.9 457.3,139.0 514.7,140.1 572.0,139.4 629.3,140.6 686.7,136.9 744.0,139.7"/>
+          <polyline class="vc-s2" points="56.0,167.3 113.3,169.2 170.7,174.9 228.0,175.3 285.3,171.0 342.7,171.8 400.0,175.3 457.3,178.0 514.7,173.0 572.0,171.4 629.3,169.9 686.7,169.3 744.0,172.2"/>
           <text class="vc-tick" x="56.0" y="286" text-anchor="middle">2026Q2</text>
           <text class="vc-tick" x="113.3" y="286" text-anchor="middle">2026Q3</text>
           <text class="vc-tick" x="170.7" y="286" text-anchor="middle">2026Q4</text>
@@ -225,37 +208,46 @@
           <text class="vc-tick" x="686.7" y="286" text-anchor="middle">2029Q1</text>
           <text class="vc-tick" x="744.0" y="286" text-anchor="middle">2029Q2</text>
         </svg>
-        <div class="olg-legend"><span class="li"><span class="ln ln-s1"></span>boe-svar median (68% band)</span><span class="li"><span class="ln ln-s2"></span>OBR March 2026 EFO</span></div>
+        <div class="olg-legend"><span class="li"><span class="ln ln-s1"></span>boe-svar median (68% and 90% bands)</span><span class="li"><span class="ln ln-s2"></span>OBR March 2026 EFO</span></div>
       </figure>
-      <div class="table-scroll">
-        <table>
-          <caption>UK CPI inflation, quarter by quarter: the archived median and band beside the OBR, Bank of England and consensus paths.</caption>
-          <thead><tr><th scope="col">Quarter</th><th scope="col">boe-svar median</th><th scope="col">68% band</th><th scope="col">OBR March 2026 EFO</th><th scope="col">BoE Feb 2026 MPR</th><th scope="col">Consensus (SEF, Apr 2026)</th></tr></thead>
-          <tbody>
-          <tr><th scope="row">2026Q2</th><td class="vs-median"><strong>2.6%</strong></td><td class="vs-band mono">2.2–3.1%</td><td>2.1%</td><td>2.1%</td><td>2.9%</td></tr>
-          <tr><th scope="row">2026Q3</th><td class="vs-median"><strong>2.5%</strong></td><td class="vs-band mono">1.8–3.3%</td><td>2.1%</td><td>2.0%</td><td>—</td></tr>
-          <tr><th scope="row">2026Q4</th><td class="vs-median"><strong>2.9%</strong></td><td class="vs-band mono">2.0–4.0%</td><td>1.9%</td><td>2.0%</td><td>—</td></tr>
-          <tr><th scope="row">2027Q1</th><td class="vs-median"><strong>3.0%</strong></td><td class="vs-band mono">1.7–4.2%</td><td>1.9%</td><td>1.7%</td><td>—</td></tr>
-          <tr><th scope="row">2027Q2</th><td class="vs-median"><strong>3.1%</strong></td><td class="vs-band mono">1.7–4.3%</td><td>2.0%</td><td>2.0%</td><td>2.9%</td></tr>
-          <tr><th scope="row">2027Q3</th><td class="vs-median"><strong>3.1%</strong></td><td class="vs-band mono">1.7–4.4%</td><td>2.0%</td><td>1.9%</td><td>—</td></tr>
-          <tr><th scope="row">2027Q4</th><td class="vs-median"><strong>3.0%</strong></td><td class="vs-band mono">1.6–4.3%</td><td>1.9%</td><td>1.8%</td><td>—</td></tr>
-          <tr><th scope="row">2028Q1</th><td class="vs-median"><strong>2.9%</strong></td><td class="vs-band mono">1.6–4.3%</td><td>1.8%</td><td>1.8%</td><td>—</td></tr>
-          <tr><th scope="row">2028Q2</th><td class="vs-median"><strong>2.9%</strong></td><td class="vs-band mono">1.5–4.4%</td><td>2.0%</td><td>2.0%</td><td>2.1%</td></tr>
-          <tr><th scope="row">2028Q3</th><td class="vs-median"><strong>2.9%</strong></td><td class="vs-band mono">1.5–4.3%</td><td>2.0%</td><td>2.0%</td><td>—</td></tr>
-          <tr><th scope="row">2028Q4</th><td class="vs-median"><strong>2.9%</strong></td><td class="vs-band mono">1.5–4.3%</td><td>2.1%</td><td>2.0%</td><td>—</td></tr>
-          <tr><th scope="row">2029Q1</th><td class="vs-median"><strong>3.0%</strong></td><td class="vs-band mono">1.5–4.3%</td><td>2.1%</td><td>2.0%</td><td>—</td></tr>
-          <tr><th scope="row">2029Q2</th><td class="vs-median"><strong>2.9%</strong></td><td class="vs-band mono">1.6–4.4%</td><td>2.0%</td><td>—</td><td>2.0%</td></tr>
-          </tbody>
-        </table>
-      </div>
 <!-- scorecard-vs-official:end -->
+<!-- open-fan-unemployment:begin -->
+      <p class="chart-intro">Unemployment, from the 2026-07-28 okun-unemployment round — no official quarterly path is stored to overlay, so the fan stands alone.</p>
+      <figure class="vchart-figure">
+        <svg class="vchart" data-chart="open-unemployment-fan" viewBox="0 0 760 300" role="img" aria-labelledby="open-unemployment-fan-t open-unemployment-fan-d">
+          <title id="open-unemployment-fan-t">okun-unemployment UK unemployment rate forecast, median with 68% and 90% bands</title>
+          <desc id="open-unemployment-fan-d">Fan chart of the UK unemployment rate, percent, from the okun-unemployment round of 2026-07-28: the archived median with its 68 and 90 percent bands, 2026Q2 to 2027Q1. The median runs from 4.97% to 4.93%.</desc>
+          <line class="vc-grid" x1="56" y1="236.8" x2="744" y2="236.8"/>
+          <line class="vc-grid" x1="56" y1="210.4" x2="744" y2="210.4"/>
+          <line class="vc-grid" x1="56" y1="184.0" x2="744" y2="184.0"/>
+          <line class="vc-grid" x1="56" y1="157.6" x2="744" y2="157.6"/>
+          <line class="vc-grid" x1="56" y1="131.2" x2="744" y2="131.2"/>
+          <line class="vc-grid" x1="56" y1="104.8" x2="744" y2="104.8"/>
+          <line class="vc-grid" x1="56" y1="78.4" x2="744" y2="78.4"/>
+          <line class="vc-grid" x1="56" y1="52.0" x2="744" y2="52.0"/>
+          <text class="vc-tick" x="48" y="240.8" text-anchor="end">4.60</text>
+          <text class="vc-tick" x="48" y="214.4" text-anchor="end">4.70</text>
+          <text class="vc-tick" x="48" y="188.0" text-anchor="end">4.80</text>
+          <text class="vc-tick" x="48" y="161.6" text-anchor="end">4.90</text>
+          <text class="vc-tick" x="48" y="135.2" text-anchor="end">5.00</text>
+          <text class="vc-tick" x="48" y="108.8" text-anchor="end">5.10</text>
+          <text class="vc-tick" x="48" y="82.4" text-anchor="end">5.20</text>
+          <text class="vc-tick" x="48" y="56.0" text-anchor="end">5.30</text>
+          <polygon class="vc-band90" points="56.0,127.3 285.3,109.3 514.7,88.7 744.0,60.1 744.0,233.9 514.7,201.1 285.3,170.6 56.0,149.6"/>
+          <polygon class="vc-band68" points="56.0,131.8 285.3,122.4 514.7,111.5 744.0,94.4 744.0,201.2 514.7,180.4 285.3,160.3 56.0,145.8"/>
+          <polyline class="vc-s1" points="56.0,138.7 285.3,141.1 514.7,146.9 744.0,148.8"/>
+          <text class="vc-tick" x="56.0" y="286" text-anchor="middle">2026Q2</text>
+          <text class="vc-tick" x="285.3" y="286" text-anchor="middle">2026Q3</text>
+          <text class="vc-tick" x="514.7" y="286" text-anchor="middle">2026Q4</text>
+          <text class="vc-tick" x="744.0" y="286" text-anchor="middle">2027Q1</text>
+        </svg>
+        <div class="olg-legend"><span class="li"><span class="ln ln-s1"></span>okun-unemployment median (68% and 90% bands)</span></div>
+      </figure>
+<!-- open-fan-unemployment:end -->
       </div>
       <div class="meth-out plain">
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>BoE column: February 2026 MPR central projection — the April 2026 Report published scenarios, not a central path (<code>forecasts/official/boe_mpr_feb_2026_central.csv</code>).</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>Consensus: SEF average of outside forecasters as of 16 April 2026, fixed one-, two- and three-year-ahead quarters only (<code>forecasts/official/boe_sef_april_2026.csv</code>).</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>The columns were fixed on different dates and different information sets.</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>GDP table stops at 2027Q4, where the stored EFO quarterly path ends; CPI runs to 2029Q2, the full archived horizon.</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>EFO fixed March 2026, round July 2026 — this shows where views differ, not who forecasts better; the hindsight 49-origin evaluation is on the <a href="/svar/validation#forecasters">boe-svar validation page</a>.</span></div>
+        <div class="meth-out-line"><span class="icon">&rarr;</span><span>The EFO was fixed in March 2026, the rounds in July — this shows where views differ, not who forecasts better. The hindsight 49-origin evaluation is on the <a href="/svar/validation#forecasters">boe-svar validation page</a>.</span></div>
+        <div class="meth-out-line"><span class="icon">&rarr;</span><span>Quarter-by-quarter numbers, including the BoE February 2026 MPR central path and the SEF consensus, are in the committed sources: the round artifacts below, <a class="mono" href="/forecasts/official/boe_mpr_feb_2026_central.csv" download><code>boe_mpr_feb_2026_central.csv</code></a> and <a class="mono" href="/forecasts/official/boe_sef_april_2026.csv" download><code>boe_sef_april_2026.csv</code></a>.</span></div>
       </div>
     </div>
   </section>
@@ -267,11 +259,9 @@
     </div>
     <div class="prose">
       <p class="mo-lead">
-        One card per archived round — a forecast file committed to Git with a
-        timestamp. <strong>Data edge</strong> is the last observation the model
-        was allowed to see, <strong>periods</strong> the number of future
-        quarters it committed to, and <strong>scored</strong> how many of those
-        have since had their official outturn published and scored above.
+        One card per archived round. <strong>Data edge</strong> is the last
+        observation the model was allowed to see; <strong>scored</strong> how
+        many committed quarters have since had their outturn published.
       </p>
 <!-- scorecard-rounds:begin -->
       <div class="forecast-round-list">
@@ -307,88 +297,39 @@
         </article>
       </div>
 <!-- scorecard-rounds:end -->
-      <p>
-        <strong>The first round was archived retroactively</strong> from a
-        forecast file already committed to Git. That commit preceded the CPI
-        outturn by about 16 hours, so the forecast was genuinely prior—but with
-        thin lead time and weaker provenance than future rounds. Every later
-        round is archived directly before the fact.
-      </p>
-      <p>
-        Rounds are append-only. Files under <code>forecasts/rounds/</code> can be
-        added but never edited or deleted, and a
-        <a href="https://github.com/PolicyEngine/macro/blob/main/.github/workflows/forecast-archive.yml">CI job</a>
-        fails any pull request that tries. Corrections create a new round; the
-        superseded forecast remains scored.
-      </p>
-      <p>
-        The scoring inputs are downloadable too:
-        <a class="mono" href="/forecasts/outturns.json" download><code>outturns.json</code></a>
-        (versioned official outturns) and
-        <a class="mono" href="/forecasts/scorecard.json" download><code>scorecard.json</code></a>
-        (the generated scores behind this page).
-      </p>
-    </div>
-  </section>
-
-  <section id="method" class="band">
-    <div class="band-head">
-      <span class="kicker mono">05 — how it is scored</span>
-      <h2>Four numbers, not one.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        A single accuracy headline hides the failures that matter, so each round
-        is scored on four things:
-      </p>
-      <div class="score-method-grid">
-        <article><span class="score-method-id mono">01</span><h3>Mean absolute error</h3><p>Typical size of a miss, in percentage points.</p></article>
-        <article><span class="score-method-id mono">02</span><h3>Signed bias</h3><p>Whether forecasts are persistently high or low rather than wrong in random directions.</p></article>
-        <article><span class="score-method-id mono">03</span><h3>Band coverage</h3><p>Whether 68% and 90% ranges contain outturns as often as they claim.</p></article>
-        <article><span class="score-method-id mono">04</span><h3>Baseline comparison</h3><p>Whether the model improves on random-walk, drift, and AR(1) forecasts.</p></article>
+      <div class="meth-out plain">
+        <div class="meth-out-line"><span class="icon">&rarr;</span><span>Rounds are append-only: files under <code>forecasts/rounds/</code> can be added but never edited or deleted, and a <a href="https://github.com/PolicyEngine/macro/blob/main/.github/workflows/forecast-archive.yml">CI job</a> fails any pull request that tries. Corrections create a new round; the superseded forecast stays scored.</span></div>
+        <div class="meth-out-line"><span class="icon">&rarr;</span><span>The first round was archived retroactively from a forecast file already in Git — genuinely prior to the CPI outturn by about 16 hours, but with thinner provenance than every later round.</span></div>
+        <div class="meth-out-line"><span class="icon">&rarr;</span><span>Scoring inputs are downloadable: <a class="mono" href="/forecasts/outturns.json" download><code>outturns.json</code></a> (vintage-versioned outturns, so revisions never silently rewrite a score) and <a class="mono" href="/forecasts/scorecard.json" download><code>scorecard.json</code></a> (the generated scores behind this page). Method detail is in the <a href="https://github.com/PolicyEngine/macro/blob/main/forecasts/README.md">forecasts README</a>.</span></div>
       </div>
-      <details class="more">
-        <summary>Why outturns are versioned rather than overwritten</summary>
-        <p>
-          Official data is revised, sometimes substantially and sometimes years
-          later. A track record that always scores against the latest vintage
-          quietly rewrites its own history every time the ONS revises a quarter,
-          and can flatter or punish a forecast that never changed.
-        </p>
-        <p>
-          So <code>forecasts/outturns.json</code> stores the vintage alongside
-          every observation and appends revisions rather than replacing them.
-          Each score records which vintage it was computed against, and can be
-          reproduced exactly.
-        </p>
-      </details>
     </div>
   </section>
 
   <section id="limits" class="band">
     <div class="band-head">
-      <span class="kicker mono">06 — what this is not</span>
+      <span class="kicker mono">05 — what this is not</span>
       <h2>Limits worth stating plainly.</h2>
     </div>
     <div class="prose">
       <div class="meth-out plain">
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span><strong>The record is short.</strong> A handful of rounds is not a track record; nothing here demonstrates forecasting skill until the scored count is well into double figures — at least a year away.</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span><strong>Three variables only.</strong> UK GDP growth and CPI inflation (boe-svar) plus the unemployment rate (Okun satellite). No Bank Rate, wages or borrowing yet.</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span><strong>Coefficients are not re-estimated each round.</strong> Only the conditioning data edge moves; the sample is extended occasionally. The 2026-07-21 round used the paper's 1992Q1&ndash;2023Q2 sample, re-estimated on 1992Q1&ndash;2025Q1 in late July 2026, and each archived round records its estimation sample.</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span><strong>No fixed calendar yet.</strong> Rounds are archived when a forecast is issued and scored when the target data lands. So far they follow data-edge refreshes; until a regular cadence exists, round spacing is itself a discretionary choice.</span></div>
+        <div class="meth-out-line"><span class="icon">&rarr;</span><span><strong>One scored round proves little.</strong> Nothing here demonstrates forecasting skill until the scored count is well into double figures — at least a year away.</span></div>
+        <div class="meth-out-line"><span class="icon">&rarr;</span><span><strong>The bands run too narrow in hindsight testing.</strong> Across 49 historical origins the 68% band contains outturns about 62% of the time and the 90% band about 77% — both under-cover, worsening with horizon. Full study on the <a href="/svar/validation">validation page</a>.</span></div>
+        <div class="meth-out-line"><span class="icon">&rarr;</span><span><strong>CPI does not beat a fair naive benchmark.</strong> Against a random walk with drift the CPI advantage largely evaporates (1.03 at eight quarters); Bank Rate is the only robust win in that exercise, and it is not yet a forecast variable here.</span></div>
+        <div class="meth-out-line"><span class="icon">&rarr;</span><span><strong>Three variables, no fixed calendar.</strong> UK GDP growth and CPI (boe-svar) plus unemployment (Okun satellite); rounds so far follow data-edge refreshes rather than a schedule, so round spacing is itself a discretionary choice. Each round records its estimation sample; coefficients are not re-estimated every round.</span></div>
       </div>
     </div>
   </section>
 
   <section id="notes" class="band">
     <div class="band-head">
-      <span class="kicker mono">07 — dated notes</span>
+      <span class="kicker mono">06 — dated notes</span>
       <h2>What the releases mean, read through the models.</h2>
     </div>
     <div class="prose">
       <p>
-        Dated readings of UK releases and fiscal events, tied to the data
-        vintage available at publication.
+        Dated readings of UK releases, tied to the data vintage available at
+        publication. Interpretation, not investment advice or evidence of
+        forecast skill.
       </p>
       <div class="question-list">
         <a href="/notes/2026-07-25-cpi-2026q2">
@@ -399,16 +340,6 @@
         <a href="/notes/releases"><span>22 automatic release notes · 2026-08-06 →</span><strong>2026-08-06 · automatic release notes</strong></a>
 <!-- generated-release-notes:end -->
       </div>
-
-      <details class="more">
-        <summary>What a note is, and is not</summary>
-        <p>
-          Each note names its vintage and remains checkable against the
-          <a href="https://github.com/PolicyEngine/macro/tree/main/data">data store</a>.
-          Corrections receive a visible notice. Notes are interpretation—not
-          investment advice or evidence of forecast skill.
-        </p>
-      </details>
     </div>
   </section>
 </main>

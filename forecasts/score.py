@@ -366,6 +366,8 @@ def build_vs_official(variable: str) -> list[dict]:
                 "median": g["median"],
                 "lo68": g["lo68"],
                 "hi68": g["hi68"],
+                "lo90": g["lo90"],
+                "hi90": g["hi90"],
                 "efo": efo[period],
                 "boe": boe_paths()[variable].get(period),
                 "sef": sef_paths()[variable].get(period),
@@ -385,8 +387,9 @@ VS_OFFICIAL_SPECS = {
             "in <code>papers/obr-macro/figures/fig_anchored_data.csv</code>"
         ),
         "intro": (
-            "The GDP-growth path from the {round_id} round beside the official "
-            "forecast — the gap between the lines is where the views differ."
+            "GDP growth from the {round_id} round — median and bands beside "
+            "the official forecast. The gap between the lines is where the "
+            "views differ."
         ),
     },
     "cpi": {
@@ -399,21 +402,17 @@ VS_OFFICIAL_SPECS = {
             "<code>papers/obr-macro/figures/efo_march_2026_cpi.csv</code>"
         ),
         "intro": (
-            "Same comparison for CPI, from the {round_id} round: the model "
-            "sees a stickier inflation path than the EFO's return to target. "
-            "That gap has a mechanical cause — a stationary VAR estimated on "
-            "a sample that includes the 2021–23 inflation surge "
-            "mean-reverts toward a higher sample mean. Re-estimating the "
-            "coefficients through 2025Q1 (this round) lowered the "
-            "long-horizon CPI medians by roughly 0.3pp relative to the "
-            "July 21 round."
+            "Same round, CPI: the model sees a stickier inflation path than "
+            "the EFO's return to target — partly mechanical, since a "
+            "stationary VAR estimated through the 2021–23 surge mean-reverts "
+            "toward a higher sample mean."
         ),
     },
 }
 
 
 def render_vs_official_variable(variable: str, include_note: bool = False) -> str:
-    """Chart + table: archived boe-svar path with 68% band vs March 2026 EFO."""
+    """Fan chart: archived boe-svar path with 68/90% bands vs March 2026 EFO."""
     rows = build_vs_official(variable)
     spec = VS_OFFICIAL_SPECS[variable]
     chart_id = spec["chart_id"]
@@ -424,7 +423,7 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
     width, height = 760, 300
     left, right, top, bottom = 56, 16, 34, 40
     plot_w, plot_h = width - left - right, height - top - bottom
-    values = [v for r in rows for v in (r["lo68"], r["hi68"], r["efo"])]
+    values = [v for r in rows for v in (r["lo90"], r["hi90"], r["efo"])]
     lo = min(0.0, min(values))
     hi = max(values)
     span = (hi - lo) or 1.0
@@ -438,10 +437,15 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
     def y(v: float) -> float:
         return top + plot_h * (1 - (v - lo) / span)
 
-    band = " ".join(f"{x(i):.1f},{y(r['hi68']):.1f}" for i, r in enumerate(rows))
-    band += " " + " ".join(
-        f"{x(i):.1f},{y(r['lo68']):.1f}" for i, r in reversed(list(enumerate(rows)))
-    )
+    def band_points(lo_key: str, hi_key: str) -> str:
+        pts = " ".join(f"{x(i):.1f},{y(r[hi_key]):.1f}" for i, r in enumerate(rows))
+        return pts + " " + " ".join(
+            f"{x(i):.1f},{y(r[lo_key]):.1f}"
+            for i, r in reversed(list(enumerate(rows)))
+        )
+
+    band90 = band_points("lo90", "hi90")
+    band = band_points("lo68", "hi68")
     median = " ".join(f"{x(i):.1f},{y(r['median']):.1f}" for i, r in enumerate(rows))
     efo = " ".join(f"{x(i):.1f},{y(r['efo']):.1f}" for i, r in enumerate(rows))
 
@@ -474,52 +478,25 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
             f'role="img" aria-labelledby="{chart_id}-t {chart_id}-d">',
             f'          <title id="{chart_id}-t">boe-svar {spec["name"]} forecast vs '
             "OBR March 2026 EFO</title>",
-            f'          <desc id="{chart_id}-d">Line chart of {spec["series"]}. '
-            "The boe-svar archived median with its 68 percent band is shown beside the OBR "
-            "March 2026 EFO path over the overlapping quarters.</desc>",
+            f'          <desc id="{chart_id}-d">Fan chart of {spec["series"]}. '
+            "The boe-svar archived median with its 68 and 90 percent bands is shown beside "
+            "the OBR March 2026 EFO path over the overlapping quarters.</desc>",
             *gridlines,
             *ticks,
+            f'          <polygon class="vc-band90" points="{band90}"/>',
             f'          <polygon class="vc-band68" points="{band}"/>',
             f'          <polyline class="vc-s1" points="{median}"/>',
             f'          <polyline class="vc-s2" points="{efo}"/>',
             *xticks,
             "        </svg>",
             '        <div class="olg-legend">'
-            '<span class="li"><span class="ln ln-s1"></span>boe-svar median (68% band)</span>'
+            '<span class="li"><span class="ln ln-s1"></span>boe-svar median (68% and 90% bands)</span>'
             '<span class="li"><span class="ln ln-s2"></span>OBR March 2026 EFO</span>'
             "</div>",
             "      </figure>",
         ]
     )
-
-    table = [
-        '      <div class="table-scroll">',
-        "        <table>",
-        f"          <caption>{spec['name']}, quarter by quarter: the archived median and band "
-        "beside the OBR, Bank of England and consensus paths.</caption>",
-        '          <thead><tr><th scope="col">Quarter</th><th scope="col">boe-svar '
-        'median</th><th scope="col">68% band</th><th scope="col">OBR March 2026 EFO'
-        '</th><th scope="col">BoE Feb 2026 MPR</th>'
-        '<th scope="col">Consensus (SEF, Apr 2026)</th></tr></thead>',
-        "          <tbody>",
-    ]
-    for r in rows:
-        boe = f"{r['boe']:.1f}%" if r["boe"] is not None else "—"
-        sef = f"{r['sef']:.1f}%" if r["sef"] is not None else "—"
-        table.append(
-            f'          <tr><th scope="row">{esc(r["period"])}</th>'
-            f'<td class="vs-median"><strong>{r["median"]:.1f}%</strong></td>'
-            f'<td class="vs-band mono">{r["lo68"]:.1f}\u2013{r["hi68"]:.1f}%</td>'
-            f"<td>{r['efo']:.1f}%</td>"
-            f"<td>{boe}</td>"
-            f"<td>{sef}</td></tr>"
-        )
-    table += [
-        "          </tbody>",
-        "        </table>",
-        "      </div>",
-    ]
-    return svg + "\n" + "\n".join(table)
+    return svg
 
 
 # ---------------------------------------------------------------- page
