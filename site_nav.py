@@ -39,6 +39,8 @@ PAGE_NAMES = {
     "/us-hank": "US HANK",
     "/olg": "OG-UK",
     "/define": "DEFINE-UK",
+    "/define/methodology": "Methodology",
+    "/define/validation": "Validation",
     "/obr/code": "Code",
     "/obr/methodology": "Methodology",
     "/obr/validation": "Validation",
