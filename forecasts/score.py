@@ -617,42 +617,37 @@ def render_results(card: dict) -> str:
         band = "68%" if e["in_68"] else ("90%" if e["in_90"] else "outside 90%")
         naive = e.get("naive_rw")
         official = e.get("official")
-        scale = max(
-            abs(e["forecast"]),
-            abs(e["outturn"]),
-            abs(naive) if naive is not None else 0.0,
-            abs(official) if official is not None else 0.0,
-            1.0,
-        )
-        forecast_width = abs(e["forecast"]) / scale * 100
-        outturn_width = abs(e["outturn"]) / scale * 100
-        naive_row = ""
+        # Dot plot on a shared scale: every value at its true position, so a
+        # 0.12pp miss is visibly small and a 0.66pp miss visibly larger —
+        # bars from zero flattened exactly that comparison.
+        marks = [("Forecast", e["forecast"], "forecast", "up"),
+                 ("Outturn", e["outturn"], "outturn", "down")]
         naive_footer = ""
         if naive is not None:
-            naive_width = abs(naive) / scale * 100
-            naive_row = (
-                f"            <div><span>Naive</span>"
-                f"<i class=\"forecast-naive\" style=\"width:{naive_width:.1f}%\"></i>"
-                f"<strong>{naive:.2f}%</strong></div>\n"
-            )
+            marks.append(("Naive", naive, "naive", "up"))
             verdict = "beats" if e["beats_naive"] else "does not beat"
             naive_footer = (
                 f"<span>{verdict} naive error "
                 f"<strong>{e['naive_abs_error']:.2f}pp</strong></span>"
             )
-        official_row = ""
         official_footer = ""
         if official is not None:
-            official_width = abs(official) / scale * 100
-            official_row = (
-                f"            <div><span>Official</span>"
-                f"<i class=\"forecast-official\" style=\"width:{official_width:.1f}%\"></i>"
-                f"<strong>{official:.2f}%</strong></div>\n"
-            )
+            marks.append(("Official", official, "official", "down"))
             official_footer = (
                 f"<span>{esc(e['official_label'])} error "
                 f"<strong>{e['official_abs_error']:.2f}pp</strong></span>"
             )
+        values = [v for _, v, _, _ in marks]
+        lo, hi = min(values), max(values)
+        pad = max(hi - lo, 0.2) * 0.12
+        lo, hi = lo - pad, hi + pad
+        mark_html = "".join(
+            f"            <div class=\"fc-mark fc-mark-{kind} fc-{side}\" "
+            f"style=\"left:{(v - lo) / (hi - lo) * 100:.1f}%\">"
+            f"<i></i><span>{label}<strong>{v:.2f}%</strong></span></div>\n"
+            for label, v, kind, side in marks
+        )
+        aria = "; ".join(f"{label} {v:.2f} percent" for label, v, _, _ in marks)
         body.append(
             "        <article class=\"forecast-result\">\n"
             "          <header>\n"
@@ -660,14 +655,9 @@ def render_results(card: dict) -> str:
             f"<h3>{esc(VARIABLE_LABELS.get(e['variable'], e['variable']))}</h3></div>\n"
             f"            <span class=\"forecast-band\">Inside {esc(band)} band</span>\n"
             "          </header>\n"
-            "          <div class=\"forecast-result-plot\" "
-            f"aria-label=\"Forecast {e['forecast']:.2f} percent; outturn {e['outturn']:.2f} percent\">\n"
-            f"            <div><span>Forecast</span><i style=\"width:{forecast_width:.1f}%\"></i>"
-            f"<strong>{e['forecast']:.2f}%</strong></div>\n"
-            f"            <div><span>Outturn</span><i style=\"width:{outturn_width:.1f}%\"></i>"
-            f"<strong>{e['outturn']:.2f}%</strong></div>\n"
-            + naive_row
-            + official_row
+            f"          <div class=\"forecast-dotplot\" aria-label=\"{aria}\">\n"
+            "            <div class=\"fc-axis\"></div>\n"
+            + mark_html
             + "          </div>\n"
             f"          <footer><span>Error <strong>{e['error']:+.2f}pp</strong></span>"
             f"{naive_footer}"

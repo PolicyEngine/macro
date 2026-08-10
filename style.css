@@ -1388,26 +1388,48 @@ h2 {
   background: var(--brand-wash);
   font: 500 var(--fs-label)/1 var(--mono);
 }
-.forecast-result-plot { display: grid; gap: 12px; margin-block: var(--s-6); }
-.forecast-result-plot > div {
-  display: grid;
-  grid-template-columns: 72px minmax(80px, 1fr) 62px;
-  align-items: center;
-  gap: 12px;
+/* Scored-result dot plot: every value at its true position on one shared
+   scale, forecast/naive labelled above the axis, outturn/official below. */
+.forecast-dotplot {
+  position: relative;
+  height: 120px;
+  margin: var(--s-6) 44px;
 }
-.forecast-result-plot span { color: var(--paper-faint); font-size: var(--fs-small); }
-.forecast-result-plot i {
-  display: block;
-  min-width: 3px;
+.fc-axis {
+  position: absolute;
+  inset: 50% 0 auto 0;
+  height: 2px;
+  background: var(--line-soft);
+}
+.fc-mark { position: absolute; top: 50%; }
+.fc-mark i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  width: 12px;
   height: 12px;
   border-radius: 999px;
   background: var(--brand);
 }
-.forecast-result-plot > div:nth-child(2) i { background: var(--chart-s2); }
-.forecast-result-plot i.forecast-naive { background: var(--paper-faint); opacity: 0.55; }
-.forecast-result-plot i.forecast-official { background: var(--chart-s2); opacity: 0.75; }
+.fc-mark span {
+  position: absolute;
+  left: 0;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  white-space: nowrap;
+  color: var(--paper-faint);
+  font-size: var(--fs-small);
+}
+.fc-mark strong { color: var(--paper); font-family: var(--mono); }
+.fc-up span { bottom: 14px; }
+.fc-down span { top: 14px; }
+.fc-mark-outturn i { background: var(--chart-s2); }
+.fc-mark-naive i { background: var(--paper-faint); opacity: 0.55; }
+.fc-mark-official i { background: var(--chart-s2); opacity: 0.55; }
 .forecast-note { color: var(--paper-faint); font-size: var(--fs-small); max-width: 60ch; }
-.forecast-result-plot strong { font-family: var(--mono); text-align: right; }
 .forecast-result footer {
   padding-top: var(--s-4);
   border-top: 1px solid var(--line-soft);
