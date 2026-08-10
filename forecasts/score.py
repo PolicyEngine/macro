@@ -583,7 +583,6 @@ def render_rounds(card: dict) -> str:
     rows = ['      <div class="forecast-round-list">']
     for detail in card["detail"]:
         href = f"{REPO_BLOB}/{detail['path']}"
-        label = "/".join(Path(detail["path"]).parts[-2:])
         rows.append(
             "        <article class=\"forecast-round\">\n"
             f"          <div><span class=\"mono\">{esc(detail['round_id'])}</span>"
@@ -594,9 +593,9 @@ def render_rounds(card: dict) -> str:
             f"            <div><dt>Scored</dt><dd>{detail['periods_scored']}</dd></div>\n"
             "          </dl>\n"
             f"          <a class=\"mono\" href=\"/{esc(detail['path'])}\" download>"
-            f"Download artifact · <code>{esc(label)}</code> →</a>\n"
+            f"Download <code>{esc(Path(detail['path']).name)}</code> →</a>\n"
             f"          <a class=\"mono\" href=\"{href}\">"
-            "Open on GitHub with commit history →</a>\n"
+            "GitHub commit history →</a>\n"
             "        </article>"
         )
     rows.append("      </div>")
