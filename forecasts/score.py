@@ -359,23 +359,47 @@ def sef_paths() -> dict[str, dict[str, float]]:
     return _SEF_CACHE
 
 
+BAND_CALIBRATION = HERE / "band_calibration.json"
+
+
+def _calibration_k(variable: str) -> dict[str, dict[str, float]]:
+    """Per-horizon widening factors from forecasts/band_calibration.json."""
+    cal = json.loads(BAND_CALIBRATION.read_text())
+    return cal["k"][variable]
+
+
+def _quarter_index(period: str) -> int:
+    return int(period[:4]) * 4 + int(period[5]) - 1
+
+
 def build_vs_official(variable: str) -> list[dict]:
-    """SVAR archived medians beside the EFO path, on shared quarters."""
+    """SVAR archived medians beside the EFO path, on shared quarters.
+
+    Band half-widths are re-scaled around the archived median by the
+    empirical calibration factors in forecasts/band_calibration.json
+    (measured under-coverage; h beyond the evaluated 8 holds the h8
+    factor). The archived round artifact itself is never modified.
+    """
     rnd = json.loads(SVAR_ROUND.read_text())
     efo = official_paths()[variable]
+    edge = _quarter_index(rnd["information_set"]["data_edge"])
+    k = _calibration_k(variable)
     rows = []
     for period in sorted(rnd["forecast"]):
         if period not in efo or variable not in rnd["forecast"][period]:
             continue
         g = rnd["forecast"][period][variable]
+        h = min(max(_quarter_index(period) - edge, 1), 8)
+        k68, k90 = k["68"][f"h{h}"], k["90"][f"h{h}"]
+        med = g["median"]
         rows.append(
             {
                 "period": period,
-                "median": g["median"],
-                "lo68": g["lo68"],
-                "hi68": g["hi68"],
-                "lo90": g["lo90"],
-                "hi90": g["hi90"],
+                "median": med,
+                "lo68": med + (g["lo68"] - med) * k68,
+                "hi68": med + (g["hi68"] - med) * k68,
+                "lo90": med + (g["lo90"] - med) * k90,
+                "hi90": med + (g["hi90"] - med) * k90,
                 "efo": efo[period],
                 "boe": boe_paths()[variable].get(period),
                 "sef": sef_paths()[variable].get(period),
@@ -485,7 +509,8 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
             f'          <title id="{chart_id}-t">boe-svar {spec["name"]} forecast vs '
             "OBR March 2026 EFO</title>",
             f'          <desc id="{chart_id}-d">Fan chart of {spec["series"]}. '
-            "The boe-svar archived median with its 68 and 90 percent bands is shown beside "
+            "The boe-svar archived median with its 68 and 90 percent bands, "
+            "empirically re-calibrated for measured under-coverage, is shown beside "
             "the OBR March 2026 EFO path over the overlapping quarters.</desc>",
             *gridlines,
             *ticks,
@@ -496,7 +521,8 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
             *xticks,
             "        </svg>",
             '        <div class="olg-legend">'
-            '<span class="li"><span class="ln ln-s1"></span>boe-svar median (68% and 90% bands)</span>'
+            '<span class="li"><span class="ln ln-s1"></span>boe-svar median (68% and 90% bands, '
+            "empirically re-calibrated)</span>"
             '<span class="li"><span class="ln ln-s2"></span>OBR March 2026 EFO</span>'
             "</div>",
             "      </figure>",

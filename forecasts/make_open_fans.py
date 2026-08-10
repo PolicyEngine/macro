@@ -112,7 +112,9 @@ def render() -> str:
             '      <p class="chart-intro">Unemployment, from the '
             f"{src.parent.name} svar-unemployment satellite round — no "
             "official quarterly path to overlay, so the fan stands "
-            "alone.</p>",
+            "alone. Bands are raw model quantiles: the satellite has no "
+            "coverage evaluation of its own, so no re-calibration is "
+            "applied.</p>",
             '      <figure class="vchart-figure">',
             f'        <svg class="vchart" data-chart="{CHART_ID}" '
             f'viewBox="0 0 {width} {height}" role="img" '
@@ -129,7 +131,7 @@ def render() -> str:
             "        </svg>",
             '        <div class="olg-legend">'
             '<span class="li"><span class="ln ln-s1"></span>'
-            "svar-unemployment median (68% and 90% bands)</span></div>",
+            "svar-unemployment median (raw 68% and 90% bands)</span></div>",
             "      </figure>",
         ]
     )
