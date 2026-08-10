@@ -56,9 +56,8 @@ MODEL_LABELS = {
 }
 
 NAIVE_NOTE = (
-    "Naive baseline is a random walk: the last outturn available at the "
-    "round's data edge, held flat. Read from the current data vintage, not "
-    "the real-time one, so revisions can flatter or hurt it slightly."
+    "Naive baseline: the last outturn at the round's data edge, held flat "
+    "(read from the current vintage, so revisions can shift it slightly)."
 )
 
 
@@ -396,9 +395,8 @@ VS_OFFICIAL_SPECS = {
             "in <code>papers/obr-macro/figures/fig_anchored_data.csv</code>"
         ),
         "intro": (
-            "GDP growth from the {round_id} round — median and bands beside "
-            "the official forecast. The gap between the lines is where the "
-            "views differ."
+            "GDP growth from the {round_id} round — our median and bands "
+            "beside the OBR's path."
         ),
     },
     "cpi": {
@@ -411,10 +409,9 @@ VS_OFFICIAL_SPECS = {
             "<code>papers/obr-macro/figures/efo_march_2026_cpi.csv</code>"
         ),
         "intro": (
-            "Same round, CPI: the model sees a stickier inflation path than "
-            "the EFO's return to target — partly mechanical, since a "
-            "stationary VAR estimated through the 2021–23 surge mean-reverts "
-            "toward a higher sample mean."
+            "Same round, CPI: the model sees stickier inflation than the "
+            "EFO — partly because a VAR estimated through the 2021–23 "
+            "surge mean-reverts toward a higher sample mean."
         ),
     },
 }
@@ -533,13 +530,13 @@ def render_status(card: dict) -> str:
         '      <div class="forecast-summary" aria-label="Current forecast record">',
         f"        <article><strong>{rounds}</strong><span>Archived "
         f"round{'' if rounds == 1 else 's'}</span>"
-        "<small>forecasts committed with a timestamp, before the outturns existed</small></article>",
+        "<small>committed to Git before the outturn existed</small></article>",
         f"        <article><strong>{scored}</strong><span>Scored "
         f"period{'' if scored == 1 else 's'}</span>"
-        "<small>target quarters whose official outturn has since been published and scored</small></article>",
+        "<small>quarters whose outturn is now published and scored</small></article>",
         f"        <article><strong>{latest_error}</strong><span>Latest absolute "
         "error</span>"
-        "<small>most recent forecast vs the outturn it targeted, in percentage points</small></article>",
+        "<small>latest forecast vs its outturn, percentage points</small></article>",
         "      </div>",
         '      <p class="forecast-next">',
     ]
@@ -655,15 +652,15 @@ def render_results(card: dict) -> str:
         )
     body.append("      </div>")
     notes = [
-        "Errors are signed as forecast − outturn: a positive error means "
-        "the forecast was too high, a negative one too low."
+        "Errors are signed forecast − outturn: positive means the "
+        "forecast ran high."
     ]
     if any(e.get("naive_rw") is not None for _, e in rows):
         notes.append(esc(NAIVE_NOTE))
     if any(e.get("official") is not None for _, e in rows):
         notes.append(
             "The official number is the OBR March 2026 EFO — fixed months "
-            "earlier on less data, so its larger error partly reflects the "
+            "earlier on less data, so part of its larger error is the "
             "information gap."
         )
     if notes:
