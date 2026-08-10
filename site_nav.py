@@ -41,6 +41,7 @@ PAGE_NAMES = {
     "/define": "DEFINE-UK",
     "/define/methodology": "Methodology",
     "/define/validation": "Validation",
+    "/define/code": "Code",
     "/obr/code": "Code",
     "/obr/methodology": "Methodology",
     "/obr/validation": "Validation",

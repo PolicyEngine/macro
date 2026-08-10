@@ -1,0 +1,64 @@
+{
+  "_comment": "Empirical band-widening factors applied at chart render time. Archived round artifacts under forecasts/rounds/ are never modified; the correction exists only in the published fan charts.",
+  "source": {
+    "repo": "PolicyEngine/boe-var-model",
+    "file": "results/coverage_evaluation.json",
+    "code_version": "826619a2cd445bc6bc0d3a540d81ca26e907118f0faed446a3b4f347d7b73833",
+    "origins": 49,
+    "horizons_evaluated": 8
+  },
+  "derivation": "Gaussian half-width approximation: k(h, level) = z(nominal) / z(empirical), where z(p) is the standard-normal quantile at (1+p)/2 and empirical is the measured coverage of the nominal band at horizon h. Each band half-width is multiplied by k around the archived median. k below 1 (an over-covering band) narrows it: this is a calibration, not a one-way widening.",
+  "extrapolation": "The evaluation covers horizons h1-h8; archived rounds run to 13 quarters. For h > 8 the h8 factor is held constant.",
+  "series_mapping": {
+    "gdp": "uk_gdp",
+    "cpi": "cpisa"
+  },
+  "caveat": "Coverage was measured on series levels in transformed model units (pseudo-out-of-sample, overlapping origins); the published fans show year-on-year growth, so the factors are an approximation.",
+  "unemployment_satellite": "Left raw. The svar-unemployment (Okun) satellite is not among the series in the coverage evaluation, so no measured factor applies to it; borrowing the boe-svar factors would assert a calibration that was never tested. Its fan is labelled as raw model quantiles.",
+  "k": {
+    "gdp": {
+      "68": {
+        "h1": 0.6438,
+        "h2": 0.8187,
+        "h3": 0.9315,
+        "h4": 0.9717,
+        "h5": 1.0572,
+        "h6": 1.1031,
+        "h7": 1.2563,
+        "h8": 1.3746
+      },
+      "90": {
+        "h1": 0.9445,
+        "h2": 1.0059,
+        "h3": 1.1227,
+        "h4": 1.2952,
+        "h5": 1.2952,
+        "h6": 1.3542,
+        "h7": 1.4766,
+        "h8": 1.4145
+      }
+    },
+    "cpi": {
+      "68": {
+        "h1": 1.3746,
+        "h2": 1.3746,
+        "h3": 1.4399,
+        "h4": 1.8545,
+        "h5": 1.9617,
+        "h6": 1.9617,
+        "h7": 1.9617,
+        "h8": 2.0808
+      },
+      "90": {
+        "h1": 1.3542,
+        "h2": 1.6764,
+        "h3": 1.8245,
+        "h4": 1.9888,
+        "h5": 1.9046,
+        "h6": 2.1726,
+        "h7": 1.8245,
+        "h8": 1.9888
+      }
+    }
+  }
+}

@@ -56,9 +56,8 @@ MODEL_LABELS = {
 }
 
 NAIVE_NOTE = (
-    "Naive baseline is a random walk: the last outturn available at the "
-    "round's data edge, held flat. Read from the current data vintage, not "
-    "the real-time one, so revisions can flatter or hurt it slightly."
+    "Naive baseline: the last outturn at the round's data edge, held flat "
+    "(read from the current vintage, so revisions can shift it slightly)."
 )
 
 
@@ -360,23 +359,47 @@ def sef_paths() -> dict[str, dict[str, float]]:
     return _SEF_CACHE
 
 
+BAND_CALIBRATION = HERE / "band_calibration.json"
+
+
+def _calibration_k(variable: str) -> dict[str, dict[str, float]]:
+    """Per-horizon widening factors from forecasts/band_calibration.json."""
+    cal = json.loads(BAND_CALIBRATION.read_text())
+    return cal["k"][variable]
+
+
+def _quarter_index(period: str) -> int:
+    return int(period[:4]) * 4 + int(period[5]) - 1
+
+
 def build_vs_official(variable: str) -> list[dict]:
-    """SVAR archived medians beside the EFO path, on shared quarters."""
+    """SVAR archived medians beside the EFO path, on shared quarters.
+
+    Band half-widths are re-scaled around the archived median by the
+    empirical calibration factors in forecasts/band_calibration.json
+    (measured under-coverage; h beyond the evaluated 8 holds the h8
+    factor). The archived round artifact itself is never modified.
+    """
     rnd = json.loads(SVAR_ROUND.read_text())
     efo = official_paths()[variable]
+    edge = _quarter_index(rnd["information_set"]["data_edge"])
+    k = _calibration_k(variable)
     rows = []
     for period in sorted(rnd["forecast"]):
         if period not in efo or variable not in rnd["forecast"][period]:
             continue
         g = rnd["forecast"][period][variable]
+        h = min(max(_quarter_index(period) - edge, 1), 8)
+        k68, k90 = k["68"][f"h{h}"], k["90"][f"h{h}"]
+        med = g["median"]
         rows.append(
             {
                 "period": period,
-                "median": g["median"],
-                "lo68": g["lo68"],
-                "hi68": g["hi68"],
-                "lo90": g["lo90"],
-                "hi90": g["hi90"],
+                "median": med,
+                "lo68": med + (g["lo68"] - med) * k68,
+                "hi68": med + (g["hi68"] - med) * k68,
+                "lo90": med + (g["lo90"] - med) * k90,
+                "hi90": med + (g["hi90"] - med) * k90,
                 "efo": efo[period],
                 "boe": boe_paths()[variable].get(period),
                 "sef": sef_paths()[variable].get(period),
@@ -396,9 +419,8 @@ VS_OFFICIAL_SPECS = {
             "in <code>papers/obr-macro/figures/fig_anchored_data.csv</code>"
         ),
         "intro": (
-            "GDP growth from the {round_id} round — median and bands beside "
-            "the official forecast. The gap between the lines is where the "
-            "views differ."
+            "GDP growth from the {round_id} round — our median and bands "
+            "beside the OBR's path."
         ),
     },
     "cpi": {
@@ -411,10 +433,9 @@ VS_OFFICIAL_SPECS = {
             "<code>papers/obr-macro/figures/efo_march_2026_cpi.csv</code>"
         ),
         "intro": (
-            "Same round, CPI: the model sees a stickier inflation path than "
-            "the EFO's return to target — partly mechanical, since a "
-            "stationary VAR estimated through the 2021–23 surge mean-reverts "
-            "toward a higher sample mean."
+            "Same round, CPI: the model sees stickier inflation than the "
+            "EFO — partly because a VAR estimated through the 2021–23 "
+            "surge mean-reverts toward a higher sample mean."
         ),
     },
 }
@@ -488,7 +509,8 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
             f'          <title id="{chart_id}-t">boe-svar {spec["name"]} forecast vs '
             "OBR March 2026 EFO</title>",
             f'          <desc id="{chart_id}-d">Fan chart of {spec["series"]}. '
-            "The boe-svar archived median with its 68 and 90 percent bands is shown beside "
+            "The boe-svar archived median with its 68 and 90 percent bands, "
+            "empirically re-calibrated for measured under-coverage, is shown beside "
             "the OBR March 2026 EFO path over the overlapping quarters.</desc>",
             *gridlines,
             *ticks,
@@ -499,7 +521,8 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
             *xticks,
             "        </svg>",
             '        <div class="olg-legend">'
-            '<span class="li"><span class="ln ln-s1"></span>boe-svar median (68% and 90% bands)</span>'
+            '<span class="li"><span class="ln ln-s1"></span>boe-svar median (68% and 90% bands, '
+            "empirically re-calibrated)</span>"
             '<span class="li"><span class="ln ln-s2"></span>OBR March 2026 EFO</span>'
             "</div>",
             "      </figure>",
@@ -533,13 +556,13 @@ def render_status(card: dict) -> str:
         '      <div class="forecast-summary" aria-label="Current forecast record">',
         f"        <article><strong>{rounds}</strong><span>Archived "
         f"round{'' if rounds == 1 else 's'}</span>"
-        "<small>forecasts committed with a timestamp, before the outturns existed</small></article>",
+        "<small>committed to Git before the outturn existed</small></article>",
         f"        <article><strong>{scored}</strong><span>Scored "
         f"period{'' if scored == 1 else 's'}</span>"
-        "<small>target quarters whose official outturn has since been published and scored</small></article>",
+        "<small>quarters whose outturn is now published and scored</small></article>",
         f"        <article><strong>{latest_error}</strong><span>Latest absolute "
         "error</span>"
-        "<small>most recent forecast vs the outturn it targeted, in percentage points</small></article>",
+        "<small>latest forecast vs its outturn, percentage points</small></article>",
         "      </div>",
         '      <p class="forecast-next">',
     ]
@@ -655,15 +678,15 @@ def render_results(card: dict) -> str:
         )
     body.append("      </div>")
     notes = [
-        "Errors are signed as forecast − outturn: a positive error means "
-        "the forecast was too high, a negative one too low."
+        "Errors are signed forecast − outturn: positive means the "
+        "forecast ran high."
     ]
     if any(e.get("naive_rw") is not None for _, e in rows):
         notes.append(esc(NAIVE_NOTE))
     if any(e.get("official") is not None for _, e in rows):
         notes.append(
             "The official number is the OBR March 2026 EFO — fixed months "
-            "earlier on less data, so its larger error partly reflects the "
+            "earlier on less data, so part of its larger error is the "
             "information gap."
         )
     if notes:
