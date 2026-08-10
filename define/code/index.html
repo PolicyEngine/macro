@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DEFINE-UK code — PolicyEngine Macro</title>
+<meta name="description" content="Run DEFINE-UK scenarios: hosted discovery tools, the pe-macro CLI, a pip install that fetches the pinned upstream at runtime, and the validation and clean-room reimplementation tracks." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/define/code" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://policyengine-macro.vercel.app/define/code" />
+<meta property="og:site_name" content="PolicyEngine Macro" />
+<meta property="og:title" content="DEFINE-UK code — PolicyEngine Macro" />
+<meta property="og:description" content="Hosted discovery tools, CLI scenario runs, local install against the pinned unlicensed upstream, and the validation gates and clean-room reimplementation track." />
+<meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
+<meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css?v=3" />
+<style>
+/* page-specific: hero sizing only — shared component styles live in style.css */
+.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
+</style>
+</head>
+<body class="doc">
+<a class="skip-link" href="#top">Skip to main content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="/">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a class="nav-mobile" href="/">Home</a>
+    <a class="nav-mobile" href="/models" aria-current="true">Models</a>
+    <a class="nav-mobile" href="/economy">Economy</a>
+    <a class="nav-mobile" href="/forecasts">Forecasts</a>
+    <a class="nav-mobile nav-start" href="/connect">Use</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<nav class="crumbs mono" aria-label="You are here">
+    <a href="/">Home</a>
+    <a href="/models">Models</a>
+    <a href="/define">DEFINE-UK</a>
+    <span aria-current="page">Code</span>
+</nav>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <p class="eyebrow reveal" style="--d:0">model 07 — ecological stock-flow consistent · define-uk · UK · experimental</p>
+      <h1 class="reveal page-title" style="--d:1;">
+        Climate policy meets the UK financial system.
+      </h1>
+      <p class="lede reveal" style="--d:2">
+        Discover the curated scenario set from the hosted server, run
+        scenario deltas locally with one CLI command, and rebuild the
+        validation record. The unlicensed upstream is fetched at a pinned
+        commit and never hosted.
+      </p>
+    </div>
+  </section>
+
+  <nav class="model-tabs" aria-label="DEFINE-UK pages">
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="/define">Overview</a>
+      <a class="model-tabs-link" href="/define/methodology">Methodology</a>
+      <a class="model-tabs-link" href="/define/validation">Validation</a>
+      <a class="model-tabs-link" href="/define/code" aria-current="page">Code</a>
+      <a class="model-tabs-link" href="/reports/define-uk-replication">Paper</a>
+    </div>
+  </nav>
+
+  <section id="run" class="band band-wide">
+    <div class="band-head">
+      <span class="kicker mono">how to run it</span>
+      <h2>Discover hosted, run locally.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        Four routes into the model, hosted to local. Because the upstream is
+        unlicensed, the hosted server discovers and bridges but never runs
+        the model — scenario deltas are produced on your machine.
+      </p>
+    </div>
+
+    <div class="scrolly-wrap scrolly-code">
+      <div class="scrolly-steps">
+      <div class="meth-step" id="run-1" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Hosted MCP tools</h3></div>
+        <h4>Discovery and the incidence bridge</h4>
+        <p>Three tools on the <a href="/connect">hosted MCP server</a> reach this model: <code>define_list_scenarios</code> (the curated scenario set), <code>define_scenario</code> (returns local run instructions — the unlicensed upstream never executes on our servers), and <code>define_scenario_incidence</code> (experimental: pass a <code>define_payload</code> of locally produced deltas and they become a pre-tax earnings overlay on <a href="/pe">PolicyEngine</a>'s UK population).</p>
+        <h4>Where to read the results</h4>
+        <p>What each scenario represents is on the <a href="/define">overview</a>; the gates behind the numbers are on the <a href="/define/validation">validation</a> page.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">MCP tools</div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>define_list_scenarios</code> — the curated scenario set</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>define_scenario</code> — local run instructions</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>define_scenario_incidence</code> — deltas in, incidence out</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="run-2" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>CLI scenario runs</h3></div>
+        <h4>Deltas from the terminal</h4>
+        <p>The CLI lists the curated scenarios and runs any of them locally: <code>pe-macro define-scenarios</code> to browse, <code>pe-macro define-scenario</code> to produce a scenario's deltas vs baseline — real GDP, emissions, unemployment, real consumption. Deltas only, never levels.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">CLI commands</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro define-scenarios              <span class="cm"># list the curated set</span>
+pe-macro define-scenario &lt;name&gt;        <span class="cm"># scenario deltas vs baseline</span></code></pre></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="run-3" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Install locally</h3></div>
+        <h4>One pip install, upstream fetched at runtime</h4>
+        <p>The adapter installs from GitHub. Nothing upstream is vendored: at runtime it fetches <code>DEFINE-model/DEFINE_UK_1.1</code> at pinned commit <code>846081a</code> and executes the published notebook unmodified.</p>
+        <h4>R does the heavy lifting once</h4>
+        <p>A fresh full run needs local R with the notebook's packages; after that, scenario deltas are instant from the cached pinned run.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">install</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/define-uk-model</code></pre></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="run-4" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Development: gates and the clean room</h3></div>
+        <h4>Clone to rebuild the validation record</h4>
+        <p>The test suite carries the validation gate: hermetic artifact checks always run, and the oracle comparisons against the pinned upstream run execute wherever a local cache exists — in CI they must skip, because a passing oracle test there would mean the unlicensed upstream was fetched.</p>
+        <h4>The path to hosting</h4>
+        <p class="opt-note">a clean-room Python reimplementation of the published Model Manual v1.1 is the route to a hostable model — protocol and milestones in <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">REIMPLEMENTATION.md</a>, upstream code used only as a numerical oracle.</p>
+        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-sec-title">development</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/define-uk-model
+cd define-uk-model
+pytest                    <span class="cm"># hermetic gate everywhere; oracle tests need the local cache</span></code></pre></div>
+        </div>
+      </div>
+      </div>
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Hosted MCP tools</span><span class="meth-panel-badge mono">Code 1</span></div>
+          <div class="meth-sec-title">MCP tools</div>
+        <div class="meth-out">
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>define_list_scenarios</code> — the curated scenario set</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>define_scenario</code> — local run instructions</span></div>
+            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>define_scenario_incidence</code> — deltas in, incidence out</span></div>
+          </div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">CLI scenario runs</span><span class="meth-panel-badge mono">Code 2</span></div>
+          <div class="meth-sec-title">CLI commands</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro define-scenarios              <span class="cm"># list the curated set</span>
+pe-macro define-scenario &lt;name&gt;        <span class="cm"># scenario deltas vs baseline</span></code></pre></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Install locally</span><span class="meth-panel-badge mono">Code 3</span></div>
+          <div class="meth-sec-title">install</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/define-uk-model</code></pre></div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Gates and the clean room</span><span class="meth-panel-badge mono">Code 4</span></div>
+          <div class="meth-sec-title">development</div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/define-uk-model
+cd define-uk-model
+pytest                    <span class="cm"># hermetic gate everywhere; oracle tests need the local cache</span></code></pre></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot foot-bar">
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="/contact">Contact</a>
+  </nav>
+</footer>
+
+<script src="/reveal.js?v=2" defer></script>
+<script>
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest("[data-copy]"); if (!btn) return;
+  var code = btn.parentElement.querySelector("code");
+  navigator.clipboard.writeText(code.textContent).then(function () {
+    btn.textContent = "copied";
+    setTimeout(function () { btn.textContent = "copy"; }, 1400);
+  });
+});
+</script>
+<script>
+// Code scrollytelling: highlight the step at the reading line and
+// show its code panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    panels.forEach(function (panel, i) {
+      panel.hidden = i !== active;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  update();
+})();
+</script>
+</body>
+</html>
