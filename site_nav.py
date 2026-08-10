@@ -67,6 +67,7 @@ PAGE_NAMES = {
     "/papers/psl-og": "psl-og",
     "/reports/define-uk-replication": "define-uk",
     "/forecasts": "Forecasts",
+    "/forecasts/us": "United States",
     "/notes/releases": "Releases",
     "/connect": "Use",
     "/contact": "Contact",
