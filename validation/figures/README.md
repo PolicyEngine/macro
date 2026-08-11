@@ -59,7 +59,9 @@ transcription, not an input.
 Deriving `obr-anchored`'s deviations from the CSV rather than transcribing them
 also gives a free cross-check: the computed values reproduce the four selected
 quarters in the paper's comparison table (+0.05%, −0.16%, +0.19%, +0.32% on GDP)
-and the MAPEs quoted in the page prose (0.18% GDP, 0.29% consumption).
+and the MAPEs quoted in the page prose (0.15% GDP, 0.25% consumption over
+2025Q1–2027Q4 on the March 2026 vintage; the paper's tables preserve the
+November 2025 study's 0.18%/0.29%).
 
 ## Accessibility
 

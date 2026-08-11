@@ -2875,6 +2875,21 @@ h2 {
 .cmp-compare table tbody th[scope="row"] {
   background: var(--brand-wash);
 }
+/* /models#validation, "By model" panel: the label column holds model ids,
+   which are identifiers, not prose, so they must never wrap. `width: 1%`
+   with `white-space: nowrap` is the shrink-to-fit idiom for an auto-layout
+   table — the column collapses to the widest name and the remaining width
+   goes to the prose columns, so one long verification-class cell can no
+   longer squeeze model names onto two lines. Scoped to this panel: the
+   sibling "Vs other institutions" table and the /olg and /frb-us tables
+   use sentence-length row headers that must stay wrappable. */
+#val-p1.cmp-compare table thead th:first-child,
+#val-p1.cmp-compare table tbody th[scope="row"],
+#val-p1 .cmp-compare table thead th:first-child,
+#val-p1 .cmp-compare table tbody th[scope="row"] {
+  width: 1%;
+  white-space: nowrap;
+}
 
 /* One frame, not three: charts inside cards drop the inner .vchart box,
    and the toolbar/legend hairlines go — the card border does the work. */
