@@ -15,6 +15,13 @@ on:
   push:
     branches: [main]
     paths: [integration/**, .github/workflows/test-integration.yml]
+  # The two model repos above are installed from git HEAD, not a pin, so this
+  # suite can start failing with no change to integration/ at all — and the
+  # path filters mean nothing would trigger it until someone next touched the
+  # directory. Manual dispatch is the way to ask "does main still pass against
+  # today's upstream?" without an empty commit. (Nightly upstream drift in the
+  # slow contracts is covered separately by contract.yml.)
+  workflow_dispatch:
 
 concurrency:
   group: test-integration-${{ github.ref }}

@@ -1,0 +1,153 @@
+name: Publish to PyPI
+
+# Publishes integration/ (the `policyengine-macro` distribution) to PyPI when a
+# GitHub release is published. `workflow_dispatch` does everything except the
+# upload, so the build and the gate can be exercised without burning a version
+# number — a PyPI filename can never be reused, so a bad upload is permanent.
+#
+# ---------------------------------------------------------------------------
+# THIS WORKFLOW LANDS DORMANT. It will FAIL on its first real release until a
+# maintainer configures Trusted Publishing on PyPI. That is deliberate: the
+# alternative is a long-lived API token sitting in repository secrets, which is
+# the thing this design exists to avoid.
+#
+# To activate it, a human with owner rights on the PyPI project must:
+#
+#   1. Sign in at https://pypi.org/ as an Owner of `policyengine-macro`.
+#      If the project has never been published, use the *pending* publisher
+#      form instead: https://pypi.org/manage/account/publishing/ — a pending
+#      publisher creates the project on the first successful upload.
+#   2. For an existing project: go to
+#      https://pypi.org/manage/project/policyengine-macro/settings/publishing/
+#   3. Add a new GitHub publisher with EXACTLY these four values (they are
+#      matched literally against the OIDC token; a typo reads as an unknown
+#      publisher and the upload is rejected):
+#         PyPI Project Name: policyengine-macro
+#         Owner:             PolicyEngine
+#         Repository name:   macro
+#         Workflow name:     publish-pypi.yml
+#         Environment name:  pypi
+#   4. In this repository's settings, create the environment `pypi`
+#      (Settings > Environments > New environment) and — recommended — add the
+#      maintainers as required reviewers, so a release upload pauses for a
+#      human approval. The environment name must match step 3 exactly.
+#
+# No secret is created at any point. Authentication is a short-lived OIDC token
+# minted by GitHub for this workflow in this repository, exchanged with PyPI
+# for a one-shot upload token (`permissions: id-token: write` below). Nothing
+# to leak, rotate, or forget to revoke when a maintainer leaves.
+#
+# Until step 3 is done, the publish step fails with
+# "invalid-publisher: valid token, but no corresponding publisher" — that is
+# this workflow working correctly against an unconfigured PyPI project, not a
+# bug in the build.
+# ---------------------------------------------------------------------------
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+concurrency:
+  # Never let two uploads race. NOT cancel-in-progress: an upload that has
+  # already reached PyPI cannot be taken back, so an interrupted run is worse
+  # than a queued one (same reasoning as deploy-mcp.yml).
+  group: publish-pypi
+  cancel-in-progress: false
+
+jobs:
+  # GATE. A release is the one moment where a broken build ships to everyone
+  # who pip-installs the package, and the ordinary PR suite does not run on
+  # tag/release events at all. Same fast suite as test-integration.yml: no
+  # heavy country models, slow tests skipped.
+  gate:
+    name: Fast integration suite must pass before anything is uploaded
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: integration
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install policyengine-macro + the two lightweight model repos
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e . pytest
+          pip install \
+            "obr-macro-model @ git+https://github.com/PolicyEngine/obr-macroeconomic-model" \
+            "boe_var @ git+https://github.com/PolicyEngine/boe-var-model"
+      - name: Tool-surface contract (exact names and count)
+        run: pytest tests/test_tool_surface.py -q
+      - name: Run fast integration suite
+        run: pytest tests -q
+
+  build:
+    name: Build sdist and wheel
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install build tooling
+        run: python -m pip install --upgrade pip build twine
+      - name: Build
+        working-directory: integration
+        run: python -m build
+      - name: Check the artifacts render on PyPI
+        # twine check catches a long_description that PyPI will refuse to
+        # render — which cannot be fixed after upload, only superseded by a new
+        # version.
+        working-directory: integration
+        run: twine check dist/*
+      - name: Confirm the built version matches the release tag
+        # A release tagged v0.3.0 that builds 0.2.0 uploads under the WRONG
+        # version and burns the filename. Caught here, before the upload.
+        if: github.event_name == 'release'
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        working-directory: integration
+        run: |
+          built=$(ls dist/*.tar.gz | sed -E 's/.*-([0-9][^-]*)\.tar\.gz/\1/')
+          want="${TAG#v}"
+          if [ "$built" != "$want" ]; then
+            echo "::error::release tag $TAG implies version '$want' but the"
+            echo "build produced '$built'. Bump version in"
+            echo "integration/pyproject.toml, or retag the release."
+            exit 1
+          fi
+          echo "OK — building $built for tag $TAG."
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: integration/dist/
+          if-no-files-found: error
+
+  publish:
+    name: Upload to PyPI (Trusted Publishing)
+    needs: build
+    # Only a published GitHub release uploads. workflow_dispatch stops after
+    # `build`, which is the dry run.
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Must match the "Environment name" registered with the PyPI publisher.
+    environment:
+      name: pypi
+      url: https://pypi.org/p/policyengine-macro
+    permissions:
+      # The whole point: mint a short-lived OIDC token instead of storing a
+      # PyPI API token as a secret. No other permission is needed — this job
+      # does not touch the repository contents.
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@release/v1

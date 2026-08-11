@@ -34,7 +34,14 @@ jobs:
         run: |
           # --diff-filter=MDR: Modified, Deleted, Renamed. Added (A) is the only
           # legitimate change to an archived round.
-          touched=$(git diff --name-only --diff-filter=MDR "$BASE" "$HEAD" -- forecasts/rounds/ || true)
+          #
+          # Three-dot, not two-dot: `A B` compares against the base branch TIP,
+          # so a round that landed on main after this branch was cut reads as a
+          # deletion BY THIS PR. `A...B` compares against the merge base — the
+          # commit the branch actually forked from — which is what "did this PR
+          # touch history" means. The two-dot form fired falsely whenever a
+          # weekly archive PR merged while another branch was open.
+          touched=$(git diff --name-only --diff-filter=MDR "$BASE...$HEAD" -- forecasts/rounds/ || true)
           if [ -n "$touched" ]; then
             echo "::error::archived forecast rounds were modified, renamed or deleted:"
             echo "$touched" | sed 's/^/  /'
@@ -48,25 +55,10 @@ jobs:
       - name: Validate the archive
         run: python3 forecasts/archive.py --check
 
-      - name: Reject edits and deletions under data/vintages/
-        if: github.event_name == 'pull_request'
-        env:
-          BASE: ${{ github.event.pull_request.base.sha }}
-          HEAD: ${{ github.event.pull_request.head.sha }}
-        run: |
-          touched=$(git diff --name-only --diff-filter=MDR "$BASE" "$HEAD" -- data/vintages/ || true)
-          if [ -n "$touched" ]; then
-            echo "::error::stored data vintages were modified, renamed or deleted:"
-            echo "$touched" | sed 's/^/  /'
-            echo ""
-            echo "Data vintages are append-only. Store a new dated snapshot"
-            echo "instead of rewriting the data previously available."
-            exit 1
-          fi
-          echo "OK — no stored data vintage was edited."
-
-      - name: Data vintage store is consistent
-        run: python3 data/fetch.py --check
+      # The data-vintage half of this job moved to data-immutability.yml, which
+      # owns the same guarantee for data/vintages/ and fails with a message
+      # about data revisions rather than forecast rounds. Two archives, two
+      # workflows, so a red check names the archive that was touched.
 
       - name: Test outturn ingestion
         run: python3 -m unittest discover -s forecasts/tests -p 'test_*.py'

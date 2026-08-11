@@ -145,8 +145,64 @@ python3 -m http.server 8000   # then open http://localhost:8000/
 | `docs/` | comparison — the model classes side by side and when to use which |
 | `papers/` | working-paper library linked to models and validation evidence |
 | `connect/` | connect it or code it — MCP / CLI setup and the Python API |
+| `data/` | the point-in-time data store — series catalogue, as-of recipe, release calendar |
 
 Deployed on Vercel (PolicyEngine team). `vercel.json` enables clean URLs.
+
+## The data
+
+Every official series the site depends on is archived as **dated, immutable
+snapshots** under `data/vintages/<source>/<series>/<YYYY-MM-DD>.json`, fetched
+from ONS, the Bank of England and FRED. Official statistics get revised, so
+reading only "the latest data" means silently rewriting your own history on
+every revision — a forecast that never changed can be made to look better or
+worse by data it could not have known about, and look-ahead bias becomes
+undetectable because only one version of the past is ever on disk.
+
+Dated snapshots make both visible. Nothing under `data/vintages/` is ever
+edited or deleted; CI enforces it. A revision arrives as a **new file beside
+the old one**, never as an edit.
+
+The store is public JSON, served with permissive CORS, so it can be read
+directly from a notebook, a browser, or a dashboard:
+
+| endpoint | what it is | caching |
+|----------|-----------|---------|
+| `/data/MANIFEST.json` | generated index of every tracked series | short TTL |
+| `/data/latest/<series>.json` | newest snapshot, flattened | short TTL |
+| `/data/vintages/<source>/<series>/<date>.json` | the series exactly as published on `<date>` | immutable, one year |
+| `/data/calendar.ics` | announced upcoming release dates | short TTL |
+
+Reconstructing a series as a forecaster would have seen it on a given date is
+one request:
+
+```python
+import json, urllib.request
+
+BASE = "https://policyengine-macro.vercel.app/data"
+as_of = "2026-07-25"     # the vintage you want to see the world through
+snap = json.load(urllib.request.urlopen(
+    f"{BASE}/vintages/ons/uk_cpi_yoy/{as_of}.json"))
+print(snap["observations"][-1])   # {'period': '2026Q2', 'value': 2.8}
+```
+
+Browse it at [`/data`](https://policyengine-macro.vercel.app/data) — the full
+catalogue, the schema, the release calendar and the recipe above. The
+[forecast track record](forecasts/) records which vintage each score was
+computed against, so any published number can be reproduced.
+
+## Contributing
+
+Many pages here are **generated** from committed data by a script with a
+`--check` mode that CI enforces, and two archives (`data/vintages/`,
+`forecasts/rounds/`) are **append-only**. Read
+[CONTRIBUTING.md](CONTRIBUTING.md) before making changes — it covers both, plus
+the model-capability registry and the release process. Security policy is in
+[SECURITY.md](SECURITY.md); changes are recorded in [CHANGELOG.md](CHANGELOG.md).
+
+> **Licensing:** this repository does not yet carry a `LICENSE` file. Until it
+> does, no open-source grant is in effect. If you intend to depend on it, open
+> an issue so the decision gets made.
 
 ## Adding a model
 
@@ -184,4 +240,5 @@ non-real numbers as illustrative.
 
 ---
 
-Open source · a [PolicyEngine](https://policyengine.org) project.
+A [PolicyEngine](https://policyengine.org) project. Publicly developed; the
+licence is still to be decided — see [Contributing](#contributing).

@@ -1,0 +1,95 @@
+name: Data immutability
+
+# The vintage store's entire value is that a dated snapshot is never edited or
+# deleted. Two claims rest on it and nothing else:
+#
+#   * look-ahead bias is DETECTABLE — a forecast can be checked against the
+#     data that actually existed on the day it was made, not against the
+#     revised series we happen to hold today;
+#   * any number the site has ever published can be REPRODUCED — the vintage
+#     it was drawn from is still byte-identical on disk.
+#
+# Both die quietly the moment a snapshot is rewritten in place, and a rewrite
+# is indistinguishable from a routine refresh in review: the diff looks like
+# "data updated", which is what a data PR is supposed to look like. So this is
+# enforced in CI rather than by convention. A revision is stored as a NEW dated
+# file beside the old one; additions are always fine, edits and deletions never
+# are.
+#
+# Same pattern as forecast-archive.yml, which makes the identical guarantee for
+# forecasts/rounds/ — see the note at the bottom of this file.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: data-immutability-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  immutability:
+    name: Stored vintages are append-only
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Need the base commit to diff against, so no shallow clone.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Reject edits and deletions under data/vintages/
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # --diff-filter=MDR: Modified, Deleted, Renamed. Added (A) is the only
+          # legitimate change to a stored vintage. A rename counts as a
+          # deletion: the path IS the identity of a snapshot (source/series/
+          # date), so moving one makes every previous citation of it wrong.
+          #
+          # "$BASE...$HEAD" (three dots) diffs HEAD against the MERGE BASE, not
+          # against the current tip of main. Two-dot would report vintages that
+          # main gained after this branch was cut as deletions by this PR — a
+          # false failure that arrives precisely when the weekly fetch PR has
+          # just merged, and the fastest way to teach everyone to ignore this
+          # gate. (forecast-archive.yml still uses the two-dot form; see the
+          # note at the bottom of this file.)
+          touched=$(git diff --name-only --diff-filter=MDR "$BASE...$HEAD" -- data/vintages/ || true)
+          if [ -n "$touched" ]; then
+            echo "::error::stored data vintages were modified, renamed or deleted:"
+            echo "$touched" | sed 's/^/  /'
+            echo ""
+            echo "Data vintages are append-only. Each file is the data as it"
+            echo "stood on that date; rewriting one destroys the evidence that"
+            echo "a forecast was made without hindsight, and makes every number"
+            echo "already published from it unreproducible."
+            echo ""
+            echo "If the upstream series was revised, store a NEW dated"
+            echo "snapshot beside the old one — that is what a revision IS."
+            echo "If the fetcher wrote over an existing file, that is a bug in"
+            echo "data/fetch.py, not something to accept into the store."
+            exit 1
+          fi
+          echo "OK — no stored data vintage was edited."
+
+      # The diff check above proves nothing was rewritten; this proves the
+      # store is internally coherent after the addition — MANIFEST.json agrees
+      # with the files on disk and latest/ points at the newest vintage of each
+      # series.
+      - name: Data vintage store is consistent
+        run: python3 data/fetch.py --check
+
+# History: forecast-archive.yml used to carry a copy of the data/vintages/
+# diff check and the `data/fetch.py --check` step, added there before the data
+# store had a workflow of its own. Both moved here in the same change that
+# created this file, so each archive now has one workflow and a red check names
+# which archive was touched. forecast-archive.yml's forecasts/rounds/ check was
+# switched to the three-dot form at the same time — it had the identical
+# false-failure mode described above.
