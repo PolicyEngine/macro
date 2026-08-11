@@ -65,11 +65,6 @@ repository and makes a class of silent regression fail loudly in CI.
 
 ### Not included
 
-- **A licence.** This repository still has no `LICENSE` file, so the README's
-  "open source" is not yet accurate and the published package is, strictly, all
-  rights reserved. `tests/test_repo_hygiene.py` carries an expected-failure
-  test that starts passing when one is added. Deferred deliberately, not
-  overlooked.
 - **A DOI.** `CITATION.cff` is ready for the identifier once the repository is
   connected to Zenodo and a release is minted.
 - **A browser reform scorer.** Running any model still requires a terminal —

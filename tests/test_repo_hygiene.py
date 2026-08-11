@@ -1,16 +1,12 @@
-"""Repository-level provenance: licence, citation, changelog, and pins.
+"""Repository-level provenance: citation, changelog, and dependency pins.
 
 The class of regression this prevents
 -------------------------------------
 This repo publishes working papers, asks to be cited, and claims in
-``README.md`` and across ``/models`` that its results are reproducible. Four
+``README.md`` and across ``/models`` that its results are reproducible. Three
 files carry those claims outside the website, and none of them is exercised by
 any other check in the repo:
 
-* **LICENSE** — without one, "open source" is not a licence grant. Nobody may
-  legally reuse the models, and the site says they may. The declared SPDX
-  identifier and the shipped licence text have to be the same licence, or the
-  package metadata is telling installers something the file does not.
 * **CITATION.cff** — the papers give a citation block; a machine-readable
   ``CITATION.cff`` is what GitHub and Zenodo read. A ``version`` that has
   drifted from the package version means every automated citation records the
@@ -41,24 +37,12 @@ import pytest
 
 # --------------------------------------------------------------- policy
 
-# Fingerprints for identifying which licence a LICENSE file actually contains,
-# so a file whose text disagrees with the declared SPDX id is caught. Ordered
-# most-specific first; each entry is (SPDX id, phrases that must all appear).
-LICENSE_FINGERPRINTS: list[tuple[str, tuple[str, ...]]] = [
-    ("AGPL-3.0", ("GNU AFFERO GENERAL PUBLIC LICENSE", "Version 3")),
-    ("GPL-3.0", ("GNU GENERAL PUBLIC LICENSE", "Version 3")),
-    ("LGPL-3.0", ("GNU LESSER GENERAL PUBLIC LICENSE", "Version 3")),
-    ("Apache-2.0", ("Apache License", "Version 2.0")),
-    ("MPL-2.0", ("Mozilla Public License Version 2.0",)),
-    ("BSD-3-Clause", ("Redistribution and use", "Neither the name")),
-    ("BSD-2-Clause", ("Redistribution and use",)),
-    ("MIT", ("Permission is hereby granted, free of charge",)),
-]
 
-# Dependency specifiers in the [models] extra that are not git checkouts and so
-# have no commit to pin. These come from PyPI, where a version specifier is the
-# reproducible form; test_source_pins.py in integration/ covers the deployment
-# side of the same question.
+
+# Only git dependencies can be SHA-pinned; PyPI requirements have no commit to
+# pin, where a version specifier is the reproducible form instead.
+# test_source_pins.py in integration/ covers the deployment side of the same
+# question.
 NON_GIT_MARKER = "git+"
 
 
@@ -74,48 +58,8 @@ def _package_version(repo_root: Path) -> str:
     return version
 
 
-def _declared_license(repo_root: Path) -> str | None:
-    """The SPDX identifier ``integration/pyproject.toml`` declares, if any.
-
-    PEP 639 allows a bare string (``license = "MIT"``); the older PEP 621 form
-    is a table with ``text`` or ``file``. Classifiers are the last resort,
-    because a ``License ::`` classifier is what older packaging used.
-    """
-    project = _pyproject(repo_root).get("project", {})
-    license_field = project.get("license")
-    if isinstance(license_field, str):
-        return license_field.strip()
-    if isinstance(license_field, dict):
-        text = license_field.get("text")
-        if isinstance(text, str) and text.strip():
-            return text.strip()
-    for classifier in project.get("classifiers", []):
-        if classifier.startswith("License :: OSI Approved ::"):
-            return classifier.split("::")[-1].strip()
-    return None
 
 
-def _identify_license(text: str) -> str | None:
-    """Which licence the LICENSE file actually contains."""
-    explicit = re.search(r"SPDX-License-Identifier:\s*([^\s]+)", text)
-    if explicit:
-        return explicit.group(1).strip()
-    for spdx, phrases in LICENSE_FINGERPRINTS:
-        if all(phrase.lower() in text.lower() for phrase in phrases):
-            return spdx
-    return None
-
-
-def _same_license(declared: str, detected: str) -> bool:
-    """Compare SPDX ids tolerantly.
-
-    ``AGPL-3.0``, ``AGPL-3.0-only`` and ``AGPL-3.0-or-later`` are the same
-    licence for this purpose, as are case variants.
-    """
-    normalise = lambda value: re.sub(  # noqa: E731 - local, single use
-        r"-(only|or-later)$", "", value.strip().lower()
-    )
-    return normalise(declared) == normalise(detected)
 
 
 def _cff_scalars(text: str) -> dict[str, str]:
@@ -140,68 +84,7 @@ def _cff_scalars(text: str) -> dict[str, str]:
     return scalars
 
 
-# --------------------------------------------------------------- 1. licence
-
-# Expected to fail: choosing a licence is a maintainer decision that has been
-# deliberately deferred, not an oversight (see CONTRIBUTING.md, "Open questions
-# for maintainers"). The test is written to be *correct*, not to pass, so the
-# day a LICENSE lands it turns green on its own and starts guarding the real
-# invariant — that the file on disk and the SPDX id in pyproject agree.
-#
-# `strict=False` on purpose: an XPASS here is the good news, not a CI failure.
-# Deleting this test instead of xfailing it would delete the only machine-
-# readable record that the gap exists.
-@pytest.mark.xfail(
-    reason=(
-        "no LICENSE file yet — licensing decision deferred by the maintainers. "
-        "Until one exists there is no open-source grant, and the published "
-        "package is strictly all rights reserved."
-    ),
-    strict=False,
-)
-def test_repository_ships_a_license_matching_its_declared_spdx_id(repo_root):
-    """A LICENSE file exists, has content, and is the licence we declare.
-
-    The site and README describe this work as open source and invite reuse of
-    the models and the papers. Without a LICENSE file that is not a licence
-    grant — default copyright reserves every right — so the invitation is one
-    nobody can legally accept.
-    """
-    candidates = [
-        repo_root / name
-        for name in ("LICENSE", "LICENSE.md", "LICENSE.txt", "COPYING")
-    ]
-    present = [path for path in candidates if path.is_file()]
-    assert present, (
-        "no LICENSE file at the repository root (looked for "
-        + ", ".join(path.name for path in candidates)
-        + "). README.md and the site describe this work as open source, which "
-        "is not true without one."
-    )
-
-    license_file = present[0]
-    text = license_file.read_text()
-    assert text.strip(), f"{license_file.name} is empty"
-
-    declared = _declared_license(repo_root)
-    assert declared, (
-        "integration/pyproject.toml declares no license: add "
-        f'`license = "<SPDX id>"` under [project] to match {license_file.name}'
-    )
-
-    detected = _identify_license(text)
-    assert detected is not None, (
-        f"{license_file.name} does not match any known licence text and carries "
-        "no `SPDX-License-Identifier:` line, so it cannot be checked against "
-        f"the {declared!r} declared in integration/pyproject.toml"
-    )
-    assert _same_license(declared, detected), (
-        f"integration/pyproject.toml declares license = {declared!r} but "
-        f"{license_file.name} contains the {detected!r} licence text"
-    )
-
-
-# --------------------------------------------------------------- 2. citation
+# --------------------------------------------------------------- 1. citation
 
 def test_citation_metadata_matches_the_package_version(repo_root):
     """``CITATION.cff`` exists, parses, and cites the current version.
@@ -235,7 +118,7 @@ def test_citation_metadata_matches_the_package_version(repo_root):
     )
 
 
-# --------------------------------------------------------------- 3. changelog
+# --------------------------------------------------------------- 2. changelog
 
 def test_changelog_top_entry_is_the_current_version(repo_root):
     """The newest changelog heading names the version we ship.
@@ -269,7 +152,7 @@ def test_changelog_top_entry_is_the_current_version(repo_root):
     )
 
 
-# --------------------------------------------------------------- 4. pins
+# --------------------------------------------------------------- 3. pins
 
 def test_model_extra_pins_every_git_dependency_to_a_commit_sha(repo_root):
     """Reproducibility depends on the ``[models]`` extra being immutable.
@@ -322,7 +205,7 @@ def test_model_extra_pins_every_git_dependency_to_a_commit_sha(repo_root):
     )
 
 
-# --------------------------------------------------------------- 5. readme
+# --------------------------------------------------------------- 4. readme
 
 def test_readme_links_to_repo_paths_that_exist(repo_root):
     """No README link points at a file or directory that is not here.

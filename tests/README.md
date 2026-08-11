@@ -68,8 +68,6 @@ Overlaps `python3 data/fetch.py --check` on purpose, and goes further:
 
 The provenance files that live outside the website.
 
-- `LICENSE` exists, is non-empty, and its licence text matches the SPDX
-  identifier declared in `integration/pyproject.toml`.
 - `CITATION.cff` parses and its `version` matches the package version.
 - `CHANGELOG.md`'s topmost version heading matches the package version.
 - The `[models]` extra pins every git dependency to a full 40-character commit

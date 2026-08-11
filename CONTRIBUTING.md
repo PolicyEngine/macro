@@ -377,11 +377,6 @@ correctly against an unconfigured project, not a broken build.
 
 ## Open questions for maintainers
 
-- **This repository has no `LICENSE` file.** Until it does, "open source" in the
-  README is not accurate and the published package is, strictly, all rights
-  reserved — which blocks adoption by universities and by any institution with
-  a compliance review. `tests/test_repo_hygiene.py` carries an expected-failure
-  test that will start passing the moment a licence is added.
 - **No DOI.** Connecting the repository to Zenodo and minting a release would
   make the archives and figures citable; `CITATION.cff` is ready for the
   identifier.

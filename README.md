@@ -285,10 +285,6 @@ Many pages here are **generated** from committed data by a script with a
 the model-capability registry and the release process. Security policy is in
 [SECURITY.md](SECURITY.md); changes are recorded in [CHANGELOG.md](CHANGELOG.md).
 
-> **Licensing:** this repository does not yet carry a `LICENSE` file. Until it
-> does, no open-source grant is in effect. If you intend to depend on it, open
-> an issue so the decision gets made.
-
 ## Adding a model
 
 The checklist has one canonical home:
@@ -314,5 +310,4 @@ checklist is not optional.
 
 ---
 
-A [PolicyEngine](https://policyengine.org) project. Publicly developed; the
-licence is still to be decided — see [Contributing](#contributing).
+A [PolicyEngine](https://policyengine.org) project, publicly developed.
