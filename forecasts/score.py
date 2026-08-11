@@ -666,9 +666,12 @@ def render_results(card: dict) -> str:
             "        </article>"
         )
     body.append("      </div>")
+    # How to read the card. Every caveat the arrow-bullet stack carried is
+    # kept verbatim; only the presentation changed, from a stack of keyed
+    # rows to one short paragraph directly under the card it explains.
     notes = [
-        "Errors are signed forecast − outturn: positive means the "
-        "forecast ran high."
+        "Errors are signed forecast − outturn, so a positive number means "
+        "the forecast ran high."
     ]
     if any(e.get("naive_rw") is not None for _, e in rows):
         notes.append(esc(NAIVE_NOTE))
@@ -680,13 +683,9 @@ def render_results(card: dict) -> str:
         )
     if notes:
         body.append(
-            '      <div class="meth-out plain">\n'
-            + "\n".join(
-                '        <div class="meth-out-line"><span class="icon">&rarr;</span>'
-                "<span>" + n + "</span></div>"
-                for n in notes
-            )
-            + "\n      </div>"
+            '      <p class="forecast-note">\n        '
+            + " ".join(notes)
+            + "\n      </p>"
         )
     return "\n".join(body)
 

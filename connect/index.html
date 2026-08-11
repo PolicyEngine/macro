@@ -416,15 +416,22 @@
       <div class="seg model-seg" role="tablist" aria-label="Model" id="model-seg">
         <button id="model-tab-obr" role="tab" data-model="obr" aria-selected="true" aria-controls="model-panel-obr" tabindex="0"><strong>obr-macro</strong><span>Near-term fiscal</span></button>
         <button id="model-tab-oguk" role="tab" data-model="oguk" aria-selected="false" aria-controls="model-panel-oguk" tabindex="-1"><strong>psl-og</strong><span>Long-run reform</span></button>
+        <button id="model-tab-ogmicro" role="tab" data-model="ogmicro" aria-selected="false" aria-controls="model-panel-ogmicro" tabindex="-1"><strong>og+microsim</strong><span>Dynamic scoring</span></button>
         <button id="model-tab-frbus" role="tab" data-model="frbus" aria-selected="false" aria-controls="model-panel-frbus" tabindex="-1"><strong>frb-us</strong><span>US shocks</span></button>
         <button id="model-tab-svar" role="tab" data-model="svar" aria-selected="false" aria-controls="model-panel-svar" tabindex="-1"><strong>boe-svar</strong><span>UK forecasts</span></button>
         <button id="model-tab-hank" role="tab" data-model="hank" aria-selected="false" aria-controls="model-panel-hank" tabindex="-1"><strong>us-hank</strong><span>US distributional</span></button>
         <button id="model-tab-pe" role="tab" data-model="pe" aria-selected="false" aria-controls="model-panel-pe" tabindex="-1"><strong>pe-microsim</strong><span>Households</span></button>
+        <button id="model-tab-define" role="tab" data-model="define" aria-selected="false" aria-controls="model-panel-define" tabindex="-1"><strong>define-uk</strong><span>UK climate scenarios</span></button>
       </div>
       <div class="model-pane compact-pane" id="model-panel-oguk" role="tabpanel" aria-labelledby="model-tab-oguk" data-model="oguk" hidden>
         <span class="tag tag-local">local</span><h3>Long-run reform effects</h3>
         <p>Model work, saving, capital, and public finances over decades.</p>
         <a class="btn btn-primary" href="/olg/code#run">Open OG-UK setup</a>
+      </div>
+      <div class="model-pane compact-pane" id="model-panel-ogmicro" role="tabpanel" aria-labelledby="model-tab-ogmicro" data-model="ogmicro" hidden>
+        <span class="tag tag-local">local only</span><h3>Dynamic reform scoring</h3>
+        <p>Experimental, UK only: an OG-UK steady-state solve feeds long-run wage changes back into a second microsimulation run. Local only, and until <a href="https://github.com/PSLmodels/OG-UK/issues/68">OG-UK#68</a> the solve needs its own environment — run <code>pe-macro og-score --json &gt; og.json</code> there, then <code>pe-macro dynamic-score --og-payload og.json</code>.</p>
+        <a class="btn btn-primary" href="/olg/code#run">Open dynamic scoring setup</a>
       </div>
       <div class="model-pane compact-pane" id="model-panel-obr" role="tabpanel" aria-labelledby="model-tab-obr" data-model="obr">
         <span class="tag tag-hosted">hosted</span><h3>Near-term UK fiscal effects</h3>
@@ -450,6 +457,11 @@
         <span class="tag tag-hosted">hosted</span><h3>UK and US household impacts</h3>
         <p>Calculate taxes, benefits, and reform effects.</p>
         <a class="btn btn-primary" href="/pe/code#run">Open PolicyEngine setup</a>
+      </div>
+      <div class="model-pane compact-pane" id="model-panel-define" role="tabpanel" aria-labelledby="model-tab-define" data-model="define" hidden>
+        <span class="tag tag-local">local only</span><h3>UK climate-policy scenarios</h3>
+        <p>Experimental: <code>pip install git+https://github.com/PolicyEngine/define-uk-model</code> fetches the pinned upstream at runtime. That upstream is unlicensed and is never hosted, so scenario deltas come from a cached local run — a fresh one needs local R.</p>
+        <a class="btn btn-primary" href="/define/code#run">Open DEFINE-UK setup</a>
       </div>
     </div>
   </section>
@@ -516,9 +528,10 @@
     applyClient();
   });
 
-  // model selector in the code section (one tab per model with a Python
-  // surface; define-uk is deliberately absent — no hosted/CLI/Python
-  // surface until its replication is validated)
+  // model selector in the code section: one tab per entry in the
+  // capabilities registry (integration/src/policyengine_macro/capabilities.py),
+  // including the local-only ones — define-uk and the og+microsim overlay
+  // have a CLI/Python surface even though neither runs hosted.
   var modelSeg = document.getElementById("model-seg");
   if (modelSeg) {
     bindTabs(modelSeg, function (btn) {

@@ -69,8 +69,10 @@
       <div class="economy-topics">
         <a href="#status">Record</a>
         <a href="#scored">Scored</a>
+        <a href="#open">Open</a>
         <a href="#rounds">Rounds</a>
         <a href="#data">Data</a>
+        <a href="#limits">Limits</a>
         <a href="#notes">Notes</a>
       </div>
     </div>
@@ -125,11 +127,9 @@
           <footer><span>Error <strong>-0.12pp</strong></span><span>beats naive error <strong>0.30pp</strong></span><span>OBR March 2026 EFO error <strong>0.66pp</strong></span><span>Round 2026-07-21</span></footer>
         </article>
       </div>
-      <div class="meth-out plain">
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>Errors are signed forecast − outturn: positive means the forecast ran high.</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>Naive baseline: the last outturn at the round's data edge, held flat (read from the current vintage, so revisions can shift it slightly).</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>The official number is the OBR March 2026 EFO — fixed months earlier on less data, so part of its larger error is the information gap.</span></div>
-      </div>
+      <p class="forecast-note">
+        Errors are signed forecast − outturn, so a positive number means the forecast ran high. Naive baseline: the last outturn at the round's data edge, held flat (read from the current vintage, so revisions can shift it slightly). The official number is the OBR March 2026 EFO — fixed months earlier on less data, so part of its larger error is the information gap.
+      </p>
 <!-- scorecard-results:end -->
     </div>
   </section>
@@ -297,11 +297,23 @@
       </figure>
 <!-- open-fan-unemployment:end -->
       </div>
-      <div class="meth-out plain">
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>The EFO was fixed in March, the rounds in July — this shows where views differ, not who forecasts better (that evaluation is on the <a href="/svar/validation#forecasters">boe-svar validation page</a>).</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>The GDP and CPI bands are widened per horizon for the under-coverage measured on the <a href="/svar/validation">validation page</a> (factors in <a class="mono" href="/forecasts/band_calibration.json" download><code>band_calibration.json</code></a>); the raw quantiles stay untouched in the round artifacts.</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>Quarter-by-quarter numbers, including the BoE MPR central path and SEF consensus, are in the round artifacts below and the committed <a href="https://github.com/PolicyEngine/macro/tree/main/forecasts/official">official CSVs</a>.</span></div>
-      </div>
+      <p class="forecast-note">
+        The EFO was fixed in March and these rounds in July, so the charts show
+        where the views differ, not who forecasts better — that evaluation is on
+        the <a href="/svar/validation#forecasters">boe-svar validation page</a>.
+      </p>
+      <details class="more">
+        <summary>Band calibration, and where the quarter-by-quarter numbers are</summary>
+        <p>
+          The GDP and CPI bands are widened per horizon for the under-coverage
+          measured on the <a href="/svar/validation">validation page</a> (factors
+          in <a class="mono" href="/forecasts/band_calibration.json" download><code>band_calibration.json</code></a>);
+          the raw quantiles stay untouched in the round artifacts. The
+          quarter-by-quarter numbers, including the BoE MPR central path and the
+          SEF consensus, are in those round artifacts below and in the committed
+          <a href="https://github.com/PolicyEngine/macro/tree/main/forecasts/official">official CSVs</a>.
+        </p>
+      </details>
     </div>
   </section>
 
@@ -351,12 +363,23 @@
         </article>
       </div>
 <!-- scorecard-rounds:end -->
-      <div class="meth-out plain">
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>Append-only: a <a href="https://github.com/PolicyEngine/macro/blob/main/.github/workflows/forecast-archive.yml">CI job</a> fails any pull request that edits or deletes a round. Corrections create a new round; the superseded one stays scored.</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>The first round was archived retroactively from a file already in Git — prior to the CPI outturn by ~16 hours, but with thinner provenance than later rounds.</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>Scoring inputs: <a class="mono" href="/forecasts/outturns.json" download><code>outturns.json</code></a> (vintage-versioned, so revisions never silently rewrite a score) and <a class="mono" href="/forecasts/scorecard.json" download><code>scorecard.json</code></a>; method in the <a href="https://github.com/PolicyEngine/macro/blob/main/forecasts/README.md">README</a>.</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>The outturns a round is scored against come from the append-only <a href="#data">data store below</a> — dated snapshots of every official series, never edited, so a score can be reproduced against the data as it stood, not as it was later revised.</span></div>
-      </div>
+      <p class="forecast-note">
+        Append-only: a <a href="https://github.com/PolicyEngine/macro/blob/main/.github/workflows/forecast-archive.yml">CI job</a>
+        fails any pull request that edits or deletes a round, so a correction
+        creates a new round and the superseded one stays scored. One round is
+        weaker than the rest: the first was archived retroactively from a file
+        already in Git — ahead of the CPI outturn by around 16 hours, but with
+        thinner provenance than every round since.
+      </p>
+      <details class="more">
+        <summary>Scoring inputs</summary>
+        <p>
+          Scores are computed from <a class="mono" href="/forecasts/outturns.json" download><code>outturns.json</code></a>,
+          which is vintage-versioned so revisions never silently rewrite a
+          score, and written to <a class="mono" href="/forecasts/scorecard.json" download><code>scorecard.json</code></a>;
+          the method is in the <a href="https://github.com/PolicyEngine/macro/blob/main/forecasts/README.md">README</a>.
+        </p>
+      </details>
     </div>
   </section>
 
@@ -1056,12 +1079,24 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
       <h2>Limits worth stating plainly.</h2>
     </div>
     <div class="prose">
-      <div class="meth-out plain">
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span><strong>One scored round proves little.</strong> No skill claim until the scored count is well into double figures — at least a year away.</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span><strong>The bands run too narrow.</strong> In hindsight testing the 68% band covers ~62% and the 90% band ~77%, worsening with horizon; the fans above are re-calibrated for this. Full study on the <a href="/svar/validation">validation page</a>.</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span><strong>CPI does not beat a fair naive benchmark.</strong> Against a random walk with drift the advantage largely evaporates; Bank Rate is the only robust win, and it is not yet forecast here.</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span><strong>Three variables, no fixed calendar.</strong> GDP growth and CPI (boe-svar) plus unemployment (its satellite); rounds follow data-edge refreshes, not a schedule, and coefficients are not re-estimated every round.</span></div>
-      </div>
+      <p>
+        <strong>One scored round proves little</strong>, and there will be no
+        skill claim here until the scored count is well into double figures —
+        at least a year away. <strong>The bands run too narrow</strong>: in
+        hindsight testing the 68% band covers about 62% and the 90% band about
+        77%, worsening with horizon, which is why the fans above are
+        re-calibrated; the full study is on the
+        <a href="/svar/validation">validation page</a>.
+      </p>
+      <p>
+        <strong>CPI does not beat a fair naive benchmark.</strong> Against a
+        random walk with drift the advantage largely evaporates. Bank Rate is
+        the only robust win, and it is not forecast here yet. What is forecast
+        is <strong>three variables on no fixed calendar</strong> — GDP growth
+        and CPI from boe-svar, unemployment from its satellite — with rounds
+        following data-edge refreshes rather than a schedule, and coefficients
+        not re-estimated every round.
+      </p>
     </div>
   </section>
 
@@ -1098,6 +1133,10 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
+<!-- Scroll-spy for the Record / Scored / Rounds / Data / Notes bar above. The
+     script is generic: it binds to .economy-topics and observes whatever
+     sections its links point at, so it needs no forecasts-specific setup. -->
+<script src="/economy/economy-nav.js" defer></script>
 <script>
 // Data catalogue: two independent collapses, both progressive enhancements.
 // The table ships whole with every detail row open and the controls hidden;
@@ -1143,6 +1182,109 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
     setListOpen(open);
     if (!open) table.scrollIntoView({ block: "start", behavior: "smooth" });
   });
+})();
+
+// Open-round chart switcher, on the same progressive-enhancement contract as
+// the catalogue above: the section ships all three fans stacked and visible,
+// and this script wraps each intro/figure pair in a tab panel, builds the tab
+// bar, and does the hiding. With JavaScript off there is no tab bar and every
+// chart stays on the page. The generators own the markup between the markers,
+// so nothing here is hand-written into the section — it is all built at
+// runtime, and the labels are read off each chart's own <title>, so a fourth
+// fan appears as a fourth tab without editing this file.
+(function () {
+  var section = document.getElementById("open");
+  var host = section && section.querySelector(".fc-vs-cards");
+  if (!host) return;
+
+  var charts = [];
+  Array.prototype.forEach.call(host.children, function (node) {
+    if (!node.classList.contains("vchart-figure")) return;
+    var intro = node.previousElementSibling;
+    charts.push({
+      figure: node,
+      intro: intro && intro.classList.contains("chart-intro") ? intro : null
+    });
+  });
+  if (charts.length < 2) return;
+
+  // Short tab labels, matched against the chart's accessible title and its
+  // data-chart identifier rather than assigned by position.
+  var KEYWORDS = [
+    ["unemployment", "Unemployment"],
+    ["cpi", "CPI"],
+    ["gdp", "GDP"]
+  ];
+
+  function describe(figure, index) {
+    var svg = figure.querySelector("svg[data-chart]") || figure.querySelector("svg");
+    var key = (svg && svg.getAttribute("data-chart")) || "chart-" + index;
+    var title = svg && svg.querySelector("title");
+    var haystack = ((title && title.textContent) || "").toLowerCase() + " " + key.toLowerCase();
+    var label = "";
+    KEYWORDS.some(function (pair) {
+      if (haystack.indexOf(pair[0]) === -1) return false;
+      label = pair[1];
+      return true;
+    });
+    // Nothing matched: humanise the chart's own identifier. Still the chart
+    // naming itself, never its index in the section.
+    return { key: key, label: label || key.replace(/[-_]+/g, " ").trim() };
+  }
+
+  var tablist = document.createElement("div");
+  tablist.className = "economy-topics fc-chart-tabs";
+  tablist.setAttribute("role", "tablist");
+  tablist.setAttribute("aria-label", "Open-round charts");
+
+  var tabs = charts.map(function (chart, index) {
+    var meta = describe(chart.figure, index);
+    var panel = document.createElement("div");
+    panel.className = "fc-chart-panel";
+    panel.id = "open-panel-" + meta.key;
+    panel.setAttribute("role", "tabpanel");
+    panel.setAttribute("tabindex", "0");
+    host.insertBefore(panel, chart.intro || chart.figure);
+    if (chart.intro) panel.appendChild(chart.intro);
+    panel.appendChild(chart.figure);
+
+    var tab = document.createElement("button");
+    tab.type = "button";
+    tab.id = "open-tab-" + meta.key;
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-controls", panel.id);
+    tab.textContent = meta.label;
+    panel.setAttribute("aria-labelledby", tab.id);
+    tablist.appendChild(tab);
+    return { tab: tab, panel: panel };
+  });
+  host.insertBefore(tablist, host.firstChild);
+
+  function select(index, moveFocus) {
+    tabs.forEach(function (entry, i) {
+      var on = i === index;
+      entry.tab.setAttribute("aria-selected", on ? "true" : "false");
+      entry.tab.tabIndex = on ? 0 : -1;
+      entry.panel.hidden = !on;
+    });
+    if (moveFocus) tabs[index].tab.focus();
+  }
+
+  tabs.forEach(function (entry, index) {
+    entry.tab.addEventListener("click", function () { select(index); });
+    entry.tab.addEventListener("keydown", function (event) {
+      var target = {
+        ArrowRight: index + 1,
+        ArrowLeft: index - 1,
+        Home: 0,
+        End: tabs.length - 1
+      }[event.key];
+      if (target === undefined) return;
+      event.preventDefault();
+      select((target + tabs.length) % tabs.length, true);
+    });
+  });
+  select(0);
 })();
 </script>
 </body>

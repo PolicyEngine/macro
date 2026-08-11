@@ -408,20 +408,28 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   scrollbar-width: none;
 }
 .economy-topics::-webkit-scrollbar { display: none; }
-.economy-topics a {
+/* Buttons join the anchors so an in-page tablist (role="tab" needs buttons,
+   not links) renders in the same idiom instead of a second component. */
+.economy-topics a,
+.economy-topics button {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   padding: var(--s-3) 2px;
+  border: 0;
   border-bottom: 2px solid transparent;
+  background: none;
   color: var(--paper-dim);
   font-family: var(--mono);
   font-size: var(--fs-small);
   text-decoration: none;
   white-space: nowrap;
 }
-.economy-topics a:hover { color: var(--brand-strong); }
-.economy-topics a[aria-current="location"] {
+.economy-topics button { cursor: pointer; }
+.economy-topics a:hover,
+.economy-topics button:hover { color: var(--brand-strong); }
+.economy-topics a[aria-current="location"],
+.economy-topics button[aria-selected="true"] {
   color: var(--paper);
   border-bottom-color: var(--brand-strong);
 }
@@ -1349,10 +1357,16 @@ h2 {
 .forecast-result-list,
 .forecast-round-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 12px;
   margin-block: var(--s-6);
 }
+/* auto-fit, not auto-fill: empty tracks collapse, so the record's first
+   scored card fills the band instead of being stranded at the track minimum
+   with dead space beside it. The minimum is the width below which the dot
+   plot stops being readable; two cards still pair up on a full-width band,
+   and min(100%, …) keeps a single card from overflowing a narrow screen. */
+.forecast-result-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); }
+.forecast-round-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
 .forecast-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1429,8 +1443,20 @@ h2 {
 .fc-mark-outturn i { background: var(--chart-s2); }
 .fc-mark-naive i { background: var(--paper-faint); opacity: 0.55; }
 .fc-mark-official i { background: var(--chart-s2); opacity: 0.55; }
-.forecast-note { color: var(--paper-faint); font-size: var(--fs-small); max-width: 60ch; }
+/* The forecasts page's supporting-prose idiom, matching .chart-intro: short
+   paragraphs that carry the caveats which used to be stacks of arrow rows. */
+.forecast-note,
+.prose .forecast-note {
+  max-width: 78ch;
+  margin-block: var(--s-5) 0;
+  color: var(--paper-dim);
+  font-size: var(--fs-body-sm);
+  line-height: 1.6;
+}
+.prose .forecast-note + .more { margin-top: var(--s-5); }
 .forecast-result footer {
+  flex-wrap: wrap;
+  row-gap: var(--s-2);
   padding-top: var(--s-4);
   border-top: 1px solid var(--line-soft);
   color: var(--paper-faint);
@@ -1472,6 +1498,25 @@ h2 {
   .forecast-summary { grid-template-columns: 1fr; }
   .forecast-result header { align-items: flex-start; }
   .forecast-result-plot > div { grid-template-columns: 62px minmax(60px, 1fr) 58px; gap: 8px; }
+}
+
+/* A scored card is never narrower than the 520px track minimum above once the
+   viewport clears ~900px — one card fills the band, two share it — so the card
+   scales with it rather than stretching a phone-sized layout: more padding,
+   a taller axis with larger marks and readable labels, an airier footer. */
+@media (min-width: 900px) {
+  .forecast-result { padding: var(--s-6) var(--s-7); }
+  .forecast-result header { padding-bottom: var(--s-4); }
+  .forecast-result header .mono { color: var(--paper-faint); font-size: var(--fs-body-sm); }
+  .forecast-result h3 { margin-top: var(--s-2); font-size: var(--fs-lede); }
+  .forecast-band { padding: 7px 14px; }
+  .forecast-dotplot { height: 172px; margin: var(--s-7) 64px; }
+  .fc-axis { height: 3px; }
+  .fc-mark i { width: 16px; height: 16px; }
+  .fc-mark span { gap: 4px; font-size: var(--fs-body-sm); }
+  .fc-up span { bottom: 20px; }
+  .fc-down span { top: 20px; }
+  .forecast-result footer { padding-top: var(--s-5); font-size: var(--fs-body-sm); }
 }
 
 /* ==========================================================================
@@ -3120,6 +3165,20 @@ h2 {
   min-width: 0;
 }
 .fc-vs-cards .vchart-figure .vchart { border: 0; border-radius: 0; padding: 0; background: none; }
+/* Open-round chart switcher. Built at runtime by the script at the foot of
+   /forecasts (see there); without JavaScript no tab bar exists and all three
+   figures stay stacked and visible, so nothing ships hidden. Aligned to the
+   figure card width above so the underline sits over the chart it selects. */
+.fc-chart-tabs {
+  max-width: 1080px;
+  margin: var(--s-6) auto 0;
+  gap: var(--s-6);
+  border-bottom: 1px solid var(--line-soft);
+}
+.fc-chart-tabs button { padding: var(--s-4) 2px; }
+.fc-chart-panel > .chart-intro { max-width: 1080px; margin: var(--s-5) auto 0; }
+.fc-chart-panel > .vchart-figure { margin-top: var(--s-3); }
+.fc-chart-panel:focus-visible { outline: 2px solid var(--brand); outline-offset: 4px; }
 .fc-vs-cards .vchart-figure figcaption {
   margin-top: var(--s-3);
   padding-top: var(--s-3);
