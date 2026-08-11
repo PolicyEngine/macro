@@ -15,10 +15,20 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+# The global header and pathway line are OWNED by site_nav.py, which is the
+# contract every other page is checked against. Import and call it rather
+# than copying its markup: `data/` sits in site_nav's SKIP_ROOTS (this page
+# is generated, so site_nav must not rewrite it), and a hand-copied header
+# silently drifts the moment a nav tab is added — which is exactly what
+# happened when /data joined the nav.
+sys.path.insert(0, str(ROOT))
+import site_nav  # noqa: E402
 STORE = ROOT / "data"
 PAGE = STORE / "index.html"
 CALENDAR = STORE / "calendar.ics"
@@ -110,35 +120,67 @@ def esc(text: str) -> str:
 
 
 def catalogue_rows() -> str:
+    """One expandable block per series.
+
+    A nine-column table needed horizontal scrolling and still hid the thing
+    that matters most: the vintage history. Native <details> gives keyboard
+    and screen-reader support with no JavaScript, keeps the summary to what
+    you scan by, and puts the full snapshot list one click away.
+
+    No link goes in the <summary>: a nested interactive control inside a
+    disclosure control is ambiguous to operate by keyboard.
+    """
     index = manifest()["series"]
     dirs = source_dirs()
-    rows = []
+    blocks = []
     for name in sorted(index):
         entry = index[name]
         series = load(name)
         now = series["observations"][-1]
         first, last = entry["coverage"]
-        rows.append(
-            "          <tr>"
-            f'<th scope="row">{esc(public_label(series))}'
-            f'<br /><span class="mono">{esc(name)}</span></th>'
-            f'<td><a href="{esc(display_url(series["url"]))}">'
-            f'{esc(series["source"])} · {esc(series["cdid"])}</a></td>'
-            f"<td>{esc(series['frequency'])}</td>"
-            f"<td>{esc(series['units'])}</td>"
-            f"<td>{esc(first)} – {esc(last)}</td>"
-            f"<td>{fmt_value(now['value'])} <span class=\"mono\">{esc(now['period'])}</span></td>"
-            # The vintage links straight at the immutable file it names.
-            # The path cell is plain text: there is no directory listing to
-            # link to, and the two tokens are what the as-of recipe takes.
-            f'<td><a href="/data/vintages/{esc(dirs[name])}/{esc(name)}/'
-            f'{esc(entry["latest_vintage"])}.json">'
-            f"{esc(entry['latest_vintage'])}.json</a></td>"
-            f"<td>{len(entry['vintages'])}</td>"
-            f'<td><span class="mono">{esc(dirs[name])}/{esc(name)}</span></td>'
-            "</tr>"
+        source_dir = dirs[name]
+        vintages = sorted(entry["vintages"], reverse=True)
+
+        snapshots = f"{len(vintages)} snapshot" + ("s" if len(vintages) != 1 else "")
+        listed = "\n".join(
+            f'              <li><a href="/data/vintages/{esc(source_dir)}/'
+            f'{esc(name)}/{esc(vintage)}.json">{esc(vintage)}</a></li>'
+            for vintage in vintages
         )
-    return "\n".join(rows)
+        next_release = series.get("next_release")
+        rows = [
+            ("Units", esc(series["units"])),
+            ("Coverage", f"{esc(first)} – {esc(last)}"),
+            ("Observations", f"{len(series['observations']):,}"),
+            ("Store path", f'<span class="mono">{esc(source_dir)}/{esc(name)}</span>'),
+            ("Next release", esc(next_release) if next_release else "not announced"),
+            ("Official source",
+             f'<a href="{esc(display_url(series["url"]))}">'
+             f'{esc(series["source"])} · {esc(series["cdid"])}</a>'),
+        ]
+        detail = "\n".join(
+            f"              <div><dt>{label}</dt><dd>{value}</dd></div>"
+            for label, value in rows
+        )
+        blocks.append(
+            f'        <details class="series">\n'
+            f'          <summary>\n'
+            f'            <span class="series-id">{esc(public_label(series))}'
+            f'<span class="mono">{esc(name)}</span></span>\n'
+            f'            <span class="series-now">{fmt_value(now["value"])} '
+            f'<span class="mono">{esc(now["period"])}</span></span>\n'
+            f'            <span class="series-meta mono">{esc(series["source"])}'
+            f' · {esc(series["frequency"])} · {snapshots}</span>\n'
+            f'          </summary>\n'
+            f'          <div class="series-detail">\n'
+            f"            <dl>\n{detail}\n            </dl>\n"
+            f'            <p class="series-vintages-head">Every snapshot taken, '
+            f'newest first. Each file is immutable.</p>\n'
+            f'            <ul class="vintage-list mono">\n{listed}\n            </ul>\n'
+            f"          </div>\n"
+            f"        </details>"
+        )
+    return "\n".join(blocks)
 
 
 def upcoming() -> list[tuple[datetime, str, dict]]:
@@ -333,25 +375,7 @@ def render_page() -> str:
 <a class="skip-link" href="#top">Skip to main content</a>
 <div class="grain" aria-hidden="true"></div>
 
-<header class="nav">
-  <a class="brand" href="/">
-    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
-  </a>
-  <nav class="nav-links" aria-label="Primary">
-    <a class="nav-mobile" href="/">Home</a>
-    <a class="nav-mobile" href="/models">Models</a>
-    <a class="nav-mobile" href="/economy">Economy</a>
-    <a class="nav-mobile" href="/forecasts">Forecasts</a>
-    <a class="nav-mobile nav-start" href="/connect">Use</a>
-    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
-  </nav>
-</header>
-
-<nav class="crumbs mono" aria-label="You are here">
-    <a href="/">Home</a>
-    <span aria-current="page">Data</span>
-</nav>
-
+{site_nav.header(ROOT / 'data' / 'index.html')}
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
@@ -373,35 +397,20 @@ def render_page() -> str:
     </div>
     <div class="prose">
       <p>
-        Official statistics get revised, sometimes years later. A site that
-        reads only the current value silently rewrites its own past on every
-        revision: a forecast that never changed can be made to look better or
-        worse by data it could not have known about. It also makes look-ahead
-        bias undetectable, because only one version of the past is ever on
-        disk.
+        Official statistics get revised, sometimes years later. Reading only
+        the current value silently rewrites the past: a forecast that never
+        changed can be made to look better or worse by data it could not have
+        known. Look-ahead bias becomes undetectable, because only one version
+        of the past is ever on disk.
       </p>
       <p>
-        Storing dated snapshots makes both problems visible. The
-        <a href="/forecasts">forecast track record</a> records which vintage
-        each score was computed against, so any published number can be
-        reproduced from the file it was computed from.
-      </p>
-      <p>
-        The store is JSON rather than Parquet because these series are small
-        and a git-diffable format means an upstream revision arrives as a
-        reviewable diff rather than an opaque binary blob. The scheduled fetch
-        opens a pull request instead of pushing, so a revision is something a
-        human sees. A fetch that finds no upstream change writes nothing —
-        otherwise real revisions would be buried in a stream of identical
-        files — and a transient network failure is reported as a failure,
-        never as “no revision”.
-      </p>
-      <p>
-        <code>latest/</code> exists because the published site is static under
-        a content-security policy with <code>connect-src 'self'</code>: the
-        browser cannot call the ONS, so anything shown on a page has to be
-        baked in at build time. It is a flattened copy of the newest snapshot,
-        not a separate source of truth.
+        Dated snapshots fix both. Nothing here is edited or deleted — a
+        revision arrives as a new file beside the old one, as a reviewable
+        pull request. The <a href="/forecasts">forecast record</a> stores which
+        vintage each score used, so any published number can be reproduced
+        from the file it came from. <code>latest/</code> is a flattened copy of
+        the newest snapshot for the site to build against, not a second source
+        of truth.
       </p>
     </div>
   </section>
@@ -413,25 +422,19 @@ def render_page() -> str:
     </div>
     <div class="prose">
       <p>
-        Latest values below are read from the committed snapshot named in the
-        vintage column — not from a live call — so they are as current as the
-        last fetch and no more.
+        Values come from the committed snapshot, not a live call — as current
+        as the last fetch and no more. Expand a series for its full snapshot
+        history and the exact store path.
       </p>
-      <div class="table-scroll">
-        <table>
-          <caption>Every series in the store. “Snapshots” counts the dated files kept for that series; “vintage” links the newest one. Values are reproduced exactly as stored, including the publisher’s sign convention — J5II, for example, records net borrowing as a negative financial balance.</caption>
-          <thead><tr><th scope="col">Series</th><th scope="col">Source</th><th scope="col">Frequency</th><th scope="col">Units</th><th scope="col">Coverage</th><th scope="col">Latest</th><th scope="col">Vintage</th><th scope="col">Snapshots</th><th scope="col">Store path</th></tr></thead>
-          <tbody>
+      <div class="series-list">
 {catalogue_rows()}
-          </tbody>
-        </table>
       </div>
       <p class="chooser-note">
-        ONS and Bank of England data are published under the
-        <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>.
-        US series are distributed by the Federal Reserve Bank of St. Louis with
-        their original BEA, BLS, and Federal Reserve attribution. Daily Bank of
-        England and FRED series retain observations from 2020 onward only.
+        ONS and Bank of England series are published under the
+        <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>;
+        US series come via FRED with their original BEA, BLS and Federal
+        Reserve attribution. Values are stored exactly as published, including
+        sign conventions. Daily series keep observations from 2020 onward.
       </p>
     </div>
   </section>

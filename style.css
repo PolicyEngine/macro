@@ -3239,3 +3239,71 @@ h2 {
 @media (max-width: 999px) {
   .hero-h1 span { display: inline; }
 }
+
+/* ---------------------------------------------------------------------------
+   /data series catalogue — expandable rows.
+
+   Replaces a nine-column table that needed horizontal scrolling and still
+   hid the vintage history. Native <details> keeps keyboard and screen-reader
+   behaviour for free; the summary carries only what you scan by, and the
+   snapshot list — the reason the store exists — sits one click away.
+   Grid collapses to stacked rows on narrow screens rather than scrolling.
+--------------------------------------------------------------------------- */
+.series-list { margin-block: var(--s-5); border-top: 1px solid var(--line-soft); }
+.series { border-bottom: 1px solid var(--line-soft); }
+.series > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: var(--s-3);
+  align-items: baseline;
+  padding: 14px 0 14px 22px;
+  cursor: pointer;
+  position: relative;
+  list-style: none;
+}
+.series > summary::-webkit-details-marker { display: none; }
+/* Disclosure caret, rotated when open. aria-expanded is supplied by the
+   native element, so this is decoration only. */
+.series > summary::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 1.25em;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--brand-strong);
+  border-bottom: 1.5px solid var(--brand-strong);
+  transform: translateY(-50%) rotate(-45deg);
+  transition: transform 120ms ease;
+}
+.series[open] > summary::before { transform: translateY(-50%) rotate(45deg); }
+.series > summary:hover { background: var(--paper-faint); }
+.series > summary:focus-visible { outline: 2px solid var(--brand-strong); outline-offset: -2px; }
+.series-id { display: grid; gap: 2px; font-weight: 600; }
+.series-id .mono { font: var(--fs-label)/1.4 var(--mono); color: var(--paper-dim); font-weight: 400; }
+.series-now { font-variant-numeric: tabular-nums; }
+.series-now .mono { font: var(--fs-label)/1.4 var(--mono); color: var(--paper-dim); }
+.series-meta { font-size: var(--fs-label); color: var(--paper-dim); justify-self: end; text-align: right; }
+.series-detail { padding: 0 0 var(--s-5) 22px; }
+.series-detail dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--s-3) var(--s-5);
+  margin: 0 0 var(--s-4);
+}
+.series-detail dt { font-size: var(--fs-label); color: var(--paper-dim); }
+.series-detail dd { margin: 2px 0 0; font-size: var(--fs-body-sm); }
+.series-vintages-head { font-size: var(--fs-label); color: var(--paper-dim); margin: 0 0 8px; }
+.vintage-list { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.vintage-list li { margin: 0; }
+.vintage-list a {
+  display: inline-block;
+  padding: 3px 8px;
+  border: 1px solid var(--line-soft);
+  font-size: var(--fs-label);
+}
+
+@media (max-width: 700px) {
+  .series > summary { grid-template-columns: 1fr; gap: 4px; }
+  .series-meta { justify-self: start; text-align: left; }
+}

@@ -22,6 +22,7 @@ DESTINATIONS = (
     ("models", "/models", "Models", "nav-mobile"),
     ("economy", "/economy", "Economy", "nav-mobile"),
     ("forecasts", "/forecasts", "Forecasts", "nav-mobile"),
+    ("data", "/data", "Data", "nav-mobile"),
     ("use", "/connect", "Use", "nav-mobile nav-start"),
 )
 
@@ -30,6 +31,7 @@ EVIDENCE_ROOTS = {"papers", "reports"}
 
 # Display names used in the pathway line and the footer directory.
 PAGE_NAMES = {
+    "/data": "Data",
     "/economy": "Economy",
     "/economy/us": "United States",
     "/models": "Models",
@@ -174,6 +176,8 @@ def section(path: Path) -> str | None:
         return "economy"
     if root == "forecasts":
         return "forecasts"
+    if root == "data":
+        return "data"
     if root == "connect":
         return "use"
     return None
