@@ -31,6 +31,16 @@ EVIDENCE_ROOTS = {"papers", "reports"}
 # Display names used in the pathway line and the footer directory.
 PAGE_NAMES = {
     "/economy": "Economy",
+    # Nested topic pages: without these the crumb falls back to
+    # "economy/topics".title() and the raw slug, so a reader sees
+    # "Economy/Topics / rates" instead of "Topics / Rates and gilts".
+    "/economy/topics": "Topics",
+    "/economy/topics/growth": "Growth",
+    "/economy/topics/inflation": "Inflation",
+    "/economy/topics/jobs": "Jobs",
+    "/economy/topics/rates": "Rates and gilts",
+    "/economy/topics/public-finances": "Public finances",
+    "/economy/topics/reform": "Tax and benefit reform",
     "/economy/us": "United States",
     "/models": "Models",
     "/obr": "OBR emulator",
