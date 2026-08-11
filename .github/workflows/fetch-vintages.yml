@@ -46,11 +46,13 @@ jobs:
       # the same reason the economy pages do.
       - name: Regenerate pages that read data/latest
         run: |
+          python3 economy/topics.py
           python3 economy/build.py
           python3 data/build_page.py
 
       - name: Validate regenerated pages
         run: |
+          python3 economy/topics.py --check
           python3 economy/build.py --check
           python3 data/build_page.py --check
 

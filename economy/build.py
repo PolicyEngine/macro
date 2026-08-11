@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import re
 from datetime import datetime
@@ -13,6 +14,45 @@ ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "economy" / "index.html"
 HOME_PAGE = ROOT / "index.html"
 US_PAGE = ROOT / "economy" / "us" / "index.html"
+
+
+def _topics_module():
+    """The topic generator, imported for its series-to-topic table.
+
+    /economy is a hub: it indexes the series and points at the topic page that
+    reads each one. The mapping is the topic table itself rather than a second
+    copy here, so a series can never be advertised on the hub as belonging to a
+    topic that has stopped carrying it — ``topic_link`` raises instead.
+    """
+    spec = importlib.util.spec_from_file_location(
+        "economy_topics", Path(__file__).resolve().parent / "topics.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+TOPIC_PAGES = _topics_module().TOPICS
+TOPIC_TITLE = {topic["slug"]: topic["title"] for topic in TOPIC_PAGES}
+SERIES_TOPIC = {
+    name: topic["slug"] for topic in TOPIC_PAGES for name in topic["series"]
+}
+
+# Reading order on the hub index: the ONS series grouped the way the topics
+# are, then the Bank of England rate series under their own subhead.
+ONS_SERIES = (
+    "uk_gdp_cvm",
+    "uk_monthly_gva",
+    "uk_business_investment",
+    "uk_cpi_yoy",
+    "uk_core_cpi_yoy",
+    "uk_unemployment_rate",
+    "uk_average_weekly_earnings",
+    "uk_vacancies",
+    "uk_public_sector_net_borrowing",
+    "uk_public_sector_net_debt_gdp",
+)
+MARKET_SERIES = ("uk_bank_rate", "uk_gilt_5y", "uk_gilt_10y", "uk_gilt_20y")
 
 PUBLIC_LABELS = {
     "ABMI": "Real gross domestic product",
@@ -207,89 +247,6 @@ def card(
             <div><dt>Source</dt><dd><a href="{url}">{source}</a></dd></div>{model_row}
           </dl>
         </article>"""
-
-
-def cards() -> str:
-    gdp = load("uk_gdp_cvm")
-    cpi = load("uk_cpi_yoy")
-    unemployment = load("uk_unemployment_rate")
-    forecast = json.loads(
-        (ROOT / "papers" / "boe-svar" / "figures" / "current_forecast.json").read_text()
-    )
-    # Archived round file keeps its original name; the satellite's display
-    # name is "svar-unemployment satellite".
-    unemp_round = json.loads(
-        (ROOT / "forecasts" / "rounds" / "2026-07-28" / "okun-unemployment.json").read_text()
-    )
-
-    growth = gdp_growth(gdp)
-    g_now, g_prev = growth[-1], growth[-2]
-    c_now, c_prev = latest(cpi), previous(cpi)
-    u_now, u_prev = latest(unemployment), previous(unemployment)
-    # First forecast quarter with no published outturn yet, per variable —
-    # showing a "forecast" for a quarter the ONS has already printed would be
-    # stale the moment the release lands.
-    def next_open(fc: dict, variable: str, last_observed: str) -> tuple[str, dict]:
-        for period, values in fc.items():
-            if period > last_observed and variable in values:
-                return period, values[variable]
-        period = list(fc)[-1]
-        return period, fc[period][variable]
-
-    g_period, g_fc = next_open(forecast["forecast"], "gdp", g_now["period"])
-    c_period, c_fc = next_open(forecast["forecast"], "cpi", c_now["period"])
-    u_period, u_fc = next_open(unemp_round["forecast"], "unemployment", u_now["period"])
-
-    def model_line(fc: dict, period: str) -> str:
-        return (
-            f"Model: {fmt(fc['median'])}% <span class=\"mono\">{period}</span>"
-            f" · 68% {fmt(fc['lo68'])}%–{fmt(fc['hi68'])}%"
-        )
-
-    svar_source = ("boe-svar", "/svar", f"generated {forecast['generated']}")
-    usat_source = (
-        "svar-unemployment satellite",
-        "/forecasts",
-        f"round {unemp_round['round_id']}",
-    )
-
-    return "\n".join(
-        [
-            card(
-                "REAL GDP · YEAR ON YEAR",
-                f"{fmt(g_now['value'])}%",
-                g_now["period"],
-                f"{g_now['value'] - g_prev['value']:+.1f}pp from prior quarter",
-                f"ONS · {gdp['cdid']}",
-                gdp["vintage"],
-                gdp["url"],
-                model_line(g_fc, g_period),
-                svar_source,
-            ),
-            card(
-                "CPI INFLATION",
-                f"{fmt(c_now['value'])}%",
-                c_now["period"],
-                f"{c_now['value'] - c_prev['value']:+.1f}pp from prior quarter",
-                f"ONS · {cpi['cdid']}",
-                cpi["vintage"],
-                cpi["url"],
-                model_line(c_fc, c_period),
-                svar_source,
-            ),
-            card(
-                "UNEMPLOYMENT RATE",
-                f"{fmt(u_now['value'])}%",
-                u_now["period"],
-                f"{u_now['value'] - u_prev['value']:+.1f}pp from prior quarter",
-                f"ONS · {unemployment['cdid']}",
-                unemployment["vintage"],
-                unemployment["url"],
-                model_line(u_fc, u_period),
-                usat_source,
-            ),
-        ]
-    )
 
 
 def uk_figures() -> str:
@@ -498,163 +455,6 @@ def us_indicator_rows() -> str:
     return "\n".join(rows)
 
 
-def outlook_rows() -> str:
-    forecast = json.loads(
-        (ROOT / "papers" / "boe-svar" / "figures" / "current_forecast.json").read_text()
-    )
-    rows = []
-    for period, values in list(forecast["forecast"].items())[:5]:
-        rows.append(
-            "          <tr>"
-            f'<th scope="row">{period}</th>'
-            f"<td>{values['gdp']['median']:.2f}%</td>"
-            f"<td>{values['gdp']['lo68']:.2f}%–{values['gdp']['hi68']:.2f}%</td>"
-            f"<td>{values['cpi']['median']:.2f}%</td>"
-            f"<td>{values['cpi']['lo68']:.2f}%–{values['cpi']['hi68']:.2f}%</td>"
-            "</tr>"
-        )
-    return "\n".join(rows)
-
-
-def indicator_rows() -> str:
-    specs = []
-
-    gva = load("uk_monthly_gva")
-    now, prior = latest(gva), previous(gva)
-    specs.append(
-        (
-            "Activity",
-            gva,
-            f"{100 * (now['value'] / prior['value'] - 1):+.1f}% m/m",
-            f"index {now['value']:.1f}",
-        )
-    )
-
-    core = load("uk_core_cpi_yoy")
-    now, prior = latest(core), previous(core)
-    specs.append(
-        ("Prices", core, f"{now['value'] - prior['value']:+.1f}pp m/m", f"{now['value']:.1f}%")
-    )
-
-    earnings = load("uk_average_weekly_earnings")
-    now, year_ago = latest(earnings), previous(earnings, 12)
-    specs.append(
-        (
-            "Labour",
-            earnings,
-            f"{100 * (now['value'] / year_ago['value'] - 1):+.1f}% y/y",
-            f"£{now['value']:,.0f}/week",
-        )
-    )
-
-    vacancies = load("uk_vacancies")
-    now, year_ago = latest(vacancies), previous(vacancies, 12)
-    specs.append(
-        (
-            "Labour",
-            vacancies,
-            f"{now['value'] - year_ago['value']:+,.0f}k y/y",
-            f"{now['value']:,.0f}k",
-        )
-    )
-
-    borrowing = load("uk_public_sector_net_borrowing")
-    now, year_ago = latest(borrowing), previous(borrowing, 12)
-    # J5II records net borrowing as a negative financial balance. Present the
-    # conventional positive "amount borrowed" and document the sign conversion.
-    specs.append(
-        (
-            "Fiscal",
-            borrowing,
-            f"{'+' if (-now['value'] + year_ago['value']) >= 0 else '-'}£{abs(-now['value'] + year_ago['value']) / 1000:.1f}bn y/y",
-            f"£{-now['value'] / 1000:,.1f}bn borrowed",
-        )
-    )
-
-    debt = load("uk_public_sector_net_debt_gdp")
-    now, prior = latest(debt), previous(debt)
-    specs.append(
-        ("Fiscal", debt, f"{now['value'] - prior['value']:+.1f}pp m/m", f"{now['value']:.1f}% GDP")
-    )
-
-    investment = load("uk_business_investment")
-    now, prior = latest(investment), previous(investment)
-    specs.append(
-        (
-            "Investment",
-            investment,
-            f"{100 * (now['value'] / prior['value'] - 1):+.1f}% q/q",
-            f"£{now['value'] / 1000:,.1f}bn",
-        )
-    )
-
-    rows = []
-    for area, series, change, value in specs:
-        now = latest(series)
-        rows.append(
-            "          <tr>"
-            f"<td>{area}</td>"
-            f'<th scope="row">{public_label(series)}</th>'
-            f"<td>{value}</td>"
-            f"<td>{change}</td>"
-            f"<td>{now['period']}</td>"
-            f"<td>{series['vintage']}</td>"
-            f'<td><a href="{series["url"]}">ONS · {series["cdid"]}</a></td>'
-            "</tr>"
-        )
-    return "\n".join(rows)
-
-
-def release_rows() -> str:
-    rows = []
-    for name in (
-        "uk_gdp_cvm",
-        "uk_cpi_yoy",
-        "uk_unemployment_rate",
-        "uk_core_cpi_yoy",
-        "uk_average_weekly_earnings",
-        "uk_vacancies",
-        "uk_monthly_gva",
-        "uk_public_sector_net_borrowing",
-        "uk_public_sector_net_debt_gdp",
-        "uk_business_investment",
-        "uk_bank_rate",
-        "uk_gilt_5y",
-        "uk_gilt_10y",
-        "uk_gilt_20y",
-    ):
-        series = load(name)
-        now = latest(series)
-        rows.append(
-            "          <tr>"
-            f'<th scope="row">{public_label(series)}</th>'
-            f"<td>{now['period']}</td>"
-            f"<td>{(series.get('release_updated') or 'not supplied').split('T')[0]}</td>"
-            f"<td>{series['vintage']}</td>"
-            f'<td><a href="{series["url"]}">{series["source"]} · {series["cdid"]}</a></td>'
-            "</tr>"
-        )
-    return "\n".join(rows)
-
-
-def market_rows() -> str:
-    rows = []
-    for name in ("uk_bank_rate", "uk_gilt_5y", "uk_gilt_10y", "uk_gilt_20y"):
-        series = load(name)
-        now = latest(series)
-        five = previous(series, 5)
-        rows.append(
-            "          <tr>"
-            f'<th scope="row">{series["title"]}</th>'
-            f"<td>{now['value']:.3f}%</td>"
-            f"<td>{now['value'] - five['value']:+.3f}pp</td>"
-            f"<td>{now['period']}</td>"
-            f"<td>{series['vintage']}</td>"
-            "</tr>"
-        )
-    return "\n".join(rows)
-
-
 def us_market_rows() -> str:
     rows = []
     for name in ("us_federal_funds_rate", "us_treasury_10y"):
@@ -691,6 +491,48 @@ def us_release_rows() -> str:
             f"<td>{now['period']}</td>"
             f"<td>{series['vintage']}</td>"
             f'<td><a href="{series["url"]}">FRED · {series["cdid"]}</a></td>'
+            "</tr>"
+        )
+    return "\n".join(rows)
+
+
+def topic_link(name: str) -> str:
+    """The topic page that reads this series, or a hard failure.
+
+    The hub advertises a topic home for every series it indexes. If a topic
+    stops carrying a series, this raises rather than printing a link into a
+    page where the number is no longer shown.
+    """
+    slug = SERIES_TOPIC.get(name)
+    if slug is None:
+        raise RuntimeError(
+            f"{name} is indexed on /economy but no topic page in "
+            f"economy/topics.py reads it — give it a topic home or drop it "
+            f"from the hub index"
+        )
+    return f'<a href="/economy/topics/{slug}">{TOPIC_TITLE[slug]}</a>'
+
+
+def series_index_rows(names: tuple[str, ...]) -> str:
+    """The hub index: what is tracked, which topic reads it, where it came from.
+
+    Deliberately carries no readings. The values, their period comparisons and
+    the model view of each one live on the topic pages; repeating them here is
+    what turned /economy and /economy/topics into two dashboards over one set
+    of numbers.
+    """
+    rows = []
+    for name in names:
+        series = load(name)
+        now = latest(series)
+        rows.append(
+            "          <tr>"
+            f'<th scope="row">{public_label(series)}</th>'
+            f"<td>{topic_link(name)}</td>"
+            f"<td>{now['period']}</td>"
+            f"<td>{(series.get('release_updated') or 'not supplied').split('T')[0]}</td>"
+            f"<td>{series['vintage']}</td>"
+            f'<td><a href="{series["url"]}">{series["source"]} · {series["cdid"]}</a></td>'
             "</tr>"
         )
     return "\n".join(rows)
@@ -876,14 +718,12 @@ def render_home() -> str:
 
 
 def render_uk() -> str:
+    """The UK hub. ``economy-topics`` belongs to economy/topics.py, not here."""
     html = PAGE.read_text()
-    html = replace(html, "economy-cards", cards())
     html = replace(html, "economy-trends-figures", uk_figures())
-    html = replace(html, "economy-indicators", indicator_rows())
-    html = replace(html, "economy-outlook", outlook_rows())
-    html = replace(html, "economy-markets", market_rows())
+    html = replace(html, "economy-series-index", series_index_rows(ONS_SERIES))
+    html = replace(html, "economy-market-index", series_index_rows(MARKET_SERIES))
     html = replace(html, "economy-calendar", calendar_rows())
-    html = replace(html, "economy-releases", release_rows())
     return html
 
 

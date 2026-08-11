@@ -275,12 +275,74 @@ def stat_card(series: dict) -> str:
         </article>"""
 
 
+# How each series' movement is read. /economy used to carry these period
+# comparisons in an indicator table beside the same values the topic pages
+# show; the comparison belongs with the series, on the page that reads it.
+# (kind, periods back, decimals, how to name the comparison window)
+MOVEMENT: dict[str, tuple[str, int, int, str]] = {
+    "uk_gdp_cvm": ("yoy_pp", 1, 1, "the prior quarter"),
+    "uk_monthly_gva": ("pct", 1, 1, "the prior month"),
+    "uk_business_investment": ("pct", 1, 1, "the prior quarter"),
+    "uk_cpi_yoy": ("pp", 1, 1, "the prior quarter"),
+    "uk_core_cpi_yoy": ("pp", 1, 1, "the prior month"),
+    "uk_unemployment_rate": ("pp", 1, 1, "the prior quarter"),
+    "uk_average_weekly_earnings": ("pct", 12, 1, "a year earlier"),
+    "uk_vacancies": ("thousands", 12, 1, "a year earlier"),
+    "uk_public_sector_net_borrowing": ("borrowed", 12, 1, "a year earlier"),
+    "uk_public_sector_net_debt_gdp": ("pp", 1, 1, "the prior month"),
+    "uk_bank_rate": ("pp", 5, 3, "five observations earlier"),
+    "uk_gilt_5y": ("pp", 5, 3, "five observations earlier"),
+    "uk_gilt_10y": ("pp", 5, 3, "five observations earlier"),
+    "uk_gilt_20y": ("pp", 5, 3, "five observations earlier"),
+}
+
+
+def movement(name: str) -> str:
+    """One period comparison, computed from the stored observations.
+
+    The comparison each series supports is not the same: a published rate moves
+    in percentage points, a level in percent, and J5II is a negative balance so
+    the honest comparison is between amounts borrowed, not between balances.
+    """
+    kind, periods, digits, window = MOVEMENT[name]
+    series = load(name)
+    observations = series["observations"]
+    now, before = observations[-1], observations[-1 - periods]
+    if kind == "yoy_pp":
+        rates = yoy(series, 4)
+        gap = rates[-1]["value"] - rates[-1 - periods]["value"]
+        change = f"{gap:+.{digits}f}pp on the year-on-year rate"
+    elif kind == "pp":
+        change = f"{now['value'] - before['value']:+.{digits}f}pp"
+    elif kind == "pct":
+        change = f"{100 * (now['value'] / before['value'] - 1):+.{digits}f}%"
+    elif kind == "thousands":
+        change = f"{now['value'] - before['value']:+,.{digits}f} thousand"
+    else:  # "borrowed"
+        gap = (-now["value"] + before["value"]) / 1000
+        sign = "+" if gap >= 0 else "-"
+        change = f"{sign}£{abs(gap):,.{digits}f}bn on the amount borrowed"
+    return (
+        f"{esc(label(series))} {change} against {window} "
+        f"({esc(before['period'])})"
+    )
+
+
+def movement_note(names: tuple[str, ...]) -> str:
+    joined = "; ".join(movement(name) for name in names)
+    return (
+        '    <p class="economy-method">How those readings have moved, derived '
+        f"from the same stored observations rather than typed in: {joined}.</p>"
+    )
+
+
 def stands(names: tuple[str, ...], note: str) -> str:
     cards = "\n".join(stat_card(load(name)) for name in names)
     return f"""    <div class="economy-grid">
 {cards}
     </div>
-    <p class="economy-method">{note}</p>"""
+    <p class="economy-method">{note}</p>
+{movement_note(names)}"""
 
 
 def data_rows(names: tuple[str, ...]) -> str:
@@ -1073,7 +1135,31 @@ def hook(slug: str) -> str:
 
 # --------------------------------------------------------------- page render
 
-def subnav(current: str) -> str:
+def subnav(current: str | None) -> str:
+    """The one control shared by the hub and every topic page.
+
+    Same markup, same vocabulary, same order everywhere, so moving between
+    /economy and a topic reads as one section rather than a page swap. The hub
+    is always reachable through the UK scope link, and the page the reader is
+    on is the only element carrying ``aria-current="page"``: on a topic page
+    the UK scope link is an ancestor, so it takes ``aria-current="true"``
+    rather than claiming to be the current URL.
+
+    ``current`` is a topic slug, or ``None`` for the hub itself.
+
+    /economy/us keeps its own copy of this bar with the same scope switch but
+    its own in-page anchors: US topic pages do not exist, and a topic strip
+    there would be six links out of the country the reader chose.
+    """
+    scope = []
+    for href, label, state in (
+        ("/economy", "UK", "page" if current is None else "true"),
+        ("/economy/us", "US", None),
+    ):
+        attr = f' aria-current="{state}"' if state else ""
+        scope.append(
+            f'        <a class="model-tabs-link"{attr} href="{href}">{label}</a>'
+        )
     links = []
     for topic in TOPICS:
         attr = ' aria-current="page"' if topic["slug"] == current else ""
@@ -1081,11 +1167,11 @@ def subnav(current: str) -> str:
             f'        <a class="model-tabs-link"{attr} '
             f'href="/economy/topics/{topic["slug"]}">{esc(topic["title"])}</a>'
         )
-    return f"""  <nav class="economy-subnav" aria-label="Economy topics">
+    return f"""  <nav class="economy-subnav" aria-label="Economy">
     <div class="economy-subnav-row">
       <div class="economy-subnav-scope">
-        <span class="economy-subnav-label mono">Topics</span>
-        <a class="model-tabs-link" href="/economy">All UK data</a>
+        <span class="economy-subnav-label mono">Economy</span>
+{chr(10).join(scope)}
       </div>
       <div class="economy-topics">
 {chr(10).join(links)}
@@ -1142,11 +1228,6 @@ def page(topic: dict) -> str:
       <p class="eyebrow reveal" style="--d:0">{esc(topic["eyebrow"])}</p>
       <h1 class="reveal page-title" style="--d:1">{esc(topic["heading"])}</h1>
       <p class="lede reveal" style="--d:2">{esc(lede)}</p>
-      <p class="lede reveal" style="--d:3">
-        Four layers, in order: what the data says, what the models see and
-        cannot see, the command that reproduces it, and the dated file every
-        number came from.
-      </p>
     </div>
   </section>
 
@@ -1216,10 +1297,12 @@ def rendered() -> list[tuple[Path, str]]:
         (TOPICS_DIR / topic["slug"] / "index.html", page(topic))
         for topic in TOPICS
     ]
-    artifacts.append(
-        (ECONOMY_PAGE,
-         replace(ECONOMY_PAGE.read_text(), "economy-topics", directory_block()))
-    )
+    # Both markers on the hub belong to this generator: the topic cards and the
+    # shared topic bar. economy/build.py owns the data blocks and touches
+    # neither, so the two --check gates never contend for the same region.
+    economy = replace(ECONOMY_PAGE.read_text(), "economy-topics", directory_block())
+    economy = replace(economy, "economy-topic-nav", subnav(None))
+    artifacts.append((ECONOMY_PAGE, economy))
     artifacts.append(
         (SITEMAP, replace(SITEMAP.read_text(), "economy-topics", sitemap_block()))
     )

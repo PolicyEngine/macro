@@ -3,7 +3,12 @@
 
   var nav = document.querySelector(".economy-topics");
   if (!nav) return;
+  // The same bar carries in-page anchors on /economy/us and links to the six
+  // topic pages on /economy and the topics themselves. Only the anchor form
+  // has sections to spy on; the page-link form is marked server-side with
+  // aria-current="page" and needs nothing here.
   var links = Array.from(nav.querySelectorAll('a[href^="#"]'));
+  if (!links.length) return;
   var sections = links
     .map(function (link) {
       return document.querySelector(link.getAttribute("href"));

@@ -52,6 +52,7 @@ build if a committed page has drifted from the data it claims to show.
 |-----------|--------------|
 | `data/build_page.py` | `/data` catalogue and the release calendar |
 | `economy/build.py` | the UK and US Economy pages |
+| `economy/topics.py` | the six topic pages, the topic nav and the topic directory |
 | `forecasts/score.py` | `forecasts/scorecard.json` |
 | `forecasts/make_open_fans.py` | open-round fan charts |
 | `validation/figures/make_charts.py` | the model validation charts |
