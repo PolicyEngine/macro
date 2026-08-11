@@ -138,6 +138,17 @@ def check_docs_match_code() -> None:
         if f"def {name}" in mcp_source and name not in readme:
             failures.append(f"integration/README.md: tool `{name}` undocumented")
 
+    # The deploy script's docstring is the other place the tool inventory is
+    # written out by hand, and nothing was checking it: it drifted to "20
+    # tools" while the server grew to 26.
+    modal_app = _read("integration/modal_app.py")
+    header = modal_app.split('"""', 2)[1]
+    if f"{tool_count} tools" not in header:
+        failures.append(
+            f"integration/modal_app.py: docstring tool count drifted — server "
+            f"defines {tool_count} @mcp.tool functions"
+        )
+
     connect = _read("connect/index.html")
     endpoint = "https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp"
     for path, page in (("connect/index.html", connect),

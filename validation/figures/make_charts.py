@@ -268,7 +268,14 @@ def grouped_bars(chart_id, title, desc, groups, y_max, y_step, fmt, unit_suffix=
     return "\n".join(out)
 
 
-def chart_obr_reform():
+def _reform_costing(chart_id: str, title: str):
+    """The PolicyEngine static costing of a 1pp basic-rate rise, vs HMRC.
+
+    Rendered twice from one committed source (chart_data.json ``obr_reform``):
+    on obr/validation as the macro bridge's input, and on the microsimulation's
+    own page as the independent check on the costing it produced. Same numbers,
+    two framings — so the numbers can only ever be changed in one place.
+    """
     data = load_transcribed()["obr_reform"]
     groups = data["groups"]
     parts = []
@@ -283,9 +290,20 @@ def chart_obr_reform():
             " The 2028–29 emulator figure is interpolated between the scored endpoints "
             "£6.46bn in 2026 and £7.38bn in 2030.")
     return grouped_bars(
+        chart_id, title, desc, groups, y_max=10, y_step=2, fmt=lambda v: f"{v:.2f}")
+
+
+def chart_obr_reform():
+    return _reform_costing(
         "obr-reform",
-        "obr-macro: 1p on the basic rate, ours vs HMRC ready reckoner (£bn/yr)",
-        desc, groups, y_max=10, y_step=2, fmt=lambda v: f"{v:.2f}")
+        "obr-macro: 1p on the basic rate, ours vs HMRC ready reckoner (£bn/yr)")
+
+
+def chart_pe_costing():
+    return _reform_costing(
+        "pe-costing",
+        "pe-microsim: 1p on the UK basic rate, our static costing vs the HMRC "
+        "ready reckoner (£bn/yr)")
 
 
 def chart_svar_fevd():
@@ -953,9 +971,12 @@ def chart_define_emissions():
     return "\n".join(out)
 
 
-# chart id -> (builder, page that owns it). Every chart lives on the
-# validation subtab of the model it provides evidence for.
+# chart id -> (builder, page that owns it). Charts live on the validation
+# subtab of the model they provide evidence for, except pe-costing, which sits
+# on the microsimulation overview so the platform's central model opens on a
+# figure rather than on prose.
 BUILDERS = [
+    ("pe-costing", chart_pe_costing, "pe/index.html"),
     ("obr-anchored", chart_obr_anchored, "obr/validation/index.html"),
     ("obr-reform", chart_obr_reform, "obr/validation/index.html"),
     ("obr-computed-share", chart_obr_computed_share, "obr/validation/index.html"),

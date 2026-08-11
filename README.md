@@ -212,10 +212,11 @@ stays consistent (this is exactly the set the OBR model added):
 1. **`<slug>/index.html`** — a new model reference page. Copy `olg/` or `obr/`
    as the template: `<body class="doc">`, the shared nav, and the section
    rhythm (what it is → quickstart → how it works → levers → calibration).
-2. **`index.html`** — add a `.strategy-card` in the `#models` grid linking to
-   `/<slug>/`.
-3. **`docs/index.html`** — add a `.doc-index` card, a column in the comparison
-   table, and a when-to-use bullet in `#choose`.
+2. **`index.html`** — add a `.verification-card` in the `#validation` grid
+   linking to `/<slug>/`.
+3. **`models/index.html`** — add a `.strategy-card` in the all-models
+   `.strategy-grid`, a `<details class="qa">` in `#choose`, a column in the
+   `.comparison-table`, and a row in the `#validation` table.
 4. **`connect/index.html`** — add a `<div class="model-pane" data-model="<slug>">`
    in the `#code` section and a button in `#model-seg` (the model selector JS
    toggles on `data-model`).

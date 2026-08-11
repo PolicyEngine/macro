@@ -71,6 +71,78 @@
       <a class="model-tabs-link" href="/pe/code">Code</a>
     </div>
   </nav>
+  <section id="what" class="band">
+    <div class="band-head">
+      <span class="kicker mono">01 — what it is</span>
+      <h2>Statute as code, at household resolution.</h2>
+    </div>
+    <div class="prose">
+      <figure class="vfig">
+        <svg class="vchart" data-chart="pe-costing" viewBox="0 0 760 304" role="img" aria-labelledby="pe-costing-t pe-costing-d">
+<title id="pe-costing-t">pe-microsim: 1p on the UK basic rate, our static costing vs the HMRC ready reckoner (£bn/yr)</title>
+<desc id="pe-costing-d">Grouped bar chart in billions of pounds per year. PolicyEngine's static costing of a 1 percentage point rise in the UK basic rate of income tax, against HMRC's Direct effects of illustrative tax changes ready reckoner, June 2025 vintage. For the basic rate +1pp, 2026–27 group, ours is 6.46 against HMRC’s 6.90, a deviation of -6.4%. For the basic rate +1pp, 2028–29 group, ours is 6.92 against HMRC’s 8.20, a deviation of -15.6%. The 2028–29 emulator figure is interpolated between the scored endpoints £6.46bn in 2026 and £7.38bn in 2030.</desc>
+<line class="vc-axis" x1="64" y1="258.0" x2="724" y2="258.0"/>
+<text class="vc-tick" x="54" y="262.0" text-anchor="end">0</text>
+<line class="vc-grid" x1="64" y1="211.6" x2="724" y2="211.6"/>
+<text class="vc-tick" x="54" y="215.6" text-anchor="end">2</text>
+<line class="vc-grid" x1="64" y1="165.2" x2="724" y2="165.2"/>
+<text class="vc-tick" x="54" y="169.2" text-anchor="end">4</text>
+<line class="vc-grid" x1="64" y1="118.8" x2="724" y2="118.8"/>
+<text class="vc-tick" x="54" y="122.8" text-anchor="end">6</text>
+<line class="vc-grid" x1="64" y1="72.4" x2="724" y2="72.4"/>
+<text class="vc-tick" x="54" y="76.4" text-anchor="end">8</text>
+<line class="vc-grid" x1="64" y1="26.0" x2="724" y2="26.0"/>
+<text class="vc-tick" x="54" y="30.0" text-anchor="end">10</text>
+<rect class="vc-b1" x="141.9" y="108.1" width="79.2" height="149.9"/>
+<text class="vc-val" x="181.5" y="100.1" text-anchor="middle">6.46</text>
+<text class="vc-tick" x="181.5" y="276" text-anchor="middle">ours</text>
+<rect class="vc-b2" x="233.0" y="97.9" width="79.2" height="160.1"/>
+<text class="vc-val" x="272.6" y="89.9" text-anchor="middle">6.90</text>
+<text class="vc-tick" x="272.6" y="276" text-anchor="middle">HMRC</text>
+<text class="vc-lab" x="229.0" y="296" text-anchor="middle">basic rate +1pp, 2026–27</text>
+<rect class="vc-b1" x="471.9" y="97.5" width="79.2" height="160.5"/>
+<text class="vc-val" x="511.5" y="89.5" text-anchor="middle">6.92</text>
+<text class="vc-tick" x="511.5" y="276" text-anchor="middle">ours</text>
+<rect class="vc-b2" x="563.0" y="67.8" width="79.2" height="190.2"/>
+<text class="vc-val" x="602.6" y="59.8" text-anchor="middle">8.20</text>
+<text class="vc-tick" x="602.6" y="276" text-anchor="middle">HMRC</text>
+<text class="vc-lab" x="559.0" y="296" text-anchor="middle">basic rate +1pp, 2028–29</text>
+</svg>
+        <figcaption>&pound;bn/yr. The microsimulation&rsquo;s static costing of a 1pp basic-rate rise, against HMRC&rsquo;s <em>Direct effects of illustrative tax changes</em> (June 2025 vintage). The 2028&ndash;29 figure is interpolated between the scored endpoints. Full evidence: <a href="/pe/validation">validation</a>.</figcaption>
+      </figure>
+      <p class="mo-lead">
+        The package encodes UK and US tax-and-benefit rules as parameterised
+        statute and computes every variable for a household you describe —
+        UK: income tax, National Insurance, Universal Credit, Child Benefit,
+        Pension Credit; US: federal and state income tax, payroll tax, SNAP,
+        TANF, EITC, CTC, SSI and Social Security. A reform is a flat dict of
+        parameter path &rarr; new value, identical at household and population
+        level.
+      </p>
+      <p>
+        The limit is structural: it cannot answer GDP, inflation, interest
+        rates or macro feedback. Its costings are static, and the macro members
+        of the suite exist to supply what it cannot see.
+      </p>
+      <details class="more">
+        <summary>The four packages underneath</summary>
+        <p>
+          <code>policyengine-core</code> (the simulation framework, forked from
+          OpenFisca), <code>policyengine-uk</code> and
+          <code>policyengine-us</code> (the statutory rules per country), and
+          <code>policyengine</code> — the analyst-facing package covered here,
+          adding dataset management, reforms, structured outputs and
+          version-pinned release bundles for reproducibility. See also the
+          <a href="/pe/code">code</a>, the
+          <a href="/pe/methodology">methodology</a>, and
+          <a href="/pe/validation">how far to trust it</a>.
+        </p>
+      </details>
+      <p class="chooser-note"><a href="/models#score">Score a reform end to end &rarr;</a></p>
+    </div>
+  </section>
+
+
   <section id="pe-bridge" class="band">
     <div class="band-head">
       <span class="kicker mono">with the microsimulation</span>
@@ -83,50 +155,6 @@
         <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Validation.</strong> <a href="/pe/validation">Checked against implemented legislation, rule by rule</a>; household maths exact, population estimates add survey error.</span></div>
         <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Results.</strong> Household and population reform impacts from <a href="/connect">any connected client</a> or at <a href="https://policyengine.org">policyengine.org</a>.</span></div>
       </div>
-    </div>
-  </section>
-
-
-  <section id="what" class="band">
-    <div class="band-head">
-      <span class="kicker mono">01 — what it is</span>
-      <h2>Statute as code, at household resolution.</h2>
-    </div>
-    <div class="prose">
-      <p class="mo-lead">
-        The package encodes UK and US tax-and-benefit rules as parameterised
-        statute and computes every variable for a household you describe —
-        UK: income tax, National Insurance, Universal Credit, Child Benefit,
-        Pension Credit; US: federal and state income tax, payroll tax, SNAP,
-        TANF, EITC, CTC, SSI and Social Security. A reform is a flat dict of
-        parameter path → new value, identical at household and population
-        level.
-      </p>
-      <p>
-        Four layers: <code>policyengine-core</code> (the simulation framework,
-        forked from OpenFisca), <code>policyengine-uk</code> and
-        <code>policyengine-us</code> (the statutory rules per country), and
-        <code>policyengine</code> — the analyst-facing package covered here,
-        adding dataset management, reforms, structured outputs and
-        version-pinned release bundles for reproducibility.
-      </p>
-      <p>
-        It is the hub of the suite: every scoring path starts here. It feeds
-        two macro engines — the <a href="/olg">OLG model</a>
-        consumes its effective and marginal rates to build tax functions;
-        the <a href="/obr">OBR emulator</a> takes its static costing as the
-        direct effect and returns the second-round one — and the macro
-        models feed back: the OLG model scales a second microsimulation run
-        with its long-run wage and labour-supply changes for a dynamic
-        score, and the experimental incidence tools do the same with a
-        <a href="/frb-us">FRB/US</a> or <a href="/us-hank">HANK</a> shock's
-        earnings path and the <a href="/svar">SVAR</a>'s inflation gap.
-        See also the
-        <a href="/pe/code">code</a>, the
-        <a href="/pe/methodology">methodology</a>, and
-        <a href="/pe/validation">how far to trust it</a>.
-      </p>
-      <p class="chooser-note"><a href="/models#score">Score a reform end to end &rarr;</a></p>
     </div>
   </section>
 

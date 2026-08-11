@@ -94,9 +94,10 @@ A new model touches a fixed set of places; update all of them:
 1. `<slug>/index.html` — the model reference page. Copy `olg/` or `obr/`:
    `<body class="doc">`, the shared nav, and the section rhythm (what it is →
    quickstart → how it works → levers → calibration).
-2. `index.html` — a `.strategy-card` in the `#models` grid.
-3. `models/index.html` — a `.doc-index` card, a comparison-table column, and a
-   when-to-use bullet.
+2. `index.html` — a `.verification-card` in the `#validation` grid.
+3. `models/index.html` — a `.strategy-card` in the all-models grid, a
+   `<details class="qa">` in `#choose`, a `.comparison-table` column, and a
+   `#validation` table row.
 4. `connect/index.html` — a `<div class="model-pane" data-model="<slug>">` and a
    button in `#model-seg`.
 5. `capabilities.py` — the registry entry, including `cannot_answer`.

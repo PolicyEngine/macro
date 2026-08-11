@@ -239,5 +239,10 @@ def test_score_reform_validates_reform_and_model():
         core.score_reform("uk", {}, model="og")
     with pytest.raises(ValueError, match="non-empty"):
         core.score_reform("uk", "not-a-dict", model="og")
+    # An unrecognised model name still falls through to the enum error. This
+    # used to say model="svar", which now gets its own explanatory refusal
+    # naming forecast_uk and model='obr' — a better error, but not this one.
+    # The generic path needs a name that really is unknown, or the fallback
+    # stops being covered at all.
     with pytest.raises(ValueError, match="model must be one of"):
-        core.score_reform("uk", {"x": 1}, model="svar")
+        core.score_reform("uk", {"x": 1}, model="not-a-model")
