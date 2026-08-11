@@ -70,13 +70,17 @@
       <h2>Connected to the microsimulation — experimentally, deltas in, incidence out.</h2>
     </div>
     <div class="prose">
-      <div class="qa-facts">
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Connection.</strong> <code>define_scenario_incidence</code> (experimental): a scenario's income deltas become a pre-tax earnings overlay on <a href="/pe">PolicyEngine</a>'s UK population run through <code>EconomicAssumptions</code> — the same pattern as the SVAR, FRB/US and HANK bridges. Local, or hosted with a <code>define_payload</code> of locally produced deltas (only numbers travel, never the unlicensed upstream). <code>score_reform</code> still will not accept it.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Worked example.</strong> Green public investment, 2030: the scenario's +0.80% real household disposable-income delta, applied as an earnings overlay across 53,508 modelled households, raises household net income by £6.6bn and improves the government balance by £5.9bn/yr through the automatic stabilizers — <em>who bears a climate-policy scenario, household by household</em>, a question no other model in the suite answers. Experimental illustration, not a forecast.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>What passes.</strong> The manual's macro block replicates (Table&nbsp;4); every scenario toggles exactly its published policy switches; both figures the paper states in text hold — green public investment peaks at +0.92% of GDP (published &asymp;+1%), and the 2030 baseline emits 343 MtCO2e/yr (published &ldquo;just under 350&rdquo;). <a href="/define/validation">Full gates &rarr;</a></span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>What doesn't.</strong> The emissions path runs below the published table (&minus;3.5% in 2025, widening to &minus;23% by 2040) — pinned and queried with the authors. And the baseline sits far from ONS/DESNZ outturns (computed and regression-tested), which is why <em>deltas, never levels</em>, are served.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Results.</strong> Scenario deltas run locally: <code>pe-macro define-scenario</code>. No numeric scenario results are published for v1.1, so a full published-figure replication is not possible — the gates above are the achievable ceiling.</span></div>
-      </div>
+      <p class="mo-lead">
+        <code>define_scenario_incidence</code> turns a scenario's household
+        income deltas into a pre-tax earnings overlay on
+        <a href="/pe">PolicyEngine</a>'s UK population — the same
+        <code>EconomicAssumptions</code> pattern as the SVAR, FRB/US and HANK
+        bridges — so a climate-policy scenario reads household by household,
+        through the automatic stabilizers. The deltas are produced locally and
+        only the numbers travel, never the unlicensed upstream code; the
+        output is a delta, not a forecast; and <code>score_reform</code>
+        still refuses this model.
+      </p>
     </div>
   </section>
 
@@ -98,32 +102,20 @@
     </div>
     <div class="prose">
       <p class="mo-lead">
-        DEFINE-UK is the ecological stock-flow consistent (E-SFC) model of
-        the UK built by Dafermos, Nikolaidi and co-authors
-        (<a href="https://define-model.org/define-uk">define-model.org/define-uk</a>).
-        It simulates the UK macrofinancial system together with its
-        environmental impacts under climate-policy scenarios, with particular
-        attention to the UK housing stock, the distinction between monetary
-        and non-monetary financial institutions, and the power sector. It is
-        calibrated to UK national accounting data.
+        DEFINE-UK is the ecological stock-flow consistent model of the UK by
+        George, Dafermos, Nikolaidi and co-authors
+        (<a href="https://define-model.org/define-uk">define-model.org/define-uk</a>):
+        the macrofinancial system and its environmental impacts in one closed
+        accounting system, with UK-specific housing and power-sector blocks.
+        Version 1.1 (April 2026) added the regulation policies.
       </p>
       <p>
-        Versions 1.0 and 1.1 were released in April 2026; version 1.1 adds
-        regulation policies. The accompanying paper, <em>Evaluating climate
-        policy mixes in the UK: an E-SFC approach</em>, evaluates scenario
-        blocks covering a fossil-fuel ban, power-sector subsidies, housing
-        regulation, green public investment, and a mixed policy package.
-      </p>
-      <p>
-        Our adapter, <a href="https://github.com/PolicyEngine/define-uk-model">github.com/PolicyEngine/define-uk-model</a>,
-        runs the authors' unmodified code. The upstream repository
-        (<a href="https://github.com/DEFINE-model/DEFINE_UK_1.1">github.com/DEFINE-model/DEFINE_UK_1.1</a>)
-        is public but carries no licence, so we vendor nothing: the adapter
-        fetches the upstream code at a pinned commit
-        (<code>846081a</code>) at runtime and executes it as published, in R.
-        On 2026-08-01 the full notebook ran end to end through the adapter
-        (R&nbsp;4.3.0), producing 151 output files across all four scenario
-        blocks.
+        The upstream repository is public but carries no licence, so we vendor
+        nothing: our <a href="https://github.com/PolicyEngine/define-uk-model">adapter</a>
+        fetches it at a pinned commit (<code>846081a</code>) and runs it
+        unmodified, in R. The scenario surface reads a cached full notebook
+        run (2026-08-01, R&nbsp;4.3.0).
+        <a href="/define/methodology">How it works &rarr;</a>
       </p>
     </div>
   </section>
@@ -136,19 +128,37 @@
     <div class="prose">
       <div class="callout">
         <strong>Experimental; partial replication — deltas only, never
-        levels.</strong> What can be checked, is: the baseline macro block
-        replicates the manual's Table&nbsp;4, every scenario toggles exactly
-        its published policy switches, and both figures the paper states in
-        text anchor. What can't be: no numeric scenario results are
-        published for v1.1, so the <a href="/define/validation">gates</a>
-        are the ceiling.
+        levels.</strong> The baseline macro block replicates the manual's
+        Table&nbsp;4 and every scenario toggles exactly its published policy
+        switches, but no numeric v1.1 scenario results are published, so those
+        <a href="/define/validation">gates</a> are the ceiling.
       </div>
-      <div class="qa-facts">
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Why never levels.</strong> The baseline's 2025 growth (4.66%) and 2024 emissions (401 MtCO2e) sit far above ONS/DESNZ actuals (1.31% and 371) — the gap is <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/validation/baseline_vs_external.csv">computed and regression-tested</a>, not prose</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Multiplier, stated honestly.</strong> Our own computation: cumulative green-public-investment multiplier 1.78 (IMF green range 1.1&ndash;1.5; OBR capital ≈1.0). The upstream summary table's multiplier columns are unusable and never quoted</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Unlicensed upstream, never hosted.</strong> Scenario deltas run locally (<code>pe-macro define-scenario</code>); hosted tools return run instructions — except the incidence bridge above, which accepts locally produced deltas. The path to hosting is a <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">clean-room reimplementation</a> of the published manual</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>No reform scoring.</strong> <code>score_reform</code> will not accept it — no statute mapping exists; this model answers <em>scenario</em> questions</span></div>
-      </div>
+      <p>
+        Two things do not pass. The baseline emissions path runs below the
+        published table — &minus;3.5% in 2025, widening to &minus;23% by 2040
+        — pinned at the observed ratios and raised with the authors. And the
+        baseline sits far from official outturns: 2025 growth 4.66% against an
+        ONS 1.31%, 2024 emissions 401.5 MtCO2e against a DESNZ 371 — a gap
+        <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/validation/baseline_vs_external.csv">computed
+        and regression-tested</a>, not asserted. Hence deltas only.
+      </p>
+      <details class="more">
+        <summary>Two more things to know before quoting a number</summary>
+        <p>
+          <strong>The multiplier runs high.</strong> Our cumulative
+          green-public-investment multiplier is 1.78, against IMF
+          green-spending estimates of 1.1&ndash;1.5 and an OBR capital
+          multiplier of &asymp;1.0 — the demand-led closure, labelled wherever
+          a delta is served. The upstream table's own multiplier columns are
+          unusable, and never quoted.
+        </p>
+        <p>
+          <strong>Nothing upstream is hosted.</strong> Hosted tools return run
+          instructions, never results; the path to hosting is a
+          <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">clean-room
+          reimplementation</a> of the published manual.
+        </p>
+      </details>
     </div>
   </section>
 
@@ -164,11 +174,11 @@
         <tbody>
           <tr>
             <th scope="row"><strong>The model</strong></th>
-            <td><a href="https://define-model.org/define-uk">define-model.org/define-uk</a> — DEFINE-UK versions 1.0 and 1.1 (April 2026), Dafermos, Nikolaidi et al.</td>
+            <td><a href="https://define-model.org/define-uk">define-model.org/define-uk</a> — the DEFINE-UK 1.1 Model Manual (George &amp; Dafermos, April 2026).</td>
           </tr>
           <tr>
             <th scope="row"><strong>The paper</strong></th>
-            <td><em>Evaluating climate policy mixes in the UK: an E-SFC approach</em> — the scenario definitions our runs are gated against; our own <a href="/reports/define-uk-replication">replication report</a> records the results.</td>
+            <td><em>Evaluating climate policy mixes in the UK: an E-SFC approach</em> — the scenario definitions; our <a href="/reports/define-uk-replication">replication report</a> records the results.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Upstream code</strong></th>
@@ -176,7 +186,7 @@
           </tr>
           <tr>
             <th scope="row"><strong>Our adapter</strong></th>
-            <td><a href="https://github.com/PolicyEngine/define-uk-model">github.com/PolicyEngine/define-uk-model</a> — the run harness, the validation record, the curated scenario surface, and the clean-room reimplementation track.</td>
+            <td><a href="https://github.com/PolicyEngine/define-uk-model">github.com/PolicyEngine/define-uk-model</a> — run harness, validation record, scenario surface, and the clean-room reimplementation track.</td>
           </tr>
         </tbody>
       </table></div>
