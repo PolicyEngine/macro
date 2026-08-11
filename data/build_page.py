@@ -15,22 +15,15 @@ from __future__ import annotations
 import argparse
 import html
 import json
-import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-# The global header and pathway line are OWNED by site_nav.py, which is the
-# contract every other page is checked against. Import and call it rather
-# than copying its markup: `data/` sits in site_nav's SKIP_ROOTS (this page
-# is generated, so site_nav must not rewrite it), and a hand-copied header
-# silently drifts the moment a nav tab is added — which is exactly what
-# happened when /data joined the nav.
-sys.path.insert(0, str(ROOT))
-import site_nav  # noqa: E402
 STORE = ROOT / "data"
-PAGE = STORE / "index.html"
+FORECASTS = ROOT / "forecasts" / "index.html"
+BEGIN = "<!-- data-store:begin -->"
+END = "<!-- data-store:end -->"
 CALENDAR = STORE / "calendar.ics"
 
 SITE = "https://policyengine-macro.vercel.app"
@@ -360,89 +353,32 @@ def render_calendar() -> str:
     return "".join(f"{fold(line)}\r\n" for line in lines)
 
 
-def render_page() -> str:
+def render_fragment() -> str:
+    """The data-store block inside /forecasts, between the markers.
+
+    Not a page of its own. The vintage store exists to make the forecast
+    record reproducible, so it lives in the section that explains what a
+    round is scored against rather than as a sixth destination competing
+    with Models and Economy.
+    """
     series_count, snapshot_count, earliest = counts()
     calendar_count = len(upcoming())
-    return f"""<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Data — PolicyEngine Macro</title>
-<meta name="description" content="The append-only point-in-time store behind every number on this site: {series_count} UK and US official series, dated snapshots that are never edited, JSON endpoints with open CORS, and an as-of recipe for reconstructing a series as it was published." />
-<link rel="canonical" href="{SITE}/data" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="{SITE}/data" />
-<meta property="og:site_name" content="PolicyEngine Macro" />
-<meta property="og:title" content="PolicyEngine Macro — data" />
-<meta property="og:description" content="Dated, append-only snapshots of the UK and US official statistics this site depends on, published as JSON anyone can read." />
-<meta property="og:image" content="{SITE}/assets/og-image.png" />
-<meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
-<meta name="twitter:card" content="summary_large_image" />
-<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
-<meta name="theme-color" content="#FFFFFF" />
-<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
-<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=3" />
-</head>
-<body class="doc">
-<a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
-
-{site_nav.header(ROOT / 'data' / 'index.html')}
-<main id="top">
-  <section class="hero model-hero">
-    <div class="hero-inner">
-      <p class="eyebrow">open data · point-in-time</p>
-      <h1 class="page-title">Every number on this site, as it was published.</h1>
-      <p class="lede">
-        {series_count} UK and US official series are stored as dated snapshots that are
-        never edited and never deleted. {snapshot_count} snapshots have accumulated since
-        {earliest}. They are plain JSON on this domain, readable from a browser,
-        a notebook, or a shell.
-      </p>
-    </div>
-  </section>
-
-  <section id="why" class="band">
-    <div class="band-head">
-      <span class="kicker mono">01 — why vintages</span>
-      <h2>Reading only the latest data rewrites your own history.</h2>
-    </div>
+    return f"""{BEGIN}
     <div class="prose">
       <p>
-        Official statistics get revised, sometimes years later. Reading only
-        the current value silently rewrites the past: a forecast that never
-        changed can be made to look better or worse by data it could not have
-        known. Look-ahead bias becomes undetectable, because only one version
-        of the past is ever on disk.
+        Rounds are scored against official data, and official data gets
+        revised. Every series this site reads is therefore archived as dated
+        snapshots that are never edited and never deleted — {series_count}
+        series, {snapshot_count} snapshots since {earliest} — so a score can
+        be reproduced against the data as it stood, not as it was later
+        revised. Reading only the current value would make look-ahead bias
+        undetectable, because only one version of the past would ever exist.
       </p>
-      <p>
-        Dated snapshots fix both. Nothing here is edited or deleted — a
-        revision arrives as a new file beside the old one, as a reviewable
-        pull request. The <a href="/forecasts">forecast record</a> stores which
-        vintage each score used, so any published number can be reproduced
-        from the file it came from. <code>latest/</code> is a flattened copy of
-        the newest snapshot for the site to build against, not a second source
-        of truth.
-      </p>
-    </div>
-  </section>
 
-  <section id="catalogue" class="band band-alt">
-    <div class="band-head">
-      <span class="kicker mono">02 — catalogue</span>
-      <h2>What is tracked.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        Values come from the committed snapshot, not a live call — as current
-        as the last fetch and no more. Expand a row for its full snapshot
-        history and store path.
-      </p>
+      <h3>What is tracked</h3>
       <div class="table-scroll">
         <table id="series-table" class="series-table">
-          <caption>Every series in the store, stored exactly as published — including sign conventions.</caption>
+          <caption>Values come from the committed snapshot, not a live call. Expand a row for its snapshot history and store path.</caption>
           <thead>
             <tr>
               <th scope="col">Series</th>
@@ -459,200 +395,79 @@ def render_page() -> str:
         <button type="button" id="show-all" class="series-show-all" hidden
                 aria-controls="series-table" aria-expanded="false"></button>
       </p>
-      <p class="chooser-note">
-        ONS and Bank of England series are published under the
-        <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>;
-        US series come via FRED with their original BEA, BLS and Federal
-        Reserve attribution. Daily series keep observations from 2020 onward.
-      </p>
-    </div>
-  </section>
 
-  <section id="recipe" class="band">
-    <div class="band-head">
-      <span class="kicker mono">03 — as-of recipe</span>
-      <h2>Reconstruct a series exactly as it was published on a date.</h2>
-    </div>
-    <div class="prose">
+      <h3>Reconstruct a series as it was published on a date</h3>
       <p>
         <code>MANIFEST.json</code> lists every snapshot date held for every
-        series. Take the newest one on or before the date you care about, and
-        read that file. Standard library only, no key, no account.
+        series. Take the newest on or before the date you want, and read that
+        file. Standard library only, no key, no account.
       </p>
-      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>{recipe_block()}</code></pre></div>
+{recipe_block()}
       <p>
-        Passing a later date returns a later snapshot, which may carry revised
-        values for periods the earlier snapshot already covered. That
-        difference is the revision, and it is the entire point of keeping both
-        files.
+        A later date returns a later snapshot, which may carry revised values
+        for periods the earlier one already covered. That difference is the
+        revision. The store begins {earliest}, when the first snapshot was
+        taken — it is a forward-looking real-time record from that date, not a
+        reconstruction of vintages predating it.
       </p>
-      <p class="chooser-note">
-        The store only goes back to {earliest}, when the first snapshot was
-        taken. It is a forward-looking real-time record from that date on, not
-        a reconstruction of historical vintages that predate it.
-      </p>
-    </div>
-  </section>
 
-  <section id="calendar" class="band band-alt">
-    <div class="band-head">
-      <span class="kicker mono">04 — release calendar</span>
-      <h2>Announced next releases.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        Each row is the <code>next_release</code> date carried in that series’
-        own snapshot, as announced by the publisher. Only the ONS supplies one;
-        Bank of England and FRED series are omitted because the field is empty
-        for them, not because nothing is scheduled. Dates are the publisher’s
-        and can move.
-      </p>
+      <h3>Announced releases</h3>
       <div class="table-scroll">
         <table>
-          <caption>{calendar_count} announced releases, from the committed snapshots.</caption>
-          <thead><tr><th scope="col">Date</th><th scope="col">Series</th><th scope="col">Name</th><th scope="col">Source</th></tr></thead>
+          <caption>{calendar_count} announced releases, from the committed snapshots. Only the ONS publishes the field; dates are the publisher's and can move. Also an iCalendar feed: <a href="/data/calendar.ics">/data/calendar.ics</a>.</caption>
+          <thead><tr><th scope="col">Date</th><th scope="col">Series</th><th scope="col">Source</th></tr></thead>
           <tbody>
 {calendar_rows()}
           </tbody>
         </table>
       </div>
-      <p class="chooser-note">
-        Subscribe to the same list as an iCalendar feed:
-        <a href="/data/calendar.ics">/data/calendar.ics</a> — one all-day event
-        per release, regenerated whenever the store is refetched.
-      </p>
-    </div>
-  </section>
 
-  <section id="access" class="band">
-    <div class="band-head">
-      <span class="kicker mono">05 — access</span>
-      <h2>Endpoints, caching, and CORS.</h2>
-    </div>
-    <div class="prose">
+      <h3>Endpoints</h3>
       <div class="table-scroll">
         <table>
-          <caption>Everything is a static file served over HTTPS. GET and HEAD only; there is no API to authenticate against.</caption>
+          <caption>Static files over HTTPS, GET and HEAD only — there is no API to authenticate against. Everything under <code>/data/</code> is served with <code>Access-Control-Allow-Origin: *</code>, so a browser-side notebook or dashboard on any origin can read it directly.</caption>
           <thead><tr><th scope="col">Endpoint</th><th scope="col">Contains</th><th scope="col">Stability</th></tr></thead>
           <tbody>
-          <tr><th scope="row"><span class="mono">/data/MANIFEST.json</span></th><td>Index of every series: source, CDID, units, frequency, coverage, and the full list of snapshot dates.</td><td>Rewritten on every fetch; short cache with <span class="mono">stale-while-revalidate</span>.</td></tr>
-          <tr><th scope="row"><span class="mono">/data/latest/&lt;series&gt;.json</span></th><td>The newest snapshot, flattened. Same schema as a vintage file.</td><td>Moves. Do not cite it as a fixed reference.</td></tr>
-          <tr><th scope="row"><span class="mono">/data/vintages/&lt;source&gt;/&lt;series&gt;/&lt;YYYY-MM-DD&gt;.json</span></th><td>One dated snapshot, exactly as fetched.</td><td>Immutable by construction — never edited, never deleted. Served with a one-year <span class="mono">immutable</span> cache.</td></tr>
-          <tr><th scope="row"><span class="mono">/data/calendar.ics</span></th><td>The release calendar above, as iCalendar.</td><td>Regenerated with the store; short cache.</td></tr>
+          <tr><th scope="row"><span class="mono">/data/MANIFEST.json</span></th><td>Index of every series: source, CDID, units, frequency, coverage, and every snapshot date.</td><td>Rewritten on each fetch; short cache.</td></tr>
+          <tr><th scope="row"><span class="mono">/data/latest/&lt;series&gt;.json</span></th><td>The newest snapshot, flattened. Same schema as a vintage file.</td><td>Moves. Do not cite as a fixed reference.</td></tr>
+          <tr><th scope="row"><span class="mono">/data/vintages/&lt;source&gt;/&lt;series&gt;/&lt;YYYY-MM-DD&gt;.json</span></th><td>One dated snapshot, exactly as fetched.</td><td>Immutable by construction; one-year cache.</td></tr>
+          <tr><th scope="row"><span class="mono">/data/calendar.ics</span></th><td>The release calendar above, as iCalendar.</td><td>Regenerated with the store.</td></tr>
           </tbody>
         </table>
       </div>
-      <p>
-        Every file under <code>/data/</code> is served with
-        <code>Access-Control-Allow-Origin: *</code> and
-        <code>Access-Control-Allow-Methods: GET, HEAD, OPTIONS</code>, so a
-        browser-side notebook or dashboard on any origin can read it directly.
-        This is public open data under the licences above; the header grants
-        read access to already-public files and nothing else.
-      </p>
-      <p>
-        Each JSON file carries <code>series</code>, <code>source</code>,
-        <code>cdid</code>, <code>title</code>, <code>frequency</code>,
-        <code>units</code>, <code>url</code>, <code>release_updated</code>,
-        <code>first_period</code>, <code>last_period</code>,
-        <code>observations</code> as a list of
-        <code>{{"period", "value"}}</code> objects, <code>vintage</code>, and
-        <code>fetched_utc</code>. <code>latest/</code> files additionally carry
-        <code>next_release</code> where the publisher supplies one.
-      </p>
       <p class="chooser-note">
-        Snapshot dates are the dates a change was recorded, not a daily
-        calendar: a fetch that found no upstream change wrote no file, so gaps
-        between dates mean “nothing moved”. The whole store is in the
-        <a href="https://github.com/PolicyEngine/macro/tree/main/data">repository</a>
-        if you would rather clone it than fetch it.
+        Each file carries <span class="mono">series, source, cdid, title, frequency, units, url,
+        release_updated, first_period, last_period, observations, vintage, fetched_utc</span>.
+        Snapshot dates are when a change was recorded, not a daily calendar: a fetch
+        that found nothing new wrote no file. ONS and Bank of England series are under the
+        <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>;
+        US series come via FRED with their original BEA, BLS and Federal Reserve attribution.
       </p>
     </div>
-  </section>
-</main>
+    {END}"""
 
-<footer class="foot foot-bar">
-  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
-  <nav class="footer-links" aria-label="PolicyEngine links">
-    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
-    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
-    <a class="footer-text" href="/contact">Contact</a>
-  </nav>
-</footer>
 
-<script src="/reveal.js?v=2" defer></script>
-<script>
-document.addEventListener("click", function (e) {{
-  var btn = e.target.closest("[data-copy]"); if (!btn) return;
-  var code = btn.parentElement.querySelector("code");
-  navigator.clipboard.writeText(code.textContent).then(function () {{
-    btn.textContent = "copied";
-    setTimeout(function () {{ btn.textContent = "copy"; }}, 1400);
-  }});
-}});
-
-// Catalogue. Two independent collapses, both progressive enhancements:
-// the table ships whole with every detail row OPEN, and script does the
-// hiding. Without JavaScript the page is long but complete — never a table
-// with rows that cannot be reached.
-(function () {{
-  var table = document.getElementById("series-table");
-  if (!table) return;
-  var groups = table.querySelectorAll(".series-group");
-  var toggles = table.querySelectorAll(".series-toggle");
-  var preview = {PREVIEW_ROWS};
-
-  // 1. Per-row detail.
-  function setOpen(btn, open) {{
-    btn.setAttribute("aria-expanded", open ? "true" : "false");
-    var row = document.getElementById(btn.getAttribute("aria-controls"));
-    if (row) row.hidden = !open;
-  }}
-  toggles.forEach(function (btn) {{ setOpen(btn, false); }});
-  document.addEventListener("click", function (e) {{
-    var btn = e.target.closest(".series-toggle");
-    if (!btn) return;
-    setOpen(btn, btn.getAttribute("aria-expanded") !== "true");
-  }});
-
-  // 2. Row count. Nothing to collapse if the store is small enough to show.
-  var showAll = document.getElementById("show-all");
-  if (!showAll || groups.length <= preview) return;
-  var hiddenCount = groups.length - preview;
-
-  function setListOpen(open) {{
-    groups.forEach(function (group) {{
-      if (+group.getAttribute("data-index") >= preview) group.hidden = !open;
-    }});
-    showAll.setAttribute("aria-expanded", open ? "true" : "false");
-    showAll.textContent = open
-      ? "Show fewer"
-      : "Show all " + groups.length + " series (" + hiddenCount + " more)";
-  }}
-
-  showAll.hidden = false;
-  setListOpen(false);
-  showAll.addEventListener("click", function () {{
-    var open = showAll.getAttribute("aria-expanded") !== "true";
-    setListOpen(open);
-    // Collapsing can leave the reader below the table; put them back on it.
-    if (!open) table.scrollIntoView({{ block: "start", behavior: "smooth" }});
-  }});
-}})();
-</script>
-</body>
-</html>
-"""
+def splice(page: str, fragment: str) -> str:
+    """Replace the marked block in /forecasts, leaving the rest untouched."""
+    start = page.index(BEGIN)
+    end = page.index(END) + len(END)
+    return page[:start] + fragment + page[end:]
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
+
+    page = FORECASTS.read_text(encoding="utf-8")
+    if BEGIN not in page or END not in page:
+        print(f"{FORECASTS.relative_to(ROOT)} is missing the data-store markers")
+        return 1
+
     # Compared and written as bytes: the calendar uses the CRLF line endings
     # RFC 5545 requires, and text mode would silently translate them.
     rendered = (
-        (PAGE, render_page().encode("utf-8")),
+        (FORECASTS, splice(page, render_fragment()).encode("utf-8")),
         (CALENDAR, render_calendar().encode("utf-8")),
     )
     if args.check:
@@ -664,11 +479,11 @@ def main() -> int:
         if stale:
             print(f"{', '.join(stale)} stale; run python3 data/build_page.py")
             return 1
-        print("Data page and release calendar match committed data")
+        print("Forecasts data block and release calendar match committed data")
         return 0
     for path, content in rendered:
         path.write_bytes(content)
-    print("updated Data page and release calendar")
+    print("updated the forecasts data block and release calendar")
     return 0
 
 

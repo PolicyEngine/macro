@@ -70,6 +70,7 @@
         <a href="#status">Record</a>
         <a href="#scored">Scored</a>
         <a href="#rounds">Rounds</a>
+        <a href="#data">Data</a>
         <a href="#notes">Notes</a>
       </div>
     </div>
@@ -354,14 +355,704 @@
         <div class="meth-out-line"><span class="icon">&rarr;</span><span>Append-only: a <a href="https://github.com/PolicyEngine/macro/blob/main/.github/workflows/forecast-archive.yml">CI job</a> fails any pull request that edits or deletes a round. Corrections create a new round; the superseded one stays scored.</span></div>
         <div class="meth-out-line"><span class="icon">&rarr;</span><span>The first round was archived retroactively from a file already in Git — prior to the CPI outturn by ~16 hours, but with thinner provenance than later rounds.</span></div>
         <div class="meth-out-line"><span class="icon">&rarr;</span><span>Scoring inputs: <a class="mono" href="/forecasts/outturns.json" download><code>outturns.json</code></a> (vintage-versioned, so revisions never silently rewrite a score) and <a class="mono" href="/forecasts/scorecard.json" download><code>scorecard.json</code></a>; method in the <a href="https://github.com/PolicyEngine/macro/blob/main/forecasts/README.md">README</a>.</span></div>
-        <div class="meth-out-line"><span class="icon">&rarr;</span><span>The outturns a round is scored against come from the append-only <a href="/data">data store</a> — dated snapshots of every official series, never edited, so a score can be reproduced against the data as it stood, not as it was later revised.</span></div>
+        <div class="meth-out-line"><span class="icon">&rarr;</span><span>The outturns a round is scored against come from the append-only <a href="#data">data store below</a> — dated snapshots of every official series, never edited, so a score can be reproduced against the data as it stood, not as it was later revised.</span></div>
       </div>
     </div>
   </section>
 
+  <section id="data" class="band band-alt">
+    <div class="band-head">
+      <span class="kicker mono">05 — the data behind it</span>
+      <h2>Every number, as it was published.</h2>
+    </div>
+<!-- data-store:begin -->
+    <div class="prose">
+      <p>
+        Rounds are scored against official data, and official data gets
+        revised. Every series this site reads is therefore archived as dated
+        snapshots that are never edited and never deleted — 20
+        series, 57 snapshots since 2026-07-25 — so a score can
+        be reproduced against the data as it stood, not as it was later
+        revised. Reading only the current value would make look-ahead bias
+        undetectable, because only one version of the past would ever exist.
+      </p>
+
+      <h3>What is tracked</h3>
+      <div class="table-scroll">
+        <table id="series-table" class="series-table">
+          <caption>Values come from the committed snapshot, not a live call. Expand a row for its snapshot history and store path.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Series</th>
+              <th scope="col">Source</th>
+              <th scope="col">Frequency</th>
+              <th scope="col">Latest</th>
+              <th scope="col">Snapshots</th>
+            </tr>
+          </thead>
+            <tbody class="series-group" data-index="0">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-uk_average_weekly_earnings"><span class="series-name">Average weekly earnings</span><span class="mono">uk_average_weekly_earnings</span></button>
+                </th>
+                <td>ONS</td>
+                <td>monthly</td>
+                <td class="num">749.0 <span class="mono">2026-05</span></td>
+                <td class="num">1</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-uk_average_weekly_earnings">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>£ per week, seasonally adjusted</dd></div>
+                  <div><dt>Coverage</dt><dd>2000-01 – 2026-05</dd></div>
+                  <div><dt>Observations</dt><dd>317</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">ons/uk_average_weekly_earnings</span></dd></div>
+                  <div><dt>Next release</dt><dd>18 August  2026</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/timeseries/kab9/lms">ONS · KAB9</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/ons/uk_average_weekly_earnings/2026-07-26.json">2026-07-26</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="1">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-uk_bank_rate"><span class="series-name">Official Bank Rate</span><span class="mono">uk_bank_rate</span></button>
+                </th>
+                <td>Bank of England</td>
+                <td>daily</td>
+                <td class="num">3.75 <span class="mono">2026-08-06</span></td>
+                <td class="num">7</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-uk_bank_rate">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>percent</dd></div>
+                  <div><dt>Coverage</dt><dd>2020-01-02 – 2026-08-06</dd></div>
+                  <div><dt>Observations</dt><dd>1,666</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">boe/uk_bank_rate</span></dd></div>
+                  <div><dt>Next release</dt><dd>not announced</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://www.bankofengland.co.uk/boeapps/database/">Bank of England · IUDBEDR</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/boe/uk_bank_rate/2026-08-10.json">2026-08-10</a></li>
+                  <li><a href="/data/vintages/boe/uk_bank_rate/2026-08-07.json">2026-08-07</a></li>
+                  <li><a href="/data/vintages/boe/uk_bank_rate/2026-08-06.json">2026-08-06</a></li>
+                  <li><a href="/data/vintages/boe/uk_bank_rate/2026-08-05.json">2026-08-05</a></li>
+                  <li><a href="/data/vintages/boe/uk_bank_rate/2026-08-04.json">2026-08-04</a></li>
+                  <li><a href="/data/vintages/boe/uk_bank_rate/2026-07-29.json">2026-07-29</a></li>
+                  <li><a href="/data/vintages/boe/uk_bank_rate/2026-07-25.json">2026-07-25</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="2">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-uk_business_investment"><span class="series-name">Real business investment</span><span class="mono">uk_business_investment</span></button>
+                </th>
+                <td>ONS</td>
+                <td>quarterly</td>
+                <td class="num">77,134.0 <span class="mono">2026Q1</span></td>
+                <td class="num">1</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-uk_business_investment">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>£m, chained volume measure, seasonally adjusted</dd></div>
+                  <div><dt>Coverage</dt><dd>1997Q1 – 2026Q1</dd></div>
+                  <div><dt>Observations</dt><dd>117</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">ons/uk_business_investment</span></dd></div>
+                  <div><dt>Next release</dt><dd>30 September 2026</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://www.ons.gov.uk/economy/grossdomesticproductgdp/timeseries/npel/ukea">ONS · NPEL</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/ons/uk_business_investment/2026-07-26.json">2026-07-26</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="3">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-uk_core_cpi_yoy"><span class="series-name">Core CPI inflation</span><span class="mono">uk_core_cpi_yoy</span></button>
+                </th>
+                <td>ONS</td>
+                <td>monthly</td>
+                <td class="num">2.6 <span class="mono">2026-06</span></td>
+                <td class="num">1</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-uk_core_cpi_yoy">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>percent, year-on-year</dd></div>
+                  <div><dt>Coverage</dt><dd>1989-01 – 2026-06</dd></div>
+                  <div><dt>Observations</dt><dd>450</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">ons/uk_core_cpi_yoy</span></dd></div>
+                  <div><dt>Next release</dt><dd>19 August 2026</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/dko8/mm23">ONS · DKO8</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/ons/uk_core_cpi_yoy/2026-07-26.json">2026-07-26</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="4">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-uk_cpi_yoy"><span class="series-name">CPI inflation</span><span class="mono">uk_cpi_yoy</span></button>
+                </th>
+                <td>ONS</td>
+                <td>quarterly</td>
+                <td class="num">2.8 <span class="mono">2026Q2</span></td>
+                <td class="num">2</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-uk_cpi_yoy">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>percent, year-on-year</dd></div>
+                  <div><dt>Coverage</dt><dd>1989Q1 – 2026Q2</dd></div>
+                  <div><dt>Observations</dt><dd>150</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">ons/uk_cpi_yoy</span></dd></div>
+                  <div><dt>Next release</dt><dd>19 August 2026</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/d7g7/mm23">ONS · D7G7</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/ons/uk_cpi_yoy/2026-07-26.json">2026-07-26</a></li>
+                  <li><a href="/data/vintages/ons/uk_cpi_yoy/2026-07-25.json">2026-07-25</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="5">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-uk_gdp_cvm"><span class="series-name">Real gross domestic product</span><span class="mono">uk_gdp_cvm</span></button>
+                </th>
+                <td>ONS</td>
+                <td>quarterly</td>
+                <td class="num">709,598.0 <span class="mono">2026Q1</span></td>
+                <td class="num">2</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-uk_gdp_cvm">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>£m, chained volume measure</dd></div>
+                  <div><dt>Coverage</dt><dd>1955Q1 – 2026Q1</dd></div>
+                  <div><dt>Observations</dt><dd>285</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">ons/uk_gdp_cvm</span></dd></div>
+                  <div><dt>Next release</dt><dd>13 August 2026</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://www.ons.gov.uk/economy/grossdomesticproductgdp/timeseries/abmi/qna">ONS · ABMI</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/ons/uk_gdp_cvm/2026-07-26.json">2026-07-26</a></li>
+                  <li><a href="/data/vintages/ons/uk_gdp_cvm/2026-07-25.json">2026-07-25</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="6">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-uk_gilt_10y"><span class="series-name">UK nominal par yield, 10 year</span><span class="mono">uk_gilt_10y</span></button>
+                </th>
+                <td>Bank of England</td>
+                <td>daily</td>
+                <td class="num">4.8802 <span class="mono">2026-08-05</span></td>
+                <td class="num">7</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-uk_gilt_10y">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>percent</dd></div>
+                  <div><dt>Coverage</dt><dd>2020-01-02 – 2026-08-05</dd></div>
+                  <div><dt>Observations</dt><dd>1,665</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">boe/uk_gilt_10y</span></dd></div>
+                  <div><dt>Next release</dt><dd>not announced</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://www.bankofengland.co.uk/boeapps/database/">Bank of England · IUDMNPY</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/boe/uk_gilt_10y/2026-08-10.json">2026-08-10</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_10y/2026-08-07.json">2026-08-07</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_10y/2026-08-06.json">2026-08-06</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_10y/2026-08-05.json">2026-08-05</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_10y/2026-08-04.json">2026-08-04</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_10y/2026-07-29.json">2026-07-29</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_10y/2026-07-25.json">2026-07-25</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="7">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-uk_gilt_20y"><span class="series-name">UK nominal par yield, 20 year</span><span class="mono">uk_gilt_20y</span></button>
+                </th>
+                <td>Bank of England</td>
+                <td>daily</td>
+                <td class="num">5.4016 <span class="mono">2026-08-05</span></td>
+                <td class="num">7</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-uk_gilt_20y">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>percent</dd></div>
+                  <div><dt>Coverage</dt><dd>2020-01-02 – 2026-08-05</dd></div>
+                  <div><dt>Observations</dt><dd>1,665</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">boe/uk_gilt_20y</span></dd></div>
+                  <div><dt>Next release</dt><dd>not announced</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://www.bankofengland.co.uk/boeapps/database/">Bank of England · IUDLNPY</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/boe/uk_gilt_20y/2026-08-10.json">2026-08-10</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_20y/2026-08-07.json">2026-08-07</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_20y/2026-08-06.json">2026-08-06</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_20y/2026-08-05.json">2026-08-05</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_20y/2026-08-04.json">2026-08-04</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_20y/2026-07-29.json">2026-07-29</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_20y/2026-07-25.json">2026-07-25</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="8">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-uk_gilt_5y"><span class="series-name">UK nominal par yield, 5 year</span><span class="mono">uk_gilt_5y</span></button>
+                </th>
+                <td>Bank of England</td>
+                <td>daily</td>
+                <td class="num">4.3871 <span class="mono">2026-08-05</span></td>
+                <td class="num">7</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-uk_gilt_5y">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>percent</dd></div>
+                  <div><dt>Coverage</dt><dd>2020-01-02 – 2026-08-05</dd></div>
+                  <div><dt>Observations</dt><dd>1,665</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">boe/uk_gilt_5y</span></dd></div>
+                  <div><dt>Next release</dt><dd>not announced</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://www.bankofengland.co.uk/boeapps/database/">Bank of England · IUDSNPY</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/boe/uk_gilt_5y/2026-08-10.json">2026-08-10</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_5y/2026-08-07.json">2026-08-07</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_5y/2026-08-06.json">2026-08-06</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_5y/2026-08-05.json">2026-08-05</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_5y/2026-08-04.json">2026-08-04</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_5y/2026-07-29.json">2026-07-29</a></li>
+                  <li><a href="/data/vintages/boe/uk_gilt_5y/2026-07-25.json">2026-07-25</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="9">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-uk_monthly_gva"><span class="series-name">Monthly gross value added index</span><span class="mono">uk_monthly_gva</span></button>
+                </th>
+                <td>ONS</td>
+                <td>monthly</td>
+                <td class="num">103.2 <span class="mono">2026-05</span></td>
+                <td class="num">1</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-uk_monthly_gva">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>index, chained volume measure, seasonally adjusted</dd></div>
+                  <div><dt>Coverage</dt><dd>1997-01 – 2026-05</dd></div>
+                  <div><dt>Observations</dt><dd>353</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">ons/uk_monthly_gva</span></dd></div>
+                  <div><dt>Next release</dt><dd>13 August 2026</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://www.ons.gov.uk/economy/grossdomesticproductgdp/timeseries/ecy2/mgdp">ONS · ECY2</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/ons/uk_monthly_gva/2026-07-26.json">2026-07-26</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="10">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-uk_public_sector_net_borrowing"><span class="series-name">Public-sector net borrowing</span><span class="mono">uk_public_sector_net_borrowing</span></button>
+                </th>
+                <td>ONS</td>
+                <td>monthly</td>
+                <td class="num">-15,989.0 <span class="mono">2026-06</span></td>
+                <td class="num">1</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-uk_public_sector_net_borrowing">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>£m, current prices, not seasonally adjusted</dd></div>
+                  <div><dt>Coverage</dt><dd>1993-01 – 2026-06</dd></div>
+                  <div><dt>Observations</dt><dd>402</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">ons/uk_public_sector_net_borrowing</span></dd></div>
+                  <div><dt>Next release</dt><dd>21 August 2026</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://www.ons.gov.uk/economy/governmentpublicsectorandtaxes/publicsectorfinance/timeseries/j5ii/pusf">ONS · J5II</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/ons/uk_public_sector_net_borrowing/2026-07-26.json">2026-07-26</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="11">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-uk_public_sector_net_debt_gdp"><span class="series-name">Public-sector net debt</span><span class="mono">uk_public_sector_net_debt_gdp</span></button>
+                </th>
+                <td>ONS</td>
+                <td>monthly</td>
+                <td class="num">94.9 <span class="mono">2026-06</span></td>
+                <td class="num">1</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-uk_public_sector_net_debt_gdp">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>percent of GDP, not seasonally adjusted</dd></div>
+                  <div><dt>Coverage</dt><dd>1993-03 – 2026-06</dd></div>
+                  <div><dt>Observations</dt><dd>400</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">ons/uk_public_sector_net_debt_gdp</span></dd></div>
+                  <div><dt>Next release</dt><dd>21 August 2026</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://www.ons.gov.uk/economy/governmentpublicsectorandtaxes/publicsectorfinance/timeseries/hf6x/pusf">ONS · HF6X</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/ons/uk_public_sector_net_debt_gdp/2026-07-26.json">2026-07-26</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="12">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-uk_unemployment_rate"><span class="series-name">Unemployment rate</span><span class="mono">uk_unemployment_rate</span></button>
+                </th>
+                <td>ONS</td>
+                <td>quarterly</td>
+                <td class="num">5.0 <span class="mono">2026Q1</span></td>
+                <td class="num">2</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-uk_unemployment_rate">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>percent</dd></div>
+                  <div><dt>Coverage</dt><dd>1971Q1 – 2026Q1</dd></div>
+                  <div><dt>Observations</dt><dd>221</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">ons/uk_unemployment_rate</span></dd></div>
+                  <div><dt>Next release</dt><dd>18 August  2026</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://www.ons.gov.uk/employmentandlabourmarket/peoplenotinwork/unemployment/timeseries/mgsx/lms">ONS · MGSX</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/ons/uk_unemployment_rate/2026-07-26.json">2026-07-26</a></li>
+                  <li><a href="/data/vintages/ons/uk_unemployment_rate/2026-07-25.json">2026-07-25</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="13">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-uk_vacancies"><span class="series-name">UK vacancies</span><span class="mono">uk_vacancies</span></button>
+                </th>
+                <td>ONS</td>
+                <td>monthly</td>
+                <td class="num">712.0 <span class="mono">2026-05</span></td>
+                <td class="num">1</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-uk_vacancies">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>thousands, seasonally adjusted three-month average</dd></div>
+                  <div><dt>Coverage</dt><dd>2001-05 – 2026-05</dd></div>
+                  <div><dt>Observations</dt><dd>301</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">ons/uk_vacancies</span></dd></div>
+                  <div><dt>Next release</dt><dd>18 August  2026</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/employmentandemployeetypes/timeseries/ap2y/lms">ONS · AP2Y</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/ons/uk_vacancies/2026-07-26.json">2026-07-26</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="14">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-us_cpi"><span class="series-name">US consumer price index, all urban consumers</span><span class="mono">us_cpi</span></button>
+                </th>
+                <td>FRED</td>
+                <td>monthly</td>
+                <td class="num">332.568 <span class="mono">2026-06</span></td>
+                <td class="num">1</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-us_cpi">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>index 1982-84=100, seasonally adjusted</dd></div>
+                  <div><dt>Coverage</dt><dd>2020-01 – 2026-06</dd></div>
+                  <div><dt>Observations</dt><dd>77</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">fred/us_cpi</span></dd></div>
+                  <div><dt>Next release</dt><dd>not announced</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://fred.stlouisfed.org/series/CPIAUCSL">FRED · CPIAUCSL</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/fred/us_cpi/2026-07-27.json">2026-07-27</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="15">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-us_federal_funds_rate"><span class="series-name">Effective federal funds rate</span><span class="mono">us_federal_funds_rate</span></button>
+                </th>
+                <td>FRED</td>
+                <td>monthly</td>
+                <td class="num">3.63 <span class="mono">2026-07</span></td>
+                <td class="num">2</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-us_federal_funds_rate">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>percent</dd></div>
+                  <div><dt>Coverage</dt><dd>2020-01 – 2026-07</dd></div>
+                  <div><dt>Observations</dt><dd>79</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">fred/us_federal_funds_rate</span></dd></div>
+                  <div><dt>Next release</dt><dd>not announced</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://fred.stlouisfed.org/series/FEDFUNDS">FRED · FEDFUNDS</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/fred/us_federal_funds_rate/2026-08-04.json">2026-08-04</a></li>
+                  <li><a href="/data/vintages/fred/us_federal_funds_rate/2026-07-27.json">2026-07-27</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="16">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-us_payroll_employment"><span class="series-name">US total nonfarm payroll employment</span><span class="mono">us_payroll_employment</span></button>
+                </th>
+                <td>FRED</td>
+                <td>monthly</td>
+                <td class="num">158,858.0 <span class="mono">2026-07</span></td>
+                <td class="num">2</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-us_payroll_employment">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>thousands of persons, seasonally adjusted</dd></div>
+                  <div><dt>Coverage</dt><dd>2020-01 – 2026-07</dd></div>
+                  <div><dt>Observations</dt><dd>79</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">fred/us_payroll_employment</span></dd></div>
+                  <div><dt>Next release</dt><dd>not announced</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://fred.stlouisfed.org/series/PAYEMS">FRED · PAYEMS</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/fred/us_payroll_employment/2026-08-10.json">2026-08-10</a></li>
+                  <li><a href="/data/vintages/fred/us_payroll_employment/2026-07-27.json">2026-07-27</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="17">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-us_real_gdp"><span class="series-name">US real gross domestic product</span><span class="mono">us_real_gdp</span></button>
+                </th>
+                <td>FRED</td>
+                <td>quarterly</td>
+                <td class="num">24,270.599 <span class="mono">2026Q2</span></td>
+                <td class="num">2</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-us_real_gdp">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>billions of chained 2017 dollars, seasonally adjusted annual rate</dd></div>
+                  <div><dt>Coverage</dt><dd>2020Q1 – 2026Q2</dd></div>
+                  <div><dt>Observations</dt><dd>26</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">fred/us_real_gdp</span></dd></div>
+                  <div><dt>Next release</dt><dd>not announced</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://fred.stlouisfed.org/series/GDPC1">FRED · GDPC1</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/fred/us_real_gdp/2026-08-04.json">2026-08-04</a></li>
+                  <li><a href="/data/vintages/fred/us_real_gdp/2026-07-27.json">2026-07-27</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="18">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-us_treasury_10y"><span class="series-name">10-year US Treasury constant maturity rate</span><span class="mono">us_treasury_10y</span></button>
+                </th>
+                <td>FRED</td>
+                <td>daily</td>
+                <td class="num">4.69 <span class="mono">2026-08-06</span></td>
+                <td class="num">7</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-us_treasury_10y">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>percent</dd></div>
+                  <div><dt>Coverage</dt><dd>2020-01-02 – 2026-08-06</dd></div>
+                  <div><dt>Observations</dt><dd>1,650</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">fred/us_treasury_10y</span></dd></div>
+                  <div><dt>Next release</dt><dd>not announced</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://fred.stlouisfed.org/series/DGS10">FRED · DGS10</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/fred/us_treasury_10y/2026-08-10.json">2026-08-10</a></li>
+                  <li><a href="/data/vintages/fred/us_treasury_10y/2026-08-07.json">2026-08-07</a></li>
+                  <li><a href="/data/vintages/fred/us_treasury_10y/2026-08-06.json">2026-08-06</a></li>
+                  <li><a href="/data/vintages/fred/us_treasury_10y/2026-08-05.json">2026-08-05</a></li>
+                  <li><a href="/data/vintages/fred/us_treasury_10y/2026-08-04.json">2026-08-04</a></li>
+                  <li><a href="/data/vintages/fred/us_treasury_10y/2026-07-29.json">2026-07-29</a></li>
+                  <li><a href="/data/vintages/fred/us_treasury_10y/2026-07-27.json">2026-07-27</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+            <tbody class="series-group" data-index="19">
+              <tr class="series-row">
+                <th scope="row">
+                  <button type="button" class="series-toggle" aria-expanded="true" aria-controls="detail-us_unemployment_rate"><span class="series-name">US unemployment rate</span><span class="mono">us_unemployment_rate</span></button>
+                </th>
+                <td>FRED</td>
+                <td>monthly</td>
+                <td class="num">4.1 <span class="mono">2026-07</span></td>
+                <td class="num">2</td>
+              </tr>
+              <tr class="series-detail-row" id="detail-us_unemployment_rate">
+                <td colspan="5">
+                  <dl>
+                  <div><dt>Units</dt><dd>percent, seasonally adjusted</dd></div>
+                  <div><dt>Coverage</dt><dd>2020-01 – 2026-07</dd></div>
+                  <div><dt>Observations</dt><dd>78</dd></div>
+                  <div><dt>Store path</dt><dd><span class="mono">fred/us_unemployment_rate</span></dd></div>
+                  <div><dt>Next release</dt><dd>not announced</dd></div>
+                  <div><dt>Official source</dt><dd><a href="https://fred.stlouisfed.org/series/UNRATE">FRED · UNRATE</a></dd></div>
+                  </dl>
+                  <p class="series-vintages-head">Every snapshot taken, newest first — each file immutable.</p>
+                  <ul class="vintage-list mono">
+                  <li><a href="/data/vintages/fred/us_unemployment_rate/2026-08-10.json">2026-08-10</a></li>
+                  <li><a href="/data/vintages/fred/us_unemployment_rate/2026-07-27.json">2026-07-27</a></li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+        </table>
+      </div>
+      <p class="table-controls">
+        <button type="button" id="show-all" class="series-show-all" hidden
+                aria-controls="series-table" aria-expanded="false"></button>
+      </p>
+
+      <h3>Reconstruct a series as it was published on a date</h3>
+      <p>
+        <code>MANIFEST.json</code> lists every snapshot date held for every
+        series. Take the newest on or before the date you want, and read that
+        file. Standard library only, no key, no account.
+      </p>
+import json, urllib.request
+
+BASE = &quot;https://policyengine-macro.vercel.app/data&quot;
+
+def get(path):
+    with urllib.request.urlopen(f&quot;{BASE}/{path}&quot;) as response:
+        return json.load(response)
+
+def as_of(source, series, date):
+    dates = get(&quot;MANIFEST.json&quot;)[&quot;series&quot;][series][&quot;vintages&quot;]    <span class="cm"># every snapshot ever taken</span>
+    dates = [d for d in dates if d &lt;= date]
+    if not dates:
+        raise LookupError(f&quot;no {series} vintage on or before {date}&quot;)
+    return get(f&quot;vintages/{source}/{series}/{max(dates)}.json&quot;)   <span class="cm"># immutable file</span>
+
+cpi = as_of(&quot;ons&quot;, &quot;uk_cpi_yoy&quot;, &quot;2026-07-25&quot;)
+print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])                    <span class="cm"># 2026-07-25 {&#x27;period&#x27;: &#x27;2026Q2&#x27;, &#x27;value&#x27;: 2.8}</span>
+      <p>
+        A later date returns a later snapshot, which may carry revised values
+        for periods the earlier one already covered. That difference is the
+        revision. The store begins 2026-07-25, when the first snapshot was
+        taken — it is a forward-looking real-time record from that date, not a
+        reconstruction of vintages predating it.
+      </p>
+
+      <h3>Announced releases</h3>
+      <div class="table-scroll">
+        <table>
+          <caption>10 announced releases, from the committed snapshots. Only the ONS publishes the field; dates are the publisher's and can move. Also an iCalendar feed: <a href="/data/calendar.ics">/data/calendar.ics</a>.</caption>
+          <thead><tr><th scope="col">Date</th><th scope="col">Series</th><th scope="col">Source</th></tr></thead>
+          <tbody>
+          <tr><th scope="row">13 August 2026</th><td>Real gross domestic product</td><td><span class="mono">uk_gdp_cvm</span></td><td><a href="https://www.ons.gov.uk/economy/grossdomesticproductgdp/timeseries/abmi/qna">ONS · ABMI</a></td></tr>
+          <tr><th scope="row">13 August 2026</th><td>Monthly gross value added index</td><td><span class="mono">uk_monthly_gva</span></td><td><a href="https://www.ons.gov.uk/economy/grossdomesticproductgdp/timeseries/ecy2/mgdp">ONS · ECY2</a></td></tr>
+          <tr><th scope="row">18 August 2026</th><td>Average weekly earnings</td><td><span class="mono">uk_average_weekly_earnings</span></td><td><a href="https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/timeseries/kab9/lms">ONS · KAB9</a></td></tr>
+          <tr><th scope="row">18 August 2026</th><td>Unemployment rate</td><td><span class="mono">uk_unemployment_rate</span></td><td><a href="https://www.ons.gov.uk/employmentandlabourmarket/peoplenotinwork/unemployment/timeseries/mgsx/lms">ONS · MGSX</a></td></tr>
+          <tr><th scope="row">18 August 2026</th><td>UK vacancies</td><td><span class="mono">uk_vacancies</span></td><td><a href="https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/employmentandemployeetypes/timeseries/ap2y/lms">ONS · AP2Y</a></td></tr>
+          <tr><th scope="row">19 August 2026</th><td>Core CPI inflation</td><td><span class="mono">uk_core_cpi_yoy</span></td><td><a href="https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/dko8/mm23">ONS · DKO8</a></td></tr>
+          <tr><th scope="row">19 August 2026</th><td>CPI inflation</td><td><span class="mono">uk_cpi_yoy</span></td><td><a href="https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/d7g7/mm23">ONS · D7G7</a></td></tr>
+          <tr><th scope="row">21 August 2026</th><td>Public-sector net borrowing</td><td><span class="mono">uk_public_sector_net_borrowing</span></td><td><a href="https://www.ons.gov.uk/economy/governmentpublicsectorandtaxes/publicsectorfinance/timeseries/j5ii/pusf">ONS · J5II</a></td></tr>
+          <tr><th scope="row">21 August 2026</th><td>Public-sector net debt</td><td><span class="mono">uk_public_sector_net_debt_gdp</span></td><td><a href="https://www.ons.gov.uk/economy/governmentpublicsectorandtaxes/publicsectorfinance/timeseries/hf6x/pusf">ONS · HF6X</a></td></tr>
+          <tr><th scope="row">30 September 2026</th><td>Real business investment</td><td><span class="mono">uk_business_investment</span></td><td><a href="https://www.ons.gov.uk/economy/grossdomesticproductgdp/timeseries/npel/ukea">ONS · NPEL</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Endpoints</h3>
+      <div class="table-scroll">
+        <table>
+          <caption>Static files over HTTPS, GET and HEAD only — there is no API to authenticate against. Everything under <code>/data/</code> is served with <code>Access-Control-Allow-Origin: *</code>, so a browser-side notebook or dashboard on any origin can read it directly.</caption>
+          <thead><tr><th scope="col">Endpoint</th><th scope="col">Contains</th><th scope="col">Stability</th></tr></thead>
+          <tbody>
+          <tr><th scope="row"><span class="mono">/data/MANIFEST.json</span></th><td>Index of every series: source, CDID, units, frequency, coverage, and every snapshot date.</td><td>Rewritten on each fetch; short cache.</td></tr>
+          <tr><th scope="row"><span class="mono">/data/latest/&lt;series&gt;.json</span></th><td>The newest snapshot, flattened. Same schema as a vintage file.</td><td>Moves. Do not cite as a fixed reference.</td></tr>
+          <tr><th scope="row"><span class="mono">/data/vintages/&lt;source&gt;/&lt;series&gt;/&lt;YYYY-MM-DD&gt;.json</span></th><td>One dated snapshot, exactly as fetched.</td><td>Immutable by construction; one-year cache.</td></tr>
+          <tr><th scope="row"><span class="mono">/data/calendar.ics</span></th><td>The release calendar above, as iCalendar.</td><td>Regenerated with the store.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="chooser-note">
+        Each file carries <span class="mono">series, source, cdid, title, frequency, units, url,
+        release_updated, first_period, last_period, observations, vintage, fetched_utc</span>.
+        Snapshot dates are when a change was recorded, not a daily calendar: a fetch
+        that found nothing new wrote no file. ONS and Bank of England series are under the
+        <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>;
+        US series come via FRED with their original BEA, BLS and Federal Reserve attribution.
+      </p>
+    </div>
+    <!-- data-store:end -->
+  </section>
+
   <section id="limits" class="band">
     <div class="band-head">
-      <span class="kicker mono">05 — what this is not</span>
+      <span class="kicker mono">06 — what this is not</span>
       <h2>Limits worth stating plainly.</h2>
     </div>
     <div class="prose">
@@ -376,7 +1067,7 @@
 
   <section id="notes" class="band">
     <div class="band-head">
-      <span class="kicker mono">06 — dated notes</span>
+      <span class="kicker mono">07 — dated notes</span>
       <h2>What the releases mean, read through the models.</h2>
     </div>
     <div class="prose">
@@ -407,5 +1098,52 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
+<script>
+// Data catalogue: two independent collapses, both progressive enhancements.
+// The table ships whole with every detail row open and the controls hidden;
+// script does the hiding and reveals the controls. Without JavaScript the
+// section is long but complete, never rows that cannot be reached.
+(function () {
+  var table = document.getElementById("series-table");
+  if (!table) return;
+  var groups = table.querySelectorAll(".series-group");
+  var toggles = table.querySelectorAll(".series-toggle");
+  var preview = 5;
+
+  function setOpen(btn, open) {
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    var row = document.getElementById(btn.getAttribute("aria-controls"));
+    if (row) row.hidden = !open;
+  }
+  toggles.forEach(function (btn) { setOpen(btn, false); });
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest(".series-toggle");
+    if (!btn) return;
+    setOpen(btn, btn.getAttribute("aria-expanded") !== "true");
+  });
+
+  var showAll = document.getElementById("show-all");
+  if (!showAll || groups.length <= preview) return;
+  var hiddenCount = groups.length - preview;
+
+  function setListOpen(open) {
+    groups.forEach(function (group) {
+      if (+group.getAttribute("data-index") >= preview) group.hidden = !open;
+    });
+    showAll.setAttribute("aria-expanded", open ? "true" : "false");
+    showAll.textContent = open
+      ? "Show fewer"
+      : "Show all " + groups.length + " series (" + hiddenCount + " more)";
+  }
+
+  showAll.hidden = false;
+  setListOpen(false);
+  showAll.addEventListener("click", function () {
+    var open = showAll.getAttribute("aria-expanded") !== "true";
+    setListOpen(open);
+    if (!open) table.scrollIntoView({ block: "start", behavior: "smooth" });
+  });
+})();
+</script>
 </body>
 </html>

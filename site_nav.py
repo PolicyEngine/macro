@@ -30,7 +30,6 @@ EVIDENCE_ROOTS = {"papers", "reports"}
 
 # Display names used in the pathway line and the footer directory.
 PAGE_NAMES = {
-    "/data": "Data",
     "/economy": "Economy",
     "/economy/us": "United States",
     "/models": "Models",
@@ -77,7 +76,6 @@ PAGE_NAMES = {
 # Parent chain overrides where the URL hierarchy is not the reading hierarchy:
 # model and evidence pages live under Models; /score is a top-level section.
 CRUMB_PARENTS = {
-    "/data": "/forecasts",
     "/obr": "/models",
     "/svar": "/models",
     "/frb-us": "/models",
@@ -175,10 +173,6 @@ def section(path: Path) -> str | None:
     if root == "economy":
         return "economy"
     if root == "forecasts":
-        return "forecasts"
-    # /data has no tab of its own: the vintage store exists to make the
-    # forecast record reproducible, so it sits under Forecasts.
-    if root == "data":
         return "forecasts"
     if root == "connect":
         return "use"
