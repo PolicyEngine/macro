@@ -23,7 +23,7 @@ PUBLIC_MODELS = (
 # Public model id -> the directory holding its four pages. papers/ pages
 # carry the same eyebrow and are checked too.
 MODEL_PAGE_ROOTS = {
-    "pe-microsim": ("pe",),
+    "pe-microsim": ("pe", "papers/pe-microsim"),
     "obr-macro": ("obr", "papers/obr-macro"),
     "boe-svar": ("svar", "papers/boe-svar"),
     "frb-us": ("frb-us", "papers/frb-us"),

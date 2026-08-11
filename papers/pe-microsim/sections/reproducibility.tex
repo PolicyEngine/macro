@@ -1,0 +1,32 @@
+\section{Reproducibility, data, and vintage}
+\label{sec:repro}
+
+Reproducibility for this model is not one property but two, split along exactly the boundary of Section~\ref{sec:uncertainty}.
+
+\subsection{Household results: reproducible by anyone}
+
+A household calculation needs no dataset and no credential. Install the package, describe the people, pick a year, and the result is deterministic. This is an unusually strong reproducibility property for fiscal analysis, and it is why the worked example of Section~\ref{sec:validation} can be offered as a check the reader performs rather than a claim the reader accepts. The only version dependence is the country package: statutory rules change, and a result is reproducible against the rules as encoded in the version recorded in the run's provenance.
+
+\subsection{Population results: reproducible with access}
+
+Population runs require microdata, and the two countries differ. The US population dataset is Current Population Survey based and public. The UK population dataset is the enhanced Family Resources Survey---by default the \texttt{enhanced\_frs\_2023\_24} vintage---distributed through a gated Hugging Face repository; the first run downloads roughly 125MB and requires a \texttt{HUGGING\_FACE\_TOKEN} from an account granted access. The adapter fails with an explicit message naming the missing credential rather than an opaque download error, and the hosted server provisions the credential server-side so hosted callers never see it.
+
+That gate is a real limit on this paper's own reproducibility, and it should be stated plainly: a reader can reproduce every household figure here exactly, and cannot reproduce the \pounds 6.46 billion costing without being granted access to the underlying microdata. The rules are open; the microdata is licensed. This is the ordinary condition of the field---national statistical agencies release household surveys under conditions---but it means ``open model'' and ``openly checkable result'' are not the same claim, and only the first is fully true of the population side.
+
+\subsection{Measured cost of a population run}
+
+The resource envelope is recorded in the integration code from measurement rather than estimate. On the UK 2026 enhanced FRS---53{,}508 households---one simulation run takes about six seconds, peaks at roughly 1.8GB of resident memory, and leaves about 92MB of derived per-year data on disk. Because the baseline simulation is cached in-process per country, year and dataset, a session scoring several reforms pays for one baseline and roughly six seconds per additional reform. The registry summarises the whole picture as ``sub-second household; minutes population,'' the minutes being dominated by the first dataset build and download rather than by the arithmetic.
+
+\subsection{Vintage, and two declared inconsistencies}
+
+The registry records this model's data vintage as ``country package and dataset dependent; recorded per run,'' which is the only honest general statement: there is no single vintage, because the statutory rules travel with the installed country package and the microdata travels with the dataset. Every population result therefore carries its dataset name in provenance, and every score block repeats it in its assumptions with the household count.
+
+Two vintage inconsistencies are declared rather than smoothed over.
+
+\emph{The UK dataset lags upstream.} Population runs here use \texttt{enhanced\_frs\_2023\_24}. Upstream now publishes an FRS 2024--25 vintage, which this integration has not adopted. A costing produced today is therefore computed on a survey one release behind the newest available, and the ageing described in Section~\ref{sec:uncertainty} carries it a year further.
+
+\emph{Statute vintages diverge inside the suite.} This integration tracks the latest released country model, while the overlapping-generations member is pinned to \texttt{policyengine-uk==2.88.0}. The two members can therefore disagree about baseline statute, which means a reform scored through both is not, strictly, the same baseline in each. The inconsistency is declared on the model's validation page and repeated here because a reader comparing two members' answers deserves to know that some of the difference is a version pin.
+
+\subsection{Provenance as the reproduction instruction}
+
+Every result returned by the integration layer carries the model identifier, the installed distribution and version, the source repository URL, the data vintage, the baseline definition, and an instruction: check out the recorded source at the recorded revision, install the recorded adapter version, and rerun the serialised inputs. That is the operational meaning of reproducibility here---not that a number can be re-derived from a description in a paper, but that the run can be reconstructed from the record the run itself emitted.
