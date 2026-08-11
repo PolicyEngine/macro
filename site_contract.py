@@ -5,15 +5,32 @@ import re
 
 
 ROOT = Path(__file__).resolve().parent
+# In the order the site presents them. pe-microsim leads: it is
+# PolicyEngine's own engine, the only production-ready member and the only
+# one covering both countries. The order here is the contract — the "model
+# NN" eyebrow on every model page is checked against this tuple's index, so
+# reordering the site means reordering this and nothing else.
 PUBLIC_MODELS = (
+    "pe-microsim",
     "obr-macro",
     "boe-svar",
     "frb-us",
     "us-hank",
-    "pe-microsim",
     "psl-og",
     "define-uk",
 )
+
+# Public model id -> the directory holding its four pages. papers/ pages
+# carry the same eyebrow and are checked too.
+MODEL_PAGE_ROOTS = {
+    "pe-microsim": ("pe",),
+    "obr-macro": ("obr", "papers/obr-macro"),
+    "boe-svar": ("svar", "papers/boe-svar"),
+    "frb-us": ("frb-us", "papers/frb-us"),
+    "us-hank": ("us-hank",),
+    "psl-og": ("olg", "papers/psl-og"),
+    "define-uk": ("define",),
+}
 # /docs is a permanent redirect to /models#compare in vercel.json; the model
 # inventory lives on the pages below.
 MODEL_INVENTORY_PAGES = (
@@ -165,6 +182,46 @@ def check_docs_match_code() -> None:
         raise SystemExit("\n".join(failures))
 
 
+def check_model_ordinals() -> None:
+    """The "model NN" eyebrow must match the order the site presents models in.
+
+    pe-microsim was promoted to lead the suite, and for a while every one of
+    its own pages still said "model 06" while it was card 01 on the homepage,
+    the models grid and /connect. Twenty-eight pages disagreed with every
+    ordered surface, and nothing caught it, because the ordinal lived only in
+    hand-written prose.
+
+    Structural rather than textual: it derives the expected number from
+    PUBLIC_MODELS' index, so reordering the site is a one-line change here and
+    a regeneration, not a 28-file hunt.
+    """
+    failures: list[str] = []
+    for model, roots in MODEL_PAGE_ROOTS.items():
+        expected = PUBLIC_MODELS.index(model) + 1
+        for root in roots:
+            for page in sorted((ROOT / root).glob("**/index.html")):
+                found = re.search(r"model (\d{2}) &mdash;|model (\d{2}) —",
+                                  page.read_text())
+                if not found:
+                    continue
+                actual = int(found.group(1) or found.group(2))
+                if actual != expected:
+                    failures.append(
+                        f"{page.relative_to(ROOT)}: eyebrow says model "
+                        f"{actual:02d}, but {model} is #{expected} in "
+                        "PUBLIC_MODELS"
+                    )
+
+    missing = set(MODEL_PAGE_ROOTS) ^ set(PUBLIC_MODELS)
+    if missing:
+        failures.append(
+            f"MODEL_PAGE_ROOTS and PUBLIC_MODELS disagree on: {sorted(missing)}"
+        )
+
+    if failures:
+        raise SystemExit("\n".join(failures))
+
+
 def check_fragment_anchors() -> None:
     """Every internal fragment link must point at an id that exists.
 
@@ -214,5 +271,6 @@ if __name__ == "__main__":
     check_economy_navigation()
     check_editorial_consistency()
     check_docs_match_code()
+    check_model_ordinals()
     check_fragment_anchors()
     print("Public inventory, navigation, and editorial claims are consistent.")
