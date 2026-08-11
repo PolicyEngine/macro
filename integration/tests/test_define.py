@@ -129,3 +129,36 @@ def test_incidence_instructions_when_adapter_missing(monkeypatch):
     assert res["available"] is False
     assert "define_payload" in res["how_to_run"]
     assert "only numbers travel" in res["how_to_run"]
+
+
+def test_score_reform_refuses_define_and_names_the_alternative():
+    """SCOPE GUARD: capabilities.py and the public site both state that
+    score_reform refuses model='define' with an explanation. Before this test
+    the call fell through to the generic "model must be one of (...)" enum
+    error, which never mentioned DEFINE-UK and pointed at no alternative — the
+    documented refusal was prose, not behaviour."""
+    for model in ("define", "define-uk"):
+        with pytest.raises(ValueError) as excinfo:
+            core.score_reform(
+                country="uk",
+                reform={"gov.hmrc.income_tax.rates.uk[0].rate": 0.21},
+                model=model,
+            )
+        message = str(excinfo.value)
+        assert "define_scenario" in message
+        assert "no mapping" in message.lower()
+
+
+def test_score_reform_rejects_define_even_with_junk_other_arguments():
+    """The refusal must not depend on the rest of the call being well-formed,
+    or a caller fixing their reform dict would eventually be told only that
+    'define' is not in an enum."""
+    with pytest.raises(ValueError, match="define_scenario"):
+        core.score_reform(country=None, reform=None, model="define")
+
+
+def test_define_is_not_in_the_supported_score_models():
+    assert "define" not in core.SCORE_MODELS
+    assert "define-uk" not in core.SCORE_MODELS
+    assert "define" in core.SCORE_MODELS_WITHOUT_REFORM_BRIDGE
+    assert "define-uk" in core.SCORE_MODELS_WITHOUT_REFORM_BRIDGE

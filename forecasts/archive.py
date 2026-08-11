@@ -17,7 +17,7 @@ the outturn did. This script copies the moving artifact into
 ``forecasts/rounds/<round-id>/forecast.json``, which is **append-only**: rounds
 are added, never edited. The commit timestamp on that file is what makes the
 claim falsifiable, so the immutability is enforced in CI
-(``.github/workflows/forecast-immutability.yml``) rather than by convention.
+(``.github/workflows/forecast-archive.yml``) rather than by convention.
 
 Scoring against outturns lives in ``forecasts/score.py`` and reads, but never
 writes, the files under ``rounds/``.

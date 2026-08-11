@@ -1,0 +1,78 @@
+\section{The curated reform-parameter catalogue}
+\label{app:params}
+
+Table~\ref{tab:params} lists the thirteen reform paths the suite curates and exposes through its \texttt{list\_reform\_parameters} tool. The paths are curated by hand and every one has been verified to resolve through a household run; the baseline values, labels and units are resolved from the installed parameter tree at call time rather than transcribed here, so a path that ceases to resolve upstream is returned marked as not live with an explicit error rather than a silently stale number. The catalogue is a convenience surface, not a statement of the reformable parameter space, which is the whole parameter tree.
+
+\begin{table}[ht]
+\centering
+\caption{The curated reform-parameter catalogue}
+\label{tab:params}
+\small
+\begin{tabular}{llp{4.4cm}l}
+\toprule
+Country & Path & Description & Unit \\
+\midrule
+UK & \texttt{gov.hmrc.income\_tax.\allowbreak rates.uk[0].rate} & Income tax basic rate (England, Wales, NI) & decimal rate \\
+UK & \texttt{gov.hmrc.income\_tax.\allowbreak rates.uk[1].rate} & Income tax higher rate & decimal rate \\
+UK & \texttt{gov.hmrc.income\_tax.\allowbreak allowances.personal\_\allowbreak allowance.amount} & Income tax personal allowance & GBP per year \\
+UK & \texttt{gov.dwp.universal\_credit.\allowbreak means\_test.reduction\_rate} & Universal Credit taper (earnings reduction) rate & decimal rate \\
+UK & \texttt{gov.hmrc.national\_\allowbreak insurance.class\_1.rates.\allowbreak employee.main} & Employee National Insurance main rate & decimal rate \\
+UK & \texttt{gov.hmrc.child\_benefit.\allowbreak amount.eldest} & Child Benefit weekly amount, eldest child & GBP per week \\
+UK & \texttt{gov.hmrc.cgt.basic\_rate}$^{\dagger}$ & CGT rate for basic-rate taxpayers & decimal rate \\
+UK & \texttt{gov.hmrc.cgt.higher\_rate}$^{\dagger}$ & CGT rate for higher and additional-rate taxpayers & decimal rate \\
+UK & \texttt{gov.hmrc.cgt.annual\_\allowbreak exempt\_amount}$^{\dagger}$ & CGT annual exempt amount & GBP per year \\
+US & \texttt{gov.irs.credits.ctc.\allowbreak amount.base[0].amount} & Child Tax Credit base amount per child & USD per year \\
+US & \texttt{gov.irs.credits.ctc.\allowbreak amount.adult\_dependent} & CTC amount for adult dependents & USD per year \\
+US & \texttt{gov.irs.income.bracket.\allowbreak rates.2} & Federal income tax rate, bracket 2 & decimal rate \\
+US & \texttt{gov.irs.deductions.\allowbreak standard.amount.JOINT} & Standard deduction for joint filers & USD per year \\
+\bottomrule
+\end{tabular}
+
+\medskip
+\parbox{0.94\textwidth}{\footnotesize \emph{Notes:} $^{\dagger}$These are valid reform paths, but the household calculator does not compute capital gains tax, so a household result will not move under them; they must be scored at population level. The catalogue carries that note on each affected entry. Source: \texttt{PE\_PARAMETERS} in \texttt{integration/src/policyengine\_macro/core.py}.}
+\end{table}
+
+\section{The worked household arithmetic}
+\label{app:arith}
+
+The validation case of Section~\ref{sec:validation} in full. A single adult aged 35, resident in England, with employment income of \pounds 50{,}000, evaluated for policy year 2026 with no reform:
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+ & \pounds \\
+\midrule
+Employment income & 50{,}000 \\
+less personal allowance & $-$12{,}570 \\
+\midrule
+Taxable income (all within the basic-rate band) & 37{,}430 \\
+Income tax at 20\% & 7{,}486 \\
+Employee National Insurance at 8\% & 2{,}994 \\
+\midrule
+Household net income (HBAI concept) & 39{,}520 \\
+\midrule
+\multicolumn{2}{l}{\emph{Reform: basic rate 20\% $\rightarrow$ 25\%}} \\
+Additional income tax, $5\% \times 37{,}430$ & 1{,}872 \\
+Change in household net income & $-$1{,}872 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent Every line is deterministic arithmetic over the implemented rules, reproducible from the published allowance and rate schedule without running the model. The reform is expressed as \texttt{\{"gov.hmrc.income\_tax.rates.uk[0].rate": 0.25\}}, and the corresponding one-point version, \texttt{\{"...rate": 0.21\}}, is the reform costed at population level in Section~\ref{sec:reckoner}. Source: the worked example published on the model's code and validation pages.
+
+\section{The reform-object grammar and its refusals}
+\label{app:grammar}
+
+A reform is a non-empty dictionary whose keys are parameter-path strings. A value is either a number, applied from the start of the scored year, or a \texttt{\{date: value\}} mapping with ISO \texttt{YYYY-MM-DD} keys and numeric values. The suite's validator normalises both forms to the second and rejects everything else with a message naming the supported shapes, so that a malformed reform never reaches the model as a partially interpreted object. The refusals, and their reasons:
+
+\begin{itemize}
+\item \emph{An empty or non-dictionary reform} is rejected: there is no default reform, and an empty one would score the baseline against itself.
+\item \emph{A non-string or empty key} is rejected: keys are parameter paths.
+\item \emph{A value that is neither a number nor a mapping} is rejected with its offending type named.
+\item \emph{An empty value mapping} is rejected rather than treated as a no-op.
+\item \emph{A non-ISO date key} is rejected; effective dates must be \texttt{YYYY-MM-DD}.
+\item \emph{A date-range key} is rejected with an explanation, and this is the substantive one. The reform API applies a value from an effective date and leaves it in force indefinitely---there is no end date to set---so a range key cannot be honoured. Accepting it would score a permanent reform while the caller believed they had scored a temporary one. The validator instead directs the caller to use the start date alone for a permanent reform, or to score each affected year individually and treat later years as baseline for a time-limited one.
+\end{itemize}
+
+\noindent Source: \texttt{validate\_reform} in \texttt{integration/src/policyengine\_macro/core.py}.

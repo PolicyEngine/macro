@@ -408,20 +408,28 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   scrollbar-width: none;
 }
 .economy-topics::-webkit-scrollbar { display: none; }
-.economy-topics a {
+/* Buttons join the anchors so an in-page tablist (role="tab" needs buttons,
+   not links) renders in the same idiom instead of a second component. */
+.economy-topics a,
+.economy-topics button {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   padding: var(--s-3) 2px;
+  border: 0;
   border-bottom: 2px solid transparent;
+  background: none;
   color: var(--paper-dim);
   font-family: var(--mono);
   font-size: var(--fs-small);
   text-decoration: none;
   white-space: nowrap;
 }
-.economy-topics a:hover { color: var(--brand-strong); }
-.economy-topics a[aria-current="location"] {
+.economy-topics button { cursor: pointer; }
+.economy-topics a:hover,
+.economy-topics button:hover { color: var(--brand-strong); }
+.economy-topics a[aria-current="location"],
+.economy-topics button[aria-selected="true"] {
   color: var(--paper);
   border-bottom-color: var(--brand-strong);
 }
@@ -815,6 +823,24 @@ h1 em {
 .band + .band { border-top: 1px solid var(--line-soft); }
 .band-wide { max-width: min(1400px, 100%); }
 
+/* Alternating band. Used on 43 pages — the economy hub and topics, the
+   forecast record, and every release note — but never defined, so all of
+   them rendered it as a plain .band. The tint is derived from the border
+   colour rather than a fixed value, so it follows the light and dark
+   palettes without a second rule, matching how --brand-wash is built. It is
+   deliberately faint: these bands separate sections, they do not compete
+   with them. */
+.band-alt { background: color-mix(in srgb, var(--border-light) 22%, transparent); }
+
+/* Used on /, /models and /connect. It lived only in connect's page-local
+   <style>, so the other two rendered it as a default paragraph. */
+.section-intro {
+  margin-top: 10px;
+  color: var(--paper-dim);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+}
+
 .band-head { margin-bottom: var(--s-6); }
 .kicker {
   display: block;
@@ -964,11 +990,9 @@ h2 {
 @media (min-width: 640px) { .strategy-grid { grid-template-columns: repeat(2, 1fr); } }
 /* four model cards: keep a balanced 2x2 at desktop */
 
-/* Cards: ONE treatment, shared by .strategy-card and .doc-index a (below).
-   Previously two padding values, two radii, two border colours and two hover
-   transforms did the same job. */
-.strategy-card,
-.doc-index a {
+/* Cards: ONE treatment. Previously two padding values, two radii, two border
+   colours and two hover transforms did the same job. */
+.strategy-card {
   display: block;
   border: 1px solid var(--line-soft);
   background: var(--card);
@@ -977,8 +1001,7 @@ h2 {
   text-decoration: none;
   transition: border-color 0.2s, background 0.2s;
 }
-.strategy-card:hover,
-.doc-index a:hover {
+.strategy-card:hover {
   border-color: var(--brand);
   background: color-mix(in srgb, var(--primary) 4%, var(--card));
 }
@@ -987,7 +1010,6 @@ h2 {
 /* The restructured cards lead with a bolded question inside the body copy,
    which was out-weighting the card title. The title takes 600 so the
    heading level still wins. */
-.strategy-card h2,
 .strategy-card h3 {
   font-family: var(--display);
   font-weight: 600;
@@ -1349,10 +1371,16 @@ h2 {
 .forecast-result-list,
 .forecast-round-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 12px;
   margin-block: var(--s-6);
 }
+/* auto-fit, not auto-fill: empty tracks collapse, so the record's first
+   scored card fills the band instead of being stranded at the track minimum
+   with dead space beside it. The minimum is the width below which the dot
+   plot stops being readable; two cards still pair up on a full-width band,
+   and min(100%, …) keeps a single card from overflowing a narrow screen. */
+.forecast-result-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); }
+.forecast-round-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
 .forecast-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1426,11 +1454,28 @@ h2 {
 .fc-mark strong { color: var(--paper); font-family: var(--mono); }
 .fc-up span { bottom: 14px; }
 .fc-down span { top: 14px; }
+/* The forecast is the claim being judged, so it is the emphatic mark: brand
+   colour at full opacity, against the outturn in the chart's second series
+   and the two benchmarks dimmed. This rule was missing while its three
+   siblings existed, so the one marker that matters rendered unstyled. */
+.fc-mark-forecast i { background: var(--brand-strong); }
 .fc-mark-outturn i { background: var(--chart-s2); }
 .fc-mark-naive i { background: var(--paper-faint); opacity: 0.55; }
 .fc-mark-official i { background: var(--chart-s2); opacity: 0.55; }
-.forecast-note { color: var(--paper-faint); font-size: var(--fs-small); max-width: 60ch; }
+/* The forecasts page's supporting-prose idiom, matching .chart-intro: short
+   paragraphs that carry the caveats which used to be stacks of arrow rows. */
+.forecast-note,
+.prose .forecast-note {
+  max-width: 78ch;
+  margin-block: var(--s-5) 0;
+  color: var(--paper-dim);
+  font-size: var(--fs-body-sm);
+  line-height: 1.6;
+}
+.prose .forecast-note + .more { margin-top: var(--s-5); }
 .forecast-result footer {
+  flex-wrap: wrap;
+  row-gap: var(--s-2);
   padding-top: var(--s-4);
   border-top: 1px solid var(--line-soft);
   color: var(--paper-faint);
@@ -1472,6 +1517,25 @@ h2 {
   .forecast-summary { grid-template-columns: 1fr; }
   .forecast-result header { align-items: flex-start; }
   .forecast-result-plot > div { grid-template-columns: 62px minmax(60px, 1fr) 58px; gap: 8px; }
+}
+
+/* A scored card is never narrower than the 520px track minimum above once the
+   viewport clears ~900px — one card fills the band, two share it — so the card
+   scales with it rather than stretching a phone-sized layout: more padding,
+   a taller axis with larger marks and readable labels, an airier footer. */
+@media (min-width: 900px) {
+  .forecast-result { padding: var(--s-6) var(--s-7); }
+  .forecast-result header { padding-bottom: var(--s-4); }
+  .forecast-result header .mono { color: var(--paper-faint); font-size: var(--fs-body-sm); }
+  .forecast-result h3 { margin-top: var(--s-2); font-size: var(--fs-lede); }
+  .forecast-band { padding: 7px 14px; }
+  .forecast-dotplot { height: 172px; margin: var(--s-7) 64px; }
+  .fc-axis { height: 3px; }
+  .fc-mark i { width: 16px; height: 16px; }
+  .fc-mark span { gap: 4px; font-size: var(--fs-body-sm); }
+  .fc-up span { bottom: 20px; }
+  .fc-down span { top: 20px; }
+  .forecast-result footer { padding-top: var(--s-5); font-size: var(--fs-body-sm); }
 }
 
 /* ==========================================================================
@@ -2064,16 +2128,8 @@ h2 {
 }
 
 /* ============================================================
-   doc index cards (shared: /docs/ and /papers/)
+   papers index cards
    ============================================================ */
-.doc-index { display: grid; grid-template-columns: 1fr; gap: var(--s-4); margin: var(--s-6) 0; }
-@media (min-width: 760px) { .doc-index { grid-template-columns: 1fr 1fr; } }
- /* .doc-index a shares the card rule defined with .strategy-card above. */
-.doc-index .di-id { font-family: var(--mono); font-size: var(--fs-label); color: var(--brand); }
-.doc-index h3 { font-family: var(--display); font-weight: 500; font-size: var(--fs-h3-sm); margin: 8px 0 8px; color: var(--paper); }
-.doc-index p { font-size: var(--fs-body-sm); line-height: 1.55; color: var(--paper-dim); margin: 0; }
-.doc-index .di-go { display: block; margin-top: 12px; font-family: var(--mono); font-size: var(--fs-label); color: var(--brand-strong); }
-
 .library-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2126,7 +2182,7 @@ h2 {
    working papers — index cards + in-page PDF viewer
    ============================================================ */
 
-/* --- papers index: extends .doc-index with a metadata/result row --- */
+/* --- papers index: metadata/result row --- */
 .paper-result {
   display: block; margin-top: 12px; padding-top: 12px;
   border-top: 1px solid var(--line-soft);
@@ -2842,6 +2898,21 @@ h2 {
 .cmp-compare table tbody th[scope="row"] {
   background: var(--brand-wash);
 }
+/* /models#validation, "By model" panel: the label column holds model ids,
+   which are identifiers, not prose, so they must never wrap. `width: 1%`
+   with `white-space: nowrap` is the shrink-to-fit idiom for an auto-layout
+   table — the column collapses to the widest name and the remaining width
+   goes to the prose columns, so one long verification-class cell can no
+   longer squeeze model names onto two lines. Scoped to this panel: the
+   sibling "Vs other institutions" table and the /olg and /frb-us tables
+   use sentence-length row headers that must stay wrappable. */
+#val-p1.cmp-compare table thead th:first-child,
+#val-p1.cmp-compare table tbody th[scope="row"],
+#val-p1 .cmp-compare table thead th:first-child,
+#val-p1 .cmp-compare table tbody th[scope="row"] {
+  width: 1%;
+  white-space: nowrap;
+}
 
 /* One frame, not three: charts inside cards drop the inner .vchart box,
    and the toolbar/legend hairlines go — the card border does the work. */
@@ -3120,6 +3191,20 @@ h2 {
   min-width: 0;
 }
 .fc-vs-cards .vchart-figure .vchart { border: 0; border-radius: 0; padding: 0; background: none; }
+/* Open-round chart switcher. Built at runtime by the script at the foot of
+   /forecasts (see there); without JavaScript no tab bar exists and all three
+   figures stay stacked and visible, so nothing ships hidden. Aligned to the
+   figure card width above so the underline sits over the chart it selects. */
+.fc-chart-tabs {
+  max-width: 1080px;
+  margin: var(--s-6) auto 0;
+  gap: var(--s-6);
+  border-bottom: 1px solid var(--line-soft);
+}
+.fc-chart-tabs button { padding: var(--s-4) 2px; }
+.fc-chart-panel > .chart-intro { max-width: 1080px; margin: var(--s-5) auto 0; }
+.fc-chart-panel > .vchart-figure { margin-top: var(--s-3); }
+.fc-chart-panel:focus-visible { outline: 2px solid var(--brand); outline-offset: 4px; }
 .fc-vs-cards .vchart-figure figcaption {
   margin-top: var(--s-3);
   padding-top: var(--s-3);
@@ -3162,9 +3247,6 @@ h2 {
    bullet block immediately after the block; suppress the
    duplicate paragraph visually without touching generated markup. */
 
-/* Footnote variant: arrow lines without the box. */
-.meth-out.plain { border: 0; border-radius: 0; background: none; padding: 0; }
-.meth-out.plain .meth-out-line:hover { background: none; }
 
 .glance-range { display: block; margin-top: 2px; color: var(--paper-faint); font-size: var(--fs-label); }
 
@@ -3238,4 +3320,97 @@ h2 {
 }
 @media (max-width: 999px) {
   .hero-h1 span { display: inline; }
+}
+
+/* ---------------------------------------------------------------------------
+   /data series catalogue — a table with expandable rows.
+
+   A table because comparing series down a column is the job. Expandable
+   because saying everything needed nine columns and horizontal scrolling,
+   and still hid the vintage history the store exists for. Detail rows ship
+   open and are collapsed by script, so the no-JS page is complete.
+--------------------------------------------------------------------------- */
+.table-controls { margin: var(--s-4) 0 0; }
+.series-show-all {
+  border: 1px solid var(--line-soft);
+  background: none;
+  cursor: pointer;
+  padding: 7px 14px;
+  font: var(--fs-label)/1.4 var(--mono);
+  color: var(--brand-strong);
+}
+.series-show-all:hover { background: var(--paper-faint); }
+.series-show-all:focus-visible { outline: 2px solid var(--brand-strong); outline-offset: 2px; }
+.series-table { width: 100%; border-collapse: collapse; }
+.series-table thead th {
+  text-align: left;
+  font: var(--fs-label)/1.4 var(--mono);
+  color: var(--paper-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0 var(--s-4) 10px 0;
+  border-bottom: 1px solid var(--line-soft);
+  white-space: nowrap;
+}
+.series-table .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.series-group { border-bottom: 1px solid var(--line-soft); }
+.series-row > * { padding: 12px var(--s-4) 12px 0; vertical-align: baseline; }
+.series-row > th { padding-left: 0; font-weight: 400; }
+.series-row .mono { font: var(--fs-label)/1.4 var(--mono); color: var(--paper-dim); }
+
+/* The row header is the disclosure control: whole label is the hit target. */
+.series-toggle {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  border: 0;
+  background: none;
+  padding: 0 0 0 20px;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  color: inherit;
+  font: inherit;
+}
+.series-toggle .series-name { font-weight: 600; }
+.series-toggle::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.5em;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--brand-strong);
+  border-bottom: 1.5px solid var(--brand-strong);
+  transform: rotate(-45deg);
+  transition: transform 120ms ease;
+}
+.series-toggle[aria-expanded="true"]::before { transform: rotate(45deg); }
+.series-toggle:hover .series-name { color: var(--brand-strong); }
+.series-toggle:focus-visible { outline: 2px solid var(--brand-strong); outline-offset: 2px; }
+
+.series-detail-row > td { padding: 0 0 var(--s-5) 20px; }
+.series-detail-row dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--s-3) var(--s-5);
+  margin: 0 0 var(--s-4);
+}
+.series-detail-row dt { font-size: var(--fs-label); color: var(--paper-dim); }
+.series-detail-row dd { margin: 2px 0 0; font-size: var(--fs-body-sm); }
+.series-vintages-head { font-size: var(--fs-label); color: var(--paper-dim); margin: 0 0 8px; }
+.vintage-list { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.vintage-list li { margin: 0; }
+.vintage-list a {
+  display: inline-block;
+  padding: 3px 8px;
+  border: 1px solid var(--line-soft);
+  font-size: var(--fs-label);
+}
+
+@media (max-width: 700px) {
+  .series-table thead { display: none; }
+  .series-row { display: grid; grid-template-columns: 1fr auto; }
+  .series-row > td { padding-right: 0; }
+  .series-detail-row > td { padding-left: 20px; }
 }

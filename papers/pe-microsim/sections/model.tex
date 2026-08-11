@@ -1,0 +1,40 @@
+\section{What the model computes}
+\label{sec:model}
+
+\subsection{Statute as a dependency graph}
+\label{sec:graph}
+
+The model represents a tax and benefit system as a directed graph of \emph{variables}. Every quantity---an allowance, a rate, a taper, a means test, an entitlement, a liability---is a variable carrying a formula and a set of \emph{dated parameters}, so that the rule in force on a given date is the one whose start date is the latest date not after it. Asking the model for a variable resolves the graph beneath it: a request for household net income is answered by evaluating the statutory chain that produces it, not by applying an approximating schedule fitted to that chain. This is the OpenFisca architecture that \texttt{policyengine-core} inherits \citep{openfisca}, and it is what makes a reform expressible as data: changing a rate is re-dating a parameter and re-resolving the same graph, with no code path specific to the reform.
+
+Four packages are involved, and the division matters when reading provenance. \texttt{policyengine-core} is the simulation framework; \texttt{policyengine-uk} and \texttt{policyengine-us} encode the statutory rules of their respective countries; and \texttt{policyengine} is the analyst-facing package this suite consumes, adding dataset management, reform application, structured outputs and version-pinned release bundles. The suite's own integration layer, \texttt{policyengine-macro}, sits above all four and is the subject of Section~\ref{sec:method}.
+
+\subsection{Entities}
+
+Variables attach to \emph{entities}, and the entity structures differ by country because the two systems assess entitlement on differently drawn units. The UK model has three: person, benefit unit, and household. The US model has six: person, tax unit, SPM unit, family, marital unit, and household. The asymmetry is not an implementation artefact---US programmes genuinely assess on different groupings of the same people, so a single household can be one tax unit for the federal income tax and a differently drawn SPM unit for poverty measurement---and it propagates into the adapters, which return a UK result with a \texttt{benunit} block and a US result with \texttt{tax\_unit} and \texttt{spm\_unit} blocks.
+
+Country coverage as the suite advertises it is: for the UK, income tax, National Insurance, Universal Credit, Child Benefit and Pension Credit among others; for the US, federal and state income tax, payroll tax, SNAP, TANF, EITC, CTC, SSI and Social Security. These are the systems the suite exercises, not an exhaustive statement of upstream coverage.
+
+\subsection{The household calculation}
+\label{sec:hhcalc}
+
+Write a household as $h$---the list of people with their ages and incomes, plus whatever entity-level attributes the country requires---and the policy environment as a parameter vector $\theta_y$ in force for policy year $y$. The model computes
+\[
+  N(h, \theta_y) \;=\; \text{the resolved value of any requested variable},
+\]
+a deterministic function. Given the same $h$, the same $y$ and the same package versions, it returns the same numbers every time; there is no sampling, no draw, no weight, and no estimated coefficient anywhere in the chain. The reform effect on that household is a difference of two such evaluations,
+\begin{equation}
+  \Delta(h) \;=\; N(h, \theta'_y) - N(h, \theta_y),
+  \label{eq:hhdelta}
+\end{equation}
+where $\theta'$ is $\theta$ with the reform's parameters re-dated. This is what \texttt{pe\_household\_impact} computes, and \eqref{eq:hhdelta} is exactly as exact as its two terms.
+
+A worked instance, which Section~\ref{sec:validation} uses as the validation case and Appendix~\ref{app:arith} sets out in full: a single UK adult aged 35 with employment income of \pounds 50{,}000 in 2026 has \pounds 37{,}430 of income above the \pounds 12{,}570 personal allowance, all within the basic-rate band, and therefore pays \pounds 7{,}486 of income tax at 20 per cent and \pounds 2{,}994 of employee National Insurance at 8 per cent, leaving \pounds 39{,}520 of household net income on the HBAI concept. Applying the reform \texttt{\{"gov.hmrc.\allowbreak income\_tax.\allowbreak rates.\allowbreak uk[0].\allowbreak rate": 0.25\}} raises the basic rate by five points and adds five per cent of \pounds 37{,}430, or \pounds 1{,}872, to the tax bill, reducing net income by the same amount. Every one of those figures is reproducible with a pencil, which is the property the rest of this paper is about.
+
+\subsection{The reform object}
+\label{sec:reform}
+
+A reform is a flat dictionary mapping a parameter path to a new value---for example \texttt{\{"gov.hmrc.\allowbreak income\_tax.\allowbreak rates.\allowbreak uk[0].\allowbreak rate": 0.21\}} for a one-point rise in the UK basic rate, or \texttt{\{"gov.irs.\allowbreak credits.\allowbreak ctc.\allowbreak amount.\allowbreak adult\_dependent": 1000\}} for a US credit change. The same object is accepted at household level, at population level, and by every other model in the suite that scores reforms at all, which is what makes cross-model scoring of a single reform meaningful.
+
+A value may be a bare number, in which case it takes effect from the start of the scored year, or a \texttt{\{date: value\}} mapping with ISO dates for an explicit effective date. The suite's validator normalises both to the second form and refuses everything else with an actionable message rather than a library traceback (Appendix~\ref{app:grammar}). One refusal is substantive rather than cosmetic and is worth recording here: a date \emph{range} key is rejected, because the reform API applies a value from an effective date and leaves it in force indefinitely---the end date cannot be expressed at all---so accepting a range would silently score a permanent reform while the caller believed they had scored a temporary one. The validator says so and points at the workaround: score the affected years individually and treat later years as baseline.
+
+The suite ships a curated catalogue of thirteen well-known reform paths (nine UK, four US; Appendix~\ref{app:params}) whose baseline values, labels and units are resolved from the installed parameter tree at call time rather than transcribed, so a path that ceases to resolve upstream is returned marked \texttt{live: false} with an explicit error instead of a silently stale value. Three of the thirteen---the capital-gains paths---carry a standing note that the household calculator does not compute CGT, so those reforms are valid but will not move a household result and must be scored at population level. That note is a small but exact illustration of this paper's theme: the model tells you where its own arithmetic does not reach.

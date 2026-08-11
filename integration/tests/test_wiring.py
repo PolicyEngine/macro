@@ -205,12 +205,27 @@ def test_cli_score_obr_corp_tax_is_clear_error(runner):
 
 
 def test_cli_compare_bad_model_is_clean_error(runner):
+    # "svar" is no longer a bad model name — it is a known member that refuses
+    # reform scoring with an explanation — so an unknown name is needed to
+    # exercise the enum fallback.
+    res = runner.invoke(main, [
+        "compare", "--reform", '{"x": 1}', "--models", "not-a-model",
+    ])
+    assert res.exit_code != 0
+    assert "Traceback" not in res.output
+    assert "model must be one of" in res.output
+
+
+def test_cli_compare_names_the_alternative_for_a_model_that_cannot_score(runner):
+    """A member that deliberately has no reform bridge says so, and says what
+    to use instead — the whole point of the explicit refusal."""
     res = runner.invoke(main, [
         "compare", "--reform", '{"x": 1}', "--models", "svar",
     ])
     assert res.exit_code != 0
     assert "Traceback" not in res.output
-    assert "model must be one of" in res.output
+    assert "no PolicyEngine-reform bridge" in res.output
+    assert "forecast_uk" in res.output
 
 
 def test_cli_obr_shock_requires_var(runner):

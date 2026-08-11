@@ -1,0 +1,53 @@
+name: Site tests
+
+# The repo-root suite under tests/ — the only check that reads the site the way
+# a visitor does. Everything else in CI validates a *generator* against its
+# sources (`--check` gates); nothing validated the ~79 committed HTML pages
+# themselves, most of which are hand-maintained and edited by hand months after
+# they were written. That leaves a whole class of regression invisible until a
+# reader hits it:
+#
+#   * a moved or renamed page silently orphaning inbound <a href> links — the
+#     generator gates stay green because no generator owns those links;
+#   * accessibility regressions creeping in with hand-authored markup (images
+#     without alt text, tables without headers, pages without a lang or title);
+#   * data/latest/ drifting behind data/vintages/ — the pages render latest/,
+#     so a stale pointer means the site states a number that the store no
+#     longer says is current (this is a correctness bug wearing a cache's
+#     clothing, cf. issue #147);
+#   * MANIFEST.json disagreeing with the files actually in the store, which
+#     breaks the reproducibility claim the manifest exists to make.
+#
+# Deliberately stdlib-only and pytest-only: no install step, no model repos,
+# nothing to go stale. It should stay a sub-minute check that can run on every
+# PR without anyone weighing whether it is worth the runner time.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A later push to the same branch supersedes this run — the suite is a
+# whole-tree check, so an in-flight run against an older commit tells nobody
+# anything useful.
+concurrency:
+  group: site-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Site integrity, data store and repo hygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install pytest
+        # pytest and nothing else. The suite is stdlib-only by design: adding a
+        # dependency here is the first step towards this check being skipped
+        # when the dependency breaks.
+        run: python3 -m pip install --upgrade pip pytest
+      - name: Run the site test suite
+        run: python3 -m pytest tests -q

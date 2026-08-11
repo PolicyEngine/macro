@@ -117,7 +117,7 @@ def boe_chart() -> str:
         )
     out += [
         "</svg>",
-        f"<figcaption>Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through {data['data_edge']}; forecast begins {data['forecast_start']}. Estimated on {data['estimation_sample'].replace('-', '&ndash;')}; {data['draws']:,} posterior draws, {data['accepted']} accepted; five stochastic paths per accepted draw. Source and provenance: <code>papers/boe-svar/figures/current_forecast.json</code>.</figcaption>",
+        f"<figcaption>Bands are the model&rsquo;s raw posterior quantiles, not rescaled to measured coverage &mdash; the calibrated version is on the <a href='/forecasts'>forecast record</a>. Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through {data['data_edge']}; forecast begins {data['forecast_start']}. Estimated on {data['estimation_sample'].replace('-', '&ndash;')}; {data['draws']:,} posterior draws, {data['accepted']} accepted; five stochastic paths per accepted draw. Source and provenance: <code>papers/boe-svar/figures/current_forecast.json</code>.</figcaption>",
         "</figure>",
     ]
     return "\n".join(out)

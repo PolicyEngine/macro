@@ -1,0 +1,50 @@
+\section{What it cannot answer, and what the suite supplies}
+\label{sec:bridge}
+
+\subsection{The refusal list}
+
+The capability registry records four things this model cannot answer, and the list is absolute rather than aspirational: \emph{GDP, inflation, interest rates, macro feedback}. Its horizon is a single policy year. It is static and partial-equilibrium by design---prices, wages and output do not move, and behavioural responses, where used at all, are optional and post-hoc rather than part of the equilibrium.
+
+This is not a gap in the implementation; it is the model class. A tax--benefit microsimulation answers what the rules do to incomes, given everything else. What happens to everything else is a different question requiring a different model, and the rest of the suite exists to answer it. The point of stating the refusal list explicitly, and of having the score block assert that GDP, consumption and investment are out of scope rather than returning them empty, is that a consumer reading a costing must not read the absence of a macro effect as a zero macro effect.
+
+\subsection{The route into the OBR emulator}
+\label{sec:obrbridge}
+
+The suite's flagship bridge reproduces the OBR's own policy-costing workflow: static costing in, second-round effects out \citep{obr2014costings}. Given a PolicyEngine reform and a scoring window, \texttt{obr\_score\_reform} runs one population microsimulation per year in the window, collects the annual budgetary impacts in \pounds bn, converts them to a quarterly path in \pounds m by multiplying by $1000/4$ and holding the value flat within each year, and injects that path into the OBR macroeconometric emulator as a held add-factor on nominal household disposable income---the declared injection point \texttt{HHDI\_ADDFACTOR}, which preserves the emulator's endogenous income identity while propagating the shock along its own demand chain from disposable income through real disposable income and consumption to output \citep{ahmadi2026obr}.
+
+For the worked 1p reform of Section~\ref{sec:reckoner}, the microsimulation's annual costings of \pounds 6.46bn rising to \pounds 7.38bn become a quarterly shock of roughly $-$\pounds 1.62bn to $-$\pounds 1.85bn on nominal household disposable income, and the emulator returns a second-round GDP effect building from $-$0.02 per cent on impact to $-$0.06 per cent by the end of the scored macro window in 2027Q4 \citep{ahmadi2026obr}. The sign is right and the magnitude is small relative to the mechanical costing, which is what the official conventions imply for an income-tax measure.
+
+\subsection{The bridge's own limits}
+\label{sec:bridgelimits}
+
+It would be easy to present that chain as the microsimulation acquiring a macroeconomy. It is not, and the limits belong in this paper rather than only in the emulator's, because they are limits on how far a costing produced \emph{here} can be pushed.
+
+\paragraph{It is a demand-side approximation, not a reform-incidence model.} The entire distributional result---the decile impacts, the winners and losers, which households paid and which taxes moved---is discarded at the boundary. What crosses is one scalar per quarter. The macro model sees an aggregate income shock and nothing else, so two reforms raising identical revenue by entirely different means, from entirely different households, produce identical second-round paths. Any genuine model of reform incidence would need the distribution the microsimulation just computed; this route deliberately does not carry it.
+
+\paragraph{The within-year profile is invented.} The microsimulation produces annual numbers, so the quarterly path is flat within each year. The code describes this as deliberately crude and declared, which is the right description.
+
+\paragraph{Income feedback is not recycled.} The economy's effect on disposable income---income falls, so tax falls, so income falls by less---is not fed back into the costing. The static costing enters once and is not revised by what the macro model does to incomes.
+
+\paragraph{Corporation tax is refused rather than mistranslated.} Corporate taxes are not household-borne in the microsimulation, so a reform touching them is rejected by the bridge with an explicit error pointing at the emulator's direct corporation-tax lever. Refusing is the correct behaviour: routing a corporate measure through a household-income injection point would produce a number, and the number would be meaningless.
+
+\paragraph{Supply-side channels are somewhere else.} Participation, saving and capital deepening belong to the suite's overlapping-generations member \citep{ahmadi2026og}. That division of labour is the point of a suite rather than an omission from one model.
+
+\paragraph{The receiving model has its own posture.} The emulator's impact multiplier is approximately one by construction under its demand closure, against the OBR's own published assumption of 0.3 for income tax and NICs and 0.6 for current spending \citep{ahmadi2026obr}. The second-round numbers are therefore to be read as sign and order of magnitude, not as point estimates---a caveat the suite prints beside the worked example rather than in a footnote.
+
+The honest summary is that the bridge supplies a \emph{declared} second-round demand effect on top of an exact-arithmetic-over-estimated-population costing, and that the compounded object is weaker than either of its parts. The costing is the stronger half.
+
+\subsection{The reverse direction: the microsimulation as incidence engine}
+
+Traffic runs the other way too, and here the microsimulation is the receiver. A macro path from another member---a wage and hours path from FRB/US or the HANK model, a CPI path from the structural VAR, scenario income deltas from the ecological model---is carried into a population run as an overlay that scales the employment-income inputs of the counterfactual simulation only, through the engine's supported dynamic-simulation hook. Policy is identical on both sides, so what is measured is the automatic-stabiliser response: a negative earnings shock reduces tax revenue and raises means-tested benefit spending.
+
+Three properties of that overlay are worth recording, because they are the kind of thing that is usually left implicit.
+
+First, the overlay carries only the counterfactual/baseline \emph{ratio}, never a level. The baseline run uses the stock inputs, which already embed the official forecast the macro member is calibrated to, so the static effect of a reform can never be counted twice; a no-op macro result produces no overlay at all and dynamic scoring reduces exactly to static scoring. The cached baseline never sees the overlay, which is the structural guarantee rather than a convention.
+
+Second, the scaling is applied uniformly across households, which understates the concentration of real incidence: an aggregate labour-income fall is spread over everyone rather than landing on the people who actually lost jobs. This is stated in the caveats attached to the result.
+
+Third, an implausible factor is refused rather than applied. A scaling factor outside $[0.5, 2.0]$ is treated as a degenerate solve or a mis-sized shock and raises, on the argument that the modeller should inspect the macro run rather than push its output through the household model.
+
+\subsection{An empirical finding worth preserving}
+
+The overlay mechanism above is the second design. The first overrode a derived uprating index in the reform dictionary, and it was silently dead. Per-year population datasets are pre-uprated at dataset \emph{build} time, so simulation-time uprating parameters are never consulted for input variables: two population runs overriding the 2026 average-earnings index---one by a factor of 0.99 and one drastically, to 0.84---both returned exactly zero everywhere, in revenue, in winners, in losers, and in every decile. A mechanism that returns a plausible-looking zero is worse than one that errors, and the codebase now refuses user reforms under the affected parameter prefix outright rather than accepting a reform it knows will do nothing. It is recorded here because it is exactly the class of defect that a paper describing a model in use should preserve and a marketing page would not.

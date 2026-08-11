@@ -56,11 +56,11 @@
         DEFINE-UK: running and gating an unlicensed ecological SFC model.
       </h1>
       <p class="lede reveal" style="--d:2">
-        The authors' unmodified R code runs at a pinned commit; the manual's
+        The authors' unmodified R code runs at a pinned commit. The manual's
         baseline macro block replicates; the emissions path diverges; no
         numeric scenario results are published to replicate against. This
-        report records exactly what is gated, what diverged, and why the
-        adapter serves scenario <em>deltas only</em>, never levels.
+        report records what is gated, what diverged, and why the adapter
+        serves scenario <em>deltas only</em>, never levels.
       </p>
     </div>
   </section>
@@ -82,226 +82,287 @@
     </div>
     <div class="prose">
       <p>
-        DEFINE-UK is the ecological stock-flow consistent (E-SFC) model of
-        the UK built by George, Dafermos, Nikolaidi and co-authors
+        DEFINE-UK is the ecological stock-flow consistent (E-SFC) model of the
+        UK built by George, Dafermos, Nikolaidi and co-authors
         (<a href="https://define-model.org/define-uk">define-model.org/define-uk</a>).
-        It simulates the UK macrofinancial system together with its
-        environmental impacts under climate-policy scenarios — a fossil-fuel
-        ban, power-sector subsidies, housing regulation, green public
-        investment, and a mixed package — with particular attention to the
-        housing stock, the monetary/non-monetary financial institution
-        distinction, and the power sector. No other model in the suite
-        answers the question it is here for: who bears a climate-policy
-        scenario. Versions 1.0 and 1.1 were released in April 2026; the
-        specification is the <em>DEFINE-UK Model Manual, Version 1.1</em>
-        and the accompanying paper <em>&ldquo;Evaluating climate policy
-        mixes in the UK: an E-SFC approach&rdquo;</em>.
+        It simulates the UK macrofinancial system and its environmental
+        impacts under climate-policy scenarios — a fossil-fuel ban,
+        power-sector subsidies, housing regulation, green public investment,
+        and a mixed package. No other model in the suite answers the question
+        it is here for: who bears a climate-policy scenario. Versions 1.0 and
+        1.1 were released in April 2026. The specification is the
+        <em>DEFINE-UK Model Manual, Version 1.1</em> and the accompanying
+        paper <em>&ldquo;Evaluating climate policy mixes in the UK: an E-SFC
+        approach&rdquo;</em>.
       </p>
       <p>
         The suite's standard is that a model earns its place by replication:
         run the published code or reimplement the published equations, then
-        compare against the published results with recorded tolerances. This
-        report applies that standard to DEFINE-UK and records where it hits
-        a ceiling the publications themselves impose.
-      </p>
-    </div>
-  </section>
-
-  <section id="licence" class="band">
-    <div class="band-head">
-      <span class="kicker mono">02 — the licensing constraint</span>
-      <h2>No licence upstream, so nothing is vendored.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        The upstream repository is public but carries <strong>no
-        licence</strong>, so its code is never vendored or hosted. The
-        adapter (<a href="https://github.com/PolicyEngine/define-uk-model">github.com/PolicyEngine/define-uk-model</a>)
-        fetches the upstream code at a pinned commit
-        (<code>846081a</code>) at runtime and executes it as published, in
-        R, unmodified. On 2026-08-01 the full notebook ran end to end
-        through <code>define_uk.runner.run</code> (R&nbsp;4.3.0, rstudioapi
-        shim only), producing 151 output files — figures and tables for all
-        four scenario blocks plus <code>tables/Multiplier_Summary.csv</code>.
-        This architecture also fixes the run surface: DEFINE-UK is
-        <strong>local-only</strong>, never hosted, and the eventual hosting
-        path is the clean-room reimplementation described in
-        <a href="#reimplementation">section 08</a>.
-      </p>
-    </div>
-  </section>
-
-  <section id="execution" class="band">
-    <div class="band-head">
-      <span class="kicker mono">03 — execution vs validation</span>
-      <h2>A model that runs has proven nothing yet.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        The run record is explicit that <strong>execution ≠
-        validation</strong>: rendering the notebook end to end demonstrates
-        only that the pinned code executes, not that its outputs mean
-        anything. The adapter's <code>VALIDATION.md</code> opens with the
-        gate — nothing built on the repository may present model output as
-        meaningful until the file records passing replications against the
-        published outputs, the same bar applied to the suite's other
-        replications (<a href="/svar">boe-svar</a>,
-        <a href="/us-hank">us-hank</a>). The sections below record what that
-        gate has since established.
+        compare against the published results at recorded tolerances. This
+        report applies that standard, and records where the publications
+        themselves impose a ceiling.
       </p>
     </div>
   </section>
 
   <section id="gates" class="band">
     <div class="band-head">
-      <span class="kicker mono">04 — the replication gates</span>
-      <h2>Table 4 macro passes; emissions diverge; scenario designs pin exactly.</h2>
+      <span class="kicker mono">02 — the record at a glance</span>
+      <h2>Every gate, its verdict, and the test that holds it.</h2>
     </div>
     <div class="prose">
       <p>
-        <strong>Macro block: PASS</strong> (2026-08-04,
-        <code>tests/test_replication_baseline.py</code>). Manual
-        Table&nbsp;4's macro block — real GDP growth, unemployment,
-        population 16+, labour force at 2025/2030/2040, S1 baseline —
-        replicates within stated tolerances (population and labour force
-        ±0.01m; growth ±0.31pp; unemployment ±0.2pp): population and labour
-        force exact to 0.01m, growth exact at 2030/2040 and &minus;0.30pp at
-        2025, unemployment within 0.2pp, and the 2025&ndash;40 mean and
-        standard deviation of growth and unemployment match the table. The
-        run is calendar-anchored on the population path (1987Q1&ndash;2040Q4,
-        2025&nbsp;=&nbsp;t153).
+        Each gate below is enforced by a test in the adapter repository
+        against the cached pinned run (upstream commit <code>846081a</code>),
+        so drift fails loudly rather than silently. The supporting narrative
+        for each — tolerances, component checks, arithmetic, search history —
+        is one disclosure away.
       </p>
-      <p>
-        <strong>Emissions: DIVERGENCE.</strong> The pinned code runs below
-        the published Table&nbsp;4 emissions, widening with horizon —
-        <strong>393 vs 407</strong> MtCO2e/yr in 2025 (&minus;3.5%),
-        <strong>343 vs 382</strong> in 2030 (&minus;10%), and
-        <strong>249 vs 324</strong> by 2040 (&minus;23%). The components
-        (EMIS_NELEC&nbsp;+&nbsp;EMIS_ELEC) sum exactly to EMIS and the
-        baseline is identical across scenario folders, so this is a
-        vintage/calibration gap between the published table and commit
-        <code>846081a</code>, not an extraction error. The divergence has
-        been queried with the upstream authors, and the tests gate at the
-        observed ratios so any further drift fails loudly.
-      </p>
-      <p>
-        <strong>Scenario design: gated exactly.</strong> No machine-readable
-        numeric scenario results are published for v1.1 — the manual's
-        results stop at the baseline plus scenario <em>design</em>
-        parameters, and the accompanying SSRN paper is paywalled with no
-        open mirror. What is verifiable is verified:
-        <code>tests/test_scenario_design.py</code> pins that each cached
-        scenario toggles exactly the policy switches its published
-        description claims (FF_BAN plus capacity/investment ban timings for
-        the ban scenarios; POWER_SUB alone for the subsidy; green public
-        investment toggles GVT_INVEST&nbsp;+ GREEN_BONDS&nbsp;+ GREEN_POWER
-        exactly; the housing variant pins the published 40% subsidy rate,
-        HOUSING_SUB_RATE&nbsp;=&nbsp;0.4).
-      </p>
-      <p>
-        <strong>Anchors from the open 2023 vintage.</strong> Two coarse
-        numeric anchors survive in the open FMM 2023 conference version of
-        the paper, held at wide tolerances because it is a pre-1.0 vintage:
-        green public investment peaks &ldquo;around +1% of GDP&rdquo; — the
-        cached run peaks at <strong>+0.92%</strong> — and the
-        current-policies baseline emits &ldquo;just under 350
-        MtCO2e&rdquo; in 2030 — the cached run gives
-        <strong>342.8</strong>. Both anchor.
-      </p>
+      <div class="table-scroll mo-tablecard"><table>
+        <caption>DEFINE-UK replication gates: verdict, date, and enforcing test</caption>
+        <thead><tr><th scope="col">gate</th><th scope="col">verdict</th><th scope="col">date</th><th scope="col">enforced by</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row">Manual Table&nbsp;4, macro block (growth, unemployment, population 16+, labour force), S1 baseline</th>
+            <td><strong>PASS</strong></td>
+            <td>2026-08-04</td>
+            <td><code>tests/test_replication_baseline.py</code></td>
+          </tr>
+          <tr>
+            <th scope="row">Manual Table&nbsp;4, total emissions, S1 baseline</th>
+            <td><strong>DIVERGENCE</strong> — pinned at the observed ratios</td>
+            <td>2026-08-04</td>
+            <td><code>tests/test_replication_baseline.py</code></td>
+          </tr>
+          <tr>
+            <th scope="row">Scenario design — the policy switches each cached scenario toggles</th>
+            <td><strong>PINNED EXACTLY</strong></td>
+            <td>2026-08-05</td>
+            <td><code>tests/test_scenario_design.py</code></td>
+          </tr>
+          <tr>
+            <th scope="row">FMM 2023 open-vintage anchors — green public investment GDP peak; baseline 2030 emissions</th>
+            <td><strong>PASS</strong> at wide (pre-1.0) tolerances</td>
+            <td>2026-08-05</td>
+            <td><code>tests/test_scenario_design.py</code></td>
+          </tr>
+          <tr>
+            <th scope="row">Published numeric scenario results for v1.1</th>
+            <td><strong>CEILING REACHED</strong> — none are published</td>
+            <td>2026-08-05</td>
+            <td><code>validation/published_targets.json</code> (search record)</td>
+          </tr>
+          <tr>
+            <th scope="row">Baseline vs external observations (ONS, DESNZ, OBR)</th>
+            <td><strong>COMPUTED</strong> — gaps are material</td>
+            <td>2026-08-05</td>
+            <td><code>tests/test_validation.py</code></td>
+          </tr>
+          <tr>
+            <th scope="row">Green public investment cumulative multiplier</th>
+            <td><strong>COMPUTED</strong> — <strong>1.78</strong>, ours, not upstream's</td>
+            <td>2026-08-05</td>
+            <td><code>tests/test_validation.py</code></td>
+          </tr>
+          <tr>
+            <th scope="row">Clean-room milestone 1 — §2.2 matrices on the §5 initial values</th>
+            <td><strong>PASS</strong></td>
+            <td>2026-08-04</td>
+            <td><code>tests/test_accounting.py</code></td>
+          </tr>
+          <tr>
+            <th scope="row">Clean-room milestone 2 — §3.2&ndash;3.3 macro and production block</th>
+            <td><strong>IN PROGRESS</strong> — §3.2 landed; not passed (<a href="#reimplementation">section 05</a>)</td>
+            <td>2026-08-11</td>
+            <td><code>tests/test_macro.py</code></td>
+          </tr>
+        </tbody>
+      </table></div>
+
+      <details class="more">
+        <summary>Macro block: the tolerances, and what each component hit</summary>
+        <p>
+          Tolerances: population and labour force &plusmn;0.01m; growth
+          &plusmn;0.31pp; unemployment &plusmn;0.2pp. Against Table&nbsp;4's
+          macro block at 2025/2030/2040 on the S1 baseline, population and
+          labour force are exact to 0.01m; growth is exact at 2030 and 2040
+          and &minus;0.30pp at 2025; unemployment is within 0.2pp; and the
+          2025&ndash;40 mean and standard deviation of growth and unemployment
+          match the table. The run is calendar-anchored on the population path
+          (1987Q1&ndash;2040Q4, 2025&nbsp;=&nbsp;t153).
+        </p>
+      </details>
+
+      <details class="more">
+        <summary>Emissions: 393 vs 407 in 2025, 343 vs 382 in 2030, 249 vs 324 by 2040</summary>
+        <p>
+          The pinned code runs below the published Table&nbsp;4 emissions, and
+          the gap widens with the horizon: <strong>393 vs 407</strong>
+          MtCO2e/yr in 2025 (&minus;3.4%), <strong>343 vs 382</strong> in 2030
+          (&minus;10%), <strong>249 vs 324</strong> by 2040 (&minus;23%).
+        </p>
+        <p>
+          Two checks rule out an extraction error on our side: the components
+          EMIS_NELEC&nbsp;+&nbsp;EMIS_ELEC sum exactly to EMIS, and the
+          baseline is identical across every scenario folder. What remains is
+          a vintage/calibration gap between the published table and commit
+          <code>846081a</code>. The divergence has been queried with the
+          upstream authors, and the tests gate at the observed ratios, so any
+          further drift fails loudly.
+        </p>
+      </details>
+
+      <details class="more">
+        <summary>Scenario design: the exact switch sets, the two anchors, and the search that closed the target</summary>
+        <p>
+          <code>tests/test_scenario_design.py</code> pins that each cached
+          scenario toggles exactly the policy switches its published
+          description claims: FF_BAN plus capacity/investment ban timings for
+          the ban scenarios; POWER_SUB alone for the subsidy;
+          GVT_INVEST&nbsp;+ GREEN_BONDS&nbsp;+ GREEN_POWER exactly for green
+          public investment; and the published 40% housing subsidy rate,
+          HOUSING_SUB_RATE&nbsp;=&nbsp;0.4.
+        </p>
+        <p>
+          Two coarse numeric anchors survive in the open FMM 2023 conference
+          version of the paper, held at wide tolerances because it is a
+          pre-1.0 vintage. Green public investment peaks &ldquo;around +1% of
+          GDP&rdquo; — the cached run peaks at <strong>+0.92%</strong>, band
+          0.7&ndash;1.3%. The current-policies baseline emits &ldquo;just
+          under 350 MtCO2e&rdquo; in 2030 — the cached run gives
+          <strong>342.8</strong>, band 330&ndash;352. Both anchor.
+        </p>
+        <p>
+          Nothing finer exists. An exhaustive search, catalogued in
+          <code>validation/published_targets.json</code>, established that no
+          machine-readable numeric scenario results are published for v1.1:
+          the manual's results stop at the baseline (Table&nbsp;4) plus
+          scenario <em>design</em> parameters, and the George/Dafermos SSRN
+          paper (abstract 6541398) is paywalled with no open mirror. Its
+          scenario set — carbon pricing and subsidies — predates v1.1's
+          regulation policies in any case.
+        </p>
+      </details>
+
+      <details class="more">
+        <summary>Calibration: the baseline against ONS and DESNZ outturns</summary>
+        <p>
+          Since 2026-08-05 this comparison is an artifact, not a paragraph.
+          <code>define_uk.validation.baseline_calibration()</code> recomputes
+          every row from the cached pinned run against vintage-exact external
+          observations; the result is committed as
+          <code>validation/baseline_vs_external.csv</code>; and
+          <code>tests/test_validation.py</code> fails on any drift between the
+          committed table and a recomputation.
+        </p>
+        <p>
+          The headline rows: 2025 real GDP growth of 4.66% (annual-mean
+          convention; Table&nbsp;4 prints 4.96%) against an ONS outturn of
+          <strong>1.31%</strong> y/y; 2025 unemployment of 4.39% against an
+          ONS annual mean of <strong>4.88%</strong>; population 16+ 55.66m vs
+          &asymp;56m, consistent; labour force 35.97m, slightly high; and
+          emissions starting above the DESNZ actuals. The full table is on the
+          <a href="/define/validation#calibration">validation page</a>.
+        </p>
+      </details>
+
+      <details class="more">
+        <summary>Multiplier: our arithmetic, and why upstream's own table is unusable</summary>
+        <p>
+          The model's cumulative green-public-investment multiplier is
+          <strong>1.78</strong> by <em>our own</em> computation: cumulative
+          ΔGDP of 209.9 over cumulative ΔSPEND_GVT of 118.2, nominal, over the
+          full simulation (<code>define_uk.validation.gpi_multiplier</code>,
+          pinned in the test suite). IMF estimates of green-spending
+          multipliers run 1.1&ndash;1.5 (Batini et al. 2021); the OBR's
+          capital-spending impact multiplier is &asymp;1.0. Ours sits above
+          but near the IMF range, as the demand-led closure predicts, and is
+          labelled accordingly wherever a delta is served.
+        </p>
+        <p>
+          The upstream repository's own
+          <code>tables/Multiplier_Summary.csv</code> is <strong>documented
+          unusable</strong>: its multiplier columns are identical across all
+          eight scenarios, and its ΔG figure (104.22) matches the cumulative
+          delta of no variable in the scenario file. It is never quoted, and
+          neither is the &asymp;2.4 once derived from it.
+        </p>
+      </details>
     </div>
   </section>
 
-  <section id="calibration" class="band">
+  <section id="run" class="band">
     <div class="band-head">
-      <span class="kicker mono">05 — calibration vs external data</span>
-      <h2>The baseline against official numbers, computed not prose.</h2>
+      <span class="kicker mono">03 — how it is run</span>
+      <h2>Unlicensed upstream, pinned commit, and a run that proves nothing on its own.</h2>
     </div>
     <div class="prose">
       <p>
-        Since 2026-08-05 the comparison against official data is an
-        artifact, not a paragraph:
-        <code>define_uk.validation.baseline_calibration()</code> recomputes
-        every row from the cached pinned run against vintage-exact external
-        observations, the result is committed as
-        <code>validation/baseline_vs_external.csv</code>, and
-        <code>tests/test_validation.py</code> fails on any drift between the
-        committed table and a recomputation. The headline rows: the model's
-        2025 real GDP growth of 4.66% (annual-mean convention; Table&nbsp;4
-        prints 4.96%) stands against an ONS outturn of
-        <strong>1.31%</strong> y/y, and its 2025 unemployment of 4.39%
-        against an ONS annual mean of <strong>4.88%</strong>. Population 16+
-        (55.66m vs &asymp;56m) is consistent; the labour force (35.97m) is
-        slightly high; emissions start above the DESNZ actuals. The full
-        table is on the <a href="/define/validation#calibration">validation
-        page</a>.
+        The upstream repository is public but carries <strong>no
+        licence</strong>, so its code is never vendored or hosted. The adapter
+        (<a href="https://github.com/PolicyEngine/define-uk-model">github.com/PolicyEngine/define-uk-model</a>)
+        fetches it at pinned commit <code>846081a</code> at runtime and
+        executes it as published, in R, unmodified. That also fixes the run
+        surface: DEFINE-UK is <strong>local-only</strong>, never hosted, and
+        the eventual hosting path is the clean-room reimplementation in
+        <a href="#reimplementation">section 05</a>.
       </p>
       <p>
-        The implication drives the product: near-term baseline levels are
-        not competitive with the <a href="/obr">OBR emulator</a> or the
-        <a href="/svar">BoE SVAR</a> and must never be presented as
-        forecasts. The manual itself says the baseline &ldquo;should not be
-        seen as a prediction&rdquo;; we take that literally. The defensible
-        outputs are scenario <em>deltas</em>, with the demand-led caveat
-        stated — which is exactly what the adapter serves.
+        <strong>Execution ≠ validation.</strong> On 2026-08-01 the full
+        notebook rendered end to end through
+        <code>define_uk.runner.run</code>, producing 151 output files. That
+        demonstrated only that the pinned code executes, not that its outputs
+        mean anything. The adapter's <code>VALIDATION.md</code> opens with the
+        gate: nothing built on the repository may present model output as
+        meaningful until the file records passing replications against the
+        published outputs — the same bar applied to
+        <a href="/svar">boe-svar</a> and <a href="/us-hank">us-hank</a>.
+        <a href="#gates">Section 02</a> records what that gate has since
+        established.
       </p>
+      <details class="more">
+        <summary>The 2026-08-01 run record</summary>
+        <p>
+          R&nbsp;4.3.0 on macOS, upstream unmodified, an rstudioapi shim the
+          only accommodation. The 151 files are the figures and tables for all
+          four scenario blocks plus
+          <code>tables/Multiplier_Summary.csv</code>.
+        </p>
+      </details>
     </div>
   </section>
 
-  <section id="multiplier" class="band">
+  <section id="serves" class="band">
     <div class="band-head">
-      <span class="kicker mono">06 — the multiplier question</span>
-      <h2>The fiscal multiplier, stated honestly.</h2>
+      <span class="kicker mono">04 — what the adapter serves</span>
+      <h2>Deltas, never levels — closed at the achievable ceiling.</h2>
     </div>
     <div class="prose">
       <p>
-        Our own computation of the model's cumulative
-        green-public-investment multiplier — cumulative ΔGDP over cumulative
-        ΔSPEND_GVT, nominal, over the full simulation — is
-        <strong>1.78</strong> (<code>define_uk.validation.gpi_multiplier</code>,
-        pinned in the test suite). IMF estimates of green-spending
-        multipliers run 1.1&ndash;1.5 (Batini et al. 2021); the OBR's
-        capital-spending impact multiplier is &asymp;1.0. Above but near the
-        IMF range, as the demand-led closure predicts, and labelled
-        accordingly wherever a delta is served.
+        Baseline levels sit far from official outturns: 2025 growth of 4.66%
+        against an ONS 1.31%, unemployment below the outturn, emissions above
+        the DESNZ actuals they should start from. The manual itself says the
+        baseline &ldquo;should not be seen as a prediction&rdquo;; we take
+        that literally. Near-term levels are not competitive with the
+        <a href="/obr">OBR emulator</a> or the <a href="/svar">BoE SVAR</a>
+        and are never presented as forecasts.
       </p>
       <p>
-        The upstream repository's own <code>Multiplier_Summary.csv</code> is
-        <strong>documented unusable</strong>: its multiplier columns are
-        identical across all eight scenarios, and its ΔG figure matches the
-        cumulative delta of no variable in the scenario file. It is never
-        quoted; our computation supersedes it.
-      </p>
-    </div>
-  </section>
-
-  <section id="ceiling" class="band">
-    <div class="band-head">
-      <span class="kicker mono">07 — the ceiling</span>
-      <h2>Closed at the achievable ceiling, with a named upgrade path.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        The scenario replication targets are <strong>closed at the
-        achievable ceiling</strong> (2026-08-05): an exhaustive search
-        established that no machine-readable numeric scenario results are
-        published for v1.1. The manual stops at the baseline; the
-        George/Dafermos SSRN paper is paywalled with no open mirror, and its
-        scenario set (carbon pricing, subsidies) predates v1.1's regulation
-        policies anyway. So the gate stack is: the pinned upstream run as
-        oracle, exact scenario-design pins, and the two FMM 2023 anchors —
-        and the adapter's scenario surface returns annualised
-        scenario-minus-baseline delta paths only, framed with mandatory
-        caveats, via <code>pe-macro define-scenario</code> (local-only,
-        experimental). The upgrade path is equally explicit: the authors
-        publish scenario tables, or the SSRN paper becomes accessible, and
-        the published-figure gate reopens.
+        So the adapter serves annualised scenario-minus-baseline delta paths
+        only — <em>deltas, never levels</em> — framed with mandatory caveats
+        including the demand-led closure, via <code>pe-macro
+        define-scenario</code> (local-only, experimental). The gate stack
+        behind them is the pinned upstream run as oracle, the exact
+        scenario-design pins, and the two FMM 2023 anchors. The upgrade path
+        is equally explicit: the authors publish scenario tables, or the SSRN
+        paper becomes accessible, and the published-figure gate reopens.
       </p>
     </div>
   </section>
 
   <section id="reimplementation" class="band">
     <div class="band-head">
-      <span class="kicker mono">08 — the clean-room track</span>
+      <span class="kicker mono">05 — the clean-room track</span>
       <h2>Reimplementing the published equations, milestone by milestone.</h2>
     </div>
     <div class="prose">
@@ -312,27 +373,62 @@
         clean-room: the specification sources are the manual, the paper, and
         Dafermos, Nikolaidi &amp; Galanis (2017); the upstream repository is
         an <em>output oracle only</em>, its source never read to write
-        equations, and every equation must carry a <code>manual_ref</code>
-        naming the manual section and equation number it implements.
+        equations; and every equation carries a <code>manual_ref</code> naming
+        the manual section and equation number it implements.
       </p>
       <p>
-        <strong>Milestone 1: PASS</strong> (2026-08-04). The §2.2
-        transactions and balance-sheet matrices and the full §5 parameter
-        and initial-value tables (Tables 5&ndash;6) are transcribed, and
-        every Table 1/2 row and column identity holds on the §5 initial
-        values within the manual's own 4-significant-figure printing
-        precision — <strong>27 identity tests</strong> in
-        <code>tests/test_accounting.py</code>. One documented manual
-        inconsistency is pinned exactly rather than papered over: Table&nbsp;6
-        LENDM_ROW omits the DIVN_ROW term of Eq.&nbsp;(383), so the MFI/RoW
-        transaction columns miss LEND by ∓DIVN_ROW (=&nbsp;5.44; the manual
-        itself tabulates overall LENDM&nbsp;=&nbsp;5.44 where it &ldquo;should
-        equal 0&rdquo;). Milestones 2&ndash;5 — macro and production block,
-        sectoral equations, ecosystem block, policy scenarios — validate
-        against the oracle and the published figures under the same
-        standard. The model design belongs to its authors; the
-        implementation is ours, AGPL-3.0, and independent — not the
-        authors' code, and not endorsed by them.
+        <strong>Milestone 1: PASS</strong> (2026-08-04). The §2.2 transactions
+        and balance-sheet matrices and the full §5 parameter and initial-value
+        tables (Tables 5&ndash;6) are transcribed, and every Table 1/2 row and
+        column identity holds on the §5 initial values within the manual's own
+        4-significant-figure printing precision — <strong>27 identity
+        tests</strong> in <code>tests/test_accounting.py</code>.
+      </p>
+      <p>
+        <strong>Milestone 2: IN PROGRESS, not passed</strong> (2026-08-11).
+        §3.2 has landed: <code>model/sectors/macro.py</code> implements
+        Eqs.&nbsp;(21)&ndash;(43) — all <strong>23 equations</strong> — and
+        the section solves as a system
+        (<code>tests/test_macro.py</code>). §3.3 and the oracle comparison
+        against the baseline GDP path remain outstanding, so the milestone is
+        <em>not</em> passed. Milestones 3&ndash;5 — sectoral equations,
+        ecosystem block, policy scenarios — are pending, each validated
+        against the oracle and the published figures under the same standard.
+      </p>
+      <p>
+        Reimplementation is already earning its keep as a reading of the
+        manual that the R source cannot give: <strong>three manual defects
+        are now pinned in tests</strong> rather than papered over or absorbed
+        into a tolerance.
+      </p>
+      <details class="more">
+        <summary>The three pinned manual defects</summary>
+        <p>
+          <strong>Table&nbsp;6 LENDM_ROW</strong> omits the DIVN_ROW term of
+          Eq.&nbsp;(383), so the MFI/RoW transaction columns miss LEND by
+          ∓DIVN_ROW (=&nbsp;5.44); the manual itself tabulates overall
+          LENDM&nbsp;=&nbsp;5.44 where it &ldquo;should equal 0&rdquo;. Pinned
+          exactly in <code>tests/test_accounting.py</code>.
+        </p>
+        <p>
+          <strong>Eq.&nbsp;(27)</strong>,
+          <code>GCF_R&nbsp;=&nbsp;GCF/P_P</code>, fails at the manual's own
+          initial values: it gives 111.88 against a tabulated 112.30 — 0.37%,
+          roughly ten times the rounding noise. The manual also disagrees with
+          itself here, since Eq.&nbsp;(25) only reproduces the tabulated
+          <code>GDP_R</code> using 112.30.
+        </p>
+        <p>
+          <strong>Eq.&nbsp;(31)</strong> uses an intercept α₀λ that
+          Table&nbsp;5 never tabulates — the α₀ block ends at α₀WS. It is
+          defaulted to 0.0, recorded in <code>macro.MANUAL_GAPS</code>, and
+          pinned by a test that fails if a value is later published.
+        </p>
+      </details>
+      <p>
+        The model design belongs to its authors; the implementation is ours,
+        AGPL-3.0, and independent — not the authors' code, and not endorsed
+        by them.
       </p>
     </div>
   </section>

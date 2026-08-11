@@ -3663,9 +3663,38 @@ SCORE_MODELS_WITHOUT_REFORM_BRIDGE = {
         "stabilizers), use hank_shock_incidence "
         "(`pe-macro hank-shock-incidence`)."
     ),
+    "define": (
+        "DEFINE-UK has no PolicyEngine-reform bridge, by design: it runs a "
+        "curated set of upstream climate-policy scenarios, and no mapping "
+        "exists from a PolicyEngine statutory reform to those scenario "
+        "definitions — inventing one would produce plausible-looking wrong "
+        "numbers. Use the define_scenario tool (or `pe-macro define-scenario "
+        "<name>`) with a scenario from define_list_scenarios; it returns "
+        "deltas against the model's own baseline, never levels. For who "
+        "bears a scenario at household resolution, use "
+        "define_scenario_incidence (`pe-macro define-incidence`)."
+    ),
+    "svar": (
+        "The Bank of England SVAR has no PolicyEngine-reform bridge, by "
+        "design: it is the baseline/conditioning member — it identifies "
+        "shocks and forecasts the economy that reforms are scored against, "
+        "and no mapping exists from a PolicyEngine reform to its structural "
+        "shocks, so inventing one would produce plausible-looking wrong "
+        "numbers. Use forecast_uk (`pe-macro forecast`) for the outlook and "
+        "latest_shocks (`pe-macro shocks`) for the identified shocks. To "
+        "score a reform against that economy, use model='obr'. For who bears "
+        "the SVAR's inflation path at household resolution, use "
+        "svar_inflation_incidence (`pe-macro svar-inflation-incidence`)."
+    ),
 }
 SCORE_MODELS_WITHOUT_REFORM_BRIDGE["us-hank"] = (
     SCORE_MODELS_WITHOUT_REFORM_BRIDGE["hank"]
+)
+SCORE_MODELS_WITHOUT_REFORM_BRIDGE["define-uk"] = (
+    SCORE_MODELS_WITHOUT_REFORM_BRIDGE["define"]
+)
+SCORE_MODELS_WITHOUT_REFORM_BRIDGE["boe-svar"] = (
+    SCORE_MODELS_WITHOUT_REFORM_BRIDGE["svar"]
 )
 
 
@@ -3709,9 +3738,11 @@ def score_reform(
       arrays, scored against the stock baseline. UK only. Extra args:
       max_iter, dataset.
 
-    "frbus" is deliberately NOT accepted and raises: FRB/US has no
-    PolicyEngine-reform bridge (see SCORE_MODELS_WITHOUT_REFORM_BRIDGE), so
-    raw variable shocks via ``frbus_shock`` are the supported entry point.
+    "frbus", "hank"/"us-hank", "define"/"define-uk" and "svar"/"boe-svar" are
+    deliberately NOT accepted and raise an explanation naming the tool to use
+    instead (see SCORE_MODELS_WITHOUT_REFORM_BRIDGE). None of them has a
+    PolicyEngine-reform bridge, so returning a number would be a
+    plausible-looking wrong answer.
     """
     # Checked before country/reform validation so the caller gets the real
     # reason ("frbus has no reform bridge") rather than being sent off to fix

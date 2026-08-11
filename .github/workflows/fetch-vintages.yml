@@ -41,11 +41,20 @@ jobs:
       # The economy pages render data/latest, so a refreshed vintage makes
       # them stale; regenerate on the same branch or the merged PR fails the
       # Site provenance gate on main (issue #147, first hit by #145).
+      # The /data catalogue reports vintage counts and the release calendar is
+      # built from `next_release`, so both move on every refresh for exactly
+      # the same reason the economy pages do.
       - name: Regenerate pages that read data/latest
-        run: python3 economy/build.py
+        run: |
+          python3 economy/topics.py
+          python3 economy/build.py
+          python3 data/build_page.py
 
       - name: Validate regenerated pages
-        run: python3 economy/build.py --check
+        run: |
+          python3 economy/topics.py --check
+          python3 economy/build.py --check
+          python3 data/build_page.py --check
 
       - name: Open a PR if anything changed
         uses: peter-evans/create-pull-request@v7

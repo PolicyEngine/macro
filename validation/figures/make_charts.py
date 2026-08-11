@@ -268,7 +268,14 @@ def grouped_bars(chart_id, title, desc, groups, y_max, y_step, fmt, unit_suffix=
     return "\n".join(out)
 
 
-def chart_obr_reform():
+def _reform_costing(chart_id: str, title: str):
+    """The PolicyEngine static costing of a 1pp basic-rate rise, vs HMRC.
+
+    Rendered twice from one committed source (chart_data.json ``obr_reform``):
+    on obr/validation as the macro bridge's input, and on the microsimulation's
+    own page as the independent check on the costing it produced. Same numbers,
+    two framings — so the numbers can only ever be changed in one place.
+    """
     data = load_transcribed()["obr_reform"]
     groups = data["groups"]
     parts = []
@@ -283,9 +290,20 @@ def chart_obr_reform():
             " The 2028–29 emulator figure is interpolated between the scored endpoints "
             "£6.46bn in 2026 and £7.38bn in 2030.")
     return grouped_bars(
+        chart_id, title, desc, groups, y_max=10, y_step=2, fmt=lambda v: f"{v:.2f}")
+
+
+def chart_obr_reform():
+    return _reform_costing(
         "obr-reform",
-        "obr-macro: 1p on the basic rate, ours vs HMRC ready reckoner (£bn/yr)",
-        desc, groups, y_max=10, y_step=2, fmt=lambda v: f"{v:.2f}")
+        "obr-macro: 1p on the basic rate, ours vs HMRC ready reckoner (£bn/yr)")
+
+
+def chart_pe_costing():
+    return _reform_costing(
+        "pe-costing",
+        "pe-microsim: 1p on the UK basic rate, our static costing vs the HMRC "
+        "ready reckoner (£bn/yr)")
 
 
 def chart_svar_fevd():
@@ -912,8 +930,12 @@ def chart_define_emissions():
     group_step = 220.0
     first_centre = 174.0
 
+    # One decimal, matching the visible caption and table. At :.0f the 2025
+    # gap rendered as "-3 per cent" against the "-3.5%" a sighted reader sees
+    # on the same page — a screen-reader user got a different number on a
+    # validation page whose whole point is that the numbers are gated.
     parts = "; ".join(f"{yr}: pinned run {p:g}, published table {m:g}, "
-                      f"a gap of {(p / m - 1) * 100:.0f} per cent"
+                      f"a gap of {(p / m - 1) * 100:.1f} per cent"
                       for yr, p, m in rows)
     desc = (
         "Grouped bar chart of S1 baseline total UK emissions in MtCO2e per year, "
@@ -953,9 +975,12 @@ def chart_define_emissions():
     return "\n".join(out)
 
 
-# chart id -> (builder, page that owns it). Every chart lives on the
-# validation subtab of the model it provides evidence for.
+# chart id -> (builder, page that owns it). Charts live on the validation
+# subtab of the model they provide evidence for, except pe-costing, which sits
+# on the microsimulation overview so the platform's central model opens on a
+# figure rather than on prose.
 BUILDERS = [
+    ("pe-costing", chart_pe_costing, "pe/index.html"),
     ("obr-anchored", chart_obr_anchored, "obr/validation/index.html"),
     ("obr-reform", chart_obr_reform, "obr/validation/index.html"),
     ("obr-computed-share", chart_obr_computed_share, "obr/validation/index.html"),

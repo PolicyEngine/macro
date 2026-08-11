@@ -26,6 +26,13 @@ jobs:
         run: python3 olg/figures/make_showcase.py --check
       - name: Economy page matches committed data and forecasts
         run: python3 economy/build.py --check
+      # The topic pages read data/latest too, and economy/build.py imports
+      # topics.py for the series-to-topic map, so the two are regenerated
+      # together or not at all.
+      - name: Economy topic pages match committed data
+        run: python3 economy/topics.py --check
+      - name: Data catalogue and release calendar match the committed vintages
+        run: python3 data/build_page.py --check
       - name: Homepage hero fan matches the current forecast artifact
         run: python3 assets/make_hero.py --check
       - name: Model-page outlook charts match the current forecast artifact

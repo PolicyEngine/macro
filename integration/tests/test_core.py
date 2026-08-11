@@ -42,6 +42,34 @@ def test_latest_shocks_rejects_unsafe_draws_before_import(draws):
         core.svar_latest_shocks(draws=draws)
 
 
+@pytest.mark.parametrize("model", ["svar", "boe-svar"])
+def test_score_reform_refuses_svar_and_names_the_alternative(model):
+    """SCOPE GUARD: /svar and /models both tell readers that score_reform does
+    not accept the SVAR. It is the baseline/conditioning member — the economy
+    reforms are scored *against* — so the refusal must explain that and point
+    at forecast_uk and model='obr', not just omit it from an enum."""
+    with pytest.raises(ValueError) as excinfo:
+        core.score_reform(
+            country="uk",
+            reform={"gov.hmrc.income_tax.rates.uk[0].rate": 0.21},
+            model=model,
+        )
+    message = str(excinfo.value)
+    assert "forecast_uk" in message
+    assert "no mapping" in message.lower()
+
+
+def test_score_reform_rejects_svar_even_with_junk_other_arguments():
+    with pytest.raises(ValueError, match="forecast_uk"):
+        core.score_reform(country=None, reform=None, model="svar")
+
+
+def test_svar_is_not_in_the_supported_score_models():
+    for model in ("svar", "boe-svar"):
+        assert model not in core.SCORE_MODELS
+        assert model in core.SCORE_MODELS_WITHOUT_REFORM_BRIDGE
+
+
 def test_provenance_uses_exact_deployed_source_revision(monkeypatch):
     revision = "a" * 40
     monkeypatch.setenv("POLICYENGINE_MACRO_SOURCE_REVISION_HANK", revision)

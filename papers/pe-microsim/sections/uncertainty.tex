@@ -1,0 +1,57 @@
+\section{Exact arithmetic and estimated aggregates}
+\label{sec:uncertainty}
+
+The suite's capability registry records this model's uncertainty in one sentence with a semicolon in it:
+
+\begin{quote}
+\emph{none for household arithmetic; survey/calibration uncertainty for population estimates.}
+\end{quote}
+
+That sentence is the central claim of this paper, and the purpose of this section is to establish that its two clauses describe different kinds of object rather than two points on a scale of confidence. Getting this wrong in either direction has a cost. Treating a household calculation as an estimate invites spurious hedging about a number that can be checked with a pencil. Treating a population costing as exact---quoting \pounds 6.46 billion to the nearest ten million and defending the second decimal---attributes to a survey-based aggregate a precision that no part of its construction supports.
+
+\subsection{Why the household number is exact}
+
+Section~\ref{sec:hhcalc} defined the household calculation as $N(h, \theta_y)$, a deterministic resolution of the statutory dependency graph. Three properties follow, and they are worth stating separately because each rules out a distinct source of error.
+
+There is no sampling. The household $h$ is not drawn from anything: it is the household the analyst described. Nothing is inferred about a wider population, so no sampling distribution exists to have a variance.
+
+There are no weights and no imputation. Every input is supplied directly. The model does not fill in an unreported income component, does not adjust for the tendency of survey respondents to under-report a benefit, and does not scale the result to represent anyone else.
+
+There are no estimated coefficients. The graph contains statutory rates, thresholds and formulae with effective dates, not fitted parameters. Nothing in the chain from \pounds 50{,}000 of employment income to \pounds 7{,}486 of income tax was estimated from data; every step is a rule.
+
+What remains is not uncertainty in the statistical sense but two auditable questions. Do the encoded rules match the statute they claim to encode? And is the household described the household intended---the right entity structure, the right year, the right state? Both are answerable by inspection, neither is random, and neither is reduced by collecting more data. This is why the registry says ``none'' rather than a small number: a household result carries no error \emph{distribution}, only the possibility of a mistake, which is a different thing and is addressed by testing rules against legislation (Section~\ref{sec:validation}) rather than by reporting an interval.
+
+\subsection{Why the population number is not}
+
+A population estimate has the form
+\begin{equation}
+  \widehat{R}(\theta) \;=\; \sum_{i=1}^{n} w_i \, b_i(x_i, \theta),
+  \label{eq:popsum}
+\end{equation}
+where $i$ indexes the households in the microdata file, $b_i$ is the household-level quantity being aggregated---a tax liability, a benefit entitlement, the government balance---computed by exactly the code of Section~\ref{sec:hhcalc}, $x_i$ is that household's recorded circumstances, and $w_i$ is its survey weight. The reform estimate is the difference of two such sums under $\theta'$ and $\theta$.
+
+The decisive observation is where the uncertainty is and is not. It is \emph{not} in $b_i$: given $x_i$, the arithmetic in \eqref{eq:popsum} is exactly as exact as a household calculation, because it is the same function. All of it lives in $w_i$ and in $x_i$, and it arrives through four channels that compound rather than cancel.
+
+\paragraph{Sampling.} The Family Resources Survey and the Current Population Survey are samples. A different draw of households would give a different $\widehat{R}$, with a variance determined by the survey design---clustering and stratification included, which is why a naive independent-sample standard error would understate it even if one were computed.
+
+\paragraph{Measurement and imputation.} Survey respondents under-report income and transfer receipt, systematically and by large margins in the cases the literature has measured \citep{meyer2015, brewer2017}. The UK enhancement responds by imputing under-reported incomes---so some components of $x_i$ are not reports at all but model outputs, and the tax computed on them inherits whatever error the imputation carries.
+
+\paragraph{Calibration.} The enhanced survey is reweighted so that its weighted aggregates better match administrative totals \citep{deville1992}. This makes the headline aggregates far more usable and simultaneously makes $w_i$ a fitted object: the weights are chosen to hit targets, and a reform whose incidence is concentrated in a subpopulation the calibration did not target is scored on weights that were never asked to be right for it.
+
+\paragraph{Ageing.} The UK population runs used by this suite are built from \texttt{enhanced\_frs\_2023\_24} and evaluated for a later policy year---2026 in every worked example here. Incomes are uprated and the file is aged forward; the resulting population is a projection of the survey, not an observation of the policy year.
+
+Any of the four alone would make $\widehat{R}$ an estimate. Together they make it an estimate whose error is dominated by data construction rather than by the statutory arithmetic, and this ordering is the practically important part: improving the rule engine does not improve a population costing much, and improving the microdata does.
+
+\subsection{What follows, and what this paper does not claim}
+
+Three consequences are enforced structurally in the codebase rather than left to the reader's discipline.
+
+\emph{Different access requirements.} A household calculation needs no data and no credential; a population run needs a gated dataset whose name is recorded in the result's provenance. The boundary is visible in what you have to obtain in order to cross it.
+
+\emph{Different declared status.} The registry states the two clauses separately; the common score block attaches ``static microsimulation: no behavioural or macro feedback'' and the dataset name with its household count to every population score; and the suite's verification gradient classifies the model as ``checked against implemented legislation'' with the headline ``household maths exact; population adds survey error.''
+
+\emph{Different rounding discipline in this paper.} Household figures are quoted to the pound because they are exact to the pound. Population figures are quoted as the committed artifacts record them and are discussed to a tenth of a billion at best, with the ready-reckoner comparison of Section~\ref{sec:validation} framed in percentage deviations rather than as agreement to a decimal place.
+
+And now the admission that the rest of the paper depends on. \emph{No interval is reported for any population estimate here, because the codebase does not produce one.} The uncertainty is documented as a string; the score block's uncertainty field for the revenue quantity reads ``not estimated in this result''; and nothing in the pipeline computes a replicate-weight or bootstrap standard error, propagates imputation variance, or reports a range around \pounds 6.46 billion. A reader who wants to know how wide that number's distribution is will not find the answer in this paper or in the artifacts behind it. Section~\ref{sec:limitations} records this as the model's first limitation and the natural next piece of work; describing an uncertainty is not the same as quantifying it, and the distinction this section draws would be worth more if the second clause had a number in it.
+
+There is one further honesty point about the boundary itself. Nothing forces a caller to read the registry string: the adapters return the declaration, but a consumer that ignores it will receive a population figure formatted exactly like a household figure, in the same units, from the same package. The boundary is documented and structurally visible, not mechanically enforced.

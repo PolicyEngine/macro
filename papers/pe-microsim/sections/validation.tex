@@ -1,0 +1,60 @@
+\section{Validation}
+\label{sec:validation}
+
+\subsection{The posture: no forecast error to report}
+
+Every other member of the PolicyEngine Macro suite is validated against something a modelling institution published: the OBR emulator against the \emph{Economic and Fiscal Outlook} and HMRC's ready reckoner \citep{ahmadi2026obr}, the structural VAR against the paper it replicates, the FRB/US implementation against the Federal Reserve's own database and reference solver. The microsimulation is the exception, and the reason is structural: it is not forecasting anything. There is no forecast error to report because no forecast is made. Published rules are applied to described circumstances, and the question validation has to answer is whether the rules were transcribed and resolved correctly.
+
+The suite's verification gradient therefore places this model in its own class---``checked against implemented legislation''---with the headline ``household maths exact; population adds survey error.'' That is a stronger epistemic position than a calibrated counterfactual and a different one from a replication with a published anchor, and it comes with its own characteristic failure mode: a rule can be correctly implemented and simply absent, and no amount of arithmetic checking will reveal a provision nobody encoded.
+
+\subsection{Rules against statute, checked by hand}
+
+The primary check is that a result is reproducible without the model. For the single UK adult of Section~\ref{sec:hhcalc}, earning \pounds 50{,}000 in 2026:
+
+\begin{itemize}
+\item \pounds 50{,}000 less the \pounds 12{,}570 personal allowance leaves \pounds 37{,}430 of taxable income, all inside the basic-rate band;
+\item at 20 per cent that is \pounds 7{,}486 of income tax;
+\item employee National Insurance at 8 per cent on the corresponding earnings is \pounds 2{,}994;
+\item household net income on the HBAI concept is \pounds 39{,}520;
+\item raising the basic rate by five points adds five per cent of \pounds 37{,}430, which is \pounds 1{,}872, and reduces net income by the same amount.
+\end{itemize}
+
+Every figure is deterministic arithmetic from the implemented rules, and the reader can check the whole chain against the published allowance and rate schedule. What this establishes is bounded and worth stating precisely, in the same words the project's own validation page uses: it verifies \emph{those rules}, not that every area of legislation has complete test coverage. One hand-checkable case demonstrates that the resolution machinery does what it claims for the provisions it exercises. It says nothing about the parts of the statute book it does not touch, and this paper makes no claim about upstream's coverage of them (Section~\ref{sec:limitations}).
+
+\subsection{The static costing against HMRC's ready reckoner}
+\label{sec:reckoner}
+
+The one committed external benchmark for the population side is the canonical UK illustrative change: one penny on the basic rate of income tax. HMRC publishes the official ready reckoner---\emph{Direct effects of illustrative tax changes}, produced on the OBR-certified costing basis---which in its June 2025 vintage puts a 1p change in the basic rate at \pounds 6.9 billion in 2026--27, rising to about \pounds 8.2 billion a year in 2027--28 and 2028--29 \citep{hmrc2025reckoner}. Scoring the same reform through the microsimulation on the enhanced FRS gives \pounds 6.46 billion in 2026, rising with fiscal drag and earnings growth to \pounds 7.38 billion by 2030. Table~\ref{tab:reckoner} sets the two side by side.
+
+\begin{table}[ht]
+\centering
+\caption{Static costing of 1p on the UK basic rate, microsimulation versus HMRC's ready reckoner}
+\label{tab:reckoner}
+\begin{tabular}{lrrr}
+\toprule
+\pounds bn per year & Microsimulation & HMRC & Deviation \\
+\midrule
+2026--27 & 6.46 & 6.9 & $-6.4\%$ \\
+2028--29$^{\dagger}$ & 6.92 & 8.2 & $-15.6\%$ \\
+2030 (end of scored window) & 7.38 & $\approx$8.2 & $-10.0\%$ \\
+\bottomrule
+\end{tabular}
+
+\medskip
+\parbox{0.92\textwidth}{\footnotesize \emph{Notes:} Reform \texttt{\{"gov.hmrc.income\_tax.rates.uk[0].rate": 0.21\}}, scored on the enhanced FRS. The microsimulation figures for 2026 and 2030 are the scored endpoints; $^{\dagger}$the 2028--29 figure is linearly interpolated between them and is therefore not an independently scored year. Official figures: HMRC, \emph{Direct effects of illustrative tax changes}, June 2025 vintage \citep{hmrc2025reckoner}. Source of every number in this table: the committed chart data at \texttt{validation/figures/chart\_data.json} (key \texttt{obr\_reform}), which is rendered as the comparison figure on both the microsimulation's overview page and the OBR emulator's validation page, and is cross-checked against the sister working paper \citep{ahmadi2026obr}.}
+\end{table}
+
+The costing sits within the range published vintages of the reckoner have spanned in recent years, toward its lower end, and the gap widens with the horizon. Four differences account for the direction and shape of that gap, and none of them is a defect to be tuned away:
+
+\begin{enumerate}
+\item \textbf{Data basis.} HMRC costs from administrative Survey of Personal Incomes data; this estimate comes from an enhanced household survey. Administrative data captures the top of the income distribution---where a rate change on a broad band still raises substantial revenue---more completely than a survey does, even an imputed and reweighted one (Section~\ref{sec:uncertainty}).
+\item \textbf{Behavioural content.} The official figure is a post-behavioural \emph{direct} effect embedding taxable-income elasticities for higher incomes \citep{saez2012}; this one is static by construction, with no behavioural response at all. The two are not the same object.
+\item \textbf{Baseline policy assumptions.} The two costings condition on different threshold-freeze paths and uprating assumptions over the window, which matters more in later years.
+\item \textbf{Fiscal drag over the horizon.} The widening from $-6.4$ to $-15.6$ per cent is concentrated in the later years, consistent with survey microdata capturing the drift of incomes across thresholds less fully than administrative data.
+\end{enumerate}
+
+\subsection{What this benchmark does and does not establish}
+
+It is a single agreement check, and this paper declines to call it a validation. It covers one reform, in one country, on one tax, in one direction, against a figure that is itself an estimate produced on a different data basis with different behavioural assumptions---so the deviations in Table~\ref{tab:reckoner} measure the distance between two estimates, not a distance from truth. Agreement to within about six per cent in the first scored year is reassuring about the order of magnitude and about the absence of gross error in the aggregation, uprating and weighting chain. It is not evidence that the model's costings are accurate to six per cent in general, and the middle row of the table is not even an independently scored year.
+
+Two further gaps should be named. There is no committed external benchmark for the US side of the model at all: everything in this section is UK. And there is no benchmark anywhere for the distributional output---the decile impacts and winner/loser counts that a costing is usually quoted alongside---which is checked for internal consistency (Section~\ref{sec:poppipeline}) but not against any published distributional analysis. Extending the benchmark set in both directions is the obvious next validation work, and Section~\ref{sec:limitations} records it as such.

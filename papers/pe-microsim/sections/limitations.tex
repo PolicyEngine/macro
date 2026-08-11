@@ -1,0 +1,30 @@
+\section{Limitations}
+\label{sec:limitations}
+
+The PolicyEngine Macro suite grades its members on a \emph{verification gradient}: how far a model's outputs can be audited against ground truth should temper the weight placed on its answers. This model sits at the top of that gradient---it is checked against implemented legislation rather than against another model's published output---which makes it the suite's most trustworthy member and does not make it trustworthy for everything. In the order of how much they should change a reader's behaviour:
+
+\begin{enumerate}
+\item \textbf{Population uncertainty is described, not quantified.} This is the first limitation because it is the one this paper most wants a reader to carry away. The registry names survey and calibration uncertainty; the score block's revenue quantity says ``not estimated in this result''; and nothing in the pipeline computes a replicate-weight or bootstrap standard error, propagates imputation variance, or attaches a range to a costing. Every population number in this paper is a point estimate whose dispersion is unknown to its producer. Quantifying it---starting with design-consistent variance from the survey's own replicate weights---is the most valuable single piece of outstanding work on the model.
+
+\item \textbf{Static by construction, one year at a time.} No behavioural response is included in the default path; behavioural adjustments, where used at all, are optional and post-hoc rather than equilibrium objects. There is no general equilibrium: prices, wages and output do not move. The horizon is a single policy year, and a multi-year window is several independent annual scores rather than a dynamic path. GDP, inflation, interest rates and macro feedback are outside the model entirely.
+
+\item \textbf{Statutory coverage is not audited here.} This paper documents the model as the suite uses it. It does not measure how completely the upstream country packages cover UK or US statute, does not report their test coverage, and offers no estimate of how much of the tax and transfer system is encoded. The hand-checkable example of Section~\ref{sec:validation} verifies the rules it exercises and nothing more, and a provision nobody has implemented will not announce itself.
+
+\item \textbf{Known partial coverage inside the household calculator.} Capital gains tax is not computed by the household calculator, so three of the thirteen curated reform paths are valid reforms that leave a household result unmoved and must be scored at population level. The catalogue carries that note on each affected path. It is a documented hole rather than a hidden one, but it is a hole, and it is a reminder that ``exact'' in Section~\ref{sec:uncertainty} means exact \emph{for what is computed}.
+
+\item \textbf{One external benchmark, one country, one tax.} The ready-reckoner comparison of Section~\ref{sec:reckoner} is the only committed check against an outside number. It is UK-only; there is no committed US benchmark. It is aggregate-only; there is no committed check of the decile impacts or the winner and loser counts against any published distributional analysis. And it is measured against another estimate produced on administrative data with embedded behavioural elasticities, so the deviation is a distance between two estimates rather than an error.
+
+\item \textbf{The interpolated middle row.} Table~\ref{tab:reckoner}'s 2028--29 figure of \pounds 6.92bn is a linear interpolation between the two scored endpoints, not an independently scored year, and its $-15.6$ per cent deviation inherits that construction. It is reported because the committed artifact reports it, with the interpolation labelled everywhere it appears.
+
+\item \textbf{Data vintage lag and intra-suite statute divergence.} UK population runs use \texttt{enhanced\_frs\_2023\_24} while upstream publishes a newer FRS vintage this integration has not adopted; and this integration tracks the latest country model while the OLG member is pinned to \texttt{policyengine-uk==2.88.0}, so two members of the same suite can disagree about baseline statute.
+
+\item \textbf{Population results are not reader-reproducible.} The UK microdata is gated. Household results are reproducible by anyone; population results are reproducible only by someone granted access. The asymmetry is inherent to licensed survey data and is not resolved by the model being open source.
+
+\item \textbf{The macro bridge is an approximation, and the compounded object is weaker than its parts.} The route into the OBR emulator discards the distributional detail the microsimulation computed, injects the whole costing at one point as a held add-factor on nominal household disposable income, interpolates it flat within each year, does not recycle income feedback, and delivers its second-round numbers from a model whose impact multiplier is approximately one by construction against an official assumption of 0.3 for income tax. Read those numbers as sign and order of magnitude (Section~\ref{sec:bridgelimits}).
+
+\item \textbf{Uniform incidence in the reverse bridge.} When a macro path is carried down into a population run, employment income is scaled uniformly across households, which understates how concentrated real incidence is---a shock that in reality falls on people who lose jobs is spread over everyone who has one.
+
+\item \textbf{A declared interface asymmetry.} The household adapters require the country argument explicitly, on the reasoning that defaulting would silently score the wrong country; the population adapter retains a UK default for backwards compatibility. Two entry points to the same model therefore treat the same mistake differently, and the safer behaviour is the newer one.
+
+\item \textbf{The boundary is documented, not enforced.} Nothing prevents a consumer from taking a population figure, ignoring the uncertainty declaration that accompanies it, and quoting it with the confidence appropriate to a household calculation. The registry, the provenance record and the score block all state the distinction; none of them can compel it to be read.
+\end{enumerate}
