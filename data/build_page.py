@@ -55,6 +55,11 @@ PUBLIC_LABELS = {
 # The worked example in the "as-of" recipe. Chosen because uk_cpi_yoy is the
 # one series with two vintages of the same last period, so a reader can change
 # the date and watch the answer change.
+# Rows shown before the reader asks for the rest. Twenty series is a wall on
+# first view; five is enough to show what a row contains and that the list
+# is alphabetical, without the section dominating the page.
+PREVIEW_ROWS = 5
+
 RECIPE_SOURCE = "ons"
 RECIPE_SERIES = "uk_cpi_yoy"
 RECIPE_DATE = "2026-07-25"
@@ -134,7 +139,7 @@ def catalogue_rows() -> str:
     index = manifest()["series"]
     dirs = source_dirs()
     groups = []
-    for name in sorted(index):
+    for position, name in enumerate(sorted(index)):
         entry = index[name]
         series = load(name)
         now = series["observations"][-1]
@@ -164,7 +169,7 @@ def catalogue_rows() -> str:
             for label, value in facts
         )
         groups.append(
-            f'            <tbody class="series-group">\n'
+            f'            <tbody class="series-group" data-index="{position}">\n'
             f'              <tr class="series-row">\n'
             f'                <th scope="row">\n'
             f'                  <button type="button" class="series-toggle"'
@@ -435,10 +440,6 @@ def render_page() -> str:
         as the last fetch and no more. Expand a row for its full snapshot
         history and store path.
       </p>
-      <p class="table-controls">
-        <button type="button" id="expand-all" class="series-expand-all" hidden
-                aria-controls="series-table">Expand all</button>
-      </p>
       <div class="table-scroll">
         <table id="series-table" class="series-table">
           <caption>Every series in the store, stored exactly as published — including sign conventions.</caption>
@@ -454,6 +455,10 @@ def render_page() -> str:
 {catalogue_rows()}
         </table>
       </div>
+      <p class="table-controls">
+        <button type="button" id="show-all" class="series-show-all" hidden
+                aria-controls="series-table" aria-expanded="false"></button>
+      </p>
       <p class="chooser-note">
         ONS and Bank of England series are published under the
         <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>;
@@ -586,34 +591,52 @@ document.addEventListener("click", function (e) {{
   }});
 }});
 
-// Catalogue rows. The detail rows ship OPEN so the page is complete without
-// JavaScript; collapsing is the enhancement, applied here on load.
+// Catalogue. Two independent collapses, both progressive enhancements:
+// the table ships whole with every detail row OPEN, and script does the
+// hiding. Without JavaScript the page is long but complete — never a table
+// with rows that cannot be reached.
 (function () {{
-  var toggles = document.querySelectorAll(".series-toggle");
-  if (!toggles.length) return;
+  var table = document.getElementById("series-table");
+  if (!table) return;
+  var groups = table.querySelectorAll(".series-group");
+  var toggles = table.querySelectorAll(".series-toggle");
+  var preview = {PREVIEW_ROWS};
 
+  // 1. Per-row detail.
   function setOpen(btn, open) {{
     btn.setAttribute("aria-expanded", open ? "true" : "false");
     var row = document.getElementById(btn.getAttribute("aria-controls"));
     if (row) row.hidden = !open;
   }}
-
   toggles.forEach(function (btn) {{ setOpen(btn, false); }});
-
   document.addEventListener("click", function (e) {{
     var btn = e.target.closest(".series-toggle");
     if (!btn) return;
     setOpen(btn, btn.getAttribute("aria-expanded") !== "true");
   }});
 
-  var all = document.getElementById("expand-all");
-  if (!all) return;
-  all.hidden = false;
-  all.addEventListener("click", function () {{
-    var open = all.getAttribute("data-open") !== "true";
-    toggles.forEach(function (btn) {{ setOpen(btn, open); }});
-    all.setAttribute("data-open", open ? "true" : "false");
-    all.textContent = open ? "Collapse all" : "Expand all";
+  // 2. Row count. Nothing to collapse if the store is small enough to show.
+  var showAll = document.getElementById("show-all");
+  if (!showAll || groups.length <= preview) return;
+  var hiddenCount = groups.length - preview;
+
+  function setListOpen(open) {{
+    groups.forEach(function (group) {{
+      if (+group.getAttribute("data-index") >= preview) group.hidden = !open;
+    }});
+    showAll.setAttribute("aria-expanded", open ? "true" : "false");
+    showAll.textContent = open
+      ? "Show fewer"
+      : "Show all " + groups.length + " series (" + hiddenCount + " more)";
+  }}
+
+  showAll.hidden = false;
+  setListOpen(false);
+  showAll.addEventListener("click", function () {{
+    var open = showAll.getAttribute("aria-expanded") !== "true";
+    setListOpen(open);
+    // Collapsing can leave the reader below the table; put them back on it.
+    if (!open) table.scrollIntoView({{ block: "start", behavior: "smooth" }});
   }});
 }})();
 </script>

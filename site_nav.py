@@ -22,7 +22,6 @@ DESTINATIONS = (
     ("models", "/models", "Models", "nav-mobile"),
     ("economy", "/economy", "Economy", "nav-mobile"),
     ("forecasts", "/forecasts", "Forecasts", "nav-mobile"),
-    ("data", "/data", "Data", "nav-mobile"),
     ("use", "/connect", "Use", "nav-mobile nav-start"),
 )
 
@@ -78,6 +77,7 @@ PAGE_NAMES = {
 # Parent chain overrides where the URL hierarchy is not the reading hierarchy:
 # model and evidence pages live under Models; /score is a top-level section.
 CRUMB_PARENTS = {
+    "/data": "/forecasts",
     "/obr": "/models",
     "/svar": "/models",
     "/frb-us": "/models",
@@ -176,8 +176,10 @@ def section(path: Path) -> str | None:
         return "economy"
     if root == "forecasts":
         return "forecasts"
+    # /data has no tab of its own: the vintage store exists to make the
+    # forecast record reproducible, so it sits under Forecasts.
     if root == "data":
-        return "data"
+        return "forecasts"
     if root == "connect":
         return "use"
     return None
