@@ -96,7 +96,7 @@ def _site_absolute(page, url: str) -> str:
 def test_every_internal_link_resolves(pages, site):
     """No page links to a URL that Vercel cannot serve.
 
-    This is the highest-value check in the suite: 78 pages of hand-maintained
+    This is the highest-value check in the suite: dozens of hand-maintained
     cross-links, resolved through the same rules production uses. Every broken
     link is reported at once — fixing them one CI run at a time would take a
     dozen rounds.

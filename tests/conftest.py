@@ -216,7 +216,7 @@ _PAGE_CACHE: dict[Path, Page] = {}
 
 
 def load_page(path: Path) -> Page:
-    """Parse each page at most once per session — 78 files, many tests."""
+    """Parse each page at most once per session — every page, many tests."""
     if path not in _PAGE_CACHE:
         _PAGE_CACHE[path] = Page(path)
     return _PAGE_CACHE[path]
