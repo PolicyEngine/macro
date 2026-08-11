@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""Regenerate the public Data page and release calendar from committed vintages.
+"""Regenerate the data-store block and release calendar from committed vintages.
 
 Writes two artifacts, both committed:
 
-    data/index.html    the /data page
-    data/calendar.ics  an iCalendar feed of announced next releases
+    forecasts/index.html   the data-store section, spliced between markers
+    data/calendar.ics      an iCalendar feed of announced next releases
+
+There is no /data page: the store exists to make the forecast record
+reproducible, so it lives in the section explaining what a round is scored
+against. /data and /data/ redirect to /forecasts#data; the JSON endpoints
+under /data/ are unaffected.
 
 Nothing here reads the clock or the network: the same store always renders the
 same bytes, so ``--check`` is a real drift test rather than a coin flip.

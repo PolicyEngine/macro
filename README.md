@@ -186,8 +186,9 @@ snap = json.load(urllib.request.urlopen(
 print(snap["observations"][-1])   # {'period': '2026Q2', 'value': 2.8}
 ```
 
-Browse it at [`/data`](https://policyengine-macro.vercel.app/data) — the full
-catalogue, the schema, the release calendar and the recipe above. The
+Browse it at [`/forecasts#data`](https://policyengine-macro.vercel.app/forecasts#data)
+— the full catalogue, the schema, the release calendar and the recipe above,
+in the section that explains what a forecast round is scored against. The
 [forecast track record](forecasts/) records which vintage each score was
 computed against, so any published number can be reproduced.
 
