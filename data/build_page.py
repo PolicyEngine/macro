@@ -120,19 +120,20 @@ def esc(text: str) -> str:
 
 
 def catalogue_rows() -> str:
-    """One expandable block per series.
+    """One <tbody> per series: a scannable row plus an expandable detail row.
 
-    A nine-column table needed horizontal scrolling and still hid the thing
-    that matters most: the vintage history. Native <details> gives keyboard
-    and screen-reader support with no JavaScript, keeps the summary to what
-    you scan by, and puts the full snapshot list one click away.
+    A table, because the point of a catalogue is comparing series against
+    each other down a column. Expandable, because the nine columns needed to
+    say everything forced horizontal scrolling and still hid the vintage
+    history — the thing the store exists for.
 
-    No link goes in the <summary>: a nested interactive control inside a
-    disclosure control is ambiguous to operate by keyboard.
+    Progressive enhancement: the detail rows are OPEN in the HTML and the
+    script collapses them on load. With JavaScript unavailable the page is
+    verbose but complete, never a table of rows that cannot be opened.
     """
     index = manifest()["series"]
     dirs = source_dirs()
-    blocks = []
+    groups = []
     for name in sorted(index):
         entry = index[name]
         series = load(name)
@@ -140,15 +141,15 @@ def catalogue_rows() -> str:
         first, last = entry["coverage"]
         source_dir = dirs[name]
         vintages = sorted(entry["vintages"], reverse=True)
+        detail_id = f"detail-{name}"
 
-        snapshots = f"{len(vintages)} snapshot" + ("s" if len(vintages) != 1 else "")
         listed = "\n".join(
-            f'              <li><a href="/data/vintages/{esc(source_dir)}/'
+            f'                  <li><a href="/data/vintages/{esc(source_dir)}/'
             f'{esc(name)}/{esc(vintage)}.json">{esc(vintage)}</a></li>'
             for vintage in vintages
         )
         next_release = series.get("next_release")
-        rows = [
+        facts = [
             ("Units", esc(series["units"])),
             ("Coverage", f"{esc(first)} – {esc(last)}"),
             ("Observations", f"{len(series['observations']):,}"),
@@ -158,29 +159,37 @@ def catalogue_rows() -> str:
              f'<a href="{esc(display_url(series["url"]))}">'
              f'{esc(series["source"])} · {esc(series["cdid"])}</a>'),
         ]
-        detail = "\n".join(
-            f"              <div><dt>{label}</dt><dd>{value}</dd></div>"
-            for label, value in rows
+        dl = "\n".join(
+            f"                  <div><dt>{label}</dt><dd>{value}</dd></div>"
+            for label, value in facts
         )
-        blocks.append(
-            f'        <details class="series">\n'
-            f'          <summary>\n'
-            f'            <span class="series-id">{esc(public_label(series))}'
-            f'<span class="mono">{esc(name)}</span></span>\n'
-            f'            <span class="series-now">{fmt_value(now["value"])} '
-            f'<span class="mono">{esc(now["period"])}</span></span>\n'
-            f'            <span class="series-meta mono">{esc(series["source"])}'
-            f' · {esc(series["frequency"])} · {snapshots}</span>\n'
-            f'          </summary>\n'
-            f'          <div class="series-detail">\n'
-            f"            <dl>\n{detail}\n            </dl>\n"
-            f'            <p class="series-vintages-head">Every snapshot taken, '
-            f'newest first. Each file is immutable.</p>\n'
-            f'            <ul class="vintage-list mono">\n{listed}\n            </ul>\n'
-            f"          </div>\n"
-            f"        </details>"
+        groups.append(
+            f'            <tbody class="series-group">\n'
+            f'              <tr class="series-row">\n'
+            f'                <th scope="row">\n'
+            f'                  <button type="button" class="series-toggle"'
+            f' aria-expanded="true" aria-controls="{esc(detail_id)}">'
+            f'<span class="series-name">{esc(public_label(series))}</span>'
+            f'<span class="mono">{esc(name)}</span></button>\n'
+            f"                </th>\n"
+            f'                <td>{esc(series["source"])}</td>\n'
+            f'                <td>{esc(series["frequency"])}</td>\n'
+            f'                <td class="num">{fmt_value(now["value"])} '
+            f'<span class="mono">{esc(now["period"])}</span></td>\n'
+            f'                <td class="num">{len(vintages)}</td>\n'
+            f"              </tr>\n"
+            f'              <tr class="series-detail-row" id="{esc(detail_id)}">\n'
+            f'                <td colspan="5">\n'
+            f"                  <dl>\n{dl}\n                  </dl>\n"
+            f'                  <p class="series-vintages-head">Every snapshot '
+            f"taken, newest first — each file immutable.</p>\n"
+            f'                  <ul class="vintage-list mono">\n{listed}\n'
+            f"                  </ul>\n"
+            f"                </td>\n"
+            f"              </tr>\n"
+            f"            </tbody>"
         )
-    return "\n".join(blocks)
+    return "\n".join(groups)
 
 
 def upcoming() -> list[tuple[datetime, str, dict]]:
@@ -423,18 +432,33 @@ def render_page() -> str:
     <div class="prose">
       <p>
         Values come from the committed snapshot, not a live call — as current
-        as the last fetch and no more. Expand a series for its full snapshot
-        history and the exact store path.
+        as the last fetch and no more. Expand a row for its full snapshot
+        history and store path.
       </p>
-      <div class="series-list">
+      <p class="table-controls">
+        <button type="button" id="expand-all" class="series-expand-all" hidden
+                aria-controls="series-table">Expand all</button>
+      </p>
+      <div class="table-scroll">
+        <table id="series-table" class="series-table">
+          <caption>Every series in the store, stored exactly as published — including sign conventions.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Series</th>
+              <th scope="col">Source</th>
+              <th scope="col">Frequency</th>
+              <th scope="col">Latest</th>
+              <th scope="col">Snapshots</th>
+            </tr>
+          </thead>
 {catalogue_rows()}
+        </table>
       </div>
       <p class="chooser-note">
         ONS and Bank of England series are published under the
         <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>;
         US series come via FRED with their original BEA, BLS and Federal
-        Reserve attribution. Values are stored exactly as published, including
-        sign conventions. Daily series keep observations from 2020 onward.
+        Reserve attribution. Daily series keep observations from 2020 onward.
       </p>
     </div>
   </section>
@@ -561,6 +585,37 @@ document.addEventListener("click", function (e) {{
     setTimeout(function () {{ btn.textContent = "copy"; }}, 1400);
   }});
 }});
+
+// Catalogue rows. The detail rows ship OPEN so the page is complete without
+// JavaScript; collapsing is the enhancement, applied here on load.
+(function () {{
+  var toggles = document.querySelectorAll(".series-toggle");
+  if (!toggles.length) return;
+
+  function setOpen(btn, open) {{
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    var row = document.getElementById(btn.getAttribute("aria-controls"));
+    if (row) row.hidden = !open;
+  }}
+
+  toggles.forEach(function (btn) {{ setOpen(btn, false); }});
+
+  document.addEventListener("click", function (e) {{
+    var btn = e.target.closest(".series-toggle");
+    if (!btn) return;
+    setOpen(btn, btn.getAttribute("aria-expanded") !== "true");
+  }});
+
+  var all = document.getElementById("expand-all");
+  if (!all) return;
+  all.hidden = false;
+  all.addEventListener("click", function () {{
+    var open = all.getAttribute("data-open") !== "true";
+    toggles.forEach(function (btn) {{ setOpen(btn, open); }});
+    all.setAttribute("data-open", open ? "true" : "false");
+    all.textContent = open ? "Collapse all" : "Expand all";
+  }});
+}})();
 </script>
 </body>
 </html>
