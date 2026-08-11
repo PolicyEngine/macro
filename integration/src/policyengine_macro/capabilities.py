@@ -26,6 +26,7 @@ MODELS = {
         "data_vintage": "country package and dataset dependent; recorded per run",
     },
     "og+microsim": {
+        "site_id": "psl-og+microsim",
         "display_name": "OG-UK overlay dynamic scoring (og+microsim)",
         "model_class": "olg-ge overlay on microsimulation",
         "geography": ["uk"],
@@ -120,6 +121,13 @@ MODELS = {
         "data_vintage": "Auclert-Bardóczy-Rognlie-Straub (2021) calibration",
     },
     "og-uk": {
+        # The website calls this model psl-og — the PSL brand, which is what
+        # every model page, the papers directory and site_contract.PUBLIC_MODELS
+        # use. The registry key stays og-uk because it is the public
+        # MCP/CLI contract (score["model"], `--model og`) and is asserted in
+        # the integration tests. Anything rendering a model name for a reader
+        # must use site_id, or the site ends up calling one model four things.
+        "site_id": "psl-og",
         "display_name": "OG-UK overlapping generations model",
         "model_class": "overlapping-generations general equilibrium",
         "geography": ["uk"],

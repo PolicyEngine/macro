@@ -930,8 +930,12 @@ def chart_define_emissions():
     group_step = 220.0
     first_centre = 174.0
 
+    # One decimal, matching the visible caption and table. At :.0f the 2025
+    # gap rendered as "-3 per cent" against the "-3.5%" a sighted reader sees
+    # on the same page — a screen-reader user got a different number on a
+    # validation page whose whole point is that the numbers are gated.
     parts = "; ".join(f"{yr}: pinned run {p:g}, published table {m:g}, "
-                      f"a gap of {(p / m - 1) * 100:.0f} per cent"
+                      f"a gap of {(p / m - 1) * 100:.1f} per cent"
                       for yr, p, m in rows)
     desc = (
         "Grouped bar chart of S1 baseline total UK emissions in MtCO2e per year, "

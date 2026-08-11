@@ -390,6 +390,16 @@ def limits_list(items: list[str]) -> str:
     return f"      <ul>\n{entries}\n      </ul>"
 
 
+def site_name(model_id: str) -> str:
+    """The name the website uses for a model.
+
+    The registry keys models by their MCP/CLI contract id (og-uk), which is
+    not always what the site calls them (psl-og). Rendering the key leaked
+    two names onto public pages that appear nowhere else on the site.
+    """
+    return MODELS[model_id].get("site_id", model_id)
+
+
 def cannot(model_id: str) -> str:
     return listed([esc(item) for item in MODELS[model_id]["cannot_answer"]])
 
@@ -740,7 +750,7 @@ def rates_model() -> str:
 {limits_list([
         f"<a href=\"/svar\">boe-svar</a> outputs {registry_terms(svar['outputs'])} — no interest-rate path is among them.",
         f"<a href=\"/pe\">pe-microsim</a> lists {esc(microsim['cannot_answer'][2])} in its own cannot-answer field.",
-        f"<a href=\"/olg\">og-uk</a> does report an interest rate, but only as part of a {esc(og['horizon'].split(';')[0])}, and it cannot answer a {esc(og['cannot_answer'][0])}. A long-run comparative static is not a market view.",
+        f"<a href=\"/olg\">{site_name('og-uk')}</a> does report an interest rate, but only as part of a {esc(og['horizon'].split(';')[0])}, and it cannot answer a {esc(og['cannot_answer'][0])}. A long-run comparative static is not a market view.",
         f"<a href=\"/frb-us\">frb-us</a> produces a {esc(frbus['outputs'][-1])}, for the {esc(', '.join(frbus['geography']).upper())} only.",
     ])}
       <p>
@@ -918,7 +928,7 @@ def reform_stands() -> str:
              ("Access", ", ".join(obr["access"]))],
         ),
         reform_capability_card(
-            "og+microsim", ", ".join(dynamic["geography"]).upper(),
+            site_name("og+microsim"), ", ".join(dynamic["geography"]).upper(),
             dynamic["model_class"],
             [("Horizon", dynamic["horizon"]), ("Runtime", dynamic["runtime"]),
              ("Access", ", ".join(dynamic["access"]))],
@@ -951,8 +961,8 @@ def reform_model() -> str:
 {limits_list([
         f"pe-microsim cannot answer {(cannot('pe-microsim'))}. A costing from it is a static costing.",
         f"The <a href=\"/obr\">OBR emulator</a> supplies the macro feedback through a reviewed reform translation, but only for {registry_terms(obr['question_types'])}, and it cannot answer {(cannot('obr-macro'))}.",
-        f"<a href=\"/olg\">og+microsim</a> goes further — {esc(dynamic['model_class'])} — but is {esc(dynamic['status'])}.",
-        f"og+microsim also cannot answer {(cannot('og+microsim'))}.",
+        f"<a href=\"/olg\">{site_name('og+microsim')}</a> goes further — {esc(dynamic['model_class'])} — but is {esc(dynamic['status'])}.",
+        f"{site_name('og+microsim')} also cannot answer {(cannot('og+microsim'))}.",
     ])}
       <p>
         Nothing here averages those answers together. They use different
@@ -985,7 +995,7 @@ def reform_run() -> str:
         Over MCP: {tool("list_reform_parameters")}, {tool("score_reform")},
         {tool("population_reform_impact")} for the population costing,
         {tool("household_reform_impact")} for a single household, and
-        {tool("dynamic_reform_impact")} for the og+microsim overlay.
+        {tool("dynamic_reform_impact")} for the {site_name("og+microsim")} overlay.
         {tool("recommend_model")} routes a question to a model, or refuses.
         <a href="/connect">Connect a client →</a>
       </p>
