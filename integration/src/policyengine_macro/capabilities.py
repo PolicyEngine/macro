@@ -645,10 +645,28 @@ def list_capabilities() -> list[dict]:
     return [{"model_id": model_id, **deepcopy(data)} for model_id, data in MODELS.items()]
 
 
+# Public site names that are not registry keys. site_id exists so pages render
+# one name per model; without the reverse mapping the alias was one-directional
+# — every page said psl-og and get_status("psl-og") raised, so a reader taking
+# the documented name into the documented API hit a hard error whose message
+# did not connect the two.
+SITE_ID_TO_KEY = {
+    model["site_id"]: key for key, model in MODELS.items() if model.get("site_id")
+}
+
+
+def resolve_model_id(model_id: str) -> str:
+    """Registry key for a registry key or a public site name."""
+    return SITE_ID_TO_KEY.get(model_id, model_id)
+
+
 def get_status(model_id: str) -> dict:
-    if model_id not in MODELS:
-        raise ValueError(f"unknown model_id {model_id!r}; choose one of {sorted(MODELS)}")
-    return {"model_id": model_id, **deepcopy(MODELS[model_id])}
+    key = resolve_model_id(model_id)
+    if key not in MODELS:
+        known = sorted(set(MODELS) | set(SITE_ID_TO_KEY))
+        raise ValueError(f"unknown model_id {model_id!r}; choose one of {known}")
+    # Echo the key, so a caller who passed a site name learns the contract id.
+    return {"model_id": key, **deepcopy(MODELS[key])}
 
 
 def recommend(

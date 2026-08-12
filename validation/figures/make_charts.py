@@ -806,8 +806,6 @@ def chart_svar_winrate():
     return "\n".join(out)
 
 
-# Order must match the order the SVGs appear in validation/index.html: the
-# substitution below is positional.
 def chart_svar_coverage():
     data = json.loads(
         (ROOT / "papers" / "boe-svar" / "figures" / "coverage_evaluation.json").read_text()

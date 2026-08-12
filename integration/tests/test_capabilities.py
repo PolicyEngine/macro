@@ -118,3 +118,27 @@ def test_every_model_has_a_real_evidence_assessment():
             assert judgement["evidence"].strip(), (
                 f"{model_id}.{dimension} has an empty evidence string"
             )
+
+
+def test_public_site_names_resolve_through_the_api():
+    """A name the site publishes must work in the API the site documents.
+
+    site_id was added so pages render one name per model, but the alias was
+    one-directional: every page said `psl-og` while `get_status("psl-og")`
+    raised, and the error listed only registry keys — so a reader who took the
+    documented name into the documented tool got a hard failure with nothing
+    connecting the two. Resolution now goes both ways, and the returned
+    model_id is the registry key, so a caller who passed a site name learns
+    the contract id.
+    """
+    for site_name, expected_key in capabilities.SITE_ID_TO_KEY.items():
+        assert capabilities.get_status(site_name)["model_id"] == expected_key
+        assert capabilities.get_status(expected_key)["model_id"] == expected_key
+
+    try:
+        capabilities.get_status("not-a-model")
+    except ValueError as error:
+        message = str(error)
+        assert "og-uk" in message and "psl-og" in message, message
+    else:
+        raise AssertionError("an unknown model_id must raise")

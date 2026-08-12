@@ -85,7 +85,11 @@
         sharpest-tested member of the suite, because for once the ground truth
         is exact rather than statistical. Three invariants carry the weight,
         all enforced in continuous integration, including four like-for-like
-        scenarios gated against vendor-generated references.
+        scenarios gated against vendor-generated references. One of the three
+        carries no weight of its own: the tracking invariant is an identity
+        <code>init_trac</code> constructs, so the evidence is the agreement
+        with the Board's <em>shocked</em> paths, where the add-factors are
+        held fixed and the solver has real work to do.
       </p>
       <p>
         Machine precision is a claim about <em>fidelity to the Fed's
@@ -103,7 +107,7 @@
       <div class="metric">
         <span class="metric-label mono">tracking invariant</span>
         <span class="metric-val">5.6e&#8722;17</span>
-        <span class="metric-note">vs LONGBASE, all 284 endos × 20 quarters; CI gate 1e&minus;8</span>
+        <span class="metric-note">vs LONGBASE, all 284 endos × 20 quarters; CI gate 1e&minus;8. An identity <code>init_trac</code> guarantees — round-off, not evidence</span>
       </div>
       <div class="metric">
         <span class="metric-label mono">shock vs pyfrbus 1.0.0</span>
@@ -136,7 +140,7 @@
       <figure class="vfig">
         <svg class="vchart" data-chart="frbus-residuals" viewBox="0 0 760 300" role="img" aria-labelledby="frbus-residuals-t frbus-residuals-d">
 <title id="frbus-residuals-t">frb-us: residuals against the Fed’s pyfrbus, log scale</title>
-<desc id="frbus-residuals-d">Horizontal bar chart on a base-10 logarithmic axis of maximum absolute residuals; shorter is closer. ours vs LONGBASE (tracking invariant): 5.6e-17; pyfrbus 1.1.1 vs LONGBASE: 1.1e-08; ours vs pyfrbus 1.0.0 (shock): 6.0e-09; ours vs pyfrbus 1.1.1 (shock): 1.4e-08; pyfrbus 1.1.1 vs 1.0.0 — the Fed’s own two releases: 1.3e-08. The framing comparison is the last row: the Federal Reserve's own two pyfrbus releases disagree with each other by as much as this implementation disagrees with either, so our agreement sits at the scale of the reference implementation's own numerical noise rather than at a chosen tolerance.</desc>
+<desc id="frbus-residuals-d">Horizontal bar chart on a base-10 logarithmic axis of maximum absolute residuals; shorter is closer. ours vs LONGBASE (identity — not evidence): 5.6e-17; pyfrbus 1.1.1 vs LONGBASE: 1.1e-08; ours vs pyfrbus 1.0.0 (shock): 6.0e-09; ours vs pyfrbus 1.1.1 (shock): 1.4e-08; pyfrbus 1.1.1 vs 1.0.0 — the Fed’s own two releases: 1.3e-08. The framing comparison is the last row: the Federal Reserve's own two pyfrbus releases disagree with each other by as much as this implementation disagrees with either, so our agreement sits at the scale of the reference implementation's own numerical noise rather than at a chosen tolerance.</desc>
 <line class="vc-grid" x1="380.0" y1="26" x2="380.0" y2="264.0"/>
 <text class="vc-tick" x="380.0" y="284.0" text-anchor="middle">1e-18</text>
 <line class="vc-grid" x1="442.5" y1="26" x2="442.5" y2="264.0"/>
@@ -149,7 +153,7 @@
 <text class="vc-tick" x="630.2" y="284.0" text-anchor="middle">1e-10</text>
 <line class="vc-grid" x1="692.7" y1="26" x2="692.7" y2="264.0"/>
 <text class="vc-tick" x="692.7" y="284.0" text-anchor="middle">1e-8</text>
-<text class="vc-lab vc-rowlab" x="366" y="55.0" text-anchor="end">ours vs LONGBASE (tracking invariant)</text>
+<text class="vc-lab vc-rowlab" x="366" y="55.0" text-anchor="end">ours vs LONGBASE (identity — not evidence)</text>
 <rect class="vc-b1" x="380" y="34.0" width="54.7" height="34"/>
 <text class="vc-val" x="442.7" y="55.0">5.6e-17</text>
 <text class="vc-lab vc-rowlab" x="366" y="103.0" text-anchor="end">pyfrbus 1.1.1 vs LONGBASE</text>
@@ -165,7 +169,7 @@
 <rect class="vc-b2" x="380" y="226.0" width="316.3" height="34"/>
 <text class="vc-val" x="704.3" y="247.0">1.3e-08</text>
 </svg>
-        <figcaption>Maximum absolute residuals, log scale — lower is closer. The bottom bar is the framing one: the Fed's own two releases disagree by as much as we disagree with either. On the tracking invariant, pyfrbus 1.1.1 reproduces LONGBASE to 1.1&times;10<sup>&minus;8</sup> against this implementation's 5.6&times;10<sup>&minus;17</sup>. Source: papers/frb-us validation tables.</figcaption>
+        <figcaption>Maximum absolute residuals, log scale — lower is closer. The bottom bar is the framing one: the Fed's own two releases disagree by as much as we disagree with either, so the three shock rows sit at the reference implementation's own noise floor. The top two bars are the tracking identity and are <strong>not</strong> a ranking: after <code>init_trac</code> the solve reproduces its input by construction, so 5.6&times;10<sup>&minus;17</sup> against pyfrbus 1.1.1's 1.1&times;10<sup>&minus;8</sup> compares two implementations' round-off, not their fidelity to the Fed's economics. Source: papers/frb-us validation tables.</figcaption>
       </figure>
       <div class="table-scroll"><table>
         <caption>Validation results against the Federal Reserve Board's own artefacts</caption>
@@ -173,8 +177,8 @@
         <tbody>
           <tr>
             <th scope="row"><strong>Tracking invariant</strong></th>
-            <td>After <code>init_trac</code>, solving the baseline must reproduce LONGBASE for all 284 endogenous variables over 2026Q1–2030Q4.</td>
-            <td>Max absolute error <strong>5.6e&minus;17</strong> — machine precision, against a 1e&minus;8 gate. The Board's own pyfrbus 1.1.1 reproduces LONGBASE to 1.1e&minus;8 on the same test.</td>
+            <td>After <code>init_trac</code>, solving the baseline must reproduce LONGBASE for all 284 endogenous variables over 2026Q1–2030Q4. <strong>This is an identity, not a comparison:</strong> <code>init_trac</code> sets each equation's add-factor to minus that equation's residual at the input data, so the solve is algebraically the identity on whatever it was tracked to, and Newton is warm-started from the row it is about to reproduce.</td>
+            <td>Max absolute error <strong>5.6e&minus;17</strong> — floating-point round-off, against a 1e&minus;8 gate. It measures re-evaluation noise, <strong>not</strong> agreement with the Fed's data or economics: the model repository's <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/tests/test_tracking.py"><code>test_tracking_invariant_holds_for_arbitrary_data</code></a> shows the identical gate passes on a scrambled baseline with every accounting identity destroyed. Read the cross-validation row below, not this one, as evidence.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Cross-validation</strong></th>
@@ -190,8 +194,17 @@
       </table></div>
       <p>
         <strong>Multipliers.</strong> Government-purchases and personal-tax
-        shocks of 1% of GDP land inside every published range they are
-        compared against — the last three rows below.
+        shocks of 1% of GDP land inside the published ranges they are compared
+        against, with one exception recorded below: the year-two
+        purchases multiplier under a pegged funds rate is
+        <strong>0.99, just below the 1.1&ndash;1.2 cross-model accommodation
+        range</strong>, and matches only the Board's looser &ldquo;roughly
+        one&rdquo; characterisation. The comparisons are also not horizon-matched
+        throughout — the year-one tax figure (0.22) is set beside a benchmark
+        the source describes as a two-year multiplier, and Ramey's survey range
+        pools empirical estimates across horizons and monetary regimes rather
+        than fixing one. Read the last three rows as plausibility bands, not as
+        a test the model passed.
       </p>
       <div class="table-scroll"><table>
         <caption>frb-us against the Fed's pyfrbus and published multiplier ranges</caption>
