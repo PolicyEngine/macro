@@ -549,9 +549,8 @@ def render_status(card: dict) -> str:
         for entry in detail["entries"]
     ]
     latest_entry = sorted(entries, key=lambda entry: entry["period"])[-1] if entries else None
-    latest_error = (
-        f"{latest_entry['abs_error']:.2f}pp" if latest_entry else "Awaiting outturn"
-    )
+    pending_card = card.get("pending_detail") or {}
+    scored_target = esc(pending_card.get("period") or "—")
     lines = [
         '      <div class="forecast-summary" aria-label="Current forecast record">',
         f"        <article><strong>{rounds}</strong><span>Archived "
@@ -560,9 +559,16 @@ def render_status(card: dict) -> str:
         f"        <article><strong>{scored}</strong><span>Scored "
         f"period{'' if scored == 1 else 's'}</span>"
         "<small>quarters whose outturn is now published and scored</small></article>",
-        f"        <article><strong>{latest_error}</strong><span>Latest absolute "
-        "error</span>"
-        "<small>latest forecast vs its outturn, percentage points</small></article>",
+        # NOT the latest error. This module's whole argument is that a
+        # headline accuracy figure derived from one observation is worse than
+        # none, and putting it in the record band — level with the round and
+        # scored counts — was the page doing exactly that, with the "one
+        # scored period is not an accuracy headline" disclaimer underneath it.
+        # The error still appears on the scored card in §02, where it sits
+        # beside its benchmarks and its caveats.
+        f"        <article><strong>{scored_target}</strong><span>Next scored "
+        "period</span>"
+        "<small>when the record next grows, not how it is doing</small></article>",
         "      </div>",
         '      <p class="forecast-next">',
     ]
@@ -626,8 +632,14 @@ def render_results(card: dict) -> str:
         if naive is not None:
             marks.append(("Naive", naive, "naive", "up"))
             verdict = "beats" if e["beats_naive"] else "does not beat"
+            # Name the benchmark. This is the DRIFTLESS walk, and §06 of the
+            # page says plainly that against a random walk WITH drift the
+            # advantage largely evaporates. Reporting a win against the weaker
+            # benchmark without saying which one it is was the page's single
+            # favourable data point resting on the comparison its own
+            # validation calls too weak for a trending series.
             naive_footer = (
-                f"<span>{verdict} naive error "
+                f"<span>{verdict} driftless-naive error "
                 f"<strong>{e['naive_abs_error']:.2f}pp</strong></span>"
             )
         official_footer = ""

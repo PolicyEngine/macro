@@ -100,15 +100,6 @@
           scores a PolicyEngine reform end to end through the static-costing
           bridge.
         </p>
-        <div class="meth-inline" aria-hidden="true">
-          <div class="meth-sec-title">hosted tools</div>
-          <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>obr_shock</code> — shock a variable, read ΔGDP per quarter</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>list_reform_variables</code> — shockable levers with units</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>score_reform</code> (<code>model="obr"</code>) — PolicyEngine reform, end to end</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>All hosted — no install, no credentials</span></div>
-          </div>
-        </div>
       </div>
 
       <div class="meth-step" id="code-2" data-step="1">
@@ -118,7 +109,7 @@
           shock a variable, list the levers, or score a reform from the
           terminal.
         </p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
           <div class="meth-sec-title">CLI equivalents</div>
           <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro obr-shock --var CGG --shock 1250
 pe-macro variables
@@ -143,7 +134,7 @@ pe-macro score --reform '{...}' --model obr</code></pre></div>
           <code>CGIPS</code> per quarter), and a £10bn austerity cut — with
           charts landing in <code>outputs/</code>.
         </p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
           <div class="meth-sec-title">install and run</div>
           <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/obr-macroeconomic-model</code></pre></div>
           <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> obr_macro <span class="kw">import</span> run_reform
@@ -173,7 +164,7 @@ results = run_reform(
           The full glossary — all 636 codes with descriptions, ONS series and
           equations — is the model package's variable and equation references.
         </p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
           <div class="meth-sec-title">levers and readouts</div>
           <div class="dial-cards">
           <div class="dial-card">
@@ -196,28 +187,18 @@ results = run_reform(
       </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">hosted tools</div>
-          <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>obr_shock</code> — shock a variable, read ΔGDP per quarter</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>list_reform_variables</code> — shockable levers with units</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>score_reform</code> (<code>model="obr"</code>) — PolicyEngine reform, end to end</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>All hosted — no install, no credentials</span></div>
-          </div>
-        </div>
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 2</span></div>
           <div class="meth-sec-title">CLI equivalents</div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro obr-shock --var CGG --shock 1250
+          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pe-macro obr-shock --var CGG --shock 1250
 pe-macro variables
 pe-macro score --reform '{...}' --model obr</code></pre></div>
         </div>
         <div class="meth-panel" data-step="2" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 3</span></div>
           <div class="meth-sec-title">install and run</div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/obr-macroeconomic-model</code></pre></div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> obr_macro <span class="kw">import</span> run_reform
+          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pip install git+https://github.com/PolicyEngine/obr-macroeconomic-model</code></pre></div>
+          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code><span class="kw">from</span> obr_macro <span class="kw">import</span> run_reform
 
 <span class="cm"># £5bn/yr government spending shock (£1.25bn per quarter)</span>
 results = run_reform(
@@ -286,8 +267,21 @@ results = run_reform(
     steps.forEach(function (step, i) {
       step.classList.toggle("active", i === active);
     });
-    panels.forEach(function (panel, i) {
-      panel.hidden = i !== active;
+    // Panels pair to steps by data-step. A step with no panel of its own
+    // keeps the nearest earlier panel pinned rather than blanking the column.
+    // Start at the FIRST panel, not -1: several pages have no panel for
+    // step 0, and seeding -1 left the sticky column empty for the whole of
+    // the opening step before popping in. Pinning the earliest panel means
+    // the column is populated from the top and only ever moves forward.
+    var want = Math.min.apply(null, panels.map(function (panel) {
+      return Number(panel.getAttribute("data-step"));
+    }));
+    panels.forEach(function (panel) {
+      var ds = Number(panel.getAttribute("data-step"));
+      if (ds <= active && ds > want) want = ds;
+    });
+    panels.forEach(function (panel) {
+      panel.hidden = Number(panel.getAttribute("data-step")) !== want;
     });
   }
   window.addEventListener("scroll", update, { passive: true });

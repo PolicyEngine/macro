@@ -75,8 +75,13 @@ def model_status(model_id, as_json):
 @click.option("--reform", required=True,
               help='PolicyEngine reform JSON, e.g. \'{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}\' '
                    "(same shape as `pe-macro population-impact`).")
+# Not a click.Choice: a Choice rejects `svar`, `frbus`, `hank` and `define`
+# with a bare usage error listing the valid names, which is exactly the
+# unhelpful message core.score_reform was given explicit refusals to replace.
+# Accepting any string and letting core refuse means a user who reasonably
+# tries --model svar is told there is no reform bridge by design, and which
+# tool to use instead. Unknown names still hit core's enum error.
 @click.option("--model", required=True,
-              type=click.Choice(list(core.SCORE_MODELS)),
               help="Scoring model: og (OG-UK steady state; slow), obr (OBR "
                    "emulator via the microsim static-costing bridge), "
                    "microsim (PolicyEngine population costing, no macro "

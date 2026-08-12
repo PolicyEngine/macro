@@ -95,21 +95,13 @@
         <p>The quickest route is the <a href="/connect">hosted MCP server</a>. Three tools reach this model: <code>forecast_uk</code> (YoY GDP-growth and CPI-inflation fan charts with 68%/90% bands), <code>latest_shocks</code> (posterior sign probabilities of each identified shock in the latest quarter), and <code>model_summary</code> (headline replication results — instant, no estimation).</p>
         <h4>Where to read the results</h4>
         <p>What each tool tells you is on the <a href="/svar">overview</a>; the estimation and identification choices behind them are on the <a href="/svar/methodology">methodology</a> page.</p>
-        <div class="meth-inline" aria-hidden="true">
-        <div class="meth-sec-title">MCP tools</div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>forecast_uk</code> — fan charts, 68%/90% bands</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>latest_shocks</code> — posterior sign probabilities</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>model_summary</code> — replication headlines, instant</span></div>
-          </div>
-        </div>
       </div>
 
       <div class="meth-step" id="run-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>CLI mirrors</h3></div>
         <h4>Same tools from the terminal</h4>
         <p>The CLI mirrors the three MCP tools one for one: <code>pe-macro forecast</code>, <code>pe-macro shocks</code>, and <code>pe-macro summary</code>. Same outputs, no MCP client required.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">CLI commands</div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro forecast   <span class="cm"># fan charts</span>
 pe-macro shocks     <span class="cm"># latest-quarter shocks</span>
@@ -123,7 +115,7 @@ pe-macro summary    <span class="cm"># replication headlines</span></code></pre>
         <p>The package installs straight from GitHub with the prepared quarterly dataset inside, so <code>boe_var.data.load_data()</code> works immediately.</p>
         <h4>All inputs are public</h4>
         <p>Every input series is public: ONS (CPI, CPI energy, real GDP), Bank of England (Bank Rate, sterling ERI), and FRED (oil, exchange rates, world components).</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">install</div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
         </div>
@@ -135,7 +127,7 @@ pe-macro summary    <span class="cm"># replication headlines</span></code></pre>
         <p>The runner scripts are for development — clone the repository to rebuild the dataset or regenerate the paper outputs.</p>
         <h4>What lands where</h4>
         <p class="opt-note">outputs land in <code>results/</code> — the replication figures (fig2–fig6), the forecast figures (fig1, fig7–fig9), and two summary reports. runtime scales with draw count; the importance weights are the expensive part — one numerical Jacobian per accepted draw.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">runner scripts</div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>python scripts/download_data.py     <span class="cm"># reassemble the public data</span>
 
@@ -149,31 +141,22 @@ python scripts/run_forecast_revision.py</code></pre></div>
       </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">Hosted MCP tools</span><span class="meth-panel-badge mono">Code 1</span></div>
-          <div class="meth-sec-title">MCP tools</div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>forecast_uk</code> — fan charts, 68%/90% bands</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>latest_shocks</code> — posterior sign probabilities</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>model_summary</code> — replication headlines, instant</span></div>
-          </div>
-        </div>
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">CLI mirrors</span><span class="meth-panel-badge mono">Code 2</span></div>
           <div class="meth-sec-title">CLI commands</div>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro forecast   <span class="cm"># fan charts</span>
+        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pe-macro forecast   <span class="cm"># fan charts</span>
 pe-macro shocks     <span class="cm"># latest-quarter shocks</span>
 pe-macro summary    <span class="cm"># replication headlines</span></code></pre></div>
         </div>
         <div class="meth-panel" data-step="2" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Install locally</span><span class="meth-panel-badge mono">Code 3</span></div>
           <div class="meth-sec-title">install</div>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
+        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
         </div>
         <div class="meth-panel" data-step="3" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Development runner scripts</span><span class="meth-panel-badge mono">Code 4</span></div>
           <div class="meth-sec-title">runner scripts</div>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>python scripts/download_data.py     <span class="cm"># reassemble the public data</span>
+        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>python scripts/download_data.py     <span class="cm"># reassemble the public data</span>
 
 <span class="cm"># the paper's core outputs: IRFs, FEVDs, shocks, historical decompositions</span>
 python scripts/run_replication.py
@@ -228,8 +211,21 @@ document.addEventListener("click", function (e) {
     steps.forEach(function (step, i) {
       step.classList.toggle("active", i === active);
     });
-    panels.forEach(function (panel, i) {
-      panel.hidden = i !== active;
+    // Panels pair to steps by data-step. A step with no panel of its own
+    // keeps the nearest earlier panel pinned rather than blanking the column.
+    // Start at the FIRST panel, not -1: several pages have no panel for
+    // step 0, and seeding -1 left the sticky column empty for the whole of
+    // the opening step before popping in. Pinning the earliest panel means
+    // the column is populated from the top and only ever moves forward.
+    var want = Math.min.apply(null, panels.map(function (panel) {
+      return Number(panel.getAttribute("data-step"));
+    }));
+    panels.forEach(function (panel) {
+      var ds = Number(panel.getAttribute("data-step"));
+      if (ds <= active && ds > want) want = ds;
+    });
+    panels.forEach(function (panel) {
+      panel.hidden = Number(panel.getAttribute("data-step")) !== want;
     });
   }
   window.addEventListener("scroll", update, { passive: true });

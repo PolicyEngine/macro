@@ -132,7 +132,7 @@ window.MathJax = {
       <p>DEFINE-UK is an ecological stock-flow consistent (E-SFC) model: DEFINE-UK 1.1, April 2026, by George, Dafermos, Nikolaidi and co-authors (<a href="https://define-model.org/define-uk">define-model.org</a>). Stock-flow consistency is an accounting discipline before it is an economic theory. Every monetary flow in the model — wages, taxes, interest, dividends, lending — leaves one sector's account and enters another's, so a transactions matrix sums to zero in every row and column; and every flow accumulates into a stock, so sector balance sheets close each period. Nothing appears from nowhere and nothing leaks out.</p>
         <h4>The ecological coupling</h4>
       <p>The <em>ecological</em> part couples that closed monetary accounting to an emissions and energy block, so climate policy and the financial system move together in one system. An emissions block splits electricity from non-electricity emissions; the components sum exactly to the total in the model's output.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">matrix identities (manual §2.2)</div>
         <div class="meth-eq"><div class="meth-eq-label">flow rows</div><div class="meth-eq-body">\(\sum_{s} T_{f,s} = 0\) — every flow leaves one sector and enters another</div></div>
         <div class="meth-eq"><div class="meth-eq-label">sector columns</div><div class="meth-eq-body">\(\sum_{f} T_{f,s} = \mathrm{LEND}_s\) — column sums give net lending</div></div>
@@ -173,7 +173,7 @@ window.MathJax = {
       <p>Households, firms, monetary financial institutions (MFIs), non-monetary financial institutions, government, the central bank, and the rest of the world — each with a full balance sheet. The balance-sheet matrix (manual §2.2 Table 2) mirrors the transactions matrix: every financial instrument row sums to zero — one sector's asset is another's liability — and each sector's column sums to its net worth.</p>
         <h4>Calibration</h4>
       <p>The model is calibrated to UK national accounting data (ONS Blue Book / UKEA), with the manual's §5 tables giving parameters and initial values.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">balance-sheet identities (manual §2.2 Table 2)</div>
         <div class="meth-eq"><div class="meth-eq-label">instrument rows</div><div class="meth-eq-body">\(\sum_{s} B_{i,s} = 0\) — one sector's asset is another's liability</div></div>
         <div class="meth-eq"><div class="meth-eq-label">sector columns</div><div class="meth-eq-body">financial rows sum to \(\mathrm{FNW}_s\); adding real assets gives \(\mathrm{NW}_s\)</div></div>
@@ -212,7 +212,7 @@ window.MathJax = {
       <p>The <strong>power-sector block</strong> carries separate fossil and renewable capital stocks: government renewable investment is triggered when non-fossil capacity falls short of a utilisation threshold relative to electricity demand, and regulation policies (new in version 1.1) can directly depreciate fossil capital — stranded assets as an explicit balance-sheet event, felt by the financial institutions that hold the claims.</p>
         <h4>What version 1.1 added</h4>
       <p>Version 1.1 (April 2026) added regulatory policies, limited forward-looking behaviour to policy announcements, direct government ownership of non-fossil power capital, and a green sovereign bond instrument.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">the two UK blocks</div>
         <div class="meth-eq"><div class="meth-eq-label">housing</div><div class="meth-eq-body">stock tracked by energy efficiency; retrofit policy works through the stock</div></div>
         <div class="meth-eq"><div class="meth-eq-label">power</div><div class="meth-eq-body">separate fossil and renewable capital stocks; utilisation threshold triggers renewable investment</div></div>
@@ -244,7 +244,7 @@ window.MathJax = {
       <p>DEFINE-UK is closed demand-led: output adjusts to aggregate demand rather than being pinned to a supply-side potential path. That is the standard post-Keynesian SFC closure, and it has a direct, observable consequence — fiscal expansions are not crowded out by an assumed return to potential, so fiscal multipliers come out larger than in supply-constrained models like the <a href="/obr">OBR emulator</a>.</p>
         <h4>Measured, not asserted</h4>
       <p>We measure this rather than assert it: our own computation of the model's cumulative green-public-investment multiplier is <strong>1.78</strong>, against IMF green-spending estimates of 1.1&ndash;1.5 and an OBR capital-spending impact multiplier of &asymp;1.0. Above the official range, but explicably so given the closure — and every surface that quotes a DEFINE-UK delta carries the demand-led caveat. The full comparison is on the <a href="/define/validation">validation page</a>.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">closure and multipliers</div>
         <div class="meth-eq"><div class="meth-eq-label">closure</div><div class="meth-eq-body">demand-led: \(Y\) adjusts to aggregate demand, not a potential path</div></div>
         <div class="meth-eq"><div class="meth-eq-label">our computation</div><div class="meth-eq-body">cumulative green-public-investment multiplier <strong>1.78</strong></div></div>
@@ -276,7 +276,7 @@ window.MathJax = {
           What that gate does and does not establish is spelled out on the
           <a href="/define/validation">validation page</a>.
         </p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">the switch sets</div>
         <div class="meth-eq"><div class="meth-eq-label">fossil-fuel ban</div><div class="meth-eq-body">ban flag + its capacity and investment timings</div></div>
         <div class="meth-eq"><div class="meth-eq-label">power subsidy</div><div class="meth-eq-body"><code>POWER_SUB</code> alone</div></div>
@@ -318,7 +318,7 @@ window.MathJax = {
       <p><code>pe-macro define-scenarios</code> and <code>pe-macro define-scenario</code> return annualised scenario-minus-baseline delta paths only, framed with mandatory caveats — never levels, because the baseline's calibration gap to ONS/DESNZ/OBR actuals is computed and material. The hosted MCP tools return run instructions instead of results, because the unlicensed upstream is never hosted. <code>score_reform</code> will not accept this model.</p>
         <h4>The clean-room path to hosting</h4>
       <p>The path to hosting is a <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">clean-room Python reimplementation</a> of the published Model Manual — the same adapted-model approach as the OBR emulator. The protocol: the manual is the specification, and the upstream run is a numerical oracle only — its outputs are compared against ours, but its source code is never read to write equations, and every equation must carry a reference to the manual section and equation number it implements. Five milestones run from the accounting core to the full policy scenarios; milestone 1 — the §2.2 transactions and balance-sheet matrices on the §5 initial values — passed with 27 identity tests, including one documented inconsistency in the manual itself (Table 6 omits a dividend term of Eq. 383 from the interbank-lending row, which the tests pin exactly rather than paper over).</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">adapter architecture</div>
         <div class="meth-eq"><div class="meth-eq-label">pinned commit</div><div class="meth-eq-body">runtime fetch at <code>846081a</code>; executed unmodified, in R; nothing vendored or hosted</div></div>
         <div class="meth-eq"><div class="meth-eq-label">cached run</div><div class="meth-eq-body">R 4.3.0 · 151 output files across all four scenario blocks</div></div>
