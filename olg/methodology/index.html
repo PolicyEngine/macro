@@ -126,17 +126,12 @@ window.MathJax = {
       <h4>Age cohorts</h4>
       <p>OG-Core models S economically active age cohorts (typically 80, ages 21 to 100). Each period a new cohort is born and the oldest dies with some probability; the age distribution evolves with fertility, mortality, and immigration, reaching a stationary distribution in the long run.</p>
       <h4>Ability types</h4>
-      <p>Each cohort splits into J ability types with distinct permanent labour productivity. High-ability types earn more per hour and typically save more, so reforms hit the income distribution, not just the average.</p>
+      <p>Each cohort splits into J ability types with distinct permanent labour productivity. Type is assigned at birth and never changes, and each type carries its own discount factor \(\beta_j\), bequest-motive weight \(\chi^b_j\), and productivity profile \(e_{j,s}\) — so productivity varies both across types and by age within a type. High-ability types earn more per hour and typically save more, so reforms hit the income distribution, not just the average.</p>
         <div class="meth-inline" aria-hidden="true">
         <div class="meth-sec-title">population</div>
         <div class="meth-eq"><div class="meth-eq-label">age cohorts</div><div class="meth-eq-body">\(s = E+1, \ldots, E+S \quad \text{(economically active)}\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">ability types</div><div class="meth-eq-body">\(j = 1, \ldots, J \quad \text{with probability } \lambda_j\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">population</div><div class="meth-eq-body">\(\omega_{s,t}\) evolves with fertility, mortality, immigration</div></div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Each type has its own \(\beta_j\), \(\chi^b_j\), \(e_{j,s}\)</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Productivity \(e_{j,s}\) varies by age and type</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Type assigned at birth, permanent</span></div>
-          </div>
         </div>
       </div>
 
@@ -227,11 +222,6 @@ window.MathJax = {
         <div class="meth-eq"><div class="meth-eq-label">CES production</div><div class="meth-eq-body">\(Y_m = Z_m\bigl[\gamma K_m^\rho + \gamma_g K_{g,m}^\rho + (1\!-\!\gamma\!-\!\gamma_g)(e^{g_y t}L_m)^\rho\bigr]^{1/\rho}\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">wage</div><div class="meth-eq-body">\(w = p_m \cdot \text{MPL}_m\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">rental rate</div><div class="meth-eq-body">\(r = (1-\tau^{\text{corp}})\,p_m\,\text{MPK}_m - \delta + \tau^{\text{corp}}\delta^\tau + \tau^{\text{inv}}\delta\)</div></div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>\(M\) industries, perfect competition</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Public capital \(K_g\) generates rents</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Nests Cobb-Douglas when \(\varepsilon \to 1\)</span></div>
-          </div>
         </div>
       </div>
 
@@ -268,13 +258,6 @@ window.MathJax = {
         <div class="meth-inline" aria-hidden="true">
         <div class="meth-sec-title">government budget</div>
         <p>\[ D_{t+1} + \text{Rev}_t = (1+r_{\text{gov}})D_t + G + I_g + \text{Pen} + TR + UBI \]</p>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Income: Gouveia-Strauss from PolicyEngine</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Consumption: VAT + excise</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Wealth: progressive 3-parameter</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Corporate: flat rate by industry</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Bequest: on inherited wealth</span></div>
-          </div>
         </div>
       </div>
 
@@ -390,7 +373,7 @@ window.MathJax = {
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
         <h4>From theory to UK data</h4>
-      <p>OG-Core supplies the theory; the OG-UK calibration layer anchors every parameter to official UK data: depreciation from ONS capital-stocks data (<strong>6.5%/yr</strong>), potential-output growth from the OBR EFO (<strong>1.1%/yr</strong>), the discount factor matched to the ONS household saving ratio, the world interest rate to Bank of England gilt yields, and a Frisch labour-supply elasticity of <strong>0.35–0.4</strong> (Blundell, MaCurdy &amp; Meghir). Demographics — population by age, mortality, immigration — come from UN data; the state pension age matches current UK rules.</p>
+      <p>OG-Core supplies the theory; the OG-UK calibration layer anchors every parameter to official UK data: depreciation from ONS capital-stocks data (<strong>6.5%/yr</strong>), potential-output growth from the OBR EFO (<strong>1.1%/yr</strong>), the discount factor matched to the ONS household saving ratio, the world interest rate to Bank of England gilt yields, and a Frisch labour-supply elasticity of <strong>0.35–0.4</strong> (Blundell, MaCurdy &amp; Meghir). Demographics — population by age, mortality, immigration — come from the UN World Population Prospects (country&nbsp;826). Tax rates and the state pension age come from HMRC and GOV.UK and match current UK rules, and the debt-to-GDP target the fiscal closure rule steers towards comes from the OBR's fiscal forecasts.</p>
       <h4>Tax function estimation</h4>
       <p>Taxes are not stylized wedges. OG-UK runs <a href="/pe">PolicyEngine-UK</a> on household microdata under baseline and reform, computes marginal rates by perturbation — add £1 of employment (or dividend) income per adult, rerun, read the change in net income — and fits three-parameter <strong>Gouveia–Strauss</strong> schedules to the effective-rate microdata for each year of a three-year budget window. Marginal-rate schedules are analytical derivatives of the same fitted parameters, so ETRs and MTRs are consistent by construction; the model sees the reform's true shape across the income and age distribution.</p>
       <h4>Real-world mapping</h4>
@@ -399,13 +382,6 @@ window.MathJax = {
         <div class="meth-sec-title">Gouveia-Strauss tax function</div>
         <div class="meth-eq"><div class="meth-eq-label">effective rate</div><div class="meth-eq-body">\(\text{ETR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-1/\phi_1}\Bigr]\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">marginal (analytical)</div><div class="meth-eq-body">\(\text{MTR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-(1+\phi_1)/\phi_1}\Bigr]\)</div></div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>ONS: GDP, national accounts anchor</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>OBR: fiscal forecasts, debt target</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>HMRC/GOV.UK: tax rates, state pension age</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>UN WPP: demographics (country 826)</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>PolicyEngine: tax function estimation</span></div>
-          </div>
         </div>
       </div>
 
@@ -439,6 +415,17 @@ window.MathJax = {
       <p>The two can tell different stories. A reform that raises revenue statically may raise less in practice as higher rates reduce labour supply and investment; one that costs revenue upfront might pay for itself through extra activity. OG-UK captures both dynamics.</p>
       <h4>Year-by-year transition paths</h4>
       <p>Rather than comparing two steady states, the transition path shows the <strong>year-by-year adjustment</strong> — how GDP dips in the first years, how interest rates respond, when revenue stabilises — on paths that map onto OBR forecast horizons.</p>
+      <h4>What the dynamic model adds</h4>
+      <p>Over a static score, five things:</p>
+      <ul>
+        <li><strong>Endogenous GDP, wages and interest rates</strong> — prices adjust instead of staying fixed.</li>
+        <li><strong>Labour-supply and savings responses</strong> — households re-optimise hours worked and asset accumulation.</li>
+        <li><strong>Year-by-year transition paths</strong>, rather than a comparison of two steady states.</li>
+        <li><strong>Generational incidence</strong> — age-varying impacts, so a reform's burden can be traced across cohorts.</li>
+        <li><strong>Fiscal sustainability projections</strong> — the debt path a reform implies under the closure rule.</li>
+      </ul>
+      <h4>Active development</h4>
+      <p>Three strands are still being built out: the multi-industry calibration, refinement of the tax functions, and OBR-grounded transition charts.</p>
       <h4>What the model does not capture</h4>
       <p>OG-UK inherits the simplifications of structural macro models. Caveats for reading its outputs:</p>
       <ul>
@@ -449,22 +436,6 @@ window.MathJax = {
         <li><strong>Truncated horizon.</strong> The default 60-period transition assumes the steady state arrives by year 60; longer-run effects collapse into the steady-state anchor.</li>
       </ul>
       <p>These are tractability choices, not bugs — worth knowing when reading the <a href="/olg#showcase">Showcase</a> charts.</p>
-        <div class="meth-inline" aria-hidden="true">
-        <div class="meth-sec-title">what OG-UK adds</div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Endogenous GDP, wages, interest rates</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Labour supply and savings responses</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Year-by-year transition paths</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Generational incidence (age-varying impacts)</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Fiscal sustainability projections</span></div>
-          </div>
-        <div class="meth-sec-title">active development</div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Multi-industry calibration</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Tax function refinement</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>OBR-grounded transition charts</span></div>
-          </div>
-        </div>
       </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">
@@ -474,11 +445,6 @@ window.MathJax = {
         <div class="meth-eq"><div class="meth-eq-label">age cohorts</div><div class="meth-eq-body">\(s = E+1, \ldots, E+S \quad \text{(economically active)}\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">ability types</div><div class="meth-eq-body">\(j = 1, \ldots, J \quad \text{with probability } \lambda_j\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">population</div><div class="meth-eq-body">\(\omega_{s,t}\) evolves with fertility, mortality, immigration</div></div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Each type has its own \(\beta_j\), \(\chi^b_j\), \(e_{j,s}\)</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Productivity \(e_{j,s}\) varies by age and type</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Type assigned at birth, permanent</span></div>
-          </div>
         </div>
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Household decisions</span><span class="meth-panel-badge mono">Step 2</span></div>
@@ -495,23 +461,11 @@ window.MathJax = {
         <div class="meth-eq"><div class="meth-eq-label">CES production</div><div class="meth-eq-body">\(Y_m = Z_m\bigl[\gamma K_m^\rho + \gamma_g K_{g,m}^\rho + (1\!-\!\gamma\!-\!\gamma_g)(e^{g_y t}L_m)^\rho\bigr]^{1/\rho}\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">wage</div><div class="meth-eq-body">\(w = p_m \cdot \text{MPL}_m\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">rental rate</div><div class="meth-eq-body">\(r = (1-\tau^{\text{corp}})\,p_m\,\text{MPK}_m - \delta + \tau^{\text{corp}}\delta^\tau + \tau^{\text{inv}}\delta\)</div></div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>\(M\) industries, perfect competition</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Public capital \(K_g\) generates rents</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Nests Cobb-Douglas when \(\varepsilon \to 1\)</span></div>
-          </div>
         </div>
         <div class="meth-panel" data-step="3" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Government</span><span class="meth-panel-badge mono">Step 4</span></div>
           <div class="meth-sec-title">government budget</div>
         <p>\[ D_{t+1} + \text{Rev}_t = (1+r_{\text{gov}})D_t + G + I_g + \text{Pen} + TR + UBI \]</p>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Income: Gouveia-Strauss from PolicyEngine</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Consumption: VAT + excise</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Wealth: progressive 3-parameter</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Corporate: flat rate by industry</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Bequest: on inherited wealth</span></div>
-          </div>
         </div>
         <div class="meth-panel" data-step="4" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Market clearing and equilibrium</span><span class="meth-panel-badge mono">Step 5</span></div>
@@ -534,30 +488,6 @@ window.MathJax = {
           <div class="meth-sec-title">Gouveia-Strauss tax function</div>
         <div class="meth-eq"><div class="meth-eq-label">effective rate</div><div class="meth-eq-body">\(\text{ETR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-1/\phi_1}\Bigr]\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">marginal (analytical)</div><div class="meth-eq-body">\(\text{MTR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-(1+\phi_1)/\phi_1}\Bigr]\)</div></div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>ONS: GDP, national accounts anchor</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>OBR: fiscal forecasts, debt target</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>HMRC/GOV.UK: tax rates, state pension age</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>UN WPP: demographics (country 826)</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>PolicyEngine: tax function estimation</span></div>
-          </div>
-        </div>
-        <div class="meth-panel" data-step="7" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">What this enables</span><span class="meth-panel-badge mono">Step 8</span></div>
-          <div class="meth-sec-title">what OG-UK adds</div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Endogenous GDP, wages, interest rates</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Labour supply and savings responses</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Year-by-year transition paths</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Generational incidence (age-varying impacts)</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Fiscal sustainability projections</span></div>
-          </div>
-        <div class="meth-sec-title">active development</div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Multi-industry calibration</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Tax function refinement</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>OBR-grounded transition charts</span></div>
-          </div>
         </div>
       </aside>
     </div>
@@ -606,8 +536,15 @@ window.MathJax = {
     steps.forEach(function (step, i) {
       step.classList.toggle("active", i === active);
     });
-    panels.forEach(function (panel, i) {
-      panel.hidden = i !== active;
+    // Panels pair to steps by data-step. A step with no panel of its own
+    // keeps the nearest earlier panel pinned rather than blanking the column.
+    var want = -1;
+    panels.forEach(function (panel) {
+      var ds = Number(panel.getAttribute("data-step"));
+      if (ds <= active && ds > want) want = ds;
+    });
+    panels.forEach(function (panel) {
+      panel.hidden = Number(panel.getAttribute("data-step")) !== want;
     });
   }
   window.addEventListener("scroll", update, { passive: true });

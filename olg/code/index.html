@@ -446,15 +446,6 @@ base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
           <code>plot.py</code>). Full API reference and theory documentation:
           <a href="https://pslmodels.github.io/OG-UK">pslmodels.github.io/OG-UK</a>.
         </p>
-        <div class="meth-inline" aria-hidden="true">
-          <div class="meth-sec-title">where the code lives</div>
-          <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Six runnable files under <a href="/olg/code/01_install.sh">/olg/code/</a></span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>CLI: <code>pe-macro og-baseline</code>, <code>pe-macro og-score</code> (steady state only)</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Upstream examples: <a href="https://github.com/PSLmodels/OG-UK/tree/main/examples">OG-UK/examples</a></span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Docs: <a href="https://pslmodels.github.io/OG-UK">pslmodels.github.io/OG-UK</a></span></div>
-          </div>
-        </div>
       </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">
@@ -586,16 +577,6 @@ base_tp.r, reform_tp.r    # baseline / reform r(t)</code></pre></div>
 )</code></pre></div>
           <p class="opt-note mono"><a href="/olg/code/06_multi_sector.py">06_multi_sector.py</a></p>
         </div>
-        <div class="meth-panel" data-step="6" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Where to go next</span><span class="meth-panel-badge mono">Step 7</span></div>
-          <div class="meth-sec-title">where the code lives</div>
-          <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Six runnable files under <a href="/olg/code/01_install.sh">/olg/code/</a></span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>CLI: <code>pe-macro og-baseline</code>, <code>pe-macro og-score</code> (steady state only)</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Upstream examples: <a href="https://github.com/PSLmodels/OG-UK/tree/main/examples">OG-UK/examples</a></span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Docs: <a href="https://pslmodels.github.io/OG-UK">pslmodels.github.io/OG-UK</a></span></div>
-          </div>
-        </div>
       </aside>
     </div>
   </section>
@@ -642,8 +623,15 @@ document.addEventListener("click", function (e) {
     steps.forEach(function (step, i) {
       step.classList.toggle("active", i === active);
     });
-    panels.forEach(function (panel, i) {
-      panel.hidden = i !== active;
+    // Panels pair to steps by data-step. A step with no panel of its own
+    // keeps the nearest earlier panel pinned rather than blanking the column.
+    var want = -1;
+    panels.forEach(function (panel) {
+      var ds = Number(panel.getAttribute("data-step"));
+      if (ds <= active && ds > want) want = ds;
+    });
+    panels.forEach(function (panel) {
+      panel.hidden = Number(panel.getAttribute("data-step")) !== want;
     });
   }
   window.addEventListener("scroll", update, { passive: true });

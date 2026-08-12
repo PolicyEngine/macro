@@ -110,32 +110,14 @@ pe-macro frbus-summary</code></pre></div>
         <p><code>rffintay_aerr</code> is in percentage points (1.0 = a 100bp tightening), but spending levers such as <code>egfe_aerr</code> are in <strong>log points of quarterly growth</strong>, not billions of dollars — a dollar-sized number there diverges the solver.</p>
         <h4>Each rule reads its own add-error</h4>
         <p><code>rffintay_aerr</code> works only under <code>inertial_taylor</code>; under <code>taylor</code> it is rejected with a pointer to <code>rfftay_aerr</code> rather than silently returning all-zero responses.</p>
-        <div class="meth-inline" aria-hidden="true">
-        <div class="meth-sec-title">before you shock</div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>rffintay_aerr</code>: percentage points — 1.0 = 100bp</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>egfe_aerr</code>: log points of quarterly growth, never dollars</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>rffintay_aerr</code> pairs with <code>inertial_taylor</code> only</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>under <code>taylor</code>, use <code>rfftay_aerr</code> — mismatch is rejected, not zeroed</span></div>
-          </div>
-        </div>
       </div>
 
       <div class="meth-step" id="code-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Choose the policy rule</h3></div>
         <h4>Usually the point of the exercise</h4>
-        <p><code>frbus_shock</code> takes a <code>policy_rule</code>: <code>inertial_taylor</code> (the default, the LONGBASE rule and the one the validation numbers use), <code>taylor</code>, or <code>fixed_funds_rate</code>, which holds the funds rate on its baseline path so there is no endogenous monetary offset.</p>
+        <p><code>frbus_shock</code> takes a <code>policy_rule</code>: <code>inertial_taylor</code> (the default, the LONGBASE rule and the one the validation numbers use), <code>taylor</code> (the non-inertial variant), or <code>fixed_funds_rate</code>, which holds the funds rate on its baseline path so there is no endogenous monetary offset.</p>
         <h4>Why it matters</h4>
         <p>A four-quarter federal-purchases shock of 0.01 log points peaks higher on real GDP with the funds rate fixed — and the price-level response is larger still.</p>
-        <div class="meth-inline" aria-hidden="true">
-        <div class="meth-sec-title">policy_rule options</div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>inertial_taylor</code> — default, LONGBASE rule, validation baseline</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>taylor</code> — non-inertial variant</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>fixed_funds_rate</code> — no endogenous monetary offset</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>fiscal shocks peak higher with the funds rate fixed</span></div>
-          </div>
-        </div>
       </div>
 
       <div class="meth-step" id="code-4" data-step="3">
@@ -210,26 +192,6 @@ sim = model.solve(start, end, with_adds)
           <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-variables
 pe-macro frbus-shock --var rffintay_aerr --shock 1.0
 pe-macro frbus-summary</code></pre></div>
-        </div>
-        <div class="meth-panel" data-step="1" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Two traps</span><span class="meth-panel-badge mono">Step 2</span></div>
-          <div class="meth-sec-title">before you shock</div>
-          <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>rffintay_aerr</code>: percentage points — 1.0 = 100bp</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>egfe_aerr</code>: log points of quarterly growth, never dollars</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>rffintay_aerr</code> pairs with <code>inertial_taylor</code> only</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>under <code>taylor</code>, use <code>rfftay_aerr</code> — mismatch is rejected, not zeroed</span></div>
-          </div>
-        </div>
-        <div class="meth-panel" data-step="2" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Choose the policy rule</span><span class="meth-panel-badge mono">Step 3</span></div>
-          <div class="meth-sec-title">policy_rule options</div>
-          <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>inertial_taylor</code> — default, LONGBASE rule, validation baseline</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>taylor</code> — non-inertial variant</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>fixed_funds_rate</code> — no endogenous monetary offset</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>fiscal shocks peak higher with the funds rate fixed</span></div>
-          </div>
         </div>
         <div class="meth-panel" data-step="3" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Install the package</span><span class="meth-panel-badge mono">Step 4</span></div>
@@ -308,8 +270,15 @@ document.addEventListener("click", function (e) {
     steps.forEach(function (step, i) {
       step.classList.toggle("active", i === active);
     });
-    panels.forEach(function (panel, i) {
-      panel.hidden = i !== active;
+    // Panels pair to steps by data-step. A step with no panel of its own
+    // keeps the nearest earlier panel pinned rather than blanking the column.
+    var want = -1;
+    panels.forEach(function (panel) {
+      var ds = Number(panel.getAttribute("data-step"));
+      if (ds <= active && ds > want) want = ds;
+    });
+    panels.forEach(function (panel) {
+      panel.hidden = Number(panel.getAttribute("data-step")) !== want;
     });
   }
   window.addEventListener("scroll", update, { passive: true });

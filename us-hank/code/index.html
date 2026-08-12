@@ -96,14 +96,6 @@
         <p>Quickest is the <a href="/connect">hosted MCP server</a>: <code>hank_shock</code> runs a stylized shock, optionally with the distributional block; <code>hank_summary</code> lists shock kinds, units, variants, and scope limits — instant, no solve.</p>
         <h4>Cold vs warm</h4>
         <p>The first call per variant pays the steady-state and Jacobian solves, roughly <strong>18 seconds cold</strong>; both are cached, so warm calls are effectively instant.</p>
-        <div class="meth-inline" aria-hidden="true">
-        <div class="meth-sec-title">hosted MCP tools</div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>hank_shock</code> — run a stylized shock, optional distributional block</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>hank_summary</code> — shock kinds, units, variants, scope limits</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>~18s cold per variant, then cached and instant</span></div>
-          </div>
-        </div>
       </div>
 
       <div class="meth-step" id="code-2" data-step="1">
@@ -123,16 +115,6 @@ pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6 --distribut
         <p><code>monetary</code>: level change in the <em>quarterly</em> policy rate (&minus;0.0025 = a 25bp easing); <code>fiscal_spending</code>: level change in G (steady-state output is 1, so 0.01 = 1% of GDP); <code>productivity</code>: level change in TFP.</p>
         <h4>Two variants</h4>
         <p><code>variant</code> selects the paper's <code>two_asset</code> model (the default) or a fast <code>one_asset</code> textbook variant — no capital, so no investment response, and monetary/productivity shocks only.</p>
-        <div class="meth-inline" aria-hidden="true">
-        <div class="meth-sec-title">shock kinds and units</div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>monetary</code> — quarterly policy rate level (&minus;0.0025 = 25bp easing)</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>fiscal_spending</code> — level change in G (0.01 = 1% of GDP)</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>productivity</code> — level change in TFP</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>variant</code> — <code>two_asset</code> (default) or fast <code>one_asset</code></span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>one_asset</code>: no capital, monetary/productivity only</span></div>
-          </div>
-        </div>
       </div>
 
       <div class="meth-step" id="code-4" data-step="3">
@@ -157,31 +139,11 @@ irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0
       </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">Ask the hosted server</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">hosted MCP tools</div>
-          <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>hank_shock</code> — run a stylized shock, optional distributional block</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>hank_summary</code> — shock kinds, units, variants, scope limits</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>~18s cold per variant, then cached and instant</span></div>
-          </div>
-        </div>
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Or use the CLI</span><span class="meth-panel-badge mono">Step 2</span></div>
           <div class="meth-sec-title">pe-macro CLI</div>
           <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro hank-summary
 pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6 --distribution</code></pre></div>
-        </div>
-        <div class="meth-panel" data-step="2" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Know the units and variants</span><span class="meth-panel-badge mono">Step 3</span></div>
-          <div class="meth-sec-title">shock kinds and units</div>
-          <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>monetary</code> — quarterly policy rate level (&minus;0.0025 = 25bp easing)</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>fiscal_spending</code> — level change in G (0.01 = 1% of GDP)</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>productivity</code> — level change in TFP</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>variant</code> — <code>two_asset</code> (default) or fast <code>one_asset</code></span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>one_asset</code>: no capital, monetary/productivity only</span></div>
-          </div>
         </div>
         <div class="meth-panel" data-step="3" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Install and script it</span><span class="meth-panel-badge mono">Step 4</span></div>
@@ -233,8 +195,15 @@ irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0
     steps.forEach(function (step, i) {
       step.classList.toggle("active", i === active);
     });
-    panels.forEach(function (panel, i) {
-      panel.hidden = i !== active;
+    // Panels pair to steps by data-step. A step with no panel of its own
+    // keeps the nearest earlier panel pinned rather than blanking the column.
+    var want = -1;
+    panels.forEach(function (panel) {
+      var ds = Number(panel.getAttribute("data-step"));
+      if (ds <= active && ds > want) want = ds;
+    });
+    panels.forEach(function (panel) {
+      panel.hidden = Number(panel.getAttribute("data-step")) !== want;
     });
   }
   window.addEventListener("scroll", update, { passive: true });

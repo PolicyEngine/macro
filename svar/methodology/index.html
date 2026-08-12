@@ -140,10 +140,6 @@ window.MathJax = {
         <div class="meth-eq"><div class="meth-eq-label">UK block</div><div class="meth-eq-body">Bank Rate · sterling exchange-rate index · CPI · CPI energy · real GDP</div></div>
         <div class="meth-eq"><div class="meth-eq-label">sample</div><div class="meth-eq-body">1992Q1–2025Q1, in levels, \(p = 4\) lags</div></div>
         <div class="meth-eq"><div class="meth-eq-label">pandemic</div><div class="meth-eq-body">exogenous Covid dummies, 2020Q1–2021Q2</div></div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Hosted forecast conditions on data through 2026Q1</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Coefficients keep the 2025Q1 estimation endpoint</span></div>
-          </div>
         </div>
       </div>
 
@@ -178,17 +174,13 @@ window.MathJax = {
         <h4>The prior</h4>
       <p>Estimation is Bayesian with a <strong>Minnesota (normal-inverse-Wishart) prior</strong> plus sum-of-coefficients and dummy-initial-observation priors — the framework of <a href="https://doi.org/10.1162/REST_a_00483">Giannone, Lenza &amp; Primiceri (2015)</a>.</p>
         <h4>The posterior</h4>
-      <p>The output is a posterior over the reduced-form coefficients \(\Pi\) and error covariance \(\Sigma\); every downstream object — impulse responses, decompositions, fan charts — is a posterior distribution, not a point estimate.</p>
+      <p>The output is a posterior over the reduced-form coefficients \(\Pi\) and error covariance \(\Sigma\); every downstream object — impulse responses, decompositions, fan charts — is a posterior distribution, not a point estimate, and every one is reported with credible bands.</p>
         <div class="meth-inline" aria-hidden="true">
         <div class="meth-sec-title">priors</div>
         <div class="meth-eq"><div class="meth-eq-label">reduced form</div><div class="meth-eq-body">\(y_t = c + \Pi_1 y_{t-1} + \cdots + \Pi_p y_{t-p} + u_t, \quad p = 4\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">main prior</div><div class="meth-eq-body">Minnesota (normal-inverse-Wishart) on \((\Pi, \Sigma)\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">additional priors</div><div class="meth-eq-body">sum-of-coefficients · dummy-initial-observation</div></div>
         <div class="meth-eq"><div class="meth-eq-label">framework</div><div class="meth-eq-body">Giannone, Lenza &amp; Primiceri (2015)</div></div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Posterior over \((\Pi, \Sigma)\), not point estimates</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>All outputs carry credible bands</span></div>
-          </div>
         </div>
       </div>
 
@@ -232,10 +224,6 @@ window.MathJax = {
         <div class="meth-eq"><div class="meth-eq-label">sign restrictions</div><div class="meth-eq-body">impact signs name the shocks (Arias et al. 2018)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">six named shocks</div><div class="meth-eq-body">world demand · world energy · world supply · UK demand · UK supply · UK monetary policy</div></div>
         <div class="meth-eq"><div class="meth-eq-label">residual</div><div class="meth-eq-body">two unidentified shocks absorb remaining volatility</div></div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Importance weights correct sampler non-uniformity</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Chan–Matthes–Yu (2025) permutation search cuts rejections</span></div>
-          </div>
         </div>
       </div>
 
@@ -268,10 +256,6 @@ window.MathJax = {
         <div class="meth-eq"><div class="meth-eq-label">effective sample size</div><div class="meth-eq-body">355.9 (importance-weighted)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">hosted default</div><div class="meth-eq-body">2,000 draws &rarr; 135 accepted, ESS 65.3</div></div>
         <div class="meth-eq"><div class="meth-eq-label">published chart</div><div class="meth-eq-body">5,600 draws &rarr; 385 accepted, ESS 176.3</div></div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Medians and bands correct, noisier than the paper's</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Hosted run conditions on the 2026Q1 vintage</span></div>
-          </div>
         </div>
       </div>
 
@@ -301,17 +285,13 @@ window.MathJax = {
           bounds swapped — high growth means low unemployment). The bands
           carry GDP-forecast uncertainty only, no regression residual uncertainty,
           so they are a lower bound on the true uncertainty. In the 73-origin
-          rolling test the published path is capped at four quarters, where
-          the satellite stops beating a no-change benchmark.
+          rolling test (origins from 2005Q1 to 2023Q1) the published path is
+          capped at four quarters, where the satellite stops beating a
+          no-change benchmark.
         </p>
         <div class="meth-inline" aria-hidden="true">
           <div class="meth-sec-title">the regression</div>
           <div class="meth-eq"><div class="meth-eq-label">the mapping (dynamic)</div><div class="meth-eq-body">\(\Delta u_t = \alpha + \beta\, g_t + \gamma\, \Delta u_{t-1} + \varepsilon_t\)</div></div>
-          <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>OLS on 1992Q1&ndash;2025Q1; furlough quarters 2020Q1&ndash;2021Q2 dummied out (&beta; attenuates ~3&times; otherwise)</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Monotone mapping: GDP bands pass through with bounds swapped; GDP uncertainty only — a lower bound</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>73-origin rolling test (2005Q1&ndash;2023Q1); published path capped at 4 quarters</span></div>
-          </div>
         </div>
       </div>
       </div>
@@ -323,10 +303,6 @@ window.MathJax = {
         <div class="meth-eq"><div class="meth-eq-label">UK block</div><div class="meth-eq-body">Bank Rate · sterling exchange-rate index · CPI · CPI energy · real GDP</div></div>
         <div class="meth-eq"><div class="meth-eq-label">sample</div><div class="meth-eq-body">1992Q1–2025Q1, in levels, \(p = 4\) lags</div></div>
         <div class="meth-eq"><div class="meth-eq-label">pandemic</div><div class="meth-eq-body">exogenous Covid dummies, 2020Q1–2021Q2</div></div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Hosted forecast conditions on data through 2026Q1</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Coefficients keep the 2025Q1 estimation endpoint</span></div>
-          </div>
         </div>
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Bayesian estimation</span><span class="meth-panel-badge mono">Step 2</span></div>
@@ -335,10 +311,6 @@ window.MathJax = {
         <div class="meth-eq"><div class="meth-eq-label">main prior</div><div class="meth-eq-body">Minnesota (normal-inverse-Wishart) on \((\Pi, \Sigma)\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">additional priors</div><div class="meth-eq-body">sum-of-coefficients · dummy-initial-observation</div></div>
         <div class="meth-eq"><div class="meth-eq-label">framework</div><div class="meth-eq-body">Giannone, Lenza &amp; Primiceri (2015)</div></div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Posterior over \((\Pi, \Sigma)\), not point estimates</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>All outputs carry credible bands</span></div>
-          </div>
         </div>
         <div class="meth-panel" data-step="2" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Identification: naming the shocks</span><span class="meth-panel-badge mono">Step 3</span></div>
@@ -347,10 +319,6 @@ window.MathJax = {
         <div class="meth-eq"><div class="meth-eq-label">sign restrictions</div><div class="meth-eq-body">impact signs name the shocks (Arias et al. 2018)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">six named shocks</div><div class="meth-eq-body">world demand · world energy · world supply · UK demand · UK supply · UK monetary policy</div></div>
         <div class="meth-eq"><div class="meth-eq-label">residual</div><div class="meth-eq-body">two unidentified shocks absorb remaining volatility</div></div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Importance weights correct sampler non-uniformity</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Chan–Matthes–Yu (2025) permutation search cuts rejections</span></div>
-          </div>
         </div>
         <div class="meth-panel" data-step="3" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Sampling: draws and acceptance</span><span class="meth-panel-badge mono">Step 4</span></div>
@@ -359,20 +327,11 @@ window.MathJax = {
         <div class="meth-eq"><div class="meth-eq-label">effective sample size</div><div class="meth-eq-body">355.9 (importance-weighted)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">hosted default</div><div class="meth-eq-body">2,000 draws &rarr; 135 accepted, ESS 65.3</div></div>
         <div class="meth-eq"><div class="meth-eq-label">published chart</div><div class="meth-eq-body">5,600 draws &rarr; 385 accepted, ESS 176.3</div></div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Medians and bands correct, noisier than the paper's</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Hosted run conditions on the 2026Q1 vintage</span></div>
-          </div>
         </div>
               <div class="meth-panel" data-step="4" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">The svar-unemployment satellite</span><span class="meth-panel-badge mono">Step 5</span></div>
           <div class="meth-sec-title">the regression</div>
           <div class="meth-eq"><div class="meth-eq-label">the mapping (dynamic)</div><div class="meth-eq-body">\(\Delta u_t = \alpha + \beta\, g_t + \gamma\, \Delta u_{t-1} + \varepsilon_t\)</div></div>
-          <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>OLS on 1992Q1&ndash;2025Q1; furlough quarters 2020Q1&ndash;2021Q2 dummied out (&beta; attenuates ~3&times; otherwise)</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>Monotone mapping: GDP bands pass through with bounds swapped; GDP uncertainty only — a lower bound</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>73-origin rolling test (2005Q1&ndash;2023Q1); published path capped at 4 quarters</span></div>
-          </div>
         </div>
 </aside>
     </div>

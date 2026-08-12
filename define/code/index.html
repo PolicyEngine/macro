@@ -97,14 +97,6 @@
         <p>Three tools on the <a href="/connect">hosted MCP server</a> reach this model: <code>define_list_scenarios</code> (the curated scenario set), <code>define_scenario</code> (returns local run instructions — the unlicensed upstream never executes on our servers), and <code>define_scenario_incidence</code> (experimental: pass a <code>define_payload</code> of locally produced deltas and they become a pre-tax earnings overlay on <a href="/pe">PolicyEngine</a>'s UK population).</p>
         <h4>Where to read the results</h4>
         <p>What each scenario represents is on the <a href="/define">overview</a>; the gates behind the numbers are on the <a href="/define/validation">validation</a> page.</p>
-        <div class="meth-inline" aria-hidden="true">
-        <div class="meth-sec-title">MCP tools</div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>define_list_scenarios</code> — the curated scenario set</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>define_scenario</code> — local run instructions</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>define_scenario_incidence</code> — deltas in, incidence out</span></div>
-          </div>
-        </div>
       </div>
 
       <div class="meth-step" id="run-2" data-step="1">
@@ -147,15 +139,6 @@ pytest                    <span class="cm"># hermetic gate everywhere; oracle te
       </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">Hosted MCP tools</span><span class="meth-panel-badge mono">Code 1</span></div>
-          <div class="meth-sec-title">MCP tools</div>
-        <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>define_list_scenarios</code> — the curated scenario set</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>define_scenario</code> — local run instructions</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>define_scenario_incidence</code> — deltas in, incidence out</span></div>
-          </div>
-        </div>
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">CLI scenario runs</span><span class="meth-panel-badge mono">Code 2</span></div>
           <div class="meth-sec-title">CLI commands</div>
@@ -220,8 +203,15 @@ document.addEventListener("click", function (e) {
     steps.forEach(function (step, i) {
       step.classList.toggle("active", i === active);
     });
-    panels.forEach(function (panel, i) {
-      panel.hidden = i !== active;
+    // Panels pair to steps by data-step. A step with no panel of its own
+    // keeps the nearest earlier panel pinned rather than blanking the column.
+    var want = -1;
+    panels.forEach(function (panel) {
+      var ds = Number(panel.getAttribute("data-step"));
+      if (ds <= active && ds > want) want = ds;
+    });
+    panels.forEach(function (panel) {
+      panel.hidden = Number(panel.getAttribute("data-step")) !== want;
     });
   }
   window.addEventListener("scroll", update, { passive: true });
