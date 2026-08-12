@@ -103,7 +103,7 @@
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>CLI scenario runs</h3></div>
         <h4>Deltas from the terminal</h4>
         <p>The CLI lists the curated scenarios and runs any of them locally: <code>pe-macro define-scenarios</code> to browse, <code>pe-macro define-scenario</code> to produce a scenario's deltas vs baseline — real GDP, emissions, unemployment, real consumption. Deltas only, never levels.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">CLI commands</div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro define-scenarios              <span class="cm"># list the curated set</span>
 pe-macro define-scenario &lt;name&gt;        <span class="cm"># scenario deltas vs baseline</span></code></pre></div>
@@ -116,7 +116,7 @@ pe-macro define-scenario &lt;name&gt;        <span class="cm"># scenario deltas 
         <p>The adapter installs from GitHub. Nothing upstream is vendored: at runtime it fetches <code>DEFINE-model/DEFINE_UK_1.1</code> at pinned commit <code>846081a</code> and executes the published notebook unmodified.</p>
         <h4>R does the heavy lifting once</h4>
         <p>A fresh full run needs local R with the notebook's packages; after that, scenario deltas are instant from the cached pinned run.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">install</div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/define-uk-model</code></pre></div>
         </div>
@@ -128,9 +128,9 @@ pe-macro define-scenario &lt;name&gt;        <span class="cm"># scenario deltas 
         <p>The test suite carries the validation gate: hermetic artifact checks always run, and the oracle comparisons against the pinned upstream run execute wherever a local cache exists — in CI they must skip, because a passing oracle test there would mean the unlicensed upstream was fetched.</p>
         <h4>The path to hosting</h4>
         <p class="opt-note">a clean-room Python reimplementation of the published Model Manual v1.1 is the route to a hostable model — protocol and milestones in <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">REIMPLEMENTATION.md</a>, upstream code used only as a numerical oracle.</p>
-        <p>Two slices have landed. The §2.2 accounting core — the transactions and balance-sheet matrices — is satisfied identically at the manual's own initial values. §3.2 adds the 23 high-level macroeconomic equations, Eqs. (21)&ndash;(43): the demand-determined expenditure core, the Kaldor&ndash;Verdoorn productivity relation, and the Leontief labour and capital supply constraints. §3.3 production and the comparison against the upstream oracle are outstanding, so <strong>nothing here is hostable yet</strong> and the hosted tools continue to return run instructions.</p>
-        <p>Reimplementing from the manual is also what surfaces its gaps. Three are recorded so far: Table 6 tabulates a net-lending residual the manual itself says &ldquo;should equal 0&rdquo;; Eq. (27) does not hold at the manual's own initial values, and disagrees with Eq. (25) about the same variable; and Eq. (31) uses an intercept that Table 5 never tabulates. Each is pinned by a test rather than absorbed into a tolerance, so a later manual revision fails loudly instead of passing quietly.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <p>Four slices have landed. The §2.2 accounting core &mdash; the transactions and balance-sheet matrices &mdash; is satisfied identically at the manual's own initial values. §3.2 adds the high-level macroeconomic block, §3.3.1 domestic production, and §3.3.2 the power generation sector: <strong>118 equations, Eqs. (21)&ndash;(138), contiguous</strong>. §3.3.3 input&ndash;output and the comparison against the upstream oracle are outstanding, so <strong>nothing here is hostable yet</strong> and the hosted tools continue to return run instructions.</p>
+        <p>Reimplementing from the manual is also what surfaces its gaps, and roughly <strong>thirty-five</strong> are now pinned by tests rather than absorbed into a tolerance &mdash; a net-lending residual the manual itself says &ldquo;should equal 0&rdquo;, identities that fail at the manual's own initial values, and symbols the equations use that the parameter tables never list. The largest is a blocker: <strong>§3.3.2 as published cannot be simulated forward.</strong> Six parameters it uses are absent from Table 5, and two variables are never defined anywhere in the manual, so credit rationing collapses to a constant and desired power-sector investment turns negative. That is the section the climate-policy scenarios run through, and it is <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">recorded in full</a> for the authors.</p>
+        <div class="meth-inline">
         <div class="meth-sec-title">development</div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/define-uk-model
 cd define-uk-model
@@ -142,18 +142,18 @@ pytest                    <span class="cm"># hermetic gate everywhere; oracle te
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">CLI scenario runs</span><span class="meth-panel-badge mono">Code 2</span></div>
           <div class="meth-sec-title">CLI commands</div>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro define-scenarios              <span class="cm"># list the curated set</span>
+        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pe-macro define-scenarios              <span class="cm"># list the curated set</span>
 pe-macro define-scenario &lt;name&gt;        <span class="cm"># scenario deltas vs baseline</span></code></pre></div>
         </div>
         <div class="meth-panel" data-step="2" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Install locally</span><span class="meth-panel-badge mono">Code 3</span></div>
           <div class="meth-sec-title">install</div>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/define-uk-model</code></pre></div>
+        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pip install git+https://github.com/PolicyEngine/define-uk-model</code></pre></div>
         </div>
         <div class="meth-panel" data-step="3" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Gates and the clean room</span><span class="meth-panel-badge mono">Code 4</span></div>
           <div class="meth-sec-title">development</div>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/define-uk-model
+        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>git clone https://github.com/PolicyEngine/define-uk-model
 cd define-uk-model
 pytest                    <span class="cm"># hermetic gate everywhere; oracle tests need the local cache</span></code></pre></div>
         </div>
@@ -205,7 +205,13 @@ document.addEventListener("click", function (e) {
     });
     // Panels pair to steps by data-step. A step with no panel of its own
     // keeps the nearest earlier panel pinned rather than blanking the column.
-    var want = -1;
+    // Start at the FIRST panel, not -1: several pages have no panel for
+    // step 0, and seeding -1 left the sticky column empty for the whole of
+    // the opening step before popping in. Pinning the earliest panel means
+    // the column is populated from the top and only ever moves forward.
+    var want = Math.min.apply(null, panels.map(function (panel) {
+      return Number(panel.getAttribute("data-step"));
+    }));
     panels.forEach(function (panel) {
       var ds = Number(panel.getAttribute("data-step"));
       if (ds <= active && ds > want) want = ds;

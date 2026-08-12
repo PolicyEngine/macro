@@ -541,7 +541,8 @@ MODEL_QUALITY = {
             "The upstream R code runs unmodified at pinned commit 846081a and "
             "the manual's Table 4 macro block replicates within stated "
             "tolerances. The clean-room Python reimplementation has landed "
-            "§2.2 accounting and §3.2's 23 equations, and surfaced three "
+            "§2.2 accounting and §3.2, §3.3.1 and §3.3.2 — 118 equations, "
+            "Eqs. (21)-(138) contiguous — and surfaced some thirty-five "
             "defects in the manual itself, each pinned by a test rather than "
             "absorbed into a tolerance.",
             "Complete §3.3 and the oracle comparison, closing milestone 2.",

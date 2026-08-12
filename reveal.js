@@ -51,3 +51,28 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(set);
   set();
 })();
+
+/* A fragment that targets a <details> element scrolls to it but does not open
+   it — browsers auto-expand only when the fragment targets a DESCENDANT. Three
+   high-traffic links point at /models#score, where the id sits on the <details>
+   itself, so the primary "score a reform" journey landed on a closed summary
+   with the content hidden. Open it on load and on subsequent hash changes. */
+(function () {
+  "use strict";
+  function openTargetedDetails() {
+    if (!location.hash || location.hash.length < 2) return;
+    var target;
+    try { target = document.querySelector(location.hash); } catch (e) { return; }
+    if (!target) return;
+    if (target.tagName === "DETAILS") target.open = true;
+    var parent = target.closest && target.closest("details");
+    if (parent) parent.open = true;
+    target.scrollIntoView({ block: "start" });
+  }
+  window.addEventListener("hashchange", openTargetedDetails);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", openTargetedDetails);
+  } else {
+    openTargetedDetails();
+  }
+})();

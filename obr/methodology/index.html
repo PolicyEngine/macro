@@ -132,7 +132,7 @@ window.MathJax = {
       <p>The OBR publishes its full equation listing, but as EViews source that few can run. The transpiler rewrites every EViews line — <code>dlog()</code>, <code>@elem</code>, lags like <code>X(-1)</code>, error-correction terms — into an equivalent Python expression, compiled once per solve.</p>
       <h4>What comes out</h4>
       <p>The result is the model itself in open code: the same behavioural equations, identities, and technical relationships the official forecaster relies on, runnable without an EViews licence.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">translation</div>
         <div class="meth-eq"><div class="meth-eq-label">growth rates</div><div class="meth-eq-body">\(\mathrm{dlog}(X) \;\rightarrow\; \log X_t - \log X_{t-1}\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">lags &amp; elements</div><div class="meth-eq-body">\(X_{t-1}\), <code>@elem</code> &rarr; indexed array reads</div></div>
@@ -163,7 +163,7 @@ window.MathJax = {
       <p>History loads from the OBR's detailed forecast tables. Of the 261 endogenous variables the listing referenced but the outlook did not print, <strong>199 had ONS series codes</strong>; a vendored 348-series ONS snapshot supplies them.</p>
       <h4>Why it matters</h4>
       <p>That snapshot ships inside the package — there is no download step — and it gives the circular fiscal and financial sub-blocks real balancing data rather than guessed starting values.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">data sources</div>
         <div class="meth-eq"><div class="meth-eq-label">forecast tables</div><div class="meth-eq-body">OBR detailed forecast tables, March 2026 EFO</div></div>
         <div class="meth-eq"><div class="meth-eq-label">ONS snapshot</div><div class="meth-eq-body">348 vendored series; 199 of 261 unprinted variables matched</div></div>
@@ -201,7 +201,7 @@ window.MathJax = {
       <p>The equations depend on each other, so each quarter is solved simultaneously: cycle through the equations, update, repeat to convergence. Quarters then solve sequentially forward.</p>
       <h4>Runtime</h4>
       <p>A twelve-quarter anchored solve takes roughly <strong>30–40 seconds</strong> single-threaded; a reform run is two such solves.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">solver</div>
         <div class="meth-eq"><div class="meth-eq-label">within quarter</div><div class="meth-eq-body">cycle &rarr; update &rarr; repeat to convergence</div></div>
         <div class="meth-eq"><div class="meth-eq-label">across quarters</div><div class="meth-eq-body">sequential forward solve</div></div>
@@ -237,7 +237,7 @@ window.MathJax = {
       <p>For forecasting rather than one-off shocks, the emulator fits add-factors over a base window of <strong>2024Q1–2025Q4</strong>, <strong>holds them constant</strong>, and projects to <strong>2027Q4</strong>, with exogenous inputs extrapolated (seasonal cash series at their trailing annual mean). Scenario solves run twelve quarters, 2025Q1–2027Q4.</p>
       <h4>Horizon limits</h4>
       <p>The anchored horizon extends to <strong>2031Q1</strong>, where GDP is reproduced to 0.29%. Anchored unemployment (<code>LFSUR</code>) is unreliable beyond 2027Q4, drifting to 0.9% against the EFO's 4.1% by 2031Q1.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">anchoring</div>
         <div class="meth-eq"><div class="meth-eq-label">add-factor window</div><div class="meth-eq-body">fit 2024Q1–2025Q4, hold constant, project to 2027Q4</div></div>
         <div class="meth-eq"><div class="meth-eq-label">scenario solves</div><div class="meth-eq-body">12 quarters, 2025Q1–2027Q4</div></div>
@@ -274,7 +274,7 @@ window.MathJax = {
       <p>The GDP identity is switched off in the OBR file, so for a shock <code>GDPM</code> is swapped in and inventories (<code>DINV</code>) become the residual — output responds to the policy instead of being fixed.</p>
       <h4>Shock against an identical baseline</h4>
       <p>The emulator solves shocked and baseline paths with identical structure and reports the difference, isolating the policy effect from the underlying forecast.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">closure and shock</div>
         <div class="meth-eq"><div class="meth-eq-label">closure swap</div><div class="meth-eq-body"><code>GDPM</code> endogenised; <code>DINV</code> becomes the residual</div></div>
         <div class="meth-eq"><div class="meth-eq-label">policy effect</div><div class="meth-eq-body">\(X_t^{\text{shocked}} - X_t^{\text{baseline}}\), identical structure</div></div>

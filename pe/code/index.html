@@ -120,7 +120,7 @@
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Install</h3></div>
         <h4>From PyPI</h4>
         <p>The base install is shared tooling only; add <code>[models]</code> for the pinned UK + US country models, or a single country extra.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
           <div class="meth-sec-title">install</div>
           <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install policyengine            <span class="cm"># shared tooling, no country models</span>
 pip install "policyengine[models]"  <span class="cm"># + pinned UK and US models</span>
@@ -141,7 +141,7 @@ pip install "policyengine[us]"      <span class="cm"># US model only</span></cod
           <strong>£1,872</strong> of income tax and cuts net income by the
           same amount.
         </p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
           <div class="meth-sec-title">household calculation</div>
           <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
 
@@ -177,7 +177,7 @@ us = pe.us.calculate_household(
           population examples locally. The hosted MCP server provisions this
           credential server-side.
         </div>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
           <div class="meth-sec-title">population scoring</div>
           <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
 <span class="kw">from</span> policyengine.core <span class="kw">import</span> Simulation
@@ -200,7 +200,7 @@ agg.run()
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Install</span><span class="meth-panel-badge mono">Step 2</span></div>
           <div class="meth-sec-title">install</div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install policyengine            <span class="cm"># shared tooling, no country models</span>
+          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pip install policyengine            <span class="cm"># shared tooling, no country models</span>
 pip install "policyengine[models]"  <span class="cm"># + pinned UK and US models</span>
 pip install "policyengine[uk]"      <span class="cm"># UK model only</span>
 pip install "policyengine[us]"      <span class="cm"># US model only</span></code></pre></div>
@@ -208,7 +208,7 @@ pip install "policyengine[us]"      <span class="cm"># US model only</span></cod
         <div class="meth-panel" data-step="2" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Calculate a household</span><span class="meth-panel-badge mono">Step 3</span></div>
           <div class="meth-sec-title">household calculation</div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
+          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
 
 <span class="cm"># UK: single adult earning £50,000 — current law</span>
 uk = pe.uk.calculate_household(
@@ -232,7 +232,7 @@ us = pe.us.calculate_household(
         <div class="meth-panel" data-step="3" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Score a whole population</span><span class="meth-panel-badge mono">Step 4</span></div>
           <div class="meth-sec-title">population scoring</div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
+          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
 <span class="kw">from</span> policyengine.core <span class="kw">import</span> Simulation
 <span class="kw">from</span> policyengine.outputs.aggregate <span class="kw">import</span> Aggregate, AggregateType
 
@@ -330,7 +330,13 @@ document.addEventListener("click", function (e) {
     });
     // Panels pair to steps by data-step. A step with no panel of its own
     // keeps the nearest earlier panel pinned rather than blanking the column.
-    var want = -1;
+    // Start at the FIRST panel, not -1: several pages have no panel for
+    // step 0, and seeding -1 left the sticky column empty for the whole of
+    // the opening step before popping in. Pinning the earliest panel means
+    // the column is populated from the top and only ever moves forward.
+    var want = Math.min.apply(null, panels.map(function (panel) {
+      return Number(panel.getAttribute("data-step"));
+    }));
     panels.forEach(function (panel) {
       var ds = Number(panel.getAttribute("data-step"));
       if (ds <= active && ds > want) want = ds;

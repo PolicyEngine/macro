@@ -102,7 +102,7 @@
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Or use the CLI</h3></div>
         <h4>Same two calls</h4>
         <p>The same two operations on the command line: <code>hank-summary</code> to see what the model accepts, <code>hank-shock</code> to run one — here a 25bp monetary easing with the distributional block on.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">pe-macro CLI</div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro hank-summary
 pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6 --distribution</code></pre></div>
@@ -123,7 +123,7 @@ pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6 --distribut
         <p>Beyond the hosted surface, install the package and use the Python API directly: solve the steady state once, solve the Jacobian once, then draw impulse responses and distributional summaries instantly.</p>
         <h4>What sits behind it</h4>
         <p>The solve behind these calls — steady state, Jacobian, then instant IRFs — is on the <a href="/us-hank/methodology">methodology page</a>; what to trust the results for, on the <a href="/us-hank/validation">validation page</a>.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">install</div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/us-hank-model</code></pre></div>
         <div class="meth-sec-title">python api</div>
@@ -142,15 +142,15 @@ irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Or use the CLI</span><span class="meth-panel-badge mono">Step 2</span></div>
           <div class="meth-sec-title">pe-macro CLI</div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro hank-summary
+          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pe-macro hank-summary
 pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6 --distribution</code></pre></div>
         </div>
         <div class="meth-panel" data-step="3" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Install and script it</span><span class="meth-panel-badge mono">Step 4</span></div>
           <div class="meth-sec-title">install</div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/us-hank-model</code></pre></div>
+          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pip install git+https://github.com/PolicyEngine/us-hank-model</code></pre></div>
           <div class="meth-sec-title">python api</div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> us_hank <span class="kw">import</span> model, distributional
+          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code><span class="kw">from</span> us_hank <span class="kw">import</span> model, distributional
 
 ss = model.solve_steady_state()          <span class="cm"># ~13s, cached</span>
 G = model.solve_jacobian(ss, T=<span class="kw">300</span>)      <span class="cm"># ~5s, cached</span>
@@ -197,7 +197,13 @@ irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0
     });
     // Panels pair to steps by data-step. A step with no panel of its own
     // keeps the nearest earlier panel pinned rather than blanking the column.
-    var want = -1;
+    // Start at the FIRST panel, not -1: several pages have no panel for
+    // step 0, and seeding -1 left the sticky column empty for the whole of
+    // the opening step before popping in. Pinning the earliest panel means
+    // the column is populated from the top and only ever moves forward.
+    var want = Math.min.apply(null, panels.map(function (panel) {
+      return Number(panel.getAttribute("data-step"));
+    }));
     panels.forEach(function (panel) {
       var ds = Number(panel.getAttribute("data-step"));
       if (ds <= active && ds > want) want = ds;
