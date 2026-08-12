@@ -96,7 +96,7 @@
         <p>A solve takes about <strong>3 seconds cold and well under a second warm</strong> — the fastest member of the suite.</p>
         <h4>CLI mirrors</h4>
         <p>The same three tools are on the CLI, no server round-trip required.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">the three tools on the CLI</div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-variables
 pe-macro frbus-shock --var rffintay_aerr --shock 1.0
@@ -126,7 +126,7 @@ pe-macro frbus-summary</code></pre></div>
         <p>For the full 284-variable model, the Board's own demo scripts, or anything the three tools do not expose — separate from the rest of the suite, with its own Python API.</p>
         <h4>No data step</h4>
         <p>The Board's raw materials are vendored unmodified, so there is no data-download step, but you clone rather than pip-install from an index.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">clone and install</div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/us-frb-model
 cd us-frb-model
@@ -159,7 +159,7 @@ uv venv &amp;&amp; uv pip install -e ".[dev]"</code></pre></div>
             <tr><th scope="row"><code>rff</code></th><td>Federal funds rate</td><td>endogenous under the rule, pp</td></tr>
           </tbody>
         </table></div>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">monetary_policy_shock.py</div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
 <span class="kw">from</span> frbus <span class="kw">import</span> Frbus, load_data
@@ -189,21 +189,21 @@ sim = model.solve(start, end, with_adds)
         <div class="meth-panel" data-step="0">
           <div class="meth-panel-head"><span class="meth-panel-title">Ask the hosted server</span><span class="meth-panel-badge mono">Step 1</span></div>
           <div class="meth-sec-title">the three tools on the CLI</div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-variables
+          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pe-macro frbus-variables
 pe-macro frbus-shock --var rffintay_aerr --shock 1.0
 pe-macro frbus-summary</code></pre></div>
         </div>
         <div class="meth-panel" data-step="3" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Install the package</span><span class="meth-panel-badge mono">Step 4</span></div>
           <div class="meth-sec-title">clone and install</div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/us-frb-model
+          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>git clone https://github.com/PolicyEngine/us-frb-model
 cd us-frb-model
 uv venv &amp;&amp; uv pip install -e ".[dev]"</code></pre></div>
         </div>
         <div class="meth-panel" data-step="4" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Run a 100bp shock in Python</span><span class="meth-panel-badge mono">Step 5</span></div>
           <div class="meth-sec-title">monetary_policy_shock.py</div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
+          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
 <span class="kw">from</span> frbus <span class="kw">import</span> Frbus, load_data
 
 data = load_data(<span class="kw">"vendor/data_only_package/LONGBASE.TXT"</span>)
@@ -272,7 +272,13 @@ document.addEventListener("click", function (e) {
     });
     // Panels pair to steps by data-step. A step with no panel of its own
     // keeps the nearest earlier panel pinned rather than blanking the column.
-    var want = -1;
+    // Start at the FIRST panel, not -1: several pages have no panel for
+    // step 0, and seeding -1 left the sticky column empty for the whole of
+    // the opening step before popping in. Pinning the earliest panel means
+    // the column is populated from the top and only ever moves forward.
+    var want = Math.min.apply(null, panels.map(function (panel) {
+      return Number(panel.getAttribute("data-step"));
+    }));
     panels.forEach(function (panel) {
       var ds = Number(panel.getAttribute("data-step"));
       if (ds <= active && ds > want) want = ds;

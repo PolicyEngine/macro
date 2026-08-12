@@ -118,7 +118,7 @@
       <p>Every quantity — an allowance, a taper, a means test — is a variable with a formula and dated parameters. Asking for one variable resolves the graph beneath it, so a net-income figure comes from the statutory chain, not an approximating schedule.</p>
       <h4>Entities</h4>
       <p>Variables attach to <strong>entities</strong>, which differ by country — UK: three (person, benefit unit, household); US: six (person, tax unit, SPM unit, family, marital unit, household) — because US programmes are assessed on differently drawn units.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">rules, entities, dependency graph</div>
         <div class="meth-eq"><div class="meth-eq-label">variable</div><div class="meth-eq-body">formula + dated parameters</div></div>
         <div class="meth-eq"><div class="meth-eq-label">resolution</div><div class="meth-eq-body">request a variable &rarr; resolve the graph beneath it</div></div>
@@ -154,7 +154,7 @@
       <p>A reform re-dates a parameter and re-resolves the same graph, so the household and population APIs take reforms in the identical format — a flat dict of parameter path &rarr; new value.</p>
       <h4>Version-pinned releases</h4>
       <p>Each release pins the country-model and dataset versions it certifies, so a published estimate traces to the exact bundle that produced it.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">reform mechanics</div>
         <div class="meth-eq"><div class="meth-eq-label">reform</div><div class="meth-eq-body">{parameter path &rarr; new value}</div></div>
         <div class="meth-eq"><div class="meth-eq-label">evaluation</div><div class="meth-eq-body">re-date parameter &rarr; re-resolve same graph</div></div>
@@ -191,7 +191,7 @@
       <p>Household calculations need no data and no credentials — the inputs are the ones you type. Population results run the same rule graph over a representative survey: for the UK the <strong>enhanced Family Resources Survey</strong> (currently the <code>enhanced_frs_2023_24</code> vintage), for the US the <strong>Current Population Survey</strong>.</p>
       <h4>Imputation and reweighting</h4>
       <p>The UK enhancement imputes under-reported incomes and reweights the survey so aggregates better match administrative totals; the resulting microdata is distributed via a gated Hugging Face repository (<code>policyengine/policyengine-uk-data</code>).</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">data enhancement</div>
         <div class="meth-eq"><div class="meth-eq-label">UK dataset</div><div class="meth-eq-body">enhanced FRS &middot; <code>enhanced_frs_2023_24</code></div></div>
         <div class="meth-eq"><div class="meth-eq-label">US dataset</div><div class="meth-eq-body">Current Population Survey (CPS)</div></div>
@@ -297,7 +297,13 @@
     });
     // Panels pair to steps by data-step. A step with no panel of its own
     // keeps the nearest earlier panel pinned rather than blanking the column.
-    var want = -1;
+    // Start at the FIRST panel, not -1: several pages have no panel for
+    // step 0, and seeding -1 left the sticky column empty for the whole of
+    // the opening step before popping in. Pinning the earliest panel means
+    // the column is populated from the top and only ever moves forward.
+    var want = Math.min.apply(null, panels.map(function (panel) {
+      return Number(panel.getAttribute("data-step"));
+    }));
     panels.forEach(function (panel) {
       var ds = Number(panel.getAttribute("data-step"));
       if (ds <= active && ds > want) want = ds;

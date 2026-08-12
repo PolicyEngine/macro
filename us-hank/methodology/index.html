@@ -133,7 +133,7 @@ window.MathJax = {
       <p>This is a validated replication of the two-asset heterogeneous-agent New Keynesian (HANK) model of Auclert, Bardóczy, Rognlie and Straub (<em>Econometrica</em> 2021, "Using the Sequence-Space Jacobian to Solve and Estimate Heterogeneous-Agent Models"). Households differ in <strong>liquid and illiquid wealth</strong>, so their marginal propensities to consume differ, and the model carries that whole distribution through the general-equilibrium response — the thing a representative-agent model cannot say.</p>
       <h4>Production grids, not demo grids</h4>
       <p>The model runs at the paper's <strong>production grid sizes</strong> — 50 liquid × 70 illiquid × 50 capital points — rather than the packaged demo grids. It is a <strong>VAR-free, sequence-space HANK</strong>: no estimated reduced form, no expectations shortcut. A <code>variant</code> option selects the paper's <code>two_asset</code> model (the default) or a fast <code>one_asset</code> textbook variant — no capital, so no investment response, and monetary/productivity shocks only.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">household structure</div>
         <div class="meth-eq"><div class="meth-eq-label">assets</div><div class="meth-eq-body">liquid + illiquid, per household</div></div>
         <div class="meth-eq"><div class="meth-eq-label">grids</div><div class="meth-eq-body">50 liquid × 70 illiquid × 50 capital points</div></div>
@@ -171,7 +171,7 @@ window.MathJax = {
       <p>The first stage solves the general-equilibrium steady state at the production grids, calibrating <strong>discounting and portfolio-adjustment costs</strong> to hit the paper's asset-market targets. The solve takes about <strong>13 seconds</strong>, is computed once, and is cached.</p>
       <h4>Checked value by value</h4>
       <p>The hosted steady state is set against the paper's published calibration targets, value by value, on the <a href="/us-hank/validation#targets">validation page</a>. The parameterisation is the published paper's throughout — there is no data vintage to refresh.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">steady-state solve</div>
         <div class="meth-eq"><div class="meth-eq-label">calibrated</div><div class="meth-eq-body">discounting + portfolio-adjustment costs</div></div>
         <div class="meth-eq"><div class="meth-eq-label">targets</div><div class="meth-eq-body">the paper's asset-market targets</div></div>
@@ -224,7 +224,7 @@ window.MathJax = {
       <p>The second stage builds the general-equilibrium <strong>sequence-space Jacobian</strong> — the \(T \times T\) linear map from each exogenous path to each outcome path, with <strong>\(T = 300\) quarters</strong>. It takes about <strong>5 seconds</strong> and is cached alongside the steady state.</p>
       <h4>Instant IRFs</h4>
       <p>With both caches warm, an impulse response is a <strong>matrix–vector product</strong> — effectively instant. The first call per variant pays the steady-state and Jacobian solves, roughly 18 seconds cold; every later call reuses them.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">Jacobian</div>
         <div class="meth-eq"><div class="meth-eq-label">object</div><div class="meth-eq-body">\(T \times T\) map: exogenous path &rarr; outcome path</div></div>
         <div class="meth-eq"><div class="meth-eq-label">horizon</div><div class="meth-eq-body">\(T = 300\) quarters</div></div>
@@ -266,7 +266,7 @@ window.MathJax = {
       <p>A shock is an AR(1) path, \(\varepsilon_t = \text{size} \times \rho^t\), on one of three instruments: the Taylor-rule intercept (<code>monetary</code>), real government spending (<code>fiscal_spending</code>), or TFP (<code>productivity</code>).</p>
       <h4>The design point that matters</h4>
       <p><strong>The labor tax is endogenous.</strong> The fiscal block balances the government budget each period, so a spending shock is implicitly tax-financed — and there is <em>no</em> exogenous transfer or tax-rate instrument to shock. Requests for one are refused with that explanation rather than answered with an invented mapping; <code>score_reform</code> refuses <code>model="hank"</code> outright.</p>
-        <div class="meth-inline" aria-hidden="true">
+        <div class="meth-inline">
         <div class="meth-sec-title">shocks</div>
         <div class="meth-eq"><div class="meth-eq-label">path</div><div class="meth-eq-body">\(\varepsilon_t = \text{size} \times \rho^t\) (AR(1))</div></div>
         <div class="meth-eq"><div class="meth-eq-label">instruments</div><div class="meth-eq-body"><code>monetary</code> · <code>fiscal_spending</code> · <code>productivity</code></div></div>
@@ -385,7 +385,13 @@ window.MathJax = {
     });
     // Panels pair to steps by data-step. A step with no panel of its own
     // keeps the nearest earlier panel pinned rather than blanking the column.
-    var want = -1;
+    // Start at the FIRST panel, not -1: several pages have no panel for
+    // step 0, and seeding -1 left the sticky column empty for the whole of
+    // the opening step before popping in. Pinning the earliest panel means
+    // the column is populated from the top and only ever moves forward.
+    var want = Math.min.apply(null, panels.map(function (panel) {
+      return Number(panel.getAttribute("data-step"));
+    }));
     panels.forEach(function (panel) {
       var ds = Number(panel.getAttribute("data-step"));
       if (ds <= active && ds > want) want = ds;
