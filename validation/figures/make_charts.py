@@ -317,10 +317,12 @@ def chart_svar_fevd():
                   {"name": "paper", "value": paper["cpi"], "series": 2}]},
     ]
     desc = (f"Grouped bar chart. Share of UK forecast-error variance attributed to identified "
-            f"global shocks (world demand, energy and supply) at the one-year horizon. For GDP, "
-            f"our 10,000-draw production run gives {ours['gdp']:.1f}% against the paper's "
-            f"{paper['gdp']:.1f}%; for CPI, {ours['cpi']:.1f}% against {paper['cpi']:.1f}%. "
-            f"Both deviations are a percentage point or less. The paper's values are approximate.")
+            f"global shocks (world demand, energy and supply) four quarters ahead, as a share of "
+            f"total variance — the statistic the paper's Figure 4 plots. For GDP, our 10,000-draw "
+            f"production run gives {ours['gdp']:.1f}% against the paper's {paper['gdp']:.1f}%, a "
+            f"match; for CPI, {ours['cpi']:.1f}% against {paper['cpi']:.1f}%, about eight points "
+            f"short. The posterior band on each is roughly plus or minus fourteen points, wider "
+            f"than the shortfall. The paper's values are approximate.")
     return grouped_bars(
         "svar-fevd",
         "boe-svar: global-shock FEVD shares, ours vs Brignone & Piffer (2025)",
@@ -679,7 +681,8 @@ def chart_svar_skill_all():
         f"{meta['origins']} expanding-window origins. A ratio below 1.0 means the model "
         f"beats the benchmark; filled dots mark differences significant at 5 per cent by a "
         f"Diebold-Mariano test, hollow dots differences that are not statistically "
-        f"distinguishable. "
+        f"distinguishable; those p-values are pairwise and the grid runs 64 tests, none of "
+        f"which clears a 10 per cent false-discovery rate once adjusted together. "
         + "; ".join(
             f"{label} runs {ratio[horizons[0]][key]:.2f} at one quarter to "
             f"{ratio[last][key]:.2f} at {last}"

@@ -130,9 +130,9 @@ BOE_URL = "https://github.com/PolicyEngine/boe-var-model"
 FRB_URL = "https://github.com/PolicyEngine/us-frb-model"
 HANK_URL = "https://github.com/PolicyEngine/us-hank-model"
 OBR_REVISION = "85ada9be070a34a4a4a0a65d92f8f148a476ccb1"
-BOE_REVISION = "3ab56259224c20a0bf65caa523e6e7440e56b37e"
-FRB_REVISION = "ca80394c99e9aeae410723ef3f51b9fdf9b84a77"
-HANK_REVISION = "b9b3130d47d02edd07668531dfb4fce54f241b9b"
+BOE_REVISION = "42cbcbb728b55b3f416764568fa8f3aef68a6730"
+FRB_REVISION = "2508a2d3ee7d078fd82f38bc17567e4433489913"
+HANK_REVISION = "19a8e5e5cd8e7120fbbd2e3de3c5b63509824f3c"
 SOURCE_REVISION_ENV = {
     "POLICYENGINE_MACRO_SOURCE_REVISION_HANK": HANK_REVISION,
 }
