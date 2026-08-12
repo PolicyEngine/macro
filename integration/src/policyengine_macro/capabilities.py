@@ -332,7 +332,7 @@ MODEL_QUALITY = {
         "implementation_fidelity": _quality(
             "strong",
             "Built directly on the authors' sequence-jacobian toolkit at the "
-            "paper's production grids; the model repo's 18-test suite gates "
+            "paper's production grids; the model repo's replication suite gates "
             "steady-state targets, market clearing, and shock responses "
             "against the published Econometrica 2021 results.",
             "Keep the replication gates hard-failing and extend them across "

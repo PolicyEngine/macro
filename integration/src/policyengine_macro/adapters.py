@@ -192,7 +192,7 @@ class USHankShockAdapter(ModelAdapter):
                 "first-order approximations from steady-state policies",
             ],
             validation=[
-                "us-hank-model's 18-test suite gates steady-state targets, "
+                "us-hank-model's replication suite gates steady-state targets, "
                 "market clearing and shock responses against the published "
                 "Econometrica 2021 results",
             ],

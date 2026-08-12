@@ -76,3 +76,25 @@
     openTargetedDetails();
   }
 })();
+
+
+/* Copy-to-clipboard, shared. This handler was pasted verbatim into fifteen
+   pages and omitted from models/index.html, which renders a copy button in
+   #score — the target of fifteen links — that did nothing. One delegated
+   copy, so a page gets the behaviour by loading this file. */
+(function () {
+  "use strict";
+  document.addEventListener("click", function (event) {
+    var button = event.target.closest("[data-copy]");
+    if (!button) return;
+    // /connect wraps its blocks in .code-window, so the code element is not
+    // a child of the button's parent there.
+    var container = button.closest(".code-window") || button.parentElement;
+    var code = container && container.querySelector("code");
+    if (!code || !navigator.clipboard) return;
+    navigator.clipboard.writeText(code.textContent).then(function () {
+      button.textContent = "copied";
+      setTimeout(function () { button.textContent = "copy"; }, 1400);
+    });
+  });
+})();

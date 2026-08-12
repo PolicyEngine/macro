@@ -784,7 +784,8 @@ HANK_SHOCK_KINDS = [
         "input": "Z",
         "description": "Total factor productivity shock",
         "units": "level change in Z around its steady-state value "
-                 "(0.01 ~ a 1% impact TFP improvement)",
+                 "(a LEVEL change: steady-state Z is 0.468, so 0.01 is a "
+                 "~2.1% TFP improvement, not 1%)",
         "typical_size": 0.01,
         "variants": ["two_asset", "one_asset"],
     },
@@ -1084,7 +1085,7 @@ def hank_summary() -> dict:
         "runtime": "steady state ~13s and jacobian ~5s on first use per "
                    "variant, both cached in-process; IRFs are then instant",
         "validation": {
-            "suite": "the model repo's 18-test suite gates the steady-state "
+            "suite": "the model repo's replication suite gates the steady-state "
                      "calibration targets, market clearing, and shock-response "
                      "signs/magnitudes against the published paper results",
             "note": "a replication gate, not a forecast-accuracy claim: no "
@@ -3700,6 +3701,12 @@ SCORE_MODELS_WITHOUT_REFORM_BRIDGE["us-hank"] = (
 )
 SCORE_MODELS_WITHOUT_REFORM_BRIDGE["define-uk"] = (
     SCORE_MODELS_WITHOUT_REFORM_BRIDGE["define"]
+)
+# The site prints "frb-us"; the registry key for the refusal was only "frbus",
+# so the id a reader copies off the page fell through to the bare enum error
+# while every other display id got the written-for-it explanation.
+SCORE_MODELS_WITHOUT_REFORM_BRIDGE["frb-us"] = (
+    SCORE_MODELS_WITHOUT_REFORM_BRIDGE["frbus"]
 )
 SCORE_MODELS_WITHOUT_REFORM_BRIDGE["boe-svar"] = (
     SCORE_MODELS_WITHOUT_REFORM_BRIDGE["svar"]
