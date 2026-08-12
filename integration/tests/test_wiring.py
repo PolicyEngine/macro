@@ -404,3 +404,22 @@ def test_cli_score_still_rejects_a_genuinely_unknown_model(runner):
     assert res.exit_code != 0
     assert "Traceback" not in res.output
     assert "model must be one of" in res.output
+
+
+def test_obr_shock_carries_the_lever_caveat_in_the_payload():
+    """Two of the four OBR levers do not work, and the payload must say so.
+
+    Measured in the model repo: CGIPS moves business investment by exactly
+    zero in all twelve quarters and leaves a wrong-signed residual, and TCPRO
+    compounds at roughly 25%/quarter with no steady state. A docstring does
+    not reach an MCP caller reading a JSON result, so the caveat travels with
+    the numbers.
+    """
+    from policyengine_macro import core
+
+    levers = {v["var"]: v for v in core.obr_list_variables()}
+    assert levers["TCPRO"]["caveat"], "the non-convergent lever declares no caveat"
+    assert levers["CGIPS"]["caveat"], "the dead lever declares no caveat"
+    # CGG has its own documented "~1 by construction" reading on the site and
+    # is not caveated here; asserting that keeps this test honest about scope.
+    assert "caveat" not in levers["CGG"]

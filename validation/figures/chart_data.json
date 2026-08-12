@@ -1,134 +1,140 @@
 {
-  "_comment": "Values that are NOT machine-readable in papers/*/figures/ are transcribed here from the papers' LaTeX sources, with an explicit source pointer per value. Everything else is read directly from the papers' committed CSV/JSON data by make_charts.py. Do not edit a number here without changing the cited source.",
-  "obr_reform": {
-    "source": "papers/obr-macro/sections/comparison.tex, Table tab:comparison panel B (cross-checked against papers/obr-macro/sections/results.tex)",
-    "groups": [
-      {
-        "label": "basic rate +1pp, 2026–27",
-        "bars": [
-          {
-            "name": "ours",
-            "value": 6.46,
-            "series": 1,
-            "source": "comparison.tex panel B / results.tex L18 (PolicyEngine static costing)"
-          },
-          {
-            "name": "HMRC",
-            "value": 6.9,
-            "series": 2,
-            "source": "comparison.tex panel B; HMRC Direct effects of illustrative tax changes, June 2025"
-          }
-        ]
-      },
-      {
-        "label": "basic rate +1pp, 2028–29",
-        "bars": [
-          {
-            "name": "ours",
-            "value": 6.92,
-            "series": 1,
-            "source": "comparison.tex panel B; interpolated between scored endpoints 6.46 (2026) and 7.38 (2030)"
-          },
-          {
-            "name": "HMRC",
-            "value": 8.2,
-            "series": 2,
-            "source": "comparison.tex panel B; HMRC June 2025 reckoner"
-          }
-        ]
-      }
+ "_comment": "Values that are NOT machine-readable in papers/*/figures/ are transcribed here from the papers' LaTeX sources, with an explicit source pointer per value. Everything else is read directly from the papers' committed CSV/JSON data by make_charts.py. Do not edit a number here without changing the cited source.",
+ "obr_reform": {
+  "source": "papers/obr-macro/sections/comparison.tex, Table tab:comparison panel B (cross-checked against papers/obr-macro/sections/results.tex)",
+  "groups": [
+   {
+    "label": "basic rate +1pp, 2026\u201327",
+    "bars": [
+     {
+      "name": "ours",
+      "value": 6.46,
+      "series": 1,
+      "source": "comparison.tex panel B / results.tex L18 (PolicyEngine static costing)"
+     },
+     {
+      "name": "HMRC",
+      "value": 6.9,
+      "series": 2,
+      "source": "comparison.tex panel B; HMRC Direct effects of illustrative tax changes, June 2025"
+     }
     ]
-  },
-  "obr_computed_share": {
-    "source": "docs/calibration_scorecard.md in the PolicyEngine/obr-macroeconomic-model repository (March 2026 EFO vintage calibration scorecard); counts cross-checked against papers/obr-macro/sections/calibration.tex Table tab:rawscore (preserved November 2025 study)",
-    "total": 21,
-    "computed": 11,
-    "passthrough": 10,
-    "bands_note": "bands: rates ±1.0pp · net balances ±1.5% of GDP · levels ≤10% MAPE",
-    "_grades_comment": "The 11 computed variables graded against the bands above. 'identity' is employment, where both inputs are themselves passthrough, so the accounting identity closes trivially and the pass carries no information.",
-    "grades": [
-      {
-        "key": "fair",
-        "label": "fair",
-        "count": 3,
-        "series": 1,
-        "in_band": true,
-        "examples": [
-          "real GDP 5.75 per cent",
-          "consumption 9.56 per cent",
-          "trade balance 0.70 per cent of GDP"
-        ],
-        "source": "calibration_scorecard.md, free-running MAPE column"
-      },
-      {
-        "key": "identity",
-        "label": "identity",
-        "count": 1,
-        "series": 2,
-        "in_band": true,
-        "trivial": true,
-        "examples": [
-          "employment"
-        ],
-        "source": "calibration_scorecard.md; employment closes from two passthrough inputs"
-      },
-      {
-        "key": "poor",
-        "label": "poor",
-        "count": 5,
-        "series": 3,
-        "in_band": false,
-        "examples": [],
-        "source": "calibration_scorecard.md, variables outside band but within an order of magnitude"
-      },
-      {
-        "key": "off",
-        "label": "off",
-        "count": 2,
-        "series": 3,
-        "in_band": false,
-        "examples": [
-          "company profits 79.80 per cent",
-          "the current account 4.17 per cent of GDP"
-        ],
-        "source": "calibration_scorecard.md, worst two computed variables"
-      }
+   },
+   {
+    "label": "basic rate +1pp, 2028\u201329",
+    "bars": [
+     {
+      "name": "ours",
+      "value": 6.92,
+      "series": 1,
+      "source": "comparison.tex panel B; interpolated between scored endpoints 6.46 (2026) and 7.38 (2030)"
+     },
+     {
+      "name": "HMRC",
+      "value": 8.2,
+      "series": 2,
+      "source": "comparison.tex panel B; HMRC June 2025 reckoner"
+     }
     ]
-  },
-  "frbus_residuals": {
-    "source": "papers/frb-us/sections/validation.tex, Tables tab:tracking and tab:refnoise",
-    "rows": [
-      {
-        "label": "ours vs LONGBASE (identity — not evidence)",
-        "value": 5.6e-17,
-        "series": 1,
-        "source": "validation.tex tab:tracking, max abs error",
-        "note": "init_trac defines add-factors as minus the residuals at the input data, so re-solving reproduces it up to float64 for ANY input — verified: the same test passes at 6.7e-9 on randomly scrambled data. Shown for completeness; it measures arithmetic, not economics."
-      },
-      {
-        "label": "pyfrbus 1.1.1 vs LONGBASE",
-        "value": 1.1e-08,
-        "series": 3,
-        "source": "validation.tex subsec:refnoise prose"
-      },
-      {
-        "label": "ours vs pyfrbus 1.0.0 (shock)",
-        "value": 6e-09,
-        "series": 1,
-        "source": "validation.tex tab:refnoise row 1"
-      },
-      {
-        "label": "ours vs pyfrbus 1.1.1 (shock)",
-        "value": 1.4e-08,
-        "series": 1,
-        "source": "validation.tex tab:refnoise row 2"
-      },
-      {
-        "label": "pyfrbus 1.1.1 vs 1.0.0 — the Fed’s own two releases",
-        "value": 1.3e-08,
-        "series": 2,
-        "source": "validation.tex tab:refnoise row 3"
-      }
-    ]
-  }
+   }
+  ]
+ },
+ "obr_computed_share": {
+  "source": "docs/calibration_scorecard.md in the PolicyEngine/obr-macroeconomic-model repository, regenerated 2026-08-12 after the OSHH ONS anchor landed (PR #22); the previous figures here predated that anchor and understated the model's accuracy across the board",
+  "total": 21,
+  "computed": 11,
+  "passthrough": 10,
+  "bands_note": "bands: rates \u00b11.0pp \u00b7 net balances \u00b11.5% of GDP \u00b7 levels \u226410% MAPE",
+  "_grades_comment": "The 11 computed variables graded against the bands above. 'identity' is employment, where both inputs are themselves passthrough, so the accounting identity closes trivially and the pass carries no information.",
+  "grades": [
+   {
+    "key": "fair",
+    "label": "fair",
+    "count": 5,
+    "series": 1,
+    "in_band": true,
+    "examples": [
+     "real GDP 4.48 per cent",
+     "consumption 7.49 per cent",
+     "household income 6.27 per cent",
+     "real household income 6.03 per cent",
+     "trade balance 0.69 per cent of GDP"
+    ],
+    "source": "calibration_scorecard.md, free-running MAPE column"
+   },
+   {
+    "key": "identity",
+    "label": "identity",
+    "count": 1,
+    "series": 2,
+    "in_band": true,
+    "trivial": true,
+    "examples": [
+     "employment"
+    ],
+    "source": "calibration_scorecard.md; employment closes from two passthrough inputs"
+   },
+   {
+    "key": "poor",
+    "label": "poor",
+    "count": 3,
+    "series": 3,
+    "in_band": false,
+    "examples": [
+     "business investment 15.73 per cent",
+     "the unemployment rate 1.01 percentage points",
+     "RPI inflation 1.71 percentage points"
+    ],
+    "source": "calibration_scorecard.md, variables outside band but within an order of magnitude"
+   },
+   {
+    "key": "off",
+    "label": "off",
+    "count": 2,
+    "series": 3,
+    "in_band": false,
+    "examples": [
+     "company profits 63.29 per cent",
+     "the current account 3.60 per cent of GDP"
+    ],
+    "source": "calibration_scorecard.md, worst two computed variables"
+   }
+  ]
+ },
+ "frbus_residuals": {
+  "source": "papers/frb-us/sections/validation.tex, Tables tab:tracking and tab:refnoise",
+  "rows": [
+   {
+    "label": "ours vs LONGBASE (identity \u2014 not evidence)",
+    "value": 5.6e-17,
+    "series": 1,
+    "source": "validation.tex tab:tracking, max abs error",
+    "note": "init_trac defines add-factors as minus the residuals at the input data, so re-solving reproduces it up to float64 for ANY input \u2014 verified: the same test passes at 6.7e-9 on randomly scrambled data. Shown for completeness; it measures arithmetic, not economics."
+   },
+   {
+    "label": "pyfrbus 1.1.1 vs LONGBASE",
+    "value": 1.1e-08,
+    "series": 3,
+    "source": "validation.tex subsec:refnoise prose"
+   },
+   {
+    "label": "ours vs pyfrbus 1.0.0 (shock)",
+    "value": 6e-09,
+    "series": 1,
+    "source": "validation.tex tab:refnoise row 1"
+   },
+   {
+    "label": "ours vs pyfrbus 1.1.1 (shock)",
+    "value": 1.4e-08,
+    "series": 1,
+    "source": "validation.tex tab:refnoise row 2"
+   },
+   {
+    "label": "pyfrbus 1.1.1 vs 1.0.0 \u2014 the Fed\u2019s own two releases",
+    "value": 1.3e-08,
+    "series": 2,
+    "source": "validation.tex tab:refnoise row 3"
+   }
+  ]
+ }
 }
