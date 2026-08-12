@@ -141,6 +141,32 @@ def stored(value: float) -> str:
     return f"{value:,}"
 
 
+def display(series: dict, value: float) -> str:
+    """The reading a person would say out loud.
+
+    stored() is right for the method note and for anything asserting fidelity
+    to the snapshot, but it is wrong for the number a reader meets first: the
+    restructure made the public-finances headline read "-15,989.0" where the
+    page it replaced said "£16.0bn borrowed", and dropped "£77.1bn" and
+    "£749/week" from the site entirely. Scale and unit here; exact stored
+    value stays one line below and in the method note.
+    """
+    units = series["units"].lower()
+    if "£m" in units or "\u00a3m" in units:
+        billions = abs(value) / 1000
+        borrowed = " borrowed" if value < 0 and "borrowing" in series["title"].lower() else ""
+        return f"\u00a3{billions:,.1f}bn{borrowed}"
+    if "per week" in units:
+        return f"\u00a3{value:,.0f}/week"
+    if "thousand" in units:
+        return f"{value:,.0f}k"
+    if "percent" in units or units.startswith("%"):
+        # Keep the publisher's precision: a stored 5.0 is 5.0%, not 5%. The
+        # trailing zero is information about how the figure was published.
+        return f"{stored(value)}%"
+    return stored(value)
+
+
 def listed(items: list[str]) -> str:
     """Join a registry list the way a sentence needs it."""
     if len(items) < 2:
@@ -265,8 +291,8 @@ def stat_card(series: dict) -> str:
     now = latest(series)
     return f"""        <article class="economy-stat">
           <p class="economy-stat-label mono">{esc(label(series).upper())}</p>
-          <p class="economy-stat-value">{esc(stored(now["value"]))}{suffix(series)}</p>
-          <p class="economy-stat-change">{esc(series["units"])}</p>
+          <p class="economy-stat-value">{esc(display(series, now["value"]))}</p>
+          <p class="economy-stat-change">stored as {esc(stored(now["value"]))} &middot; {esc(series["units"])}</p>
           <dl>
             <div><dt>Observation</dt><dd>{esc(now["period"])}</dd></div>
             <div><dt>Vintage</dt><dd>{esc(series["vintage"])}</dd></div>
