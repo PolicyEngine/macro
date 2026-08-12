@@ -375,3 +375,32 @@ def test_cli_wrong_shaped_reform_is_clean_error(runner):
             assert res.exit_code != 0
             assert "Traceback" not in res.output
             assert "non-empty" in res.output
+
+
+def test_cli_score_names_the_alternative_for_a_model_without_a_reform_bridge(runner):
+    """`--model svar` must reach core's explanation, not click's usage error.
+
+    --model was a click.Choice over SCORE_MODELS, so click rejected every
+    known-but-unbridgeable member with a bare "invalid choice" listing the
+    valid names — the exact unhelpful message core.score_reform was given
+    explicit refusals to replace. The refusals existed and no CLI user could
+    ever see them.
+    """
+    for model, expected in (("svar", "forecast_uk"), ("define", "define_scenario")):
+        res = runner.invoke(main, [
+            "score", "--country", "uk", "--reform", '{"x": 1}', "--model", model,
+        ])
+        assert res.exit_code != 0
+        assert "Traceback" not in res.output
+        assert "no PolicyEngine-reform bridge" in res.output, (model, res.output)
+        assert expected in res.output, (model, res.output)
+
+
+def test_cli_score_still_rejects_a_genuinely_unknown_model(runner):
+    """Opening up the option must not swallow typos."""
+    res = runner.invoke(main, [
+        "score", "--country", "uk", "--reform", '{"x": 1}', "--model", "not-a-model",
+    ])
+    assert res.exit_code != 0
+    assert "Traceback" not in res.output
+    assert "model must be one of" in res.output
