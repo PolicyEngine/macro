@@ -136,12 +136,33 @@ OBR_VARIABLES = [
         "description": "Corporation tax (main) rate",
         "units": "rate change in decimal (e.g. -0.05 = 5pp cut from 25% to 20%)",
         "investment_closure": True,
+        # The investment closure's stabiliser anchors the LEVEL, not the
+        # deviation, and the deviation does not converge at any horizon: for a
+        # sustained +5pp rise |delta_IF| runs £97m at q3, £2,876m at q12 and
+        # £43,387m at q25, growing 1.21-1.27x every quarter for 25 quarters.
+        # Truncating the shock from 12 quarters to 8 barely moves the q12
+        # response, so the number is carried by accumulated drift rather than
+        # by the tax rate. The 12-quarter default is not where this settles;
+        # it is where the magnitude still looks plausible.
+        "caveat": (
+            "the response does not converge: it compounds at roughly "
+            "25%/quarter with no steady state, so read the sign and the "
+            "first few quarters, not the level or the cumulative total"
+        ),
     },
     {
         "var": "CGIPS",
         "description": "Nominal central government investment (feeds real GGI via the GGIPS/GGIDEF chain)",
         "units": "£m nominal per quarter (e.g. 3000 ≈ £2.5bn real per quarter)",
         "investment_closure": False,
+        # Measured: delta_IF is exactly 0.0 in all twelve quarters and the
+        # residual GDP effect goes negative (-0.047 by q12) against the OBR's
+        # published 1.0. The channel is not weak, it is absent.
+        "caveat": (
+            "this channel is dead under the demand closure: business "
+            "investment does not respond at all and the residual GDP effect "
+            "is wrong-signed. Do not use it to score capital spending"
+        ),
     },
 ]
 
@@ -203,7 +224,16 @@ def obr_shock(
     rows = _obr_result_rows(df)
     shocked = rows[: int(periods)]
     peak = max(rows, key=lambda r: abs(r["pct_gdp"]))
-    return {
+    # A lever whose channel is dead or non-convergent must say so in the
+    # payload, not only in a docstring nobody reads over MCP. Of the four
+    # fiscal instruments here exactly one contains behaviour: CGG is an
+    # accounting identity (multiplier exactly 1.0000, flat, against the OBR's
+    # published 0.6), CGIPS is dead, TCPRO never converges, and the
+    # household-income lever is the only one with a response worth reading.
+    caveat = next(
+        (v.get("caveat") for v in OBR_VARIABLES if v["var"] == var), None
+    )
+    result = {
         "name": name,
         "provenance": _provenance(
             model_id="obr-emulator",
@@ -222,6 +252,9 @@ def obr_shock(
         "peak_pct_gdp": peak["pct_gdp"],
         "peak_period": peak["period"],
     }
+    if caveat:
+        result["caveat"] = caveat
+    return result
 
 
 # ---------------------------------------------------------------------------
