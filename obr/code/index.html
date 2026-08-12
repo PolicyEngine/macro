@@ -100,15 +100,6 @@
           scores a PolicyEngine reform end to end through the static-costing
           bridge.
         </p>
-        <div class="meth-inline" aria-hidden="true">
-          <div class="meth-sec-title">hosted tools</div>
-          <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>obr_shock</code> — shock a variable, read ΔGDP per quarter</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>list_reform_variables</code> — shockable levers with units</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>score_reform</code> (<code>model="obr"</code>) — PolicyEngine reform, end to end</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>All hosted — no install, no credentials</span></div>
-          </div>
-        </div>
       </div>
 
       <div class="meth-step" id="code-2" data-step="1">
@@ -196,16 +187,6 @@ results = run_reform(
       </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">hosted tools</div>
-          <div class="meth-out">
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>obr_shock</code> — shock a variable, read ΔGDP per quarter</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>list_reform_variables</code> — shockable levers with units</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span><code>score_reform</code> (<code>model="obr"</code>) — PolicyEngine reform, end to end</span></div>
-            <div class="meth-out-line"><span class="icon">&rarr;</span><span>All hosted — no install, no credentials</span></div>
-          </div>
-        </div>
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 2</span></div>
           <div class="meth-sec-title">CLI equivalents</div>
@@ -286,8 +267,15 @@ results = run_reform(
     steps.forEach(function (step, i) {
       step.classList.toggle("active", i === active);
     });
-    panels.forEach(function (panel, i) {
-      panel.hidden = i !== active;
+    // Panels pair to steps by data-step. A step with no panel of its own
+    // keeps the nearest earlier panel pinned rather than blanking the column.
+    var want = -1;
+    panels.forEach(function (panel) {
+      var ds = Number(panel.getAttribute("data-step"));
+      if (ds <= active && ds > want) want = ds;
+    });
+    panels.forEach(function (panel) {
+      panel.hidden = Number(panel.getAttribute("data-step")) !== want;
     });
   }
   window.addEventListener("scroll", update, { passive: true });

@@ -1169,12 +1169,15 @@ h2 {
 .codeblock pre,
 .code-window pre { overflow-x: auto; max-width: 100%; }
 .table-scroll table { margin: 0; min-width: 720px; }
-.prose table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: var(--fs-body-sm); }
-.prose th {
+/* Reference tables also appear inside scrollytelling steps (the frb-us/code
+   series list, the pe/code route map), which sit outside .prose — same
+   treatment there rather than falling back to unstyled HTML. */
+.prose table, .meth-step table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: var(--fs-body-sm); }
+.prose th, .meth-step th {
   text-align: left; font-family: var(--mono); font-size: var(--fs-label);
   letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--paper-faint);
 }
-.prose th, .prose td {
+.prose th, .prose td, .meth-step th, .meth-step td {
   padding: 11px 16px 11px 0; border-bottom: 1px solid var(--line-soft); vertical-align: top;
 }
 .opt-note { font-size: var(--fs-body-sm); line-height: 1.55; color: var(--paper-faint); }
@@ -2654,28 +2657,6 @@ h2 {
   letter-spacing: 0.08em;
 }
 .meth-eq-body { text-align: center; }
-.meth-out {
-  margin: 8px 0;
-  padding: 10px 14px;
-  border: 1px solid var(--line-soft);
-  border-radius: 8px;
-  background: var(--ink);
-  font-size: var(--fs-small);
-}
-.meth-out-line {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 3px 6px;
-  border-radius: 4px;
-  color: var(--paper-dim);
-}
-.meth-out-line:hover { background: var(--brand-wash); }
-.meth-out-line .icon { flex: 0 0 auto; color: var(--brand-strong); font-weight: 600; }
-/* Long inline paths (e.g. forecasts/official/…csv) must wrap on narrow
-   screens: let the flex text column shrink and break anywhere inside code. */
-.meth-out-line > span { min-width: 0; }
-.meth-out-line code { overflow-wrap: anywhere; }
 /* Narrative sub-headings: bold sentence case, not uppercase micro-labels. */
 .meth-step h4 {
   margin: var(--s-5) 0 var(--s-2);
@@ -2770,7 +2751,7 @@ h2 {
 }
 
 /* fact lines: enumerable results pulled out of a paragraph wall,
-   in the .meth-out-line idiom (icon + line, hover wash) */
+   in the .qa-fact idiom (icon + line, hover wash) */
 .mo-facts {
   margin: var(--s-5) 0;
   padding: var(--s-3) var(--s-4);
@@ -3071,7 +3052,7 @@ h2 {
 .vmet-note { display: block; font-family: var(--mono); font-size: var(--fs-label); color: var(--paper-faint); margin-top: 10px; line-height: 1.5; }
 
 /* compact definition/caveat block under the configurations table,
-   in the .meth-out-line idiom: keyed lines, no run-on paragraph */
+   in the .qa-fact idiom: keyed lines, no run-on paragraph */
 .vmet-notes {
   max-width: 80ch;
   margin: var(--s-4) auto var(--s-5);

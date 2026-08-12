@@ -292,7 +292,11 @@ FRBUS_VARIABLES = [
         "var": "rffintay_aerr",
         "description": "Add-error on the inertial Taylor rule — the standard "
                        "monetary policy shock (vendor demos/example1.py)",
-        "units": "percentage points on the funds rate (1.0 = 100bp tightening)",
+        "units": "percentage points on the funds rate, PER SHOCKED PERIOD "
+                 "(1.0 = 100bp). With periods>1 the add-factors stack: "
+                 "shock=1.0, periods=4 peaks near +3pp on the funds "
+                 "rate, not +1pp — set periods=1 for a one-quarter "
+                 "100bp move.",
         "typical_shock": 1.0,
         "requires_policy_rule": "inertial_taylor",
     },
@@ -300,7 +304,11 @@ FRBUS_VARIABLES = [
         "var": "rfftay_aerr",
         "description": "Add-error on the non-inertial Taylor rule — the "
                        "monetary policy shock when policy_rule='taylor'",
-        "units": "percentage points on the funds rate (1.0 = 100bp tightening)",
+        "units": "percentage points on the funds rate, PER SHOCKED PERIOD "
+                 "(1.0 = 100bp). With periods>1 the add-factors stack: "
+                 "shock=1.0, periods=4 peaks near +3pp on the funds "
+                 "rate, not +1pp — set periods=1 for a one-quarter "
+                 "100bp move.",
         "typical_shock": 1.0,
         "requires_policy_rule": "taylor",
     },

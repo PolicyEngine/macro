@@ -377,13 +377,223 @@ MODEL_QUALITY = {
             "revised.",
         ),
     },
+    "pe-microsim": {
+        "implementation_fidelity": _quality(
+            "strong",
+            "Statutory rules are implemented and tested rule-by-rule in the "
+            "policyengine-uk and policyengine-us packages, and a household "
+            "result is exact arithmetic over those rules — no sampling, no "
+            "weights, no estimated coefficients. A single case is hand-"
+            "checkable end to end: £50,000 employment income gives a £12,570 "
+            "personal allowance, £37,430 taxed at 20% = £7,486, NI at 8% = "
+            "£2,994, net £39,520.",
+            "Publish per-country statutory test coverage, so 'tested against "
+            "statute' is a measured share rather than a description.",
+        ),
+        "predictive_validation": _quality(
+            "not_applicable",
+            "The model does not forecast. It evaluates statute on a given "
+            "population for a given year, so there is no out-of-sample error "
+            "to report and a forecast-skill score would be a category error.",
+            "None. This dimension stays not_applicable by construction.",
+        ),
+        "identification_robustness": _quality(
+            "not_applicable",
+            "No structural shocks are identified; the model is an accounting "
+            "evaluation of legislation, not an econometric identification.",
+            "None.",
+        ),
+        "policy_counterfactual_validity": _quality(
+            "moderate",
+            "The static costing of a 1p basic-rate rise gives £6.46bn in 2026 "
+            "rising to £7.38bn by 2030, against HMRC's published ready "
+            "reckoner at £6.9bn and £8.2bn — within range, and the gap is "
+            "reported rather than tuned away. That is one reform, one "
+            "country, one tax, against another estimate on a different data "
+            "basis, so it is a benchmark and not a validation.",
+            "Benchmark a US reform and a distributional result against an "
+            "independent published costing.",
+        ),
+        "uncertainty_calibration": _quality(
+            "weak",
+            "The distinction is the model's central one and is stated "
+            "honestly: household arithmetic carries no error distribution, "
+            "while a population estimate is a weighted sum whose uncertainty "
+            "sits entirely in the survey weights and imputed microdata. But "
+            "that population uncertainty is never quantified — ScoreQuantity "
+            "records 'not estimated in this result' — so a revenue total is "
+            "published as a point with no interval.",
+            "Produce replicate-weight or bootstrap intervals for population "
+            "aggregates, so a costing carries a range.",
+        ),
+        "vintage_reproducibility": _quality(
+            "moderate",
+            "Household results reproduce for anyone from the pinned country "
+            "packages. Population runs need the enhanced-FRS microdata, which "
+            "is gated behind a HuggingFace token, so an outside reader cannot "
+            "reproduce a revenue total independently. Every result records "
+            "its dataset and package versions in provenance.",
+            "Publish a reproducibility path for population aggregates that "
+            "does not require gated microdata access.",
+        ),
+    },
+    "og-uk": {
+        "implementation_fidelity": _quality(
+            "moderate",
+            "Built on PSL's OG-Core, whose solver and household problem are "
+            "maintained and tested upstream; the UK calibration is this "
+            "project's. No independent check of the UK parameterisation "
+            "against an outside implementation exists.",
+            "Cross-check the UK calibration against an independent OLG "
+            "implementation or the OG-Core reference results.",
+        ),
+        "predictive_validation": _quality(
+            "not_applicable",
+            "A long-run steady-state comparative static, not a forecast. "
+            "cannot_answer names short-run forecasting explicitly.",
+            "None.",
+        ),
+        "identification_robustness": _quality(
+            "not_applicable",
+            "No shocks are identified; behaviour comes from the calibrated "
+            "lifecycle structure.",
+            "None.",
+        ),
+        "policy_counterfactual_validity": _quality(
+            "weak",
+            "This is the model's defining limitation and the site says so: "
+            "targets are met by construction and no independent outcome "
+            "benchmark exists. A reform score is internally consistent with "
+            "the calibration and cannot be checked against anything outside "
+            "it.",
+            "Identify any published OLG reform result for the UK to score "
+            "against, or state permanently that none exists.",
+        ),
+        "uncertainty_calibration": _quality(
+            "weak",
+            "No interval is produced and sensitivity analysis is not "
+            "comprehensive, so a steady-state result is a single number "
+            "conditional on one parameterisation.",
+            "Run and publish a sensitivity sweep over the elasticities the "
+            "result is most exposed to.",
+        ),
+        "vintage_reproducibility": _quality(
+            "weak",
+            "Local-only: excluded from the hosted image because one steady-"
+            "state solve exceeds the request timeout. Reproduction needs the "
+            "gated enhanced-FRS microdata plus UN demographics fetched at "
+            "runtime, and the baseline cache is in-process only, so nothing "
+            "persists between runs.",
+            "Cache the demographic and microdata inputs so a solve is "
+            "reproducible from committed artifacts.",
+        ),
+    },
+    "og+microsim": {
+        "implementation_fidelity": _quality(
+            "moderate",
+            "The overlay itself is small and tested — a steady-state factor "
+            "applied to a microsimulation run, with the ratio-not-level "
+            "invariant and bounds enforced. Its fidelity is bounded by "
+            "og-uk's, since the factor comes from there.",
+            "Inherit og-uk's calibration cross-check.",
+        ),
+        "predictive_validation": _quality(
+            "not_applicable",
+            "Not a forecast: one policy year under long-run steady-state "
+            "assumptions.",
+            "None.",
+        ),
+        "identification_robustness": _quality(
+            "not_applicable",
+            "No identification step.",
+            "None.",
+        ),
+        "policy_counterfactual_validity": _quality(
+            "weak",
+            "Inherits og-uk's no-ground-truth problem and adds an "
+            "approximation of its own: the steady-state factor is applied "
+            "flat, so no transition path is represented, and the "
+            "distributional incidence of effective-labour changes is reported "
+            "rather than allocated.",
+            "Score the overlay against a transition-path run to measure what "
+            "the flat factor costs.",
+        ),
+        "uncertainty_calibration": _quality(
+            "weak",
+            "No interval on either leg: the OG factor is a point comparative "
+            "static and the microsimulation aggregate carries unquantified "
+            "survey uncertainty.",
+            "Quantify the microsimulation leg first; the OG leg needs a "
+            "sensitivity sweep.",
+        ),
+        "vintage_reproducibility": _quality(
+            "weak",
+            "Local-only and two-step: it needs an og-uk solve in its own "
+            "environment and a --og-payload handoff, so a single command does "
+            "not reproduce a result.",
+            "Single-command reproduction once the OG environment constraint "
+            "is resolved upstream.",
+        ),
+    },
+    "define-uk": {
+        "implementation_fidelity": _quality(
+            "moderate",
+            "The upstream R code runs unmodified at pinned commit 846081a and "
+            "the manual's Table 4 macro block replicates within stated "
+            "tolerances. The clean-room Python reimplementation has landed "
+            "§2.2 accounting and §3.2's 23 equations, and surfaced three "
+            "defects in the manual itself, each pinned by a test rather than "
+            "absorbed into a tolerance.",
+            "Complete §3.3 and the oracle comparison, closing milestone 2.",
+        ),
+        "predictive_validation": _quality(
+            "not_applicable",
+            "Explicitly not a forecaster: cannot_answer names forecasts and "
+            "baseline levels, and the manual itself says the baseline should "
+            "not be seen as a prediction.",
+            "None.",
+        ),
+        "identification_robustness": _quality(
+            "not_applicable",
+            "Scenario deltas from a deterministic stock-flow consistent "
+            "system; nothing is identified statistically.",
+            "None.",
+        ),
+        "policy_counterfactual_validity": _quality(
+            "weak",
+            "No numeric v1.1 scenario results are published anywhere, so a "
+            "published-figure replication is impossible — the ceiling, not an "
+            "omission. What is checkable is checked: every scenario toggles "
+            "exactly its published policy switches, and two coarse anchors "
+            "from the open 2023 vintage hold.",
+            "Reopens if the authors publish scenario tables or the paper "
+            "becomes accessible.",
+        ),
+        "uncertainty_calibration": _quality(
+            "weak",
+            "Deterministic deltas from one calibration, with no interval and "
+            "no sensitivity sweep.",
+            "Sweep the parameters the scenario deltas are most exposed to.",
+        ),
+        "vintage_reproducibility": _quality(
+            "weak",
+            "The baseline sits far from outturns — 2025 growth 4.66% against "
+            "an ONS 1.31%, 2024 emissions 401.5 against 371 MtCO2e — which is "
+            "why deltas are served and never levels. Reproduction needs local "
+            "R and the unlicensed upstream fetched at a pinned commit, so "
+            "nothing is hosted and the comparison table is recomputed and "
+            "regression-tested rather than asserted.",
+            "The clean-room reimplementation removes the R and licensing "
+            "dependency entirely.",
+        ),
+    },
 }
 
 for _model_id, _model in MODELS.items():
     _model["quality"] = deepcopy(MODEL_QUALITY.get(_model_id, {
         dimension: _quality(
             "not_assessed",
-            "Outside the scope of the current three-model audit.",
+            "No evidence review has been completed for this model yet.",
             "Complete a model-specific evidence review before assigning a level.",
         )
         for dimension in QUALITY_DIMENSIONS

@@ -64,3 +64,57 @@ def test_distribution_routing_keeps_dynamic_member():
         "policy_reform", country="uk", needs_distribution=True
     )
     assert "og+microsim" in rec["candidate_models"]
+
+
+def test_every_model_has_a_real_evidence_assessment():
+    """No model may ship the auto-filled placeholder quality entry.
+
+    MODEL_QUALITY originally covered three macro models, and every other
+    member fell through to a generated block of `not_assessed` dimensions
+    whose evidence string read "Outside the scope of the current three-model
+    audit." That is a placeholder, not an assessment — but `get_status` and
+    `list_capabilities` serve it in the same shape as a real one, so a
+    consumer could not tell a considered "not_applicable" from an unexamined
+    gap. Four of the eight models were in that state, including the one the
+    site leads with.
+
+    not_applicable and a reasoned not_assessed are both legitimate: a
+    microsimulation has no forecast error, and frb-us honestly records that
+    no forecast evaluation has been run here and names the one that would
+    settle it. What is not acceptable is the generated fallback text, which
+    asserts nothing while being served in the same shape as a judgement.
+    """
+    PLACEHOLDER = "No evidence review has been completed"
+    for model_id in capabilities.MODELS:
+        assert model_id in capabilities.MODEL_QUALITY, (
+            f"{model_id} has no MODEL_QUALITY entry and would fall back to "
+            "the placeholder"
+        )
+        entry = capabilities.MODEL_QUALITY[model_id]
+        assert set(entry) == capabilities.QUALITY_DIMENSIONS, (
+            f"{model_id} is missing dimensions: "
+            f"{sorted(capabilities.QUALITY_DIMENSIONS - set(entry))}"
+        )
+        for dimension, judgement in entry.items():
+            assert judgement["level"] in capabilities.QUALITY_LEVELS, (
+                f"{model_id}.{dimension}: {judgement['level']!r} is not a "
+                f"recognised level"
+            )
+            # not_assessed is a legitimate verdict when it is reasoned:
+            # frb-us records that no forecast evaluation is published here
+            # and names the run that would change it. What is forbidden is
+            # the generated fallback, which asserts nothing and is
+            # indistinguishable from a real judgement in the served payload.
+            assert PLACEHOLDER not in judgement["evidence"], (
+                f"{model_id}.{dimension} carries the placeholder evidence "
+                "string — write the review, or record the level with a "
+                "reason specific to this model"
+            )
+            if judgement["level"] == "not_assessed":
+                assert judgement["next_gate"].strip(), (
+                    f"{model_id}.{dimension} is not_assessed with no "
+                    "next_gate, so nothing says what would settle it"
+                )
+            assert judgement["evidence"].strip(), (
+                f"{model_id}.{dimension} has an empty evidence string"
+            )
