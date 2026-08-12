@@ -172,7 +172,7 @@
           </tr>
           <tr>
             <th scope="row">Clean-room milestone 2 — §3.2&ndash;3.3 macro and production block</th>
-            <td>IN PROGRESS — §3.2, §3.3.1 and §3.3.2 landed (118 eqs); §3.3.3 + oracle outstanding, so not passed<strong>IN PROGRESS</strong> — §3.2 landed; not passed (<a href="#reimplementation">section 05</a>)</td>
+            <td><strong>IN PROGRESS</strong> — §3.2, §3.3.1 and §3.3.2 landed (118 eqs); §3.3.3 + oracle outstanding, so not passed (<a href="#reimplementation">section 05</a>)</td>
             <td>2026-08-11</td>
             <td><code>tests/test_macro.py</code></td>
           </tr>
@@ -274,7 +274,7 @@
           ΔGDP of 209.9 over cumulative ΔSPEND_GVT of 118.2, nominal, over the
           full simulation (<code>define_uk.validation.gpi_multiplier</code>,
           pinned in the test suite). IMF estimates of green-spending
-          multipliers run 1.1&ndash;1.5 (Batini et al. 2021); the OBR's
+          multipliers run 1.1&ndash;1.5; the OBR's
           capital-spending impact multiplier is &asymp;1.0. Ours sits above
           but near the IMF range, as the demand-led closure predicts, and is
           labelled accordingly wherever a delta is served.
@@ -389,12 +389,17 @@
         §3.2, §3.3.1 and §3.3.2 have landed: <code>model/sectors/macro.py</code>, <code>production.py</code> and <code>power.py</code> implement Eqs.&nbsp;(21)&ndash;(138) &mdash; <strong>118 equations, contiguous</strong> &mdash; each solving as a system under its own test module. §3.3.3 input&ndash;output and the oracle baseline comparison remain outstanding, so milestone 2 is <strong>not passed</strong>.</p>
       <p>
         Reimplementation is already earning its keep as a reading of the
-        manual that the R source cannot give: <strong>some thirty-five manual defects
-        are now pinned in tests</strong> rather than papered over or absorbed
-        into a tolerance.
+        manual that the R source cannot give: <strong>thirteen manual defects
+        are pinned in tests</strong> as machine-readable gap records rather
+        than papered over or absorbed into a tolerance, with the wider set
+        written up in the reimplementation notes. An audit of those notes
+        also re-characterised four findings that were reading as the manual
+        contradicting itself: Table 5 describes the parameters concerned as
+        historical means, never claimed to reproduce the manual's own initial
+        period, so those are first-period jumps rather than defects.
       </p>
       <details class="more">
-        <summary>The three pinned manual defects</summary>
+        <summary>Three of the pinned manual defects, worked through</summary>
         <p>
           <strong>Table&nbsp;6 LENDM_ROW</strong> omits the DIVN_ROW term of
           Eq.&nbsp;(383), so the MFI/RoW transaction columns miss LEND by
@@ -454,15 +459,5 @@
   </nav>
 </footer>
 <script src="/reveal.js?v=2" defer></script>
-<script>
-document.addEventListener("click", function (e) {
-  var btn = e.target.closest("[data-copy]"); if (!btn) return;
-  var code = btn.parentElement.querySelector("code");
-  navigator.clipboard.writeText(code.textContent).then(function () {
-    btn.textContent = "copied";
-    setTimeout(function () { btn.textContent = "copy"; }, 1400);
-  });
-});
-</script>
 </body>
 </html>

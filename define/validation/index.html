@@ -55,7 +55,7 @@
     <div class="hero-inner">
       <p class="eyebrow reveal" style="--d:0">model 07 — ecological stock-flow consistent · define-uk · UK · experimental</p>
       <h1 class="reveal page-title" style="--d:1;">
-        Validated to the ceiling the publications allow.
+        Validated where the publications allow it, and no further.
       </h1>
       <p class="lede reveal" style="--d:2">
         The manual's macro block replicates; the emissions path diverges and
@@ -94,7 +94,7 @@
           <tr>
             <th scope="row">Manual Table&nbsp;4, macro block — real GDP growth, unemployment, population 16+, labour force at 2025/2030/2040, S1 baseline</th>
             <td>population and labour force &plusmn;0.01m; growth &plusmn;0.31pp; unemployment &plusmn;0.2pp</td>
-            <td><strong>PASS</strong> (2026-08-04) — growth exact at 2030/2040, &minus;0.30pp at 2025</td>
+            <td><strong>PASS</strong> (2026-08-04) — growth exact at 2030/2040, &minus;0.30pp at 2025 against a &plusmn;0.31pp gate: passing by 0.01pp is not the same as matching</td>
           </tr>
           <tr>
             <th scope="row">Manual Table&nbsp;4, total emissions, S1 baseline</th>
@@ -109,7 +109,7 @@
           <tr>
             <th scope="row">FMM-2023 anchors — green public investment GDP peak; baseline 2030 emissions</th>
             <td>wide (pre-1.0 vintage): GDP peak 0.7&ndash;1.3%; emissions 330&ndash;352 MtCO2e</td>
-            <td><strong>PASS</strong> — peak +0.92% vs published &asymp;+1%; 342.8 vs &ldquo;just under 350&rdquo;</td>
+            <td><strong>PASS</strong> — peak +0.92% vs published &asymp;+1%; 342.8 vs &ldquo;just under 350&rdquo;. The tests assert membership of the wide bands, not these two figures</td>
           </tr>
           <tr>
             <th scope="row">Published numeric scenario results for v1.1</th>
@@ -235,11 +235,22 @@
         Our own computation of the model's cumulative
         green-public-investment multiplier — cumulative ΔGDP over cumulative
         ΔSPEND_GVT, nominal, over the full simulation — is
-        <strong>1.78</strong>. IMF estimates of green-spending multipliers
-        run 1.1&ndash;1.5 (Batini et al. 2021); the OBR's capital-spending
-        impact multiplier is &asymp;1.0. Above but near the IMF range, as the
-        demand-led closure predicts, and labelled accordingly wherever a
-        delta is served.
+        <strong>1.78</strong>. It is <em>not</em> comparable to the published
+        green-spending multipliers it sat beside here — an IMF range of
+        1.1&ndash;1.5 and the OBR's &asymp;1.0 capital-spending impact
+        multiplier. Three things all push the same way. Ours is a
+        <em>cumulative ratio to 2040</em> set against short-horizon
+        multipliers. Its denominator <code>SPEND_GVT</code> is
+        <em>endogenous</em>: government investment is only 12.8% of it, and
+        social benefits fall when unemployment does, so a scenario that cuts
+        unemployment shrinks the denominator and biases the ratio up. And the
+        closure is demand-led with Kaldor&ndash;Verdoorn productivity and real
+        GDP not held to a supply ceiling, so a ratio above 1 over fifteen
+        years is what the model implies rather than a finding. The clean
+        comparison — cumulative ΔGDP over cumulative ΔGCF_GVTG — has not been
+        computed; until it is, treat 1.78 as upper-leaning. The caveats travel
+        with every served delta (<code>GPI_MULTIPLIER_CAVEATS</code>, gated by
+        test).
       </p>
       <p>
         The upstream repository's own <code>Multiplier_Summary.csv</code> is

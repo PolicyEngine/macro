@@ -477,3 +477,35 @@ def test_the_suite_actually_found_the_site(pages):
 def test_deployment_configuration_files_exist(repo_root, required):
     """The three files that define how the site is served must be present."""
     assert (repo_root / required).is_file(), f"{required} is missing from the repo root"
+
+
+# ------------------------------------------------- 7. shared page behaviour
+
+def test_copy_buttons_have_a_handler_that_will_run(page):
+    """A page that renders a copy button must load the script that binds it.
+
+    The handler was pasted verbatim into fourteen pages plus a variant inside
+    /connect's own IIFE, and omitted from models/index.html — which renders a
+    copy button in #score, the target of fifteen "how to score a reform" links
+    from across the site. The button looked live and did nothing. It is one
+    delegated listener in reveal.js now, so the failure mode this test guards
+    is the reverse: a page that renders the button without loading the file.
+    """
+    if "data-copy" not in page.source:
+        return
+    assert "/reveal.js" in page.source, (
+        f"{page.rel} renders a [data-copy] button but does not load "
+        "/reveal.js, so the button does nothing when clicked"
+    )
+
+
+def test_no_page_rebinds_the_shared_copy_handler(page):
+    """Two listeners on one button means two clipboard writes per click.
+
+    Re-pasting the handler into a page is the natural thing to do when adding
+    a code block, and nothing about the page would look wrong afterwards.
+    """
+    assert 'closest("[data-copy]")' not in page.source, (
+        f"{page.rel} defines its own [data-copy] click handler; reveal.js "
+        "already binds one for every page, and both would fire"
+    )

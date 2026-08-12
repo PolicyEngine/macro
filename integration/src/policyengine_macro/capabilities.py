@@ -246,24 +246,38 @@ MODEL_QUALITY = {
         ),
         "predictive_validation": _quality(
             "weak",
-            "Against a no-change random walk the model looked strong on CPI "
-            "(0.63 at h=1), but a driftless walk on a trending log level is "
-            "too weak a benchmark: against a random walk WITH DRIFT the CPI "
-            "ratio becomes 0.83 at h=1 and 1.03 at h=8, i.e. no better than "
-            "naive. Bank Rate is the one series that improves under the "
-            "harder benchmark (0.79 at h=1, p=0.018) and is the defensible "
-            "forecasting claim. UK GDP is not distinguishable from either "
-            "benchmark (p=0.38-0.67), and excluding six Covid-target origins "
-            "its ratio falls to 0.77. The frozen-edge run gives 0.32pp RMSE "
-            "from a single origin.",
+            "No demonstrated skill against a random walk WITH DRIFT on any "
+            "variable at any horizon once the 64 variable-by-horizon tests "
+            "are adjusted together: minimum Benjamini-Hochberg q = 0.36, and "
+            "0.40 under the published specification. A driftless walk on a "
+            "trending log level is too weak a benchmark, so the strong-looking "
+            "CPI result (0.63 at h=1) becomes 0.83 at h=1 and 1.03 at h=8 "
+            "against drift. Bank Rate comes closest (0.79 at h=1, unadjusted "
+            "p=0.018 -- the smallest of the 64) but does not survive the "
+            "adjustment. UK GDP is not distinguishable from drift at any "
+            "horizon (p=0.33-0.43). Two caveats on figures quoted elsewhere: "
+            "the ex-Covid ratio of 0.77 and the p=0.38-0.67 range are against "
+            "the weaker no-change benchmark, not drift. Separately, the "
+            "rolling evaluation had estimated without the six Covid dummies "
+            "that every published forecast carries; under the published "
+            "specification UK GDP goes 1.06 to 0.99 at h=1 and 1.12 to 0.95 "
+            "at h=8 -- level with naive rather than worse, still not better. "
+            "The frozen-edge run gives 0.32pp RMSE from a single origin.",
             "Score the predictive densities rather than point forecasts, "
             "report rolling interval coverage, and re-run once the estimation "
             "sample extends past the Covid dummies.",
         ),
         "identification_robustness": _quality(
             "moderate",
-            "Headline FEVD shares replicate the paper in the weighted production "
-            "run, but proxy world data and undisclosed source settings matter.",
+            "On the paper's own definition -- the posterior mean of the "
+            "per-draw group share of TOTAL forecast-error variance, four "
+            "quarters ahead -- UK GDP replicates (37.4% against ~40%) and UK "
+            "CPI falls about 8pp short (42.3% against ~50%). The earlier "
+            "match on both came from summing per-shock medians and "
+            "renormalising them to 100%, which inflated the identified shares "
+            "by about a third. The 68% posterior band is roughly +/-14pp, "
+            "wider than the shortfall, and proxy world data and undisclosed "
+            "source settings matter.",
             "Show conclusions across lag, prior, proxy-data and weighting grids "
             "with effective-sample-size diagnostics.",
         ),
@@ -332,7 +346,7 @@ MODEL_QUALITY = {
         "implementation_fidelity": _quality(
             "strong",
             "Built directly on the authors' sequence-jacobian toolkit at the "
-            "paper's production grids; the model repo's 18-test suite gates "
+            "paper's production grids; the model repo's replication suite gates "
             "steady-state targets, market clearing, and shock responses "
             "against the published Econometrica 2021 results.",
             "Keep the replication gates hard-failing and extend them across "
@@ -645,10 +659,28 @@ def list_capabilities() -> list[dict]:
     return [{"model_id": model_id, **deepcopy(data)} for model_id, data in MODELS.items()]
 
 
+# Public site names that are not registry keys. site_id exists so pages render
+# one name per model; without the reverse mapping the alias was one-directional
+# — every page said psl-og and get_status("psl-og") raised, so a reader taking
+# the documented name into the documented API hit a hard error whose message
+# did not connect the two.
+SITE_ID_TO_KEY = {
+    model["site_id"]: key for key, model in MODELS.items() if model.get("site_id")
+}
+
+
+def resolve_model_id(model_id: str) -> str:
+    """Registry key for a registry key or a public site name."""
+    return SITE_ID_TO_KEY.get(model_id, model_id)
+
+
 def get_status(model_id: str) -> dict:
-    if model_id not in MODELS:
-        raise ValueError(f"unknown model_id {model_id!r}; choose one of {sorted(MODELS)}")
-    return {"model_id": model_id, **deepcopy(MODELS[model_id])}
+    key = resolve_model_id(model_id)
+    if key not in MODELS:
+        known = sorted(set(MODELS) | set(SITE_ID_TO_KEY))
+        raise ValueError(f"unknown model_id {model_id!r}; choose one of {known}")
+    # Echo the key, so a caller who passed a site name learns the contract id.
+    return {"model_id": key, **deepcopy(MODELS[key])}
 
 
 def recommend(

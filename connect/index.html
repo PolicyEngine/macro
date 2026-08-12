@@ -285,7 +285,9 @@
       <p class="lede reveal" style="--d:2;">
         Three routes to the same models. Start with MCP below — it needs no
         install, no PolicyEngine account and no API key, though some clients
-        gate custom connectors by plan. Use the CLI or Python when you want the
+        gate custom connectors by plan. That is true of the hosted route; a
+        <em>local</em> UK population or reform-scoring run additionally needs a
+        HuggingFace token, as below. Use the CLI or Python when you want the
         models in a script, or need one of the local-only members.
       </p>
     </div>
@@ -368,10 +370,19 @@
           takes around 20 seconds while the tax-benefit models load; a UK
           forecast runs a couple of minutes on first call. Other tools
           respond faster.</span></p>
+        <p class="vmet-notes-line"><span class="vmet-notes-key">uk microdata</span>
+          <span>Running a UK <em>population</em> or reform score locally needs
+          <code>HUGGING_FACE_TOKEN</code> from an account with access to the
+          private <code>policyengine/policyengine-uk-data-private</code>
+          dataset. UK household calls, every US call, and every hosted call
+          need nothing.</span></p>
         <p class="vmet-notes-line"><span class="vmet-notes-key">local only</span>
           <span>OG-UK long-run scoring (<code>score_reform</code> with
           <code>model='og'</code>) and <code>dynamic_reform_impact</code> take
-          tens of minutes — the hosted server points you to the local CLI.
+          tens of minutes and are excluded from the hosted image;
+          <code>dynamic_reform_impact</code> returns the two-step local recipe,
+          while <code>model='og'</code> returns an import error — use the local
+          CLI for both.
           The three <code>define_*</code> tools likewise return run instructions rather than results when called on the hosted server &mdash; the unlicensed upstream is never hosted. Everything else here runs hosted.</span></p>
       </div>
     </div>
@@ -443,7 +454,7 @@
       </div>
       <div class="model-pane compact-pane" id="model-panel-ogmicro" role="tabpanel" aria-labelledby="model-tab-ogmicro" data-model="ogmicro" hidden>
         <span class="tag tag-local">local only</span><h3>Dynamic reform scoring</h3>
-        <p>Experimental, UK only: an OG-UK steady-state solve feeds long-run wage changes back into a second microsimulation run. Local only, and until <a href="https://github.com/PSLmodels/OG-UK/issues/68">OG-UK#68</a> the solve needs its own environment — run <code>pe-macro og-score --json &gt; og.json</code> there, then <code>pe-macro dynamic-score --og-payload og.json</code>.</p>
+        <p>Experimental, UK only: an OG-UK steady-state solve feeds long-run wage changes back into a second microsimulation run. Local only, and until <a href="https://github.com/PSLmodels/OG-UK/issues/68">OG-UK#68</a> the solve needs its own environment — run <code>pe-macro og-score --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --json &gt; og.json</code> there, then <code>pe-macro dynamic-score --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --og-payload og.json</code> &mdash; both steps need the same <code>--reform</code>.</p>
         <a class="btn btn-primary" href="/olg/code#run">Open dynamic scoring setup</a>
       </div>
       <div class="model-pane compact-pane" id="model-panel-define" role="tabpanel" aria-labelledby="model-tab-define" data-model="define" hidden>
@@ -529,15 +540,6 @@
     });
   }
 
-  document.addEventListener("click", function (e) {
-    var btn = e.target.closest("[data-copy]"); if (!btn) return;
-    var container = btn.closest(".code-window") || btn.parentElement;
-    var code = container.querySelector("code");
-    navigator.clipboard.writeText(code.textContent).then(function () {
-      btn.textContent = "copied";
-      setTimeout(function () { btn.textContent = "copy"; }, 1400);
-    });
-  });
 })();
 </script>
 <script>

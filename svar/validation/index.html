@@ -91,14 +91,19 @@
         <thead><tr><th scope="col">check</th><th scope="col">this replication</th><th scope="col">the paper</th></tr></thead>
         <tbody>
           <tr>
-            <th scope="row">Global shocks' share of UK GDP variance (1 year)</th>
-            <td><strong>42.1%</strong></td>
+            <th scope="row">Global shocks' share of UK GDP variance (4 quarters)</th>
+            <td><strong>37.4%</strong> <span class="mono">[23.4, 52.2]</span> 68%</td>
             <td>~40%</td>
           </tr>
           <tr>
-            <th scope="row">Global shocks' share of UK CPI variance (1 year)</th>
-            <td><strong>49.5%</strong></td>
+            <th scope="row">Global shocks' share of UK CPI variance (4 quarters)</th>
+            <td><strong>42.3%</strong> <span class="mono">[25.5, 60.3]</span> 68% &mdash; about 8pp short</td>
             <td>~50%</td>
+          </tr>
+          <tr>
+            <th scope="row">Identified shocks' total share, UK GDP / UK CPI</th>
+            <td>76.3% / 78.9%</td>
+            <td>&ldquo;around 80%&rdquo;</td>
           </tr>
           <tr>
             <th scope="row">IRFs, FEVDs, shocks, historical decompositions</th>
@@ -116,9 +121,9 @@
             <td>—</td>
           </tr>
           <tr>
-            <th scope="row">Forecast-revision adding-up identity</th>
+            <th scope="row">Forecast-revision adding-up identity <span class="vc-note">(software check, not an agreement)</span></th>
             <td>exact per draw (max abs error 5.23e-12)</td>
-            <td>holds by construction</td>
+            <td>holds by construction &mdash; it cannot disagree, and is here only to catch a coding regression</td>
           </tr>
         </tbody>
       </table></div>
@@ -161,8 +166,12 @@
         forecast archive's append-only rule are <strong>gated</strong> — CI
         fails if they break. The 49-origin rolling evaluation and the
         band-coverage study were <strong>computed once</strong> on real data
-        and are refreshed manually when the code or data change. Both are
-        real evidence; only the first kind is continuously enforced.
+        and are refreshed manually when the code or data change. Only the
+        first kind is continuously enforced &mdash; and within it, the
+        sign and zero restrictions are <em>imposed</em> by the identification
+        scheme, so that gate protects the software and cannot be evidence
+        about the economy. The FEVD shares and the two studies are the
+        substantive evidence here.
       </div>
   </section>
 
@@ -180,7 +189,7 @@
       <figure class="vfig">
         <svg class="vchart" data-chart="svar-fevd" viewBox="0 0 760 304" role="img" aria-labelledby="svar-fevd-t svar-fevd-d">
 <title id="svar-fevd-t">boe-svar: global-shock FEVD shares, ours vs Brignone &amp; Piffer (2025)</title>
-<desc id="svar-fevd-d">Grouped bar chart. Share of UK forecast-error variance attributed to identified global shocks (world demand, energy and supply) at the one-year horizon. For GDP, our 10,000-draw production run gives 42.1% against the paper's 40.0%; for CPI, 49.5% against 50.0%. Both deviations are a percentage point or less. The paper's values are approximate.</desc>
+<desc id="svar-fevd-d">Grouped bar chart. Share of UK forecast-error variance attributed to identified global shocks (world demand, energy and supply) four quarters ahead, as a share of total variance — the statistic the paper's Figure 4 plots. For GDP, our 10,000-draw production run gives 37.4% against the paper's 40.0%, a match; for CPI, 42.3% against 50.0%, about eight points short. The posterior band on each is roughly plus or minus fourteen points, wider than the shortfall. The paper's values are approximate.</desc>
 <line class="vc-axis" x1="64" y1="258.0" x2="724" y2="258.0"/>
 <text class="vc-tick" x="54" y="262.0" text-anchor="end">0%</text>
 <line class="vc-grid" x1="64" y1="180.7" x2="724" y2="180.7"/>
@@ -189,15 +198,15 @@
 <text class="vc-tick" x="54" y="107.3" text-anchor="end">40%</text>
 <line class="vc-grid" x1="64" y1="26.0" x2="724" y2="26.0"/>
 <text class="vc-tick" x="54" y="30.0" text-anchor="end">60%</text>
-<rect class="vc-b1" x="141.9" y="95.2" width="79.2" height="162.8"/>
-<text class="vc-val" x="181.5" y="87.2" text-anchor="middle">42.1</text>
+<rect class="vc-b1" x="141.9" y="113.4" width="79.2" height="144.6"/>
+<text class="vc-val" x="181.5" y="105.4" text-anchor="middle">37.4</text>
 <text class="vc-tick" x="181.5" y="276" text-anchor="middle">ours</text>
 <rect class="vc-b2" x="233.0" y="103.3" width="79.2" height="154.7"/>
 <text class="vc-val" x="272.6" y="95.3" text-anchor="middle">40.0</text>
 <text class="vc-tick" x="272.6" y="276" text-anchor="middle">paper</text>
 <text class="vc-lab" x="229.0" y="296" text-anchor="middle">UK GDP, 1-yr horizon</text>
-<rect class="vc-b1" x="471.9" y="66.6" width="79.2" height="191.4"/>
-<text class="vc-val" x="511.5" y="58.6" text-anchor="middle">49.5</text>
+<rect class="vc-b1" x="471.9" y="94.4" width="79.2" height="163.6"/>
+<text class="vc-val" x="511.5" y="86.4" text-anchor="middle">42.3</text>
 <text class="vc-tick" x="511.5" y="276" text-anchor="middle">ours</text>
 <rect class="vc-b2" x="563.0" y="64.7" width="79.2" height="193.3"/>
 <text class="vc-val" x="602.6" y="56.7" text-anchor="middle">50.0</text>
@@ -207,29 +216,48 @@
         <figcaption>Global shocks = world demand + energy + supply. Ours = 10,000-draw production run; paper values approximate. Global-shock FEVD shares at the one-year horizon: the production run against the paper's published values. Source: <code>papers/boe-svar/figures/comparison_numbers.json</code> and the paper's validation table.</figcaption>
       </figure>
       <details class="more">
-        <summary>Why the fast CI configuration lands 6&ndash;10 points off</summary>
+        <summary>What this comparison is measuring, and how noisy it is</summary>
       <p>
-        The deliberately cheap unweighted CI configuration lands at 49.6% and
-        43.8% — 6&ndash;10 points off, in opposite directions for the two
-        variables. That gap is itself informative rather than embarrassing:
-        the importance weights correct the Arias et al. (2018)
-        zero-restriction sampler towards the uniform-over-rotations
-        posterior, and applying them moves both shares substantially towards
-        the published values, though on the 2026Q1 vintage GDP still lands
-        2.1 points high. Both configurations sit inside the wide [30, 60]% acceptance
-        band that CI enforces, which is chosen to catch gross regressions
-        without being flaky to Monte-Carlo variation.
+        The paper's Figure 4 plots the <em>mean of the sum</em> of the
+        decomposition, and its note attributes the gap to 100% to the two
+        unidentified shocks &mdash; so its shares are posterior means of
+        shares of <em>total</em> forecast-error variance, with roughly a fifth
+        left unexplained. Earlier rounds here published a different quantity:
+        the sum of per-shock posterior <em>medians</em>, renormalised to 100%.
+        Those medians sum to about 0.62 for GDP and 0.71 for CPI, so
+        renormalising inflated every identified share by about a third. That
+        step, not the model, produced the previous 49.5% CPI figure against
+        the paper's ~50%. The horizon was also read one column late: column
+        <code>h</code> of the decomposition holds the (h+1)-step variance, so
+        &ldquo;one year&rdquo; was five quarters.
+      </p>
+      <p>
+        The CI configuration is deliberately cheap &mdash; 600 unweighted
+        draws, of which about 50 are accepted &mdash; and it is a noisy
+        estimator rather than a second opinion: across sampling seeds its
+        global GDP share has a standard deviation of about 6.5 percentage
+        points. Both configurations sit inside the wide [30, 60]% acceptance
+        band CI enforces, which is chosen to catch gross regressions without
+        being flaky to Monte-Carlo variation. The production run is adequately
+        converged: quadrupling it to 40,000 draws moves both shares by about a
+        point.
       </p>
       <div class="table-scroll mo-tablecard">
       <table>
-        <caption>boe-svar global-shock FEVD shares against Brignone &amp; Piffer (2025)</caption>
-        <thead><tr><th scope="col">Global share, 1-yr FEVD</th><th scope="col">Paper</th><th scope="col">CI config (fast)</th><th scope="col">Production (10k draws)</th><th scope="col">Deviation, CI / production</th></tr></thead>
+        <caption>boe-svar global-shock FEVD shares against Brignone &amp; Piffer (2025), on the paper's definition</caption>
+        <thead><tr><th scope="col">Global share, 4-quarter FEVD</th><th scope="col">Paper</th><th scope="col">CI config (fast, ~50 draws)</th><th scope="col">Production (10k draws)</th><th scope="col">Production 68% band</th></tr></thead>
         <tbody>
-          <tr><th scope="row">UK GDP</th><td>~40%</td><td>49.6%</td><td>42.1%</td><td>+9.6 / +2.1 pp</td></tr>
-          <tr><th scope="row">UK CPI</th><td>~50%</td><td>43.8%</td><td>49.5%</td><td>&minus;6.2 / &minus;0.5 pp</td></tr>
+          <tr><th scope="row">UK GDP</th><td>~40%</td><td>42.0%</td><td>37.4%</td><td>[23.4, 52.2]</td></tr>
+          <tr><th scope="row">UK CPI</th><td>~50%</td><td>37.6%</td><td>42.3%</td><td>[25.5, 60.3]</td></tr>
         </tbody>
       </table>
       </div>
+      <p>
+        The band is the point: it is about &plusmn;14pp wide, so the 8pp CPI
+        shortfall is inside a single posterior interval. It is a real gap on
+        the paper's own definition and is reported as one, but it is not
+        resolvable at this sample size.
+      </p>
       </details>
       <p>
         <strong>Out-of-sample.</strong> Forecasting seven quarters ahead from
@@ -312,7 +340,8 @@
         evaluates 49 historical origins without future-data leakage; the full
         benchmark treatment is in the
         <a href="#forecasters">forecast-accuracy section below</a>. The short
-        version: Bank Rate is the only defensible forecasting claim, and the
+        version: no variable clears a 10% false-discovery rate against a
+        drifting random walk once the 64 tests are adjusted together, and the
         single frozen-edge result must not be read as broad forecast
         superiority.
       </p>
@@ -406,9 +435,13 @@
       </p>
 
       <p>
-        <strong>Bank Rate is the only robust forecasting win.</strong> CPI
-        loses its advantage against a drift benchmark; GDP does not beat that
-        benchmark over the full sample, and Covid dominates squared error.
+        <strong>No forecasting win survives the number of tests run.</strong>
+        Bank Rate is the closest thing to one &mdash; 0.79 against a drift
+        benchmark at one quarter &mdash; but that is the smallest of 64
+        variable&times;horizon tests, and once they are adjusted together
+        nothing clears a 10% false-discovery rate. CPI's advantage is a
+        benchmark artefact, and GDP's full-sample loss turns out to be a Covid
+        artefact.
       </p>
       <details class="more">
       <summary>Benchmark and sample diagnostics</summary>
@@ -434,22 +467,46 @@
         the benchmark rather than a finding about the model.
       </p>
       <p>
-        <strong>What survives is Bank Rate.</strong> It is the one series here
-        that does not trend, so no-change <em>is</em> the right naive for it,
-        and it is the one series that improves under the harder benchmark:
-        <strong>0.79 against drift at one quarter</strong> (Diebold&ndash;Mariano
-        p&nbsp;=&nbsp;0.018) and 0.85 at eight. On the evidence assembled here
-        that, not inflation, is the model's defensible forecasting claim.
+        <strong>Bank Rate comes closest, and still does not clear the bar.</strong>
+        It is the one series here that does not trend, so no-change <em>is</em>
+        the right naive for it, and it is the one series that improves under
+        the harder benchmark: <strong>0.79 against drift at one quarter</strong>
+        and 0.85 at eight. Its Diebold&ndash;Mariano p of 0.018 is the number
+        this page used to lead with &mdash; but the evaluation runs 64 tests
+        per benchmark, and the smallest of 64 p-values is not a discovery.
+        Adjusting the whole grid together (Benjamini&ndash;Hochberg), the
+        minimum q-value against drift is <strong>0.36</strong>, and 0.40 under
+        the published specification below. <strong>Nothing survives at a 10%
+        false-discovery rate, on any variable at any horizon.</strong>
       </p>
       <p>
-        <strong>UK GDP is not beaten by the benchmark either.</strong> Its
-        ratio of 1.06&ndash;1.09 is not statistically distinguishable from a
-        random walk at any horizon (p&nbsp;=&nbsp;0.38 to 0.67), and excluding
-        the six origins whose target quarter falls in 2020Q1&ndash;2021Q2 it
-        becomes <strong>0.77</strong> at one quarter. Under squared loss the
-        2020Q2 collapse dominates a 49-origin average. Both the full-sample
-        and the excluding-Covid figures are published; neither is the
-        preferred number.
+        <strong>The evaluation was scoring a model this site does not
+        publish.</strong> Every forecast shown here is estimated with six
+        Covid dummies (2020Q1&ndash;2021Q2); the rolling evaluation had always
+        left them out, so 2020Q2 entered the likelihood as an ordinary
+        observation. Re-run on the published specification, UK GDP against
+        drift goes <strong>1.06 &rarr; 0.99</strong> at one quarter and
+        <strong>1.12 &rarr; 0.95</strong> at eight, and its ex-Covid one-quarter
+        ratio goes 1.21 &rarr; 0.97. CPI moves by less than 0.02 and Bank Rate
+        by less than 0.02, so the inflation weakness is <em>not</em> a Covid
+        artefact while the GDP weakness substantially was. The dummies are
+        real-time safe: a dummy column for a quarter after the origin is
+        identically zero in training. Both blocks are published in the source
+        file; the charts below still show the headline (no-dummy) block, and
+        the published-spec ratios are the ones to weight.
+      </p>
+      <p>
+        <strong>UK GDP is still not distinguishable from the benchmark.</strong>
+        Its drift-benchmark ratios are not statistically separable at any
+        horizon (p&nbsp;=&nbsp;0.33 to 0.43), and that is true in both
+        specifications &mdash; moving from worse-than-naive to level with it is
+        not the same as beating it. Two numbers this page previously placed in
+        a drift-benchmark paragraph belong to the weaker no-change benchmark:
+        the p&nbsp;=&nbsp;0.38&ndash;0.67 range, and the ex-Covid
+        <strong>0.77</strong>, which against drift is <strong>1.21</strong>.
+        Under squared loss the 2020Q2 collapse dominates a 49-origin average;
+        both the full-sample and the excluding-Covid figures are published, and
+        neither is the preferred number.
       </p>
       <p class="vc-note">
         The AR(1) comparison is reported in the source file but is
@@ -463,7 +520,7 @@
       <figure class="vfig">
         <svg class="vchart" data-chart="svar-skill-all" viewBox="0 0 760 404" role="img" aria-labelledby="svar-skill-all-t svar-skill-all-d">
 <title id="svar-skill-all-t">boe-svar forecast skill against a random walk with drift, all eight variables</title>
-<desc id="svar-skill-all-d">Dot matrix of forecast error relative to a random walk with drift, eight variables by eight quarterly horizons, from 49 expanding-window origins. A ratio below 1.0 means the model beats the benchmark; filled dots mark differences significant at 5 per cent by a Diebold-Mariano test, hollow dots differences that are not statistically distinguishable. Bank Rate runs 0.79 at one quarter to 0.85 at 8; UK CPI runs 0.83 at one quarter to 1.03 at 8; World CPI runs 0.94 at one quarter to 1.07 at 8; Oil price runs 1.01 at one quarter to 0.98 at 8; CPI energy runs 0.98 at one quarter to 1.11 at 8; UK real GDP runs 1.06 at one quarter to 1.12 at 8; World GDP runs 1.07 at one quarter to 1.10 at 8; Exchange rate runs 1.03 at one quarter to 1.33 at 8. Bank Rate is the best at the longest horizon and Exchange rate the worst. Against this harder benchmark only four of eight variables beat naive at one quarter and two at 8.</desc>
+<desc id="svar-skill-all-d">Dot matrix of forecast error relative to a random walk with drift, eight variables by eight quarterly horizons, from 49 expanding-window origins. A ratio below 1.0 means the model beats the benchmark; filled dots mark differences significant at 5 per cent by a Diebold-Mariano test, hollow dots differences that are not statistically distinguishable; those p-values are pairwise and the grid runs 64 tests, none of which clears a 10 per cent false-discovery rate once adjusted together. Bank Rate runs 0.79 at one quarter to 0.85 at 8; UK CPI runs 0.83 at one quarter to 1.03 at 8; World CPI runs 0.94 at one quarter to 1.07 at 8; Oil price runs 1.01 at one quarter to 0.98 at 8; CPI energy runs 0.98 at one quarter to 1.11 at 8; UK real GDP runs 1.06 at one quarter to 1.12 at 8; World GDP runs 1.07 at one quarter to 1.10 at 8; Exchange rate runs 1.03 at one quarter to 1.33 at 8. Bank Rate is the best at the longest horizon and Exchange rate the worst. Against this harder benchmark only four of eight variables beat naive at one quarter and two at 8.</desc>
 <text class="vc-lab" x="150" y="30">RMSE &divide; drifting-random-walk RMSE &middot; horizons 1&ndash;8 quarters</text>
 <text class="vc-note" x="150" y="48">filled = difference significant at 5% (Diebold&ndash;Mariano); hollow = not distinguishable</text>
 <line class="vc-grid" x1="194.2" y1="62" x2="194.2" y2="362"/>
@@ -569,7 +626,7 @@
 <circle cx="661.1" cy="344.0" r="4.0" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
 <text class="vc-val" x="671.1" y="348.0">1.33</text>
 </svg>
-        <figcaption>Expanding-window pseudo-out-of-sample error ratios against a random walk <strong>with drift</strong>, on the level of each series. A driftless walk is too weak a benchmark for a trending series, so this is the fair comparison; the no-change ratios are in the table below. 49 forecast origins, 2012Q1&ndash;2024Q1 (the window includes the Covid quarters); estimation sample from 1992Q1, data through 2026Q1; 4 lags. Estimation uses final revised data, so this is pseudo- rather than real-time out-of-sample. No single origin contributes more than 35% of any drift-benchmark squared error. Source: <code>papers/boe-svar/figures/rolling_evaluation.json</code>.</figcaption>
+        <figcaption>Expanding-window pseudo-out-of-sample error ratios against a random walk <strong>with drift</strong>, on the level of each series. A driftless walk is too weak a benchmark for a trending series, so this is the fair comparison; the no-change ratios are in the table below. 49 forecast origins, 2012Q1&ndash;2024Q1 (the window includes the Covid quarters); estimation sample from 1992Q1, data through 2026Q1; 4 lags. Estimation uses final revised data, so this is pseudo- rather than real-time out-of-sample. These ratios are concentrated in a few origins: in 16 of the 64 variable&ndash;horizon cells a single origin contributes more than 35% of the drift-benchmark squared error, peaking at <strong>63% for UK GDP at h=1</strong>, so individual ratios rest on far fewer effective observations than 49 origins suggests. Source: <code>papers/boe-svar/figures/rolling_evaluation.json</code> (<code>worst_origin_mse_share.drift</code>).</figcaption>
       </figure>
       <figure class="vfig">
         <svg class="vchart" data-chart="svar-winrate" viewBox="0 0 760 300" role="img" aria-labelledby="svar-winrate-t svar-winrate-d">
@@ -627,11 +684,11 @@
 <rect class="vc-b2" x="330" y="272" width="14" height="10"/><text class="vc-note" x="350" y="281">beats it, not significantly</text>
 <rect class="vc-b3" x="560" y="272" width="14" height="10"/><text class="vc-note" x="580" y="281">does not beat it</text>
 </svg>
-        <figcaption>Wins are counted at a ratio strictly below 1.0, which is a hard cut: a variable at 0.99 counts as a win and one at 1.01 does not, even though neither is distinguishable from the benchmark. That is why the significance split matters more than the count. Same 49 origins and benchmark as the chart above. Source: <code>papers/boe-svar/figures/rolling_evaluation.json</code>.</figcaption>
+        <figcaption>Wins are counted at a ratio strictly below 1.0, which is a hard cut: a variable at 0.99 counts as a win and one at 1.01 does not, even though neither is distinguishable from the benchmark. That is why the significance split matters more than the count &mdash; and the significance shown is pairwise, unadjusted for the 64 tests the grid runs. Under a Benjamini&ndash;Hochberg adjustment the significant-win count is zero at every horizon. Same 49 origins and benchmark as the chart above. Source: <code>papers/boe-svar/figures/rolling_evaluation.json</code>.</figcaption>
       </figure>
       <div class="table-scroll mo-tablecard">
       <table>
-        <caption>boe-svar forecast error relative to two naive benchmarks (ratio; below 1.0 beats the benchmark). Bold marks a win that is statistically significant; <abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr> marks any significant difference. All eight variables are shown &mdash; the four previously omitted were among the weakest.</caption>
+        <caption>boe-svar forecast error relative to two naive benchmarks (ratio; below 1.0 beats the benchmark). Bold marks a win that is statistically significant; <abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr> marks any significant difference. These are unadjusted pairwise p-values: the grid runs 64 tests per benchmark, and adjusting them together leaves nothing below a 10% false-discovery rate, so read a star as "worth a second look", not as a result. Ratios are the headline block, estimated without Covid dummies; the published specification carries them, and its UK GDP ratios are 0.99 / 0.99 / 0.97 / 0.95 against drift. All eight variables are shown &mdash; the four previously omitted were among the weakest.</caption>
         <thead><tr><th scope="col" rowspan="2">variable</th><th scope="col" colspan="2">h=1</th><th scope="col" colspan="2">h=2</th><th scope="col" colspan="2">h=4</th><th scope="col" colspan="2">h=8</th><th scope="col" rowspan="2">h=1 ex-Covid<br/>(vs no-change)</th></tr>
         <tr><th scope="col">vs drift</th><th scope="col">vs no-change</th><th scope="col">vs drift</th><th scope="col">vs no-change</th><th scope="col">vs drift</th><th scope="col">vs no-change</th><th scope="col">vs drift</th><th scope="col">vs no-change</th></tr></thead>
         <tbody>

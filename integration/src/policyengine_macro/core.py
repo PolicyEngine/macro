@@ -784,7 +784,8 @@ HANK_SHOCK_KINDS = [
         "input": "Z",
         "description": "Total factor productivity shock",
         "units": "level change in Z around its steady-state value "
-                 "(0.01 ~ a 1% impact TFP improvement)",
+                 "(a LEVEL change: steady-state Z is 0.468, so 0.01 is a "
+                 "~2.1% TFP improvement, not 1%)",
         "typical_size": 0.01,
         "variants": ["two_asset", "one_asset"],
     },
@@ -1084,7 +1085,7 @@ def hank_summary() -> dict:
         "runtime": "steady state ~13s and jacobian ~5s on first use per "
                    "variant, both cached in-process; IRFs are then instant",
         "validation": {
-            "suite": "the model repo's 18-test suite gates the steady-state "
+            "suite": "the model repo's replication suite gates the steady-state "
                      "calibration targets, market clearing, and shock-response "
                      "signs/magnitudes against the published paper results",
             "note": "a replication gate, not a forecast-accuracy claim: no "
@@ -3701,6 +3702,12 @@ SCORE_MODELS_WITHOUT_REFORM_BRIDGE["us-hank"] = (
 SCORE_MODELS_WITHOUT_REFORM_BRIDGE["define-uk"] = (
     SCORE_MODELS_WITHOUT_REFORM_BRIDGE["define"]
 )
+# The site prints "frb-us"; the registry key for the refusal was only "frbus",
+# so the id a reader copies off the page fell through to the bare enum error
+# while every other display id got the written-for-it explanation.
+SCORE_MODELS_WITHOUT_REFORM_BRIDGE["frb-us"] = (
+    SCORE_MODELS_WITHOUT_REFORM_BRIDGE["frbus"]
+)
 SCORE_MODELS_WITHOUT_REFORM_BRIDGE["boe-svar"] = (
     SCORE_MODELS_WITHOUT_REFORM_BRIDGE["svar"]
 )
@@ -3867,9 +3874,31 @@ def svar_summary() -> dict:
 
     if summary_path.exists():
         text = summary_path.read_text()
+        # Two FEVD tables, and which one a caller compares to the paper
+        # matters. ``fevd_1yr_headline`` is the sum of per-shock posterior
+        # medians renormalised to 100% — the historical presentation, kept
+        # for continuity. ``fevd_1yr_group_shares`` forms the group share on
+        # every accepted draw and reports its posterior mean, which is what
+        # the paper's Figure 4 plots ("the mean of the sum") and what its
+        # ~40% / ~50% refer to. Renormalising inflates the identified shares
+        # by about a third here, because the per-shock medians sum to ~0.62
+        # (GDP) and ~0.71 (CPI) rather than to 1.
+        #
+        # The heading match is a substring of the heading rather than the
+        # whole of it: the upstream heading gained "(4-quarter-ahead forecast
+        # error)" when the off-by-one was fixed, and an exact-ish match
+        # returned an empty table with no error anywhere.
         out["replication"] = {
             "metadata": _parse_kv_lines(text.split("##")[0]),
-            "fevd_1yr_headline": _parse_md_table(text, "FEVD at 1-year horizon"),
+            "fevd_1yr_headline": _parse_md_table(text, "FEVD at"),
+            "fevd_1yr_group_shares": _parse_md_table(
+                text, "Posterior of the group share"),
+            "fevd_note": (
+                "fevd_1yr_headline renormalises a sum of per-shock medians to "
+                "100%; compare fevd_1yr_group_shares (mean column) to the "
+                "paper, which reports shares of total variance and leaves "
+                "roughly 20% with the unidentified shocks."
+            ),
         }
     else:
         out["replication"] = {"error": f"missing {summary_path}"}

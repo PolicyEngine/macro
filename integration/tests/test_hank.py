@@ -95,7 +95,7 @@ def test_summary_reports_honest_framing_without_a_solve():
                   "not a forecaster", "first-order"):
         assert claim in framing, f"framing must state: {claim}"
     assert "Econometrica 2021" in summary["upstream"]
-    assert "18-test" in summary["validation"]["suite"]
+    assert "replication suite" in summary["validation"]["suite"]
     assert "endogenous" in summary["no_tax_or_transfer_instrument"]
     assert summary["provenance"]["model_id"] == "us-hank"
 

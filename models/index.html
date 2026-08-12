@@ -121,7 +121,7 @@
           <p>The Federal Reserve’s FRB/US model — 284 equations &mdash; 120 estimated behavioural equations and 164 identities &mdash; parsed from the Board’s own model file — is solved by damped Newton around the April 2026 LONGBASE baseline; you pick the lever and the policy rule, and read the deviation path quarter by quarter.</p>
           <div class="qa-facts">
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Levers: federal funds rate, government spending, transfers, taxes — each in its own units</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Replicates the Board’s dynamics to machine precision (residuals ~1e-8 or better)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Matches the Fed’s own pyfrbus across all 284 variables to <strong>~1&times;10<sup>&minus;8</sup></strong> &mdash; the Board’s own two releases differ from each other by 1.3&times;10<sup>&minus;8</sup>, so this sits at the reference implementation’s noise floor. Reproducing LONGBASE itself is an identity, not evidence</span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>VAR expectations only; a conditioning baseline, not a forecast</span></div>
           </div>
           <p class="qa-link"><a href="/frb-us">Open FRB/US &rarr;</a></p>
@@ -193,7 +193,7 @@
   <section id="compare" class="band">
     <div class="band-head">
       <span class="kicker mono">compare the models</span>
-      <h2>Seven models, side by side, side by side.</h2>
+      <h2>Seven models, side by side.</h2>
     </div>
     <div class="prose comparison-prose">
       <div class="table-scroll desktop-comparison comparison-table-wrap cmp-clamped" id="cmp-wrap">
@@ -264,19 +264,19 @@
             <th scope="row"><a href="/svar/validation"><strong>boe-svar</strong></a></th>
             <td>Replication with a published anchor</td>
             <td>Brignone &amp; Piffer (2025); ONS outturns</td>
-            <td>FEVD shares 42.1% / 49.5% vs the paper's ~40% / ~50%</td>
+            <td>FEVD shares 37.4% / 42.3% vs the paper's ~40% / ~50%</td>
           </tr>
           <tr>
             <th scope="row"><a href="/frb-us/validation"><strong>frb-us</strong></a></th>
             <td>Replication with a published anchor</td>
             <td>The Fed's LONGBASE and <code>pyfrbus</code>; published multiplier ranges</td>
-            <td>Tracks LONGBASE to machine precision (5.6&times;10<sup>&minus;17</sup>)</td>
+            <td>Matches the Fed&rsquo;s own pyfrbus to ~1&times;10<sup>&minus;8</sup> across 284 variables, its version-to-version noise floor</td>
           </tr>
           <tr>
             <th scope="row"><a href="/us-hank/validation"><strong>us-hank</strong></a></th>
             <td>Replication with a published anchor</td>
             <td>Auclert et al. (2021), via the authors' toolkit</td>
-            <td>18 gated tests: targets, market clearing, shock responses</td>
+            <td>Gated: steady-state targets, market clearing, shock responses</td>
           </tr>
           <tr>
             <th scope="row"><a href="/olg/validation"><strong>psl-og</strong></a></th>
@@ -306,21 +306,21 @@
         <tbody>
           <tr>
             <th scope="row">Long-run effect of a 1pp basic-rate rise (psl-og)</th>
-            <td>Not yet produced — open validation work</td>
+            <td>Not yet produced — the committed run is a transition path stopping at 2030, not a steady state, so it is not comparable to WP&nbsp;22's long-run figures. Open validation work</td>
             <td><a href="https://obr.uk/docs/dlm_uploads/Working_paper_22_A_new_UK_overlapping_generations_model.pdf">OBR Working Paper 22</a>, Table 5.1: GDP/person &minus;0.1%, labour supply &minus;0.2%, productivity +0.1%</td>
             <td><strong>Future benchmark</strong> — same scenario; the target we will be judged against, not a match claimed today</td>
           </tr>
           <tr>
-            <th scope="row">Cost of cutting the basic rate 1p, 2026&ndash;27 (obr-macro + pe)</th>
+            <th scope="row">Yield of a 1p rise in the basic rate, 2026&ndash;27 (obr-macro + pe)</th>
             <td>£6.46bn static</td>
             <td><a href="https://www.gov.uk/government/statistics/direct-effects-of-illustrative-tax-changes">HMRC ready reckoner</a> (June 2025): £6.9bn, rising to £8.2bn by 2028&ndash;29</td>
-            <td>Direct — &minus;6.4% in year one; HMRC's figure embeds behavioural response</td>
+            <td>Adjusted — &minus;6.4% in year one and below HMRC at every matched year; HMRC's figures are post-behavioural and built on administrative Survey of Personal Incomes data, ours is static and survey-based. A benchmark, not a validation</td>
           </tr>
           <tr>
-            <th scope="row">Government-purchases multiplier, year one (frb-us)</th>
-            <td>0.72 (inertial Taylor rule); 0.99 in year two with the funds rate fixed</td>
-            <td><a href="https://econweb.ucsd.edu/~vramey/research/Ramey_Fiscal_JEP.pdf">Ramey (JEP 2019)</a>: the literature sits "in a surprisingly narrow range of 0.6 to 1"</td>
-            <td>Direct — both estimates fall inside the survey range</td>
+            <th scope="row">Government-purchases multiplier (frb-us)</th>
+            <td>0.72 in year one (inertial Taylor rule); 0.90 in year two with the funds rate fixed</td>
+            <td><a href="https://econweb.ucsd.edu/~vramey/research/Ramey_Fiscal_JEP.pdf">Ramey (JEP 2019)</a>: estimates of the general government-purchases multiplier sit "in a surprisingly narrow range of 0.6 to 1"</td>
+            <td>Adjusted — both fall inside the survey range, but Ramey pools empirical estimates across horizons and monetary regimes, so neither of our two horizon- and rule-specific figures is matched to it. Against the tighter cross-model range for a pegged funds rate (1.1&ndash;1.2), our 0.90 sits below</td>
           </tr>
           <tr>
             <th scope="row">Income-tax multiplier (frb-us, US)</th>
@@ -352,7 +352,7 @@
       <a class="strategy-card" href="/papers/boe-svar"><header><span class="card-id mono">boe-svar</span><span class="tag-row"><span class="tag">working paper</span></span></header><p>The Bayesian structural VAR replication of Brignone &amp; Piffer (2025), its identification, and its forecast diagnostics.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
       <a class="strategy-card" href="/papers/frb-us"><header><span class="card-id mono">frb-us</span><span class="tag-row"><span class="tag">working paper</span></span></header><p>Parsing and solving the Fed's FRB/US model, with the machine-precision tracking evidence.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
       <a class="strategy-card" href="/papers/psl-og"><header><span class="card-id mono">psl-og</span><span class="tag-row"><span class="tag">working paper</span></span></header><p>The OG-UK calibration, tax-function estimation, and the limits of a model with no ground truth.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
-      <a class="strategy-card" href="/reports/us-hank-open-source"><header><span class="card-id mono">us-hank</span><span class="tag-row"><span class="tag">feasibility note</span></span></header><p>The open US HANK landscape — public code, data, citations and coverage — and why the Auclert et al. (2021) toolkit was the foundation to build on. Not a replication write-up: the 18-test replication gate is documented on the us-hank validation page.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
+      <a class="strategy-card" href="/reports/us-hank-open-source"><header><span class="card-id mono">us-hank</span><span class="tag-row"><span class="tag">feasibility note</span></span></header><p>The open US HANK landscape — public code, data, citations and coverage — and why the Auclert et al. (2021) toolkit was the foundation to build on. Not a replication write-up: the replication gate is documented on the us-hank validation page.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
       <a class="strategy-card" href="/reports/define-uk-replication"><header><span class="card-id mono">define-uk</span><span class="tag-row"><span class="tag">replication report</span></span></header><p>Running the authors' unmodified code at a pinned commit, the Table&nbsp;4 gate, the emissions divergence, and why only deltas are served.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
     </div>
   </section>

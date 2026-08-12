@@ -130,6 +130,11 @@ def crumb_chain(url: str) -> list[str]:
                 # /notes retired into /forecasts#notes: never emit a crumb
                 # link to the deleted index page.
                 current = "/forecasts"
+            if current == "/economy/topics":
+                # Same treatment: /economy/topics is a redirect source, not a
+                # page, so the crumb on all six topic pages was a 308 hop.
+                # One retired prefix was handled here and the other was not.
+                current = "/economy"
             if current == "/":
                 break
     return chain
