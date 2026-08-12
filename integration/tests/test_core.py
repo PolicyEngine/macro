@@ -297,3 +297,28 @@ def test_cli_summary_env_checkout_missing_files_errors(monkeypatch, tmp_path):
     res = CliRunner().invoke(main, ["summary"])
     assert res.exit_code != 0
     assert "no parseable SVAR results" in res.output
+
+
+def test_svar_summary_serves_the_paper_comparable_fevd(monkeypatch):
+    """A heading change upstream must not silently empty a served table.
+
+    ``_parse_md_table`` returns [] when it cannot find the heading, and the
+    summary is assembled without checking, so when the upstream heading
+    gained "(4-quarter-ahead forecast error)" the served FEVD table became
+    empty with no error anywhere in the payload. Both tables are asserted
+    here: the renormalised one that was already published, and the group
+    share formed per draw, which is the statistic the paper's ~40% / ~50%
+    refer to.
+    """
+    s = core.svar_summary()
+    if "error" in s or "error" in s.get("replication", {}):
+        pytest.skip(s.get("error") or s["replication"]["error"])
+    rep = s["replication"]
+    assert rep["fevd_1yr_headline"], "the renormalised FEVD table parsed empty"
+    groups = rep["fevd_1yr_group_shares"]
+    assert groups, "the per-draw group-share table parsed empty"
+    assert {"Variable", "Group", "Mean"} <= set(groups[0])
+    assert any(
+        row["Variable"] == "UK GDP" and row["Group"] == "global" for row in groups
+    )
+    assert "renormalises" in rep["fevd_note"]

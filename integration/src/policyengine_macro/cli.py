@@ -692,8 +692,15 @@ def summary(as_json):
         click.echo(f"  {ln}")
     fevd = rep.get("fevd_1yr_headline", [])
     if fevd:
-        click.echo("\nFEVD at 1-year horizon (median shares)")
+        click.echo("\nFEVD at 1-year horizon (sum of medians, renormalised)")
         click.echo(_table(fevd, list(fevd[0].keys())))
+    groups = rep.get("fevd_1yr_group_shares", [])
+    if groups:
+        click.echo("\nGroup share formed per draw — the paper-comparable "
+                   "statistic is the mean column")
+        click.echo(_table(groups, list(groups[0].keys())))
+    if rep.get("fevd_note"):
+        click.echo(f"\n  {rep['fevd_note']}")
     fr = res.get("forecast_revision", {})
     click.echo("\nForecast-revision exercise (results/forecast_summary.md)")
     if "error" in fr:

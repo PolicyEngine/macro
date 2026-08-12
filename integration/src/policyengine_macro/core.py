@@ -3874,9 +3874,31 @@ def svar_summary() -> dict:
 
     if summary_path.exists():
         text = summary_path.read_text()
+        # Two FEVD tables, and which one a caller compares to the paper
+        # matters. ``fevd_1yr_headline`` is the sum of per-shock posterior
+        # medians renormalised to 100% — the historical presentation, kept
+        # for continuity. ``fevd_1yr_group_shares`` forms the group share on
+        # every accepted draw and reports its posterior mean, which is what
+        # the paper's Figure 4 plots ("the mean of the sum") and what its
+        # ~40% / ~50% refer to. Renormalising inflates the identified shares
+        # by about a third here, because the per-shock medians sum to ~0.62
+        # (GDP) and ~0.71 (CPI) rather than to 1.
+        #
+        # The heading match is a substring of the heading rather than the
+        # whole of it: the upstream heading gained "(4-quarter-ahead forecast
+        # error)" when the off-by-one was fixed, and an exact-ish match
+        # returned an empty table with no error anywhere.
         out["replication"] = {
             "metadata": _parse_kv_lines(text.split("##")[0]),
-            "fevd_1yr_headline": _parse_md_table(text, "FEVD at 1-year horizon"),
+            "fevd_1yr_headline": _parse_md_table(text, "FEVD at"),
+            "fevd_1yr_group_shares": _parse_md_table(
+                text, "Posterior of the group share"),
+            "fevd_note": (
+                "fevd_1yr_headline renormalises a sum of per-shock medians to "
+                "100%; compare fevd_1yr_group_shares (mean column) to the "
+                "paper, which reports shares of total variance and leaves "
+                "roughly 20% with the unidentified shocks."
+            ),
         }
     else:
         out["replication"] = {"error": f"missing {summary_path}"}
