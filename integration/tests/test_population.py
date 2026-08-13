@@ -142,8 +142,27 @@ def test_population_impact_uk_real_basic_rate():
     res = core.pe_population_impact(
         "uk", reform={"gov.hmrc.income_tax.rates.uk[0].rate": 0.21}, year=2026
     )
-    # 1p on the basic rate raises roughly £6-7bn/yr (measured £6.46bn).
-    assert 4.0 < res["budgetary_impact_bn"] < 9.0, res["budgetary_impact_bn"]
+    # This is the ONLY place in the project that recomputes the headline
+    # microsim costing. £6.46bn is published on /pe/validation, in the
+    # pe-microsim and obr-macro papers, and frozen as a constant in the OBR
+    # model repo's own gate -- none of which regenerate it. The band here used
+    # to be 4.0-9.0, which admits HMRC's £6.9bn AND its £8.2bn, so it could not
+    # tell our costing from the benchmark it is compared against, let alone
+    # detect drift.
+    #
+    # +/-5% is wide enough to survive an ordinary microdata or uprating
+    # refresh and narrow enough to catch a real regression. If a legitimate
+    # data change moves it outside, that is the signal to update the published
+    # figure everywhere -- which is the property worth having, since today
+    # nothing forces those surfaces to move together.
+    PUBLISHED_BN = 6.46
+    measured = res["budgetary_impact_bn"]
+    assert abs(measured - PUBLISHED_BN) / PUBLISHED_BN < 0.05, (
+        f"basic-rate +1pp costing is £{measured:.2f}bn against the £"
+        f"{PUBLISHED_BN}bn published on /pe/validation and in two papers. "
+        "If this move is legitimate, update those surfaces in the same "
+        "change -- nothing else regenerates that number."
+    )
     assert res["household_net_income_change_bn"] < 0
     assert res["n_households"] > 10_000
     assert res["losers"] > res["winners"]

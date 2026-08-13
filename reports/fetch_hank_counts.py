@@ -38,8 +38,12 @@ PAGE = Path(__file__).resolve().parent / "us-hank-open-source.html"
 # short name because the table prints names with en-dashes and diacritics
 # ("Bayer-Born-Lutticke"), which an ASCII key does not match.
 SOURCES = {
+    # The authors' own repository, not the FRBNY fork this row used to point
+    # at: the fork has 4 stars against the canonical repo's 70, so the reach
+    # column was comparing a third-party copy against everyone else's original
+    # and understating this entry seventeenfold.
     "Bayer-Born-Lutticke": (
-        "W3121400794", "FRBNY-DSGE/HANK_BusinessCycleAndInequality",
+        "W3121400794", "BASEforHANK/HANK_BusinessCycleAndInequality",
         "Shocks, Frictions, and Inequality"),
     "FRBNY Estimating HANK": (
         "W4386056217", "FRBNY-DSGE/Estimating_HANK",

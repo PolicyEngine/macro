@@ -262,7 +262,8 @@ MODEL_QUALITY = {
             "that every published forecast carries; under the published "
             "specification UK GDP goes 1.06 to 0.99 at h=1 and 1.12 to 0.95 "
             "at h=8 -- level with naive rather than worse, still not better. "
-            "The frozen-edge run gives 0.32pp RMSE from a single origin.",
+            "The frozen-edge run gives 0.32pp RMSE from a single origin, on the "
+            "2024Q2 real-time vintage.",
             "Score the predictive densities rather than point forecasts, "
             "report rolling interval coverage, and re-run once the estimation "
             "sample extends past the Covid dummies.",

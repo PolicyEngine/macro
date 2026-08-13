@@ -4,14 +4,55 @@ Reads data/obr_model_variables_october_2025.xlsx from the model repository and
 emits ../sections/glossary_table.tex: a longtable of mnemonic -> definition
 (and ONS identifier where published) for every variable referenced in the
 equations transcribed in the paper, plus the headline scorecard variables.
+
+Usage: OBR_MACRO_MODEL=~/obr-macroeconomic-model python make_glossary.py
 """
 
+import os
 from pathlib import Path
 
 import openpyxl
 
 HERE = Path(__file__).parent
-XLSX = "/Users/janansadeqian/obr-macroeconomic-model/data/obr_model_variables_october_2025.xlsx"
+WORKBOOK = "obr_model_variables_october_2025.xlsx"
+
+
+def _find_workbook() -> Path:
+    """Locate the OBR variables workbook on any machine.
+
+    This used to be a literal path into one developer's home directory, which
+    both pinned the script to that machine and went stale when the workbook
+    moved from ``data/`` into the package at ``obr_macro/_data/``. Prefer the
+    installed package, then an explicit checkout, then the default checkout
+    location, and try both layouts in each.
+    """
+    roots = []
+    try:  # installed package ships the workbook as package data
+        import obr_macro
+
+        roots.append(Path(obr_macro.__file__).resolve().parent)
+    except Exception:
+        pass
+    env = os.environ.get("OBR_MACRO_MODEL")
+    for base in ([Path(env).expanduser()] if env else []) + [
+        Path.home() / "obr-macroeconomic-model"
+    ]:
+        roots += [base / "obr_macro", base]
+    tried = []
+    for root in roots:
+        for sub in ("_data", "data", ""):
+            cand = root / sub / WORKBOOK if sub else root / WORKBOOK
+            tried.append(cand)
+            if cand.is_file():
+                return cand
+    raise SystemExit(
+        f"OBR variables workbook ({WORKBOOK}) not found. Install obr_macro or "
+        "set OBR_MACRO_MODEL to the obr-macroeconomic-model checkout path. "
+        "Tried:\n  " + "\n  ".join(str(p) for p in tried)
+    )
+
+
+XLSX = _find_workbook()
 
 # Every mnemonic that appears in an equation or table in the paper.
 WANTED = sorted(

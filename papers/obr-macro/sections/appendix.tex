@@ -10,7 +10,7 @@ Table~\ref{tab:glossary} defines every OBR mnemonic used in this paper, with the
 \section{The complete free-running scorecard}
 \label{app:scorecard}
 
-Table~\ref{tab:fullscore} reproduces the complete 21-variable free-running scorecard summarised in Table~\ref{tab:rawscore}, organised by model block, with each variable's metric and passthrough status made explicit. The de-seeding procedure and band definitions are those of Section~\ref{sec:rawscore}: rates within 1.0pp, net balances within 1.5 per cent of GDP, levels within 10 per cent MAPE.
+Table~\ref{tab:fullscore} reproduces the complete 21-variable free-running scorecard summarised in Table~\ref{tab:rawscore}, organised by model block, with each variable's metric and passthrough status made explicit. Figures are the March 2026 vintage, reproduced from a fresh \texttt{python -m obr\_macro.calibration\_score} run; the set this appendix carried previously predated the $OSHH$ ONS level anchor. The de-seeding procedure and band definitions are those of Section~\ref{sec:rawscore}: rates within 1.0pp, net balances within 1.5 per cent of GDP, levels within 10 per cent MAPE.
 
 \begin{table}[ht]
 \centering
@@ -21,10 +21,10 @@ Table~\ref{tab:fullscore} reproduces the complete 21-variable free-running score
 \toprule
 Block & Variable & Code & Metric & Error & Status \\
 \midrule
-Demand & Real GDP & $GDPM$ & MAPE & 5.70\% & computed --- fair \\
- & Consumption & $CONS$ & MAPE & 9.45\% & computed --- fair \\
+Demand & Real GDP & $GDPM$ & MAPE & 4.48\% & computed --- fair$^{\S}$ \\
+ & Consumption & $CONS$ & MAPE & 7.49\% & computed --- fair \\
  & Total investment & $IF$ & MAPE & 0.00\% & passthrough \\
- & Business investment & $IBUS$ & MAPE & 15.48\% & computed --- poor \\
+ & Business investment & $IBUS$ & MAPE & 15.73\% & computed --- poor \\
  & Exports & $X$ & MAPE & 0.00\% & passthrough \\
  & Imports & $M$ & MAPE & 0.00\% & passthrough \\
 \midrule
@@ -34,23 +34,23 @@ Labour market & Employment & $ETLFS$ & MAPE & 0.00\% & trivial identity \\
  & Average earnings & $AWEI$ & MAPE & 0.00\% & passthrough \\
 \midrule
 Prices \& wages & CPI index & $CPI$ & MAPE & 0.00\% & passthrough \\
- & RPI inflation & $RPI$ & pp & 2.03 & computed --- poor \\
+ & RPI inflation & $RPI$ & pp & 1.71 & computed --- poor \\
  & CPI inflation & $CPIGR$ & pp & 0.00 & passthrough \\
  & GDP deflator & $PGDP$ & MAPE & 0.00\% & passthrough \\
  & Wages \& salaries & $WFP$ & MAPE & 0.00\% & passthrough \\
 \midrule
-Incomes & Household income & $HHDI$ & MAPE & 14.76\% & computed --- poor \\
+Incomes & Household income & $HHDI$ & MAPE & 6.27\% & computed --- fair \\
  & Compensation & $COMP$ & MAPE & 0.00\% & passthrough \\
- & Real household income & $RHHDI$ & MAPE & 14.48\% & computed --- poor \\
- & Company profits & $FYCPR$ & MAPE & 54.57\% & computed --- off \\
+ & Real household income & $RHHDI$ & MAPE & 6.03\% & computed --- fair \\
+ & Company profits & $FYCPR$ & MAPE & 63.29\% & computed --- off \\
 \midrule
-External & Current account & $CB$ & \% of GDP & 2.76 & computed --- poor \\
- & Trade balance & $TB$ & \% of GDP & 0.62 & computed --- fair \\
+External & Current account & $CB$ & \% of GDP & 3.60 & computed --- off \\
+ & Trade balance & $TB$ & \% of GDP & 0.69 & computed --- fair \\
 \bottomrule
 \end{tabular}
 
 \medskip
-\parbox{0.92\textwidth}{\footnotesize \emph{Notes:} ``Passthrough'' means the variable's equation is dead or exogenous in this configuration and the series is held at the OBR's published value, so a 0.00 error carries no information about calibration. The employment identity $ETLFS = 1000\,HWA/AVH$ is computed but trivial, both inputs being passthrough. RPI inflation is scored as a rate against the EFO's $RPIGR$ series (scoring the modelled inflation \emph{rate} against the RPI \emph{index} is a category error the scorecard previously made, reading a meaningless 99.6 per cent). Net balances are scored as a per cent of GDP, the OBR's own convention for differences of large gross flows. Source: \texttt{docs/calibration\_scorecard.md} and \texttt{obr\_macro/calibration\_score.py} in the model repository.}
+\parbox{0.92\textwidth}{\footnotesize \emph{Notes:} ``Passthrough'' means the variable's equation is dead or exogenous in this configuration and the series is held at the OBR's published value, so a 0.00 error carries no information about calibration. The employment identity $ETLFS = 1000\,HWA/AVH$ is computed but trivial, both inputs being passthrough. $^{\S}$Real GDP is not an independent row either: with every other expenditure component exogenous or pinned, 98--99 per cent of the free-running GDP error is the consumption error, and in the anchored solve the two are equal to the pound (Section~\ref{sec:calibration}). RPI inflation is scored as a rate against the EFO's $RPIGR$ series (scoring the modelled inflation \emph{rate} against the RPI \emph{index} is a category error the scorecard previously made, reading a meaningless 99.6 per cent). Net balances are scored as a per cent of GDP, the OBR's own convention for differences of large gross flows. Source: \texttt{docs/calibration\_scorecard.md} and \texttt{obr\_macro/calibration\_score.py} in the model repository.}
 \end{table}
 
 \section{Solver and convergence details}

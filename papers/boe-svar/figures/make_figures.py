@@ -124,6 +124,25 @@ def main(wanted=ALL_FIGURES):
     wanted = set(wanted)
     rng = np.random.default_rng(SEED)
     df_full = load_data()
+    # VINTAGE TRAP -- read before regenerating fig_fan / figure_numbers.json.
+    #
+    # This truncates to the 2024Q2 edge, which fixes the END of the sample but
+    # NOT its vintage: the packaged series is a 2026 vintage, so every
+    # historical observation carries revisions the Bank did not have in August
+    # 2024. The committed artifact was produced when the packaged data itself
+    # ended at 2024Q2, i.e. on the real-time vintage, and the original code
+    # asserted that -- the assertion was guarding the vintage, not the
+    # endpoint.
+    #
+    # Re-running now therefore answers a different question (same edge, revised
+    # data) and gives a different accepted count (223 against the committed
+    # 217), medians moving up to 0.16pp and GDP RMSE 0.30 against 0.32. That is
+    # not a correction of the committed numbers; it is a second experiment.
+    # Regenerating means moving the paper's Table 2, its scorecard narrative,
+    # /svar/validation, models/index.html and the capability registry together,
+    # and saying which vintage each number is on. Do it deliberately or not at
+    # all.
+    #
     # The frozen 2024Q2 edge has to be imposed, not assumed: the packaged
     # dataset now runs past it, and this used to be a bare assert that simply
     # failed once the data was extended (so the figures became unregenerable).
@@ -334,8 +353,20 @@ def main(wanted=ALL_FIGURES):
                         float(hi90[qi, I_CPI])],
             }
         i_year = analysis.fevd_horizon_index(4)
-        out = {
-            "accepted_replication": len(pairs),
+        # A partial run (--figures fan) never executes the replication block,
+        # so `pairs` and `fevd_mean` do not exist and writing them unguarded
+        # raised UnboundLocalError -- which defeats the point of the flag, and
+        # would have been worse if it had silently written a stale value.
+        # Merge into the committed artifact instead: keys this run computed are
+        # replaced, the rest are carried forward untouched.
+        try:
+            with open(os.path.join(HERE, "figure_numbers.json")) as f:
+                out = json.load(f)
+        except FileNotFoundError:
+            out = {}
+        if wanted & {"irf", "fevd", "hd"}:
+            out["accepted_replication"] = len(pairs)
+        out.update({
             "accepted_forecast": len(pairs2),
             "n_draws": N_DRAWS,
             "seed": SEED,
@@ -344,12 +375,13 @@ def main(wanted=ALL_FIGURES):
                 "forecast-error variance; not renormalised over the identified "
                 "shocks. Matches fig_fevd.pdf."
             ),
-            "fevd_1yr_global_share_pct": None if fevd_mean is None else {
+            "forecast_table": table,
+        })
+        if (wanted & {"irf", "fevd", "hd"}) and fevd_mean is not None:
+            out["fevd_1yr_global_share_pct"] = {
                 "gdp": 100.0 * float(fevd_mean[I_GDP, :3, i_year].sum()),
                 "cpi": 100.0 * float(fevd_mean[I_CPI, :3, i_year].sum()),
-            },
-            "forecast_table": table,
-        }
+            }
         with open(os.path.join(HERE, "figure_numbers.json"), "w") as f:
             json.dump(out, f, indent=1)
         print("done")

@@ -120,12 +120,28 @@ def test_validation_and_paper_landings_lead_with_current_uk_vintages():
     assert "2026Q2&ndash;2029Q2" in boe_paper
 
 
-def test_paper_page_counts_match_embedded_pdfs():
+def test_paper_landings_publish_the_page_count_of_the_pdf_they_link():
+    """Pin the published page count against a rebuild that changes it.
+
+    Renamed from ``..._match_embedded_pdfs``: this never opens a PDF. It pins
+    the landing page against the constants below, so it catches the case that
+    actually happens -- a paper is rebuilt, its length changes, and the "N
+    pages" line beside the download link is not updated. Both are needed
+    together, and the second is the one people forget.
+
+    All four papers moved in the same review round: frb-us 36 -> 38 (the
+    tracking-invariant retraction and the corrected pegged multipliers),
+    pe-microsim 23 -> 25 (ready-reckoner provenance) which was not covered here
+    at all, obr-macro 36 -> 40 (the refreshed scorecard, the lever scorecard
+    and the anchored-fit dependency) and boe-svar 30 -> 33 (the corrected FEVD
+    statistic and the multiplicity result).
+    """
     expected = {
-        "obr-macro": 36,
-        "boe-svar": 30,
-        "frb-us": 36,
+        "obr-macro": 40,
+        "boe-svar": 33,
+        "frb-us": 38,
         "psl-og": 34,
+        "pe-microsim": 25,
     }
     # The /papers listing was retired; each landing carries its own
     # "slug · … · N pages" line, and /models links every paper landing.
