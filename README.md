@@ -203,7 +203,7 @@ python3 -m http.server 8000   # then open http://localhost:8000/
 | `forecasts/` | the forecast track record, plus the data store (`#data`) and the release notes index (`#notes`) |
 | `forecasts/us/` | why there is no US track record yet |
 | `papers/<slug>/` | the four working-paper pages: `obr-macro`, `boe-svar`, `frb-us`, `psl-og` (`papers/us-hank/` holds figures only, and `papers/*.pdf` are served directly) |
-| `reports/` | replication reports — `define-uk-replication/` and `us-hank-open-source.html` |
+| `reports/` | replication reports — `define-uk-replication/` and `us-hank-open-source/` |
 | `notes/releases/` | index of the generated per-vintage release notes, plus `notes/<date>-<slug>/` note pages |
 | `connect/` | connect it or code it — MCP / CLI setup and the Python API |
 | `contact/` | who to contact |

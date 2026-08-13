@@ -1,0 +1,104 @@
+\appendix
+\section*{Appendices}
+\addcontentsline{toc}{section}{Appendices}
+
+\section{The published baseline table}
+\label{app:table4}
+
+Table~\ref{tab:table4} reproduces the manual's Table~4 \citep[p.~50]{georgedafermos2026manual} in full, since it is the only published numeric result this replication has to work with and only its first four rows plus emissions are gated. Its note reads: ``All quarterly values are annualised and the mean and standard deviation are calculated from 2025-2040.'' It does not state \emph{which} annualisation, which is the unresolved convention behind the 2025 growth gap of Section~\ref{sec:target1a}.
+
+\begin{table}[h]
+\centering
+\caption{DEFINE-UK Model Manual v1.1, Table 4: key characteristics of the baseline scenario}
+\label{tab:table4}
+\footnotesize
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Variable & 2025 & 2030 & 2040 & Mean & St.\ dev. \\
+\midrule
+Real GDP growth (\%) & 4.96 & 2.35 & 2.01 & 2.35 & 0.71 \\
+Unemployment (\%) & 4.31 & 4.73 & 4.72 & 4.71 & 0.14 \\
+Population (millions) & 55.66 & 57.74 & 61.61 & 58.68 & 1.87 \\
+Labour force (millions) & 35.97 & 37.12 & 39.13 & 37.62 & 1.00 \\
+Proportion of non-fossil electricity generation (\%) & 57.93 & 61.77 & 77.14 & 65.92 & 6.35 \\
+Total emissions (MtCO$_2$e/year) & 407.32 & 381.76 & 324.37 & 367.10 & 25.46 \\
+Emission price (\pounds/tCO$_2$e) & 8.01 & 10.58 & 15.71 & 11.86 & 2.44 \\
+Green investment (\% of GDP) & 1.00 & 1.07 & 1.30 & 1.13 & 0.10 \\
+NFC default rate (\%) & 0.28 & 0.33 & 0.45 & 0.36 & 0.05 \\
+NFC credit rationing (\%) & 3.81 & 2.56 & 4.79 & 3.49 & 0.74 \\
+Power sector default rate (\%) & 0.16 & 0.11 & 0.13 & 0.12 & 0.01 \\
+Power sector credit rationing (\%) & 47.22 & 35.44 & 21.09 & 30.64 & 9.04 \\
+Imports (\% of GDP) & 39.99 & 39.97 & 41.18 & 40.31 & 0.51 \\
+Exports (\% of GDP) & 38.58 & 40.19 & 44.15 & 41.21 & 1.80 \\
+Real effective exchange rate (index, 2022 $=$ 1) & 1.00 & 1.00 & 0.98 & 0.99 & 0.01 \\
+\bottomrule
+\end{tabular}
+\par\smallskip
+\parbox{0.95\textwidth}{\footnotesize \emph{Notes:} ``Population'' is the population aged 16 and over, not total population. Rows 1--4 are the macro block of target 1a (Section~\ref{sec:target1a}); row 6 is target 1b (Section~\ref{sec:target1b}). The remaining nine rows are published but not gated: no tolerance has been set for them and no verdict is claimed on them here.}
+\end{table}
+
+\section{The thirteen gap records}
+\label{app:gaps}
+
+Table~\ref{tab:gaps} lists every machine-readable gap record carried by the clean-room reimplementation as of 12 August 2026. Each is pinned by a test that fails if the situation changes --- including if the DEFINE team publishes a value for a defaulted parameter.
+
+\begin{table}[h]
+\centering
+\caption{Machine-readable gap records in the clean-room reimplementation}
+\label{tab:gaps}
+\scriptsize
+\begin{tabularx}{\textwidth}{@{}llX@{}}
+\toprule
+Section & Record & What it records \\
+\midrule
+\S3.2 & intercept of Eq.~(31) & Table~5 never tabulates the Kaldor--Verdoorn intercept; the $\alpha_0$ block ends one entry earlier. Defaulted to 0.0. \\
+\addlinespace
+\S3.3.1 & direct-energy symbols & Eqs.~(59)--(63) use a ``direct energy'' subscript family that appears nowhere in Tables~5--6, while the tables carry a non-electric-energy family that appears nowhere in the body. They are the same variables: Eqs.~(60) and (62) reproduce the tabulated values to $1.1\times10^{-5}$ and $5.8\times10^{-5}$ under that identification. The tabulated names are used. \\
+\S3.3.1 & split green capital stocks & Eq.~(68) sums the NFC and government real green capital stocks; Table~6 tabulates only their sum. Nothing defaulted --- both are exogenous to the section --- and the identity is checked against the tabulated sum instead. \\
+\addlinespace
+\S3.3.2 & power-sector depreciation rate & Seven equations use one rate; Table~6 tabulates only the two split rates, which are equal, so the identification is unambiguous and the rate is seeded from them. If a revision ever splits them, two equations need rewriting rather than reseeding. \\
+\S3.3.2 & intercept of Eq.~(96) & Not in Table~5. The table carries the two intercepts of a \emph{split} investment rule that v1.1's body replaced, and neither can be substituted without guessing which. Defaulted to 0.0; a steady-state reading of Table~6 implies about 0.0210, recorded and deliberately not used. \\
+\S3.3.2 & Eq.~(99) split parameters and profit rates & Two logistic parameters untabulated and two \emph{variables} --- the fossil and non-fossil capital profit rates --- never defined anywhere in the manual. All four defaulted to 0.0, which forces a 50:50 green/fossil investment split against the 69:31 Table~6 implies. The largest hole in the section, since this split is what steers investment green. \\
+\S3.3.2 & Eq.~(138) credit-rationing slopes & Three of four slopes untabulated. The NFC equation has identical structure and its slopes \emph{are} tabulated, and Table~5 reuses NFC values for the power sector in at least nine other places --- but reusing them here would be our inference, not the manual's instruction, and it does not reproduce Table~6 anyway. Defaulted to 0.0. \\
+\S3.3.2 & government non-fossil capital & Eq.~(86) puts it in a denominator; Table~6 does not tabulate it. Measured to be zero in the baseline twice over, via Eq.~(86) and via \S3.1's Eq.~(5). It is a scenario instrument. \\
+\S3.3.2 & forward-looking switches & Eqs.~(88)--(89) introduce four quantities \S5 never tabulates (ban period, credibility, planning horizon, hyperbolic discount); the manual gives only bounds. Treated as scenario switches with an inert baseline. \\
+\S3.3.2 & expected capital path & \emph{Our choice, not a manual defect.} Eq.~(89) averages expected utilisation over the planning horizon, but the manual never says what capital stock the sector expects to hold, and the model carries no forecast of it. Real capital and electricity demand are held at current values; inert whenever credibility is zero. \\
+\S3.3.2 & Eq.~(88) inequality direction & The printed condition and the prose above it point opposite ways. The printed inequality is implemented --- transcription beats interpretation --- with the baseline switch set so the no-ban case returns current utilisation, which is what the manual's own annotation asserts. \\
+\S3.3.2 & unprinted electricity-price rule & \S5 calibrates a long-run electricity-price formation rule --- a switch quarter and a long-run price --- that \S3 never prints. Nothing is implemented, because nothing is printed to implement. The most economical account of Eq.~(84)'s factor of 3.04. \\
+\S3.3.2 & five untabulated endogenous variables & Table~6 omits five variables the section determines. Three are recoverable from what Table~6 does print and are checked that way; one recovery is confirmed by Eq.~(106) reproducing a tabulated lending figure to $2.7\times10^{-5}$. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Run record}
+\label{app:runrecord}
+
+Every entry below is dated and held in the adapter's \texttt{VALIDATION.md}. Changing any pinned reference number requires editing the committed reference artifact deliberately and adding an entry here --- never editing a test.
+
+\footnotesize
+\begin{longtable}{@{}l>{\raggedright\arraybackslash}p{0.16\textwidth}>{\raggedright\arraybackslash}p{0.53\textwidth}@{}}
+\caption{Dated run record} \label{tab:runrecord} \\
+\toprule
+Date & Basis & Result \\
+\midrule
+\endfirsthead
+\toprule
+Date & Basis & Result \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+2026-08-01 & \texttt{846081a}, R 4.3.0 & Full upstream notebook renders end to end, unmodified, with an \texttt{rstudioapi} shim the only accommodation. 151 output files. \textbf{Execution is not validation}: no comparison against published figures yet, so every target remains pending. \\
+\addlinespace
+2026-08-04 & \texttt{846081a}, cached run & Table~4 replication run. Macro block passes (population and labour force exact to 0.01\,m; growth exact at 2030/2040, $-0.30$\,pp at 2025; unemployment within 0.2\,pp; 2025--40 means and standard deviations match). Emissions diverge as target 1b records. \\
+\addlinespace
+2026-08-04 & clean-room, manual only & \textbf{Milestone 1 PASS.} \S2.2 matrices and \S5 Tables~5--6 transcribed in full; every Table~1/2 row and column identity holds on the \S5 initial values at the manual's four-significant-figure printing precision. The rest-of-world lending inconsistency pinned exactly. \\
+\addlinespace
+2026-08-04 & \texttt{846081a}, cached run & Scenario surface gated against the pinned oracle: all 22 scenario files across four blocks registered, annualised delta paths only with mandatory caveats, 11 pinned delta points, sign and ordering structure pinned. \\
+\addlinespace
+2026-08-05 & \texttt{846081a}, cached run & \textbf{Targets 2 and 3 closed at the achievable ceiling}; scenario-design gate added with the two FMM 2023 anchors; external comparator table computed and committed; the 1.78 multiplier computed, replacing the unusable upstream multiplier table; published sources catalogued. \\
+\addlinespace
+2026-08-11 & clean-room, manual only & \S3.2, \S3.3.1 and \S3.3.2 landed: 118 contiguous equations, Eqs.~(21)--(138). \S3.3.3 and the oracle gate outstanding, so \textbf{milestone 2 is not passed}. \\
+\addlinespace
+2026-08-12 & audit, manual + committed artifacts & All 661 transcribed \S5 values re-checked against the manual page each source comment names; every pinned discrepancy recomputed independently of the sector modules. All arithmetic reproduced. Four findings re-characterised as first-period jumps, one claim withdrawn outright, five discrepancies unified into one deflator finding, one new gap found. Suite: 236 passed, 59 skipped. \\
+\end{longtable}

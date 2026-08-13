@@ -135,6 +135,12 @@ def test_paper_landings_publish_the_page_count_of_the_pdf_they_link():
     at all, obr-macro 36 -> 40 (the refreshed scorecard, the lever scorecard
     and the anchored-fit dependency) and boe-svar 30 -> 33 (the corrected FEVD
     statistic and the multiplicity result).
+
+    define-uk joined at 28 pages, filling the one gap in the suite: it was the
+    only model without a working paper. Its /models card has been repointed
+    from /reports/define-uk-replication to /papers/define-uk, so every paper
+    is linked from the hub again and the exemption that recorded the gap is
+    gone.
     """
     expected = {
         "obr-macro": 40,
@@ -142,6 +148,7 @@ def test_paper_landings_publish_the_page_count_of_the_pdf_they_link():
         "frb-us": 38,
         "psl-og": 34,
         "pe-microsim": 25,
+        "define-uk": 28,
     }
     # The /papers listing was retired; each landing carries its own
     # "slug · … · N pages" line, and /models links every paper landing.

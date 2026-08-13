@@ -29,7 +29,7 @@ MODEL_PAGE_ROOTS = {
     "frb-us": ("frb-us", "papers/frb-us"),
     "us-hank": ("us-hank",),
     "psl-og": ("olg", "papers/psl-og"),
-    "define-uk": ("define",),
+    "define-uk": ("define", "papers/define-uk"),
 }
 # /docs is a permanent redirect to /models#compare in vercel.json; the model
 # inventory lives on the pages below.

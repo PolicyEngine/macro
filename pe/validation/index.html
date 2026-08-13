@@ -81,44 +81,34 @@
     </div>
     <div class="prose">
       <p>
-        There is no forecast error to report, because the model is not
-        forecasting — it applies published rules, checkable by hand. For
-        the £50,000 UK earner on the <a href="/pe/code">code page</a>:
-        £50,000 − £12,570 personal allowance = £37,430 of basic-rate income;
-        at 20% that is <strong>£7,486</strong> of income tax, at 8%
-        <strong>£2,994</strong> of National Insurance, leaving
-        <strong>£39,520</strong> net. Raising the basic rate 5pp adds 5% of
-        £37,430 = <strong>£1,872</strong>. Every figure in the code sample
-        is deterministic arithmetic from the implemented rules — which
-        verifies those rules, not that every area of legislation has
-        complete test coverage.
+        No forecast error to report: the model applies published rules, and
+        the worked £50,000 case on the <a href="/pe/code">code page</a> can be
+        checked with a pencil. That verifies the implemented rules — not that
+        every area of legislation is covered by a test.
       </p>
       <p>
-        What is <em>not</em> exact is anything resting on survey microdata —
-        population aggregates inherit sampling error, imputation and ageing
-        assumptions from the enhanced FRS and the CPS, so a headline
-        budgetary cost is an estimate in a way a household calculation is
-        not. For the UK 1p basic-rate case, the
-        <a href="/papers/obr-macro">OBR emulator working paper</a> compares
-        static costings against official sources: £6.46bn in 2026 rising to
-        £7.38bn by 2030. Every one of those years is
-        <strong>below</strong> HMRC's June 2025 figures at every year that can
-        be matched (£6.9bn for 2026&ndash;27, £8.2bn for 2028&ndash;29) —
-        &minus;6.4% in the first year, widening to &minus;10.0% by the end of
-        our window. Nor is the comparison like-for-like: HMRC's reckoner runs
-        to 2028&ndash;29, so our 2030 figure has no year-matched counterpart,
-        and HMRC publishes post-behavioural estimates built on administrative
-        Survey of Personal Incomes data against our static, survey-based one.
-        It is a benchmark, not a validation. No interval is published with
-        either of our figures, because the pipeline does not produce one.
-        Suite-wide evidence: <a href="/models#validation">validation</a>.
+        Population costings are a different kind of number: survey-weighted
+        estimates (<a href="#caveats">limits</a>), published without an
+        interval because the pipeline produces none. The one external
+        comparison is a 1p rise in the UK basic rate, scored at
+        <strong>£6.46bn</strong> in 2026 against HMRC's June 2025 ready
+        reckoner of £6.9bn for 2026&ndash;27 —
+        <strong>&minus;6.4%</strong>. HMRC's
+        estimate is post-behavioural on administrative SPI data where ours is
+        static and survey-based, so this is a benchmark, not a validation.
+        Our second published figure, £7.38bn in 2030, has no counterpart at
+        all: the reckoner stops at 2028&ndash;29. Both endpoints have thin
+        provenance — no scored run is committed for either, and the only
+        executable check pins 2026 within ±5% of £6.46bn and is skipped
+        without microdata access. Full account:
+        <a href="/papers/pe-microsim">the paper</a>.
       </p>
     </div>
     <div class="metrics">
       <div class="metric">
-        <span class="metric-label mono">household calculation</span>
-        <span class="metric-val">deterministic</span>
-        <span class="metric-note">implemented rules applied, not estimated</span>
+        <span class="metric-label mono">1p on the UK basic rate, 2026</span>
+        <span class="metric-val">&minus;6.4%<span class="metric-vs">vs HMRC</span></span>
+        <span class="metric-note">benchmark, not validation — different bases</span>
       </div>
       <div class="metric">
         <span class="metric-label mono">countries</span>
@@ -145,37 +135,31 @@
         <tbody>
           <tr>
             <th scope="row"><strong>Static, no general equilibrium</strong></th>
-            <td>Reforms are modelled statically, with optional post-hoc behavioural responses; prices, wages and output do not move.</td>
+            <td>Prices, wages and output do not move; behavioural responses are optional and post-hoc.</td>
           </tr>
           <tr>
             <th scope="row"><strong>UK data vintage</strong></th>
-            <td>UK population runs use <code>enhanced_frs_2023_24</code>. Upstream now publishes an FRS 2024-25 vintage, which this integration has <strong>not</strong> adopted.</td>
+            <td><code>enhanced_frs_2023_24</code>; upstream's FRS 2024-25 vintage is <strong>not</strong> adopted here.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Survey-based aggregates</strong></th>
-            <td>Population estimates inherit sampling, imputation and ageing error. HMRC's costings use administrative Survey of Personal Incomes data and embed taxable-income elasticities, so differences of a few hundred million on a broad-based rate change are expected.</td>
+            <td>Population estimates carry sampling, imputation and ageing error, and no interval is computed for them. HMRC's costings use administrative Survey of Personal Incomes data and embed taxable-income elasticities, so a few hundred million of difference on a broad-based rate change is expected.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Gated UK microdata</strong></th>
-            <td>A <code>HUGGING_FACE_TOKEN</code> with access is required locally. Household calculations are unaffected.</td>
+            <td>Population runs need a <code>HUGGING_FACE_TOKEN</code> with access. Household calculations are unaffected.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Statute-vintage divergence with OLG</strong></th>
-            <td>This package tracks the latest release; the <a href="/olg">OLG member</a> is pinned to <code>policyengine-uk==2.88.0</code>, so the two can disagree on baseline statute — a declared inconsistency.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Two countries</strong></th>
-            <td>UK and US only.</td>
+            <td>This package tracks the latest release; the <a href="/olg">OLG member</a> is pinned to <code>policyengine-uk==2.88.0</code>, so baseline statute can disagree — a declared inconsistency.</td>
           </tr>
         </tbody>
       </table></div>
       <p class="opt-note">
-        full write-up: the <a href="/papers/pe-microsim">pe-microsim working
-        paper</a> sets out the exactness boundary, the validation posture and
-        the ready-reckoner benchmark in full. Where this member feeds the macro
-        members, the bridges are documented in the
-        <a href="/papers/obr-macro">OBR</a> and
-        <a href="/papers/psl-og">OLG</a> papers.
+        bridges into the macro members:
+        <a href="/papers/obr-macro">OBR</a>,
+        <a href="/papers/psl-og">OLG</a>. Suite-wide evidence:
+        <a href="/models#validation">validation</a>.
       </p>
     </div>
   </section>

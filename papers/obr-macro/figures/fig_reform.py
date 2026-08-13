@@ -2,7 +2,7 @@
 
 Left panel: the PolicyEngine static costing by year (endpoints from the scored
 reform: £6.46bn in 2026 rising to £7.38bn by 2030, interior years linearly
-interpolated) against the range of HMRC's published ready reckoner (~£6-8bn
+interpolated) against HMRC's published ready reckoner, which it sits below
 per 1p on the basic rate).
 
 Right panel: the second-round GDP effect from propagating the corresponding
