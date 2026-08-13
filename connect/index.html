@@ -363,27 +363,22 @@
       </details>
       <div class="vmet-notes connect-notes">
         <p class="vmet-notes-line"><span class="vmet-notes-key">access</span>
-          <span>No account or API key. Capacity is shared on a fair-use basis
-          — a few concurrent runs.</span></p>
+          <span>No account, no API key. Fair use, a few concurrent runs.</span></p>
         <p class="vmet-notes-line"><span class="vmet-notes-key">cold start</span>
-          <span>The first household or population call in a fresh container
-          takes around 20 seconds while the tax-benefit models load; a UK
-          forecast runs a couple of minutes on first call. Other tools
-          respond faster.</span></p>
+          <span>~20s on the first household or population call while the
+          tax-benefit models load; a couple of minutes for a first UK forecast.
+          Warm calls are fast.</span></p>
         <p class="vmet-notes-line"><span class="vmet-notes-key">uk microdata</span>
-          <span>Running a UK <em>population</em> or reform score locally needs
-          <code>HUGGING_FACE_TOKEN</code> from an account with access to the
-          private <code>policyengine/policyengine-uk-data-private</code>
-          dataset. UK household calls, every US call, and every hosted call
-          need nothing.</span></p>
+          <span>Only a <em>local</em> UK population or reform score needs
+          <code>HUGGING_FACE_TOKEN</code> (private
+          <code>policyengine-uk-data-private</code>). Hosted calls need
+          nothing.</span></p>
         <p class="vmet-notes-line"><span class="vmet-notes-key">local only</span>
-          <span>OG-UK long-run scoring (<code>score_reform</code> with
-          <code>model='og'</code>) and <code>dynamic_reform_impact</code> take
-          tens of minutes and are excluded from the hosted image;
-          <code>dynamic_reform_impact</code> returns the two-step local recipe,
-          while <code>model='og'</code> returns an import error — use the local
-          CLI for both.
-          The three <code>define_*</code> tools likewise return run instructions rather than results when called on the hosted server &mdash; the unlicensed upstream is never hosted. Everything else here runs hosted.</span></p>
+          <span>Three things are not hosted: <code>model='og'</code> and
+          <code>dynamic_reform_impact</code> (tens of minutes), and the
+          <code>define_*</code> tools (unlicensed upstream). Called here they
+          return run instructions or an import error, not results — use the
+          CLI. Everything else runs hosted.</span></p>
       </div>
     </div>
   </section>

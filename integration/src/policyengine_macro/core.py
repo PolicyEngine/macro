@@ -719,6 +719,22 @@ def frbus_summary() -> dict:
                           "quarters, baseline solve vs LONGBASE after init_trac",
                 "value": 5.6e-17,
                 "gate": 1e-8,
+                # Served alongside the number because a consumer reading
+                # validation off this payload would otherwise take the
+                # smallest figure here as the strongest evidence, when it is
+                # the only one that carries none.
+                "is_evidence": False,
+                "caveat": (
+                    "NOT evidence about the economy. init_trac sets each "
+                    "add-factor to minus that equation's residual at the "
+                    "input data, so the solve is algebraically the identity "
+                    "on whatever it was tracked to -- for any input. The "
+                    "model repo gates the demonstration: the same check "
+                    "passes at 6.7e-9 on a baseline whose every series has "
+                    "been scrambled by a random factor, with every "
+                    "accounting identity destroyed. It gates the software. "
+                    "Read vs_vendor_pyfrbus and the multipliers instead."
+                ),
             },
             "vs_vendor_pyfrbus": {
                 "metric": "max abs difference vs the Fed's pyfrbus 1.0.0 on the "

@@ -42,27 +42,44 @@ res = json.loads((HERE / "results.json").read_text())
 qlab = res["quarters"]
 years = (np.arange(len(qlab))) / 4.0
 
+
+def calendar_year_multiplier(key: str, year: int) -> float:
+    """Calendar-year average GDP deviation, recomputed from results.json.
+
+    These values were previously hardcoded here, which is how the stale 0.99
+    year-2 pegged multiplier survived in the committed figure after the
+    experiment behind it had been corrected. Nothing quantitative in this
+    script may be typed by hand.
+    """
+    x = res[key]["xgdp_pct"][4 * (year - 1) : 4 * year]
+    if len(x) != 4:
+        raise SystemExit(f"results.json has no full year {year} for {key}")
+    return sum(x) / 4.0
+
+
 # ---------------------------------------------------------------- figure 1
-# Grouped bars: our first-year multipliers vs published ranges.
+# Grouped bars: our multipliers vs published ranges. Every bar is matched to a
+# benchmark of the SAME horizon and the SAME monetary conditioning; the label
+# carries the horizon so the bar cannot be read against the wrong band.
 fig, ax = plt.subplots(figsize=(6.4, 3.6))
 groups = [
     (
-        "Purchases,\nTaylor rule",
-        0.72,
+        "Purchases, Taylor rule\n(year 1)",
+        calendar_year_multiplier("gov_taylor", 1),
         (0.7, 1.0),
         None,
-        "Coenen et al. (2012),\nno accommodation",
+        "Coenen et al. (2012),\nyr 1, no accommodation",
     ),
     (
-        "Purchases,\nfixed funds rate",
-        0.99,
+        "Purchases, pegged rate\n(year 2)",
+        calendar_year_multiplier("gov_fixed", 2),
         (1.1, 1.2),
         None,
-        "Coenen et al. (2012),\n2-yr accommodation",
+        "Coenen et al. (2012),\nyr 2, 2-yr accommodation",
     ),
     (
-        "Personal tax cut,\nTaylor rule",
-        0.32,
+        "Personal tax cut,\nTaylor rule (year 2)",
+        calendar_year_multiplier("taxcut", 2),
         (0.2, 0.4),
         0.3,
         "Coenen et al. (2012);\nCBO central 0.3",
@@ -102,7 +119,7 @@ ax.set_ylabel("GDP multiplier")
 ax.set_ylim(0, 1.35)
 ax.set_title(
     "Fiscal multipliers: this implementation vs published benchmarks\n"
-    "(purchases: yr 1 Taylor / yr 2 fixed rate; tax cut: yr 2)",
+    "each bar against a band of matching horizon and monetary conditioning",
     fontsize=9,
 )
 ax.legend(frameon=False, fontsize=8, loc="upper right")

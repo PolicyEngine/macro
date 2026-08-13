@@ -303,9 +303,11 @@ MODEL_QUALITY = {
     "frb-us": {
         "implementation_fidelity": _quality(
             "strong",
-            "The baseline and four like-for-like scenarios (monetary, fiscal "
-            "egfe, tax trp, non-inertial Taylor) match LONGBASE and pyfrbus at "
-            "the reference solver's numerical noise floor.",
+            "Four like-for-like scenarios (monetary, fiscal egfe, tax trp, "
+            "non-inertial Taylor) match the Fed's own pyfrbus at the "
+            "reference solver's version-to-version noise floor. The baseline "
+            "agreement with LONGBASE is excluded from this judgement: it is "
+            "an add-factor identity that passes on randomly scrambled data.",
             "Extend like-for-like gates across further official demos, closures "
             "and recodes; add the MCE expectations path.",
         ),
@@ -556,9 +558,13 @@ MODEL_QUALITY = {
             "the manual's Table 4 macro block replicates within stated "
             "tolerances. The clean-room Python reimplementation has landed "
             "§2.2 accounting and §3.2, §3.3.1 and §3.3.2 — 118 equations, "
-            "Eqs. (21)-(138) contiguous — and surfaced some thirty-five "
-            "defects in the manual itself, each pinned by a test rather than "
-            "absorbed into a tolerance.",
+            "Eqs. (21)-(138) contiguous — and surfaced defects in the manual "
+            "itself, thirteen of them pinned as machine-readable gap records "
+            "rather than absorbed into a tolerance. An audit of the wider "
+            "write-up re-characterised four findings as first-period jumps "
+            "(Table 5 describes those parameters as historical means, never "
+            "claimed to fit the manual's own initial period) and withdrew one "
+            "claim outright.",
             "Complete §3.3 and the oracle comparison, closing milestone 2.",
         ),
         "predictive_validation": _quality(

@@ -4,7 +4,7 @@
 \subsection{The Fed's pyfrbus and the published FRB/US record}
 \label{sec:cmp-published}
 
-This section consolidates the paper's headline numbers against the published record in one place. Two kinds of comparison must be kept apart. The first is \emph{like-for-like}: the Fed's own \texttt{pyfrbus} reference implementation runs on this machine, on the same \texttt{model.xml}, the same LONGBASE vintage and the identical shock, so the two implementations should agree --- and they do, to solver precision. Re-running the Board's demo experiment (a 100-basis-point add-factor to \texttt{rffintay} under surplus-ratio fiscal targeting) in both codes gives a maximum absolute difference of $6.0\times10^{-9}$ across all 284 endogenous variables and all twenty quarters, i.e.\ solver-tolerance noise. The second kind of comparison is against \emph{published} FRB/US output --- most usefully the 2014 FEDS Note responses under VAR expectations \citep{brayton2014note} and the cross-model fiscal ranges of \citet{coenen2012effects} and \citet{whalen2015fiscal}. There the numbers can only be close, not identical: the published simulations were produced on earlier model and database vintages, from different baselines, and with shock designs (e.g.\ persistence of the funds-rate innovation) that the notes do not fully pin down. Table~\ref{tab:published-comparison} shows both kinds side by side.
+This section consolidates the paper's headline numbers against the published record in one place. Three kinds of comparison must be kept apart, and the first of them is not a comparison at all. A number that is \emph{true by construction} --- an identity, a calibration input reported as an achieved target, a solver tolerance reported as accuracy --- can never fail, so it belongs in the table only if it is labelled as such where it appears. The tracking residual of Section~\ref{subsec:tracking} is the case in point and is flagged in the table below rather than counted as agreement. The second kind is \emph{like-for-like}: the Fed's own \texttt{pyfrbus} reference implementation runs on this machine, on the same \texttt{model.xml}, the same LONGBASE vintage and the identical shock, so the two implementations should agree --- and they do, to solver precision. Re-running the Board's demo experiment (a 100-basis-point add-factor to \texttt{rffintay} under surplus-ratio fiscal targeting) in both codes gives a maximum absolute difference of $6.0\times10^{-9}$ across all 284 endogenous variables and all twenty quarters, i.e.\ solver-tolerance noise. This one is real evidence: the shock moves the solution away from the tracked baseline, so nothing forces the two codes to agree. The third kind of comparison is against \emph{published} FRB/US output --- most usefully the 2014 FEDS Note responses under VAR expectations \citep{brayton2014note} and the cross-model fiscal ranges of \citet{coenen2012effects} and \citet{whalen2015fiscal}. There the numbers can only be close, not identical: the published simulations were produced on earlier model and database vintages, from different baselines, and with shock designs (e.g.\ persistence of the funds-rate innovation) that the notes do not fully pin down. Table~\ref{tab:published-comparison} shows both kinds side by side.
 
 \begin{table}[htbp]
 \centering
@@ -20,14 +20,18 @@ Quantity & Ours & Published & Deviation and reading \\
 \quad Output gap, trough & $-0.50$pp (yr~1.5) & $\approx-0.4$pp max & $\approx0.1$pp deeper; vintage/shock design \citep{brayton2014note} \\
 \quad Unemployment, peak & $+0.26$pp (yr~2) & rises (consistent with the output--unemployment link) & consistent; peak $\approx$ half the gap trough \\
 \quad Core PCE inflation, trough & $-0.034$pp (yr~2) & $\approx-0.08$pp & $0.05$pp smaller; flatter current-vintage Phillips curve \citep{brayton2014note} \\
-\quad vs.\ vendor pyfrbus (like-for-like) & \multicolumn{2}{l}{identical to $6.0\times10^{-9}$ (284 vars)} & exact by construction \citep{fedfrbuspython} \\
+\quad vs.\ vendor pyfrbus (like-for-like) & \multicolumn{2}{l}{agrees to $6.0\times10^{-9}$ (284 vars)} & solver-tolerance noise on a \emph{shocked} path; not an identity \citep{fedfrbuspython} \\
+\quad Tracking residual vs.\ LONGBASE & \multicolumn{2}{l}{$5.6\times10^{-17}$} & \textbf{true by construction} --- an add-factor identity, not evidence (Sec.~\ref{subsec:tracking}) \\
 \addlinespace
-\multicolumn{4}{l}{\emph{Government purchases, 1\% of GDP}}\\
-\quad Multiplier, yr~1, Taylor rule & $0.72$ & $0.7$--$1.0$ (no accommodation) & inside range \citep{coenen2012effects} \\
-\quad Multiplier, yr~2, fixed funds rate & $0.99$ & ``roughly one'' pegged; $1.1$--$1.2$ with 2-yr accommodation & matches the Board's characterisation; just below cross-model accommodation range \citep{brayton2014note, coenen2012effects} \\
+\multicolumn{4}{l}{\emph{Government purchases, 1\% of GDP for 8 quarters}}\\
+\quad Multiplier, yr~1, Taylor rule & $0.72$ & $0.7$--$1.0$, yr~1, no accommodation & inside range \citep{coenen2012effects} \\
+\quad Multiplier, yr~2, Taylor rule & $0.64$ & no matched published cell & reported for completeness \\
+\quad Multiplier, yr~1, funds rate pegged & $0.77$ & no matched published cell & reported for completeness \\
+\quad Multiplier, yr~2, funds rate pegged & $0.90$ & $1.1$--$1.2$, yr~2, with 2-yr accommodation & \textbf{below} the cross-model range; consistent with the looser ``roughly one'' pegged characterisation \citep{brayton2014note, coenen2012effects} \\
 \addlinespace
 \multicolumn{4}{l}{\emph{Personal tax cut, 1\% of GDP ex ante}}\\
-\quad Multiplier, yrs~1--2 & $0.22\rightarrow0.32$ & $0.2$--$0.4$; CBO central $\approx0.3$ & inside both ranges \citep{coenen2012effects, whalen2015fiscal} \\
+\quad Multiplier, yr~1 & $0.22$ & $0.2$--$0.4$, yr~1 labour-tax cut & inside range \citep{coenen2012effects} \\
+\quad Multiplier, yr~2 & $0.32$ & CBO central $\approx0.3$, two-year & on the central estimate \citep{whalen2015fiscal} \\
 \bottomrule
 \end{tabularx}
 
@@ -69,7 +73,7 @@ CBO rule of thumb \citep{cbo2022rules} & none published (GDP held fixed) & $+10$
 \parbox{0.97\textwidth}{\footnotesize ``This implementation'' from Table~\ref{tab:irf}. VAR-literature entries are trough responses of industrial production to a shock normalised to a 100bp funds-rate movement, as surveyed in \citet{ramey2016shocks}; industrial production is roughly three times as cyclical as GDP, so these are not directly convertible into GDP units.}
 \end{table}
 
-The placement is comfortable: FRB/US under VAR expectations delivers activity effects at the moderate end of the empirical range --- above the smallest CEE-style VAR estimates, close to the post-1984 FAVAR evidence once industrial production's greater cyclicality is taken into account, and well below the ``medium effects'' narrative-identification numbers --- with a peak-effect timing (about two years) shared by nearly every entry. The NY Fed DSGE attributes a somewhat larger per-shock output effect but the same flat-Phillips-curve property of small inflation responses. On the fiscal side, the CBO comparison is already embedded in Table~\ref{tab:published-comparison}: CBO's published ranges are wide (0.5--2.5 for federal purchases, 0.3--1.5 for broad two-year tax cuts, with the central individual-tax multiplier around 0.3), and every multiplier in Table~\ref{tab:multipliers} lies inside them \citep{whalen2015fiscal, cbo2022rules}.
+The placement is comfortable: FRB/US under VAR expectations delivers activity effects at the moderate end of the empirical range --- above the smallest CEE-style VAR estimates, close to the post-1984 FAVAR evidence once industrial production's greater cyclicality is taken into account, and well below the ``medium effects'' narrative-identification numbers --- with a peak-effect timing (about two years) shared by nearly every entry. The NY Fed DSGE attributes a somewhat larger per-shock output effect but the same flat-Phillips-curve property of small inflation responses. On the fiscal side, the CBO comparison is already embedded in Table~\ref{tab:published-comparison}. CBO's published ranges are wide (0.5--2.5 for federal purchases, 0.3--1.5 for broad two-year tax cuts, with the central individual-tax multiplier around 0.3), and they must be read against the cell of matching horizon: all four of our purchases multipliers lie inside the purchases range, and our \emph{two-year} tax multiplier of 0.32 sits just inside the two-year tax range and on its central estimate \citep{whalen2015fiscal, cbo2022rules}. Our first-year tax multiplier of 0.22 is below the bottom of CBO's two-year band, which is not a disagreement --- it is a different horizon --- and it is inside the first-year cross-model range of 0.2--0.4 that is the matching benchmark \citep{coenen2012effects}.
 
 \subsection{Reading the comparisons}
 
@@ -78,7 +82,7 @@ The like-for-like agreement is the decisive test: on identical inputs the two co
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{figures/fig_cmp_multipliers.pdf}
-\caption{Fiscal multipliers: this implementation (bars) against the \citet{coenen2012effects} cross-model ranges (bands) and the CBO central estimate \citep{whalen2015fiscal}.}
+\caption{Fiscal multipliers: this implementation (bars) against the \citet{coenen2012effects} cross-model ranges (bands) and the CBO central estimate \citep{whalen2015fiscal}. Each bar carries its horizon in the axis label and is placed against a band published for that same horizon and the same monetary conditioning; the bar values are recomputed from \texttt{figures/results.json} by the plotting script rather than typed in. The pegged year-2 purchases multiplier falls short of its band --- that gap is the result, not a plotting artefact.}
 \label{fig:cmp-multipliers}
 \end{figure}
 

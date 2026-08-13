@@ -18,7 +18,36 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OGUK_DEMO = "/Users/janansadeqian/OG-UK/oguk/data/demographic"
+
+# Resolvable on any machine. This previously hardcoded one developer's home
+# directory, so nobody else could regenerate the figures -- which is how a
+# figure that misrepresented the calibration fit stayed committed. Same
+# pattern as papers/frb-us/figures/run_experiments.py.
+#
+# Point OG_UK at an OG-UK checkout, or let it default to ~/OG-UK. If oguk is
+# importable, its own package data is preferred and no checkout is needed.
+def _oguk_demographic_dir():
+    try:
+        import oguk
+
+        packaged = os.path.join(
+            os.path.dirname(os.path.abspath(oguk.__file__)),
+            "data",
+            "demographic",
+        )
+        if os.path.isdir(packaged):
+            return packaged
+    except ImportError:
+        pass
+    root = os.path.expanduser(os.environ.get("OG_UK", "~/OG-UK"))
+    packaged = os.path.join(root, "oguk", "data", "demographic")
+    if not os.path.isdir(packaged):
+        raise SystemExit(
+            f"OG-UK demographic data not found at {packaged}. Install oguk "
+            "(pip install git+https://github.com/PSLmodels/OG-UK) or set "
+            "OG_UK to an OG-UK checkout."
+        )
+    return packaged
 
 # Okabe-Ito
 OI = ["#0072B2", "#D55E00", "#009E73", "#CC79A7",
@@ -31,9 +60,10 @@ plt.rcParams.update({
 
 
 def fig_demographics():
-    pop = pd.read_csv(f"{OGUK_DEMO}/un_uk_pop.csv", sep="|", skiprows=1)
-    fert = pd.read_csv(f"{OGUK_DEMO}/un_uk_fert.csv", sep="|", skiprows=1)
-    dth = pd.read_csv(f"{OGUK_DEMO}/un_uk_deaths.csv", sep="|", skiprows=1)
+    demo = _oguk_demographic_dir()
+    pop = pd.read_csv(f"{demo}/un_uk_pop.csv", sep="|", skiprows=1)
+    fert = pd.read_csv(f"{demo}/un_uk_fert.csv", sep="|", skiprows=1)
+    dth = pd.read_csv(f"{demo}/un_uk_deaths.csv", sep="|", skiprows=1)
 
     yr = 2021
     p = (pop[(pop.TimeLabel == yr) & (pop.Sex == "Both sexes")]
@@ -213,40 +243,75 @@ def fig_dep():
 
 
 def fig_targets():
-    """Calibration targets vs current official UK aggregates (normalised).
+    """Calibration settings vs current official UK aggregates.
 
-    Model values are the deployed OG-UK calibration settings/targets; official
-    values are the mid-2026 prints cited in the comparison section. Bars show
-    model as a percentage of the official value; annotations flag whether the
-    quantity is imposed, targeted, or emergent (so an exact match is anchoring,
-    not validation).
+    Every value here is a *calibration input*, not a model output: no OG-UK
+    steady state is solved anywhere in this script, so nothing in this figure
+    can be read as a fit. The chart's only job is to show which inputs are
+    imposed (and therefore cannot disagree with the data) and which one carries
+    a real, unresolved gap.
+
+    This figure previously misrepresented two rows and both errors flattered
+    the calibration:
+
+      * The labour share was plotted as 60.0 vs 59.5 -- a near-exact match --
+        when the deployed setting is 1 - gamma = 0.65 against an ONS labour
+        share near 0.595. The paper's own table records that as a ~5pp miss.
+      * The household saving ratio was plotted by copying the official value
+        into the model column, producing a perfect fit the model never
+        produced. beta is a fixed input (estimate_beta=False); the model's
+        achieved saving ratio is not published for OG-UK 0.3.2, so there is
+        no model value to plot and none is invented here.
     """
+    # (label, model value, official value, unit, treatment, is_imposed)
+    # Sources for the official column are the citations in comparison.tex; the
+    # debt figure is the committed ONS HF6X artifact (data/latest/, vintage
+    # 2026-07-26: 94.9% for June 2026).
     rows = [
-        # (label, model value, official value, unit, treatment)
-        ("Labour share of income", 60.0, 59.5, "%", "set from factor shares"),
-        ("Depreciation / capital stock", 6.5, 6.5, "%", "imposed"),
-        ("Potential growth $g_y$", 1.1, 1.1, "%/yr", "imposed"),
-        ("Debt-to-GDP (target vs ONS)", 94.4, 95.1, "%", "imposed via $\\alpha_D$"),
-        ("Household saving ratio", 8.9, 8.9, "%", "targeted via $\\beta$"),
+        ("Labour share of income", 65.0, 59.5, "%",
+         r"$1-\gamma$ retained from OG-Core", False),
+        ("Debt-to-GDP", 95.0, 94.9, "%",
+         r"imposed via $\alpha_D$", True),
+        ("Depreciation / capital stock", 6.5, 6.5, "%",
+         r"imposed, $\delta$", True),
+        ("Potential growth $g_y$", 1.1, 1.1, "%/yr",
+         r"imposed, $g_y$", True),
     ]
-    labels = [r[0] for r in rows]
-    ratio = [100.0 * r[1] / r[2] for r in rows]
-    ypos = np.arange(len(rows))[::-1]
+    # No bar: beta is an input and the achieved saving ratio is unpublished.
+    unplotted = ("Household saving ratio", 8.9, "%",
+                 r"$\beta$ fixed, not estimated; model value not published")
 
-    fig, ax = plt.subplots(figsize=(7.6, 3.2))
-    ax.barh(ypos, ratio, height=0.55, color=OI[0], alpha=0.85)
-    ax.axvline(100, color=OI[6], lw=1.0, ls="--")
+    ypos = np.arange(len(rows) + 1)[::-1]
+    fig, ax = plt.subplots(figsize=(7.8, 3.4))
+    for y, (lab, model, official, unit, treat, imposed) in zip(ypos, rows):
+        gap = model - official
+        ax.barh(y, gap, height=0.5, left=0,
+                color="#8C8C8C" if imposed else OI[1],
+                alpha=0.9 if not imposed else 0.7)
+        tag = (f"{treat} — cannot disagree" if imposed
+               else f"{treat}; NOT re-anchored to ONS factor shares")
+        ax.text(gap + (0.25 if gap >= 0 else -0.25), y,
+                f"{model:g}{unit} vs {official:g}{unit}  ({tag})",
+                va="center", ha="left" if gap >= 0 else "right", fontsize=7)
+    # The saving-ratio row: an explicit blank, not a bar at zero.
+    y0 = ypos[-1]
+    ax.text(0.25, y0,
+            f"no model-produced value  ({unplotted[3]}; official "
+            f"{unplotted[1]:g}{unplotted[2]})",
+            va="center", fontsize=7, style="italic", color="#555555")
+    ax.axvline(0, color=OI[6], lw=1.0)
     ax.set_yticks(ypos)
-    ax.set_yticklabels(labels, fontsize=8)
-    ax.set_xlim(96, 103)
-    ax.set_xlabel("Calibration value as % of current official UK value "
-                  "(100 = exact match)")
-    for y, r, row in zip(ypos, ratio, rows):
-        ax.text(r + 0.15, y,
-                f"{row[1]:g}{row[3]} vs {row[2]:g}{row[3]}  ({row[4]})",
-                va="center", fontsize=7)
-    ax.set_title("Calibration targets against official UK aggregates "
-                 "(mid-2026 vintages)", fontsize=9)
+    ax.set_yticklabels([r[0] for r in rows] + [unplotted[0]], fontsize=8)
+    ax.set_ylim(y0 - 0.6, ypos[0] + 0.6)
+    ax.set_xlim(-1.5, 9.0)
+    ax.set_xlabel("Calibration setting minus official UK value "
+                  "(percentage points; 0 = agreement)")
+    ax.set_title("Calibration inputs against official UK aggregates "
+                 "(mid-2026 vintages)\n"
+                 "Grey rows are imposed and cannot disagree; only the labour "
+                 "share carries a real gap", fontsize=9)
+    ax.grid(axis="x", alpha=0.3)
+    ax.set_axisbelow(True)
     fig.tight_layout()
     fig.savefig(f"{HERE}/fig_targets.pdf")
     plt.close(fig)

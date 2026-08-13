@@ -401,19 +401,16 @@ def render_fragment() -> str:
                 aria-controls="series-table" aria-expanded="false"></button>
       </p>
 
-      <h3>Reconstruct a series as it was published on a date</h3>
+      <h3>Read a series as it was published on a date</h3>
       <p>
-        <code>MANIFEST.json</code> lists every snapshot date held for every
-        series. Take the newest on or before the date you want, and read that
-        file. Standard library only, no key, no account.
+        Take the newest snapshot on or before your date. No key, no account,
+        standard library only.
       </p>
 {recipe_block()}
       <p>
-        A later date returns a later snapshot, which may carry revised values
-        for periods the earlier one already covered. That difference is the
-        revision. The store begins {earliest}, when the first snapshot was
-        taken — it is a forward-looking real-time record from that date, not a
-        reconstruction of vintages predating it.
+        Two dates, two snapshots: the difference between them is the revision.
+        The store starts {earliest} and runs forward from there — it does not
+        reconstruct vintages older than itself.
       </p>
 
       <h3>Announced releases</h3>

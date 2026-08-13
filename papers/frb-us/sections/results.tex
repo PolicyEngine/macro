@@ -25,11 +25,11 @@ Quarter & \texttt{rff} (pp) & \texttt{xgdp} (\%) & \texttt{lur} (pp) & \texttt{p
 2027Q3 & $0.097$  & $-0.544$ & $0.254$  & $-0.033$ \\
 2027Q4 & $0.001$  & $\mathbf{-0.551}$ & $\mathbf{0.258}$ & $\mathbf{-0.034}$ \\
 2028Q1 & $-0.079$ & $-0.544$ & $0.257$  & $-0.033$ \\
-2028Q2 & $-0.143$ & $-0.526$ & $0.250$  & $-0.033$ \\
+2028Q2 & $-0.143$ & $-0.526$ & $0.251$  & $-0.033$ \\
 2028Q3 & $-0.191$ & $-0.499$ & $0.240$  & $-0.032$ \\
 2028Q4 & $-0.226$ & $-0.464$ & $0.226$  & $-0.031$ \\
-2029Q1 & $-0.248$ & $-0.426$ & $0.209$  & $-0.030$ \\
-2029Q2 & $-0.260$ & $-0.384$ & $0.190$  & $-0.030$ \\
+2029Q1 & $-0.248$ & $-0.425$ & $0.209$  & $-0.030$ \\
+2029Q2 & $-0.260$ & $-0.383$ & $0.189$  & $-0.030$ \\
 2029Q3 & $-0.262$ & $-0.340$ & $0.168$  & $-0.029$ \\
 2029Q4 & $-0.257$ & $-0.296$ & $0.146$  & $-0.028$ \\
 2030Q1 & $-0.245$ & $-0.254$ & $0.124$  & $-0.027$ \\
@@ -104,20 +104,20 @@ How much of the multiplier erosion is the central bank's doing? FRB/US's switch 
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}
 Quarter & \texttt{xgdp} (\%) & \texttt{rff} (pp) & \texttt{picxfe} (pp) & \texttt{xgdp} (\%) & \texttt{rff} (pp) & \texttt{picxfe} (pp) \\
 \midrule
-2026Q1 & $0.74$ & $0.11$ & $0.00$ & $0.74$ & $-0.07$ & $0.00$ \\
-2026Q4 & $0.69$ & $0.34$ & $0.02$ & $0.84$ & $-0.12$ & $0.03$ \\
-2027Q2 & $0.67$ & $0.43$ & $0.02$ & $0.97$ & $-0.08$ & $0.04$ \\
-2027Q4 & $0.59$ & $0.48$ & $0.02$ & $1.06$ & $-0.06$ & $0.05$ \\
-2028Q4 & $-0.30$ & $0.12$ & $0.01$ & $0.37$ & $0.02$ & $0.05$ \\
-2030Q4 & $-0.33$ & $-0.21$ & $0.01$ & $0.17$ & $0.01$ & $0.05$ \\
+2026Q1 & $0.74$ & $0.11$ & $0.00$ & $0.74$ & $0.00$ & $0.00$ \\
+2026Q4 & $0.69$ & $0.34$ & $0.02$ & $0.79$ & $0.00$ & $0.02$ \\
+2027Q2 & $0.67$ & $0.43$ & $0.02$ & $0.89$ & $0.00$ & $0.03$ \\
+2027Q4 & $0.59$ & $0.48$ & $0.02$ & $0.95$ & $0.00$ & $0.04$ \\
+2028Q4 & $-0.30$ & $0.12$ & $0.01$ & $0.26$ & $0.00$ & $0.04$ \\
+2030Q4 & $-0.33$ & $-0.21$ & $0.01$ & $0.09$ & $0.00$ & $0.04$ \\
 \midrule
-Year-1 multiplier & \multicolumn{3}{c}{$0.72$} & \multicolumn{3}{c}{$0.79$} \\
-Year-2 multiplier & \multicolumn{3}{c}{$0.64$} & \multicolumn{3}{c}{$0.99$} \\
+Year-1 multiplier & \multicolumn{3}{c}{$0.72$} & \multicolumn{3}{c}{$0.77$} \\
+Year-2 multiplier & \multicolumn{3}{c}{$0.64$} & \multicolumn{3}{c}{$0.90$} \\
 \bottomrule
 \end{tabular}
 
 \medskip
-\parbox{0.95\textwidth}{\footnotesize Deviations from baseline; multipliers are calendar-year averages of the GDP response per unit of shock. Under \texttt{dmpex} the funds rate is pegged to its baseline path (small residual movements in \texttt{rff} reflect the effective-lower-bound recode operating on the baseline path); long rates still move through expected \emph{future} rates in the VAR expectations block.}
+\parbox{0.95\textwidth}{\footnotesize Deviations from baseline; multipliers are calendar-year averages of the GDP response per unit of shock. The pegged \texttt{rff} column is exactly zero to machine precision in every quarter, and the experiment script asserts it (\texttt{max |drift|} $<10^{-10}$): a pegged run whose funds rate moves is not pegged. Achieving that requires the switches (\texttt{dmpintay} $=0$, \texttt{dmpex} $=1$, \texttt{rfffix} on the baseline path) to be present in the data \emph{before} \texttt{init\_trac}, and the deviation to be taken against a baseline itself solved under the peg; see the note below. Long rates still move through expected \emph{future} rates in the VAR expectations block, which is why the peg is not a fixed real rate.}
 \end{table}
 
 \begin{figure}[htbp]
@@ -127,7 +127,11 @@ Year-2 multiplier & \multicolumn{3}{c}{$0.64$} & \multicolumn{3}{c}{$0.99$} \\
 \label{fig:fiscalrules}
 \end{figure}
 
-The two regimes start identically --- the inertial rule moves only 11 basis points in the impact quarter, so the impact multiplier is 0.74 either way --- and then diverge sharply. Under the Taylor rule the cumulated 48-basis-point tightening caps the output gain and produces the post-expiry undershoot; with the rate fixed, the multiplier \emph{grows} over the spending window, averaging 0.99 in year two and peaking at 1.06, as rising inflation lowers real rates and no crowding-out force operates. The inflation response is correspondingly larger and far more persistent ($+0.05$ percentage point and still there in 2030, versus $+0.02$ fading to zero under the rule). This reproduces the central finding the Board reports for FRB/US and that the multi-model comparison of \citet{coenen2012effects} documents across U.S.\ models: spending multipliers of roughly one when the funds rate is held fixed --- FRB/US's first-year multiplier is 0.7--1.0 without accommodation, rising to about 1.1--1.2 with two years of accommodation --- and noticeably below one when monetary policy leans against the stimulus.
+The two regimes start identically --- the inertial rule moves only 11 basis points in the impact quarter, so the impact multiplier is 0.74 either way --- and then diverge. Under the Taylor rule the cumulated 48-basis-point tightening caps the output gain and produces the post-expiry undershoot; with the rate pegged, the multiplier \emph{grows} over the spending window, averaging 0.90 in year two and peaking at 0.95 in the final quarter of the stimulus, as rising inflation lowers real rates and no crowding-out force operates. The inflation response is correspondingly larger and far more persistent ($+0.04$ percentage point and still there in 2030, versus $+0.02$ fading to zero under the rule).
+
+The direction of this result is the one the Board reports for FRB/US and that the multi-model comparison of \citet{coenen2012effects} documents across U.S.\ models --- purchases multipliers noticeably below one when monetary policy leans against the stimulus, and materially higher when it does not. The \emph{level}, however, does not reach the cross-model benchmark: at 0.90 in year two the pegged multiplier sits below the 1.1--1.2 range \citet{coenen2012effects} report for two years of monetary accommodation, and only just inside the ``roughly one'' characterisation. The honest reading is that this model's pegged multiplier is at the low end of the accommodated cross-model evidence, not in the middle of it.
+
+\paragraph{A pegged run whose rate moves is not pegged.} An earlier version of this paper reported a year-two pegged multiplier of 0.99 from an experiment in which the policy switches were flipped \emph{after} \texttt{init\_trac}, on the shocked frame only, with the deviation taken against the Taylor-rule baseline. At the LONGBASE baseline the inertial rule's own value \texttt{rffintay} exceeds the actual funds rate by 0.07--0.12 percentage point, and with \texttt{dmpintay} $=1$ at tracking time that wedge is absorbed into the \texttt{rff} block's add factor. Switching to \texttt{dmpex} afterwards leaves the wedge still being subtracted, so the funds rate settled 0.123 percentage point \emph{below} its own \texttt{rfffix} target --- an unintended monetary easing stacked on top of the fiscal stimulus, worth about 0.09 on the multiplier. The corrected experiment sets the switches before \texttt{init\_trac} and deviates against a pegged baseline; \texttt{figures/run\_experiments.py} now asserts that the funds-rate drift is zero, which is the cheap check that would have caught the original error.
 
 \subsection{A personal-tax-cut experiment}
 \label{sec:taxcut}
@@ -183,7 +187,7 @@ Because the price block is indexed to its own lags (equation~\ref{eq:picxfe}), t
 \subsection{The multiplier menu and published benchmarks}
 \label{sec:multipliers}
 
-Table~\ref{tab:multipliers} collects the experiments into a multiplier menu and sets them against published figures. The pattern matches the Board's documented fiscal properties and the cross-model evidence closely: FRB/US spending multipliers are somewhat below one under an estimated policy rule and close to one with a pegged rate \citep{brayton2014note, coenen2012effects}; personal tax multipliers are a fraction of spending multipliers --- \citet{coenen2012effects} report first-year labour-tax-cut multipliers of 0.2--0.4 across U.S.\ models, almost invariant to monetary accommodation, and CBO's central two-year multiplier for broad individual tax cuts is about 0.3 (range 0.1--0.6) \citep{whalen2015fiscal}, while the FRB/US-based fiscal-effect measure of \citet{cashin2018fiscal} likewise embodies personal-tax MPCs of a few tenths. Our year-one figure of 0.22 and year-two figure of 0.32 sit inside every one of those ranges. Note what is \emph{not} in the table: at the effective lower bound, published FRB/US analysis finds substantially larger fiscal multipliers because the accommodation is automatic \citep{reifschneider2000three, coenen2012effects}; our fixed-rate experiment is the deterministic analogue of that mechanism.
+Table~\ref{tab:multipliers} collects the experiments into a multiplier menu and sets them against published figures, with each of our cells placed beside a benchmark of the \emph{same} horizon and the same monetary conditioning --- a discipline the previous version of this table did not keep. The pattern broadly matches the Board's documented fiscal properties and the cross-model evidence: FRB/US spending multipliers are somewhat below one under an estimated policy rule and higher, though here still below one, with a pegged rate \citep{brayton2014note, coenen2012effects}; personal tax multipliers are a fraction of spending multipliers --- \citet{coenen2012effects} report first-year labour-tax-cut multipliers of 0.2--0.4 across U.S.\ models, almost invariant to monetary accommodation, and CBO's central two-year multiplier for broad individual tax cuts is about 0.3 (range 0.1--0.6) \citep{whalen2015fiscal}, while the FRB/US-based fiscal-effect measure of \citet{cashin2018fiscal} likewise embodies personal-tax MPCs of a few tenths. Matched horizon for horizon, our year-one figure of 0.22 sits inside the first-year cross-model range and our year-two figure of 0.32 sits on CBO's central two-year estimate. Note what is \emph{not} in the table: at the effective lower bound, published FRB/US analysis finds substantially larger fiscal multipliers because the accommodation is automatic \citep{reifschneider2000three, coenen2012effects}; our fixed-rate experiment is the deterministic analogue of that mechanism.
 
 \begin{table}[htbp]
 \centering
@@ -194,12 +198,12 @@ Table~\ref{tab:multipliers} collects the experiments into a multiplier menu and 
 \toprule
 Experiment & Year 1 & Year 2 & Published benchmark \\
 \midrule
-Purchases, inertial Taylor rule & $0.72$ & $0.64$ & $0.7$--$1.0$ first-year, no accommodation \citep{coenen2012effects} \\
-Purchases, fixed funds rate & $0.79$ & $0.99$ & $\approx 1$ with rate held fixed \citep{brayton2014note}; $1.1$--$1.2$ with 2-yr accommodation \citep{coenen2012effects} \\
-Personal tax cut, Taylor rule & $0.22$ & $0.32$ & $0.2$--$0.4$ labour-tax cut \citep{coenen2012effects}; $\approx0.3$ CBO central estimate \citep{whalen2015fiscal} \\
+Purchases, inertial Taylor rule & $0.72$ & $0.64$ & yr~1 vs $0.7$--$1.0$, first-year, no accommodation \citep{coenen2012effects}: inside \\
+Purchases, funds rate pegged & $0.77$ & $0.90$ & yr~2 vs $1.1$--$1.2$, two years of accommodation \citep{coenen2012effects}: \textbf{below}; consistent with the Board's looser ``roughly one'' characterisation \citep{brayton2014note} \\
+Personal tax cut, Taylor rule & $0.22$ & $0.32$ & yr~1 vs $0.2$--$0.4$ first-year labour-tax cut \citep{coenen2012effects}: inside; yr~2 vs $\approx0.3$ CBO central two-year estimate \citep{whalen2015fiscal}: inside \\
 \bottomrule
 \end{tabularx}
 
 \medskip
-\parbox{0.95\textwidth}{\footnotesize Multipliers are calendar-year average GDP deviations per unit of ex-ante budgetary cost (1\% of GDP). All shocks last eight quarters, 2026Q1--2027Q4.}
+\parbox{0.95\textwidth}{\footnotesize Multipliers are calendar-year average GDP deviations per unit of ex-ante budgetary cost (1\% of GDP). All shocks last eight quarters, 2026Q1--2027Q4. Each benchmark is stated with the horizon and monetary conditioning it was published for, and is compared only against the matching cell: the year-1 and year-2 columns of one row are two horizons of one experiment, and the two purchases rows are two different experiments, so reading 0.72 against 0.90 would compare neither like with like.}
 \end{table}

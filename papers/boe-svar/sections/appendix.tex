@@ -38,7 +38,7 @@ Variable & Description & Source (codes) & Construction \\
 \section{Prior hyperparameters}
 \label{app:priors}
 
-Table~\ref{tab:priors} lists every prior hyperparameter, its default, and its role. Defaults follow the \citet{giannone2015} conventions; the source paper does not report the Bank's settings. Maximising the closed-form marginal likelihood \eqref{eq:lml} over $(\lambda, \mu, \theta)$ on the estimation sample --- the optional empirical-Bayes step --- selects substantially looser lag shrinkage than the default ($\lambda \approx 1.12$, $\mu \approx 0.48$, $\theta \approx 1.0$; log ML $-1678.5$ against $-1795.4$ at the defaults, computed on the estimation sample with the Covid dummies); the shipped configuration retains the conventional defaults for comparability with standard practice, and the calibration bands of Section~\ref{sec:validation} are wide enough to cover both settings.
+Table~\ref{tab:priors} lists every prior hyperparameter, its default, and its role. Defaults follow the \citet{giannone2015} conventions; the source paper does not report the Bank's settings. Maximising the closed-form marginal likelihood \eqref{eq:lml} over $(\lambda, \mu, \theta)$ on the estimation sample --- the optional empirical-Bayes step --- selects substantially looser lag shrinkage than the default ($\lambda \approx 1.12$, $\mu \approx 0.48$, $\theta \approx 1.0$; log ML $-1678.5$ against $-1795.4$ at the defaults, computed on the estimation sample with the Covid dummies); the shipped configuration retains the conventional defaults for comparability with standard practice. That the $[30,60]$ per cent tripwire of Section~\ref{sec:validation} covers both settings is not reassurance --- the band is too wide to distinguish them --- and the sensitivity of the headline FEVD shares to the hyperparameters has not been measured.
 
 \begin{table}[h]
 \centering
@@ -66,7 +66,7 @@ Covid dummies & 6 & One exogenous 0/1 dummy per quarter, 2020Q1--2021Q2. \\
 \section{Sampling and convergence diagnostics}
 \label{app:diagnostics}
 
-Posterior draws are i.i.d.\ (direct sampling from the conjugate NIW posterior; no Markov chain), so the relevant diagnostics concern the identification step: the sign-restriction acceptance rate and the effective sample size of the \citet{arias2018} importance weights. Table~\ref{tab:diagnostics} reports them for every run used in this paper. Acceptance rates of 7--8 per cent are typical for a restriction set of this size (23 sign restrictions across six shocks plus 13 zero restrictions), and are materially raised by the \citet{chan2025} permutation search relative to plain accept/reject. The weighted ESS of roughly 43--47 per cent of accepted draws (47.4 per cent in the production run, 42.6 per cent in the forecast-revision run) indicates moderately variable weights --- informative but not degenerate; no single draw dominates ($\max_i w_i / \sum_i w_i < 2$ per cent in the production run). Weighted and unweighted headline statistics are compared in Section~\ref{sec:validation}: the weights move the one-year global FEVD shares of UK GDP and CPI from 49.6 and 43.8 per cent towards the paper's approximate 40 and 50 per cent, i.e.\ towards the uniform-over-rotations posterior the weights are designed to recover.
+Posterior draws are i.i.d.\ (direct sampling from the conjugate NIW posterior; no Markov chain), so the relevant diagnostics concern the identification step: the sign-restriction acceptance rate and the effective sample size of the \citet{arias2018} importance weights. Table~\ref{tab:diagnostics} reports them for every run used in this paper. Acceptance rates of 7--8 per cent are typical for a restriction set of this size (23 sign restrictions across six shocks plus 13 zero restrictions), and are materially raised by the \citet{chan2025} permutation search relative to plain accept/reject. The weighted ESS of roughly 43--48 per cent of accepted draws (47.9 per cent in the production run, 42.6 per cent in the forecast-revision run) indicates moderately variable weights --- informative but not degenerate; no single draw dominates ($\max_i w_i / \sum_i w_i < 2$ per cent in the production run). Weighted and unweighted headline statistics are compared in Section~\ref{sec:validation}. The weights are there to recover the uniform-over-rotations posterior, but on this dataset they do not visibly move the headline shares: the unweighted 3{,}000-draw run gives one-year global FEVD shares of 38.1 (UK GDP) and 42.3 (UK CPI) per cent against the weighted production run's 37.4 and 42.3. The much larger spread of the 600-draw CI configuration (42.0 and 37.6) is Monte-Carlo noise from 51 accepted draws, not a weighting effect.
 
 \begin{table}[h]
 \centering
@@ -77,9 +77,9 @@ Posterior draws are i.i.d.\ (direct sampling from the conjugate NIW posterior; n
 \toprule
 Run & Posterior draws & Accepted & Acceptance & Weights & ESS \\
 \midrule
-Production replication & 10{,}000 & 751 & 7.5\% & yes & 355.9 \\
+Production replication & 10{,}000 & 744 & 7.4\% & yes & 356.1 \\
 Forecast revision (2024Q2 edge) & 6{,}000 & 487 & 8.1\% & yes & 207.5 \\
-Paper figures, estimation sample & 3{,}000 & 246 & 8.2\% & no & --- \\
+Paper figures, estimation sample & 3{,}000 & 241 & 8.0\% & no & --- \\
 Paper figures, 2024Q2 edge & 3{,}000 & 217 & 7.2\% & no & --- \\
 \bottomrule
 \end{tabular}
