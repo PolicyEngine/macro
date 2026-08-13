@@ -1,0 +1,52 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+% Paper chrome uses the firm-microsim template blue (YGTemplate MyBlue);
+% figures use the PolicyEngine palette separately.
+\definecolor{paperblue}{rgb}{0,0,0.7}   % MyBlue, matching the sister papers
+\definecolor{peteal}{HTML}{39C6C0}      % PolicyEngine teal accent
+\usepackage{sectsty}
+\allsectionsfont{\color{paperblue}}
+\usepackage[colorlinks=true, citecolor=paperblue, linkcolor=paperblue, urlcolor=paperblue]{hyperref}
+\usepackage{xurl}
+\usepackage[hang,flushmargin]{footmisc}
+\usepackage{natbib}
+\emergencystretch=1.2em
+\bibliographystyle{apalike}
+
+\title{\bfseries DEFINE-UK: running and gating an unlicensed ecological stock-flow consistent model\thanks{\textbf{Acknowledgements:} I thank Max Ghenis for his great suggestions and helpful discussions. DEFINE-UK is the work of Adam George and Yannis Dafermos at SOAS University of London, building on the DEFINE framework of Yannis Dafermos, Maria Nikolaidi and Giorgos Galanis; this paper documents an independent replication and reimplementation of their published model, is neither produced by nor endorsed by them, and any errors in the description of their work are mine. This paper and the accompanying codebase were prepared with the assistance of Claude (Anthropic); all remaining errors are my own.}\\[0.7cm]}
+\author{Vahid Ahmadi\thanks{Research Associate at PolicyEngine. Email: \href{mailto:vahid@policyengine.org}{vahid@policyengine.org}.}}
+\date{\small \ifcase\month\or January\or February\or March\or April\or May\or June\or July\or August\or September\or October\or November\or December\fi\ \the\year}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent DEFINE-UK is the ecological stock-flow consistent (E-SFC) model of the United Kingdom built at SOAS by \citet{georgedafermos2026manual}: a closed monetary accounting system for seven institutional sectors, coupled to an energy and emissions block, with UK-specific housing and power-generation structures through which climate policy reaches the financial system. It is the only member of the PolicyEngine Macro suite that answers the question \emph{who bears a climate-policy scenario}. This paper is its replication record, and it is deliberately a record of a ceiling as much as of a result. The upstream repository is public but carries \textbf{no licence}, so nothing is vendored or hosted: the adapter fetches it at pinned commit \texttt{846081a} at runtime and runs the authors' unmodified R. Four published-target gates were attempted. The manual's Table~4 baseline macro block \textbf{passes} --- population and labour force exact to 0.01\,m, growth matching to 0.06\,pp at 2030 and 2040 --- but the 2025 growth miss of $-0.30$\,pp clears a $\pm0.31$\,pp gate \emph{that was set after the run}, so that year's pass is a statement about the tolerance, not about agreement, and it is labelled as such at every point of claim. The baseline emissions path \textbf{diverges} and is pinned rather than tolerated: 393 vs 407 MtCO$_2$e/yr in 2025, 343 vs 382 in 2030, 249 vs 324 by 2040 ($-3.5$, $-10.2$, $-23.3$ per cent, computed from the pinned ratios rather than the rounded levels). The two scenario targets are \textbf{closed at the achievable ceiling, not passed}: no machine-readable numeric scenario results are published for version 1.1, so what is gated is scenario \emph{design} --- the exact policy-switch set each cached scenario toggles --- plus two coarse anchors from a pre-1.0 conference version, which are regression pins and not agreement tests; the emissions anchor admits 330--352 for a published claim of ``just under 350'', so a run at 351 would pass a gate named for a statement it violates. Because baseline levels sit far from outturns (2025 growth of 4.66 per cent against an ONS 1.31) and the manual itself says the baseline ``should also not be seen as a prediction or forecast'', the adapter serves annualised scenario-minus-baseline \emph{deltas, never levels}. A cumulative green-public-investment multiplier of \textbf{1.78} is reported as ours and as \emph{not comparable} to any published multiplier, for three reasons that all push the same way. In parallel, a clean-room Python reimplementation of the published equations --- the only route to a hostable model given the licence --- has passed milestone~1 (62 collected accounting tests, 44 of them Table~1/2 row and column identities) and stands at 118 contiguous equations, Eqs.~(21)--(138), on milestone~2, which is \textbf{in progress and not passed}. Thirteen defects in the manual are carried as machine-readable gap records rather than absorbed into tolerances; an August 2026 audit re-characterised four of them and withdrew one claim outright.
+\end{abstract}
+
+\medskip
+\noindent\textbf{Keywords:} ecological macroeconomics, stock-flow consistent modelling, climate policy, replication, clean-room reimplementation, open source
+
+\newpage
+\input{sections/intro}
+\input{sections/literature}
+\input{sections/model}
+\input{sections/source}
+\input{sections/implementation}
+\input{sections/validation}
+\input{sections/calibration}
+\input{sections/reimplementation}
+\input{sections/limitations}
+
+\input{sections/references}
+
+\input{sections/appendix}
+
+\end{document}

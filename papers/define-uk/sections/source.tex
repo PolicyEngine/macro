@@ -1,0 +1,37 @@
+\section{The source publications, the licence, and replication scope}
+\label{sec:source}
+
+\subsection{What is published}
+
+Four documents and one repository make up the published record of DEFINE-UK, and they differ sharply in what they let a replicator check.
+
+\paragraph{The manual.} \emph{DEFINE-UK Model Manual, Version 1.1} \citep{georgedafermos2026manual}, by Adam George and Yannis Dafermos of SOAS University of London, April 2026. This is the specification: the full equation listing by sector (\S3), the calibration approach (\S4) and the parameter and initial-value tables (\S5). It is also the only source of published \emph{numeric results}, and those stop at the baseline: Table~4 (p.~50) gives fifteen baseline quantities at 2025, 2030 and 2040 with 2025--40 means and standard deviations, and Table~5 embeds the design parameters of the model's scenarios. Table~6 (pp.~63--82) gives initial values for the endogenous variables, which is a large replication surface for a single period but is not a scenario result.
+
+\paragraph{The two companion papers.} Both are access-restricted. \emph{Green Fiscal Policy in the UK: A Scenario Analysis} \citep{georgedafermos2026scenario} is the version~1.0 paper (SSRN abstract 6541398); its scenario set, per the abstract, is carbon pricing, green power-sector subsidies and green housing subsidies --- a set that predates version~1.1's regulation instruments in any case. \emph{Evaluating climate policy mixes in the UK: an E-SFC approach} \citep{georgedafermos2026mixes} is the version~1.1 paper (SSRN abstract 6588778) and is likewise not obtainable. An exhaustive search, catalogued in the adapter's \texttt{validation/published\_targets.json}, found no open mirror of either on RePEc, SOAS pages or author pages.
+
+\paragraph{The conference version.} One open document survives: \emph{Green fiscal policy in an empirical UK E-SFC model} \citep{georgedafermos2023fmm}, the October 2023 FMM conference paper, marked by its authors ``preliminary and incomplete''. Its results are figure-based and it predates DEFINE-UK 1.0, so it can support qualitative or coarse checks and nothing finer. Section~\ref{sec:validation} uses exactly two numbers from it and is explicit about what they can and cannot establish.
+
+\paragraph{The repository.} \url{https://github.com/DEFINE-model/DEFINE_UK_1.1}: the authors' R implementation, public, and carrying \textbf{no licence file}.
+
+\subsection{The licence position and what follows from it}
+\label{sec:licence}
+
+Absent a licence, the default position is that no reproduction, redistribution or hosting right has been granted. This is treated as binding rather than as an oversight to be assumed away, and three consequences follow, each of which shapes the rest of this paper.
+
+First, \emph{nothing upstream is vendored}. The adapter contains no upstream code and no upstream data. It fetches the repository at pinned commit \texttt{846081a} at runtime, on the machine of whoever is running it, and executes it there.
+
+Second, \emph{nothing upstream is hosted}. DEFINE-UK is the only member of the PolicyEngine Macro suite that is local-only. Hosted tooling returns run instructions, never results computed from the upstream code, and continuous integration never fetches or runs it --- which is why the oracle comparisons of Section~\ref{sec:validation} run only where a cached pinned run exists, with a hermetic subset of the gate running everywhere.
+
+Third, \emph{the route to a hostable model is reimplementation}. Section~\ref{sec:reimplementation} describes the clean-room Python implementation of the published equations that exists for this reason, and its attribution stance: the model design belongs to its authors; the implementation is ours, AGPL-3.0, and independent.
+
+\subsection{Replication scope}
+
+The exercise has two tracks, held to the same standard applied to two different references.
+
+The \textbf{oracle track} runs the authors' unmodified R code at the pinned commit and compares its outputs against the published figures --- the manual's Table~4 for the baseline, and the scenario design parameters of Table~5 plus the two FMM 2023 anchors for the scenarios. The run is calendar-anchored on the population path: 1987Q1--2040Q4, with 2025 at $t=153$.
+
+The \textbf{clean-room track} reimplements the published equations in Python from the manual, with the upstream repository used strictly as a numerical \emph{output oracle} whose source is never read to write an equation. Its milestone gates compare the reimplementation against the manual's own tables first and against the oracle second.
+
+\paragraph{What is out of scope.} No attempt is made to re-estimate the manual's econometrically estimated behavioural equations from source data, or to reconstruct the authors' input spreadsheets. Where the reimplementation needs data it takes it from official sources rather than from the upstream repository's \texttt{input/} directory --- again a consequence of the licence, and incidentally a stronger test.
+
+\paragraph{Execution is not validation.} On 1 August 2026 the full upstream notebook rendered end to end through the adapter's runner, on R~4.3.0 under macOS, with the upstream unmodified and an \texttt{rstudioapi} shim the only accommodation, producing 151 output files: figures and tables for all four scenario blocks plus a multiplier summary. That established that the pinned code executes. It established nothing whatever about whether its outputs mean anything, and the record says so at that date. The adapter's validation gate is explicit on the point: nothing built on the repository may present model output as meaningful except by naming the target it rests on. Section~\ref{sec:validation} is the record of what that gate has since established --- including where the answer is ``nothing further can be established from what is published''.

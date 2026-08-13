@@ -1,0 +1,104 @@
+\section{The replication record}
+\label{sec:validation}
+
+Four published-target gates were attempted against the pinned upstream run. One passes, one diverges and is pinned, and two are closed at the ceiling the publications allow rather than passed. This section reports each with its tolerance, its arithmetic, and --- where the check could not have come out any other way --- a statement to that effect at the point of claim rather than in a footnote.
+
+Table~\ref{tab:gates} is the summary. Every gate in it is enforced by a test in the adapter repository against the cached pinned run, so drift fails loudly rather than silently.
+
+\begin{table}[t]
+\centering
+\caption{DEFINE-UK replication gates}
+\label{tab:gates}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xll@{}}
+\toprule
+Gate & Verdict & Enforced by \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Cannot fail as evidence of agreement --- pins and post-hoc tolerances, reported as such}} \\
+2025 real GDP growth within $\pm0.31$\,pp & clears by 0.01\,pp & tolerance set after the run \\
+FMM 2023 anchor: GPI GDP peak in $[0.7, 1.3]$\,\% & in band ($+0.92$) & band chosen by us, $\pm30$\,\% \\
+FMM 2023 anchor: 2030 baseline emissions in $[330, 352]$ & in band (342.8) & band admits values it is named against \\
+Emissions ratios within $\pm0.02$ of 0.965/0.898/0.767 & holds & pin at the \emph{observed} divergence \\
+11 scenario delta points, rel.\ $10^{-6}$ & holds & pin of the cached run against itself \\
+Reference artifact well-formed and self-consistent & holds & hermetic artifact check \\
+\addlinespace
+\multicolumn{3}{@{}l}{\emph{Can fail --- comparisons against a publication}} \\
+Manual Table~4 macro block, S1 baseline & \textbf{PASS} & \texttt{test\_replication\_baseline.py} \\
+\quad population 16+ and labour force, $\pm0.01$\,m & exact & \\
+\quad real GDP growth at 2030 and 2040 & match to 0.06\,pp & \\
+\quad unemployment, $\pm0.2$\,pp & within tolerance & \\
+Manual Table~4 total emissions, S1 baseline & \textbf{DIVERGENCE} & \texttt{test\_replication\_baseline.py} \\
+Scenario policy-switch sets vs published descriptions & exact & \texttt{test\_scenario\_design.py} \\
+Published numeric v1.1 scenario results & \textbf{CEILING} --- none exist & \texttt{published\_targets.json} \\
+Baseline vs ONS/DESNZ/OBR outturns & \textbf{COMPUTED} --- gaps material & \texttt{test\_validation.py} \\
+Clean-room milestone 1 (\S2.2 matrices on \S5 values) & \textbf{PASS} & \texttt{test\_accounting.py} \\
+Clean-room milestone 2 (\S3.2--3.3) & \textbf{IN PROGRESS} & \texttt{test\_macro.py} \\
+\bottomrule
+\end{tabularx}
+\par\smallskip
+\parbox{0.97\textwidth}{\footnotesize \emph{Notes:} The first block is separated because none of those six checks can produce evidence that this replication agrees with a publication. The growth tolerance was set after the deviation it admits was known; the two anchor bands were chosen by us to fit a verbal quantity and were never published as tolerances; the emissions gate is set \emph{at} the observed divergence, so it detects further drift and asserts no agreement; the delta-point and artifact checks compare the cached run and the committed artifacts against themselves. All verdicts are against upstream commit \texttt{846081a}, dated 4--5 August 2026 for the oracle gates and 11 August 2026 for milestone~2.}
+\end{table}
+
+\subsection{Target 1a: the baseline macro block --- PASS, with one year that proves nothing}
+\label{sec:target1a}
+
+The manual's Table~4 publishes fifteen baseline quantities at 2025, 2030 and 2040. Four of them --- real GDP growth, unemployment, population aged 16 and over, and the labour force --- form the macro block, and it is the one published target this replication passes. Tolerances were population and labour force $\pm0.01$\,m, growth $\pm0.31$\,pp, and unemployment $\pm0.2$\,pp.
+
+Population and labour force reproduce exactly to 0.01\,m at all three dates. Unemployment is within 0.2\,pp at all three. Real GDP growth matches to \textbf{0.06\,pp} at 2030 and 2040. The 2025--40 means and standard deviations of growth and unemployment reproduce the table at its printing precision. The run is calendar-anchored on the population path, 1987Q1--2040Q4, with 2025 at $t=153$.
+
+\paragraph{The 2025 growth gate is not independent of the deviation it admits.} At 2025 the run gives 4.66 per cent against Table~4's 4.96 --- a miss of $-0.30$\,pp against a $\pm0.31$\,pp gate. The gate was set \emph{after} the run, and the only year that uses any of it clears by 0.01\,pp. As a test of agreement in 2025 it is doing no work: any tolerance chosen once the deviation is known will admit that deviation. What it is doing is stopping that year drifting further, which is worth having and is not the same claim. \textbf{The informative part of this gate is the pair of 0.06\,pp matches at 2030 and 2040}, which were not fitted to anything.
+
+The recorded reason for the 2025 gap is a convention we could not resolve. Table~4's note says only that ``all quarterly values are annualised''; it does not say which annualisation, and the readings differ by more than the gap. The adapter's own comparator table uses the annual-mean convention, which is what gives 4.66. This is recorded as an unresolved convention mismatch, not as a demonstrated agreement --- and it is the reason the tolerance exists at that width rather than a tighter one.
+
+\subsection{Target 1b: the emissions path --- DIVERGENCE, pinned}
+\label{sec:target1b}
+
+The pinned code runs \emph{below} the published Table~4 emissions, and the gap widens monotonically with the horizon:
+
+\begin{center}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+& 2025 & 2030 & 2040 \\
+\midrule
+Pinned run (MtCO$_2$e/yr) & 393 & 343 & 249 \\
+Manual Table~4 (MtCO$_2$e/yr) & 407 & 382 & 324 \\
+Pinned ratio, run/table & 0.965 & 0.898 & 0.767 \\
+Deviation & $-3.5\%$ & $-10.2\%$ & $-23.3\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The percentages are computed from the pinned ratios themselves --- 0.965, 0.898 and 0.767, held in the committed reference artifact --- and not from the rounded levels printed in the first two rows, which would give slightly different figures.
+
+Two checks rule out an extraction error on this side. First, the components satisfy the model's own identity \eqref{eq:emis}: $\mathrm{EMIS}_{\mathrm{NELEC}} + \mathrm{EMIS}_{\mathrm{ELEC}}$ sums exactly to $\mathrm{EMIS}$ in the run outputs. Second, the baseline is identical across every scenario folder, so no scenario contamination is involved. What remains is a vintage or calibration gap between the published table and commit \texttt{846081a}: the table was produced by some code vintage, and it is not this one.
+
+The divergence has been raised with the upstream authors on their own issue tracker, so that the record here and the record there stay in step. Meanwhile the tests gate at the \emph{observed} ratios, within $\pm0.02$, rather than at agreement. That is a deliberate and limited claim, and it belongs in the first block of Table~\ref{tab:gates}: a gate set at the divergence cannot fail on account of the divergence. It can and will fail if the gap moves, which is the only thing it is for.
+
+\subsection{Targets 2 and 3: closed at the achievable ceiling, not passed}
+\label{sec:targets23}
+
+The two scenario targets are the ones a reader of a climate-policy model most wants replicated, and they are the ones that cannot be. An exhaustive search, catalogued with locators in the adapter's \texttt{validation/published\_targets.json}, established that \textbf{no machine-readable numeric scenario results are published for version~1.1}. The manual's results stop at Table~4's baseline plus the scenario \emph{design} parameters embedded in Table~5; both companion papers \citep{georgedafermos2026scenario, georgedafermos2026mixes} are access-restricted with no open mirror; and the version~1.0 paper's scenario set --- carbon pricing and subsidies --- predates version~1.1's regulation instruments in any case.
+
+There is therefore no scenario replication in this paper, and none is manufactured. What is verifiable has been verified, and it is design rather than results.
+
+\paragraph{Scenario design, pinned exactly.} Each cached scenario is checked to toggle \emph{exactly} the policy switches its published description claims --- no more and no fewer. The fossil-fuel-ban scenarios toggle the ban flag with its capacity and investment ban timings; the power subsidy toggles its subsidy switch alone; green public investment toggles government investment, green bonds and green power exactly; and the housing-subsidy variant pins the published 40 per cent subsidy rate. This is a real check against a published description, and it can fail --- but it constrains the scenario's \emph{inputs}, not its outputs.
+
+\paragraph{Two anchors, and what they are worth.} Two coarse numeric statements survive in the open FMM 2023 conference version \citep{georgedafermos2023fmm}, and both are used, at wide tolerances, because that document is a pre-1.0 vintage marked preliminary by its authors. The current-policies baseline is described as emitting ``just under 350 MtCO$_2$e'' in 2030; the cached run gives \textbf{342.8}, inside a band of 330--352. And the green-public-investment scenario is described in terms of ``1\% of GDP''; the cached run's real GDP delta peaks at \textbf{$+0.92$} per cent, inside a band of 0.7--1.3.
+
+\textbf{Both should be read as regression pins, not as agreement tests}, and there are three separate reasons, each of which would be sufficient on its own.
+
+First, \emph{the bands are ours}. Neither was published as a tolerance. Both were chosen by us to fit a verbal quantity after the run was in hand, which puts them in the same category as the 2025 growth gate of Section~\ref{sec:target1a}.
+
+Second, \emph{they cannot discriminate}. The GDP band is $\pm30$ per cent around ``around 1 per cent''. The emissions band runs to 352, which is \emph{above} the 350 that the phrase ``just under'' is supposed to bound --- so a run at 351 would pass a gate named for a statement it violates. A test that a value contradicting the claim would pass is not testing the claim.
+
+Third, and specific to the GPI anchor, \emph{the two sides may not be the same quantity}. The transcription of the FMM text held in \texttt{published\_targets.json} records the green-public-investment scenario as one in which ``government invests an additional 1\% of GDP in green projects by 2030'' --- that is, 1 per cent of GDP is the size of the policy \emph{input}. The gate compares it against the peak of the model's real GDP \emph{response}. Those are different objects that happen to sit near each other numerically, and this replication has not been able to obtain the conference paper's figures to establish whether a comparable published GDP-response reading exists. On the reading in the record, the anchor is not like-for-like at all; on the more generous reading it is like-for-like inside a $\pm30$ per cent band. Neither reading supports quoting $+0.92$ against $\approx1$ as a replication result, so it is not quoted as one anywhere.
+
+What the two anchors do establish is worth stating plainly, because it is not nothing: the cached run has not moved since they were recorded.
+
+\paragraph{The upgrade path.} This ceiling is not permanent and its lifting conditions are specific. If the authors publish scenario tables, or either SSRN paper becomes accessible, the published-figure gate reopens and targets 2 and 3 can be attempted as replications rather than closed as design checks. Until then, the honest verdict is the one in the adapter's own record: \emph{closed at the achievable ceiling}, which is not a pass.
+
+\subsection{What the whole record does and does not license}
+
+The adapter's validation file carries a status header, and for a period after target 1a passed that header still read ``NOT VALIDATED. No published DEFINE-UK result has been reproduced'' --- which put it in contradiction with every page that cited it as the record. The correction belongs in this paper because this paper cites that file as the record. It now reads \textbf{PARTIALLY VALIDATED} and breaks the claim down target by target: 1a pass, 1b divergence pinned, targets 2 and 3 closed at the achievable ceiling rather than passed, reimplementation milestone~1 pass and milestone~2 outstanding.
+
+Nothing in that licenses presenting DEFINE-UK scenario output as a validated result. The operative rule, held in the repository and applied throughout this paper, is that a claim about this model must name the target it rests on.

@@ -1,0 +1,70 @@
+\section{The model}
+\label{sec:model}
+
+This section describes DEFINE-UK as the manual specifies it \citep{georgedafermos2026manual}. It is a description of the authors' model, not of an implementation choice of ours; where the manual's own text and tables disagree, Section~\ref{sec:reimplementation} reports the disagreement rather than resolving it here.
+
+\subsection{Accounting before theory}
+\label{sec:accounting}
+
+DEFINE (Dynamic Ecosystem FINance-Economy) is the stock-flow-fund framework of \citet{dafermos2017}; DEFINE-UK is its United Kingdom application, with the accounting structure derived directly from UK national accounts (ONS Blue Book and UK Economic Accounts) rather than assumed. Two matrices carry the discipline.
+
+The \emph{transactions flow matrix} (manual \S2.2, Table~1) records every monetary flow in the model with a sign convention in which $+$ is an inflow and $-$ an outflow to the sector in whose column it sits. Two families of identity follow:
+\begin{align}
+\sum_{s} T_{f,s} &= 0 && \text{for every flow row } f, \label{eq:trow}\\
+\sum_{f} T_{f,s} &= \mathrm{LEND}_s && \text{for every sector column } s, \label{eq:tcol}
+\end{align}
+that is, each flow leaves one sector and enters another, and each sector's column sums to its net lending position.
+
+The \emph{balance-sheet matrix} (\S2.2, Table~2) mirrors it for stocks, with $+$ an asset and $-$ a liability:
+\begin{align}
+\sum_{s} B_{i,s} &= 0 && \text{for every instrument row } i, \label{eq:brow}\\
+\sum_{i} B_{i,s} &= \mathrm{FNW}_s, \qquad \sum_{s} \mathrm{FNW}_s = 0, \label{eq:bcol}
+\end{align}
+so one sector's asset is another's liability, financial columns sum to sector financial net worth, and financial net worth sums to zero across the economy. Adding real assets to a sector's financial column gives its total net worth.
+
+Because the matrices are derived from national accounts rather than written down abstractly, they cannot close on model-determined flows alone. Following the treatment the manual attributes to Zezza and Zezza, two residual constructs absorb the difference: a \emph{residual transaction} in the flow matrix, capturing the net position of flows the model does not represent, and a \emph{residual financial instrument} $\mathrm{RES}_s = \mathrm{FNW}_s - \mathrm{FNWM}_s$ in the balance sheet, capturing the net asset position of stocks it excludes. These are part of the specification, not a plug added by this replication, and they are transcribed as such.
+
+\subsection{Sectors}
+
+The model has seven institutional sectors --- non-financial corporations (NFC), the power sector (PS), households (HH), monetary financial institutions (MFI), non-monetary financial institutions (NMFI), government (GVT) and the rest of the world (RoW) --- plus a \emph{production module} that is not a sector. The production module is where GDP expenditure (consumption, gross capital formation, exports less imports) flows in and GDP income (wages, gross operating surplus, indirect taxes) flows out; it holds no assets or liabilities, so its column in the transactions matrix sums to exactly zero rather than to a net-lending position. The split between the power sector and the production module follows the NACE classification: electricity generation (D35) is the power sector and all other productive activity, public and private, sits in the production module, with input--output intermediate consumption running between them in both directions.
+
+The rest of the world is recorded in \emph{net} terms for property income and financial stocks (\S3.4.6): net interest and net dividends in the flow matrix, and a net interest-bearing position in the balance sheet. This matters for transcription --- it is the only reading of the manual's own initialisation that is consistent with its tabulated MFI financial assets and liabilities --- and it is where one of the pinned manual defects lives (Section~\ref{sec:reimplementation}).
+
+\subsection{The macro block and the closure}
+
+The manual's \S3.2 sets out the high-level macroeconomic variables --- GDP by expenditure and income, deflators, employment, the labour force and unemployment, productivity --- in 23 equations, Eqs.~(21)--(43). Two of its properties do most of the work in interpreting every result in this paper.
+
+First, the closure is \textbf{demand-led}. Output adjusts to aggregate demand; real GDP is not held to a supply ceiling. Second, productivity growth is \textbf{Kaldor--Verdoorn} (Eq.~(31)): a demand impulse raises productivity growth, and does so persistently, in the tradition \citet{kaldor1966} set out for exactly the UK growth question. Together these mean that a sustained fiscal impulse in DEFINE-UK raises output without being returned to potential by assumption, and raises the productivity path as it goes. That is a deliberate feature of the post-Keynesian closure, and it is also the reason the model's fiscal multipliers are not comparable, without adjustment, to those of supply-constrained models such as the OBR emulator \citep{ahmadi2026obr}; Section~\ref{sec:calibration} makes that argument with the arithmetic attached.
+
+\subsection{Production, power, and the two UK-specific blocks}
+
+Production (\S3.3) divides into the domestic production module (\S3.3.1, Eqs.~(44)--(70)), the power generation sector (\S3.3.2, Eqs.~(71)--(138)) and input--output calculations (\S3.3.3). The production module carries a Leontief gross-output block, mark-up pricing over lagged unit costs, a wage-share and wage-rate distribution block, direct-energy prices and costs, and the productive capital aggregates.
+
+The power sector is where the model's climate-policy content concentrates. It carries separate fossil and non-fossil generation capital, a fossil/non-fossil cost split, marginal-cost electricity pricing, a utilisation and forward-looking-expectation block that drives investment, credit-rationed capital formation, and a full financial account running through to leverage, illiquidity and credit rationing. Government renewable investment is triggered when non-fossil capacity falls short of a utilisation threshold relative to electricity demand. Version~1.1's regulatory policies enter here: a ban or regulation directly depreciates fossil capital, which is a balance-sheet event for whoever holds the claims against it --- the transmission channel of \citet{carney2015} and \citet{battiston2017} implemented inside the accounting rather than bolted onto it.
+
+The second UK-specific block is housing: the dwelling stock is tracked by energy efficiency, so retrofit subsidies and regulation change household energy demand and emissions through the composition of the stock rather than through a reduced-form elasticity.
+
+\subsection{The ecosystem block}
+
+The ecological side (\S3.1) covers energy, emissions, and ecological efficiency and technology. Emissions decompose into electricity and non-electricity components,
+\begin{equation}
+\mathrm{EMIS} = \mathrm{EMIS}_{\mathrm{ELEC}} + \mathrm{EMIS}_{\mathrm{NELEC}},
+\label{eq:emis}
+\end{equation}
+an identity that turns out to be diagnostically useful: in the pinned run the two components sum exactly to the total, which is one of the two checks that rule out an extraction error on our side in the emissions divergence of Section~\ref{sec:validation}.
+
+\subsection{Rates of return and financial behaviour}
+
+Interest rates (\S3.4.7) run off a simple Taylor rule for the Bank Rate in logs, which enforces the zero lower bound; asset rates adjust towards a long-run mark-down on the base rate subject to a floor, and liability rates towards a mark-up over the corresponding asset rate plus a risk premium that depends on the sector's liability depreciation rate and on the MFI sector's own financial-liabilities-to-assets ratio. Default rates and credit rationing then feed investment. This is the \citet{dafermos2018} climate--finance loop in UK form: a policy shock that impairs capital raises leverage, tightens credit, and reduces investment, with the tightening depending on the state of the banking sector.
+
+\subsection{Calibration and the status of the baseline}
+
+The manual estimates its key behavioural equations econometrically on UK data and calibrates the remainder, with \S5's Tables~5 and 6 giving parameters and initial values respectively. The baseline is calibrated against external projections --- OBR macroeconomic forecasts to 2030 with growth rates extended thereafter, NESO current-policy emission pathways, and NGFS scenario data (\S4.1).
+
+Two statements from the manual govern how any of its baseline numbers may be used, and both are quoted here because the rest of this paper depends on them. First, on the emissions path: the manual itself notes that the baseline reduction ``falls significantly short'' of the UK's 2035 NDC target --- by design, since it is a current-policies baseline. Second, and more consequentially, on the baseline as a whole:
+
+\begin{quote}
+\emph{``The baseline of the model should also not be seen as a prediction or forecast''} \citep[\S4.1]{georgedafermos2026manual}.
+\end{quote}
+
+\noindent Section~\ref{sec:implementation} takes that literally. It is the reason the adapter serves deltas and never levels, and the reason no DEFINE-UK number appears anywhere in PolicyEngine Macro's forecast surfaces.

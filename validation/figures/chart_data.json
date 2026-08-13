@@ -103,16 +103,17 @@
  },
  "frbus_residuals": {
   "source": "papers/frb-us/sections/validation.tex, Tables tab:tracking and tab:refnoise",
+  "_series_comment": "series is the row's KIND of comparison, not a decoration: 1 = ours against the Fed's implementation under shock (the evidence), 2 = the Fed's own two releases against each other (the reference-noise yardstick our rows are judged against), 3 = a tracking identity that re-solves to its own input and therefore cannot fail. Series 3 was previously 1 on the first row, which painted the row the page calls 'not evidence' in the accent colour.",
   "rows": [
    {
-    "label": "ours vs LONGBASE (identity \u2014 not evidence)",
+    "label": "ours vs LONGBASE \u2014 tracking identity, not evidence",
     "value": 5.6e-17,
-    "series": 1,
+    "series": 3,
     "source": "validation.tex tab:tracking, max abs error",
     "note": "init_trac defines add-factors as minus the residuals at the input data, so re-solving reproduces it up to float64 for ANY input \u2014 verified: the same test passes at 6.7e-9 on randomly scrambled data. Shown for completeness; it measures arithmetic, not economics."
    },
    {
-    "label": "pyfrbus 1.1.1 vs LONGBASE",
+    "label": "pyfrbus 1.1.1 vs LONGBASE \u2014 tracking identity",
     "value": 1.1e-08,
     "series": 3,
     "source": "validation.tex subsec:refnoise prose"
@@ -130,11 +131,20 @@
     "source": "validation.tex tab:refnoise row 2"
    },
    {
-    "label": "pyfrbus 1.1.1 vs 1.0.0 \u2014 the Fed\u2019s own two releases",
+    "label": "pyfrbus 1.1.1 vs 1.0.0 \u2014 the Fed\u2019s own releases",
     "value": 1.3e-08,
     "series": 2,
     "source": "validation.tex tab:refnoise row 3"
    }
   ]
+ },
+ "define_emissions": {
+  "_comment": "What the define-uk divergence gate actually pins is the RATIO of the pinned run to the manual's Table 4, not the two levels: the levels in validation/figures/data/define_emissions_divergence.csv are rounded to whole MtCO2e, so recomputing the percentage from them gives -3.4 / -10.2 / -23.1 where the gate and the validation page say -3.5 / -10.2 / -23.3. The bars plot the rounded levels; the percentages come from the gated ratios below.",
+  "source": "validation/reference_outputs.json in the PolicyEngine define-uk adapter repository (the divergence gate, pinned to \u00b10.02), as recorded in that repository's VALIDATION.md target 1b and published on define/validation/",
+  "gated_ratios": {
+   "2025": 0.965,
+   "2030": 0.898,
+   "2040": 0.767
+  }
  }
 }

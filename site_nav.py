@@ -82,7 +82,9 @@ PAGE_NAMES = {
     "/papers/boe-svar": "boe-svar",
     "/papers/frb-us": "frb-us",
     "/papers/psl-og": "psl-og",
+    "/papers/define-uk": "define-uk",
     "/reports/define-uk-replication": "define-uk",
+    "/reports/us-hank-open-source": "Open models",
     "/forecasts": "Forecasts",
     "/forecasts/us": "United States",
     "/notes/releases": "Releases",
@@ -105,7 +107,11 @@ CRUMB_PARENTS = {
     "/papers/boe-svar": "/models",
     "/papers/frb-us": "/models",
     "/papers/psl-og": "/models",
+    "/papers/define-uk": "/models",
     "/reports/define-uk-replication": "/models",
+    # The open-models survey is one of the five us-hank tabs, so its pathway
+    # runs through the model rather than straight to /models.
+    "/reports/us-hank-open-source": "/us-hank",
     # /notes was folded into /forecasts#notes; the surviving note pages hang
     # off Forecasts so no crumb links to the retired /notes page.
     "/notes/releases": "/forecasts",
@@ -239,11 +245,12 @@ def header(path: Path) -> str:
 
 
 # Standalone documents allowed to ship without the global nav header.
-# Anything else without <header class="nav"> fails the check instead of
-# being silently skipped forever.
-NAV_EXEMPT = {
-    Path("reports/us-hank-open-source.html"),
-}
+# Empty: reports/us-hank-open-source was the last one, and a reader clicking
+# through from /us-hank landed on a page with no header, no breadcrumb and no
+# footer, which reads as leaving the site. It now carries the global chrome
+# like every other page. Anything without <header class="nav"> fails the check
+# instead of being silently skipped forever.
+NAV_EXEMPT: set[Path] = set()
 
 # Directories that never contain public pages.
 SKIP_ROOTS = {"vendor", "reveal.js", "audit", "assets", "data"}

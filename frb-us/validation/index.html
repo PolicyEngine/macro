@@ -81,38 +81,33 @@
     </div>
     <div class="prose">
       <p>
-        This is a <strong>replication with a published anchor</strong> — the
-        sharpest-tested member of the suite, because for once the ground truth
-        is exact rather than statistical. Three invariants carry the weight,
-        all enforced in continuous integration, including four like-for-like
-        scenarios gated against vendor-generated references. One of the three
-        carries no weight of its own: the tracking invariant is an identity
-        <code>init_trac</code> constructs, so the evidence is the agreement
-        with the Board's <em>shocked</em> paths, where the add-factors are
-        held fixed and the solver has real work to do.
+        Shocked paths match the Fed's own <code>pyfrbus</code> to
+        6.0&times;10<sup>&minus;9</sup>, inside the gap between the Board's own
+        two releases. The baseline tracking residual is <em>not</em> evidence:
+        <code>init_trac</code> makes that solve an algebraic identity
+        (<a href="#trust-table">table below</a>).
       </p>
       <p>
-        Machine precision is a claim about <em>fidelity to the Fed's
-        baseline</em>, not about the baseline being right: against realized
-        2026 outturns, the April 2026 LONGBASE tracks GDP growth,
-        unemployment, and the funds rate within ~0.3pp but <strong>misses
-        core PCE inflation by &minus;1.7pp</strong> (2.7% baseline vs 4.4%
-        annualized outturn, 2026Q1) — recorded by a weekly
+        Fidelity to the Fed's baseline is not the baseline being right. Against
+        2026 outturns the April 2026 LONGBASE tracks GDP growth, unemployment
+        and the funds rate within ~0.3pp but <strong>misses core PCE inflation
+        by &minus;1.7pp</strong> (2.7% vs a 4.4% annualized outturn, 2026Q1) —
+        a weekly
         <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md">outturn
-        backtest</a> that reports rather than gates, since the baseline is
-        the Board's, not ours.
+        backtest</a> that reports rather than gates, because the baseline is
+        the Board's.
       </p>
     </div>
     <div class="metrics">
       <div class="metric">
         <span class="metric-label mono">tracking invariant</span>
         <span class="metric-val">5.6e&#8722;17</span>
-        <span class="metric-note">vs LONGBASE, all 284 endos × 20 quarters; CI gate 1e&minus;8. An identity <code>init_trac</code> guarantees — round-off, not evidence</span>
+        <span class="metric-note">an identity, not evidence — see the table</span>
       </div>
       <div class="metric">
         <span class="metric-label mono">shock vs pyfrbus 1.0.0</span>
         <span class="metric-val">6.0e&#8722;9</span>
-        <span class="metric-note">the committed reference; CI gate 1e&minus;6</span>
+        <span class="metric-note">100bp shock, 284 endos &times; 20 quarters; the pinned reference, CI gate 1e&minus;6</span>
       </div>
       <div class="metric">
         <span class="metric-label mono">shock vs pyfrbus 1.1.1</span>
@@ -127,115 +122,97 @@
     </div>
     <div class="prose">
       <p>
-        The last figure frames the other three. The Board's two releases ship
-        a <em>byte-identical</em> <code>model.xml</code> and LONGBASE and
-        differ only in how the Newton routine reuses its LU factorisation —
-        yet they <strong>disagree with each other by
-        1.3&times;10<sup>&minus;8</sup></strong>, as much as this
-        implementation disagrees with either. Agreement therefore sits at the
-        reference implementation's own numerical noise, not at a tolerance
-        anyone chose. All three residuals concentrate in the same near-zero
-        expectational-gap series (<code>wpsn</code>, <code>zgap05</code>).
+        The last tile frames the other three. The Board's two releases ship a
+        <em>byte-identical</em> <code>model.xml</code> and LONGBASE, differing
+        only in how Newton reuses its LU factorisation, yet disagree by
+        1.3&times;10<sup>&minus;8</sup> — as much as this implementation
+        disagrees with either. Agreement sits at the reference's own numerical
+        noise, not at a chosen tolerance; all three residuals concentrate in
+        the same near-zero expectational-gap series (<code>wpsn</code>,
+        <code>zgap05</code>).
       </p>
       <figure class="vfig">
-        <svg class="vchart" data-chart="frbus-residuals" viewBox="0 0 760 300" role="img" aria-labelledby="frbus-residuals-t frbus-residuals-d">
+        <svg class="vchart" data-chart="frbus-residuals" viewBox="0 0 760 330" role="img" aria-labelledby="frbus-residuals-t frbus-residuals-d">
 <title id="frbus-residuals-t">frb-us: residuals against the Fed’s pyfrbus, log scale</title>
-<desc id="frbus-residuals-d">Horizontal bar chart on a base-10 logarithmic axis of maximum absolute residuals; shorter is closer. ours vs LONGBASE (identity — not evidence): 5.6e-17; pyfrbus 1.1.1 vs LONGBASE: 1.1e-08; ours vs pyfrbus 1.0.0 (shock): 6.0e-09; ours vs pyfrbus 1.1.1 (shock): 1.4e-08; pyfrbus 1.1.1 vs 1.0.0 — the Fed’s own two releases: 1.3e-08. The framing comparison is the last row: the Federal Reserve's own two pyfrbus releases disagree with each other by as much as this implementation disagrees with either, so our agreement sits at the scale of the reference implementation's own numerical noise rather than at a chosen tolerance.</desc>
+<desc id="frbus-residuals-d">Horizontal bar chart on a base-10 logarithmic axis of maximum absolute residuals; shorter is closer. The rows fall into three kinds. ours vs LONGBASE — tracking identity, not evidence: 5.6e-17 (tracking identity); pyfrbus 1.1.1 vs LONGBASE — tracking identity: 1.1e-08 (tracking identity); ours vs pyfrbus 1.0.0 (shock): 6.0e-09 (ours vs the Fed); ours vs pyfrbus 1.1.1 (shock): 1.4e-08 (ours vs the Fed); pyfrbus 1.1.1 vs 1.0.0 — the Fed’s own releases: 1.3e-08 (the Fed vs itself). The two tracking rows are an identity — init_trac defines the add-factors as minus the residuals at the input data, so re-solving reproduces the input for any input at all — and are shown for completeness, not as evidence. The framing comparison is the last row: the Federal Reserve's own two pyfrbus releases disagree with each other by as much as this implementation disagrees with either, so our agreement sits at the scale of the reference implementation's own numerical noise rather than at a chosen tolerance.</desc>
 <line class="vc-grid" x1="380.0" y1="26" x2="380.0" y2="264.0"/>
 <text class="vc-tick" x="380.0" y="284.0" text-anchor="middle">1e-18</text>
-<line class="vc-grid" x1="442.5" y1="26" x2="442.5" y2="264.0"/>
-<text class="vc-tick" x="442.5" y="284.0" text-anchor="middle">1e-16</text>
-<line class="vc-grid" x1="505.1" y1="26" x2="505.1" y2="264.0"/>
-<text class="vc-tick" x="505.1" y="284.0" text-anchor="middle">1e-14</text>
-<line class="vc-grid" x1="567.6" y1="26" x2="567.6" y2="264.0"/>
-<text class="vc-tick" x="567.6" y="284.0" text-anchor="middle">1e-12</text>
-<line class="vc-grid" x1="630.2" y1="26" x2="630.2" y2="264.0"/>
-<text class="vc-tick" x="630.2" y="284.0" text-anchor="middle">1e-10</text>
-<line class="vc-grid" x1="692.7" y1="26" x2="692.7" y2="264.0"/>
-<text class="vc-tick" x="692.7" y="284.0" text-anchor="middle">1e-8</text>
-<text class="vc-lab vc-rowlab" x="366" y="55.0" text-anchor="end">ours vs LONGBASE (identity — not evidence)</text>
-<rect class="vc-b1" x="380" y="34.0" width="54.7" height="34"/>
-<text class="vc-val" x="442.7" y="55.0">5.6e-17</text>
-<text class="vc-lab vc-rowlab" x="366" y="103.0" text-anchor="end">pyfrbus 1.1.1 vs LONGBASE</text>
-<rect class="vc-b3" x="380" y="82.0" width="314.0" height="34"/>
-<text class="vc-val" x="702.0" y="103.0">1.1e-08</text>
+<line class="vc-grid" x1="436.9" y1="26" x2="436.9" y2="264.0"/>
+<text class="vc-tick" x="436.9" y="284.0" text-anchor="middle">1e-16</text>
+<line class="vc-grid" x1="493.7" y1="26" x2="493.7" y2="264.0"/>
+<text class="vc-tick" x="493.7" y="284.0" text-anchor="middle">1e-14</text>
+<line class="vc-grid" x1="550.6" y1="26" x2="550.6" y2="264.0"/>
+<text class="vc-tick" x="550.6" y="284.0" text-anchor="middle">1e-12</text>
+<line class="vc-grid" x1="607.4" y1="26" x2="607.4" y2="264.0"/>
+<text class="vc-tick" x="607.4" y="284.0" text-anchor="middle">1e-10</text>
+<line class="vc-grid" x1="664.3" y1="26" x2="664.3" y2="264.0"/>
+<text class="vc-tick" x="664.3" y="284.0" text-anchor="middle">1e-8</text>
+<text class="vc-lab vc-rowlab" x="366" y="55.0" text-anchor="end">ours vs LONGBASE — tracking identity, not evidence</text>
+<rect class="vc-b3" x="380" y="34.0" width="49.7" height="34" stroke="currentColor" stroke-dasharray="3 2" stroke-width="1"/>
+<text class="vc-val" x="437.7" y="55.0">5.6e-17</text>
+<text class="vc-lab vc-rowlab" x="366" y="103.0" text-anchor="end">pyfrbus 1.1.1 vs LONGBASE — tracking identity</text>
+<rect class="vc-b3" x="380" y="82.0" width="285.4" height="34" stroke="currentColor" stroke-dasharray="3 2" stroke-width="1"/>
+<text class="vc-val" x="673.4" y="103.0">1.1e-08</text>
 <text class="vc-lab vc-rowlab" x="366" y="151.0" text-anchor="end">ours vs pyfrbus 1.0.0 (shock)</text>
-<rect class="vc-b1" x="380" y="130.0" width="305.8" height="34"/>
-<text class="vc-val" x="693.8" y="151.0">6.0e-09</text>
+<rect class="vc-b1" x="380" y="130.0" width="278.0" height="34"/>
+<text class="vc-val" x="666.0" y="151.0">6.0e-09</text>
 <text class="vc-lab vc-rowlab" x="366" y="199.0" text-anchor="end">ours vs pyfrbus 1.1.1 (shock)</text>
-<rect class="vc-b1" x="380" y="178.0" width="317.3" height="34"/>
-<text class="vc-val" x="705.3" y="199.0">1.4e-08</text>
-<text class="vc-lab vc-rowlab" x="366" y="247.0" text-anchor="end">pyfrbus 1.1.1 vs 1.0.0 — the Fed’s own two releases</text>
-<rect class="vc-b2" x="380" y="226.0" width="316.3" height="34"/>
-<text class="vc-val" x="704.3" y="247.0">1.3e-08</text>
+<rect class="vc-b1" x="380" y="178.0" width="288.4" height="34"/>
+<text class="vc-val" x="676.4" y="199.0">1.4e-08</text>
+<text class="vc-lab vc-rowlab" x="366" y="247.0" text-anchor="end">pyfrbus 1.1.1 vs 1.0.0 — the Fed’s own releases</text>
+<rect class="vc-b2" x="380" y="226.0" width="287.5" height="34"/>
+<text class="vc-val" x="675.5" y="247.0">1.3e-08</text>
+<rect class="vc-b1" x="64" y="292" width="14" height="10"/><text class="vc-note" x="84" y="301">ours vs the Fed&rsquo;s pyfrbus, under shock</text>
+<rect class="vc-b2" x="380" y="292" width="14" height="10"/><text class="vc-note" x="400" y="301">the Fed&rsquo;s two releases vs each other</text>
+<rect class="vc-b3" x="64" y="310" width="14" height="10" stroke="currentColor" stroke-dasharray="3 2" stroke-width="1"/><text class="vc-note" x="84" y="319">tracking identity &mdash; round-off, not fidelity</text>
 </svg>
-        <figcaption>Maximum absolute residuals, log scale — lower is closer. The bottom bar is the framing one: the Fed's own two releases disagree by as much as we disagree with either, so the three shock rows sit at the reference implementation's own noise floor. The top two bars are the tracking identity and are <strong>not</strong> a ranking: after <code>init_trac</code> the solve reproduces its input by construction, so 5.6&times;10<sup>&minus;17</sup> against pyfrbus 1.1.1's 1.1&times;10<sup>&minus;8</sup> compares two implementations' round-off, not their fidelity to the Fed's economics. Source: papers/frb-us validation tables.</figcaption>
+        <figcaption>Maximum absolute residuals, log scale — lower is closer. The top two bars are the tracking identity and are <strong>not</strong> a ranking: they compare two implementations' round-off, not their fidelity to the Fed's economics. Source: papers/frb-us validation tables.</figcaption>
       </figure>
-      <div class="table-scroll"><table>
+      <div id="trust-table" class="table-scroll"><table>
         <caption>Validation results against the Federal Reserve Board's own artefacts</caption>
         <thead><tr><th scope="col">test</th><th scope="col">what it checks</th><th scope="col">result</th></tr></thead>
         <tbody>
           <tr>
             <th scope="row"><strong>Tracking invariant</strong></th>
-            <td>After <code>init_trac</code>, solving the baseline must reproduce LONGBASE for all 284 endogenous variables over 2026Q1–2030Q4. <strong>This is an identity, not a comparison:</strong> <code>init_trac</code> sets each equation's add-factor to minus that equation's residual at the input data, so the solve is algebraically the identity on whatever it was tracked to, and Newton is warm-started from the row it is about to reproduce.</td>
-            <td>Max absolute error <strong>5.6e&minus;17</strong> — floating-point round-off, against a 1e&minus;8 gate. It measures re-evaluation noise, <strong>not</strong> agreement with the Fed's data or economics: the model repository's <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/tests/test_tracking.py"><code>test_tracking_invariant_holds_for_arbitrary_data</code></a> shows the identical gate passes on a scrambled baseline with every accounting identity destroyed. Read the cross-validation row below, not this one, as evidence.</td>
+            <td>Re-solving the baseline reproduces LONGBASE, 284 endogenous variables over 2026Q1–2030Q4.</td>
+            <td><strong>5.6e&minus;17</strong> against a 1e&minus;8 gate — but <strong>an identity, not a comparison</strong>. <code>init_trac</code> sets each add-factor to minus that equation's residual at the input data, so the solve reproduces whatever it was tracked to, for any input: the model repository's <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/tests/test_tracking.py"><code>test_tracking_invariant_holds_for_arbitrary_data</code></a> passes at 6.7e&minus;9 on a scrambled baseline with every accounting identity destroyed. Read the row below, not this one, as evidence.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Cross-validation</strong></th>
-            <td>An identical 100bp <code>rffintay_aerr</code> shock run in both implementations, compared across all 284 variables and all 20 quarters.</td>
-            <td><strong>6.0e&minus;9</strong> against pyfrbus 1.0.0 and <strong>1.4e&minus;8</strong> against 1.1.1 — where the two Board releases differ from each other by 1.3e&minus;8.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Simulation properties</strong></th>
-            <td>A 100bp tightening must move the right things in the right direction by the right order of magnitude.</td>
-            <td>rff +1.000pp on impact, GDP trough &minus;0.55%, unemployment peak +0.26pp, core inflation trough &minus;0.034pp — consistent with the Board's documented VAR-expectations properties.</td>
+            <td>The same 100bp <code>rffintay_aerr</code> shock run in both implementations, all 284 variables &times; 20 quarters.</td>
+            <td><strong>6.0e&minus;9</strong> against pyfrbus 1.0.0 and <strong>1.4e&minus;8</strong> against 1.1.1, where the two Board releases differ from each other by 1.3e&minus;8.</td>
           </tr>
         </tbody>
       </table></div>
       <p>
-        <strong>Multipliers.</strong> Government-purchases and personal-tax
-        shocks of 1% of GDP land inside the published ranges they are compared
-        against, with one exception recorded below: the year-two
-        purchases multiplier under a pegged funds rate is
-        <strong>0.90, below the 1.1&ndash;1.2 cross-model accommodation
-        range</strong>, and matches only the Board's looser &ldquo;roughly
-        one&rdquo; characterisation. The comparisons are also not horizon-matched
-        throughout — the year-one tax figure (0.22) is set beside a benchmark
-        the source describes as a two-year multiplier, and Ramey's survey range
-        pools empirical estimates across horizons and monetary regimes rather
-        than fixing one. Read the last three rows as plausibility bands, not as
-        a test the model passed.
+        <strong>Multipliers.</strong> Read these as plausibility bands, not as
+        a test passed: the comparisons are not horizon-matched throughout, and
+        Ramey's survey range pools estimates across horizons and monetary
+        regimes.
       </p>
       <div class="table-scroll"><table>
-        <caption>frb-us against the Fed's pyfrbus and published multiplier ranges</caption>
+        <caption>frb-us fiscal multipliers (1% of GDP, sustained) against published ranges</caption>
         <thead><tr><th scope="col">Quantity</th><th scope="col">Ours</th><th scope="col">Published</th><th scope="col">Reading</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Tracking invariant, max abs. error</th><td>5.6&times;10<sup>&minus;17</sup></td><td>CI gate &lt;10<sup>&minus;8</sup>; pyfrbus 1.1.1 gives 1.1&times;10<sup>&minus;8</sup></td><td>an identity, not accuracy &mdash; passes on scrambled data</td></tr>
-          <tr><th scope="row">Shock responses vs pyfrbus 1.0.0</th><td>6.0&times;10<sup>&minus;9</sup></td><td>—</td><td>at the reference's noise floor</td></tr>
-          <tr><th scope="row">Shock responses vs pyfrbus 1.1.1</th><td>1.4&times;10<sup>&minus;8</sup></td><td>1.1.1 vs 1.0.0: 1.3&times;10<sup>&minus;8</sup></td><td>the Fed's releases differ as much as we do</td></tr>
-          <tr><th scope="row">Gov. purchases multiplier, yr 1, inertial Taylor rule</th><td>0.72</td><td>0.7&ndash;1.0 (Coenen et al. 2012); Ramey (JEP 2019): "a surprisingly narrow range of 0.6 to 1"</td><td>inside range</td></tr>
-          <tr><th scope="row">Gov. purchases multiplier, yr 2, fixed funds rate</th><td>0.90</td><td>"roughly one" pegged; 1.1&ndash;1.2 with accommodation</td><td>matches the Board's characterisation</td></tr>
-          <tr><th scope="row">Personal tax cut multiplier, yrs 1&ndash;2</th><td>0.22 → 0.32</td><td>0.2&ndash;0.4; CBO central ≈0.3</td><td>inside both ranges</td></tr>
+          <tr><th scope="row">Gov. purchases, yr 1, inertial Taylor rule</th><td>0.72</td><td>0.7&ndash;1.0 (Coenen et al. 2012); Ramey (JEP 2019): "a surprisingly narrow range of 0.6 to 1"</td><td>inside range</td></tr>
+          <tr><th scope="row">Gov. purchases, yr 2, pegged funds rate</th><td>0.90</td><td>"roughly one" pegged; 1.1&ndash;1.2 with accommodation</td><td><strong>below</strong> the accommodation range</td></tr>
+          <tr><th scope="row">Personal tax cut, yrs 1&ndash;2</th><td>0.22 → 0.32</td><td>0.2&ndash;0.4; CBO central ≈0.3; yr-1 benchmark is a two-year figure</td><td>inside range, horizons unmatched</td></tr>
         </tbody>
       </table></div>
       <p>
-        <strong>Uncertainty engine.</strong> The implementation now supports
-        seeded stochastic simulations that jointly resample the official
-        stochastic-equation residual vector, preserving contemporaneous
-        dependence and reporting failed replications. Model and LONGBASE
-        packages are also verified against separate SHA-256 provenance gates.
-        Published probability results still require a reviewed simulation
-        design; model-consistent expectations remain unavailable.
+        <strong>Uncertainty engine.</strong> Seeded stochastic simulation
+        jointly resamples the official residual vector, preserving
+        contemporaneous dependence; model and LONGBASE packages carry SHA-256
+        provenance gates. Published probability results still need a reviewed
+        simulation design, and model-consistent expectations remain
+        unavailable.
       </p>
     </div>
     <p class="chart-note" style="max-width: 80ch;">
-      The committed reference stays pinned to pyfrbus 1.0.0 so the gate has a
-      fixed anchor; the 1.1.1 comparison is a recorded cross-check. CI goes
-      beyond re-checking a committed CSV: a dedicated job re-runs the Board's
-      pyfrbus from source in a throwaway environment and gates against that
-      freshly generated solution, and a weekly scheduled run repeats the suite
-      across Python 3.10–3.12 so dependency drift surfaces without a pull
-      request. Full tables in
+      CI does not just re-check a committed CSV: a dedicated job re-runs the
+      Board's pyfrbus from source and gates against that fresh solution, and a
+      weekly run repeats the suite across Python 3.10–3.12. The multiplier
+      comparisons are refreshed manually. Full tables in
       <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md">VALIDATION.md</a>
       and the <a href="/papers/frb-us">working paper</a>.
     </p>
@@ -244,15 +221,6 @@
         Board's published model equations and data. It is not produced,
         maintained, or endorsed by the Federal Reserve, and its results
         should not be presented as official Federal Reserve estimates.
-      </p>
-      <p class="callout">
-        <strong>How to read the evidence on this page.</strong> The tracking
-        invariant, the pyfrbus cross-validation, and the monetary-shock
-        sign/magnitude bands are <strong>gated</strong> — CI on the model
-        repository fails if they break. The fiscal-multiplier comparisons
-        against published ranges were <strong>computed for the paper</strong>
-        and are refreshed manually. Both are real evidence; only the first
-        kind is continuously enforced.
       </p>
   </section>
 
@@ -264,28 +232,26 @@
     </div>
     <div class="prose">
       <p class="mo-lead">
-        One command reproduces the validation experiment — a 100 basis-point
-        funds-rate tightening under the inertial Taylor rule:
+        One command reproduces a 100bp funds-rate tightening under the
+        inertial Taylor rule:
       </p>
       <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code></pre></div>
       <div class="table-scroll mo-tablecard cmp-compare">
       <table>
-        <thead><tr><th scope="col">Response</th><th scope="col">Ours</th><th scope="col">Published Fed reference</th><th scope="col">Reading</th></tr></thead>
+        <thead><tr><th scope="col">Response</th><th scope="col">Ours</th><th scope="col">Published Fed reference</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Funds rate, on impact</th><td><strong>+1.000pp</strong></td><td>+1.00pp by design</td><td>exact</td></tr>
-          <tr><th scope="row">Real GDP, trough</th><td><strong>&minus;0.55%</strong></td><td>consistent with the Board's documented VAR-expectations properties</td><td>right sign, size and timing</td></tr>
-          <tr><th scope="row">Output gap, trough</th><td><strong>&minus;0.50pp</strong></td><td>~&minus;0.4pp (2014 FEDS Note, read off charts)</td><td>approximate — vintage and shock-design differences</td></tr>
-          <tr><th scope="row">Unemployment, peak</th><td><strong>+0.26pp</strong></td><td>consistent with the documented properties</td><td>right sign and order</td></tr>
-          <tr><th scope="row">Core inflation, trough</th><td><strong>&minus;0.034pp</strong></td><td>consistent with the documented properties</td><td>right sign and order</td></tr>
+          <tr><th scope="row">Funds rate, on impact</th><td><strong>+1.000pp</strong></td><td>+1.00pp by design — exact</td></tr>
+          <tr><th scope="row">Real GDP, trough</th><td><strong>&minus;0.55%</strong></td><td>right sign, size and timing vs the Board's documented VAR-expectations properties</td></tr>
+          <tr><th scope="row">Unemployment, peak</th><td><strong>+0.26pp</strong></td><td>right sign and order, same source</td></tr>
+          <tr><th scope="row">Core inflation, trough</th><td><strong>&minus;0.034pp</strong></td><td>right sign and order, same source</td></tr>
+          <tr><th scope="row">Output gap, trough</th><td><strong>&minus;0.50pp</strong></td><td>~&minus;0.4pp, read off 2014 FEDS Note charts — approximate by nature (<a href="#caveats">limits</a>)</td></tr>
         </tbody>
       </table>
       </div>
       <p class="forecast-note">
         The exact cross-check is numerical, not chart-reading: the same shock
-        run in the Board's own <code>pyfrbus</code> matches to
-        6.0&times;10<sup>&minus;9</sup> (see the invariants above). The FEDS
-        Note comparison is approximate by nature — its values are read off
-        2014-vintage charts.
+        in the Board's own <code>pyfrbus</code> matches to
+        6.0&times;10<sup>&minus;9</sup>.
       </p>
     </div>
   </section>
@@ -301,27 +267,27 @@
         <tbody>
           <tr>
             <th scope="row"><strong>VAR expectations only</strong></th>
-            <td>The model-consistent-expectations (MCE) equation variants are not implemented — <code>Frbus(path, mce=...)</code> raises <code>NotImplementedError</code> — so anything that turns on agents anticipating announced future policy, forward guidance most obviously, is out of scope.</td>
+            <td>Model-consistent expectations are not implemented (<code>mce=</code> raises <code>NotImplementedError</code>), so forward guidance is out of scope.</td>
           </tr>
           <tr>
             <th scope="row"><strong>No <code>mcontrol</code></strong></th>
-            <td>The reference implementation's trajectory-targeting routine is out of scope. Stochastic simulation <em>is</em> implemented &mdash; <code>stochsim_bands()</code> produces seeded residual-bootstrap percentile bands &mdash; but the hosted <code>frbus_shock</code> path returns a single deterministic projection, so bands are not available over MCP.</td>
+            <td>Trajectory targeting is out of scope. <code>stochsim_bands()</code> does produce seeded bootstrap bands, but the hosted <code>frbus_shock</code> returns a single deterministic path.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Hosted, but only as raw shocks</strong></th>
-            <td>The hosted tools and their <code>pe-macro</code> mirrors expose one lever, one shock size, a policy rule and a headline set of responses — not the full 284-variable model. Anything beyond that (the Board's demo scripts, <code>exogenize</code>, arbitrary variable sets) means installing the package and using its Python API.</td>
+            <td>One lever, one shock size, a policy rule and a headline set of responses — not the full 284-variable model. Anything more means installing the package.</td>
           </tr>
           <tr>
             <th scope="row"><strong>No PolicyEngine reform bridge</strong></th>
-            <td>Reforms enter as shocks to model variables, not as statute. There is no equivalent of the OBR emulator's static-costing bridge from a PolicyEngine reform dict — <code>score_reform</code> refuses <code>model="frbus"</code> outright and points at <code>frbus_shock</code> — so US reform scoring stops at <a href="/pe">pe-microsim</a>'s static answer. Hosting did not change this.</td>
+            <td>Reforms enter as shocks, not statute: <code>score_reform</code> refuses <code>model="frbus"</code>, so US reform scoring stops at <a href="/pe">pe-microsim</a>'s static answer.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Approximate published comparisons</strong></th>
-            <td>The 100bp funds-rate responses in the Board's 2014 FEDS Note are read off charts, so those comparisons are approximate by nature: our output-gap trough of &minus;0.50pp against the Note's roughly &minus;0.4pp reflects vintage and shock-design differences, not a claimed match.</td>
+            <td>The 2014 FEDS Note responses are read off charts. Our &minus;0.50pp output-gap trough against its ~&minus;0.4pp reflects vintage and shock-design differences, not a claimed match.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Vintage</strong></th>
-            <td>The April 2026 <code>model.xml</code> and LONGBASE as published by the Board. Later Board vintages have not been adopted.</td>
+            <td>The Board's April 2026 <code>model.xml</code> and LONGBASE. Later vintages not adopted.</td>
           </tr>
         </tbody>
       </table></div>

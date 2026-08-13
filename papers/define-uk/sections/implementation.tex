@@ -1,0 +1,37 @@
+\section{The adapter: how the model is run, and what it serves}
+\label{sec:implementation}
+
+\subsection{Code architecture}
+
+The adapter is a small Python package, \texttt{define\_uk} (src layout), at \url{https://github.com/PolicyEngine/define-uk-model}. It has two halves that never touch: a harness that runs the authors' R code, and a clean-room reimplementation that must not read it.
+
+\begin{itemize}
+\item \texttt{upstream.py} --- clones the upstream repository into a local cache at run time at the pinned commit \texttt{846081a580a6033159d5c421632ad8f0b30d0ded}, and nothing else. Bumping the pin is an explicit, reviewed change, because the validation targets are tied to that revision.
+\item \texttt{runner.py} --- renders the upstream R Markdown notebook in place, unmodified.
+\item \texttt{scenarios.py} --- the curated scenario surface over the \emph{cached} outputs of that run. It never runs R; if no cached run exists it raises with instructions to produce one.
+\item \texttt{validation.py} --- the computed comparators: the baseline-versus-external calibration table, the green-public-investment multiplier, and the caveats that travel with it.
+\item \texttt{model/} --- the clean-room reimplementation (Section~\ref{sec:reimplementation}): an equation registry that requires a manual reference on every equation, a Gauss--Seidel per-period solver, one module per manual \S3 section, the \S5 parameter and initial-value tables, and the \S2.2 accounting matrices.
+\end{itemize}
+
+\subsection{The scenario surface}
+
+The pinned run produces 22 scenario files across four blocks: government investment, housing regulation, power-sector regulation and mixed packages. The power-sector block is run under five expectation regimes --- mutual trust, poor credibility, false confidence, no forward guidance, and unexpected enforcement --- of which mutual trust is treated as canonical and the others carry an explicit variant suffix. Each of the 22 is registered, and each is checked against the policy switches its published description claims (Section~\ref{sec:targets23}).
+
+The surface returns \emph{annualised scenario-minus-baseline delta paths only}. The convention is fixed and tested: scenario minus baseline, annual mean of quarterly levels, calendar-anchored 1987Q1--2040Q4. Eleven delta points across four scenarios and three variables are pinned to relative tolerance $10^{-6}$ against the cached run, and the sign and ordering structure --- deltas finite, baselines identical across block folders, emissions falling in every scenario by 2035, the mixed package dominating --- is pinned exactly.
+
+\subsection{Deltas, never levels}
+\label{sec:deltas}
+
+The decision to serve deltas and never levels is the single most consequential design choice in the adapter, and it is a direct reading of two facts established in Sections~\ref{sec:model} and \ref{sec:calibration}: the manual's own statement that its baseline ``should also not be seen as a prediction or forecast'', and the measured distance between the baseline and UK outturns --- 2025 real GDP growth of 4.66 per cent against an ONS 1.31, unemployment below the outturn, emissions above the DESNZ actuals they should start from.
+
+Enforcing that is not left to documentation. Every scenario result carries a result type of ``scenario deltas'' and a mandatory caveat list, held in code and gated by tests: that the exercise is experimental and gated at the ceiling described in Section~\ref{sec:targets23}; that baseline levels are not validated against outturns and must never be presented as forecasts; that the closure is demand-led, so multipliers sit above mainstream estimates; and that the pinned commit's baseline emissions path diverges from the manual's published table. Near-term DEFINE-UK levels are not competitive with the suite's OBR emulator \citep{ahmadi2026obr} or its Bank of England SVAR \citep{ahmadi2026boesvar}, and are never presented as forecasts.
+
+\subsection{Integration}
+
+Within PolicyEngine Macro the model is exposed through the \texttt{pe-macro} command-line interface --- \texttt{define-scenarios} to list the registry, \texttt{define-scenario} to produce delta paths --- marked local-only and experimental, for the licence reason of Section~\ref{sec:licence}. A further command bridges a scenario's household income deltas into PolicyEngine's UK microsimulation as a pre-tax earnings overlay, the same economic-assumptions pattern the suite uses for its other macro members, so that a climate-policy scenario can be read household by household through the tax and benefit system. Only numbers travel across that bridge; the unlicensed upstream code does not. The suite's reform-scoring entry point continues to refuse this model.
+
+\subsection{What continuous integration can and cannot check}
+
+Because the upstream is unlicensed, continuous integration never fetches or runs it, so the oracle comparisons skip there and run only where a cached pinned run exists. This would be a serious weakness if the gate were left at that, so the gate is split.
+
+Every pinned reference number the oracle tests compare against lives in one committed artifact, \texttt{validation/reference\_outputs.json}, rather than in test code --- so that a local run and a CI run gate identical numbers, and no tolerance or reference can drift silently inside a test. The \emph{hermetic} half of the suite runs everywhere, on every pull request, without R or any upstream fetch: it checks that the reference artifact is well-formed and internally consistent (for instance, that the committed multiplier reproduces from its committed cumulants), that it is pinned to the same commit the code is, that the committed calibration table keeps its exact schema, pinned external observations, gap arithmetic and headline divergences, that the scenario registry matches, and that the repository's own documentation still names the pinned commit. Changing any reference number requires editing the artifact deliberately, with a dated run-record entry --- never editing a test.

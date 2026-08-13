@@ -2420,7 +2420,13 @@ h2 {
 /* honest-warning cells in validation tables (over-band, imposed, targeted) */
 /* Was --brand-strong: the same teal as links, series 1 and .metric-val, so
    "Weak" read in the site's affirmative accent. --brand-warning is AA-tested. */
-.vchart .vc-warn, td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
+/* SVG text takes `fill`, not `color`, so the shared rule below set a
+   property nothing reads and `.vchart text { fill: var(--paper-dim) }` won:
+   every vc-warn line inside a chart rendered as muted grey at the browser
+   default 16px instead of the warning colour. The HTML cells were always
+   fine, so the bug was invisible wherever both appeared together. */
+.vchart .vc-warn { fill: var(--brand-warning); font-weight: 600; font-size: 12px; }
+td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 
 /* Methodology step diagrams: dashboard schematics remapped to site tokens,
    click to expand in a modal. */

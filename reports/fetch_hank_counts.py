@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refresh the citation and star counts in reports/us-hank-open-source.html.
+"""Refresh the citation and star counts in reports/us-hank-open-source/.
 
 The report said its counts "use canonical OpenAlex records" and the GitHub
 API, but nothing recorded when they were taken and no script existed to
@@ -31,7 +31,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-PAGE = Path(__file__).resolve().parent / "us-hank-open-source.html"
+PAGE = Path(__file__).resolve().parent / "us-hank-open-source" / "index.html"
 
 # label -> (OpenAlex work id, GitHub repo or None, substring that identifies
 # the row in the page). The row marker is the paper title rather than the
@@ -118,7 +118,8 @@ def published() -> dict[str, int]:
             # A checker that silently skips a row it cannot find is the same
             # failure this script exists to prevent.
             raise SystemExit(
-                f"cannot find the {label} row in {PAGE.name} via "
+                f"cannot find the {label} row in "
+                f"{PAGE.parent.name}/{PAGE.name} via "
                 f"{row_marker!r}; the table changed and this script must be "
                 "updated with it"
             )

@@ -1,0 +1,88 @@
+\section{The clean-room reimplementation}
+\label{sec:reimplementation}
+
+The upstream code cannot be hosted, so the route to a hostable DEFINE-UK is to implement the published equations from scratch --- the same play the suite ran for the OBR macroeconometric model \citep{ahmadi2026obr}. This section reports where that stands, and treats it as more than an engineering task: reading a manual closely enough to run it is itself a form of validation, and it has produced findings the R source could not.
+
+\subsection{Protocol}
+
+The specification sources are the manual \citep{georgedafermos2026manual}, the companion papers, and \citet{dafermos2017} for framework-level derivations the manual references. Three rules make the exercise clean-room rather than a translation.
+
+\begin{enumerate}
+\item \textbf{The upstream repository is an output oracle only.} Its numerical outputs are compared against ours in the oracle tests. Its source code is never read to write an equation here.
+\item \textbf{Every equation carries its provenance.} Each registered equation declares a \texttt{manual\_ref} of the form ``\S3.3.2 eq.\ (84)'', validated by a regular expression at construction time, and an equation without one does not merge. Two registrations citing the same reference are rejected, because a copy-pasted provenance would make an equation \emph{look} transcribed while implementing something else --- a failure the per-section contiguity checks cannot see on their own, since a duplicate shows up there only as a hole somewhere else.
+\item \textbf{Data come from official sources}, not from the upstream repository's input spreadsheets --- again a licence consequence, and incidentally a stronger test.
+\end{enumerate}
+
+The architecture is an equation registry, a Gauss--Seidel per-period solver that iterates all registered equations to convergence, one module per manual \S3 section, the \S5 parameter and initial-value tables, and the \S2.2 accounting matrices. Stock-flow norms are asserted each period, not assumed.
+
+\subsection{Milestone 1: PASS}
+
+Milestone~1 (4 August 2026) transcribes the \S2.2 transactions and balance-sheet matrices and the full \S5 parameter and initial-value tables, and requires that every Table~1 and Table~2 row and column identity hold on the \S5 initial values within the manual's own four-significant-figure printing precision.
+
+It passes. The accounting test module collects \textbf{62} tests, of which \textbf{44} are the Table~1/2 row and column identities themselves: 20 transactions rows, 6 transactions columns, 7 balance-sheet rows and 11 balance-sheet columns. The remaining 18 are the residual-instrument and model-financial-net-worth definitions, the economy-wide closure $\sum_s \mathrm{FNW}_s = 0$, and the two tests that pin the one manual inconsistency this milestone found.
+
+That inconsistency is worth stating because it is the template for everything in Section~\ref{sec:gaps}. Table~6's rest-of-world lending entry omits the net-dividends term of Eq.~(383), so the MFI and RoW transaction columns miss lending by $\mp$5.44. This is not an inference: the manual itself tabulates overall lending at 5.44 where, by its own account, it ``should equal 0''. Rather than adjust a value or widen a tolerance until the matrix closed, the discrepancy is pinned exactly, so the implementation reproduces the manual including its defect and a future correction upstream fails the test rather than passing silently.
+
+\subsection{Milestone 2: IN PROGRESS, not passed}
+
+Milestone~2 covers the high-level macro and production blocks (\S3.2--3.3), gated on the baseline GDP path against the oracle. Three of its four sections have landed:
+
+\begin{center}
+\begin{tabular}{@{}llrl@{}}
+\toprule
+Manual section & Content & Equations & Range \\
+\midrule
+\S3.2 & High-level macroeconomic variables & 23 & (21)--(43) \\
+\S3.3.1 & Domestic production module & 27 & (44)--(70) \\
+\S3.3.2 & Power generation sector & 68 & (71)--(138) \\
+\midrule
+\multicolumn{2}{@{}l}{Total} & \textbf{118} & \textbf{(21)--(138)}, contiguous \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Each section solves as a system under its own test module, and contiguity is checked structurally rather than asserted: the equation numbers parsed out of the provenance strings must form an unbroken range, so a skipped equation fails a test rather than going unnoticed.
+
+\textbf{Milestone 2 is not passed.} \S3.3.3, the input--output calculations, is not implemented, and the oracle baseline comparison --- the milestone's actual gate --- has not been run. Reporting 118 contiguous equations as a milestone pass would be reporting effort as evidence. What can be said is narrower and true: three of four sections are transcribed and internally consistent against the manual's own initial values, at the precision those values are printed to, with every disagreement enumerated below rather than absorbed.
+
+\subsection{Thirteen gap records}
+\label{sec:gaps}
+
+Where the manual is incomplete, silent, or inconsistent with itself, the implementation does not patch, tune or tolerate. It implements what is printed and records the gap as a machine-readable entry, pinned by a test that fails if the situation changes --- including if the DEFINE team later publishes a value. There are \textbf{thirteen} such records: one in \S3.2, two in \S3.3.1 and ten in \S3.3.2. Appendix~\ref{app:gaps} lists them all. Three general observations matter more than the individual entries.
+
+\paragraph{They are not all the same kind of thing, and one is not a manual defect at all.} The thirteen cover missing parameters, symbols the body uses and the tables never define, variables the tables carry and the body never uses, a printed inequality that contradicts the prose above it, and quantities Table~6 simply omits. One of them --- the expected capital path over the planning horizon of Eq.~(89) --- records \emph{our} modelling choice rather than a defect: the manual never says what capital stock the sector expects to hold at $t+\tau$ and the model carries no forecast of it, so real capital and electricity demand are held at current values across the horizon. It is recorded in the same place as the others precisely so that a choice of ours is not mistaken for a reading of theirs. It is inert whenever the baseline credibility switch is zero.
+
+\paragraph{Some of them have consequences, and the consequences are stated.} \S3.3.2 as published \emph{cannot be simulated forward}: six parameters it uses are absent from Table~5, and two variables --- the fossil and non-fossil capital profit rates of Eq.~(99) --- are never defined anywhere in the manual. At the defaults this is not cosmetic. Credit rationing degenerates to a constant, the green/fossil investment split degenerates to 50:50 against the 69:31 that Table~6 implies, and desired power-sector investment turns negative: held at its own initial values the section returns power-sector capital formation of $-0.021$ against a tabulated $+2.15$. The 50:50 default is visibly wrong and is pinned as such rather than tuned to fit, because tuning it would replace a documented hole with an undocumented guess. This is the single largest gap in the section, since that split is what steers investment green.
+
+\paragraph{Where the manual could have been guessed, it was not.} Table~5 reuses non-financial-corporation parameter values for the power sector in at least nine places, so reusing them once more for Eq.~(138)'s credit-rationing slopes would have been a defensible inference --- but it would have been \emph{our} inference rather than the manual's instruction, and it does not reproduce Table~6 in any case. It was not done. Similarly, Eq.~(96)'s missing intercept can be backed out as roughly 0.0210 if Table~6 is read as a steady state; that value is recorded and \emph{not used}, because the equation's two lagged terms make the steady-state reading an assumption rather than a measurement.
+
+\subsection{The largest disagreements}
+
+Beyond the gaps, a number of printed identities disagree with Table~6 by one to three orders of magnitude more than its printing noise. All are implemented as printed and pinned individually. Four deserve statement here.
+
+\paragraph{Eq.~(84): a factor of 3.04.} The electricity price rule, a fixed mark-up over marginal cost, gives 0.9725 against a tabulated 0.3198, implying a mark-up of $-0.267$ --- electricity sold below marginal cost. Both sides are independently corroborated: marginal cost by Eqs.~(82) and (83) to $4.5\times10^{-5}$, and the price by Eq.~(74) to $3.7\times10^{-4}$. So the manual's two chains meet at a contradiction. The most economical account is not a wrong number but a \emph{missing equation}: \S5 calibrates an electricity-price long-run formation rule --- a switch time and a long-run price --- that \S3 never prints, and Eq.~(84) is the only price equation printed, with no long-run term and no switch. Nothing is implemented for the unprinted rule, because there is nothing printed to implement.
+
+\paragraph{One deflator, counted once.} Eq.~(27) gives real gross capital formation of 111.88 against a tabulated 112.30 --- 0.37 per cent, roughly ten times the rounding noise --- and Eq.~(25) reproduces the tabulated real GDP only using 112.30. This is emphatically \emph{one} finding and not five: gross capital formation, its NFC, household and government components, and the two capital stocks all show nominal-to-real ratios of 1.0309--1.0312 where the equations prescribe a production deflator of 1.035, and the same 0.4 per cent reappears in \S3.3.2's Eqs.~(104), (105), (132) and (133). Table~6's entire capital block is deflated at 1.031 --- most plausibly a national-accounts investment deflator where the equations want the production deflator. Counting it once matters: reported as five independent discrepancies it would look like a section riddled with errors rather than one systematic property of one table's capital rows.
+
+\paragraph{Eq.~(107): a model-wide sign problem, not a power-sector one.} Eq.~(107) has a determinate-sign right-hand side and Table~6 tabulates the opposite. This qualification belongs with the finding wherever it is quoted: \textbf{it is not a power-sector defect}. The manual prints the same rule for three other sectors --- Eqs.~(177), (231) and (284) --- every coefficient is positive, and Table~6 tabulates all four transfers negative, with magnitudes out by factors of 1.7 to 4.6 as well. Whatever is wrong is wrong in the interest-bearing asset transfer rule, or in Table~6's sign convention for it, \emph{model-wide}; \S3.3.2 is simply where it is met first. Confirming that requires \S3.4.1, \S3.4.3 and \S3.4.4, which are not implemented yet, so the claim is scoped accordingly.
+
+\paragraph{A normalisation that propagates.} Eq.~(61) gives a fuel price of 0.6788 against a tabulated 1, where Table~5 says of the relevant parameter that ``at the initial condition fuel price is normalised to equal 1''. A third witness supports the normalisation: Table~6 tabulates the power sector's nominal and real fuel intermediate consumption at the same value, which is only possible at a fuel price of 1. The gap does not contaminate any \S3.3.2 identity, because the affected quantity is tabulated. In a \emph{simulation} it cuts that input 32 per cent and carries essentially undiluted into marginal cost and the electricity price --- and it does not cancel Eq.~(84): $3.04 \times 0.68$ still leaves the price at 2.07 times Table~6's.
+
+\subsection{The audit, and what it withdrew}
+\label{sec:audit}
+
+On 12 August 2026 the pinned findings were audited against the manual PDF and recomputed independently of the sector modules: all 661 transcribed \S5 values were re-checked against the page each source comment names, and every pinned discrepancy was reproduced. The arithmetic held. The interpretations did not entirely, and the corrections are recorded here because a replication that only ever adds findings is not being audited.
+
+\paragraph{Four findings re-characterised.} Eqs.~(51), (59), (94) and (111) had been reading as the manual contradicting itself. They are not. Table~5 describes each of the parameters concerned as a \emph{historical mean} --- ``calibrated so the long-run mark-up at initial utilisation equals the mean of'' two sample windows, ``calculated using the mean over past data'', ``set as the mean of past implied values'', ``taken as the mean of past data''. A parameter described that way never claimed to reproduce the manual's own initial period. These are therefore \textbf{first-period jumps} that a run started from Table~6 will take in its first quarter, not defects. They still matter --- one of them moves a price that steers green investment, by 60 per cent --- and they are still pinned. They are simply not evidence that the manual disagrees with itself, and the distinction turns on the manual's own stated provenance for each parameter, which is why Table~5's remarks are treated as part of the specification.
+
+\paragraph{One claim withdrawn outright.} An earlier version of the reimplementation notes claimed of Eq.~(51) that ``the equation is the corroborated one'', because Eqs.~(49) and (50) imply a value close to it. That inference does not hold and is withdrawn: Eq.~(49) reads \emph{lagged} unit costs, and the corroborating value is what it gives only if unit costs were flat into the initial period. Honouring the lag, the tabulated mark-up implies $+0.91$ per cent quarterly unit-cost growth and the equation's implies $-0.12$ per cent --- deflation --- and the manual's own initial period is growing and inflating, which favours the tabulated value if anything. On the evidence a single-period snapshot provides, neither side is the outlier, and the finding now says so.
+
+\paragraph{One finding unified.} Eqs.~(27), (104), (105), (132) and (133) were counted as five and are now counted as one: the single deflator finding above.
+
+\paragraph{One new gap found.} The unprinted electricity-price rule described above was identified by the audit, and is the likeliest account of Eq.~(84).
+
+Two of the findings have been filed publicly on the authors' own tracker --- the emissions vintage divergence of Section~\ref{sec:target1b}, and \S3.3.2's missing parameters and undefined variables together with Eqs.~(84) and (61) --- so that the record here and the record there stay in step. Both were re-verified in the audit.
+
+\subsection{Attribution}
+
+The suite's standard adapted-model stance applies. The \textbf{model design belongs to its authors}; the \textbf{implementation is ours}. Every surface that presents results names DEFINE-UK and its authors, links the manual and papers, and states that this is an independent Python implementation of the published equations --- not the authors' code, and not endorsed by them. The implementation is AGPL-3.0, which is what makes hosting possible without any upstream licence.

@@ -247,23 +247,15 @@ MODEL_QUALITY = {
         "predictive_validation": _quality(
             "weak",
             "No demonstrated skill against a random walk WITH DRIFT on any "
-            "variable at any horizon once the 64 variable-by-horizon tests "
-            "are adjusted together: minimum Benjamini-Hochberg q = 0.36, and "
-            "0.40 under the published specification. A driftless walk on a "
-            "trending log level is too weak a benchmark, so the strong-looking "
-            "CPI result (0.63 at h=1) becomes 0.83 at h=1 and 1.03 at h=8 "
-            "against drift. Bank Rate comes closest (0.79 at h=1, unadjusted "
-            "p=0.018 -- the smallest of the 64) but does not survive the "
-            "adjustment. UK GDP is not distinguishable from drift at any "
-            "horizon (p=0.33-0.43). Two caveats on figures quoted elsewhere: "
-            "the ex-Covid ratio of 0.77 and the p=0.38-0.67 range are against "
-            "the weaker no-change benchmark, not drift. Separately, the "
-            "rolling evaluation had estimated without the six Covid dummies "
-            "that every published forecast carries; under the published "
-            "specification UK GDP goes 1.06 to 0.99 at h=1 and 1.12 to 0.95 "
-            "at h=8 -- level with naive rather than worse, still not better. "
-            "The frozen-edge run gives 0.32pp RMSE from a single origin, on the "
-            "2024Q2 real-time vintage.",
+            "variable at any horizon. The grid runs 64 variable-by-horizon "
+            "tests; adjusted together, the smallest Benjamini-Hochberg q is "
+            "0.36. Bank Rate comes closest (0.79 at h=1) and does not "
+            "survive. The model looks strong against a driftless walk, but "
+            "that benchmark forfeits the trend on a trending log level and "
+            "is too weak to learn from. Under the published specification "
+            "UK GDP is level with naive rather than worse -- an "
+            "improvement, not a win. Benchmarks, horizons and the "
+            "multiplicity table are on the validation page.",
             "Score the predictive densities rather than point forecasts, "
             "report rolling interval coverage, and re-run once the estimation "
             "sample extends past the Covid dummies.",
@@ -271,14 +263,11 @@ MODEL_QUALITY = {
         "identification_robustness": _quality(
             "moderate",
             "On the paper's own definition -- the posterior mean of the "
-            "per-draw group share of TOTAL forecast-error variance, four "
-            "quarters ahead -- UK GDP replicates (37.4% against ~40%) and UK "
-            "CPI falls about 8pp short (42.3% against ~50%). The earlier "
-            "match on both came from summing per-shock medians and "
-            "renormalising them to 100%, which inflated the identified shares "
-            "by about a third. The 68% posterior band is roughly +/-14pp, "
-            "wider than the shortfall, and proxy world data and undisclosed "
-            "source settings matter.",
+            "per-draw group share of TOTAL four-quarter-ahead variance -- UK "
+            "GDP replicates (37.4% against ~40%) and UK CPI falls about 8pp "
+            "short (42.3% against ~50%). The 68% band is roughly +/-14pp, "
+            "wider than the shortfall, so the data do not resolve it. Proxy "
+            "world aggregates remain a candidate explanation.",
             "Show conclusions across lag, prior, proxy-data and weighting grids "
             "with effective-sample-size diagnostics.",
         ),
@@ -422,12 +411,15 @@ MODEL_QUALITY = {
         ),
         "policy_counterfactual_validity": _quality(
             "moderate",
-            "The static costing of a 1p basic-rate rise gives £6.46bn in 2026 "
-            "rising to £7.38bn by 2030, against HMRC's published ready "
-            "reckoner at £6.9bn and £8.2bn — within range, and the gap is "
-            "reported rather than tuned away. That is one reform, one "
-            "country, one tax, against another estimate on a different data "
-            "basis, so it is a benchmark and not a validation.",
+            "The static costing of a 1p basic-rate rise gives £6.46bn in "
+            "2026-27, which is 6.4% BELOW HMRC's published ready reckoner at "
+            "£6.9bn -- not within its range, and the gap is reported rather "
+            "than tuned away. The reckoner stops at 2028-29, so the £7.38bn "
+            "this suite scores for 2030 has no year-matched counterpart. "
+            "HMRC's income-tax reckoner is post-behavioural on administrative "
+            "data and ours is static and survey-based, so this is one reform, "
+            "one country, one tax, on a different basis: a benchmark and not "
+            "a validation.",
             "Benchmark a US reform and a distributional result against an "
             "independent published costing.",
         ),
@@ -561,11 +553,9 @@ MODEL_QUALITY = {
             "§2.2 accounting and §3.2, §3.3.1 and §3.3.2 — 118 equations, "
             "Eqs. (21)-(138) contiguous — and surfaced defects in the manual "
             "itself, thirteen of them pinned as machine-readable gap records "
-            "rather than absorbed into a tolerance. An audit of the wider "
-            "write-up re-characterised four findings as first-period jumps "
-            "(Table 5 describes those parameters as historical means, never "
-            "claimed to fit the manual's own initial period) and withdrew one "
-            "claim outright.",
+            "rather than absorbed into a tolerance. Four apparent "
+            "contradictions proved to be historical-mean calibration and are "
+            "recorded as such in the replication report.",
             "Complete §3.3 and the oracle comparison, closing milestone 2.",
         ),
         "predictive_validation": _quality(

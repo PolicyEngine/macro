@@ -1,0 +1,51 @@
+\section{External calibration and the multiplier}
+\label{sec:calibration}
+
+Replication against a publication and calibration against the world are different questions, and a model can pass the first while failing the second badly. DEFINE-UK does. This section reports the second, and then reports the one number from the model that has circulated most widely --- a cumulative green-investment multiplier of 1.78 --- with the reasons it cannot be read against anybody else's multiplier.
+
+\subsection{The baseline against outturns}
+
+Since 5 August 2026 this comparison is an artifact rather than a paragraph. A function in the adapter recomputes every row from the cached pinned run against vintage-exact external observations; the result is committed as \texttt{validation/baseline\_vs\_external.csv}; and a test fails on any drift between the committed table and a recomputation. Table~\ref{tab:calibration} reproduces it.
+
+\begin{table}[t]
+\centering
+\caption{DEFINE-UK baseline against external observations}
+\label{tab:calibration}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xrrl>{\raggedright\arraybackslash}X@{}}
+\toprule
+Quantity & Model & External & Units & Verdict \\
+\midrule
+Real GDP growth, 2025 & 4.66 & 1.31 & \% y/y & far above outturn; never a forecast \\
+Real GDP growth, mean 2025--40 & 2.4 & 1.65 & \% y/y & high vs official long-run \\
+Unemployment, 2025 & 4.39 & 4.88 & \% & below outturn \\
+Population 16+, 2025 & 55.66 & 56.0 & millions & consistent \\
+Labour force, 2025 & 35.97 & 34.5 & millions & slightly high \\
+Emissions, 2024 & 401.5 & 371.0 & MtCO$_2$e/yr & above the actuals it should start from \\
+Emissions, 2030 vs NDC & 342.8 & 260.0 & MtCO$_2$e/yr & short of the NDC by design \\
+\bottomrule
+\end{tabularx}
+\par\smallskip
+\parbox{0.97\textwidth}{\footnotesize \emph{Notes:} Model column from the cached pinned run at commit \texttt{846081a}, annual-mean convention --- which is why 2025 growth reads 4.66 where the manual's Table~4 prints 4.96, the same anchoring gap recorded under target 1a (Section~\ref{sec:target1a}). Sources: ONS quarterly national accounts, vintage 26 July 2026 \citep{ons2026gdp}; ONS series MGSX, same vintage, 2025 quarterly path 4.6/4.7/5.0/5.2 giving an annual mean of 4.88 \citep{ons2026lms}; ONS 16+ population and labour force; DESNZ UK territorial greenhouse gas emissions, 2024 provisional, with 2023 final at 384 \citep{desnz2025ghg}; OBR March 2026 long-run growth assumption \citep{obr2026efo}; and the UK NDC of 68 per cent below 1990 by 2030. The final row is not a failure: the manual states that its current-policies baseline falls short of the NDC by design.}
+\end{table}
+
+The 2025 growth gap is the one to keep in view: 4.66 per cent against an ONS outturn of 1.31, a gap of well over three percentage points on the single most familiar macroeconomic quantity there is. Unemployment sits about half a point below the outturn, the labour force about a million and a half high, and 2024 emissions some 30 MtCO$_2$e above the DESNZ actuals the model should be starting from. None of this is presented as a defect of the model as its authors intend it to be used --- the manual is explicit that the baseline is not a forecast --- but it is decisive for how the adapter may serve it. It is the measured basis for Section~\ref{sec:deltas}'s deltas-only rule.
+
+\subsection{The 1.78 multiplier, and why it is not comparable to any published one}
+\label{sec:multiplier}
+
+The model's cumulative green-public-investment multiplier is \textbf{1.78} by \emph{our own} computation: cumulative $\Delta$GDP of 209.9 over cumulative $\Delta$SPEND\_GVT of 118.2, nominal, over the full simulation, on the green-public-investment-plus-green-bonds scenario against its baseline. The arithmetic reproduces ($209.9/118.2 = 1.7758$) and the number is pinned in the test suite to $\pm0.01$ with its cumulants pinned to $\pm0.5$.
+
+Two labels must travel with it. The first is that \textbf{the number is ours, not the authors'}: no published DEFINE-UK multiplier corresponds to it, and it is a quantity this replication defined and computed, not one it reproduced. The second is that \textbf{it is not like-for-like against any published multiplier}, on three separate grounds, all of which push in the same direction.
+
+\paragraph{Horizon.} Ours is a cumulative ratio over the whole simulation to 2040. Published green-spending multipliers, and the OBR's capital-spending impact multiplier of roughly 1.0, are short-horizon figures --- impact or first-few-year. A long-horizon cumulative ratio is \emph{expected} to sit above them, so setting 1.78 beside a short-horizon number and reading a disagreement is a units error dressed as a finding.
+
+\paragraph{Denominator.} SPEND\_GVT is total government spending excluding wages. The manual's Table~6 components imply it is other government consumption plus social benefits plus government gross capital formation ($58.03 + 82.8 + 20.76 = 161.59$ against a tabulated 161.6), of which government investment --- the actual policy lever --- is only \textbf{12.8 per cent}. The denominator is therefore an endogenous aggregate rather than the policy impulse, and it moves the wrong way for the ratio: the scenario cuts unemployment, social benefits fall, the denominator shrinks, and the measured multiplier is \textbf{biased up}. The clean comparison --- cumulative $\Delta$GDP over cumulative $\Delta\mathrm{GCF\_GVTG}$, the actual impulse --- \textbf{has never been computed}. Until it is, 1.78 should be read as upper-leaning, and that is stated wherever the number is served.
+
+\paragraph{Closure.} As Section~\ref{sec:model} sets out, the model is demand-led with Kaldor--Verdoorn productivity (Eq.~(31)) and real GDP not held to a supply ceiling (Eq.~(38)). A multiplier above one over fifteen years is what this closure \emph{implies}. It is not a symptom of an implementation error, and it is not a finding about the world; it is a property of the model one has chosen to run. That is why the number is labelled rather than corrected.
+
+These three caveats are not editorial: they are carried in code as a constant and gated hermetically by a test that fails if the number is served without them.
+
+\paragraph{A withdrawn comparator.} Earlier versions of this project's surfaces set 1.78 beside ``IMF green-spending multipliers of 1.1--1.5'', attributed to a 2021 IMF publication. That publication could not be located in either repository or anywhere else, and the attribution has been \textbf{withdrawn rather than repaired}, on the principle that an unidentifiable citation is worse than none. The only IMF reference this project actually holds is \citet{batini2014}, which is a different paper reporting a different quantity: first-year multipliers of 0--1 for advanced economies. No published multiplier is quoted alongside 1.78 in this paper, because none of them measures the same object.
+
+\paragraph{The upstream multiplier table is unusable.} The upstream run also produces its own \texttt{tables/Multiplier\_Summary.csv}, and it is documented unusable rather than quietly ignored. Its impact, four-quarter and eight-quarter multiplier columns are \emph{identical across all eight scenarios} ($-32.22$, $-0.88$, $2.6$), which no correct scenario-specific multiplier can be; and its cumulative government-spending figure of 104.22 matches the cumulative delta of \emph{no} variable in the scenario file. One column does reconcile --- its cumulative GDP delta of 250.76 is the cumulative quarterly real-GDP delta of the green-public-investment scenario, 250.6 by our own sum --- which is what makes the failure of the others diagnostic rather than ambiguous. Neither the table nor the multiplier of roughly 2.4 once derived from it is quoted anywhere.
