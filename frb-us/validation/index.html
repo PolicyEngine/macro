@@ -4,13 +4,13 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>FRB/US validation — PolicyEngine Macro</title>
-<meta name="description" content="How far to trust the FRB/US implementation: LONGBASE reproduced to machine precision, shocks matching the Fed's pyfrbus at its own version-to-version noise floor, and the known limits." />
+<meta name="description" content="How far to trust the FRB/US implementation: why the baseline tracking residual is an add-factor identity rather than evidence, the shocked paths matching the Fed's pyfrbus at its own version-to-version noise floor, and the known limits." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/frb-us/validation" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://policyengine-macro.vercel.app/frb-us/validation" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
 <meta property="og:title" content="FRB/US validation — PolicyEngine Macro" />
-<meta property="og:description" content="A from-scratch Python implementation of the Federal Reserve Board's FRB/US model — 284 equations under VAR expectations, reproducing LONGBASE to machine precision." />
+<meta property="og:description" content="A from-scratch Python implementation of the Federal Reserve Board's FRB/US model — 284 equations under VAR expectations, matching the Fed's own pyfrbus on shocked paths." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -77,7 +77,7 @@
   <section id="trust" class="band">
     <div class="band-head">
       <span class="kicker mono">how far to trust it</span>
-      <h2>Machine precision on the baseline; the Fed's own noise floor on shocks.</h2>
+      <h2>The baseline agreement is an identity; the shocks are the evidence.</h2>
     </div>
     <div class="prose">
       <p>
@@ -210,7 +210,7 @@
         <caption>frb-us against the Fed's pyfrbus and published multiplier ranges</caption>
         <thead><tr><th scope="col">Quantity</th><th scope="col">Ours</th><th scope="col">Published</th><th scope="col">Reading</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Tracking invariant, max abs. error</th><td>5.6&times;10<sup>&minus;17</sup></td><td>CI gate &lt;10<sup>&minus;8</sup>; pyfrbus 1.1.1 gives 1.1&times;10<sup>&minus;8</sup></td><td>machine precision</td></tr>
+          <tr><th scope="row">Tracking invariant, max abs. error</th><td>5.6&times;10<sup>&minus;17</sup></td><td>CI gate &lt;10<sup>&minus;8</sup>; pyfrbus 1.1.1 gives 1.1&times;10<sup>&minus;8</sup></td><td>an identity, not accuracy &mdash; passes on scrambled data</td></tr>
           <tr><th scope="row">Shock responses vs pyfrbus 1.0.0</th><td>6.0&times;10<sup>&minus;9</sup></td><td>—</td><td>at the reference's noise floor</td></tr>
           <tr><th scope="row">Shock responses vs pyfrbus 1.1.1</th><td>1.4&times;10<sup>&minus;8</sup></td><td>1.1.1 vs 1.0.0: 1.3&times;10<sup>&minus;8</sup></td><td>the Fed's releases differ as much as we do</td></tr>
           <tr><th scope="row">Gov. purchases multiplier, yr 1, inertial Taylor rule</th><td>0.72</td><td>0.7&ndash;1.0 (Coenen et al. 2012); Ramey (JEP 2019): "a surprisingly narrow range of 0.6 to 1"</td><td>inside range</td></tr>

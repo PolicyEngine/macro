@@ -10,7 +10,7 @@
 <meta property="og:url" content="https://policyengine-macro.vercel.app/frb-us/methodology" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
 <meta property="og:title" content="FRB/US methodology — PolicyEngine Macro" />
-<meta property="og:description" content="A from-scratch Python implementation of the Federal Reserve Board's FRB/US model — 284 equations under VAR expectations, reproducing LONGBASE to machine precision." />
+<meta property="og:description" content="A from-scratch Python implementation of the Federal Reserve Board's FRB/US model — 284 equations under VAR expectations, matching the Fed's own pyfrbus on shocked paths." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -162,7 +162,7 @@ window.MathJax = {
                 <rect x="431" y="42" width="134" height="90" rx="10" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1.5"/>
                 <text x="498" y="70" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">= LONGBASE</text>
                 <text x="498" y="90" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">reproduced to</text>
-                <text x="498" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">machine precision</text>
+                <text x="498" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">identity by construction</text>
                 <rect x="80" y="150" width="420" height="36" rx="8" fill="var(--bg-diagram)" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5 3"/>
                 <text x="290" y="172" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-mid)">shocks are then imposed on top of the add-factored baseline</text>
               </svg>
@@ -171,7 +171,7 @@ window.MathJax = {
         <h4>The baseline database</h4>
       <p>The load stage brings <code>LONGBASE.TXT</code> — the April 2026 vintage — into a pandas frame on a quarterly <code>PeriodIndex</code>. This is the Board's own historical and projection database, and it conditions everything that follows: every simulation is read as a deviation from this baseline.</p>
       <h4>Tracking residuals (<code>init_trac</code>)</h4>
-      <p><code>init_trac</code> sets each equation's tracking residual so that solving the model reproduces the database <strong>to machine precision</strong> — an invariant checked on the <a href="/frb-us/validation">validation page</a>. This is the Fed's own device, used the Fed's own way — the direct analogue of the OBR emulator's anchoring. Shocks are then imposed on top of the add-factored baseline.</p>
+      <p><code>init_trac</code> sets each equation's add-factor to minus that equation's residual at the input data, so solving afterwards reproduces the database <strong>identically &mdash; for any input</strong>. That is the Fed's own device used the Fed's own way, the direct analogue of the OBR emulator's anchoring, and it is why the resulting residual is a software check rather than evidence about the economy (the <a href="/frb-us/validation">validation page</a> shows the same gate passing on randomly scrambled data). Shocks are then imposed on top of the add-factored baseline, where the solver does real work.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">LONGBASE conditioning</div>
         <div class="meth-eq"><div class="meth-eq-label">tracking residual</div><div class="meth-eq-body">\(\text{trac}_i = -F_i(\text{baseline})\) per equation, per quarter</div></div>

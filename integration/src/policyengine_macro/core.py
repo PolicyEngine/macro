@@ -486,10 +486,13 @@ def _frbus_period(value, *, argument: str):
 def _frbus_baseline(policy_rule: str, start, end):
     """Compiled model + add-factored baseline that solves to LONGBASE exactly.
 
-    After init_trac the tracking residuals are set so a baseline solve
-    reproduces the data to machine precision (VALIDATION.md Test 1, 5.6e-17);
-    every reported number is a deviation from THAT baseline, so the shock is
-    the only thing moving.
+    "Exactly" is the point and also the whole content of it: init_trac sets
+    each add-factor to minus that equation's residual at the input data, so
+    the baseline solve is algebraically the identity on whatever it was
+    tracked to. The 5.6e-17 residual is a software check, not evidence about
+    the economy -- the same gate passes at 6.7e-9 on randomly scrambled data.
+    What it buys us here is the thing that matters: every reported number is a
+    deviation from THAT baseline, so the shock is the only thing moving.
     """
     key = (policy_rule, str(start), str(end))
     if key in _FRBUS_BASELINE_CACHE:
@@ -719,6 +722,22 @@ def frbus_summary() -> dict:
                           "quarters, baseline solve vs LONGBASE after init_trac",
                 "value": 5.6e-17,
                 "gate": 1e-8,
+                # Served alongside the number because a consumer reading
+                # validation off this payload would otherwise take the
+                # smallest figure here as the strongest evidence, when it is
+                # the only one that carries none.
+                "is_evidence": False,
+                "caveat": (
+                    "NOT evidence about the economy. init_trac sets each "
+                    "add-factor to minus that equation's residual at the "
+                    "input data, so the solve is algebraically the identity "
+                    "on whatever it was tracked to -- for any input. The "
+                    "model repo gates the demonstration: the same check "
+                    "passes at 6.7e-9 on a baseline whose every series has "
+                    "been scrambled by a random factor, with every "
+                    "accounting identity destroyed. It gates the software. "
+                    "Read vs_vendor_pyfrbus and the multipliers instead."
+                ),
             },
             "vs_vendor_pyfrbus": {
                 "metric": "max abs difference vs the Fed's pyfrbus 1.0.0 on the "

@@ -41,7 +41,7 @@ The damping criterion is deliberately permissive --- it guards against leaving t
 \subsection{Performance}
 \label{sec:performance}
 
-Table~\ref{tab:perf} reports wall-clock times on the development machine (Apple Silicon laptop, single-threaded), measured on fresh runs of the experiment script in \texttt{figures/}. One-off model construction --- XML parsing, lexing, symbolic differentiation of all 284 equations and compilation --- takes about 0.7 seconds; after that, solving costs about \textbf{4.5 milliseconds per quarter}, so a 20-quarter policy simulation runs in under a tenth of a second and the full experiment suite of Section~\ref{sec:results}, spanning three model configurations and 40-quarter horizons, completes in a few seconds. Add-factoring (\texttt{init\_trac}) is a single equation evaluation per quarter and is essentially free. These times remove any computational barrier to embedding FRB/US in bootstrap loops, optimisation over rule coefficients, or microsimulation pipelines.
+Table~\ref{tab:perf} reports wall-clock times on the development machine (Apple Silicon laptop, single-threaded), measured on fresh runs of the experiment script in \texttt{figures/}. One-off model construction --- XML parsing, lexing, symbolic differentiation of all 284 equations and compilation --- takes about half a second; after that, solving costs about \textbf{3.6 milliseconds per quarter}, so a 20-quarter policy simulation runs in under a tenth of a second and the full experiment suite of Section~\ref{sec:results}, spanning three model configurations and 40-quarter horizons, completes in a few seconds. Add-factoring (\texttt{init\_trac}) is a single equation evaluation per quarter and is essentially free. These times remove any computational barrier to embedding FRB/US in bootstrap loops, optimisation over rule coefficients, or microsimulation pipelines.
 
 \begin{table}[htbp]
 \centering
@@ -51,21 +51,21 @@ Table~\ref{tab:perf} reports wall-clock times on the development machine (Apple 
 \toprule
 Operation & Time \\
 \midrule
-Parse \texttt{model.xml} & 0.012\,s \\
-Lex, differentiate and compile (one-off, incl.\ \texttt{init\_trac} over 40q) & 0.68\,s \\
-Solve, 20 quarters & 0.088\,s \\
-Solve, 40 quarters & 0.181\,s \\
-Per solved quarter & $\approx$4.5\,ms \\
+Parse \texttt{model.xml} & 0.007\,s \\
+Lex, differentiate and compile (one-off, incl.\ \texttt{init\_trac} over 40q) & 0.47\,s \\
+Solve, 20 quarters & 0.070\,s \\
+Solve, 40 quarters & 0.144\,s \\
+Per solved quarter & $\approx$3.6\,ms \\
 \bottomrule
 \end{tabular}
 
 \medskip
-\parbox{0.8\textwidth}{\footnotesize Sparse LU via SuperLU; Jacobian: 900 non-zeros, density 1.12\%. Times from \texttt{figures/run\_experiments.py} on the April 2026 artefacts.}
+\parbox{0.8\textwidth}{\footnotesize Sparse LU via SuperLU; Jacobian: 900 non-zeros, density 1.12\%. Times read from the \texttt{timing} block of the committed \texttt{figures/results.json}, produced by \texttt{figures/run\_experiments.py} on the April 2026 artefacts. These are wall-clock times on one laptop and will differ on other hardware; they are reported as an order of magnitude, not a benchmark result.}
 \end{table}
 
 \subsection{Add factors}
 
-\texttt{init\_trac} implements FRB/US's standard add-factoring (``tracking'') mechanism: for each quarter in the simulation window it evaluates every equation at the baseline data and stores the negated residual in the equation's \texttt{\_trac} variable, so that the baseline is an exact solution of the adjusted model. Shocks are then imposed on top of the add-factored baseline (e.g.\ via \texttt{\_aerr} terms), and simulated paths are read as deviations from base. Section~\ref{sec:validation} shows this reproduction is exact to machine precision.
+\texttt{init\_trac} implements FRB/US's standard add-factoring (``tracking'') mechanism: for each quarter in the simulation window it evaluates every equation at the baseline data and stores the negated residual in the equation's \texttt{\_trac} variable, so that the baseline is an exact solution of the adjusted model. Shocks are then imposed on top of the add-factored baseline (e.g.\ via \texttt{\_aerr} terms), and simulated paths are read as deviations from base. Note what this construction implies: because the add factor is defined as minus the residual at the input data, the tracked baseline reproduces \emph{whatever it was tracked to} as an algebraic identity, for any input. The residual left over when the baseline is re-solved is therefore floating-point noise, not a measurement of accuracy, and Section~\ref{subsec:tracking} states that at the point where the number is reported.
 
 \subsection{Differences from pyfrbus}
 

@@ -32,10 +32,16 @@ def _topics_module():
     return module
 
 
-TOPIC_PAGES = _topics_module().TOPICS
-TOPIC_TITLE = {topic["slug"]: topic["title"] for topic in TOPIC_PAGES}
+_TOPICS = _topics_module()
+TOPIC_PAGES = _TOPICS.TOPICS
+# Keyed by series rather than by slug, because the same slug now exists in two
+# countries: /economy/topics/growth and /economy/us/topics/growth are different
+# pages reading different series. Series names carry their country prefix, so
+# the mapping stays unambiguous and each hub links into its own scope.
 SERIES_TOPIC = {
-    name: topic["slug"] for topic in TOPIC_PAGES for name in topic["series"]
+    name: (_TOPICS.topic_url(topic), topic["title"])
+    for topic in TOPIC_PAGES
+    for name in topic["series"]
 }
 
 # Reading order on the hub index: the ONS series grouped the way the topics
@@ -54,18 +60,20 @@ ONS_SERIES = (
 )
 MARKET_SERIES = ("uk_bank_rate", "uk_gilt_5y", "uk_gilt_10y", "uk_gilt_20y")
 
-PUBLIC_LABELS = {
-    "ABMI": "Real gross domestic product",
-    "D7G7": "CPI inflation",
-    "MGSX": "Unemployment rate",
-    "DKO8": "Core CPI inflation",
-    "KAB9": "Average weekly earnings",
-    "AP2Y": "UK vacancies",
-    "ECY2": "Monthly gross value added index",
-    "J5II": "Public-sector net borrowing",
-    "HF6X": "Public-sector net debt",
-    "NPEL": "Real business investment",
-}
+# The same two groups for the US hub, in the same reading order: the series
+# the topic pages read, then the two rate series under their own subhead.
+FRED_SERIES = (
+    "us_real_gdp",
+    "us_cpi",
+    "us_unemployment_rate",
+    "us_payroll_employment",
+)
+US_MARKET_SERIES = ("us_federal_funds_rate", "us_treasury_10y")
+
+# Catalogue titles are not reader-facing labels. One table, shared with the
+# topic generator, so a series is called the same thing on the hub that indexes
+# it and on the topic page that reads it.
+PUBLIC_LABELS = _TOPICS.PUBLIC_LABELS
 
 
 def load(name: str) -> dict:
@@ -88,10 +96,6 @@ def latest(series: dict) -> dict:
 
 def public_label(series: dict) -> str:
     return PUBLIC_LABELS.get(series["cdid"], series["title"])
-
-
-def previous(series: dict, periods: int = 1) -> dict:
-    return series["observations"][-1 - periods]
 
 
 def gdp_growth(series: dict) -> list[dict]:
@@ -213,42 +217,6 @@ def line_chart(
       </figure>"""
 
 
-def card(
-    label: str,
-    value: str,
-    period: str,
-    change: str,
-    source: str,
-    vintage: str,
-    url: str,
-    model_line: str | None = None,
-    model_source: tuple[str, str, str] | None = None,
-) -> str:
-    """One stat card; optionally paired with a model line under the outturn."""
-    model_html = (
-        f"\n          <p class=\"economy-stat-change\">{model_line}</p>"
-        if model_line
-        else ""
-    )
-    model_row = ""
-    if model_source:
-        m_label, m_url, m_vintage = model_source
-        model_row = (
-            f"\n            <div><dt>Model</dt>"
-            f'<dd><a href="{m_url}">{m_label}</a> · {m_vintage}</dd></div>'
-        )
-    return f"""        <article class="economy-stat">
-          <p class="economy-stat-label mono">{label}</p>
-          <p class="economy-stat-value">{value}</p>
-          <p class="economy-stat-change">{change}</p>{model_html}
-          <dl>
-            <div><dt>Observation</dt><dd>{period}</dd></div>
-            <div><dt>Vintage</dt><dd>{vintage}</dd></div>
-            <div><dt>Source</dt><dd><a href="{url}">{source}</a></dd></div>{model_row}
-          </dl>
-        </article>"""
-
-
 def uk_figures() -> str:
     gdp = load("uk_gdp_cvm")
     cpi = load("uk_cpi_yoy")
@@ -278,105 +246,6 @@ def uk_figures() -> str:
                 "%",
                 f"ONS · {unemployment['cdid']}",
                 unemployment["url"],
-            ),
-        )
-    )
-
-
-def us_cards() -> str:
-    gdp = load("us_real_gdp")
-    cpi = load("us_cpi")
-    unemployment = load("us_unemployment_rate")
-    payrolls = load("us_payroll_employment")
-    fed_funds = load("us_federal_funds_rate")
-    treasury = load("us_treasury_10y")
-
-    growth = gdp_growth(gdp)
-    inflation = yoy_growth(cpi, 12)
-    payroll_growth = yoy_growth(payrolls, 12)
-    g_now, g_prior = growth[-1], growth[-2]
-    p_now, p_prior = inflation[-1], inflation[-2]
-    u_now, u_prior = latest(unemployment), previous(unemployment)
-    jobs_now = payroll_growth[-1]
-
-    baseline = longbase_baseline()
-    g_base = baseline_next_open(baseline, g_now["period"])
-    p_base = baseline_next_open(baseline, p_now["period"])
-    u_base = baseline_next_open(baseline, u_now["period"])
-
-    def baseline_line(row: dict, column: str) -> str:
-        return (
-            f"LONGBASE baseline: {fmt(row[column])}%"
-            f" <span class=\"mono\">{row['quarter']}</span>"
-        )
-
-    longbase_source = (
-        "FRB/US LONGBASE (April 2026)",
-        "/frb-us",
-        "conditioning baseline, no bands",
-    )
-
-    return "\n".join(
-        (
-            card(
-                "REAL GDP · YEAR ON YEAR",
-                f"{g_now['value']:.1f}%",
-                g_now["period"],
-                f"{g_now['value'] - g_prior['value']:+.1f}pp from prior quarter",
-                "BEA via FRED · GDPC1",
-                gdp["vintage"],
-                gdp["url"],
-                baseline_line(g_base, "gdp_yoy_pct"),
-                longbase_source,
-            ),
-            card(
-                "CPI INFLATION",
-                f"{p_now['value']:.1f}%",
-                p_now["period"],
-                f"{p_now['value'] - p_prior['value']:+.1f}pp from prior month",
-                "BLS via FRED · CPIAUCSL",
-                cpi["vintage"],
-                cpi["url"],
-                baseline_line(p_base, "cpi_yoy_pct"),
-                longbase_source,
-            ),
-            card(
-                "UNEMPLOYMENT RATE",
-                f"{u_now['value']:.1f}%",
-                u_now["period"],
-                f"{u_now['value'] - u_prior['value']:+.1f}pp from prior month",
-                "BLS via FRED · UNRATE",
-                unemployment["vintage"],
-                unemployment["url"],
-                baseline_line(u_base, "unemployment_pct"),
-                longbase_source,
-            ),
-            card(
-                "PAYROLL EMPLOYMENT",
-                f"{jobs_now['value']:+.1f}%",
-                jobs_now["period"],
-                "year-on-year employment growth",
-                "BLS via FRED · PAYEMS",
-                payrolls["vintage"],
-                payrolls["url"],
-            ),
-            card(
-                "EFFECTIVE FED FUNDS RATE",
-                f"{latest(fed_funds)['value']:.2f}%",
-                latest(fed_funds)["period"],
-                f"{latest(fed_funds)['value'] - previous(fed_funds, 5)['value']:+.2f}pp over five months",
-                "Federal Reserve via FRED · FEDFUNDS",
-                fed_funds["vintage"],
-                fed_funds["url"],
-            ),
-            card(
-                "10-YEAR TREASURY YIELD",
-                f"{latest(treasury)['value']:.2f}%",
-                latest(treasury)["period"],
-                f"{latest(treasury)['value'] - previous(treasury, 5)['value']:+.2f}pp over five observations",
-                "Federal Reserve via FRED · DGS10",
-                treasury["vintage"],
-                treasury["url"],
             ),
         )
     )
@@ -416,84 +285,58 @@ def us_figures() -> str:
     )
 
 
+def us_trends_note() -> str:
+    """The long view, and the two respects in which it is shorter than the UK's.
 
-def us_indicator_rows() -> str:
-    gdp = load("us_real_gdp")
-    cpi = load("us_cpi")
-    unemployment = load("us_unemployment_rate")
-    payrolls = load("us_payroll_employment")
-    specs = (
-        ("Activity", gdp, f"{gdp_growth(gdp)[-1]['value']:.1f}%", "year on year"),
-        ("Prices", cpi, f"{yoy_growth(cpi, 12)[-1]['value']:.1f}%", "year on year"),
-        (
-            "Labor",
-            unemployment,
-            f"{latest(unemployment)['value']:.1f}%",
-            f"{latest(unemployment)['value'] - previous(unemployment)['value']:+.1f}pp m/m",
-        ),
-        (
-            "Labor",
-            payrolls,
-            f"{latest(payrolls)['value'] / 1000:,.1f}m",
-            f"{latest(payrolls)['value'] - previous(payrolls)['value']:+,.0f}k m/m",
-        ),
+    The UK hub draws three quarterly series over 20 quarters. Two of the three
+    US series are monthly, so the identical 20-point window is 20 months, and
+    every US series in this store begins in 2020 where the ONS series behind
+    the UK charts run back decades. Both facts are derived from the manifest
+    and the observations rather than asserted, so the sentence cannot outlive
+    the data it describes.
+    """
+    index = _TOPICS.manifest()
+    gdp = gdp_growth(load("us_real_gdp"))[-20:]
+    cpi = yoy_growth(load("us_cpi"), 12)[-20:]
+    unemployment = load("us_unemployment_rate")["observations"][-20:]
+    us_start = min(
+        index[name]["coverage"][0] for name in FRED_SERIES + US_MARKET_SERIES
     )
-    rows = []
-    for area, series, value, change in specs:
-        now = latest(series)
-        rows.append(
-            "          <tr>"
-            f"<td>{area}</td>"
-            f'<th scope="row">{public_label(series)}</th>'
-            f"<td>{value}</td>"
-            f"<td>{change}</td>"
-            f"<td>{now['period']}</td>"
-            f"<td>{series['vintage']}</td>"
-            f'<td><a href="{series["url"]}">FRED · {series["cdid"]}</a></td>'
-            "</tr>"
+    uk_start = min(index[name]["coverage"][0] for name in ONS_SERIES)
+    return f"""    <p class="economy-method">
+      The topic pages carry the current reading and, where one exists, the
+      conditioning baseline beside it; these three charts are the one place the
+      whole path is drawn. Each is generated from the same committed
+      point-in-time observations, and the source link opens the corresponding
+      official series. Two of the three are shorter than their UK counterparts:
+      GDPC1 is quarterly, so twenty points span {gdp[0]['period']}–{gdp[-1]['period']}, but CPIAUCSL
+      and UNRATE are monthly, so the same twenty-point window covers only
+      {cpi[0]['period']}–{cpi[-1]['period']} and {unemployment[0]['period']}–{unemployment[-1]['period']}. And no US series in this store
+      starts before {us_start}, where the ONS series behind the UK charts reach
+      back to {uk_start}: the long view here is as long as the store, not as long
+      as the published record.
+    </p>"""
+
+
+def us_release_dates_absent(names: tuple[str, ...]) -> None:
+    """/economy/us says FRED announces no release dates. Check, do not assume.
+
+    The US hub carries no ``Released`` column and no release calendar, and
+    tells the reader why. Both absences are claims about the data, so they are
+    re-derived here: if a US snapshot ever arrives with either field populated,
+    the build fails instead of the page quietly under-reporting what is known.
+    """
+    announced = sorted(
+        name
+        for name in names
+        if load(name).get("release_updated") or load(name).get("next_release")
+    )
+    if announced:
+        raise RuntimeError(
+            f"{', '.join(announced)} now carries a release date, but "
+            "/economy/us tells readers FRED supplies none — give the US hub "
+            "its Released column and its release calendar back"
         )
-    return "\n".join(rows)
-
-
-def us_market_rows() -> str:
-    rows = []
-    for name in ("us_federal_funds_rate", "us_treasury_10y"):
-        series = load(name)
-        now, five = latest(series), previous(series, 5)
-        rows.append(
-            "          <tr>"
-            f'<th scope="row">{series["title"]}</th>'
-            f"<td>{now['value']:.3f}%</td>"
-            f"<td>{now['value'] - five['value']:+.3f}pp</td>"
-            f"<td>{now['period']}</td>"
-            f"<td>{series['vintage']}</td>"
-            f'<td><a href="{series["url"]}">FRED · {series["cdid"]}</a></td>'
-            "</tr>"
-        )
-    return "\n".join(rows)
-
-
-def us_release_rows() -> str:
-    rows = []
-    for name in (
-        "us_real_gdp",
-        "us_cpi",
-        "us_unemployment_rate",
-        "us_payroll_employment",
-        "us_federal_funds_rate",
-        "us_treasury_10y",
-    ):
-        series = load(name)
-        now = latest(series)
-        rows.append(
-            "          <tr>"
-            f'<th scope="row">{series["title"]}</th>'
-            f"<td>{now['period']}</td>"
-            f"<td>{series['vintage']}</td>"
-            f'<td><a href="{series["url"]}">FRED · {series["cdid"]}</a></td>'
-            "</tr>"
-        )
-    return "\n".join(rows)
 
 
 def topic_link(name: str) -> str:
@@ -503,34 +346,46 @@ def topic_link(name: str) -> str:
     stops carrying a series, this raises rather than printing a link into a
     page where the number is no longer shown.
     """
-    slug = SERIES_TOPIC.get(name)
-    if slug is None:
+    entry = SERIES_TOPIC.get(name)
+    if entry is None:
         raise RuntimeError(
-            f"{name} is indexed on /economy but no topic page in "
+            f"{name} is indexed on an economy hub but no topic page in "
             f"economy/topics.py reads it — give it a topic home or drop it "
             f"from the hub index"
         )
-    return f'<a href="/economy/topics/{slug}">{TOPIC_TITLE[slug]}</a>'
+    url, title = entry
+    return f'<a href="{url}">{title}</a>'
 
 
-def series_index_rows(names: tuple[str, ...]) -> str:
+def series_index_rows(names: tuple[str, ...], released: bool = True) -> str:
     """The hub index: what is tracked, which topic reads it, where it came from.
 
     Deliberately carries no readings. The values, their period comparisons and
     the model view of each one live on the topic pages; repeating them here is
     what turned /economy and /economy/topics into two dashboards over one set
     of numbers.
+
+    ``released`` drops the publisher's release date, which the US hub does: the
+    ONS stamps every series with one, FRED stamps none of them through this
+    site's fetcher, and a column of six identical "not supplied" cells says
+    less than one sentence of prose. ``us_release_dates_absent`` is what keeps
+    that sentence true.
     """
     rows = []
     for name in names:
         series = load(name)
         now = latest(series)
+        release = (
+            f"<td>{(series.get('release_updated') or 'not supplied').split('T')[0]}</td>"
+            if released
+            else ""
+        )
         rows.append(
             "          <tr>"
             f'<th scope="row">{public_label(series)}</th>'
             f"<td>{topic_link(name)}</td>"
             f"<td>{now['period']}</td>"
-            f"<td>{(series.get('release_updated') or 'not supplied').split('T')[0]}</td>"
+            f"{release}"
             f"<td>{series['vintage']}</td>"
             f'<td><a href="{series["url"]}">{series["source"]} · {series["cdid"]}</a></td>'
             "</tr>"
@@ -728,12 +583,24 @@ def render_uk() -> str:
 
 
 def render_us() -> str:
+    """The US hub, the same shape as the UK one: directory, long view, index.
+
+    No stat cards and no indicator table: every reading they carried is on the
+    topic page that owns the series, and the hub's job is the provenance
+    behind them.
+    """
+    us_release_dates_absent(FRED_SERIES + US_MARKET_SERIES)
     html = US_PAGE.read_text()
-    html = replace(html, "us-economy-cards", us_cards())
+    html = replace(html, "us-economy-trends-note", us_trends_note())
     html = replace(html, "us-economy-trends-figures", us_figures())
-    html = replace(html, "us-economy-indicators", us_indicator_rows())
-    html = replace(html, "us-economy-markets", us_market_rows())
-    html = replace(html, "us-economy-releases", us_release_rows())
+    html = replace(
+        html, "us-economy-series-index", series_index_rows(FRED_SERIES, released=False)
+    )
+    html = replace(
+        html,
+        "us-economy-market-index",
+        series_index_rows(US_MARKET_SERIES, released=False),
+    )
     return html
 
 

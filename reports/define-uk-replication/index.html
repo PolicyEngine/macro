@@ -124,7 +124,7 @@
         <tbody>
           <tr>
             <th scope="row">Manual Table&nbsp;4, macro block (growth, unemployment, population 16+, labour force), S1 baseline</th>
-            <td><strong>PASS</strong></td>
+            <td><strong>PASS</strong> — but the 2025 growth miss is &minus;0.30pp against a &plusmn;0.31pp gate: passing by 0.01pp is not the same as matching</td>
             <td>2026-08-04</td>
             <td><code>tests/test_replication_baseline.py</code></td>
           </tr>
@@ -160,7 +160,7 @@
           </tr>
           <tr>
             <th scope="row">Green public investment cumulative multiplier</th>
-            <td><strong>COMPUTED</strong> — <strong>1.78</strong>, ours, not upstream's</td>
+            <td><strong>COMPUTED</strong> — <strong>1.78</strong>, ours, not upstream's, and not comparable to any published multiplier</td>
             <td>2026-08-05</td>
             <td><code>tests/test_validation.py</code></td>
           </tr>
@@ -185,11 +185,24 @@
           Tolerances: population and labour force &plusmn;0.01m; growth
           &plusmn;0.31pp; unemployment &plusmn;0.2pp. Against Table&nbsp;4's
           macro block at 2025/2030/2040 on the S1 baseline, population and
-          labour force are exact to 0.01m; growth is exact at 2030 and 2040
-          and &minus;0.30pp at 2025; unemployment is within 0.2pp; and the
-          2025&ndash;40 mean and standard deviation of growth and unemployment
-          match the table. The run is calendar-anchored on the population path
-          (1987Q1&ndash;2040Q4, 2025&nbsp;=&nbsp;t153).
+          labour force are exact to 0.01m; growth matches to 0.06pp at 2030 and
+          2040 and misses by &minus;0.30pp at 2025; unemployment is within
+          0.2pp; and the 2025&ndash;40 mean and standard deviation of growth
+          and unemployment match the table. The run is calendar-anchored on the
+          population path (1987Q1&ndash;2040Q4, 2025&nbsp;=&nbsp;t153).
+        </p>
+        <p>
+          <strong>The growth gate is not independent of the deviation it
+          admits.</strong> &plusmn;0.31pp was set after the run, and the only
+          year that uses any of it misses by &minus;0.30pp &mdash; the gate
+          clears by 0.01pp. It is doing no work as a test of agreement in 2025;
+          what it does is stop that year drifting further, and the 2030/2040
+          matches to 0.06pp are the part of this gate that is genuinely
+          informative. The recorded reason for the 2025 gap is that Table&nbsp;4
+          never states its annualisation convention
+          (<code>validation/reference_outputs.json</code>), so it is a
+          convention mismatch we could not resolve, not a demonstrated
+          agreement.
         </p>
       </details>
 
@@ -198,8 +211,12 @@
         <p>
           The pinned code runs below the published Table&nbsp;4 emissions, and
           the gap widens with the horizon: <strong>393 vs 407</strong>
-          MtCO2e/yr in 2025 (&minus;3.4%), <strong>343 vs 382</strong> in 2030
-          (&minus;10%), <strong>249 vs 324</strong> by 2040 (&minus;23%).
+          MtCO2e/yr in 2025 (&minus;3.5%), <strong>343 vs 382</strong> in 2030
+          (&minus;10.2%), <strong>249 vs 324</strong> by 2040 (&minus;23.3%).
+          The percentages come from the pinned run/table ratios themselves
+          (0.965, 0.898, 0.767 in
+          <code>validation/reference_outputs.json</code>), not from the rounded
+          levels printed here.
         </p>
         <p>
           Two checks rule out an extraction error on our side: the components
@@ -231,6 +248,16 @@
           0.7&ndash;1.3%. The current-policies baseline emits &ldquo;just
           under 350 MtCO2e&rdquo; in 2030 — the cached run gives
           <strong>342.8</strong>, band 330&ndash;352. Both anchor.
+        </p>
+        <p>
+          <strong>Read those two as regression pins, not as agreement
+          tests.</strong> Both bands were chosen by us to fit a verbal
+          quantity, not published as tolerances, and neither can discriminate
+          much: &plusmn;30% around &ldquo;around +1%&rdquo;, and an emissions
+          band whose upper edge (352) is above the 350 the phrase &ldquo;just
+          under&rdquo; is supposed to bound, so a run at 351 would pass a gate
+          named for a claim it violates. What they establish is that the cached
+          run has not moved since the anchors were recorded.
         </p>
         <p>
           Nothing finer exists. An exhaustive search, catalogued in
@@ -267,17 +294,41 @@
       </details>
 
       <details class="more">
-        <summary>Multiplier: our arithmetic, and why upstream's own table is unusable</summary>
+        <summary>Multiplier: our arithmetic, and why it is not comparable to a published one</summary>
         <p>
           The model's cumulative green-public-investment multiplier is
           <strong>1.78</strong> by <em>our own</em> computation: cumulative
           ΔGDP of 209.9 over cumulative ΔSPEND_GVT of 118.2, nominal, over the
           full simulation (<code>define_uk.validation.gpi_multiplier</code>,
-          pinned in the test suite). IMF estimates of green-spending
-          multipliers run 1.1&ndash;1.5; the OBR's
-          capital-spending impact multiplier is &asymp;1.0. Ours sits above
-          but near the IMF range, as the demand-led closure predicts, and is
-          labelled accordingly wherever a delta is served.
+          pinned in the test suite).
+        </p>
+        <p>
+          It is <em>not</em> like-for-like against the published green-spending
+          multipliers it used to be set beside here, and three properties of
+          our definition all push it the same way. Ours is a <em>cumulative
+          ratio to 2040</em>; the published figures are short-horizon
+          multipliers. Its denominator <code>SPEND_GVT</code> is
+          <em>endogenous</em> — government investment is 12.8% of it, and
+          social benefits fall as the scenario cuts unemployment, so the
+          denominator shrinks and biases the ratio up. And the closure is
+          demand-led with Kaldor&ndash;Verdoorn productivity and real GDP not
+          held to the supply ceiling, so a ratio above 1 over fifteen years is
+          what the model implies rather than a finding about the world. The
+          clean comparison — cumulative ΔGDP over cumulative ΔGCF_GVTG, the
+          actual impulse — has not been computed; until it is, 1.78 is an
+          upper-leaning estimate. These caveats travel with the number
+          wherever a delta is served
+          (<code>GPI_MULTIPLIER_CAVEATS</code>, held by a test).
+        </p>
+        <p>
+          One comparator this report previously quoted has been withdrawn: an
+          IMF green-spending range of 1.1&ndash;1.5, attributed to a source
+          that could not be located in either repository. The only IMF
+          reference either repository actually holds is Batini et&nbsp;al.
+          (2014), a different paper with a different quantity — first-year
+          multipliers of 0&ndash;1 for advanced economies. No published
+          multiplier is quoted alongside 1.78 here, because none of them
+          measures the same object.
         </p>
         <p>
           The upstream repository's own
@@ -312,13 +363,24 @@
         notebook rendered end to end through
         <code>define_uk.runner.run</code>, producing 151 output files. That
         demonstrated only that the pinned code executes, not that its outputs
-        mean anything. The adapter's <code>VALIDATION.md</code> opens with the
-        gate: nothing built on the repository may present model output as
-        meaningful until the file records passing replications against the
-        published outputs — the same bar applied to
+        mean anything. The adapter's <code>VALIDATION.md</code> holds the gate:
+        nothing built on the repository may present model output as meaningful
+        except by naming the target it rests on — the same bar applied to
         <a href="/svar">boe-svar</a> and <a href="/us-hank">us-hank</a>.
         <a href="#gates">Section 02</a> records what that gate has since
         established.
+      </p>
+      <p>
+        That file's own status line was wrong for a stretch, and the correction
+        belongs in this record because this report cites it as the record. It
+        read <em>&ldquo;NOT VALIDATED. No published DEFINE-UK result has been
+        reproduced&rdquo;</em> for some time after target 1a passed, which put
+        it in contradiction with every page that cited it. It now reads
+        <strong>PARTIALLY VALIDATED</strong> and breaks the claim down target
+        by target: 1a pass, 1b divergence pinned, targets 2 and 3 closed at the
+        achievable ceiling rather than passed, reimplementation milestone 1
+        pass and milestone 2 outstanding. Nothing there licenses presenting
+        scenario output as a validated result.
       </p>
       <details class="more">
         <summary>The 2026-08-01 run record</summary>
@@ -381,8 +443,12 @@
         and balance-sheet matrices and the full §5 parameter and initial-value
         tables (Tables 5&ndash;6) are transcribed, and every Table 1/2 row and
         column identity holds on the §5 initial values within the manual's own
-        4-significant-figure printing precision — <strong>27 identity
-        tests</strong> in <code>tests/test_accounting.py</code>.
+        4-significant-figure printing precision. <code>tests/test_accounting.py</code>
+        collects <strong>62 tests</strong>, of which <strong>44</strong> are
+        the Table 1/2 row and column identities themselves (20 transactions
+        rows, 6 transactions columns, 7 balance-sheet rows, 11 balance-sheet
+        columns); the remainder are the residual-instrument and net-worth
+        definitions and the two that pin the one manual inconsistency below.
       </p>
       <p>
         <strong>Milestone 2: IN PROGRESS, not passed</strong> (2026-08-11).
@@ -394,9 +460,13 @@
         than papered over or absorbed into a tolerance, with the wider set
         written up in the reimplementation notes. An audit of those notes
         also re-characterised four findings that were reading as the manual
-        contradicting itself: Table 5 describes the parameters concerned as
-        historical means, never claimed to reproduce the manual's own initial
-        period, so those are first-period jumps rather than defects.
+        contradicting itself — Eqs.&nbsp;(51), (59), (94) and (111). Table 5
+        describes the parameters concerned as historical means or means of
+        past implied values, and so never claimed to reproduce the manual's
+        own initial period; those are first-period jumps a run started from
+        Table&nbsp;6 will take in its first quarter, not defects. The same
+        audit withdrew one claim outright, on Eq.&nbsp;(51), where the
+        corroborating inference had ignored a lag.
       </p>
       <details class="more">
         <summary>Three of the pinned manual defects, worked through</summary>
@@ -408,12 +478,19 @@
           exactly in <code>tests/test_accounting.py</code>.
         </p>
         <p>
-          <strong>Eq.&nbsp;(27)</strong>,
-          <code>GCF_R&nbsp;=&nbsp;GCF/P_P</code>, fails at the manual's own
-          initial values: it gives 111.88 against a tabulated 112.30 — 0.37%,
-          roughly ten times the rounding noise. The manual also disagrees with
-          itself here, since Eq.&nbsp;(25) only reproduces the tabulated
-          <code>GDP_R</code> using 112.30.
+          <strong>Table&nbsp;6's capital block is deflated at the wrong
+          price.</strong> Eq.&nbsp;(27), <code>GCF_R&nbsp;=&nbsp;GCF/P_P</code>,
+          gives 111.88 against a tabulated 112.30 — 0.37%, roughly ten times
+          the rounding noise — and Eq.&nbsp;(25) only reproduces the tabulated
+          <code>GDP_R</code> using 112.30. This is <em>one</em> finding, not
+          five: GCF, GCF_NFC, GCF_HH, GCF_GVT, K_P and K_NFC all show
+          nominal/real ratios of 1.0309&ndash;1.0312 where the equations
+          prescribe P_P&nbsp;=&nbsp;1.035, and the same 0.4% reappears in
+          §3.3.2's Eqs.&nbsp;(104), (105), (132) and (133). One systematic
+          property of Table&nbsp;6's capital rows — most likely a
+          national-accounts investment deflator where the equations want the
+          production deflator — counted once. Pinned in the tests rather than
+          absorbed into a tolerance.
         </p>
         <p>
           <strong>Eq.&nbsp;(31)</strong> uses an intercept α₀λ that

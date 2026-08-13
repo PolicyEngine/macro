@@ -23,7 +23,7 @@ $g_{n,t}$, $\bar g_n$ & population growth rate; stationary value & derived & fro
 $g_y$ & labour-augmenting productivity growth & calibrated & OBR potential growth \\
 $c_{j,s,t}$, $n_{j,s,t}$, $b_{j,s,t}$ & consumption, labour, assets & endogenous & household problem \\
 $\sigma$ & coefficient of relative risk aversion & calibrated & 1.5 \\
-$\beta$ & discount factor & matched & ONS saving ratio \\
+$\beta$ & discount factor & fixed input, not estimated & set consistent with the ONS saving ratio \\
 $\chi^n_s$, $\chi^b_j$ & labour-disutility scale; bequest intensity & calibrated & OG-Core profiles \\
 $v(n)$; $b$, $\upsilon$, $\tilde l$ & elliptical disutility; its parameters & fitted & CFE-matching (Section~\ref{subsubsec:ellipse}) \\
 $\theta$ & Frisch elasticity of labour supply & calibrated & 0.35--0.4 \\
@@ -100,5 +100,5 @@ pe-macro score --country uk --model og --reform \textbackslash\\
 \end{quote}
 Two solves are required (baseline and reform); within one process the baseline is cached, so a batch of reforms pays for the baseline once.
 \item \textbf{Determinism and outputs.} Solves are deterministic given versions and data vintage: the pipeline involves no simulation randomness, so re-runs reproduce results to solver tolerance ($10^{-9}$ in the steady-state outer loop). Raw solver output is pickled under \texttt{OUTPUT/} in the working directory (\texttt{SS\_vars.pkl}; \texttt{TPI\_vars.pkl} when a transition path is run via the \texttt{oguk} API), and the CLI's JSON \texttt{ScoreResult} carries the levels, \pounds bn changes, percent changes, and the status caveats of Section~\ref{sec:limitations}.
-\item \textbf{Figures.} The illustrative figures in this paper regenerate with \texttt{python figures/\allowbreak make\_\allowbreak figures.py} from the paper directory; they load only the UN demographic CSVs shipped with \texttt{oguk}, the OG-Core default \texttt{Specifications}, and published parameter values --- no equilibrium solve is required.
+\item \textbf{Figures.} The illustrative figures in this paper regenerate with \texttt{python figures/\allowbreak make\_\allowbreak figures.py} from the paper directory; they load only the UN demographic CSVs shipped with \texttt{oguk}, the OG-Core default \texttt{Specifications}, and published parameter values --- no equilibrium solve is required, and \emph{nothing in them is a model output}. The demographic panels take their CSVs from the installed \texttt{oguk} package if it is importable, and otherwise from \texttt{\$OG\_UK/oguk/data/demographic} (default \texttt{\textasciitilde/OG-UK}), failing with an explicit message if neither is present; the calibration-input figure needs neither.
 \end{enumerate}

@@ -42,6 +42,12 @@ PAGE_NAMES = {
     "/economy/topics/public-finances": "Public finances",
     "/economy/topics/reform": "Tax and benefit reform",
     "/economy/us": "United States",
+    "/economy/us/topics": "Topics",
+    "/economy/us/topics/growth": "Growth",
+    "/economy/us/topics/inflation": "Inflation",
+    "/economy/us/topics/jobs": "Jobs",
+    "/economy/us/topics/rates": "Rates and Treasuries",
+    "/economy/us/topics/reform": "Tax and benefit reform",
     "/models": "Models",
     "/obr": "OBR emulator",
     "/svar": "BoE SVAR",
@@ -135,6 +141,11 @@ def crumb_chain(url: str) -> list[str]:
                 # page, so the crumb on all six topic pages was a 308 hop.
                 # One retired prefix was handled here and the other was not.
                 current = "/economy"
+            if current == "/economy/us/topics":
+                # And the US mirror of it. Skipping the segment lands on
+                # /economy/us, which is a real page, so the chain reads
+                # Home / Economy / United States / <topic>.
+                current = "/economy/us"
             if current == "/":
                 break
     return chain

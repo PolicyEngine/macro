@@ -1,31 +1,87 @@
 {
   "_comment": [
-    "US HANK steady-state replication: hosted adapter's achieved values",
-    "against the published calibration targets of Auclert, Bardoczy,",
-    "Rognlie & Straub (2021), 'Using the Sequence-Space Jacobian to Solve",
-    "and Estimate Heterogeneous-Agent Models', Econometrica 89(5).",
-    "Achieved values computed 2026-07-29 by solving the hosted two-asset",
-    "model via policyengine_macro.core._hank_solved('two_asset')",
-    "(us-hank-model production grids nB=50/nA=70/nK=50).",
-    "Targets are the upstream repo's own test assertions",
-    "(us-hank-model tests/test_steady_state.py), which cite the paper."
+    "US HANK two-asset steady state. READ THE `kind` FIELD ON EVERY ROW.",
+    "",
+    "The rows in `targets` are NOT all results. Y, K, r, G, Bg and total",
+    "wealth A+B are calibration INPUTS: they are literal entries in the",
+    "calibration dictionary, held fixed through the solve, and (Z, alpha,",
+    "mu_p, tau, phi) are backed out to make the rest of the model consistent",
+    "with them. 'target 10, achieved 10' on capital is a constant equalling",
+    "itself; its zero deviation is an identity and carries no information",
+    "about whether the model replicates anything. The phrase 'hits every",
+    "calibration target' was retired for exactly this reason.",
+    "",
+    "The replication that can fail is in `published_table_b3` below: the",
+    "parameters the model solves for INTERNALLY, against the values",
+    "Auclert, Bardoczy, Rognlie & Straub (2021), 'Using the Sequence-Space",
+    "Jacobian to Solve and Estimate Heterogeneous-Agent Models',",
+    "Econometrica 89(5), print in Table B.III. Those had somewhere to miss.",
+    "",
+    "Achieved values in `targets` computed 2026-07-29 by solving the hosted",
+    "two-asset model via policyengine_macro.core._hank_solved('two_asset')",
+    "(us-hank-model production grids nB=50/nA=70/nK=50); re-solved",
+    "independently 2026-08-13 against us-hank-model directly, see",
+    "`independent_resolve` below."
   ],
   "model": "us-hank (two_asset)",
   "generated": "2026-07-29",
   "units_note": "Model units: steady-state annualized-quarterly, Y normalised to 1.",
   "targets": [
-    {"name": "Output Y", "target": 1.0, "achieved": 1.0},
-    {"name": "Capital K", "target": 10.0, "achieved": 10.0},
-    {"name": "Real rate r (quarterly)", "target": 0.0125, "achieved": 0.0125},
-    {"name": "Government spending G", "target": 0.2, "achieved": 0.2},
-    {"name": "Government debt Bg", "target": 2.8, "achieved": 2.8},
-    {"name": "Total wealth A+B", "target": 14.0, "achieved": 13.999999999999733},
-    {"name": "Liquid assets B", "target": 1.04, "achieved": 1.0400000000000948},
-    {"name": "Discount factor beta", "target": 0.976, "achieved": 0.9762739008880044}
+    {"name": "Output Y", "target": 1.0, "achieved": 1.0,
+     "kind": "calibration input — imposed, not solved; deviation is an identity"},
+    {"name": "Capital K", "target": 10.0, "achieved": 10.0,
+     "kind": "calibration input — imposed, not solved; deviation is an identity"},
+    {"name": "Real rate r (quarterly)", "target": 0.0125, "achieved": 0.0125,
+     "kind": "calibration input — imposed, not solved; deviation is an identity"},
+    {"name": "Government spending G", "target": 0.2, "achieved": 0.2,
+     "kind": "calibration input — imposed, not solved; deviation is an identity"},
+    {"name": "Government debt Bg", "target": 2.8, "achieved": 2.8,
+     "kind": "calibration input — imposed, not solved; deviation is an identity"},
+    {"name": "Total wealth A+B", "target": 14.0, "achieved": 13.999999999999733,
+     "kind": "calibration input, reached through a solver — the residual is the solver's own convergence on a target it was given, i.e. a tolerance, not an accuracy"},
+    {"name": "Liquid assets B", "target": 1.04, "achieved": 1.0400000000000948,
+     "kind": "calibration input, reached through a solver — as above"},
+    {"name": "Discount factor beta", "target": 0.976, "achieved": 0.9762739008880044,
+     "kind": "SOLVED — the one row here compared against a number the paper publishes (Table B.III)"}
   ],
+  "published_table_b3": {
+    "_comment": [
+      "The real replication. These parameters are not imposed: beta and chi1",
+      "are solved numerically (chi1 from a 6.5 initial guess), the rest",
+      "analytically, from the calibration inputs above. They are compared",
+      "against Auclert et al. (2021) Table B.III, which prints 3-4",
+      "significant figures. Agreement is to the last published digit on all",
+      "six. Recomputed 2026-08-13 by solving us_hank.model.solve_steady_state()",
+      "at production grids."
+    ],
+    "recomputed": "2026-08-13",
+    "gate": "us-hank-model tests/test_steady_state.py::test_internally_calibrated_parameters_match_published_table, |ours - published| < 5e-4",
+    "parameters": [
+      {"name": "beta (discount factor)", "published": 0.976, "ours": 0.9762739008880044, "solved": "numerically"},
+      {"name": "chi1 (portfolio adjustment cost scale)", "published": 6.416, "ours": 6.4164195942140925, "solved": "numerically, from a 6.5 initial guess"},
+      {"name": "Z (TFP)", "published": 0.468, "ours": 0.4677898145312322, "solved": "analytically"},
+      {"name": "alpha (capital share)", "published": 0.33, "ours": 0.3299492385786802, "solved": "analytically"},
+      {"name": "mu_p (price markup)", "published": 1.015, "ours": 1.015228426395939, "solved": "analytically"},
+      {"name": "tau (labour tax rate)", "published": 0.356, "ours": 0.3560606060606061, "solved": "analytically"}
+    ],
+    "unexplained_discrepancy": {
+      "name": "vphi (wage Phillips curve disutility scale)",
+      "published": 2.073,
+      "ours": 1.7134759440504952,
+      "gap_pct": -17.3,
+      "status": "UNRESOLVED and deliberately not asserted in the upstream test suite. This DAG's union_ss block yields 1.7135 where Table B.III publishes 2.073. The implementation is internally self-consistent (wnkpc = 0 at the steady state) and no asset or wealth target depends on it, but asserting a value we cannot reconcile with the paper would launder the discrepancy. It is reported here so the six agreements above are not read as a clean sweep — they are six of seven."
+    }
+  },
   "residuals": [
-    {"name": "Goods market clearing", "value": 3.2936184668486135e-08},
-    {"name": "Asset market clearing", "value": 3.126388037344441e-13}
+    {"name": "Goods market clearing", "value": 3.2936184668486135e-08,
+     "kind": "UNTARGETED — holds only by Walras' law, so this is the honest measure of steady-state accuracy"},
+    {"name": "Asset market clearing", "value": 3.126388037344441e-13,
+     "kind": "SOLVER TARGET — this is the tolerance the root-finder converged to, not an accuracy. Quoting it as the model's precision would overstate it by roughly five orders of magnitude."}
   ],
-  "beta_note": "beta is the calibrated free parameter that hits the wealth targets; the paper reports ~0.976 at full grids."
+  "independent_resolve": {
+    "date": "2026-08-13",
+    "method": "us_hank.model.solve_steady_state() run directly against a us-hank-model checkout (US_HANK_MODEL, default ~/us-hank-model) at production grids, outside the hosted adapter",
+    "note": "Reproduces every value above. The two market-clearing residuals land at 3.197e-13 (asset) and 3.294e-08 (goods) rather than the 3.126e-13 / 3.294e-08 recorded on 2026-07-29 — run-to-run variation at the solver tolerance, which is itself a reason not to read the asset-market figure as a precision claim. The 2026-07-29 values are kept as the record rather than overwritten."
+  },
+  "beta_note": "beta is one of the two numerically solved parameters, not a free knob tuned to the wealth targets: the wealth targets are inputs, and beta is what the household block requires to be consistent with them. Its independent content is that the paper reports 0.976 and this implementation returns 0.9762739."
 }

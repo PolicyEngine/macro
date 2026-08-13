@@ -1,28 +1,42 @@
 \section{Validation}
 \label{sec:validation}
 
-The implementation is validated against the Fed's own artefacts in two layers, both of which run as hard gates in the package's test suite and continuous integration. All experiments use the VAR model over 2026Q1--2030Q4 with the Fed's standard demo fiscal configuration (surplus-ratio targeting: \texttt{dfpdbt} $=0$, \texttt{dfpsrp} $=1$) and the April 2026 LONGBASE vintage.
+The implementation runs two gated checks against the Fed's own artefacts, and they are evidence of very different strength. One is a \emph{software invariant} that is true by construction and carries no economic information; the other is a genuine cross-implementation comparison. They are presented in that order, and labelled as such, because the first was previously reported as this paper's headline validation result and it cannot bear that weight. All experiments use the VAR model over 2026Q1--2030Q4 with the Fed's standard demo fiscal configuration (surplus-ratio targeting: \texttt{dfpdbt} $=0$, \texttt{dfpsrp} $=1$) and the April 2026 LONGBASE vintage.
 
-\subsection{Tracking invariant}
+\subsection{The tracking invariant is an identity, not evidence}
 \label{subsec:tracking}
 
-After \texttt{init\_trac}, solving the baseline must reproduce LONGBASE exactly for all 284 endogenous variables in all 20 quarters. This exercises the entire pipeline --- parser, lexer, coefficient substitution, compiled residuals, Jacobian and Newton solver --- against the Fed's own data. Table~\ref{tab:tracking} shows the result: the maximum absolute error across all $284\times20$ variable-quarters is $5.6\times10^{-17}$, i.e.\ machine precision.
+After \texttt{init\_trac}, solving the baseline reproduces LONGBASE for all 284 endogenous variables in all 20 quarters to a maximum absolute error of $5.6\times10^{-17}$. \textbf{This number is true by construction and must not be quoted as evidence that the implementation agrees with the Fed's data.} Three facts establish why.
+
+First, \texttt{init\_trac} sets each equation's add factor to \emph{minus that equation's residual evaluated at the input data}, so after tracking, \texttt{solve} is algebraically the identity map on whatever it was tracked to --- for any input whatsoever. Second, \texttt{solve\_periods} seeds the Newton iteration with the current row of the input data, i.e.\ with the answer: at the tracked baseline, 282 of the 284 equations have a \emph{bit-exactly zero} residual before the solver runs at all (the largest is $8.7\times10^{-19}$), so Newton converges without moving. Third, the residual that remains is floating-point non-associativity in re-evaluating $A - (A-B) - B$, not solver accuracy: 5{,}645 of the 5{,}680 compared cells are bit-identical.
+
+The decisive demonstration is itself a gated test (\texttt{tests/test\_tracking.py::\allowbreak test\_\allowbreak tracking\_\allowbreak invariant\_\allowbreak holds\_\allowbreak for\_\allowbreak arbitrary\_\allowbreak data}): multiplying every endogenous series by an independent random factor drawn from $U[0.5,1.5]$ --- which destroys every accounting identity in the database ($C+I+G+NX$ no longer sums to GDP) and every estimated behavioural relation in the model --- still passes the identical gate. Table~\ref{tab:tracking} reports the gate on inputs of decreasing economic meaning; the last row is the point.
 
 \begin{table}[htbp]
 \centering
-\caption{Tracking invariant: solved baseline vs.\ LONGBASE, 2026Q1--2030Q4}
+\caption{The tracking gate on inputs of decreasing economic meaning (2026Q1--2030Q4). An identity, not a measurement: the gate passes on data in which every accounting identity has been destroyed.}
 \label{tab:tracking}
-\begin{tabular}{lcc}
+\small
+\begin{tabular}{lccc}
 \toprule
-Metric & Value & Test gate \\
+Baseline handed to \texttt{init\_trac} & Max abs.\ error & Max rel.\ error & Passes? \\
 \midrule
-Max absolute error, all 284 endogenous $\times$ 20 quarters & $5.6\times10^{-17}$ & $<10^{-8}$ \\
-Max relative error & $5.6\times10^{-17}$ & $<10^{-10}$ \\
+LONGBASE (the published figure) & $5.6\times10^{-17}$ & $5.6\times10^{-17}$ & yes \\
+LONGBASE $+$ 5\% i.i.d.\ noise on every cell & $4.4\times10^{-11}$ & $1.8\times10^{-13}$ & yes \\
+Every endogenous series $\times\,U[0.5,1.5]$ & $6.7\times10^{-9}$ & $9.1\times10^{-12}$ & yes \\
+\midrule
+\emph{Test gate} & $<10^{-8}$ & $<10^{-10}$ & \\
 \bottomrule
 \end{tabular}
+
+\medskip
+\parbox{0.95\textwidth}{\footnotesize The test is worth keeping: it pins that \texttt{init\_trac} and \texttt{solve} remain exact inverses, which would catch a real regression in the add-factor machinery. It says nothing about whether the model's economics are right, and nothing about this implementation's numerical quality relative to any other. The substantive fidelity evidence in this paper is the cross-implementation comparison of Section~\ref{subsec:crossval}, where the add factors are frozen and the solver has genuine work to do, and the multiplier comparisons of Section~\ref{sec:multipliers}.}
 \end{table}
 
 \subsection{Cross-validation against the Fed's pyfrbus}
+\label{subsec:crossval}
+
+This is the check that carries the fidelity claim. Unlike the tracking invariant, it compares two independent codebases on a \emph{shocked} path, where the add factors are held fixed and both solvers must actually iterate to a fixed point; there is no construction that forces the two answers to agree.
 
 The identical experiment --- \texttt{init\_trac} followed by a 100-basis-point shock to \texttt{rffintay\_aerr} in 2026Q1, mirroring the Fed's \texttt{demos/example1.py} --- was run in both this implementation and the Fed's \texttt{pyfrbus}, and all 284 endogenous variables were compared over all 20 quarters. The vendor reference was produced by \texttt{pyfrbus} running in a separate Python 3.11 environment with its Newton solver at \texttt{xtol} $=10^{-8}$; a documented script regenerates it, recording the out-of-repo patches needed to run the vendor package on modern dependencies (an \texttt{splu} shim replacing \texttt{scikit-umfpack}, unpinning \texttt{sympy}, a fix to the vendor's \texttt{Max}/\texttt{Min} derivative fallback under modern \texttt{symengine}, and \texttt{pandas} $<2$).
 
@@ -79,4 +93,6 @@ This implementation vs.\ \texttt{pyfrbus} 1.1.1 & $1.4\times10^{-8}$ & $1.8\time
 \end{tabular}
 \end{table}
 
-The third row is the informative one: the Board's own two releases differ from each other by as much as this implementation differs from either, and all three residuals are concentrated in the same near-zero series (\texttt{wpsn}, \texttt{zgap05}). The agreement documented above is therefore not an artefact of the particular vendored release --- it sits at the scale of the reference implementation's own numerical noise. On the tracking invariant of Section~\ref{subsec:tracking}, \texttt{pyfrbus} 1.1.1 reproduces LONGBASE to $1.1\times10^{-8}$, against this implementation's $5.6\times10^{-17}$. The committed reference remains 1.0.0 so that the regression gate has a fixed anchor. Only the VAR path was exercised in this comparison; 1.1.1 additionally fixes a lead-substitution guard that affects the MCE path, which this implementation does not support and which was therefore not tested.
+The third row is the informative one: the Board's own two releases differ from each other by as much as this implementation differs from either, and all three residuals are concentrated in the same near-zero series (\texttt{wpsn}, \texttt{zgap05}). The agreement documented above is therefore not an artefact of the particular vendored release --- it sits at the scale of the reference implementation's own numerical noise.
+
+On the tracking invariant of Section~\ref{subsec:tracking}, \texttt{pyfrbus} 1.1.1 reproduces LONGBASE to $1.1\times10^{-8}$ where this implementation reports $5.6\times10^{-17}$. \textbf{That is not a quality ranking and an earlier version of this paper was wrong to present it as one.} Both figures are add-factor identities (Section~\ref{subsec:tracking}); the entire difference is that this implementation seeds Newton with the data row it is about to reproduce and hands it back unchanged, whereas the vendor's block-decomposed solver iterates each block to its own step tolerance. A smaller number here means less arithmetic was performed, not that the economics are closer to the Board's. The committed reference remains 1.0.0 so that the regression gate has a fixed anchor. Only the VAR path was exercised in this comparison; 1.1.1 additionally fixes a lead-substitution guard that affects the MCE path, which this implementation does not support and which was therefore not tested.
