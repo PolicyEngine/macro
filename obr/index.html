@@ -78,12 +78,37 @@
       <h2>Microsimulation supplies the direct cost; this model returns the feedback.</h2>
     </div>
     <div class="prose">
-      <div class="qa-facts">
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Connection.</strong> Static-costing bridge, both hosted: <a href="/pe">PolicyEngine</a> computes the direct Exchequer effect of a statutory reform; <code>score_reform</code> injects it through the declared <code>HHDI_ADDFACTOR</code> point and this model returns the economy-wide second round.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Worked example.</strong> 1p on the basic rate from April 2026: direct yield &pound;6.46bn in 2026; GDP &minus;0.020% on impact, deepening to &minus;0.057% by 2027Q4 (full walkthrough &rarr; <a href="/models#score">score a reform</a>).</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Validation.</strong> <a href="/obr/validation">Anchored to the March 2026 EFO</a> (0.15% GDP MAPE) &mdash; but anchored accuracy is a <strong>by-construction invariant</strong>, not a forecast claim: free-running, the same equations miss GDP by <strong>4.48%</strong>. Checked against HMRC&rsquo;s ready reckoner (&pound;6.46bn vs &pound;6.9bn).</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Results.</strong> Run it from <a href="/connect">any connected client</a>; every score carries its assumptions and data vintage.</span></div>
+      <div class="pipeline">
+        <span class="pl-node"><strong>Reform</strong></span>
+        <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+        <a class="pl-node" href="/pe"><strong>pe-microsim</strong><span class="mono">cost &middot; who pays</span></a>
+        <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+        <span class="pl-node"><strong>obr-macro</strong><span class="mono">macro feedback</span></span>
+        <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+        <span class="pl-node pl-node-out"><strong>Scored result</strong></span>
       </div>
+      <div class="qa-facts">
+        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>The combination.</strong> <code>score_reform(country="uk", reform=..., model="obr")</code> runs <a href="/pe">PolicyEngine</a>'s static costing for each year of the window, then hands this model the bill — the OBR's own workflow: static costing in, second-round effects out.</span></div>
+        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>The mechanism.</strong> Each year's costing enters as <code>HHDI_ADDFACTOR</code>: minus the annual &pound;bn, spread flat across its four quarters (&times;1000&nbsp;&divide;&nbsp;4 &rarr; &pound;m/qtr), held as an add-factor on household disposable income. The emulator then solves income &rarr; consumption &rarr; GDP quarter by quarter against the anchored March 2026 baseline.</span></div>
+        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Worked example.</strong> 1p on the basic rate from April 2026: direct yield <strong>&pound;6.46bn in 2026</strong> (HMRC's reckoner says &pound;6.9bn, a &minus;6.4% gap); GDP <strong>&minus;0.020% on impact, deepening to &minus;0.057% by 2027Q4</strong>.</span></div>
+        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Validation.</strong> <a href="/obr/validation">Anchored to the March 2026 EFO</a> (0.15% GDP MAPE) &mdash; but anchored accuracy is a <strong>by-construction invariant</strong>, not a forecast claim: free-running, the same equations miss GDP by <strong>4.48%</strong>.</span></div>
+      </div>
+      <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro score --country uk \
+  --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
+  --model obr</code></pre></div>
+      <div class="callout">
+        <strong>Same-breath caveats.</strong> The impact multiplier is
+        <strong>~1 by construction</strong> against the OBR's published 0.6,
+        so read the GDP feedback as an upper bound. Corporation tax cannot go
+        through the bridge — it is not household-borne in the microsim, and
+        the direct <code>TCPRO</code> lever never converges, so the bridge
+        refuses it rather than guessing. UK only: no US bridge exists, so a
+        US reform is scored statically.
+      </div>
+      <p class="vlinks mono">
+        <a href="/models#compose">every join in the suite →</a>
+        <a href="/#joins">this join on the landing page →</a>
+      </p>
     </div>
   </section>
 
@@ -167,7 +192,7 @@
         Worked example — 1p on the basic rate of income tax from April 2026:
         direct yield <strong>£6.46bn in 2026</strong>, <strong>£7.38bn by
         2030</strong>; GDP falls <strong>0.020% (−£0.14bn) on impact in
-        2026Q1, deepening to 0.057% (−£0.40bn) by 2027Q4</strong> on the
+        2026Q1, deepening to 0.057% (−£0.42bn) by 2027Q4</strong> on the
         March 2026 baseline. Full walkthrough → <a href="/models#score">/score</a>.
       </p>
       <div class="callout">
