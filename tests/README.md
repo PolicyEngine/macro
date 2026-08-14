@@ -24,7 +24,9 @@ destination is what must exist).
 - **Links** — every `href`/`src` that points into the repo resolves to a file
   Vercel could serve. All broken links are reported in one message.
 - **Redirects** — every `vercel.json` destination resolves, including its
-  in-page anchor.
+  in-page anchor, and no page links to a redirect *source*: an inbound link
+  from outside the site may take the 308, one page of this site linking to
+  another may not.
 - **Head metadata** — doctype, `<html lang="en">`, charset, viewport, a
   non-empty `<title>`, a `<meta name="description">`, and exactly one
   `rel="canonical"` whose URL matches where the file is actually served.

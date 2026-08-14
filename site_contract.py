@@ -96,17 +96,22 @@ def check_economy_navigation() -> None:
     for path in MODEL_INVENTORY_PAGES:
         header = _read(path).split("</header>", 1)[0]
         home_position = header.find('href="/"')
-        economy_position = header.find('href="/economy"')
-        if home_position == -1 or economy_position == -1:
-            failures.append(f"{path}: missing Home or Economy navigation")
-        elif home_position > economy_position:
+        forecasts_position = header.find('href="/forecasts"')
+        if home_position == -1 or forecasts_position == -1:
+            failures.append(f"{path}: missing Home or Forecasts navigation")
+        elif home_position > forecasts_position:
             failures.append(f"{path}: Home is not the first navigation tab")
-        if 'href="/notes"' in header:
-            failures.append(f"{path}: Notes remains a global navigation tab")
-        if 'href="/validation"' in header:
-            failures.append(f"{path}: Evidence remains a global navigation tab")
-        if 'href="/contact"' in header:
-            failures.append(f"{path}: Contact remains a global navigation tab")
+        for retired, name in (
+            ('href="/notes"', "Notes"),
+            ('href="/validation"', "Evidence"),
+            ('href="/contact"', "Contact"),
+            # Economy was merged into Forecasts. The pages under /economy are
+            # still live and still linked in prose; what must not come back is
+            # a second global tab over the same section.
+            ('href="/economy"', "Economy"),
+        ):
+            if retired in header:
+                failures.append(f"{path}: {name} remains a global navigation tab")
         if ">Forecasts</a>" not in header:
             failures.append(f"{path}: the forecasts tab is not labelled Forecasts")
 

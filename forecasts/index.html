@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Forecast track record — PolicyEngine Macro</title>
-<meta name="description" content="Every PolicyEngine Macro forecast, archived with a timestamp before its outturn exists, then scored in public against realised data and naive baselines." />
+<title>Forecasts — PolicyEngine Macro</title>
+<meta name="description" content="What this platform produces for the UK: reform scores from the PolicyEngine microsimulation, the macro models that extend them, and every forecast archived with a timestamp before its outturn exists and then scored in public." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/forecasts" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://policyengine-macro.vercel.app/forecasts" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
-<meta property="og:title" content="PolicyEngine Macro — forecast track record" />
-<meta property="og:description" content="Forecasts archived before the outturn exists, then scored in public against naive baselines — point error, bias and band coverage." />
+<meta property="og:title" content="PolicyEngine Macro — forecasts" />
+<meta property="og:description" content="Reform scores from the PolicyEngine microsimulation, the macro models that extend them, and forecasts archived before the outturn exists and scored in public." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -32,7 +32,6 @@
   <nav class="nav-links" aria-label="Primary">
     <a class="nav-mobile" href="/">Home</a>
     <a class="nav-mobile" href="/models">Models</a>
-    <a class="nav-mobile" href="/economy">Economy</a>
     <a class="nav-mobile" href="/forecasts" aria-current="page">Forecasts</a>
     <a class="nav-mobile nav-start" href="/connect">Use</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
@@ -47,19 +46,23 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">real-time forecast record</p>
+      <p class="eyebrow reveal" style="--d:0">UK · what the platform produces</p>
       <h1 class="reveal page-title" style="--d:1;">
-        Every forecast, archived before the answer exists.
+        Score a reform. Then ask what it does to the economy.
       </h1>
       <p class="lede reveal" style="--d:2">
-        Each round is committed to Git with a timestamp before the outturn is
-        published, kept immutable, and scored here against realised data —
-        whatever that shows.
+        The microsimulation is the engine: a reform goes in, and household
+        incomes, revenue and a distribution come out. The macro models are
+        what it cannot do alone — a second round, a general-equilibrium
+        overlay, a forecast. Every forecast here is archived with a timestamp
+        before the outturn is published, kept immutable, and scored against
+        realised data, whatever that shows.
       </p>
     </div>
   </section>
 
-  <nav class="economy-subnav" aria-label="Forecasts navigation">
+<!-- forecasts-section-nav:begin -->
+  <nav class="economy-subnav" aria-label="Forecasts">
     <div class="economy-subnav-row">
       <div class="economy-subnav-scope">
         <span class="economy-subnav-label mono">Forecasts</span>
@@ -67,20 +70,82 @@
         <a class="model-tabs-link" href="/forecasts/us">US</a>
       </div>
       <div class="economy-topics">
-        <a href="#status">Record</a>
-        <a href="#scored">Scored</a>
-        <a href="#open">Open</a>
-        <a href="#rounds">Rounds</a>
-        <a href="#data">Data</a>
-        <a href="#limits">Limits</a>
-        <a href="#notes">Notes</a>
+        <a class="model-tabs-link" aria-current="page" href="/forecasts">Overview</a>
+        <a class="model-tabs-link" href="/economy">Data</a>
+        <a class="model-tabs-link" href="/economy/topics/growth">Growth</a>
+        <a class="model-tabs-link" href="/economy/topics/inflation">Inflation</a>
+        <a class="model-tabs-link" href="/economy/topics/jobs">Jobs</a>
+        <a class="model-tabs-link" href="/economy/topics/rates">Rates and gilts</a>
+        <a class="model-tabs-link" href="/economy/topics/public-finances">Public finances</a>
+        <a class="model-tabs-link" href="/economy/topics/reform">Tax and benefit reform</a>
       </div>
     </div>
   </nav>
+<!-- forecasts-section-nav:end -->
 
-  <section id="status" class="band">
+  <section id="run" class="band">
     <div class="band-head">
-      <span class="kicker mono">01 — where this stands</span>
+      <span class="kicker mono">01 — what you can run</span>
+      <h2>Six outputs, and the models behind each one.</h2>
+    </div>
+<!-- forecasts-platform:begin -->
+    <div class="prose">
+      <p>
+        The engine underneath this section is
+        <a href="/pe">pe-microsim</a> — PolicyEngine's own
+        microsimulation, the only member whose question types include <span class="mono">household</span> and
+        the only one that covers both countries. It applies a reform to household microdata
+        and reports <span class="mono">taxes</span>, <span class="mono">benefits</span>, <span class="mono">net_income</span>, <span class="mono">revenue</span>, <span class="mono">distribution</span> over a
+        single policy year. The only two members that report a distribution are <a href="/pe">pe-microsim</a> and <a href="/olg">psl-og+microsim</a>, and the second is an overlay that runs the first.
+      </p>
+      <p>
+        The macro members are what it cannot do on its own. pe-microsim
+        cannot answer GDP, inflation, interest rates and macro feedback — so every macro number in this
+        section comes from a member that produces one, and the table says which,
+        in the order they run. Four of the six routes below put pe-microsim in
+        the chain; two are a macro model standing alone, which is also a fine
+        thing to publish.
+      </p>
+      <div class="table-scroll">
+        <table>
+          <caption>What this section can produce for the UK. Every command is checked against <code>cli.py</code> when this page is generated; a route that stopped running would fail the build rather than sit here.</caption>
+          <thead><tr><th scope="col">What you get</th><th scope="col">Models, in the order they run</th><th scope="col">What the chain does</th><th scope="col">Command</th></tr></thead>
+          <tbody>
+          <tr><th scope="row">One household, exactly</th><td><a href="/pe">pe-microsim</a></td><td>arithmetic over the statutory rules; no sampling, no weights</td><td><code class="mono">pe-macro household-impact --country uk --people &#x27;[{&quot;age&quot;:35,&quot;employment_income&quot;:50000}]&#x27; --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27;</code></td></tr>
+          <tr><th scope="row">The whole population, one policy year</th><td><a href="/pe">pe-microsim</a></td><td>revenue and distribution; a static costing</td><td><code class="mono">pe-macro score --country uk --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27; --model microsim</code></td></tr>
+          <tr><th scope="row">The same reform, with a macro second round</th><td><a href="/pe">pe-microsim</a> &rarr; <a href="/obr">obr-macro</a></td><td>the static costing becomes a held add-factor on household income</td><td><code class="mono">pe-macro score --country uk --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27; --model obr</code></td></tr>
+          <tr><th scope="row">The same reform, with long-run general equilibrium</th><td><a href="/olg">psl-og</a> &rarr; <a href="/pe">pe-microsim</a></td><td>steady-state earnings ratio scales the microsim&#x27;s income inputs</td><td><code class="mono">pe-macro dynamic-score --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27;</code></td></tr>
+          <tr><th scope="row">A GDP and CPI forecast, standing alone</th><td><a href="/svar">boe-svar</a></td><td>medians with 68% and 90% bands; archived and scored below</td><td><code class="mono">pe-macro forecast --horizons 8</code></td></tr>
+          <tr><th scope="row">That forecast carried into household incomes</th><td><a href="/svar">boe-svar</a> &rarr; <a href="/pe">pe-microsim</a></td><td>the model-versus-OBR CPI gap, scored as a real uprating reform</td><td><code class="mono">pe-macro svar-inflation-incidence --year 2027 --reference obr</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="callout">
+        <strong>pe-microsim does not forecast, and this section does not
+        pretend it does.</strong> Its question types are
+        <span class="mono">household</span>, <span class="mono">population</span>, <span class="mono">policy_reform</span> —
+        <span class="mono">forecast</span> is not among them, and its
+        predictive validation is recorded as
+        <span class="mono">not_applicable</span>.
+        The forecast rows are <a href="/svar">boe-svar</a>, whose uncertainty is
+        posterior 68% and 90% intervals; the record below is what those rounds have
+        been worth so far. <a href="/models#score">See how a score is put together →</a>
+      </p>
+      <p>
+        Over MCP the same six routes are <span class="mono">household_reform_impact</span>,
+        <span class="mono">population_reform_impact</span>, <span class="mono">score_reform</span>,
+        <span class="mono">dynamic_reform_impact</span>, <span class="mono">forecast_uk</span> and
+        <span class="mono">svar_inflation_incidence</span>; <span class="mono">recommend_model</span> routes a
+        question to a member, or refuses when none supports it.
+        <a href="/connect">Connect a client →</a>
+      </p>
+    </div>
+<!-- forecasts-platform:end -->
+  </section>
+
+  <section id="status" class="band band-alt">
+    <div class="band-head">
+      <span class="kicker mono">02 — where this stands</span>
       <h2>The record so far.</h2>
     </div>
     <div class="prose">
@@ -106,7 +171,7 @@
 
   <section id="scored" class="band">
     <div class="band-head">
-      <span class="kicker mono">02 — scored</span>
+      <span class="kicker mono">03 — scored</span>
       <h2>Scored so far: one round.</h2>
     </div>
     <div class="prose">
@@ -136,7 +201,7 @@
 
   <section id="open" class="band">
     <div class="band-head">
-      <span class="kicker mono">03 — open rounds</span>
+      <span class="kicker mono">04 — open rounds</span>
       <h2>On the record, waiting to be scored.</h2>
     </div>
     <div class="prose">
@@ -325,7 +390,7 @@
 
   <section id="rounds" class="band">
     <div class="band-head">
-      <span class="kicker mono">04 — the rounds</span>
+      <span class="kicker mono">05 — the rounds</span>
       <h2>What was claimed, and when.</h2>
     </div>
     <div class="prose">
@@ -391,7 +456,7 @@
 
   <section id="data" class="band band-alt">
     <div class="band-head">
-      <span class="kicker mono">05 — the data behind it</span>
+      <span class="kicker mono">06 — the vintage store</span>
       <h2>Every number, as it was published.</h2>
     </div>
 <!-- data-store:begin -->
@@ -1083,7 +1148,7 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
 
   <section id="limits" class="band">
     <div class="band-head">
-      <span class="kicker mono">06 — what this is not</span>
+      <span class="kicker mono">07 — what this is not</span>
       <h2>Limits worth stating plainly.</h2>
     </div>
     <div class="prose">
@@ -1110,7 +1175,7 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
 
   <section id="notes" class="band">
     <div class="band-head">
-      <span class="kicker mono">07 — dated notes</span>
+      <span class="kicker mono">08 — dated notes</span>
       <h2>What the releases mean, read through the models.</h2>
     </div>
     <div class="prose">

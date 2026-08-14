@@ -145,7 +145,7 @@ def note_page(series: dict, vintage: str) -> str:
   <section class="band">
     <div class="band-head"><span class="kicker mono">03 — model context</span><h2>Outturn first; interpretation separately.</h2></div>
     <div class="prose">
-      <p>The <a href="/economy">Economy page</a> places this observation beside the other current indicators. If it completes an archived forecast period, the <a href="/forecasts">forecast record</a> is scored by the separate outturn pipeline.</p>
+      <p>The <a href="/economy">UK data page</a> places this observation beside the other current indicators. If it completes an archived forecast period, the <a href="/forecasts">forecast record</a> is scored by the separate outturn pipeline.</p>
       <p>A dated research note may add model interpretation after human review. This factual page does not pretend the observation establishes a cause or policy conclusion.</p>
     </div>
   </section>

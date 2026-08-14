@@ -119,6 +119,50 @@ def test_every_internal_link_resolves(pages, site):
     )
 
 
+def test_no_page_links_to_a_redirect_source(pages, site):
+    """An internal link must name the destination, not a 308 on the way to it.
+
+    ``test_every_internal_link_resolves`` follows the redirect table, so a link
+    to a retired URL passes it — the reader still lands somewhere real, one
+    round trip later. That is fine for an inbound link from outside the site
+    and wrong for one page of this site linking to another: every such link is
+    a redirect the site is imposing on itself, and it accumulates. Merging
+    Economy into Forecasts was done without moving a single URL partly so this
+    stayed at zero; the sitemap has had the equivalent rule for longer.
+
+    Fragments are stripped first, because ``/economy/topics#growth`` and
+    ``/economy/topics`` are the same redirect source.
+    """
+    config_line: dict[str, int] = {}
+    for number, line in enumerate(
+        (site.root / "vercel.json").read_text().splitlines(), start=1
+    ):
+        match = re.search(r'"source":\s*"([^"]+)"', line)
+        if match:
+            config_line.setdefault(match.group(1), number)
+
+    offenders: list[str] = []
+    for page in pages:
+        for node, attribute, url in _link_nodes(page):
+            if not _is_internal(url):
+                continue
+            path, _ = site.split(_site_absolute(page, url))
+            for candidate in {path, site.canonicalise(path)}:
+                if candidate in site.redirects:
+                    offenders.append(
+                        f"{page.rel}:{node.line}: <{node.tag} {attribute}="
+                        f'"{url}"> is a redirect source '
+                        f"(vercel.json:{config_line.get(candidate, 0)} -> "
+                        f"{site.redirects[candidate]}) — link to the "
+                        "destination instead"
+                    )
+                    break
+    assert not offenders, (
+        f"{len(offenders)} internal link(s) point at a redirect source:\n  "
+        + "\n  ".join(offenders)
+    )
+
+
 def test_every_redirect_destination_resolves(pages, site):
     """A redirect must land somewhere real, including its fragment.
 

@@ -20,7 +20,11 @@ FOOTER_DIR = re.compile(r'<nav class="footer-dir".*?</nav>\s*', re.DOTALL)
 DESTINATIONS = (
     ("home", "/", "Home", "nav-mobile"),
     ("models", "/models", "Models", "nav-mobile"),
-    ("economy", "/economy", "Economy", "nav-mobile"),
+    # Economy was folded into Forecasts: one tab for everything the platform
+    # produces and the data it is produced from. /economy and /economy/us keep
+    # their URLs — ~200 generated release notes, the homepage and the models
+    # hub link to them in prose — but they are Forecasts pages now, and
+    # ``section`` and ``CRUMB_PARENTS`` below are what make that true.
     ("forecasts", "/forecasts", "Forecasts", "nav-mobile"),
     ("use", "/connect", "Use", "nav-mobile nav-start"),
 )
@@ -30,7 +34,10 @@ EVIDENCE_ROOTS = {"papers", "reports"}
 
 # Display names used in the pathway line and the footer directory.
 PAGE_NAMES = {
-    "/economy": "Economy",
+    # The two country data hubs. Named for the job they do inside Forecasts —
+    # the series, the long view and the provenance the record is scored on —
+    # rather than for the URL segment they still live under.
+    "/economy": "UK data",
     # Nested topic pages: without these the crumb falls back to
     # "economy/topics".title() and the raw slug, so a reader sees
     # "Economy/Topics / rates" instead of "Topics / Rates and gilts".
@@ -41,7 +48,7 @@ PAGE_NAMES = {
     "/economy/topics/rates": "Rates and gilts",
     "/economy/topics/public-finances": "Public finances",
     "/economy/topics/reform": "Tax and benefit reform",
-    "/economy/us": "United States",
+    "/economy/us": "US data",
     "/economy/us/topics": "Topics",
     "/economy/us/topics/growth": "Growth",
     "/economy/us/topics/inflation": "Inflation",
@@ -116,6 +123,13 @@ CRUMB_PARENTS = {
     # off Forecasts so no crumb links to the retired /notes page.
     "/notes/releases": "/forecasts",
     "/notes/2026-07-25-cpi-2026q2": "/forecasts",
+    # Economy was merged into Forecasts. The URLs did not move, so the reading
+    # hierarchy and the URL hierarchy disagree here on purpose: both country
+    # data hubs hang off /forecasts directly rather than off each other, which
+    # keeps every crumb four segments at most —
+    # Home / Forecasts / US data / Growth.
+    "/economy": "/forecasts",
+    "/economy/us": "/forecasts",
 }
 
 
@@ -204,9 +218,10 @@ def section(path: Path) -> str | None:
         return "models"
     if root in EVIDENCE_ROOTS:
         return "models"
-    if root == "economy":
-        return "economy"
-    if root == "forecasts":
+    # Both roots are one section now. /economy keeps its URLs but highlights
+    # the Forecasts tab, so a reader on a topic page is never told they are in
+    # a section the header no longer offers.
+    if root in ("economy", "forecasts"):
         return "forecasts"
     if root == "connect":
         return "use"
