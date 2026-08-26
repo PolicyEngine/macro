@@ -2956,9 +2956,16 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 /* Inside a scrollytelling column the 4-up strip has ~560px, not the full band
    width, and it needs ~660px: the viewport media query above cannot see that,
    so the fourth stat was being clipped (overflow-x is visible here, so it did
-   not even scroll). Two-up fits and keeps the stats legible. */
+   not even scroll).
+   The column width is set by the scrolly grid, NOT by the viewport, so this
+   has to be a CONTAINER query. A first attempt used @media (min-width:1500px)
+   to restore 4-up on big screens and reintroduced the same bug from the other
+   side: at a 1728px viewport the query matched while the column was still
+   562px, and the strip clipped again. Two-up is the floor; 4-up returns only
+   when the column itself is wide enough to hold it. */
+.scrolly-steps { container-type: inline-size; }
 .scrolly-steps .vmet-strip { grid-template-columns: repeat(2, 1fr); }
-@media (min-width: 1500px) {
+@container (min-width: 700px) {
   .scrolly-steps .vmet-strip { grid-template-columns: repeat(4, 1fr); }
 }
 
