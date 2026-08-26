@@ -53,10 +53,17 @@ JOB_TOOLS: tuple[str, ...] = (
     "pe_population_impact",
 )
 
-# The longest a get_job_result call may block. The transport ceiling is 150s;
-# this leaves room for request overhead so the poll itself never becomes the
-# thing that times out.
-MAX_WAIT_SECONDS = 120
+# How long a get_job_result call blocks.
+#
+# The hard ceiling is 150s, but staying under it is not sufficient: measured
+# end-to-end through a real Claude Code session, polls at 60-120s repeatedly
+# hit transport timeouts and one Modal `InternalFailure: Server has lost track
+# of input`, while 30s polls came back reliably. The flakiness scales with how
+# long the connection is held open, not with how close it gets to 150s -- so
+# the default is short, and a caller asking for a long block gets capped well
+# below the ceiling rather than at it.
+DEFAULT_WAIT_SECONDS = 30
+MAX_WAIT_SECONDS = 60
 
 _spawn: Callable[[str, dict], str] | None = None
 _poll: Callable[[str, int], Any] | None = None
@@ -112,13 +119,15 @@ def start(tool: str, arguments: dict | None = None) -> dict:
         "status": "running",
         "next_step": (
             f"Call get_job_result(job_id={job_id!r}). It blocks until the job "
-            f"finishes or up to wait_seconds (max {MAX_WAIT_SECONDS}); if it "
-            "returns status 'running', call it again with the same job_id."
+            f"finishes or up to wait_seconds (default {DEFAULT_WAIT_SECONDS}, "
+            f"max {MAX_WAIT_SECONDS}); if it returns status 'running', call it "
+            "again with the same job_id. Short polls are more reliable than "
+            "long ones -- prefer the default over asking for a long block."
         ),
     }
 
 
-def result(job_id: str, wait_seconds: int = 60) -> dict:
+def result(job_id: str, wait_seconds: int = DEFAULT_WAIT_SECONDS) -> dict:
     """Poll a job. Blocks up to wait_seconds, then reports back either way."""
     if not backend_available():
         raise NoBackend(_NO_BACKEND_MESSAGE.format(tools=", ".join(JOB_TOOLS)))
@@ -132,7 +141,10 @@ def result(job_id: str, wait_seconds: int = 60) -> dict:
         "waited_seconds": wait,
         "next_step": (
             "Not finished yet. Call get_job_result again with the same "
-            "job_id; a score_reform over the default five-year window "
-            "typically needs two or three polls."
+            "job_id -- polling repeatedly is expected and cheap. A "
+            "score_reform over the default five-year window typically needs "
+            "several polls. If a poll errors rather than returning, retry it: "
+            "the job keeps running regardless of what happens to the "
+            "connection watching it."
         ),
     }
