@@ -2885,6 +2885,25 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   list-style: none;
 }
 .qa summary::-webkit-details-marker { display: none; }
+
+/* Rows arrive in sequence rather than as one block, so the eye reads the
+   suite as a list of seven choices. --qa-i restarts per .qa-list, so the
+   second list does not inherit the first list's delays. The global
+   prefers-reduced-motion rule disables all of this. */
+@keyframes qa-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.qa-list.in-view .qa {
+  animation: qa-in 380ms cubic-bezier(.2, .7, .3, 1) both;
+  animation-delay: calc(var(--qa-i, 0) * 55ms);
+}
+.qa { transition: border-color 180ms ease, transform 180ms ease; }
+.qa:hover { border-color: var(--brand-strong); }
+.qa[open] { border-color: var(--brand-strong); }
+.qa summary::after { transition: transform 180ms ease; }
+.qa[open] summary::after { transform: rotate(45deg); }
+
 .qa summary::after {
   content: "+";
   flex: 0 0 auto;
