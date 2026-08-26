@@ -421,8 +421,13 @@
         because changing its forecast vintage would erase the historical
         forecast being tested. Reform effects are differences between
         structurally identical runs, so the re-anchoring leaves the
-        £6.46bn/£7.38bn static costing untouched and moves the 2027Q4
-        second-round GDP effect by 0.001pp, to <strong>&minus;0.057%</strong>.
+        £6.46bn/£7.38bn static costing untouched. The second-round GDP effect
+        is quoted as a ratio to the revenue raised (<strong>~0.35&times;</strong>
+        by the end of the window) rather than as a per-quarter percentage: the
+        earlier <strong>&minus;0.057%</strong> figure for 2027Q4 does not
+        reproduce on either the current or the previous pinned model revision,
+        and per-quarter values are in any case a function of where the solver
+        stops rather than of the model (see <a href="#caveats">convergence</a>).
       </p>
       </details>
       <p class="vlinks mono">
@@ -452,7 +457,7 @@
           </tr>
           <tr>
             <th scope="row"><strong>Government investment does not transmit</strong></th>
-            <td><code>CGIPS</code> moves business investment by exactly zero in all twelve quarters and leaves a wrong-signed GDP residue, against the OBR's published 1.0. Capital spending should not be scored on this model.</td>
+            <td><code>CGIPS</code> does not transmit, in two separate ways. Total fixed investment (<code>IF</code>) moves <strong>exactly zero</strong> at any shock size, because <code>IF</code> has no live equation in the published listing — the chain never reaches the GDP identity. Business investment (<code>IBUSX</code>) does move, but wrong-signed and grossly non-proportional: mean responses of −£6.8bn, −£8.8bn and −£11.6bn for shocks of £1.5bn, £3bn and £6bn per quarter. Quadrupling the shock changes the response by under a factor of two, so that is residue, not a multiplier, and the ratio must never be quoted as one. Against the OBR's published 1.0. Capital spending should not be scored on this model.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Corporation-tax closure converges slowly</strong></th>
@@ -461,6 +466,14 @@
           <tr>
             <th scope="row"><strong>Passthrough channels</strong></th>
             <td>Exports, imports and CPI are exogenous here, held at the OBR value. They score 0.00% error without being behavioural wins — 10 of 21 scorecard lines are passthroughs, labelled as such.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Whole blocks do not respond to policy</strong></th>
+            <td>Distinct from the baseline passthroughs above: this is about <em>shock response</em>. Across every lever tested — government consumption, the household tax bridge, corporation tax, Bank Rate and the exchange rate — the unemployment rate, employment, retail prices, exports and imports move by <strong>exactly zero</strong>, not approximately zero. There is no Okun channel, no Phillips channel and no trade channel: a 6% sterling appreciation moves exports and imports not at all. The second round is consumption — or, under the investment closure, business investment — and nothing else. Pinned per block in <code>tests/test_sign_conventions.py</code>.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Bank Rate is not usable</strong></th>
+            <td>+100bp moves GDP by about −£26m; −100bp moves it by about +£2,393m — the cut is roughly <strong>ninety times</strong> the rise. Business investment falls under <em>both</em> directions, so the sign carries no information either. There is no monetary-policy experiment this model can answer.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Approximated add-factors</strong></th>

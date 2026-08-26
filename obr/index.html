@@ -112,9 +112,11 @@
   --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
   --model obr</code></pre></div>
         <div class="callout">
-          <strong>Same-breath caveats.</strong> The impact multiplier is
-          <strong>~1 by construction</strong> against the OBR's published 0.6,
-          so read the GDP feedback as an upper bound. Corporation tax cannot go
+          <strong>Same-breath caveats.</strong> The bridge's own multiplier is
+          about <strong>0.35</strong> against the OBR's published 0.3 for income
+          tax &mdash; the ~1-by-construction problem is on the <em>spending</em>
+          lever, not this one. But no quarter of the solve converges, so read
+          the direction and the scale, not single quarters. Corporation tax cannot go
           through the bridge &mdash; it is not household-borne in the microsim, and
           the direct <code>TCPRO</code> lever converges only slowly (a 12-quarter run is ~40% of its plateau), so the bridge
           refuses it rather than guessing. UK only: no US bridge exists, so a
@@ -219,18 +221,27 @@
         <p>
           1p on the basic rate of income tax from April 2026:
           direct yield <strong>&pound;6.46bn in 2026</strong>, <strong>&pound;7.38bn by
-          2030</strong>; GDP falls <strong>0.020% (&minus;&pound;0.14bn) on impact in
-          2026Q1, deepening to 0.057% (&minus;&pound;0.42bn) by 2027Q4</strong> on the
-          March 2026 baseline. Full walkthrough &rarr; <a href="/models#score">/score</a>.
+          2030</strong>. The second round is a GDP fall that builds to roughly
+          <strong>0.35&times; the revenue raised</strong> by the end of the
+          five-year window &mdash; close to the OBR's published <strong>0.3</strong>
+          for income tax and NICs. Read the direction and the scale, not the
+          individual quarters: <a href="/obr/validation#caveats">no quarter of
+          the solve converges to tolerance</a>, and the first year flips sign
+          under a shock that is flat across it.
+          Full walkthrough &rarr; <a href="/models#score">/score</a>.
         </p>
         <div class="callout">
-          <strong>Read GDP-feedback estimates as an upper bound.</strong> Under
-          the demand closure a spending shock lands directly in the GDP
-          identity with the behavioural second round largely inactive, so the
-          impact multiplier is ~1 by construction; the OBR's
-          <a href="https://obr.uk/box/fiscal-multipliers/">published impact
-          multiplier</a> for day-to-day public services and welfare spending is
-          0.6. The
+          <strong>The household route behaves; the spending levers do not.</strong>
+          A tax reform through the bridge implies a multiplier of about
+          <strong>0.35</strong> against the OBR's
+          <a href="https://obr.uk/box/fiscal-multipliers/">published 0.3</a> for
+          income tax and NICs. The by-construction problem is elsewhere: a
+          <em>spending</em> shock (<code>CGG</code>) lands straight in the GDP
+          identity with no behavioural equation responding, giving a multiplier
+          of exactly <strong>1.0000</strong>, flat, against the OBR's 0.6 &mdash;
+          and capital spending (<code>CGIPS</code>) is worse, moving business
+          investment <strong>&minus;292% of the shock</strong>, wrong-signed
+          against the OBR's 1.0. The
           <a href="/obr/validation#caveats">validation page</a> lists the
           full set of known limits.
         </div>
@@ -245,8 +256,9 @@
         <div class="meth-inline">
         <div class="meth-sec-title">1p on the basic rate, April 2026</div>
         <div class="meth-eq"><div class="meth-eq-label">direct yield</div><div class="meth-eq-body">&pound;6.46bn (2026) &rarr; &pound;7.38bn (2030)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">GDP on impact</div><div class="meth-eq-body">&minus;0.020% (&minus;&pound;0.14bn), 2026Q1</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">deepening to</div><div class="meth-eq-body">&minus;0.057% (&minus;&pound;0.42bn), 2027Q4</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">second round</div><div class="meth-eq-body">GDP falls, building to ~0.35&times; the revenue raised</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">vs OBR</div><div class="meth-eq-body">published 0.3 for income tax &amp; NICs</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">per-quarter</div><div class="meth-eq-body">not reliable &mdash; no quarter converges to tolerance</div></div>
         <div class="meth-eq"><div class="meth-eq-label">cross-check</div><div class="meth-eq-body">HMRC ready reckoner &pound;6.9bn (&minus;6.4% gap)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">anchored fit</div><div class="meth-eq-body">0.15% GDP MAPE; free-running 4.48%</div></div>
         </div>
@@ -275,8 +287,9 @@
           <div class="meth-panel-head"><span class="meth-panel-title">Worked example</span><span class="meth-panel-badge mono">Step 3</span></div>
           <div class="meth-sec-title">1p on the basic rate, April 2026</div>
           <div class="meth-eq"><div class="meth-eq-label">direct yield</div><div class="meth-eq-body">&pound;6.46bn (2026) &rarr; &pound;7.38bn (2030)</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">GDP on impact</div><div class="meth-eq-body">&minus;0.020% (&minus;&pound;0.14bn), 2026Q1</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">deepening to</div><div class="meth-eq-body">&minus;0.057% (&minus;&pound;0.42bn), 2027Q4</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">second round</div><div class="meth-eq-body">GDP falls, building to ~0.35&times; the revenue raised</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">vs OBR</div><div class="meth-eq-body">published 0.3 for income tax &amp; NICs</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">per-quarter</div><div class="meth-eq-body">not reliable &mdash; no quarter converges to tolerance</div></div>
           <div class="meth-eq"><div class="meth-eq-label">cross-check</div><div class="meth-eq-body">HMRC ready reckoner &pound;6.9bn (&minus;6.4% gap)</div></div>
           <div class="meth-eq"><div class="meth-eq-label">anchored fit</div><div class="meth-eq-body">0.15% GDP MAPE; free-running 4.48%</div></div>
         </div>
