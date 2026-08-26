@@ -130,24 +130,45 @@ OBR_VARIABLES = [
         "description": "Real government consumption",
         "units": "£m per quarter (e.g. 1250 = £5bn/year increase)",
         "investment_closure": False,
+        # Measured: +1250/qtr moves GDP +1.2500bn/qtr, flat for twelve
+        # quarters, with consumption moving at most 0.6m and investment
+        # exactly zero. The impact multiplier is 1.0000 because the shock
+        # lands in the GDP identity and no behavioural equation responds --
+        # against the OBR's published 0.6 for day-to-day spending, tapering
+        # over five years. This is the largest known gap of any lever here,
+        # and it reached MCP callers uncaveated while the reading lived only
+        # on the website, which a JSON consumer never sees.
+        "caveat": (
+            "this is an accounting identity, not a behavioural response: the "
+            "impact multiplier is exactly 1.0000 at any shock size and stays "
+            "flat, because the shock enters the GDP identity and nothing "
+            "else moves (consumption responds by <0.1% of the shock, "
+            "investment by zero). The OBR's published impact multiplier for "
+            "day-to-day spending and welfare is 0.6, tapering over five "
+            "years, so read this as an upper bound"
+        ),
     },
     {
         "var": "TCPRO",
         "description": "Corporation tax (main) rate",
         "units": "rate change in decimal (e.g. -0.05 = 5pp cut from 25% to 20%)",
         "investment_closure": True,
-        # The investment closure's stabiliser anchors the LEVEL, not the
-        # deviation, and the deviation does not converge at any horizon: for a
-        # sustained +5pp rise |delta_IF| runs £97m at q3, £2,876m at q12 and
-        # £43,387m at q25, growing 1.21-1.27x every quarter for 25 quarters.
-        # Truncating the shock from 12 quarters to 8 barely moves the q12
-        # response, so the number is carried by accumulated drift rather than
-        # by the tax rate. The 12-quarter default is not where this settles;
-        # it is where the magnitude still looks plausible.
+        # Since 2026-08 the closure's anchor add-factors are held in log
+        # space (the EViews convention for a dlog equation), so the published
+        # equation's own error-correction term gives the deviation a steady
+        # state: for a sustained +5pp rise, delta_IF runs £0.24bn at q8,
+        # £0.38bn at q12, £0.68bn at q25, approaching a ~£0.95bn/q plateau.
+        # The root is slow (~0.958/quarter), so a 12-quarter run captures
+        # only ~40% of the full effect — the result's
+        # investment_closure_plateau_fraction attr says where a run sits.
+        # (Before the fix the deviation compounded 1.21-1.27x per quarter
+        # with no steady state; that history lives in the model repo.)
         "caveat": (
-            "the response does not converge: it compounds at roughly "
-            "25%/quarter with no steady state, so read the sign and the "
-            "first few quarters, not the level or the cumulative total"
+            "the response converges to a plateau with a slow root "
+            "(~0.958/quarter): a 12-quarter run captures only about 40% of "
+            "the full effect, and the result carries "
+            "investment_closure_plateau_fraction so a partial response is "
+            "not read as the whole one"
         ),
     },
     {
@@ -170,6 +191,29 @@ OBR_VARIABLES = [
 def obr_list_variables() -> list[dict]:
     """Commonly shocked policy variables with descriptions and units."""
     return [dict(v) for v in OBR_VARIABLES]
+
+
+def _obr_solver_diagnostics(df) -> dict | None:
+    """Solver convergence for an OBR result frame, or None if unreported.
+
+    A reported delta is the difference of two Gauss-Seidel solves. Where both
+    stall short of tolerance the residual does not cancel, and the leftover
+    can be large enough to flip the sign of a quarter under a shock that is
+    flat across it. The model records this on the frame; an MCP caller sees
+    only JSON, so it has to travel in the payload or it does not exist.
+    """
+    attrs = getattr(df, "attrs", {})
+    if "solver_converged" not in attrs:
+        return None  # older obr-macro-model build; nothing to report
+    diagnostics = {
+        "converged": bool(attrs["solver_converged"]),
+        "nonconverged_periods": list(
+            attrs.get("solver_nonconverged_periods") or []
+        ),
+    }
+    if attrs.get("solver_warning"):
+        diagnostics["warning"] = attrs["solver_warning"]
+    return diagnostics
 
 
 def _obr_result_rows(df) -> list[dict]:
@@ -222,13 +266,21 @@ def obr_shock(
         investment_closure=bool(investment_closure),
     )
     rows = _obr_result_rows(df)
+    # The TCPRO caveat promises the caller an
+    # investment_closure_plateau_fraction so a partial response is not read
+    # as the whole one. The model records it on the frame's attrs; carry it
+    # into the payload, or the promise goes unkept over MCP, where the
+    # frame itself never arrives.
+    plateau_fraction = getattr(df, "attrs", {}).get(
+        "investment_closure_plateau_fraction"
+    )
     shocked = rows[: int(periods)]
     peak = max(rows, key=lambda r: abs(r["pct_gdp"]))
     # A lever whose channel is dead or non-convergent must say so in the
     # payload, not only in a docstring nobody reads over MCP. Of the four
     # fiscal instruments here exactly one contains behaviour: CGG is an
     # accounting identity (multiplier exactly 1.0000, flat, against the OBR's
-    # published 0.6), CGIPS is dead, TCPRO never converges, and the
+    # published 0.6), CGIPS is dead, TCPRO converges only slowly, and the
     # household-income lever is the only one with a response worth reading.
     caveat = next(
         (v.get("caveat") for v in OBR_VARIABLES if v["var"] == var), None
@@ -245,6 +297,12 @@ def obr_shock(
         "shock": float(shock),
         "periods": int(periods),
         "investment_closure": bool(investment_closure),
+        "investment_closure_plateau_fraction": (
+            round(float(plateau_fraction), 4)
+            if plateau_fraction is not None
+            else None
+        ),
+        "solver": _obr_solver_diagnostics(df),
         "results": rows,
         "cumulative_delta_gdp_bn_over_shock_periods": round(
             sum(r["delta_gdp_bn"] for r in shocked), 3
@@ -2787,6 +2845,12 @@ def obr_score_reform(
         "corporation-tax reforms are out of scope (direct TCPRO lever via "
         "obr_shock)",
     ]
+    # The solver warning is a caveat about the numbers themselves, so it goes
+    # in the list a caller is most likely to read, not only in the block a
+    # caller has to know to look for.
+    solver_diagnostics = _obr_solver_diagnostics(df)
+    if solver_diagnostics and solver_diagnostics.get("warning"):
+        caveats.append(solver_diagnostics["warning"])
     out = {
         "model": "OBR emulator via PolicyEngine static costing",
         "country": "uk",
@@ -2800,6 +2864,7 @@ def obr_score_reform(
             for y, bn in zip(window, annual_bn)
         ],
         "quarterly_shock_path_m": shock_path,
+        "solver": solver_diagnostics,
         "results": rows,
         "cumulative_delta_gdp_bn_over_shock_periods": cumulative_gdp_bn,
         "peak_pct_gdp": peak["pct_gdp"],
