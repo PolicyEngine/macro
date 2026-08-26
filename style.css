@@ -3877,3 +3877,65 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 .home-page .strategy-card p { max-width: 88ch; }
 .home-page .glance-tabs { justify-content: flex-start; }
 .home-page #now .glance-col { margin-inline: 0; max-width: 980px; }
+
+
+/* ---------- model horizon map (landing 02) ----------
+   Six models placed on one shared time axis, split into UK and US lanes, so
+   the reader can see at a glance which model answers over which horizon
+   instead of reading six paragraphs to find out. Evidence strength is in the
+   shape itself: a solid outline is checked against an external published
+   anchor, a dashed one has no independent outcome benchmark. Fonts come from
+   the tokens, never a hardcoded family. */
+.mm-figure { margin: var(--s-6) 0 var(--s-5); }
+.model-map {
+  display: block;
+  width: 100%;
+  max-width: 940px;
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+}
+.model-map text { font-family: var(--body); }
+.mm-band { fill: color-mix(in srgb, var(--brand) 4%, transparent); }
+.mm-div { stroke: var(--line-soft); stroke-width: 1; stroke-dasharray: 3 4; }
+.mm-axis { stroke: var(--line); stroke-width: 1.5; }
+.mm-lanediv { stroke: var(--line-soft); stroke-width: 1; }
+.mm-lane {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--paper-faint);
+  letter-spacing: .06em;
+}
+.mm-zone {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--paper-faint);
+}
+.mm-pill {
+  fill: var(--surface);
+  stroke: var(--brand-strong);
+  stroke-width: 1.5;
+  transition: fill 180ms ease, stroke-width 180ms ease;
+}
+.mm-pill-soft { stroke-dasharray: 5 4; stroke: var(--paper-faint); }
+.mm-key { stroke-width: 1.5; }
+.mm-id {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  fill: var(--paper);
+}
+.mm-what { font-size: 12px; fill: var(--paper-faint); }
+.mm-legend { font-size: 11px; fill: var(--paper-faint); }
+.model-map a { cursor: pointer; }
+.model-map a:hover .mm-pill { fill: color-mix(in srgb, var(--brand) 10%, transparent); stroke-width: 2.5; }
+.model-map a:hover .mm-id { fill: var(--brand-strong); }
+.model-map a:focus-visible .mm-pill { stroke-width: 3; }
+.mm-evidence { margin-top: var(--s-5); }
+
+@media (max-width: 720px) {
+  /* The map is a two-dimensional layout; below this width it stops being
+     readable at all, so the evidence lines carry the section on their own. */
+  .mm-figure { display: none; }
+}
