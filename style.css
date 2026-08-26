@@ -2953,6 +2953,14 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   border-bottom: 1px solid var(--line-soft);
 }
 @media (min-width: 720px) { .vmet-strip { grid-template-columns: repeat(4, 1fr); } }
+/* Inside a scrollytelling column the 4-up strip has ~560px, not the full band
+   width, and it needs ~660px: the viewport media query above cannot see that,
+   so the fourth stat was being clipped (overflow-x is visible here, so it did
+   not even scroll). Two-up fits and keeps the stats legible. */
+.scrolly-steps .vmet-strip { grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 1500px) {
+  .scrolly-steps .vmet-strip { grid-template-columns: repeat(4, 1fr); }
+}
 
 .vmet-stat {
   padding: 22px 4px 20px;
