@@ -122,6 +122,31 @@
           refuses it rather than guessing. UK only: no US bridge exists, so a
           US reform is scored statically.
         </div>
+        <h4>Or drive it directly, without the microsimulation</h4>
+        <p>
+          The bridge is one way in, not the only one. You can shock the
+          model's own exogenous variables directly, in model units, with no
+          PolicyEngine reform involved &mdash; useful when what you have is a
+          macro assumption rather than a statutory change, or when the reform
+          is not household-borne. <code>list_reform_variables</code> returns
+          the levers and the caveat attached to each.
+        </p>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code># £5bn/year more government consumption, 12 quarters
+pe-macro obr-shock --var CGG --shock 1250 --periods 12
+
+# or in Python, with no PolicyEngine dependency at all
+from obr_macro import run_reform
+df = run_reform(name="spending", var="CGG", shock=1250, periods=12)</code></pre></div>
+        <p>
+          Levers: <code>CGG</code> (government consumption, &pound;m/qtr),
+          <code>TCPRO</code> (corporation tax rate), <code>CGIPS</code>
+          (public investment &mdash; dead, do not use),
+          <code>HHDI_ADDFACTOR</code> (a costing you produced yourself), and
+          the <code>R</code> / <code>RX</code> monetary and exchange-rate
+          assumptions. Read each one's caveat first: only two of them carry
+          behaviour, and <a href="/obr/validation#caveats">two do not work at
+          all</a>.
+        </p>
         <p class="vlinks mono">
           <a href="/models#compose">every join in the suite &rarr;</a>
           <a href="/#joins">this join on the landing page &rarr;</a>
