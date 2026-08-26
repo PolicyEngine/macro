@@ -12,7 +12,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "economy" / "index.html"
-HOME_PAGE = ROOT / "index.html"
 US_PAGE = ROOT / "economy" / "us" / "index.html"
 
 
@@ -443,135 +442,6 @@ def replace(html: str, name: str, value: str) -> str:
     return updated
 
 
-def home_uk_now() -> str:
-    """Homepage 'UK at a glance' table: outturns beside next-open forecasts."""
-    gdp = load("uk_gdp_cvm")
-    cpi = load("uk_cpi_yoy")
-    unemployment = load("uk_unemployment_rate")
-    forecast = json.loads(
-        (ROOT / "papers" / "boe-svar" / "figures" / "current_forecast.json").read_text()
-    )
-    # Archived round file keeps its original name; the satellite's display
-    # name is "svar-unemployment satellite".
-    unemp_round = json.loads(
-        (ROOT / "forecasts" / "rounds" / "2026-07-28" / "okun-unemployment.json").read_text()
-    )
-
-    growth = gdp_growth(gdp)
-    g_now = growth[-1]
-    c_now = latest(cpi)
-    u_now = latest(unemployment)
-
-    def next_open(fc: dict, variable: str, last_observed: str) -> tuple[str, dict]:
-        for period, values in fc.items():
-            if period > last_observed and variable in values:
-                return period, values[variable]
-        period = list(fc)[-1]
-        return period, fc[period][variable]
-
-    g_period, g_fc = next_open(forecast["forecast"], "gdp", g_now["period"])
-    c_period, c_fc = next_open(forecast["forecast"], "cpi", c_now["period"])
-    u_period, u_fc = next_open(unemp_round["forecast"], "unemployment", u_now["period"])
-
-    def rng(fc: dict) -> str:
-        return (f'<br><small class="glance-range">68% range '
-                f"{fmt(fc['lo68'])}%–{fmt(fc['hi68'])}%</small>")
-
-    caption = (
-        "ONS outturns (as of "
-        f"{max(gdp['vintage'], cpi['vintage'], unemployment['vintage'])}) beside "
-        'archived <a href="/forecasts">forecast rounds</a>. '
-        '<a href="/economy">Full horizon &rarr;</a>'
-    )
-    def row(name, unit, out_v, out_p, fc_v, fc_p, fc_extra):
-        return (
-            '        <div class="glance-row">\n'
-            f'          <span class="g-name">{name} <small>{unit}</small></span>\n'
-            f'          <span class="g-cell"><strong>{out_v}</strong> <span class="mono">{out_p}</span></span>\n'
-            '          <span class="g-arrow">&rarr;</span>\n'
-            f'          <span class="g-cell"><strong>{fc_v}</strong> <span class="mono">{fc_p}</span><small>{fc_extra}</small></span>\n'
-            "        </div>"
-        )
-
-    def rng(fc: dict) -> str:
-        return f"68% range {fmt(fc['lo68'])}%\u2013{fmt(fc['hi68'])}%"
-
-    return "\n".join(
-        [
-            '      <div class="glance-rows">',
-            '        <div class="glance-row glance-row-head mono">'
-            '<span class="g-name">indicator</span>'
-            '<span>latest outturn</span><span></span>'
-            '<span>model near-term forecast</span></div>',
-            row("Real GDP growth", "y/y", f"{fmt(g_now['value'])}%", g_now["period"],
-                f"{fmt(g_fc['median'])}%", g_period, rng(g_fc)),
-            row("CPI inflation", "y/y", f"{fmt(c_now['value'])}%", c_now["period"],
-                f"{fmt(c_fc['median'])}%", c_period, rng(c_fc)),
-            row("Unemployment rate", "", f"{fmt(u_now['value'])}%", u_now["period"],
-                f"{fmt(u_fc['median'])}%", u_period, rng(u_fc)),
-            "      </div>",
-            f'      <p class="glance-caption">{caption}</p>',
-        ]
-    )
-
-
-def home_us_now() -> str:
-    """Homepage 'US at a glance' table: outturns beside the LONGBASE baseline."""
-    gdp = load("us_real_gdp")
-    cpi = load("us_cpi")
-    unemployment = load("us_unemployment_rate")
-    baseline = longbase_baseline()
-
-    g_now = gdp_growth(gdp)[-1]
-    c_now = yoy_growth(cpi, 12)[-1]
-    u_now = latest(unemployment)
-
-    g_base = baseline_next_open(baseline, g_now["period"])
-    c_base = baseline_next_open(baseline, c_now["period"])
-    u_base = baseline_next_open(baseline, u_now["period"])
-
-    caption = (
-        "FRED outturns (as of "
-        f"{max(gdp['vintage'], cpi['vintage'], unemployment['vintage'])}) beside "
-        "the FRB/US LONGBASE conditioning baseline — not a forecast. "
-        '<a href="/economy/us">Full sources &rarr;</a>'
-    )
-    def row(name, unit, out_v, out_p, base_v, base_p):
-        return (
-            '        <div class="glance-row">\n'
-            f'          <span class="g-name">{name} <small>{unit}</small></span>\n'
-            f'          <span class="g-cell"><strong>{out_v}</strong> <span class="mono">{out_p}</span></span>\n'
-            '          <span class="g-arrow">&rarr;</span>\n'
-            f'          <span class="g-cell"><strong>{base_v}</strong> <span class="mono">{base_p}</span></span>\n'
-            "        </div>"
-        )
-
-    return "\n".join(
-        [
-            '      <div class="glance-rows">',
-            '        <div class="glance-row glance-row-head mono">'
-            '<span class="g-name">indicator</span>'
-            '<span>latest outturn</span><span></span>'
-            '<span>LONGBASE baseline</span></div>',
-            row("Real GDP growth", "y/y", f"{fmt(g_now['value'])}%", g_now["period"],
-                f"{fmt(g_base['gdp_yoy_pct'])}%", g_base["quarter"]),
-            row("CPI inflation", "y/y", f"{fmt(c_now['value'])}%", c_now["period"],
-                f"{fmt(c_base['cpi_yoy_pct'])}%", c_base["quarter"]),
-            row("Unemployment rate", "", f"{fmt(u_now['value'])}%", u_now["period"],
-                f"{fmt(u_base['unemployment_pct'])}%", u_base["quarter"]),
-            "      </div>",
-            f'      <p class="glance-caption">{caption}</p>',
-        ]
-    )
-
-
-def render_home() -> str:
-    html = HOME_PAGE.read_text()
-    html = replace(html, "home-uk-now", home_uk_now())
-    html = replace(html, "home-us-now", home_us_now())
-    return html
-
-
 def render_uk() -> str:
     """The UK hub. ``economy-topics`` belongs to economy/topics.py, not here."""
     html = PAGE.read_text()
@@ -608,13 +478,11 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    rendered_home = render_home()
     rendered_uk = render_uk()
     rendered_us = render_us()
     if args.check:
         stale = []
         for path, rendered in (
-            (HOME_PAGE, rendered_home),
             (PAGE, rendered_uk),
             (US_PAGE, rendered_us),
         ):
@@ -625,7 +493,6 @@ def main() -> int:
             return 1
         print("UK and US Economy pages match committed data")
         return 0
-    HOME_PAGE.write_text(rendered_home)
     PAGE.write_text(rendered_uk)
     US_PAGE.write_text(rendered_us)
     print("updated UK and US Economy pages")

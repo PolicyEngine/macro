@@ -44,14 +44,18 @@
       <div class="hero-copy">
         <p class="eyebrow reveal" style="--d:0">one core model · six extensions · uk &amp; us</p>
       <h1 class="reveal hero-h1" style="--d:1">
-        <span>Two economies, seven open models.</span>
-        <span>Each one says how far to trust it.</span>
+        <span>An open platform for policy analysis</span>
+        <span>and economic research.</span>
       </h1>
       <p class="lede reveal" style="--d:2">
-          The core is the tax-benefit engine behind policyengine.org, running
-          here in process for the UK and the US: what a reform does to each
-          household, and what it costs. Six macro models extend it with GDP,
-          inflation, interest rates, long-run effects and climate.
+          The tax-benefit engine behind policyengine.org &mdash; what a reform
+          does to each UK or US household, and what it costs &mdash; joined to six
+          macro models: the <a href="/obr">OBR</a> emulator, the
+          <a href="/svar">Bank of England</a> SVAR, the
+          <a href="/frb-us">Fed&rsquo;s FRB/US</a>, a
+          <a href="/us-hank">US HANK</a>, an
+          <a href="/olg">overlapping-generations</a> model and
+          <a href="/define">DEFINE-UK</a> for climate.
       </p>
       <div class="hero-cta reveal" style="--d:3">
         <a class="btn btn-primary" href="/connect">Run a hosted model</a>
@@ -146,99 +150,11 @@
     </div>
   </section>
 
-  <section id="core" class="band">
-    <div class="band-head">
-      <span class="kicker mono">01 &mdash; the core</span>
-      <h2>Start at the microsimulation.</h2>
-      <p class="section-intro">A reform goes in; household incomes, revenue and a distribution come out. <strong>It does not forecast</strong> &mdash; that is what the six extensions are for.</p>
-    </div>
-    <a class="strategy-card" href="/pe">
-      <header><span class="card-id mono">pe-microsim</span><span class="tag-row"><span class="tag tag-country">UK</span><span class="tag tag-country">US</span><span class="tag tag-hosted">hosted</span></span></header>
-      <h3>PolicyEngine tax-benefit microsimulation</h3>
-      <p>The only model here covering both countries, and the only one that works at household level. Tax and benefit law written as code, run over survey data.</p>
-      <span class="strategy-paper-link mono">open the microsimulation →</span>
-    </a>
-    <div class="core-split">
-      <div class="core-panel">
-        <p class="core-panel-head mono">one household &mdash; exact</p>
-        <dl class="calc">
-          <div class="calc-row">
-            <dt><span class="calc-op"></span>UK employment income</dt>
-            <dd>£50,000</dd>
-          </div>
-          <div class="calc-row">
-            <dt><span class="calc-op">&minus;</span>Income tax
-              <span class="calc-note">personal allowance £12,570: the first £12,570 is not taxed</span></dt>
-            <dd>£7,486</dd>
-          </div>
-          <div class="calc-row">
-            <dt><span class="calc-op">&minus;</span>National Insurance</dt>
-            <dd>£2,994</dd>
-          </div>
-          <div class="calc-row calc-total">
-            <dt><span class="calc-op">=</span>Net income</dt>
-            <dd>£39,520</dd>
-          </div>
-        </dl>
-        <p class="core-panel-foot"><strong>Household arithmetic is exact:</strong> <span class="calc-identity mono">50,000 &minus; 7,486 &minus; 2,994 = 39,520</span>, to the penny. <a href="/pe/code">See the case &rarr;</a></p>
-      </div>
-      <div class="core-panel">
-        <p class="core-panel-head mono">the whole population &mdash; an estimate</p>
-        <ul class="core-limits">
-          <li>Population totals are survey-weighted estimates that <strong>inherit survey uncertainty</strong>, published without an interval.</li>
-          <li>The HMRC costing comparison is a <strong>benchmark, not a validation</strong>.</li>
-        </ul>
-        <p class="core-panel-foot">Same run, same code &mdash; but the household case can be checked line by line and a national total cannot. <a href="/pe/validation">How far to trust it &rarr;</a></p>
-      </div>
-    </div>
-  </section>
-
-  <section id="extend" class="band">
-    <div class="band-head">
-      <span class="kicker mono">02 &mdash; the extensions</span>
-      <h2>Six models add what the microsimulation does not cover.</h2>
-      <p class="section-intro">The microsimulation returns no GDP, inflation or interest rates. Each model below adds some of them &mdash; the evidence for it, and the limit of that evidence, on the same line.</p>
-    </div>
-    <ol class="xt-list" aria-label="What each macro model adds, and the evidence for it">
-      <li class="xt-row">
-        <span class="xt-id"><a class="mono" href="/obr">obr-macro</a><span class="xt-tag">anchored replication</span></span>
-        <p class="xt-what">Adds the knock-on effects on the UK economy.</p>
-        <p class="xt-proof">Tracks the March 2026 EFO to <strong>0.15% GDP MAPE</strong> with the anchors held; free-running, <strong>4.48%</strong>.</p>
-      </li>
-      <li class="xt-row">
-        <span class="xt-id"><a class="mono" href="/svar">boe-svar</a><span class="xt-tag">forecast evaluation</span></span>
-        <p class="xt-what">Adds a UK forecast for the next few quarters.</p>
-        <p class="xt-proof">Replicates the paper&rsquo;s GDP decomposition (<strong>37.4% vs ~40%</strong>), <strong>8pp short on CPI</strong>. Against a drifting random walk, <strong>no forecast skill survives</strong> the 64 tests run.</p>
-      </li>
-      <li class="xt-row">
-        <span class="xt-id"><a class="mono" href="/frb-us">frb-us</a><span class="xt-tag">software replication</span></span>
-        <p class="xt-what">Adds how the US economy responds to a shock.</p>
-        <p class="xt-proof">Matches the Fed&rsquo;s own pyfrbus inside its two releases&rsquo; disagreement (<strong>~1&times;10⁻⁸</strong>); <strong>no predictive claim</strong>.</p>
-      </li>
-      <li class="xt-row">
-        <span class="xt-id"><a class="mono" href="/us-hank">us-hank</a><span class="xt-tag">published replication</span></span>
-        <p class="xt-what">Adds who gains and loses, by wealth group.</p>
-        <p class="xt-proof">Solves Auclert et al. (2021) to four decimals &mdash; the headline targets are <strong>inputs, not results</strong>.</p>
-      </li>
-      <li class="xt-row">
-        <span class="xt-id"><a class="mono" href="/olg">psl-og</a><span class="xt-tag xt-tag-warn">calibration only</span></span>
-        <p class="xt-what">Adds long-run effects on work, saving and capital.</p>
-        <p class="xt-proof">+1pp on the basic rate: GDP <strong>&minus;£5.0bn (&minus;0.14%)</strong>, revenue <strong>+0.29pp of GDP</strong> by 2030. Targets met by construction; <strong>no independent outcome benchmark exists</strong>.</p>
-      </li>
-      <li class="xt-row">
-        <span class="xt-id"><a class="mono" href="/define">define-uk</a><span class="xt-tag xt-tag-warn">partial replication</span></span>
-        <p class="xt-what">Adds UK climate-policy scenarios: emissions, energy, green investment.</p>
-        <p class="xt-proof">Baseline replicates the manual; scenarios are design-gated and paper-anchored. <strong>Deltas only, never levels.</strong></p>
-      </li>
-    </ol>
-    <p class="chooser-note"><a href="/models">Inspect all seven models</a>, <a href="/models#compare">compare them side by side</a>, or <a href="/models#validation">read the evidence for each</a>.</p>
-  </section>
-
   <section id="joins" class="band">
     <div class="band-head">
-      <span class="kicker mono">03 &mdash; the joins</span>
+      <span class="kicker mono">01 &mdash; how it fits together</span>
       <h2>How the models connect.</h2>
-      <p class="section-intro">One score can run several models in a row: <code>score_reform</code> accepts <code>microsim</code>, <code>obr</code>, <code>og</code> and <code>og+microsim</code>.</p>
+      <p class="section-intro">The microsimulation is the core: it knows every household, and nothing about the economy around them. Each macro model joins it at one named point, in one of two directions &mdash; a reform&rsquo;s cost goes <em>out</em> to a macro model and feedback comes back (<code>score_reform</code> accepts <code>microsim</code>, <code>obr</code>, <code>og</code>, <code>og+microsim</code>), or a macro path comes <em>in</em> and is pushed down onto households as incidence. Nothing connects macro model to macro model.</p>
     </div>
     <p class="join-lead">
       Every bridge starts or ends at the microsimulation.
@@ -297,75 +213,50 @@
     <p class="join-note"><span class="mono">united states</span>No US macro bridge exists, so a US reform is scored statically.</p>
   </section>
 
-  <section id="now" class="band">
+  <section id="extend" class="band">
     <div class="band-head">
-      <span class="kicker mono">04 &mdash; the economy now</span>
-      <h2>The latest data, and what the models expect next.</h2>
-      <p class="section-intro">ONS and FRED outturns beside the archived forecast rounds. boe-svar is the only forecaster here and it is UK-only; the US column shows the path FRB/US starts from, which is not a forecast.</p>
+      <span class="kicker mono">02 &mdash; what each one is for</span>
+      <h2>Six models, six different questions.</h2>
+      <p class="section-intro">Pick by the question you have, not by the model you know. Each line is what that model is for, and what its evidence does and does not support.</p>
     </div>
-    <div class="glance-tabs model-tabs-set mono" role="tablist" aria-label="Country">
-      <button type="button" id="glance-tab-uk" role="tab" aria-selected="true" aria-controls="glance-uk" class="is-current">United Kingdom</button>
-      <button type="button" id="glance-tab-us" role="tab" aria-selected="false" aria-controls="glance-us">United States</button>
-    </div>
-    <div class="glance-both">
-        <div class="glance-col" id="glance-uk" role="tabpanel" aria-labelledby="glance-tab-uk">
-<!-- home-uk-now:begin -->
-      <div class="glance-rows">
-        <div class="glance-row glance-row-head mono"><span class="g-name">indicator</span><span>latest outturn</span><span></span><span>model near-term forecast</span></div>
-        <div class="glance-row">
-          <span class="g-name">Real GDP growth <small>y/y</small></span>
-          <span class="g-cell"><strong>0.9%</strong> <span class="mono">2026Q1</span></span>
-          <span class="g-arrow">&rarr;</span>
-          <span class="g-cell"><strong>1.1%</strong> <span class="mono">2026Q2</span><small>68% range 0.6%–1.7%</small></span>
-        </div>
-        <div class="glance-row">
-          <span class="g-name">CPI inflation <small>y/y</small></span>
-          <span class="g-cell"><strong>2.8%</strong> <span class="mono">2026Q2</span></span>
-          <span class="g-arrow">&rarr;</span>
-          <span class="g-cell"><strong>2.5%</strong> <span class="mono">2026Q3</span><small>68% range 1.8%–3.3%</small></span>
-        </div>
-        <div class="glance-row">
-          <span class="g-name">Unemployment rate <small></small></span>
-          <span class="g-cell"><strong>4.9%</strong> <span class="mono">2026Q2</span></span>
-          <span class="g-arrow">&rarr;</span>
-          <span class="g-cell"><strong>5.0%</strong> <span class="mono">2026Q3</span><small>68% range 4.9%–5.0%</small></span>
-        </div>
-      </div>
-      <p class="glance-caption">ONS outturns (as of 2026-08-26) beside archived <a href="/forecasts">forecast rounds</a>. <a href="/economy">Full horizon &rarr;</a></p>
-<!-- home-uk-now:end -->
-        </div>
-        <div class="glance-col" id="glance-us" role="tabpanel" aria-labelledby="glance-tab-us" hidden>
-<!-- home-us-now:begin -->
-      <div class="glance-rows">
-        <div class="glance-row glance-row-head mono"><span class="g-name">indicator</span><span>latest outturn</span><span></span><span>LONGBASE baseline</span></div>
-        <div class="glance-row">
-          <span class="g-name">Real GDP growth <small>y/y</small></span>
-          <span class="g-cell"><strong>2.1%</strong> <span class="mono">2026Q2</span></span>
-          <span class="g-arrow">&rarr;</span>
-          <span class="g-cell"><strong>2.0%</strong> <span class="mono">2026Q3</span></span>
-        </div>
-        <div class="glance-row">
-          <span class="g-name">CPI inflation <small>y/y</small></span>
-          <span class="g-cell"><strong>3.3%</strong> <span class="mono">2026-07</span></span>
-          <span class="g-arrow">&rarr;</span>
-          <span class="g-cell"><strong>3.2%</strong> <span class="mono">2026Q4</span></span>
-        </div>
-        <div class="glance-row">
-          <span class="g-name">Unemployment rate <small></small></span>
-          <span class="g-cell"><strong>4.1%</strong> <span class="mono">2026-07</span></span>
-          <span class="g-arrow">&rarr;</span>
-          <span class="g-cell"><strong>4.4%</strong> <span class="mono">2026Q4</span></span>
-        </div>
-      </div>
-      <p class="glance-caption">FRED outturns (as of 2026-08-26) beside the FRB/US LONGBASE conditioning baseline — not a forecast. <a href="/economy/us">Full sources &rarr;</a></p>
-<!-- home-us-now:end -->
-        </div>
-      </div>
+    <ol class="xt-list" aria-label="What each macro model adds, and the evidence for it">
+      <li class="xt-row">
+        <span class="xt-id"><a class="mono" href="/obr">obr-macro</a><span class="xt-tag">anchored replication</span></span>
+        <p class="xt-what">For scoring a UK reform with its knock-on effects on GDP, not just its cost.</p>
+        <p class="xt-proof">Tracks the March 2026 EFO to <strong>0.15% GDP MAPE</strong> with the anchors held; free-running, <strong>4.48%</strong>.</p>
+      </li>
+      <li class="xt-row">
+        <span class="xt-id"><a class="mono" href="/svar">boe-svar</a><span class="xt-tag">forecast evaluation</span></span>
+        <p class="xt-what">For reading what has been driving UK GDP and inflation, and what comes next.</p>
+        <p class="xt-proof">Replicates the paper&rsquo;s GDP decomposition (<strong>37.4% vs ~40%</strong>), <strong>8pp short on CPI</strong>. Against a drifting random walk, <strong>no forecast skill survives</strong> the 64 tests run.</p>
+      </li>
+      <li class="xt-row">
+        <span class="xt-id"><a class="mono" href="/frb-us">frb-us</a><span class="xt-tag">software replication</span></span>
+        <p class="xt-what">For tracing how the US economy responds to a rate or spending shock.</p>
+        <p class="xt-proof">Matches the Fed&rsquo;s own pyfrbus inside its two releases&rsquo; disagreement (<strong>~1&times;10⁻⁸</strong>); <strong>no predictive claim</strong>.</p>
+      </li>
+      <li class="xt-row">
+        <span class="xt-id"><a class="mono" href="/us-hank">us-hank</a><span class="xt-tag">published replication</span></span>
+        <p class="xt-what">For seeing which US households absorb a shock, by wealth.</p>
+        <p class="xt-proof">Solves Auclert et al. (2021) to four decimals &mdash; the headline targets are <strong>inputs, not results</strong>.</p>
+      </li>
+      <li class="xt-row">
+        <span class="xt-id"><a class="mono" href="/olg">psl-og</a><span class="xt-tag xt-tag-warn">calibration only</span></span>
+        <p class="xt-what">For the decades-long effects on work, saving and the capital stock.</p>
+        <p class="xt-proof">+1pp on the basic rate: GDP <strong>&minus;£5.0bn (&minus;0.14%)</strong>, revenue <strong>+0.29pp of GDP</strong> by 2030. Targets met by construction; <strong>no independent outcome benchmark exists</strong>.</p>
+      </li>
+      <li class="xt-row">
+        <span class="xt-id"><a class="mono" href="/define">define-uk</a><span class="xt-tag xt-tag-warn">partial replication</span></span>
+        <p class="xt-what">For UK climate-policy scenarios: emissions, energy, green investment.</p>
+        <p class="xt-proof">Baseline replicates the manual; scenarios are design-gated and paper-anchored. <strong>Deltas only, never levels.</strong></p>
+      </li>
+    </ol>
+    <p class="chooser-note"><a href="/models">Inspect all seven models</a>, <a href="/models#compare">compare them side by side</a>, or <a href="/models#validation">read the evidence for each</a>.</p>
   </section>
 
   <section id="workflow" class="band">
     <div class="band-head">
-      <span class="kicker mono">05 &mdash; start using it</span>
+      <span class="kicker mono">03 &mdash; start using it</span>
       <h2>Run a hosted model, or use the code directly.</h2>
       <p class="section-intro">Connect the public MCP server with no PolicyEngine account or API key, use the shared CLI, or call each Python package directly.</p>
     </div>
