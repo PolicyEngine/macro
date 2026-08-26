@@ -128,13 +128,29 @@ def test_unfinished_job_tells_the_caller_to_poll_again():
     assert "again" in out["next_step"]
 
 
-def test_wait_is_capped_below_the_transport_ceiling():
-    """A poll that outlived the 150s ceiling would be the bug it works around."""
+def test_wait_is_capped_well_below_the_transport_ceiling():
+    """A poll that outlived the 150s ceiling would be the bug it works around.
+
+    The cap sits far below it, not just inside it. Measured end-to-end through
+    a real Claude Code session: polls at 60-120s repeatedly hit transport
+    timeouts and one Modal `InternalFailure: Server has lost track of input`,
+    while 30s polls came back reliably. The flakiness tracks how long the
+    connection is held open rather than how close it gets to 150s.
+    """
     seen = []
     jobs.set_backend(lambda t, a: "fc-1", lambda j, w: (seen.append(w), (False, None))[1])
     jobs.result("fc-1", wait_seconds=10_000)
     assert seen == [jobs.MAX_WAIT_SECONDS]
-    assert jobs.MAX_WAIT_SECONDS < 150, "the cap must sit inside the ceiling"
+    assert jobs.MAX_WAIT_SECONDS <= 60, "long blocking polls are unreliable"
+    assert jobs.DEFAULT_WAIT_SECONDS <= 30, "the default poll must be short"
+
+
+def test_default_wait_is_the_short_one():
+    """Callers who pass nothing get the interval that actually works."""
+    seen = []
+    jobs.set_backend(lambda t, a: "fc-1", lambda j, w: (seen.append(w), (False, None))[1])
+    jobs.result("fc-1")
+    assert seen == [jobs.DEFAULT_WAIT_SECONDS]
 
 
 def test_negative_wait_is_clamped_not_passed_through():

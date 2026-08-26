@@ -49,14 +49,19 @@ def start_job(
 def get_job_result(
     job_id: Annotated[str, Field(description="Job id from start_job")],
     wait_seconds: Annotated[
-        int, Field(description="Seconds to block waiting, max 120")
-    ] = 60,
+        int, Field(description="Seconds to block waiting, max 60")
+    ] = 30,
 ) -> dict:
     """Fetch a started job's result, waiting up to wait_seconds for it.
 
     Returns status 'done' with the result, or status 'running' -- in which
     case call again with the same job_id. A score_reform over the default
-    five-year window typically needs two or three polls.
+    five-year window typically needs several polls; that is expected.
+
+    Keep wait_seconds short. Long blocking polls hit transport timeouts far
+    more often than short ones, and a poll that errors is not a job that
+    failed -- the job runs on regardless of the connection watching it, so
+    just call again with the same job_id.
     """
     return jobs.result(job_id, wait_seconds)
 

@@ -422,7 +422,7 @@ async def test_score_reform_default_window_works_through_a_job():
     out = None
     while waited < deadline:
         out = await asyncio.wait_for(
-            _call("get_job_result", {"job_id": job_id, "wait_seconds": 120}),
+            _call("get_job_result", {"job_id": job_id, "wait_seconds": 30}),
             timeout=180,
         )
         if out["status"] == "done":
