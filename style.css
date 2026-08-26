@@ -3021,28 +3021,38 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 
 /* compact definition/caveat block under the configurations table,
    in the .qa-fact idiom: keyed lines, no run-on paragraph */
+/* Key/value notes.
+   Three constraints at once: keys must align across lines, values must wrap
+   as normal prose, and inline markup inside a value (a link, a <code>) must
+   stay inline. display:flex on the line fails the third -- every child
+   becomes a flex item, which once shrank "working paper" into a 40px box
+   broken across three lines. A hanging indent fixes that but fails the
+   first: a key wider than the indent (e.g. "uk microdata") shunts its own
+   value out of line with the others.
+   So the GRID lives on the container and each line is display:contents, so
+   every key and value becomes a direct grid item of one shared two-column
+   grid. Columns then align across all lines whatever the longest key is, and
+   each value is a single item whose contents flow inline. */
 .vmet-notes {
   max-width: 80ch;
   margin: var(--s-4) auto var(--s-5);
   font-size: var(--fs-label);
   color: var(--paper-faint);
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: var(--s-4);
+  row-gap: var(--s-2);
+  align-items: baseline;
 }
 .vmet-notes-line {
-  /* NOT display:flex. Flex makes every child its own item, so an inline <a>
-     in the note text became a 40px flex item and broke "working paper" across
-     three lines mid-word. A hanging indent reproduces the key/body look while
-     leaving inline content in normal flow. */
-  display: block;
-  padding-left: 6.5ch;
-  text-indent: -6.5ch;
+  display: contents;
   gap: 10px;
   margin: 0;
   padding: 4px 0;
   line-height: 1.6;
 }
 .vmet-notes-key {
-  display: inline-block;
-  min-width: 5.5ch;
+  min-width: 0;
   color: var(--brand-strong);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
