@@ -2,8 +2,8 @@
 
     modal deploy integration/modal_app.py
 
-Serves the FastMCP instance from `policyengine_macro.mcp_server` (26 tools:
-list_model_capabilities, get_model_status, recommend_model,
+Serves the FastMCP instance from `policyengine_macro.mcp_server` (28 tools:
+start_job, get_job_result, list_model_capabilities, get_model_status, recommend_model,
 format_score_report, score_reform, obr_shock, list_reform_variables, frbus_shock,
 frbus_list_variables, frbus_summary, frbus_shock_incidence, hank_shock,
 hank_summary, hank_shock_incidence, forecast_uk,
@@ -304,6 +304,37 @@ pe_data_volume = modal.Volume.from_name("policyengine-macro-pe-data", create_if_
         "POLICYENGINE_MACRO_PE_DATA_DIR": f"{CACHE_DIR}/policyengine-data",
     }),
     cpu=4,
+    memory=8192,
+    # 30 minutes. This function is NOT behind the HTTP proxy, so the 150s
+    # web-endpoint ceiling does not apply to it -- that is the entire point.
+    # The ceiling is why it exists: score_reform over its default five-year
+    # window is two full 372-equation solves plus one PolicyEngine static
+    # costing per year, which does not fit in 150s on this hardware and
+    # cannot be made to.
+    timeout=1800,
+    min_containers=0,
+    scaledown_window=300,
+    max_containers=3,
+    secrets=[modal.Secret.from_name("macromod-hf")],
+    volumes={CACHE_DIR: pe_data_volume},
+)
+def run_tool_job(tool: str, arguments: dict) -> dict:
+    """Worker for start_job: run one allow-listed adapter call to completion."""
+    import os
+
+    if "HUGGING_FACE_TOKEN" not in os.environ and os.environ.get("HF_TOKEN"):
+        os.environ["HUGGING_FACE_TOKEN"] = os.environ["HF_TOKEN"]
+    from policyengine_macro import jobs
+
+    return jobs.run(tool, arguments)
+
+
+@app.function(
+    image=image.env({
+        "HF_HOME": f"{CACHE_DIR}/huggingface",
+        "POLICYENGINE_MACRO_PE_DATA_DIR": f"{CACHE_DIR}/policyengine-data",
+    }),
+    cpu=4,
     memory=8192,            # UK population run peaks ~1.8GB; headroom for 2+
     timeout=600,
     min_containers=0,       # scale to zero: no idle cost
@@ -320,8 +351,23 @@ def serve():
     if "HUGGING_FACE_TOKEN" not in os.environ and os.environ.get("HF_TOKEN"):
         os.environ["HUGGING_FACE_TOKEN"] = os.environ["HF_TOKEN"]
 
-    from policyengine_macro import core
+    from policyengine_macro import core, jobs
     from policyengine_macro.mcp_server import mcp
+
+    # Wire the job tools to Modal. Done here rather than at import time so the
+    # local stdio server and the CLI keep no Modal dependency and report the
+    # absence plainly instead of queueing work nothing will run.
+    def _spawn(tool: str, arguments: dict) -> str:
+        return run_tool_job.spawn(tool, arguments).object_id
+
+    def _poll(job_id: str, wait_seconds: int):
+        call = modal.FunctionCall.from_id(job_id)
+        try:
+            return True, call.get(timeout=wait_seconds)
+        except TimeoutError:
+            return False, None
+
+    jobs.set_backend(_spawn, _poll)
 
     # Warm the cheap in-process cache (parses committed results/*.md only —
     # NOT a model estimation, which would make cold starts take minutes).
