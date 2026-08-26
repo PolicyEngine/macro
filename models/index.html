@@ -25,7 +25,6 @@
   <nav class="nav-links" aria-label="Primary">
     <a class="nav-mobile" href="/">Home</a>
     <a class="nav-mobile" href="/models" aria-current="page">Models</a>
-    <a class="nav-mobile" href="/economy">Economy</a>
     <a class="nav-mobile" href="/forecasts">Forecasts</a>
     <a class="nav-mobile nav-start" href="/connect">Use</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
@@ -41,25 +40,117 @@
   <section class="hero model-hero">
     <div class="hero-inner">
       <p class="eyebrow reveal" style="--d:0">model catalog</p>
-      <h1 class="reveal page-title" style="--d:1">Choose the model that fits the question.</h1>
-      <p class="lede reveal" style="--d:2">PolicyEngine&rsquo;s tax-benefit microsimulation answers the household question — what a UK or US family pays and receives — and six macro models orbit it, supplying the fiscal and monetary shocks, near-term forecasts, long-run structural change and (experimentally) climate-policy scenarios that it cannot see.</p>
+      <h1 class="reveal page-title" style="--d:1">One microsimulation, six models that extend it.</h1>
+      <p class="lede reveal" style="--d:2">PolicyEngine&rsquo;s tax-benefit microsimulation is the core: what a UK or US family pays and receives, and what a reform costs. Six macro models supply the shocks, forecasts and long-run change it cannot see &mdash; and a score can chain them together.</p>
     </div>
   </section>
   <nav class="model-tabs" aria-label="Model catalog sections" data-models-subnav>
     <div class="model-tabs-row">
-      <a class="model-tabs-link" href="#choose">Choose</a>
+      <a class="model-tabs-link" href="#choose">Models</a>
+      <a class="model-tabs-link" href="#compose">Combine</a>
       <a class="model-tabs-link" href="#compare">Compare</a>
       <a class="model-tabs-link" href="#validation">Validation</a>
       <a class="model-tabs-link" href="#evidence">Papers</a>
     </div>
   </nav>
-  <section id="journeys" class="band band-stack">
-    <div class="band-head"><span class="kicker mono">start with the question</span><h2>Three questions, three routes.</h2></div>
+  <section id="choose" class="band band-stack">
+    <div class="band-head"><span class="kicker mono">the suite</span><h2>The core, and six extensions.</h2><p class="section-intro">Every extension names where it joins the microsimulation.</p></div>
+    <div class="qa-list">
+      <details class="qa" id="core" open>
+        <summary><span>Taxes and benefits, for a household or a population</span><strong>the core &middot; UK + US &middot; pe-microsim</strong></summary>
+        <div class="qa-body">
+          <p>PolicyEngine&rsquo;s own engine, and the one behind policyengine.org: the tax-benefit rules as code over enhanced survey microdata, for one household or the whole population. The only member covering both countries.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>£50,000 of UK employment income gives <strong>£39,520 net</strong> &mdash; £12,570 allowance, £7,486 income tax, £2,994 National Insurance. Household answers are <strong>exact rule arithmetic</strong></span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Population answers inherit <strong>survey-data error</strong> and carry no interval</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Static by design: no forecast, and no GDP, inflation, rates or behavioural response &mdash; the six below add those</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Hosted &mdash; MCP tools and a CLI, no account needed</span></div>
+          </div>
+          <p class="qa-link"><a href="/pe">Open PolicyEngine microsim &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>A selected UK fiscal or macro scenario over 3&ndash;5 years</span><strong>UK &middot; obr-macro</strong></summary>
+        <div class="qa-body">
+          <p>A transpiled, solvable copy of the OBR&rsquo;s published macroeconometric model, anchored to the latest EFO: shock a lever, re-solve, and read GDP, consumption and investment against the official path.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Tracks the published forecast within <strong>0.15% (GDP) / 0.25% (consumption)</strong> with the anchors held; free-running, <strong>4.48%</strong></span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Impact multiplier ~1 by construction vs the OBR&rsquo;s published 0.6 &mdash; read magnitudes, not point estimates</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core: <code>score_reform</code> feeds the static costing in through <code>HHDI_ADDFACTOR</code></span></div>
+          </div>
+          <p class="qa-link"><a href="/obr">Open the OBR emulator &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>What drove UK GDP and inflation at the latest model-data vintage</span><strong>UK &middot; boe-svar</strong></summary>
+        <div class="qa-body">
+          <p>An eight-variable Bayesian structural VAR: named shocks identified by sign and zero restrictions, a decomposition of recent GDP and inflation, and a forward projection with credible bands.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Frozen-edge check: 14 of 14 outturns inside the 68% bands (bands run wide)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Against a drifting random walk <strong>no skill survives</strong> the 64 variable-by-horizon tests &mdash; the smallest Benjamini-Hochberg q is <strong>0.36</strong></span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core: the CPI path drives benefit-uprating incidence (<code>svar_inflation_incidence</code>, experimental)</span></div>
+          </div>
+          <p class="qa-link"><a href="/svar">Open BoE SVAR &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>A monetary or fiscal shock in the US over coming quarters</span><strong>US &middot; frb-us</strong></summary>
+        <div class="qa-body">
+          <p>The Federal Reserve&rsquo;s FRB/US model &mdash; 284 equations parsed from the Board&rsquo;s own model file &mdash; solved around the April 2026 LONGBASE baseline. Pick a lever and a policy rule, read the deviation path.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Levers: federal funds rate, government spending, transfers, taxes</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Matches the Fed&rsquo;s own pyfrbus to <strong>~1&times;10<sup>&minus;8</sup></strong>, the reference implementation&rsquo;s own noise floor. Reproducing LONGBASE is an identity, not evidence</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core one way: the wage and hours path drives employment-income incidence (<code>frbus_shock_incidence</code>, experimental). <code>score_reform</code> refuses <code>model="frbus"</code></span></div>
+          </div>
+          <p class="qa-link"><a href="/frb-us">Open FRB/US &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>How US shock responses differ across the household wealth distribution</span><strong>US &middot; us-hank</strong></summary>
+        <div class="qa-body">
+          <p>A two-asset heterogeneous-agent New Keynesian model (an ABRS 2021 replication): one monetary, fiscal or productivity shock, solved for the whole distribution of households.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Consumption responses by liquid-wealth quartile and the hand-to-mouth share, warm in seconds from a cached sequence-space Jacobian</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Stylized replication &mdash; not a forecaster, no reform scoring, and responses are first-order</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core one way: wage and labour IRFs drive employment-income incidence (<code>hank_shock_incidence</code>, experimental)</span></div>
+          </div>
+          <p class="qa-link"><a href="/us-hank">Open US HANK &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>Work, saving, and capital effects over decades</span><strong>UK &middot; psl-og</strong></summary>
+        <div class="qa-body">
+          <p>80 overlapping cohorts choose work and saving over their lifetimes. Solve the steady state or the 60-period transition path and read where a reform takes GDP, investment and revenue in the long run.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Worked example: +1pp basic rate &rarr; GDP <strong>&minus;£5.0bn (&minus;0.14%)</strong> and tax revenue <strong>+0.29pp of GDP</strong> by 2030</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Local-only and experimental: calibrated, with <strong>no published ground truth</strong></span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core both ways: statute in through PolicyEngine-estimated tax functions, long-run changes back out into a second microsim run (<code>og+microsim</code>)</span></div>
+          </div>
+          <p class="qa-link"><a href="/olg">Open OG-UK &rarr;</a></p>
+        </div>
+      </details>
+      <details class="qa">
+        <summary><span>A UK climate-policy scenario, as deltas against a baseline</span><strong>UK &middot; define-uk</strong></summary>
+        <div class="qa-body">
+          <p>The authors&rsquo; ecological stock-flow-consistent model of the UK economy and climate, run unmodified at a pinned commit: one published scenario, read as deltas over 2023&ndash;2037.</p>
+          <div class="qa-facts">
+          <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Deltas only, never levels</strong> &mdash; the baseline sits far from outturns, so nothing here is a forecast</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Partial replication: the macro block replicates manual Table&nbsp;4, and scenario deltas are design-gated because <strong>no numeric v1.1 scenario results are published</strong></span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core one way: scenario income deltas drive employment-income incidence (<code>define_scenario_incidence</code>, experimental)</span></div>
+          </div>
+          <p class="qa-link"><a href="/define">Open DEFINE-UK &rarr;</a></p>
+        </div>
+      </details>
+    </div>
+    <p class="chooser-note">Already have two candidates? <a href="#compare">Compare their assumptions and tradeoffs</a>.</p>
+  </section>
+  <section id="compose" class="band band-stack">
+    <div class="band-head"><span class="kicker mono">combine the models</span><h2>Every join starts or ends at the microsimulation.</h2><p class="section-intro"><code>score_reform</code> accepts <code>microsim</code>, <code>obr</code>, <code>og</code> and <code>og+microsim</code>. The other four members connect the opposite way.</p></div>
     <div class="qa-list">
       <details class="qa" id="score">
-        <summary><span>What would a reform cost — and what would it do to the economy?</span><strong>score a reform</strong></summary>
+        <summary><span>What would a reform cost &mdash; and what would it do to the economy?</span><strong>score a reform</strong></summary>
         <div class="qa-body">
-          <p>The scoring pipeline chains two members: PolicyEngine's microsimulation produces the static costing from the actual tax-benefit rules, then the OBR emulator feeds it through the macro model for the second-round effects — the OBR's own "static costing in, second-round effects out" workflow.</p>
+          <p>The pipeline chains two members: the microsimulation produces the static costing from the actual tax-benefit rules, then the OBR emulator returns the second-round effects.</p>
           <div class="pipeline" role="img" aria-label="Pipeline: a reform goes to the PolicyEngine microsimulation for the static costing, which feeds the OBR emulator for macro feedback.">
             <span class="pl-node"><strong>Reform</strong></span>
             <span class="pl-arrow" aria-hidden="true">&rarr;</span>
@@ -70,125 +161,34 @@
             <span class="pl-node"><strong>Scored result</strong></span>
           </div>
           <div class="qa-facts">
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Worked example: 1p on the basic rate — £6.46bn (2026) &rarr; £7.38bn (2030), GDP &minus;0.02% on impact building to &minus;0.06%</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Static costing runs <strong>below</strong> HMRC's ready reckoner at every matched year &mdash; &minus;6.4% in 2026&ndash;27; a benchmark, not a validation</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Hosted — MCP tools or one CLI command</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Worked example: 1p on the basic rate &mdash; £6.46bn (2026) &rarr; £7.38bn (2030), GDP &minus;0.02% on impact building to &minus;0.06%</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>The static costing runs <strong>below</strong> HMRC&rsquo;s ready reckoner at every matched year &mdash; &minus;6.4% in 2026&ndash;27; a benchmark, not a validation</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>UK only: no US macro bridge exists, so a US reform is scored statically</span></div>
           </div>
-          <p>The <code>score_reform</code> MCP tool and the <code>pe-macro score</code> CLI take the same flat reform dict and a scoring model: <code>microsim</code> (static costing), <code>obr</code> (with macro feedback), <code>og</code> (long-run steady state; local-only), or <code>og+microsim</code> (dynamic).</p>
           <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro score --country uk --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --model obr</code></pre></div>
-          <p>Read the caveats before the headline: the direct costing inherits survey-microdata uncertainty, and the emulator's impact multiplier is ~1 by construction vs the OBR's published 0.6 — treat macro feedback as sign and order of magnitude. Step-by-step mechanics live on the <a href="/pe">microsimulation</a> (the direct effect) and <a href="/obr">OBR emulator</a> (the second round) pages; setup on the <a href="/connect">Use page</a>.</p>
+          <p>Read the caveats before the headline: the costing inherits survey-microdata uncertainty, and the emulator&rsquo;s impact multiplier is ~1 by construction vs the OBR&rsquo;s published 0.6 &mdash; treat macro feedback as sign and order of magnitude. Mechanics on the <a href="/pe">microsimulation</a> and <a href="/obr">OBR emulator</a> pages; setup on the <a href="/connect">Use page</a>.</p>
         </div>
       </details>
       <details class="qa">
-        <summary><span>What is the outlook for the UK or US economy?</span><strong>economy</strong></summary>
+        <summary><span>What a reform does once wages and the capital stock adjust</span><strong>UK &middot; og+microsim</strong></summary>
         <div class="qa-body">
-          <p>The economy pages put the latest official outturns beside the models' near-term view, every number tied to the data vintage it was published with: the UK forecast comes from the boe-svar model (with credible bands, archived and scored in public), the US path from the FRB/US conditioning baseline.</p>
+          <p>OG-UK solves the reform&rsquo;s long-run steady state, then its wage and interest-rate changes feed a second microsimulation run, so the distributional result carries general-equilibrium feedback.</p>
           <div class="qa-facts">
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>UK: GDP, CPI and unemployment with 68% ranges, quarterly</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>US: outturns beside the LONGBASE baseline — a conditioning path, not a forecast</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Every forecast archived before outturns exist; scored on the <a href="/forecasts">Forecasts</a> page</span></div>
-          </div>
-          <p class="qa-link"><a href="/economy">Economy &rarr;</a></p>
-        </div>
-      </details>
-      <details class="qa">
-        <summary><span>What does a specific shock or policy lever do?</span><strong>pick a model</strong></summary>
-        <div class="qa-body">
-          <p>That depends on the country, the horizon, and the mechanism you care about — the chooser below matches the question to the right model.</p>
-          <p class="qa-link"><a href="#choose">Pick a model below &darr;</a></p>
-        </div>
-      </details>
-    </div>
-  </section>
-  <section id="choose" class="band band-stack">
-    <div class="band-head"><span class="kicker mono">choose a model</span><h2>What do you need to understand?</h2></div>
-    <div class="qa-list">
-      <details class="qa">
-        <summary><span>Taxes and benefits for a household or population</span><strong>UK + US · PolicyEngine</strong></summary>
-        <div class="qa-body">
-          <p>The microsimulation runs the actual tax-benefit rules as code over enhanced survey microdata (Enhanced FRS for the UK, CPS for the US), so it answers at both levels: one household’s net income under a reform, or the population-wide revenue and distributional effect.</p>
-          <div class="qa-facts">
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Hosted — MCP tools and a CLI, no account needed</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Household answers are exact rule arithmetic; population answers inherit survey-data error</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Static by design: no behavioural or macro feedback (the macro members add that)</span></div>
-          </div>
-          <p class="qa-link"><a href="/pe">Open PolicyEngine microsim &rarr;</a></p>
-        </div>
-      </details>
-      <details class="qa">
-        <summary><span>A monetary or fiscal shock in the US over coming quarters</span><strong>US · frb-us</strong></summary>
-        <div class="qa-body">
-          <p>The Federal Reserve’s FRB/US model — 284 equations &mdash; 120 estimated behavioural equations and 164 identities &mdash; parsed from the Board’s own model file — is solved by damped Newton around the April 2026 LONGBASE baseline; you pick the lever and the policy rule, and read the deviation path quarter by quarter.</p>
-          <div class="qa-facts">
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Levers: federal funds rate, government spending, transfers, taxes — each in its own units</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Matches the Fed’s own pyfrbus across all 284 variables to <strong>~1&times;10<sup>&minus;8</sup></strong> &mdash; the Board’s own two releases differ from each other by 1.3&times;10<sup>&minus;8</sup>, so this sits at the reference implementation’s noise floor. Reproducing LONGBASE itself is an identity, not evidence</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>VAR expectations only; a conditioning baseline, not a forecast</span></div>
-          </div>
-          <p class="qa-link"><a href="/frb-us">Open FRB/US &rarr;</a></p>
-        </div>
-      </details>
-      <details class="qa">
-        <summary><span>How US shock responses differ across the household wealth distribution</span><strong>US · us-hank</strong></summary>
-        <div class="qa-body">
-          <p>A two-asset heterogeneous-agent New Keynesian model (an ABRS 2021 replication) solves the same monetary, fiscal or productivity shock for the whole distribution of households, then reports consumption responses by liquid-wealth quartile and the hand-to-mouth share.</p>
-          <div class="qa-facts">
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>MPCs by wealth quartile alongside the aggregate response</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Warm shock in seconds via a cached sequence-space Jacobian</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Stylized replication — not a forecaster, no reform scoring</span></div>
-          </div>
-          <p class="qa-link"><a href="/us-hank">Open US HANK &rarr;</a></p>
-        </div>
-      </details>
-      <details class="qa">
-        <summary><span>A selected UK fiscal or macro scenario over 3–5 years</span><strong>UK · obr-macro</strong></summary>
-        <div class="qa-body">
-          <p>A transpiled, solvable copy of the OBR’s published macroeconometric model, anchored to the latest EFO with held add-factors: shock a lever, re-solve, and read GDP, consumption and investment deviations against the official forecast path.</p>
-          <div class="qa-facts">
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Worked example: 1p on the basic rate — £6.46bn (2026) rising to £7.38bn (2030) with the macro feedback</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Emulator tracks the published forecast within 0.15% (GDP) / 0.25% (consumption)</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Impact multiplier ~1 by construction vs the OBR’s published 0.6 — read magnitudes, not point estimates</span></div>
-          </div>
-          <p class="qa-link"><a href="/obr">Open the OBR emulator &rarr;</a></p>
-        </div>
-      </details>
-      <details class="qa">
-        <summary><span>Work, saving, and capital effects over decades</span><strong>UK · psl-og</strong></summary>
-        <div class="qa-body">
-          <p>80 overlapping cohorts choose work and saving over their lifetimes; firms and the government close the economy. Solve the steady state or the full 60-period transition path and read where a reform takes GDP, investment and revenue in the long run.</p>
-          <div class="qa-facts">
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Worked example: +1pp basic rate → GDP −£5.0bn (−0.14%) and tax revenue +0.29pp of GDP by 2030</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Tax functions estimated from PolicyEngine microdata; ONS/OBR-calibrated</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Local-only and experimental: calibrated, with no published ground truth</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Local-only and experimental; the OG solve needs its own environment, so run the two-step <code>--og-payload</code> pipeline</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>The steady-state factor is applied flat: <strong>no transition path</strong>, and no price-level effects, because the OG model is real</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Effective-labour incidence is reported, not allocated &mdash; and <strong>no scored result is published</strong></span></div>
           </div>
           <p class="qa-link"><a href="/olg">Open OG-UK &rarr;</a></p>
         </div>
       </details>
       <details class="qa">
-        <summary><span>What drove UK GDP and inflation at the latest model-data vintage</span><strong>UK · boe-svar</strong></summary>
+        <summary><span>How a macro shock lands across households</span><strong>experimental &middot; four members</strong></summary>
         <div class="qa-body">
-          <p>An eight-variable Bayesian structural VAR identifies named shocks (demand, supply, policy…) with sign and zero restrictions, then decomposes recent GDP and inflation into their contributions — and projects forward with credible bands.</p>
-          <div class="qa-facts">
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Frozen-edge check: 14 of 14 outturns inside the 68% bands (bands run wide)</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Forecasts are archived before outturns exist and scored in public</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Hosted — same model behind the site’s UK forecast</span></div>
-          </div>
-          <p class="qa-link"><a href="/svar">Open BoE SVAR &rarr;</a></p>
+          <p>The four members that cannot score a reform run the arrow the other way instead. <strong>boe-svar</strong>, <strong>frb-us</strong>, <strong>us-hank</strong> and <strong>define-uk</strong> each take a macro path in and return distributional incidence through a microsimulation run &mdash; all four experimental, and none of them a reform bridge. The row-by-row mapping is in the <a href="#compare">comparison table</a>.</p>
         </div>
       </details>
     </div>
-    <p class="chooser-note">Already have two candidates? <a href="#compare">Compare their assumptions and tradeoffs</a>.</p>
-  </section>
-  <section class="band band-stack">
-    <div class="band-head"><span class="kicker mono">all models</span><h2>Inspect the model before you use it.</h2><p class="section-intro">Each guide covers inputs, outputs, method, validation, limitations, and how to run the model.</p></div>
-    <div class="strategy-grid">
-      <a class="strategy-card" href="/pe"><header><span class="card-id mono">pe-microsim</span><span class="tag-row"><span class="tag tag-country">UK</span><span class="tag tag-country">US</span><span class="tag tag-hosted">hosted</span></span></header><h3>PolicyEngine microsimulation</h3><p>PolicyEngine&rsquo;s own engine, and the one behind policyengine.org: taxes, benefits, net income and population impacts, household by household. Population results carry survey uncertainty; it cannot answer GDP, inflation, interest rates or macro feedback.</p><span class="strategy-paper-link mono">open model →</span></a>
-      <a class="strategy-card" href="/obr"><header><span class="card-id mono">obr-macro</span><span class="tag-row"><span class="tag tag-country">UK</span><span class="tag tag-hosted">hosted</span></span></header><h3>OBR macroeconometric model</h3><p>Trace GDP, consumption, and investment under selected near-term scenarios. Checked against published anchors; borrowing is not yet returned.</p><span class="strategy-paper-link mono">open model →</span></a>
-      <a class="strategy-card" href="/svar"><header><span class="card-id mono">boe-svar</span><span class="tag-row"><span class="tag tag-country">UK</span><span class="tag tag-hosted">hosted</span></span></header><h3>Bank of England structural VAR</h3><p>Identify shocks and forecast GDP and inflation with uncertainty ranges. Estimated through 2025Q1; conditioned through 2026Q1.</p><span class="strategy-paper-link mono">open model →</span></a>
-      <a class="strategy-card" href="/frb-us"><header><span class="card-id mono">frb-us</span><span class="tag-row"><span class="tag tag-country">US</span><span class="tag tag-hosted">hosted</span></span></header><h3>Federal Reserve macroeconomic model</h3><p>Run selected monetary and fiscal levers under VAR expectations. No reform bridge or model-consistent expectations.</p><span class="strategy-paper-link mono">open model →</span></a>
-      <a class="strategy-card" href="/us-hank"><header><span class="card-id mono">us-hank</span><span class="tag-row"><span class="tag tag-country">US</span><span class="tag tag-hosted">hosted</span></span></header><h3>US heterogeneous-agent NK model</h3><p>Run stylized shocks in a two-asset HANK replication with MPC-by-quartile output. Not a forecaster; no reform scoring.</p><span class="strategy-paper-link mono">open model →</span></a>
-      <a class="strategy-card" href="/olg"><header><span class="card-id mono">psl-og</span><span class="tag-row"><span class="tag tag-country">UK</span><span class="tag tag-local">local</span></span></header><h3>PSL overlapping generations</h3><p>Run local long-run reform analysis; transition paths are available from the package. Calibrated, not outcome-validated.</p><span class="strategy-paper-link mono">open model →</span></a>
-      <a class="strategy-card" href="/define"><header><span class="card-id mono">define-uk</span><span class="tag-row"><span class="tag tag-country">UK</span><span class="tag tag-local">local</span></span></header><h3>DEFINE-UK ecological stock-flow model</h3><p>Run UK climate-policy scenarios through the upstream E-SFC code, unmodified. Experimental — partial replication: the baseline replicates the manual; scenario deltas are design-gated and paper-anchored. Deltas only, never levels.</p><span class="strategy-paper-link mono">open model →</span></a>
-    </div>
+    <p class="chooser-note">The routes that run these chains end to end are listed on the <a href="/forecasts">Forecasts</a> page.</p>
   </section>
   <section id="compare" class="band">
     <div class="band-head">
@@ -198,17 +198,16 @@
     <div class="prose comparison-prose">
       <div class="table-scroll desktop-comparison comparison-table-wrap cmp-clamped" id="cmp-wrap">
       <table class="comparison-table">
-        <caption>The seven models compared across question class, method, country, vintage, verification and run surface</caption>
+        <caption>The seven models compared across question class, method, country, vintage, microsimulation connection and run surface</caption>
         <thead><tr><td></td><th scope="col"><a href="/pe">PolicyEngine microsimulation<br><span>pe-microsim</span></a></th><th scope="col"><a href="/obr">OBR macroeconometric<br><span>obr-macro</span></a></th><th scope="col"><a href="/svar">Bank of England structural VAR<br><span>boe-svar</span></a></th><th scope="col"><a href="/frb-us">Federal Reserve model<br><span>frb-us</span></a></th><th scope="col"><a href="/us-hank">US heterogeneous-agent NK<br><span>us-hank</span></a></th><th scope="col"><a href="/olg">Overlapping generations<br><span>psl-og</span></a></th><th scope="col"><a href="/define">Ecological stock-flow consistent<br><span>define-uk</span></a></th></tr></thead>
         <tbody>
           <tr><th scope="row"><strong>Question class</strong></th><td>What a specific family pays and receives; distributional effects</td><td>Selected near-term UK fiscal and macro scenarios</td><td>What drove the UK economy at the latest vintage; short-run forecasts</td><td>US macro dynamics: monetary and fiscal shocks, quarter by quarter</td><td>Distributional transmission of stylized US shocks: who responds, by wealth</td><td>Long-run incentives: labour supply, saving, the capital stock over decades</td><td>UK climate-policy scenario deltas — nothing quotable today</td></tr>
           <tr><th scope="row"><strong>Method</strong></th><td>Static tax-benefit microsimulation — direct rule evaluation, no behavioural response</td><td>Structural macroeconometric emulator — Gauss–Seidel over 372 equations per quarter</td><td>Bayesian structural VAR — posterior sampling with zero and sign restrictions</td><td>Large-scale macroeconometric model — 284 equations solved under VAR expectations</td><td>Two-asset HANK (Auclert et al. 2021) — first-order sequence-space impulse responses</td><td>Dynamic general equilibrium (OLG) — steady-state root-find and transition-path iteration</td><td>Ecological stock-flow consistent (E-SFC) — upstream R code run unmodified at a pinned commit</td></tr>
           <tr><th scope="row"><strong>Country</strong></th><td>UK &amp; US</td><td>UK</td><td>UK</td><td>US</td><td>US</td><td>UK (OG-UK)</td><td>UK</td></tr>
           <tr><th scope="row"><strong>Data vintage</strong></th><td>UK &amp; US statute; enhanced FRS 2023–24 microdata for UK population runs</td><td>OBR <em>Economic and Fiscal Outlook</em>, March 2026</td><td>ONS, BoE and FRED — estimated through 2025Q1, conditioned to the 2026Q1 edge</td><td>The Fed's <code>model.xml</code> and LONGBASE database, April 2026</td><td>The published Econometrica 2021 calibration; no data vintage</td><td>ONS, OBR and BoE aggregates as calibration targets; OG-UK 0.3.2</td><td>DEFINE-UK 1.1, April 2026, at pinned commit <code>846081a</code></td></tr>
-          <tr><th scope="row"><strong>Evidence class</strong> (<a href="#validation">numbers →</a>)</th><td>Deterministic rule calculation; population estimates add survey uncertainty</td><td>Validated for selected scenarios; published anchor is not out-of-sample validation</td><td>Validated replication for selected outputs</td><td>Validated software replication; substantive comparisons are approximate</td><td>Validated replication for stylized shocks; not a forecaster; responses are first-order</td><td>Research prototype; calibrated counterfactual with no ground truth</td><td>Partial replication — the macro block replicates manual Table 4; scenario deltas are design-gated, as no numeric scenario results are published</td></tr>
           <tr><th scope="row"><strong>Microsim connection</strong></th><td>Is the microsimulation — every bridge starts or ends here</td><td>Static costing in, macro feedback out — <code>score_reform</code> via <code>HHDI_ADDFACTOR</code></td><td>CPI path &rarr; benefit-uprating incidence (<code>svar_inflation_incidence</code>, experimental)</td><td>Wage/hours path &rarr; employment-income incidence (<code>frbus_shock_incidence</code>, experimental)</td><td>Wage/labor IRFs &rarr; employment-income incidence (<code>hank_shock_incidence</code>, experimental)</td><td>Two-way: statute in via PE tax functions; long-run changes back into a second microsim run (<code>og+microsim</code>)</td><td>Scenario income deltas &rarr; employment-income incidence (<code>define_scenario_incidence</code>, experimental; hosted via <code>define_payload</code>)</td></tr>
           <tr><th scope="row"><strong>Reform scoring</strong></th><td>Yes — a PolicyEngine parameter + a new value, applied directly to households</td><td>Yes — shocks to exogenous model variables; static-costing bridge from PolicyEngine reforms</td><td>No — the baseline/conditioning member: it reads the economy reforms are scored against</td><td>No — shock experiments only; no reform bridge, so <code>score_reform</code> refuses <code>model="frbus"</code></td><td>No — stylized shocks only; the labor tax is endogenous, so <code>score_reform</code> refuses <code>model="hank"</code></td><td>Yes — a PolicyEngine policy translated into estimated tax functions</td><td>No — no reform bridge; <code>score_reform</code> will not accept it</td></tr>
-          <tr><th scope="row"><strong>Out of scope</strong></th><td>GDP, inflation, interest rates, or macro feedback</td><td>Arbitrary reform incidence; borrowing; capital spending (<code>CGIPS</code> is dead) and corporation tax (<code>TCPRO</code> never converges)</td><td>The causal effect of a specific statutory reform</td><td>PolicyEngine reform effects, anticipated-policy paths, or MCE scenarios</td><td>Forecasts, detailed tax reforms, or nonlinear/state-dependent dynamics</td><td>A short-run forecast or independently validated reform effect</td><td>Levels, forecasts, reform scoring; microsimulation incidence (planned, post-validation)</td></tr>
+          <tr><th scope="row"><strong>Out of scope</strong></th><td>GDP, inflation, interest rates, or macro feedback</td><td>Arbitrary reform incidence; borrowing; capital spending (<code>CGIPS</code> is dead) and corporation-tax magnitudes (<code>TCPRO</code> converges slowly: 12 quarters is ~40% of its plateau)</td><td>The causal effect of a specific statutory reform</td><td>PolicyEngine reform effects, anticipated-policy paths, or MCE scenarios</td><td>Forecasts, detailed tax reforms, or nonlinear/state-dependent dynamics</td><td>A short-run forecast or independently validated reform effect</td><td>Levels, forecasts, reform scoring; microsimulation incidence (planned, post-validation)</td></tr>
           <tr><th scope="row"><strong>Run surface</strong></th><td>Hosted</td><td>Hosted (CLI, MCP, Python API)</td><td>Hosted (CLI, MCP, Python API)</td><td>Hosted (CLI, MCP, Python API) — raw shocks only</td><td>Hosted (CLI, MCP, Python API) — stylized shocks only</td><td>Local only</td><td>Local CLI (<code>pe-macro define-scenario</code>); hosted MCP tools return run instructions</td></tr>
           <tr><th scope="row"><strong>Typical runtime</strong></th><td>Sub-second per household; minutes for population runs</td><td>Seconds to minutes per scenario</td><td>Minutes per full estimation + identification run</td><td>Seconds to minutes per simulation</td><td>~18s cold per variant (cached); instant warm</td><td>~17+ min per steady-state solve (two per score); hours for transition paths</td><td>Instant from the cached pinned run; a fresh upstream run takes tens of minutes in R 4.3</td></tr>
         </tbody>
@@ -237,9 +236,8 @@
       </div>
       <div id="val-p1" role="tabpanel" aria-labelledby="val-tab-1">
       <p>
-        The seven models support different kinds of checks; the table below
-        groups them into four classes, one headline each. Open a model's
-        validation page for the evidence behind the row.
+        The seven models support different kinds of check, grouped below into
+        four classes with one headline each.
       </p>
       <div class="table-scroll mo-tablecard cmp-compare">
       <table>
@@ -295,7 +293,7 @@
       <p>
         Imposed matches are anchors, not validation. The stronger evidence is
         out-of-sample forecasts, independent costings, and agreement with
-        another implementation — published institutional answers beside ours.
+        another implementation.
       </p>
       <div class="table-scroll mo-tablecard cmp-compare">
       <table>
@@ -341,7 +339,7 @@
     <div class="band-head">
       <span class="kicker mono">evidence guides</span>
       <h2>Read the source literature and replication notes.</h2>
-      <p class="section-intro">Five working papers (full PDFs), one replication report, one feasibility note — one document per model.</p>
+      <p class="section-intro">Six working papers (full PDFs) and one feasibility note — one document per model.</p>
     </div>
     <div class="strategy-grid evidence-grid">
       <a class="strategy-card" href="/papers/pe-microsim"><header><span class="card-id mono">pe-microsim</span><span class="tag-row"><span class="tag">working paper</span></span></header><p>Statute as code for the UK and US: why household arithmetic is exact, population estimates are not, and how the static costing benchmarks against HMRC.</p><span class="strategy-paper-link mono">read &rarr;</span></a>

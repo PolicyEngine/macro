@@ -36,7 +36,6 @@
   <nav class="nav-links" aria-label="Primary">
     <a class="nav-mobile" href="/">Home</a>
     <a class="nav-mobile" href="/models" aria-current="true">Models</a>
-    <a class="nav-mobile" href="/economy">Economy</a>
     <a class="nav-mobile" href="/forecasts">Forecasts</a>
     <a class="nav-mobile nav-start" href="/connect">Use</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
@@ -73,48 +72,94 @@
       <a class="model-tabs-link" href="/papers/obr-macro">Paper</a>
     </div>
   </nav>
-  <section id="pe-bridge" class="band">
+  <section id="overview" class="band band-wide">
     <div class="band-head">
-      <span class="kicker mono">with the microsimulation</span>
-      <h2>Microsimulation supplies the direct cost; this model returns the feedback.</h2>
+      <span class="kicker mono">overview</span>
+      <h2>How a reform reaches it, what it is, what it can answer.</h2>
     </div>
     <div class="prose">
-      <div class="qa-facts">
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Connection.</strong> Static-costing bridge, both hosted: <a href="/pe">PolicyEngine</a> computes the direct Exchequer effect of a statutory reform; <code>score_reform</code> injects it through the declared <code>HHDI_ADDFACTOR</code> point and this model returns the economy-wide second round.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Worked example.</strong> 1p on the basic rate from April 2026: direct yield &pound;6.46bn in 2026; GDP &minus;0.020% on impact, deepening to &minus;0.057% by 2027Q4 (full walkthrough &rarr; <a href="/models#score">score a reform</a>).</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Validation.</strong> <a href="/obr/validation">Anchored to the March 2026 EFO</a> (0.15% GDP MAPE) &mdash; but anchored accuracy is a <strong>by-construction invariant</strong>, not a forecast claim: free-running, the same equations miss GDP by <strong>4.48%</strong>. Checked against HMRC&rsquo;s ready reckoner (&pound;6.46bn vs &pound;6.9bn).</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Results.</strong> Run it from <a href="/connect">any connected client</a>; every score carries its assumptions and data vintage.</span></div>
-      </div>
-    </div>
-  </section>
-
-
-  <section id="what" class="band">
-    <div class="band-head">
-      <span class="kicker mono">01 — what it is</span>
-      <h2>An open Python implementation of the OBR's published equations.</h2>
-    </div>
-    <div class="prose">
-      <p class="mo-lead">
-        The OBR's model is a computational representation of the UK National
-        Accounts — built by HM Treasury in 1970, jointly maintained by the
-        OBR and the Treasury since 2010. The OBR publishes its full equation
-        listing, but as EViews source few can run. This project transpiles it
-        to Python and solves it: <strong>372 published equations</strong> in
-        <strong>17 thematic groups</strong> over <strong>636
-        variables</strong> — 383 solved by the model (roughly 29
-        econometrically estimated, 216 identities, 138 calibrated or
-        technical) and 253 exogenous inputs, the judgements and assumptions
-        you get to change.
-      </p>
       <p>
-        It is a <strong>structural macroeconometric model</strong> in the
-        HM Treasury / Cowles-Commission tradition: where the
-        <a href="/olg">OLG model</a> derives behaviour from optimising
-        households and firms, this one reproduces the estimated relationships
-        the official forecaster actually relies on.
+        Three things to know before you run it: how a PolicyEngine reform gets
+        into the model, what the model actually is, and what it will and will
+        not tell you. The panel alongside carries the figures each step
+        refers to.
       </p>
-      <div class="mo-figcard">
+    </div>
+
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+
+      <div class="meth-step" id="pe-bridge" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>With the microsimulation</h3></div>
+        <p class="mo-lead">
+          Microsimulation supplies the direct cost; this model returns the
+          feedback.
+        </p>
+        <div class="pipeline">
+          <span class="pl-node"><strong>Reform</strong></span>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <a class="pl-node" href="/pe"><strong>pe-microsim</strong><span class="mono">cost &middot; who pays</span></a>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <span class="pl-node"><strong>obr-macro</strong><span class="mono">macro feedback</span></span>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <span class="pl-node pl-node-out"><strong>Scored result</strong></span>
+        </div>
+        <h4>The combination</h4>
+        <p><code>score_reform(country="uk", reform=..., model="obr")</code> runs <a href="/pe">PolicyEngine</a>'s static costing for each year of the window, then hands this model the bill &mdash; the OBR's own workflow: static costing in, second-round effects out.</p>
+        <h4>The mechanism</h4>
+        <p>Each year's costing enters as <code>HHDI_ADDFACTOR</code>: minus the annual &pound;bn, spread flat across its four quarters (&times;1000&nbsp;&divide;&nbsp;4 &rarr; &pound;m/qtr), held as an add-factor on household disposable income. The emulator then solves income &rarr; consumption &rarr; GDP quarter by quarter against the anchored March 2026 baseline.</p>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro score --country uk \
+  --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
+  --model obr</code></pre></div>
+        <div class="callout">
+          <strong>Same-breath caveats.</strong> The impact multiplier is
+          <strong>~1 by construction</strong> against the OBR's published 0.6,
+          so read the GDP feedback as an upper bound. Corporation tax cannot go
+          through the bridge &mdash; it is not household-borne in the microsim, and
+          the direct <code>TCPRO</code> lever converges only slowly (a 12-quarter run is ~40% of its plateau), so the bridge
+          refuses it rather than guessing. UK only: no US bridge exists, so a
+          US reform is scored statically.
+        </div>
+        <p class="vlinks mono">
+          <a href="/models#compose">every join in the suite &rarr;</a>
+          <a href="/#joins">this join on the landing page &rarr;</a>
+        </p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">the join</div>
+        <div class="meth-eq"><div class="meth-eq-label">entry point</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code> &mdash; household disposable income, &pound;m/qtr</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">spreading</div><div class="meth-eq-body">&minus;(annual &pound;bn) &times; 1000 &divide; 4, flat across four quarters</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">solved chain</div><div class="meth-eq-body">income &rarr; consumption &rarr; GDP, against the anchored baseline</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">refused</div><div class="meth-eq-body">corporation tax; US reforms (scored statically)</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="what" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it is</h3></div>
+        <p class="mo-lead">
+          An open Python implementation of the OBR's published equations.
+        </p>
+        <h4>The published listing, made runnable</h4>
+        <p>
+          The OBR's model is a computational representation of the UK National
+          Accounts &mdash; built by HM Treasury in 1970, jointly maintained by the
+          OBR and the Treasury since 2010. The OBR publishes its full equation
+          listing, but as EViews source few can run. This project transpiles it
+          to Python and solves it: <strong>372 published equations</strong> in
+          <strong>17 thematic groups</strong> over <strong>636
+          variables</strong> &mdash; 383 solved by the model (roughly 29
+          econometrically estimated, 216 identities, 138 calibrated or
+          technical) and 253 exogenous inputs, the judgements and assumptions
+          you get to change.
+        </p>
+        <h4>Where it sits</h4>
+        <p>
+          It is a <strong>structural macroeconometric model</strong> in the
+          HM Treasury / Cowles-Commission tradition: where the
+          <a href="/olg">OLG model</a> derives behaviour from optimising
+          households and firms, this one reproduces the estimated relationships
+          the official forecaster actually relies on.
+        </p>
+        <div class="mo-figcard">
 <!-- obr-current-outlook:begin -->
 <figure class="vfig current-outlook">
 <svg class="vchart" viewBox="0 0 800 326" role="img" aria-labelledby="obr-current-t obr-current-d">
@@ -147,49 +192,95 @@
 <div class="olg-legend"><span class="li"><span class="ln ln-s1"></span>Real GDP</span><span class="li"><span class="ln ln-s2"></span>Household consumption</span></div>
 </figure>
 <!-- obr-current-outlook:end -->
+        </div>
+        <div class="meth-inline">
+        <div class="meth-sec-title">the listing</div>
+        <div class="meth-eq"><div class="meth-eq-label">equations</div><div class="meth-eq-body">372 published, in 17 thematic groups</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">variables</div><div class="meth-eq-body">636 &mdash; 383 solved, 253 exogenous</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">of the 383</div><div class="meth-eq-body">~29 estimated, 216 identities, 138 calibrated or technical</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">tradition</div><div class="meth-eq-body">HM Treasury / Cowles-Commission structural</div></div>
+        </div>
       </div>
-    </div>
-  </section>
 
-  <section id="answers" class="band">
-    <div class="band-head">
-      <span class="kicker mono">02 — what it can answer</span>
-      <h2>Second-round effects on a static costing.</h2>
-    </div>
-    <div class="prose">
-      <p class="mo-lead">
-        The emulator does the second half of the official workflow:
-        microsimulation supplies the direct Exchequer effect, the macro model
-        the economy-wide feedback. A static-costing bridge wires
-        <a href="/pe">PolicyEngine's microsimulation</a> into the emulator so
-        a statutory reform can be scored end to end.
-      </p>
-      <p>
-        Worked example — 1p on the basic rate of income tax from April 2026:
-        direct yield <strong>£6.46bn in 2026</strong>, <strong>£7.38bn by
-        2030</strong>; GDP falls <strong>0.020% (−£0.14bn) on impact in
-        2026Q1, deepening to 0.057% (−£0.40bn) by 2027Q4</strong> on the
-        March 2026 baseline. Full walkthrough → <a href="/models#score">/score</a>.
-      </p>
-      <div class="callout">
-        <strong>Read GDP-feedback estimates as an upper bound.</strong> Under
-        the demand closure a spending shock lands directly in the GDP
-        identity with the behavioural second round largely inactive, so the
-        impact multiplier is ~1 by construction; the OBR's
-        <a href="https://obr.uk/box/fiscal-multipliers/">published impact
-        multiplier</a> for day-to-day public services and welfare spending is
-        0.6. The
-        <a href="/obr/validation#caveats">validation page</a> lists the
-        full set of known limits.
+      <div class="meth-step" id="answers" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
+        <p class="mo-lead">
+          Second-round effects on a static costing.
+        </p>
+        <h4>The half of the workflow it does</h4>
+        <p>
+          The emulator does the second half of the official workflow:
+          microsimulation supplies the direct Exchequer effect, the macro model
+          the economy-wide feedback. A static-costing bridge wires
+          <a href="/pe">PolicyEngine's microsimulation</a> into the emulator so
+          a statutory reform can be scored end to end.
+        </p>
+        <h4>Worked example</h4>
+        <p>
+          1p on the basic rate of income tax from April 2026:
+          direct yield <strong>&pound;6.46bn in 2026</strong>, <strong>&pound;7.38bn by
+          2030</strong>; GDP falls <strong>0.020% (&minus;&pound;0.14bn) on impact in
+          2026Q1, deepening to 0.057% (&minus;&pound;0.42bn) by 2027Q4</strong> on the
+          March 2026 baseline. Full walkthrough &rarr; <a href="/models#score">/score</a>.
+        </p>
+        <div class="callout">
+          <strong>Read GDP-feedback estimates as an upper bound.</strong> Under
+          the demand closure a spending shock lands directly in the GDP
+          identity with the behavioural second round largely inactive, so the
+          impact multiplier is ~1 by construction; the OBR's
+          <a href="https://obr.uk/box/fiscal-multipliers/">published impact
+          multiplier</a> for day-to-day public services and welfare spending is
+          0.6. The
+          <a href="/obr/validation#caveats">validation page</a> lists the
+          full set of known limits.
+        </div>
+        <div class="callout">
+          <strong>It cannot</strong> tell you who wins and loses &mdash; that is
+          <a href="/pe">PolicyEngine</a>'s distributional analysis. Nor a
+          long-run structural counterfactual &mdash; that is the
+          <a href="/olg">OLG model</a>. Nor what state the economy is in
+          today &mdash; that is the <a href="/svar">SVAR</a> (structural vector
+          autoregression).
+        </div>
+        <div class="meth-inline">
+        <div class="meth-sec-title">1p on the basic rate, April 2026</div>
+        <div class="meth-eq"><div class="meth-eq-label">direct yield</div><div class="meth-eq-body">&pound;6.46bn (2026) &rarr; &pound;7.38bn (2030)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">GDP on impact</div><div class="meth-eq-body">&minus;0.020% (&minus;&pound;0.14bn), 2026Q1</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">deepening to</div><div class="meth-eq-body">&minus;0.057% (&minus;&pound;0.42bn), 2027Q4</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">cross-check</div><div class="meth-eq-body">HMRC ready reckoner &pound;6.9bn (&minus;6.4% gap)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">anchored fit</div><div class="meth-eq-body">0.15% GDP MAPE; free-running 4.48%</div></div>
+        </div>
       </div>
-      <div class="callout">
-        <strong>It cannot</strong> tell you who wins and loses — that is
-        <a href="/pe">PolicyEngine</a>'s distributional analysis. Nor a
-        long-run structural counterfactual — that is the
-        <a href="/olg">OLG model</a>. Nor what state the economy is in
-        today — that is the <a href="/svar">SVAR</a> (structural vector
-        autoregression).
+
       </div>
+
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">The bridge</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">the join</div>
+          <div class="meth-eq"><div class="meth-eq-label">entry point</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code> &mdash; household disposable income, &pound;m/qtr</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">spreading</div><div class="meth-eq-body">&minus;(annual &pound;bn) &times; 1000 &divide; 4, flat across four quarters</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">solved chain</div><div class="meth-eq-body">income &rarr; consumption &rarr; GDP, against the anchored baseline</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">refused</div><div class="meth-eq-body">corporation tax; US reforms (scored statically)</div></div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Model at a glance</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">the listing</div>
+          <div class="meth-eq"><div class="meth-eq-label">equations</div><div class="meth-eq-body">372 published, in 17 thematic groups</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">variables</div><div class="meth-eq-body">636 &mdash; 383 solved, 253 exogenous</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">of the 383</div><div class="meth-eq-body">~29 estimated, 216 identities, 138 calibrated or technical</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">tradition</div><div class="meth-eq-body">HM Treasury / Cowles-Commission structural</div></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Worked example</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">1p on the basic rate, April 2026</div>
+          <div class="meth-eq"><div class="meth-eq-label">direct yield</div><div class="meth-eq-body">&pound;6.46bn (2026) &rarr; &pound;7.38bn (2030)</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">GDP on impact</div><div class="meth-eq-body">&minus;0.020% (&minus;&pound;0.14bn), 2026Q1</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">deepening to</div><div class="meth-eq-body">&minus;0.057% (&minus;&pound;0.42bn), 2027Q4</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">cross-check</div><div class="meth-eq-body">HMRC ready reckoner &pound;6.9bn (&minus;6.4% gap)</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">anchored fit</div><div class="meth-eq-body">0.15% GDP MAPE; free-running 4.48%</div></div>
+        </div>
+      </aside>
     </div>
   </section>
 
@@ -205,5 +296,42 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
+<script>
+// Overview scrollytelling: highlight the step at the reading line and
+// show its panel in the sticky aside.
+(function () {
+  "use strict";
+  var steps = Array.from(document.querySelectorAll(".meth-step"));
+  var panels = Array.from(document.querySelectorAll(".meth-panel"));
+  if (!steps.length || !panels.length) return;
+  var current = -1;
+  function update() {
+    var offset = window.innerHeight * 0.33;
+    var active = 0;
+    steps.forEach(function (step, i) {
+      if (step.getBoundingClientRect().top < offset) active = i;
+    });
+    if (active === current) return;
+    current = active;
+    steps.forEach(function (step, i) {
+      step.classList.toggle("active", i === active);
+    });
+    var want = Math.min.apply(null, panels.map(function (panel) {
+      return Number(panel.getAttribute("data-step"));
+    }));
+    panels.forEach(function (panel) {
+      var ds = Number(panel.getAttribute("data-step"));
+      if (ds <= active && ds > want) want = ds;
+    });
+    panels.forEach(function (panel) {
+      panel.hidden = Number(panel.getAttribute("data-step")) !== want;
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
+  update();
+})();
+</script>
 </body>
 </html>

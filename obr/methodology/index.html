@@ -45,7 +45,6 @@ window.MathJax = {
   <nav class="nav-links" aria-label="Primary">
     <a class="nav-mobile" href="/">Home</a>
     <a class="nav-mobile" href="/models" aria-current="true">Models</a>
-    <a class="nav-mobile" href="/economy">Economy</a>
     <a class="nav-mobile" href="/forecasts">Forecasts</a>
     <a class="nav-mobile nav-start" href="/connect">Use</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
@@ -91,11 +90,13 @@ window.MathJax = {
     </div>
     <div class="prose">
       <p>
-        The pipeline in five steps: the OBR's published EViews equation
+        The pipeline in six steps: the OBR's published EViews equation
         listing is rewritten in Python, initialised from official data,
         solved quarter by quarter until the equations agree, anchored so the
-        baseline reproduces the published EFO, and shocked against an
-        identical baseline so the difference is the policy effect.
+        baseline reproduces the published EFO, shocked against an identical
+        baseline so the difference is the policy effect — and joined to the
+        <a href="/pe">PolicyEngine microsimulation</a>, which supplies the
+        static costing the shock comes from.
       </p>
     </div>
 
@@ -280,6 +281,45 @@ window.MathJax = {
         <div class="meth-eq"><div class="meth-eq-label">policy effect</div><div class="meth-eq-body">\(X_t^{\text{shocked}} - X_t^{\text{baseline}}\), identical structure</div></div>
         </div>
       </div>
+
+      <div class="meth-step" id="meth-6" data-step="5">
+        <div class="meth-step-head"><span class="meth-step-num mono">6</span><h3>Score a costed reform through the microsimulation bridge</h3></div>
+        <figure class="step-diagram" data-title="The static-costing bridge" tabindex="0" role="button" aria-label="Expand diagram: The static-costing bridge">
+          <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
+            <defs><marker id="arr-s6" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--accent)"/></marker></defs>
+            <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-light)" font-weight="600">Static costing in, second-round effects out</text>
+            <rect x="15" y="48" width="150" height="80" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="90" y="72" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">pe-microsim</text>
+            <text x="90" y="92" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-mid)">static costing, &pound;bn/yr</text>
+            <text x="90" y="109" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">who pays, how much</text>
+            <line x1="170" y1="88" x2="205" y2="88" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s6)"/>
+            <rect x="210" y="48" width="160" height="80" rx="10" fill="var(--accent)"/>
+            <text x="290" y="72" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#fff" font-weight="700">HHDI_ADDFACTOR</text>
+            <text x="290" y="92" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="rgba(255,255,255,0.85)">minus the costing</text>
+            <text x="290" y="109" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="rgba(255,255,255,0.85)">&times;1000 &divide; 4 &rarr; &pound;m/qtr, held</text>
+            <line x1="375" y1="88" x2="410" y2="88" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-s6)"/>
+            <rect x="415" y="48" width="150" height="80" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+            <text x="490" y="72" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--accent)" font-weight="700">obr-macro</text>
+            <text x="490" y="92" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--text-mid)">HHDI &rarr; CONS &rarr; GDPM</text>
+            <text x="490" y="109" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">quarterly, vs baseline</text>
+            <text x="290" y="158" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-light)">1p on the basic rate: &pound;6.46bn in &rarr; GDP &minus;0.020% on impact, &minus;0.057% by 2027Q4</text>
+            <text x="290" y="180" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="var(--text-light)">impact multiplier ~1 by construction (OBR publishes 0.6) &mdash; an upper bound</text>
+          </svg>
+          <figcaption class="expand-hint mono">click to expand</figcaption>
+        </figure>
+        <h4>Static costing in, second-round effects out</h4>
+      <p>The suite's flagship join. <a href="/pe">PolicyEngine's microsimulation</a> costs a statutory reform year by year — who pays and how much — and <code>score_reform(country="uk", reform=..., model="obr")</code> hands this model the bill: each year's costing enters as <code>HHDI_ADDFACTOR</code>, minus the annual &pound;bn spread flat across its four quarters (&times;1000&nbsp;&divide;&nbsp;4 &rarr; &pound;m/qtr), held as an add-factor on household disposable income.</p>
+        <h4>What the emulator computes</h4>
+      <p>Lower income moves consumption through the published consumption equation, and consumption moves GDP under the demand closure — the second round, quarter by quarter, against the anchored baseline of step 4. 1p on the basic rate from April 2026: <strong>&pound;6.46bn</strong> static in 2026, GDP <strong>&minus;0.020% on impact, &minus;0.057% by 2027Q4</strong>.</p>
+        <h4>Where the bridge stops</h4>
+      <p>The impact multiplier is <strong>~1 by construction</strong> against the OBR's published 0.6, so read the feedback as an upper bound. Corporation tax is refused — not household-borne in the microsim, and the direct <code>TCPRO</code> closure converges only slowly (a 12-quarter run reaches ~40% of its plateau). UK only; no US bridge exists. Every join in the suite → <a href="/models#compose">/models#compose</a>.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">the bridge</div>
+        <div class="meth-eq"><div class="meth-eq-label">injection</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code> = &minus;(annual costing) &times; 1000 &divide; 4, &pound;m/qtr, held</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">transmission</div><div class="meth-eq-body"><code>HHDI</code> &rarr; <code>RHHDI</code> &rarr; <code>CONS</code> &rarr; <code>GDPM</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">command</div><div class="meth-eq-body"><code>pe-macro score --country uk --reform '{&hellip;}' --model obr</code></div></div>
+        </div>
+      </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">
         <div class="meth-panel" data-step="0">
@@ -312,6 +352,13 @@ window.MathJax = {
           <div class="meth-sec-title">closure and shock</div>
         <div class="meth-eq"><div class="meth-eq-label">closure swap</div><div class="meth-eq-body"><code>GDPM</code> endogenised; <code>DINV</code> becomes the residual</div></div>
         <div class="meth-eq"><div class="meth-eq-label">policy effect</div><div class="meth-eq-body">\(X_t^{\text{shocked}} - X_t^{\text{baseline}}\), identical structure</div></div>
+        </div>
+        <div class="meth-panel" data-step="5" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Score a costed reform through the bridge</span><span class="meth-panel-badge mono">Step 6</span></div>
+          <div class="meth-sec-title">the bridge</div>
+        <div class="meth-eq"><div class="meth-eq-label">injection</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code> = &minus;(annual costing) &times; 1000 &divide; 4, &pound;m/qtr, held</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">transmission</div><div class="meth-eq-body"><code>HHDI</code> &rarr; <code>RHHDI</code> &rarr; <code>CONS</code> &rarr; <code>GDPM</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">command</div><div class="meth-eq-body"><code>pe-macro score --country uk --reform '{&hellip;}' --model obr</code></div></div>
         </div>
       </aside>
     </div>

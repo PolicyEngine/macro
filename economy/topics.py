@@ -1,8 +1,21 @@
 #!/usr/bin/env python3
-"""Regenerate the topic-first entry pages for both countries.
+"""Regenerate the Forecasts section: fifteen pages, one shared bar.
 
-Six under /economy/topics and five under /economy/us/topics, plus the shared
-topic bar that both hubs and every topic page carry.
+Economy and Forecasts used to be two tabs over one body of work. They are one
+section now, and this module renders the parts of it that are derived rather
+than written:
+
+    /forecasts, /forecasts/us      the platform band — what a reader can
+                                   produce here, pe-microsim first — and the
+                                   section bar
+    /economy, /economy/us          the topic directory and the section bar
+    eleven topic pages             whole, under /economy/topics and
+                                   /economy/us/topics
+
+No URL moved in the merge. The eleven topic pages and the two data hubs keep
+their /economy prefix because roughly two hundred generated release notes, the
+homepage and the models hub link into it in prose; what changed is which tab
+they belong to, which ``site_nav.section`` decides, not the URL.
 
 The rest of this site is organised by model — a reader has to know what a
 structural VAR is before they can find the inflation forecast. These pages are
@@ -49,6 +62,8 @@ TOPICS_DIR = ROOT / "economy" / "topics"
 ECONOMY_PAGE = ROOT / "economy" / "index.html"
 US_TOPICS_DIR = ROOT / "economy" / "us" / "topics"
 US_PAGE = ROOT / "economy" / "us" / "index.html"
+FORECASTS_PAGE = ROOT / "forecasts" / "index.html"
+US_FORECASTS_PAGE = ROOT / "forecasts" / "us" / "index.html"
 SITEMAP = ROOT / "sitemap.xml"
 SITE = "https://policyengine-macro.vercel.app"
 
@@ -57,19 +72,40 @@ SITE = "https://policyengine-macro.vercel.app"
 # second copy of the renderer is how /economy and /economy/us drifted into two
 # different shapes in the first place — one with six topic pages and a topic
 # strip, the other with four in-page anchors that looked like tabs.
+#
+# Economy and Forecasts are one section now, so each country has two hub pages
+# with different jobs and one bar across both:
+#
+#   ``hub``   /forecasts     what the platform produces, and the scored record
+#   ``data``  /economy       the series, the long view, and the provenance
+#
+# ``topics_base`` is deliberately separate from ``hub``: the eleven topic pages
+# keep their /economy/topics/... URLs because ~200 generated release notes, the
+# homepage and the models hub link into that prefix in prose. The section a
+# page belongs to is decided by site_nav.section(), not by its URL.
 COUNTRIES = {
     "uk": {
         "label": "UK",
-        "hub": "/economy",
-        "hub_page": ECONOMY_PAGE,
+        "hub": "/forecasts",
+        "hub_page": FORECASTS_PAGE,
+        "hub_nav_marker": "forecasts-section-nav",
+        "platform_marker": "forecasts-platform",
+        "data": "/economy",
+        "data_page": ECONOMY_PAGE,
+        "topics_base": "/economy",
         "dir": TOPICS_DIR,
         "nav_marker": "economy-topic-nav",
         "directory_marker": "economy-topics",
     },
     "us": {
         "label": "US",
-        "hub": "/economy/us",
-        "hub_page": US_PAGE,
+        "hub": "/forecasts/us",
+        "hub_page": US_FORECASTS_PAGE,
+        "hub_nav_marker": "us-forecasts-section-nav",
+        "platform_marker": "us-forecasts-platform",
+        "data": "/economy/us",
+        "data_page": US_PAGE,
+        "topics_base": "/economy/us",
         "dir": US_TOPICS_DIR,
         "nav_marker": "us-economy-topic-nav",
         "directory_marker": "us-economy-topics",
@@ -79,7 +115,7 @@ COUNTRIES = {
 
 def topic_url(topic: dict) -> str:
     """Site path for one topic page, derived from its country."""
-    return f"{COUNTRIES[topic['country']]['hub']}/topics/{topic['slug']}"
+    return f"{COUNTRIES[topic['country']]['topics_base']}/topics/{topic['slug']}"
 
 sys.path.insert(0, str(ROOT))
 import site_nav  # noqa: E402  (canonical header/crumbs/footer renderer)
@@ -306,6 +342,29 @@ def band_text(values: dict) -> str:
 
 # --------------------------------------------------- verified run-it-yourself
 
+def shared_option_blocks() -> dict[str, set[str]]:
+    """Long options contributed by a shared decorator such as
+    ``@_pe_common_options``.
+
+    Without this the parser sees only the options written inline under
+    ``@main.command``, so ``pe-macro household-impact`` looks as though it
+    declares nothing but ``--reform`` — and ``command()`` would reject the
+    ``--country`` and ``--people`` the command in fact requires. Every
+    household example on this site went unverified for exactly that reason.
+    """
+    blocks: dict[str, set[str]] = {}
+    for name, body in re.findall(
+        r"^def (_[a-z0-9_]*options)\(fn\):\n(.*?)(?=\n@|\ndef |\Z)",
+        CLI_SOURCE,
+        flags=re.M | re.S,
+    ):
+        options: set[str] = set()
+        for declared in re.findall(r'click\.option\(\s*"(--[^"]+)"', body):
+            options.update(declared.split("/"))
+        blocks[name] = options
+    return blocks
+
+
 def cli_commands() -> dict[str, set[str]]:
     """``pe-macro`` command names mapped to their declared long options.
 
@@ -313,6 +372,7 @@ def cli_commands() -> dict[str, set[str]]:
     would drag in click and the model packages. A command or flag this
     generator prints but the CLI does not declare is a hard failure.
     """
+    shared = shared_option_blocks()
     commands: dict[str, set[str]] = {}
     blocks = re.split(r"^@main\.command", CLI_SOURCE, flags=re.M)[1:]
     for block in blocks:
@@ -328,6 +388,9 @@ def cli_commands() -> dict[str, set[str]]:
         head = block.split("\ndef ", 1)[0]
         for declared in re.findall(r'click\.option\(\s*"(--[^"]+)"', head):
             options.update(declared.split("/"))
+        for decorator, declared in shared.items():
+            if f"@{decorator}" in head:
+                options.update(declared)
         commands[name] = options
     return commands
 
@@ -1209,6 +1272,277 @@ def reform_data() -> str:
       <p class="chooser-note">
         Dated, immutable JSON snapshots of every series this site reads —
         <a href="/forecasts#data">browse the store, its release calendar, and the as-of recipe →</a>
+      </p>
+    </div>"""
+
+
+# --------------------------------------------- the platform band on the hubs
+#
+# Band 01 of /forecasts and /forecasts/us: what a reader can actually produce
+# here, with pe-microsim at the centre of it. Everything below is derived —
+# the "core" claim from the registry, the commands from cli.py, the tool names
+# from the golden surface — so the band cannot outlive the capability it
+# advertises. The three raise-instead-of-print helpers are the same contract
+# ``no_us_forecaster`` has held on the US topic pages.
+
+# Registry key -> the model's page on this site.
+MODEL_PAGES = {
+    "pe-microsim": "/pe",
+    "obr-macro": "/obr",
+    "boe-svar": "/svar",
+    "frb-us": "/frb-us",
+    "us-hank": "/us-hank",
+    "og-uk": "/olg",
+    "og+microsim": "/olg",
+    "define-uk": "/define",
+}
+
+
+def model_link(model_id: str) -> str:
+    return f'<a href="{MODEL_PAGES[model_id]}">{esc(site_name(model_id))}</a>'
+
+
+def only_household_member() -> str:
+    """pe-microsim is the only member that answers a household question."""
+    members = sorted(
+        model_id
+        for model_id, model in MODELS.items()
+        if "household" in model["question_types"]
+    )
+    if members != ["pe-microsim"]:
+        raise RuntimeError(
+            "the Forecasts hub is built on pe-microsim being the only member "
+            'whose question_types include "household", but the registry now '
+            f"lists {', '.join(members)} — rewrite the band rather than the claim"
+        )
+    return (
+        'the only member whose question types include '
+        f'<span class="mono">household</span>'
+    )
+
+
+def only_two_country_member() -> str:
+    """pe-microsim is the only member covering both countries."""
+    members = sorted(
+        model_id
+        for model_id, model in MODELS.items()
+        if {"uk", "us"} <= set(model["geography"])
+    )
+    if members != ["pe-microsim"]:
+        raise RuntimeError(
+            "the Forecasts hub says pe-microsim is the only member covering "
+            f"both countries, but the registry now lists {', '.join(members)}"
+        )
+    return "the only one that covers both countries"
+
+
+def distribution_members() -> str:
+    """The members that report a distribution — pe-microsim and its overlay."""
+    members = sorted(
+        model_id
+        for model_id, model in MODELS.items()
+        if any("distribution" in output for output in model["outputs"])
+    )
+    if members != ["og+microsim", "pe-microsim"]:
+        raise RuntimeError(
+            "the Forecasts hub says the only members reporting a distribution "
+            "are pe-microsim and the og+microsim overlay that runs it, but the "
+            f"registry now lists {', '.join(members)}"
+        )
+    return (
+        f"The only two members that report a distribution are {model_link('pe-microsim')} "
+        f"and {model_link('og+microsim')}, and the second is an overlay that "
+        "runs the first."
+    )
+
+
+def route_row(title: str, chain: list[str], line: str, comment: str) -> str:
+    """One producible output: what it is, which models run, and the command."""
+    rendered_chain = (
+        " &rarr; ".join(model_link(model_id) for model_id in chain)
+        if chain
+        else "&mdash;"
+    )
+    return (
+        "          <tr>"
+        f'<th scope="row">{esc(title)}</th>'
+        f"<td>{rendered_chain}</td>"
+        f"<td>{esc(comment)}</td>"
+        f'<td><code class="mono">{command(line)}</code></td>'
+        "</tr>"
+    )
+
+
+UK_REFORM = '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}'
+US_REFORM = '{"gov.irs.credits.ctc.amount.adult_dependent":1000}'
+PEOPLE = '[{"age":35,"employment_income":50000}]'
+
+
+def uk_platform() -> str:
+    """Band 01 of /forecasts: the six things this section can produce."""
+    microsim = MODELS["pe-microsim"]
+    svar = MODELS["boe-svar"]
+    rows = [
+        route_row(
+            "One household, exactly",
+            ["pe-microsim"],
+            f"pe-macro household-impact --country uk --people '{PEOPLE}' --reform '{UK_REFORM}'",
+            "arithmetic over the statutory rules; no sampling, no weights",
+        ),
+        route_row(
+            "The whole population, one policy year",
+            ["pe-microsim"],
+            f"pe-macro score --country uk --reform '{UK_REFORM}' --model microsim",
+            "revenue and distribution; a static costing",
+        ),
+        route_row(
+            "The same reform, with a macro second round",
+            ["pe-microsim", "obr-macro"],
+            f"pe-macro score --country uk --reform '{UK_REFORM}' --model obr",
+            "the static costing becomes a held add-factor on household income",
+        ),
+        route_row(
+            "The same reform, with long-run general equilibrium",
+            ["og-uk", "pe-microsim"],
+            f"pe-macro dynamic-score --reform '{UK_REFORM}'",
+            "steady-state earnings ratio scales the microsim's income inputs",
+        ),
+        route_row(
+            "A GDP and CPI forecast, standing alone",
+            ["boe-svar"],
+            "pe-macro forecast --horizons 8",
+            "medians with 68% and 90% bands; archived and scored below",
+        ),
+        route_row(
+            "That forecast carried into household incomes",
+            ["boe-svar", "pe-microsim"],
+            "pe-macro svar-inflation-incidence --year 2027 --reference obr",
+            "the model-versus-OBR CPI gap, scored as a real uprating reform",
+        ),
+    ]
+    return f"""    <div class="prose">
+      <p>
+        The engine underneath this section is
+        {model_link("pe-microsim")} — PolicyEngine's own
+        {esc(microsim["model_class"])}, {only_household_member()} and
+        {only_two_country_member()}. It applies a reform to household microdata
+        and reports {registry_terms(microsim["outputs"])} over a
+        {esc(microsim["horizon"])}. {distribution_members()}
+      </p>
+      <p>
+        The macro members are what it cannot do on its own. pe-microsim
+        cannot answer {(cannot('pe-microsim'))} — so every macro number in this
+        section comes from a member that produces one, and the table says which,
+        in the order they run. Four of the six routes below put pe-microsim in
+        the chain; two are a macro model standing alone, which is also a fine
+        thing to publish.
+      </p>
+      <div class="table-scroll">
+        <table>
+          <caption>What this section can produce for the UK. Every command is checked against <code>cli.py</code> when this page is generated; a route that stopped running would fail the build rather than sit here.</caption>
+          <thead><tr><th scope="col">What you get</th><th scope="col">Models, in the order they run</th><th scope="col">What the chain does</th><th scope="col">Command</th></tr></thead>
+          <tbody>
+{chr(10).join(rows)}
+          </tbody>
+        </table>
+      </div>
+      <p class="callout">
+        <strong>pe-microsim does not forecast, and this section does not
+        pretend it does.</strong> Its question types are
+        {registry_terms(microsim["question_types"])} —
+        <span class="mono">forecast</span> is not among them, and its
+        predictive validation is recorded as
+        {registry_terms([microsim["quality"]["predictive_validation"]["level"]])}.
+        The forecast rows are {model_link("boe-svar")}, whose uncertainty is
+        {esc(svar["uncertainty"])}; the record below is what those rounds have
+        been worth so far. <a href="/models#score">See how a score is put together →</a>
+      </p>
+      <p>
+        Over MCP the same six routes are {tool("household_reform_impact")},
+        {tool("population_reform_impact")}, {tool("score_reform")},
+        {tool("dynamic_reform_impact")}, {tool("forecast_uk")} and
+        {tool("svar_inflation_incidence")}; {tool("recommend_model")} routes a
+        question to a member, or refuses when none supports it.
+        <a href="/connect">Connect a client →</a>
+      </p>
+    </div>"""
+
+
+def us_platform() -> str:
+    """Band 01 of /forecasts/us: what runs, and the two things that do not."""
+    microsim = MODELS["pe-microsim"]
+    rows = [
+        route_row(
+            "One household, exactly",
+            ["pe-microsim"],
+            f"pe-macro household-impact --country us --people '{PEOPLE}' --reform '{US_REFORM}'",
+            "arithmetic over the statutory rules; no sampling, no weights",
+        ),
+        route_row(
+            "The whole population, one policy year",
+            ["pe-microsim"],
+            f"pe-macro score --country us --reform '{US_REFORM}' --model microsim",
+            "revenue and distribution; a static costing",
+        ),
+        route_row(
+            "A macro shock carried into household earnings",
+            ["frb-us", "pe-microsim"],
+            "pe-macro frbus-shock-incidence --var rffintay_aerr --shock 1.0 --year 2027",
+            "the wage-bill change applied through the automatic stabilisers",
+        ),
+        route_row(
+            "The same question in the HANK member",
+            ["us-hank", "pe-microsim"],
+            "pe-macro hank-shock-incidence --kind monetary --size -0.0025 --year 2026",
+            "impulse responses around a calibrated steady state",
+        ),
+    ]
+    return f"""    <div class="prose">
+      <p>
+        The engine underneath this section is
+        {model_link("pe-microsim")} — {only_two_country_member()}, so the two
+        household rows below are the same command as the UK ones with
+        <span class="mono">--country us</span>. It reports
+        {registry_terms(microsim["outputs"])} over a {esc(microsim["horizon"])}.
+      </p>
+      <div class="table-scroll">
+        <table>
+          <caption>What this section can produce for the US. Every command is checked against <code>cli.py</code> when this page is generated.</caption>
+          <thead><tr><th scope="col">What you get</th><th scope="col">Models, in the order they run</th><th scope="col">What the chain does</th><th scope="col">Command</th></tr></thead>
+          <tbody>
+{chr(10).join(rows)}
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Two rows that exist on the UK side are missing here, and both absences
+        are the registry's, not an oversight:
+      </p>
+{limits_list([
+        "<strong>No reform with a macro second round.</strong> Both US "
+        f'members — {model_link("frb-us")} and {model_link("us-hank")} — record '
+        f'{registry_terms([registry_cannot("frb-us", "policyengine")])} in '
+        "their own cannot-answer field, and us-hank adds "
+        f'{registry_terms([registry_cannot("us-hank", "detailed tax")])}. No '
+        "mapping exists from a US statutory reform to a US macro model, and "
+        "none is invented here.",
+        f"<strong>No forecast.</strong> {no_us_forecaster()} A section called "
+        "Forecasts that showed a US path anyway would be the one dishonest "
+        "thing on this site.",
+    ])}
+      <p>
+        The bridge that does exist runs the other way: the incidence rows take
+        a <em>macro shock</em>, not a reform, and push its earnings
+        consequences through the microsimulation. So this section can answer
+        &ldquo;who bears this shock&rdquo; for the US, and cannot answer
+        &ldquo;what would this reform do to output&rdquo;.
+      </p>
+      <p>
+        Over MCP the four routes are {tool("household_reform_impact")},
+        {tool("population_reform_impact")}, {tool("frbus_shock_incidence")} and
+        {tool("hank_shock_incidence")}; {tool("recommend_model")} refuses a US
+        reform needing macro feedback, which is the correct answer.
+        <a href="/connect">Connect a client →</a>
       </p>
     </div>"""
 
@@ -2157,40 +2491,68 @@ def hook(country: str, slug: str) -> str:
 
 # --------------------------------------------------------------- page render
 
+def scope_target(country: str, current: str | None) -> str:
+    """Where the UK/US switch goes: the same kind of page, other country.
+
+    The switch used to land on the country hub from everywhere, so a reader
+    comparing the two inflation pages went topic -> hub -> topic. Here it is
+    the counterpart of the page they are on, and it falls back to that
+    country's data hub only when the counterpart does not exist — which is
+    exactly the two UK-only cases, public finances and (on the US side) a
+    scored record.
+    """
+    entry = COUNTRIES[country]
+    if current is None:
+        return entry["hub"]
+    if current == "data":
+        return entry["data"]
+    topic = TOPIC_BY_SLUG.get((country, current))
+    return topic_url(topic) if topic else entry["data"]
+
+
 def subnav(country: str, current: str | None) -> str:
-    """The one control shared by both hubs and every topic page.
+    """The one control shared by all fifteen pages of the Forecasts section.
 
     Same markup, same vocabulary, same order in both countries, so moving
     between a hub and a topic reads as one section rather than a page swap.
-    Two groups: the scope switch (UK / US) and the topic strip for the scope
+    Two groups: the scope switch (UK / US) and the page strip for the scope
     the reader is in.
 
-    ``current`` is a topic slug, or ``None`` for the hub itself — which is the
-    Overview tab. Overview exists because the strip is a tab set and a tab set
-    with nothing selected tells the reader they are nowhere: on the hub, the
-    four sections below the bar *are* a page, and Overview is its name. It is
-    the only tab whose target is the hub, so it is also the way back.
+    ``current`` is ``None`` on the section hub (/forecasts), ``"data"`` on the
+    country data hub (/economy), or a topic slug. Overview and Data exist as
+    tabs because the strip is a tab set and a tab set with nothing selected
+    tells the reader they are nowhere; they are also the way back.
+
+    The strip names pages, not in-page anchors. /forecasts used to carry its
+    own anchor bar here and /economy a page bar, which is how one section
+    ended up with two different controls in the same slot. The bands on
+    /forecasts keep every id they had — /data and /notes still redirect onto
+    them — they are simply no longer the section's navigation.
 
     The page the reader is on is the only element carrying
     ``aria-current="page"``. On a topic page the country scope link is an
     ancestor, not the current URL, so it takes ``aria-current="true"``.
     """
-    hub = COUNTRIES[country]["hub"]
+    entry = COUNTRIES[country]
     scope = []
-    for code, entry in COUNTRIES.items():
+    for code, other in COUNTRIES.items():
+        target = scope_target(code, current)
         if code == country:
-            state = "page" if current is None else "true"
+            state = "page" if target == _self_url(country, current) else "true"
         else:
             state = None
         attr = f' aria-current="{state}"' if state else ""
         scope.append(
             f'        <a class="model-tabs-link"{attr} '
-            f'href="{entry["hub"]}">{entry["label"]}</a>'
+            f'href="{target}">{other["label"]}</a>'
         )
     overview_attr = ' aria-current="page"' if current is None else ""
+    data_attr = ' aria-current="page"' if current == "data" else ""
     links = [
         f'        <a class="model-tabs-link"{overview_attr} '
-        f'href="{hub}">Overview</a>'
+        f'href="{entry["hub"]}">Overview</a>',
+        f'        <a class="model-tabs-link"{data_attr} '
+        f'href="{entry["data"]}">Data</a>',
     ]
     for topic in topics_for(country):
         attr = ' aria-current="page"' if topic["slug"] == current else ""
@@ -2198,10 +2560,10 @@ def subnav(country: str, current: str | None) -> str:
             f'        <a class="model-tabs-link"{attr} '
             f'href="{topic_url(topic)}">{esc(topic["title"])}</a>'
         )
-    return f"""  <nav class="economy-subnav" aria-label="Economy">
+    return f"""  <nav class="economy-subnav" aria-label="Forecasts">
     <div class="economy-subnav-row">
       <div class="economy-subnav-scope">
-        <span class="economy-subnav-label mono">Economy</span>
+        <span class="economy-subnav-label mono">Forecasts</span>
 {chr(10).join(scope)}
       </div>
       <div class="economy-topics">
@@ -2209,6 +2571,16 @@ def subnav(country: str, current: str | None) -> str:
       </div>
     </div>
   </nav>"""
+
+
+def _self_url(country: str, current: str | None) -> str:
+    """The URL of the page ``subnav`` is being rendered into."""
+    entry = COUNTRIES[country]
+    if current is None:
+        return entry["hub"]
+    if current == "data":
+        return entry["data"]
+    return topic_url(TOPIC_BY_SLUG[(country, current)])
 
 
 def page(topic: dict) -> str:
@@ -2367,20 +2739,35 @@ def rendered() -> list[tuple[Path, str]]:
          page(topic))
         for topic in TOPICS
     ]
-    # The topic cards and the shared bar on each hub belong to this generator.
-    # economy/build.py owns the readings and the provenance tables on the same
-    # two pages and touches neither marker, so the two --check gates never
-    # contend for the same region.
+    # The topic cards and the shared bar on each data hub belong to this
+    # generator. economy/build.py owns the readings and the provenance tables
+    # on the same two pages and touches neither marker, so the two --check
+    # gates never contend for the same region.
+    platform = {"uk": uk_platform, "us": us_platform}
     for country, entry in COUNTRIES.items():
-        hub = entry["hub_page"].read_text()
-        hub = replace(hub, entry["directory_marker"], directory_block(country))
-        hub = replace(hub, entry["nav_marker"], subnav(country, None))
+        data_hub = entry["data_page"].read_text()
+        data_hub = replace(
+            data_hub, entry["directory_marker"], directory_block(country)
+        )
+        data_hub = replace(data_hub, entry["nav_marker"], subnav(country, "data"))
         if country == "us":
-            hub = replace(hub, "us-economy-gaps", us_public_finance_gap())
-            hub = replace(
-                hub, "us-economy-forecast-note", us_hub_forecast_note()
+            data_hub = replace(data_hub, "us-economy-gaps", us_public_finance_gap())
+            data_hub = replace(
+                data_hub, "us-economy-forecast-note", us_hub_forecast_note()
             )
-        artifacts.append((entry["hub_page"], hub))
+        artifacts.append((entry["data_page"], data_hub))
+
+        # The section hub carries the same bar and the platform band.
+        # forecasts/score.py and data/build_page.py own other markers on the
+        # UK one; none of the three regions overlap.
+        section_hub = entry["hub_page"].read_text()
+        section_hub = replace(
+            section_hub, entry["hub_nav_marker"], subnav(country, None)
+        )
+        section_hub = replace(
+            section_hub, entry["platform_marker"], platform[country]()
+        )
+        artifacts.append((entry["hub_page"], section_hub))
     artifacts.append(
         (SITEMAP, replace(SITEMAP.read_text(), "economy-topics", sitemap_block()))
     )
@@ -2403,14 +2790,14 @@ def main() -> int:
             print(f"{', '.join(stale)} stale; run python3 economy/topics.py")
             return 1
         print(f"{len(TOPICS)} topic pages ({len(topics_for('uk'))} UK, "
-              f"{len(topics_for('us'))} US), both economy directories and the "
-              "sitemap match committed data")
+              f"{len(topics_for('us'))} US), both section hubs, both data "
+              "hubs and the sitemap match committed data")
         return 0
     for path, content in artifacts:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
-    print(f"updated {len(TOPICS)} topic pages, both economy directories "
-          "and the sitemap")
+    print(f"updated {len(TOPICS)} topic pages, both section hubs, both data "
+          "hubs and the sitemap")
     return 0
 
 

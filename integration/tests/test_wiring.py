@@ -407,19 +407,28 @@ def test_cli_score_still_rejects_a_genuinely_unknown_model(runner):
 
 
 def test_obr_shock_carries_the_lever_caveat_in_the_payload():
-    """Two of the four OBR levers do not work, and the payload must say so.
+    """None of the three OBR levers reads straight, and the payload says so.
 
     Measured in the model repo: CGIPS moves business investment by exactly
-    zero in all twelve quarters and leaves a wrong-signed residual, and TCPRO
-    compounds at roughly 25%/quarter with no steady state. A docstring does
-    not reach an MCP caller reading a JSON result, so the caveat travels with
-    the numbers.
+    zero in all twelve quarters and leaves a wrong-signed residual, and
+    TCPRO's response converges only slowly (a 12-quarter run captures ~40%
+    of the plateau, since the 2026-08 log-space anchor fix gave it a steady
+    state at all). A docstring does not reach an MCP caller reading a JSON
+    result, so the caveat travels with the numbers.
+
+    CGG carries one too, as of 2026-08. It was previously exempt because the
+    "~1 by construction" reading was documented on the website -- but the
+    website is exactly what an MCP caller never sees, which is the reason
+    the other two levers carry caveats at all. Measured: +1250/qtr gives
+    GDP +1.2500bn/qtr flat, a multiplier of 1.0000 against the OBR's
+    published 0.6. That is the largest published-vs-modelled gap of any
+    lever here, so it is the last one that should have shipped silent.
     """
     from policyengine_macro import core
 
     levers = {v["var"]: v for v in core.obr_list_variables()}
-    assert levers["TCPRO"]["caveat"], "the non-convergent lever declares no caveat"
+    assert levers["TCPRO"]["caveat"], "the slow-converging lever declares no caveat"
     assert levers["CGIPS"]["caveat"], "the dead lever declares no caveat"
-    # CGG has its own documented "~1 by construction" reading on the site and
-    # is not caveated here; asserting that keeps this test honest about scope.
-    assert "caveat" not in levers["CGG"]
+    assert levers["CGG"]["caveat"], "the identity lever declares no caveat"
+    assert "1.0000" in levers["CGG"]["caveat"], "CGG caveat omits the measured multiplier"
+    assert "0.6" in levers["CGG"]["caveat"], "CGG caveat omits the OBR published figure"

@@ -649,32 +649,6 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
 }
 .callout.formal { overflow-x: auto; }
 
-.home-proof {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  max-width: var(--max);
-  margin: var(--s-5) auto 0;
-  border-top: 1px solid var(--line-soft);
-  border-bottom: 1px solid var(--line-soft);
-}
-.home-proof > div {
-  display: grid;
-  gap: 7px;
-  min-width: 0;
-  padding: var(--s-5);
-}
-.home-proof > div + div { border-left: 1px solid var(--line-soft); }
-.home-proof strong {
-  color: var(--paper);
-  font-family: var(--mono);
-  font-size: var(--fs-small);
-}
-.home-proof span {
-  color: var(--paper-faint);
-  font-size: var(--fs-small);
-  line-height: 1.45;
-}
-
 .model-local-nav,
 .validation-model-nav {
   display: flex;
@@ -1221,9 +1195,6 @@ h2 {
   font-weight: 500;
 }
 .chooser-note { margin-top: var(--s-5); color: var(--paper-dim); font-size: var(--fs-body-sm); }
-/* Centred under the card grid it belongs to, rather than ranged left
-   under the first card, which read as a caption on that card. */
-.chooser-note-center { text-align: center; }
 .chooser-note a { color: var(--brand-strong); }
 
 /* Micro→macro pipeline strip: the scoring flow at a glance. */
@@ -1768,47 +1739,6 @@ h2 {
   padding-bottom: var(--s-3);
 }
 
-/* compact verification scorecard on the homepage */
-.verification-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-block: var(--s-6);
-}
-.verification-card {
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-card);
-  padding: 18px 20px;
-}
-.verification-card > div {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-.verification-card .mono { color: var(--brand-strong); font-size: var(--fs-small); }
-.verification-card p { margin: 0; color: var(--paper-dim); font-size: var(--fs-body-sm); line-height: 1.5; }
-.verification-card .verification-what {
-  margin-bottom: 6px;
-  color: var(--brand-strong);
-  font-size: var(--fs-small);
-}
-.verification-tag {
-  border-radius: 999px;
-  padding: 4px 8px;
-  background: var(--brand-wash);
-  color: var(--brand-strong);
-  font: 500 10px/1 var(--mono);
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.verification-tag-statute { background: #edf4f2; }
-.verification-tag-calibrated { background: #f7eee8; color: #945c42; }
-/* All verification cards stay half-width so every model reads at the same
-   size; with an odd count the last row simply carries one card. */
-
 /* --- economy dashboard --- */
 .economy-grid {
   display: grid;
@@ -2098,7 +2028,6 @@ h2 {
 }
 
 @media (max-width: 700px) {
-  .verification-grid { grid-template-columns: 1fr; }
   .economy-grid { grid-template-columns: 1fr; }
   .economy-model-grid { grid-template-columns: 1fr; }
   .economy-trends-directory { grid-template-columns: 1fr; }
@@ -2112,10 +2041,6 @@ h2 {
   .contact-socials { grid-template-columns: 1fr; }
   .contact-socials > span { padding: 0 0 10px; }
   .contact-socials a + a { border-left: 1px solid var(--line-soft); border-top: 0; }
-  .home-proof { grid-template-columns: 1fr 1fr; }
-  .home-proof > div + div { border-left: 0; }
-  .home-proof > div:nth-child(even) { border-left: 1px solid var(--line-soft); }
-  .home-proof > div:nth-child(n + 3) { border-top: 1px solid var(--line-soft); }
 }
 
 /* one callout treatment (was: left-rule callout + tinted note + bordered box) */
@@ -3404,3 +3329,502 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   .series-row > td { padding-right: 0; }
   .series-detail-row > td { padding-left: 20px; }
 }
+
+/* =====================================================================
+   HOMEPAGE (index.html only, except where noted)
+
+   The page runs as one argument: the hero states the claim (seven open
+   models, each says how far to trust it) beside the fan chart whose own
+   caption admits "no forecast skill"; the .band-result band under it
+   holds the two proof objects side by side — the three-grade verdict
+   ladder and the one scored forecast period drawn to scale; then the
+   system tour (core → extensions → joins), the live glance tables, and
+   the start band. Two-panel compositions repeat down the page (hero,
+   proof band, core split) so it reads as one hand.
+   ===================================================================== */
+
+/* --- the verdict band under the hero --- */
+/* h2 is capped at 26ch site-wide, which is right for a section label and
+   wrong for a two-sentence claim: it broke this one over five short lines. */
+.verdict-claim {
+  max-width: 34ch;
+  text-wrap: balance;
+}
+.home-page .band-result .section-intro { max-width: 72ch; }
+
+/* Scoping note for everything below: this sheet is global across 96 pages,
+   so the blocks added here use names no other page carries (checked), and
+   the ones generic enough to be claimed later by another page — .calc*,
+   .rail*, .join*, .core-*, .xt-*, .proof-*, .scored-* — are additionally
+   scoped to .home-page. .verdict-* and .rung-* are left unscoped, matching
+   .verdict-claim above. No shared rule is touched: .pipeline and .qa-fact
+   keep their own definitions untouched, and this page's pipeline overrides
+   are all under `.home-page .join`. */
+
+/* --- the proof band: two panels, verdicts beside the score ---
+   The differentiator has two working parts — every model gets a graded
+   verdict, and every forecast is scored after the fact — so the band
+   shows both at once, in the same top-ruled, mono-headed panel idiom as
+   the core split below. On mobile the panels stack, ladder first,
+   matching the intro sentence's order. */
+.home-page .proof-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-6);
+}
+@media (min-width: 1000px) {
+  .home-page .proof-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-8); }
+}
+.home-page .proof-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-top: var(--s-3);
+  border-top: 2px solid color-mix(in srgb, var(--brand) 55%, transparent);
+}
+.home-page .proof-head {
+  margin: 0 0 var(--s-4);
+  color: var(--brand-strong);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+/* both panels close on their link, on one baseline */
+.home-page .proof-col .qa-link { margin-top: auto; padding-top: var(--s-5); }
+
+/* The three grades are a scale: an ordered list, strongest at the top,
+   one row per grade separated by a full-width rule so the rows read as
+   one object. The step mark on the left fills 3 → 2 → 1, so the
+   direction of the scale is visible before any word is read. Inside the
+   half-width proof panel the grade sits above its example — two short
+   lines beat three cramped columns at this measure. */
+.verdict-ladder {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.verdict-rung {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 6px var(--s-4);
+  padding: var(--s-4) 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--brand) 34%, transparent);
+}
+.rung-grade {
+  color: var(--brand-strong);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.rung-what {
+  grid-column: 2;
+  color: var(--paper-dim);
+  font-size: var(--fs-body-sm);
+  line-height: 1.5;
+}
+/* Ascending bars, filled from the left: three lit for the strongest grade,
+   one for the weakest. Decorative — the order is already carried by the
+   list itself and by "strongest first" in the intro. */
+.rung-step {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 18px;
+  translate: 0 3px;
+}
+.rung-step i {
+  display: block;
+  width: 7px;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--paper-faint) 34%, transparent);
+}
+.rung-step i:nth-child(1) { height: 8px; }
+.rung-step i:nth-child(2) { height: 13px; }
+.rung-step i:nth-child(3) { height: 18px; }
+.rung-step i.on { background: var(--brand); }
+.verdict-rung:first-child { padding-top: var(--s-2); }
+
+/* --- 01, the core: the arithmetic, then the limits ---
+   These were two .qa-fact rows: a worked calculation and a statement about
+   survey uncertainty, narrated as prose in the same undifferentiated
+   format. They are now two panels side by side, because the pair is the
+   point — the same run gives an exact answer for one household and an
+   estimate for the country, and the caveat sits at the same weight as the
+   claim rather than in a footnote under it. */
+.home-page .core-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-6);
+  margin-top: var(--s-5);
+}
+@media (min-width: 900px) {
+  .home-page .core-split { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: var(--s-7); }
+}
+.home-page .core-panel { padding-top: var(--s-3); border-top: 2px solid var(--brand); }
+.home-page .core-panel + .core-panel { border-top-color: color-mix(in srgb, var(--paper-faint) 45%, transparent); }
+.home-page .core-panel-head {
+  margin: 0 0 var(--s-4);
+  color: var(--brand-strong);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.home-page .core-panel + .core-panel .core-panel-head { color: var(--paper-dim); }
+.home-page .core-panel-foot {
+  margin: var(--s-4) 0 0;
+  color: var(--paper-dim);
+  font-size: var(--fs-body-sm);
+  line-height: 1.55;
+  max-width: 62ch;
+}
+.home-page .core-panel-foot strong { color: var(--paper); font-weight: 650; }
+.home-page .core-panel-foot a { color: var(--brand-strong); white-space: nowrap; }
+
+/* The worked example is numbers, so it is set as numbers: one line per
+   figure, the amounts right-aligned in tabular mono so the columns check
+   by eye, and a rule above the total. The personal allowance is a note on
+   the income-tax line, not a row of its own — it is the reason that line
+   reads £7,486, not a fourth thing subtracted from £50,000. */
+.home-page .calc { margin: 0; }
+.home-page .calc-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 4px var(--s-4);
+  padding: 10px 0;
+}
+.home-page .calc-row + .calc-row { border-top: 1px solid var(--line-soft); }
+.home-page .calc-row dt { margin: 0; color: var(--paper-dim); font-size: var(--fs-body-sm); line-height: 1.4; }
+.home-page .calc-row dd {
+  margin: 0;
+  color: var(--paper);
+  font-family: var(--mono);
+  font-size: var(--fs-body);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+.home-page .calc-op {
+  display: inline-block;
+  width: 1.1em;
+  color: var(--paper-dim);
+  font-family: var(--mono);
+}
+.home-page .calc-note {
+  display: block;
+  margin-top: 3px;
+  margin-left: 1.1em;
+  color: var(--paper-faint);
+  font-size: var(--fs-label);
+  line-height: 1.45;
+}
+.home-page .calc-total { padding-top: 12px; }
+.home-page .calc-row + .calc-total { border-top: 2px solid color-mix(in srgb, var(--paper) 60%, transparent); }
+.home-page .calc-total dt { color: var(--paper); font-weight: 600; }
+.home-page .calc-total dd { font-size: 1.35rem; font-weight: 650; letter-spacing: -0.01em; }
+.home-page .calc-identity { color: var(--paper); font-size: var(--fs-mono); white-space: nowrap; }
+
+.home-page .core-limits { margin: 0; padding: 0; list-style: none; }
+.home-page .core-limits li {
+  padding: 10px 0 10px var(--s-4);
+  border-left: 2px solid color-mix(in srgb, var(--brand-warning) 55%, transparent);
+  color: var(--paper-dim);
+  font-size: var(--fs-body-sm);
+  line-height: 1.55;
+  max-width: 62ch;
+}
+.home-page .core-limits li + li { margin-top: var(--s-3); }
+.home-page .core-limits strong { color: var(--paper); font-weight: 650; }
+
+/* --- 02, the extensions: a ledger, not a card wall ---
+   Six models were six bordered cards in a 2x2x2 grid, each restating the
+   same anatomy. As rows on ruled lines — name, what it adds, the
+   evidence with its limit — the section scans down one column per
+   question and echoes the worked-example ledger in 01. */
+.home-page .xt-list {
+  margin: var(--s-6) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+.home-page .xt-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px var(--s-6);
+  padding: var(--s-4) 0 var(--s-5);
+  border-bottom: 1px solid var(--line-soft);
+}
+.home-page .xt-id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--s-3);
+  row-gap: 2px;
+}
+.home-page .xt-id a {
+  color: var(--brand-strong);
+  font-size: var(--fs-body-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+.home-page .xt-id a:hover { text-decoration: underline; }
+.home-page .xt-tag {
+  color: var(--paper-faint);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.home-page .xt-tag-warn { color: var(--brand-warning); }
+.home-page .xt-what {
+  margin: 0;
+  color: var(--paper);
+  font-size: var(--fs-body-sm);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.home-page .xt-proof {
+  margin: 0;
+  max-width: 92ch;
+  color: var(--paper-dim);
+  font-size: var(--fs-body-sm);
+  line-height: 1.55;
+}
+.home-page .xt-proof strong { color: var(--paper); font-weight: 650; }
+@media (min-width: 960px) {
+  .home-page .xt-row {
+    grid-template-columns: 176px minmax(0, 1fr) minmax(0, 1.55fr);
+    align-items: baseline;
+    padding: var(--s-5) 0;
+  }
+  .home-page .xt-id { display: grid; align-content: start; gap: 5px; }
+  .home-page .xt-what { font-weight: 500; }
+}
+
+/* --- 03, the joins: one chain per join ---
+   Was a pipeline strip, a caption, and three .qa-fact rows that each spelled
+   a chain out in a sentence — including one that re-narrated the strip
+   directly above it. Each join is now drawn as the chain it is (what goes
+   in, which model, what comes out) with its own numbers keyed underneath,
+   so the result sits on the chain that produced it. The terminal node
+   carries the honest ending: og+microsim stops at "No scored result". */
+.home-page .join-lead {
+  margin: 0 0 var(--s-6);
+  color: var(--paper-dim);
+  font-size: var(--fs-body-sm);
+  line-height: 1.55;
+}
+.home-page .join-lead a { color: var(--brand-strong); }
+.home-page .join-list { margin: 0; padding: 0; list-style: none; }
+.home-page .join {
+  padding: var(--s-5) 0;
+  border-top: 1px solid var(--line-soft);
+}
+.home-page .join:first-child { border-top-color: var(--line); }
+.home-page .join:last-child { border-bottom: 1px solid var(--line-soft); }
+.home-page .join .pipeline { justify-content: flex-start; margin-block: 0 var(--s-4); }
+/* The two ends of a chain are results, not models: no link, no hover, and
+   the stop node is dashed so a chain that produces nothing looks different
+   from one that produces a number. */
+.home-page .join .pl-node-out { background: var(--brand-wash); border-color: color-mix(in srgb, var(--brand) 40%, transparent); }
+.home-page .join .pl-node-stop {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--brand-warning) 55%, transparent);
+  color: var(--paper-dim);
+}
+.home-page .join-lines { display: grid; gap: 8px; margin: 0; }
+.home-page .join-lines > div {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 2px var(--s-4);
+}
+.home-page .join-lines dt {
+  margin: 0;
+  color: var(--paper-faint);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.home-page .join-lines dd {
+  margin: 0;
+  max-width: 92ch;
+  color: var(--paper-dim);
+  font-size: var(--fs-body-sm);
+  line-height: 1.55;
+}
+.home-page .join-lines strong { color: var(--paper); font-weight: 650; }
+/* The caveat gets the same slot, the same measure and the same emphasis as
+   the result line, plus a keyed colour — never smaller, never after a link. */
+.home-page .join-caveat dt { color: var(--brand-warning); }
+.home-page .join-more { margin: var(--s-4) 0 0; }
+.home-page .join-more a { color: var(--brand-strong); font-size: var(--fs-body-sm); }
+.home-page .join-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px var(--s-4);
+  margin: var(--s-5) 0 0;
+  color: var(--paper-dim);
+  font-size: var(--fs-body-sm);
+}
+.home-page .join-note .mono {
+  flex: 0 0 120px;
+  color: var(--paper-faint);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+/* Below ~560px four nodes and three arrows cannot share a row without the
+   node text going ragged, so the flow turns vertical and the arrows turn
+   with it. Scoped to .join: .pipeline itself is on 45 other pages. */
+@media (max-width: 560px) {
+  .home-page .join .pipeline { flex-direction: column; align-items: stretch; }
+  .home-page .join .pipeline .pl-node { text-align: center; }
+  .home-page .join .pipeline .pl-arrow { display: block; text-align: center; rotate: 90deg; }
+  .home-page .join-lines > div { grid-template-columns: 1fr; }
+}
+
+/* --- the one scored period ---
+   The only scored result the project has, drawn as the comparison it
+   describes: the 68% band to scale, the forecast marked on it, the
+   outturn marked beside it. The "not a track record" line keeps the same
+   width and a keyed rule, so the caveat is read with the hit and not
+   after it. */
+.home-page .scored-subject {
+  margin: 0 0 var(--s-6);
+  color: var(--paper);
+  font-size: var(--fs-h4);
+  font-weight: 600;
+}
+.home-page .scored-subject .mono { color: var(--paper-dim); font-weight: 400; }
+.home-page .scored-rail {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 10px;
+  max-width: 560px;
+}
+.home-page .rail-cap {
+  grid-area: 1 / 1 / 2 / 4;
+  margin: 0 0 var(--s-3);
+  color: var(--paper-faint);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.home-page .rail-lab {
+  width: max-content;
+  max-width: 100%;
+  margin: 0;
+  position: relative;
+  left: var(--x);
+  translate: -50% 0;
+  color: var(--paper-dim);
+  font-size: var(--fs-body-sm);
+  white-space: nowrap;
+}
+.home-page .rail-lab strong { font-variant-numeric: tabular-nums; font-weight: 650; }
+.home-page .rail-lab-f { grid-area: 2 / 2 / 3 / 3; margin-bottom: 7px; }
+.home-page .rail-lab-f strong { color: var(--brand-strong); }
+.home-page .rail-lab-o { grid-area: 4 / 2 / 5 / 3; margin-top: 7px; }
+.home-page .rail-lab-o strong { color: var(--paper); }
+.home-page .rail-end {
+  color: var(--paper-faint);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+}
+.home-page .rail-end-lo { grid-area: 3 / 1 / 4 / 2; }
+.home-page .rail-end-hi { grid-area: 3 / 3 / 4 / 4; }
+.home-page .rail {
+  grid-area: 3 / 2 / 4 / 3;
+  position: relative;
+  display: block;
+  height: 14px;
+  border: 1px solid color-mix(in srgb, var(--brand) 34%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand) 18%, transparent);
+}
+.home-page .rail-tick {
+  position: absolute;
+  top: -7px;
+  bottom: -7px;
+  left: var(--x);
+  width: 2px;
+  translate: -1px 0;
+  border-radius: 1px;
+}
+.home-page .rail-tick::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  translate: -50% 0;
+  border-radius: 50%;
+}
+.home-page .rail-tick-f { background: var(--brand-strong); }
+.home-page .rail-tick-f::after { top: -3px; background: var(--brand-strong); }
+.home-page .rail-tick-o { background: var(--paper); }
+.home-page .rail-tick-o::after { bottom: -3px; background: var(--paper); }
+.home-page .scored-note {
+  margin: var(--s-5) 0 0;
+  max-width: 66ch;
+  color: var(--paper-faint);
+  font-size: var(--fs-small);
+  line-height: 1.55;
+}
+.home-page .scored-verdict {
+  margin: var(--s-4) 0 0;
+  padding-left: var(--s-4);
+  max-width: 66ch;
+  border-left: 2px solid var(--brand-warning);
+  color: var(--paper-dim);
+  font-size: var(--fs-body-sm);
+  line-height: 1.6;
+}
+.home-page .scored-verdict strong { color: var(--paper); font-weight: 650; }
+
+/* --- start-using-it row --- */
+.start-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-5) var(--s-7);
+}
+.start-row .ai-client-row { margin: 0; }
+
+/* --- reading measure on the homepage ---
+   The bands run to --max (1320px). That is right for the model grid and the
+   at-a-glance tables, and wrong for running text: the joins caveat was
+   setting a single ~150-character line. Text blocks get a measure; data
+   blocks keep the full band. Scoped to .home-page — .section-intro is
+   shared with three other pages. */
+.home-page .section-intro { max-width: 980px; }
+
+/* At ≤640px .glance-row collapses to two columns and .g-arrow is hidden, but
+   the header row still spent a cell on the arrow gap, so "latest outturn" and
+   "model near-term forecast" stacked instead of sitting over their columns. */
+@media (max-width: 640px) {
+  .home-page .glance-row-head span:nth-of-type(3) { display: none; }
+}
+
+/* ---------------------------------------------------------------------
+   Landing page: one left edge, one right edge.
+
+   Rendered at 1440 the page had three alignments competing. Sections 01
+   and 03 stopped at 980px because the text measure was applied to the
+   CARD as well as to the running text; section 02's grid ran the full
+   1320px band; and section 04's country tabs and table were centred by
+   `.glance-tabs { justify-content: center }`, inherited from /economy
+   where that block is the whole page. Three edges in one scroll, and the
+   eye cannot find the column.
+
+   The measure belongs on prose, not on a card: capping .strategy-card
+   also made the CORE model's card narrower than the six extension cards
+   below it, which inverts the hierarchy the section exists to state.
+   --------------------------------------------------------------------- */
+.home-page .strategy-card { max-width: none; }
+.home-page .strategy-card p { max-width: 88ch; }
+.home-page .glance-tabs { justify-content: flex-start; }
+.home-page #now .glance-col { margin-inline: 0; max-width: 980px; }

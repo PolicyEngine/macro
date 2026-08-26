@@ -36,7 +36,6 @@
   <nav class="nav-links" aria-label="Primary">
     <a class="nav-mobile" href="/">Home</a>
     <a class="nav-mobile" href="/models" aria-current="true">Models</a>
-    <a class="nav-mobile" href="/economy">Economy</a>
     <a class="nav-mobile" href="/forecasts">Forecasts</a>
     <a class="nav-mobile nav-start" href="/connect">Use</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
@@ -98,7 +97,10 @@
           <code>list_reform_variables</code> lists the shockable levers with
           units; <code>score_reform</code> with <code>model="obr"</code>
           scores a PolicyEngine reform end to end through the static-costing
-          bridge.
+          bridge — how that combination works, with the worked example and
+          its caveats, is on the <a href="/obr#pe-bridge">overview</a>.
+          Corporation-tax reforms are refused by the bridge (not
+          household-borne); UK only.
         </p>
       </div>
 
@@ -113,7 +115,9 @@
           <div class="meth-sec-title">CLI equivalents</div>
           <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro obr-shock --var CGG --shock 1250
 pe-macro variables
-pe-macro score --reform '{...}' --model obr</code></pre></div>
+pe-macro score --country uk \
+  --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
+  --model obr</code></pre></div>
         </div>
       </div>
 
@@ -171,7 +175,7 @@ results = run_reform(
             <div class="dial-name mono">levers — set these (exogenous)</div>
             <div class="dial-choice"><code>CGG</code><span class="dial-tradeoff"><strong>Government consumption</strong> — spending shocks, £m per quarter</span></div>
             <div class="dial-choice"><code>CGIPS</code><span class="dial-tradeoff"><strong>Central government investment</strong> — public investment, £m per quarter (nominal). <strong>Dead channel:</strong> business investment does not respond at all and the residual GDP effect is wrong-signed, against the OBR&rsquo;s published 1.0. Do not score capital spending with it</span></div>
-            <div class="dial-choice"><code>TCPRO</code><span class="dial-tradeoff"><strong>Corporation tax rate</strong> — rate, e.g. &minus;0.05 for a 5pp cut. <strong>Does not converge:</strong> the response compounds at roughly 25% a quarter with no steady state, so read the sign and the first few quarters, never the level or the cumulative total</span></div>
+            <div class="dial-choice"><code>TCPRO</code><span class="dial-tradeoff"><strong>Corporation tax rate</strong> — rate, e.g. &minus;0.05 for a 5pp cut. <strong>Converges slowly:</strong> since the log-space anchor fix the response reaches a plateau, but the root is slow &mdash; a 12-quarter run captures only ~40% of the full effect, and the result reports its <code>plateau_fraction</code></span></div>
             <div class="dial-choice"><code>HHDI_ADDFACTOR</code><span class="dial-tradeoff"><strong>Externally costed household reform</strong> — virtual instrument, quarterly £m; positive revenue lowers HHDI via a held add-factor</span></div>
             <div class="dial-choice"><code>R / GILT / RX</code><span class="dial-tradeoff"><strong>Bank Rate &middot; gilt yields &middot; exchange rate</strong> — monetary &amp; market assumptions</span></div>
           </div>
@@ -192,7 +196,9 @@ results = run_reform(
           <div class="meth-sec-title">CLI equivalents</div>
           <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pe-macro obr-shock --var CGG --shock 1250
 pe-macro variables
-pe-macro score --reform '{...}' --model obr</code></pre></div>
+pe-macro score --country uk \
+  --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
+  --model obr</code></pre></div>
         </div>
         <div class="meth-panel" data-step="2" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 3</span></div>
@@ -219,7 +225,7 @@ results = run_reform(
             <div class="dial-name mono">levers — set these (exogenous)</div>
             <div class="dial-choice"><code>CGG</code><span class="dial-tradeoff"><strong>Government consumption</strong> — spending shocks, £m per quarter</span></div>
             <div class="dial-choice"><code>CGIPS</code><span class="dial-tradeoff"><strong>Central government investment</strong> — public investment, £m per quarter (nominal). <strong>Dead channel:</strong> business investment does not respond at all and the residual GDP effect is wrong-signed, against the OBR&rsquo;s published 1.0. Do not score capital spending with it</span></div>
-            <div class="dial-choice"><code>TCPRO</code><span class="dial-tradeoff"><strong>Corporation tax rate</strong> — rate, e.g. &minus;0.05 for a 5pp cut. <strong>Does not converge:</strong> the response compounds at roughly 25% a quarter with no steady state, so read the sign and the first few quarters, never the level or the cumulative total</span></div>
+            <div class="dial-choice"><code>TCPRO</code><span class="dial-tradeoff"><strong>Corporation tax rate</strong> — rate, e.g. &minus;0.05 for a 5pp cut. <strong>Converges slowly:</strong> since the log-space anchor fix the response reaches a plateau, but the root is slow &mdash; a 12-quarter run captures only ~40% of the full effect, and the result reports its <code>plateau_fraction</code></span></div>
             <div class="dial-choice"><code>HHDI_ADDFACTOR</code><span class="dial-tradeoff"><strong>Externally costed household reform</strong> — virtual instrument, quarterly £m; positive revenue lowers HHDI via a held add-factor</span></div>
             <div class="dial-choice"><code>R / GILT / RX</code><span class="dial-tradeoff"><strong>Bank Rate &middot; gilt yields &middot; exchange rate</strong> — monetary &amp; market assumptions</span></div>
           </div>
