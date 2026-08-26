@@ -3009,15 +3009,20 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   color: var(--paper-faint);
 }
 .vmet-notes-line {
-  display: flex;
-  align-items: flex-start;
+  /* NOT display:flex. Flex makes every child its own item, so an inline <a>
+     in the note text became a 40px flex item and broke "working paper" across
+     three lines mid-word. A hanging indent reproduces the key/body look while
+     leaving inline content in normal flow. */
+  display: block;
+  padding-left: 6.5ch;
+  text-indent: -6.5ch;
   gap: 10px;
   margin: 0;
   padding: 4px 0;
   line-height: 1.6;
 }
 .vmet-notes-key {
-  flex: 0 0 auto;
+  display: inline-block;
   min-width: 5.5ch;
   color: var(--brand-strong);
   text-transform: uppercase;
