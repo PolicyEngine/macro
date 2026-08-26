@@ -212,8 +212,12 @@ benefits the MCP server).
 ## MCP server
 
 Runs over stdio via `python -m policyengine_macro.mcp_server`, exposing
-26 tools:
+28 tools:
 `score_reform` (a PolicyEngine reform through a chosen macro model),
+`start_job` and `get_job_result` (run a slow tool in the background and
+collect it — the hosted transport abandons any request after 150s, and
+`score_reform` over its default five-year window needs longer; there is
+no such limit locally, and no job backend, so call tools directly here),
 `frbus_shock_incidence`, `hank_shock_incidence` and
 `svar_inflation_incidence` (macro-to-microsimulation incidence overlays),
 `dynamic_reform_impact` (the OG-UK overlay dynamic score; local-only —
