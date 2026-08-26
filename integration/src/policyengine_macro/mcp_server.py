@@ -14,9 +14,51 @@ from pydantic import Field
 
 from policyengine_macro import core
 from policyengine_macro import capabilities
+from policyengine_macro import jobs
 from policyengine_macro import reporting
 
 mcp = FastMCP("policyengine-macro")
+
+
+@mcp.tool()
+def start_job(
+    tool: Annotated[str, Field(description="Adapter tool to run as a job")],
+    arguments: Annotated[
+        dict | None, Field(description="Arguments for that tool")
+    ] = None,
+) -> dict:
+    """Run a slow tool in the background and get a job id back immediately.
+
+    USE THIS FOR score_reform. The hosted server sits behind a transport that
+    abandons any HTTP request after 150 seconds, and score_reform over its
+    default five-year window takes longer than that, so calling it directly
+    on the hosted server fails every time. obr_shock, frbus_shock, hank_shock,
+    dynamic_reform_impact and population_reform_impact are also close enough
+    to the ceiling to fail on a cold server.
+
+    Returns a job id straight away. Poll it with get_job_result. The job
+    itself has a 30-minute budget, so the 150-second ceiling stops applying.
+
+    Running locally (stdio server or the pe-macro CLI) there is no such
+    ceiling and no job backend: call the tool directly instead.
+    """
+    return jobs.start(tool, arguments)
+
+
+@mcp.tool()
+def get_job_result(
+    job_id: Annotated[str, Field(description="Job id from start_job")],
+    wait_seconds: Annotated[
+        int, Field(description="Seconds to block waiting, max 120")
+    ] = 60,
+) -> dict:
+    """Fetch a started job's result, waiting up to wait_seconds for it.
+
+    Returns status 'done' with the result, or status 'running' -- in which
+    case call again with the same job_id. A score_reform over the default
+    five-year window typically needs two or three polls.
+    """
+    return jobs.result(job_id, wait_seconds)
 
 
 @mcp.tool()

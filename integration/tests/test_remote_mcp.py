@@ -376,3 +376,76 @@ async def test_calculate_household_uk_50k():
 @pytest.fixture
 def anyio_backend():
     return "asyncio"
+
+
+@pytest.mark.anyio
+async def test_score_reform_default_window_works_through_a_job():
+    """The path the ceiling used to make impossible.
+
+    Modal abandons any HTTP request after 150 seconds. score_reform over its
+    DEFAULT five-year window needs longer than that, so calling it directly on
+    the hosted server fails every time -- measured: HTTP 303 at 150.3s, and
+    following that redirect gives `400 modal-http: bad redirect method`
+    because a 303 turns the POST into a GET.
+
+    Note the existing bridge test uses years=1 to stay under the ceiling,
+    which is exactly why the ceiling survived so long without CI noticing:
+    nothing in the smoke suite exercised the default a real caller gets.
+    This does.
+    """
+    import asyncio
+
+    started = await _call(
+        "start_job",
+        {
+            "tool": "score_reform",
+            "arguments": {
+                "country": "uk",
+                "reform": {"gov.hmrc.income_tax.rates.uk[0].rate": 0.21},
+                "model": "obr",
+            },
+        },
+    )
+    assert started["status"] == "running", started
+    job_id = started["job_id"]
+    assert job_id, started
+    # The handle must tell an agent how to collect it.
+    assert "get_job_result" in started["next_step"]
+
+    # Poll. Each call blocks server-side well inside the 150s ceiling, so the
+    # loop is what makes an arbitrarily long job reachable over this transport.
+    # Bounded so a broken job path fails the deploy quickly rather than
+    # sitting on the runner: deploy (~4 min) + this must stay under the
+    # workflow's 25-minute cap.
+    deadline = 10 * 60
+    waited = 0
+    out = None
+    while waited < deadline:
+        out = await asyncio.wait_for(
+            _call("get_job_result", {"job_id": job_id, "wait_seconds": 120}),
+            timeout=180,
+        )
+        if out["status"] == "done":
+            break
+        assert out["status"] == "running", out
+        waited += out["waited_seconds"] or 1
+    assert out is not None and out["status"] == "done", (
+        f"score_reform did not finish within {deadline}s: {out}"
+    )
+
+    result = out["result"]
+    # Same invariants as the direct bridge test, over the full default window.
+    assert result["bridge_variable"] == "HHDI_ADDFACTOR"
+    assert len(result["annual_costings_bn"]) == 5, "not the default 5-year window"
+    assert all(c["budgetary_impact_bn"] > 0 for c in result["annual_costings_bn"])
+    assert result["cumulative_delta_gdp_bn_over_shock_periods"] < 0
+    assert result["score"]["caveats"]
+
+
+@pytest.mark.anyio
+async def test_job_tools_refuse_a_tool_that_is_not_allow_listed():
+    """`tool` is caller-supplied, so the server must not getattr it onto core."""
+    text = await _call_expecting_error(
+        "start_job", {"tool": "__import__", "arguments": {}}
+    )
+    assert "cannot be run as a job" in text

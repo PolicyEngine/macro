@@ -21,6 +21,7 @@ GOLDEN_TOOLS = frozenset(
         "define_scenario_incidence",
         "dynamic_reform_impact",
         "forecast_uk",
+        "start_job",
         "format_score_report",
         "frbus_list_variables",
         "frbus_shock",
@@ -36,6 +37,7 @@ GOLDEN_TOOLS = frozenset(
         "list_reform_parameters",
         "list_reform_variables",
         "model_summary",
+        "get_job_result",
         "get_model_status",
         "obr_shock",
         "population_reform_impact",
@@ -44,7 +46,7 @@ GOLDEN_TOOLS = frozenset(
     }
 )
 
-GOLDEN_TOOL_COUNT = 26
+GOLDEN_TOOL_COUNT = 28
 
 assert len(GOLDEN_TOOLS) == GOLDEN_TOOL_COUNT
 
