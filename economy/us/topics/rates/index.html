@@ -4,13 +4,13 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Rates and Treasuries — PolicyEngine Macro</title>
-<meta name="description" content="The effective federal funds rate is 3.63% in 2026-07 and the 10-year Treasury 4.7% on 2026-08-24 — and no model on this site forecasts either." />
+<meta name="description" content="The effective federal funds rate is 3.63% in 2026-08 and the 10-year Treasury 4.79% on 2026-09-02 — and no model on this site forecasts either." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/economy/us/topics/rates" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://policyengine-macro.vercel.app/economy/us/topics/rates" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
 <meta property="og:title" content="PolicyEngine Macro — Rates and Treasuries" />
-<meta property="og:description" content="The effective federal funds rate is 3.63% in 2026-07 and the 10-year Treasury 4.7% on 2026-08-24 — and no model on this site forecasts either." />
+<meta property="og:description" content="The effective federal funds rate is 3.63% in 2026-08 and the 10-year Treasury 4.79% on 2026-09-02 — and no model on this site forecasts either." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -49,7 +49,7 @@
     <div class="hero-inner">
       <p class="eyebrow reveal" style="--d:0">US topic · policy rate and the Treasury curve</p>
       <h1 class="reveal page-title" style="--d:1">What do US rates say — and what can this site honestly say back?</h1>
-      <p class="lede reveal" style="--d:2">The effective federal funds rate is 3.63% in 2026-07 and the 10-year Treasury 4.7% on 2026-08-24 — and no model on this site forecasts either.</p>
+      <p class="lede reveal" style="--d:2">The effective federal funds rate is 3.63% in 2026-08 and the 10-year Treasury 4.79% on 2026-09-02 — and no model on this site forecasts either.</p>
     </div>
   </section>
 
@@ -83,24 +83,24 @@
           <p class="economy-stat-value">3.63%</p>
           <p class="economy-stat-change">stored as 3.63 &middot; percent</p>
           <dl>
-            <div><dt>Observation</dt><dd>2026-07</dd></div>
-            <div><dt>Vintage</dt><dd>2026-08-04</dd></div>
+            <div><dt>Observation</dt><dd>2026-08</dd></div>
+            <div><dt>Vintage</dt><dd>2026-09-04</dd></div>
             <div><dt>Source</dt><dd><a href="https://fred.stlouisfed.org/series/FEDFUNDS">FRED · FEDFUNDS</a></dd></div>
           </dl>
         </article>
         <article class="economy-stat">
           <p class="economy-stat-label mono">10-YEAR TREASURY YIELD</p>
-          <p class="economy-stat-value">4.7%</p>
-          <p class="economy-stat-change">stored as 4.7 &middot; percent</p>
+          <p class="economy-stat-value">4.79%</p>
+          <p class="economy-stat-change">stored as 4.79 &middot; percent</p>
           <dl>
-            <div><dt>Observation</dt><dd>2026-08-24</dd></div>
-            <div><dt>Vintage</dt><dd>2026-08-26</dd></div>
+            <div><dt>Observation</dt><dd>2026-09-02</dd></div>
+            <div><dt>Vintage</dt><dd>2026-09-04</dd></div>
             <div><dt>Source</dt><dd><a href="https://fred.stlouisfed.org/series/DGS10">FRED · DGS10</a></dd></div>
           </dl>
         </article>
     </div>
     <p class="economy-method">Federal Reserve observations as FRED distributes them: FEDFUNDS is a monthly average of the effective rate and DGS10 a business-day constant-maturity quote. Nothing is rounded on the way in or out.</p>
-    <p class="economy-method">How those readings have moved, derived from the same stored observations rather than typed in: Effective federal funds rate -0.010pp against five months earlier (2026-02); 10-year Treasury yield -0.020pp against five observations earlier (2026-08-17).</p>
+    <p class="economy-method">How those readings have moved, derived from the same stored observations rather than typed in: Effective federal funds rate -0.010pp against five months earlier (2026-03); 10-year Treasury yield +0.130pp against five observations earlier (2026-08-26).</p>
   </section>
 
   <section id="model" class="band band-alt">
@@ -152,9 +152,9 @@
       <div class="codeblock"><pre><code>import json, urllib.request
 
 BASE = &quot;https://policyengine-macro.vercel.app/data&quot;
-with urllib.request.urlopen(f&quot;{BASE}/vintages/fred/us_federal_funds_rate/2026-08-04.json&quot;) as response:
+with urllib.request.urlopen(f&quot;{BASE}/vintages/fred/us_federal_funds_rate/2026-09-04.json&quot;) as response:
     fed_funds = json.load(response)
-print(fed_funds[&quot;vintage&quot;], fed_funds[&quot;observations&quot;][-1])   <span class="cm"># 2026-08-04 {&#x27;period&#x27;: &#x27;2026-07&#x27;, &#x27;value&#x27;: 3.63}</span></code></pre></div>
+print(fed_funds[&quot;vintage&quot;], fed_funds[&quot;observations&quot;][-1])   <span class="cm"># 2026-09-04 {&#x27;period&#x27;: &#x27;2026-08&#x27;, &#x27;value&#x27;: 3.63}</span></code></pre></div>
       <p>And the refusal is checkable rather than asserted:</p>
       <div class="codeblock"><pre><code>pe-macro model-status   <span class="cm"># every model, its country, status and access</span>
 pe-macro model-status frb-us --json   <span class="cm"># outputs, question types and cannot_answer, verbatim</span>
@@ -179,8 +179,8 @@ pe-macro model-status us-hank --json   <span class="cm"># the same for the HANK 
           <caption>Every value on this page is read from the vintage file linked here, not from a live call.</caption>
           <thead><tr><th scope="col">Series</th><th scope="col">Publisher</th><th scope="col">Coverage</th><th scope="col">Snapshots</th><th scope="col">This vintage</th><th scope="col">Next release</th></tr></thead>
           <tbody>
-          <tr><th scope="row">Effective federal funds rate</th><td><a href="https://fred.stlouisfed.org/series/FEDFUNDS">FRED · FEDFUNDS</a></td><td>2020-01 – 2026-07</td><td>2</td><td><a class="mono" href="/data/vintages/fred/us_federal_funds_rate/2026-08-04.json">2026-08-04.json</a></td><td>not announced</td></tr>
-          <tr><th scope="row">10-year Treasury yield</th><td><a href="https://fred.stlouisfed.org/series/DGS10">FRED · DGS10</a></td><td>2020-01-02 – 2026-08-24</td><td>9</td><td><a class="mono" href="/data/vintages/fred/us_treasury_10y/2026-08-26.json">2026-08-26.json</a></td><td>not announced</td></tr>
+          <tr><th scope="row">Effective federal funds rate</th><td><a href="https://fred.stlouisfed.org/series/FEDFUNDS">FRED · FEDFUNDS</a></td><td>2020-01 – 2026-08</td><td>3</td><td><a class="mono" href="/data/vintages/fred/us_federal_funds_rate/2026-09-04.json">2026-09-04.json</a></td><td>not announced</td></tr>
+          <tr><th scope="row">10-year Treasury yield</th><td><a href="https://fred.stlouisfed.org/series/DGS10">FRED · DGS10</a></td><td>2020-01-02 – 2026-09-02</td><td>10</td><td><a class="mono" href="/data/vintages/fred/us_treasury_10y/2026-09-04.json">2026-09-04.json</a></td><td>not announced</td></tr>
           </tbody>
         </table>
       </div>
