@@ -107,14 +107,14 @@
         <h4>The combination</h4>
         <p><code>score_reform(country="uk", reform=..., model="obr")</code> runs <a href="/pe">PolicyEngine</a>'s static costing for each year of the window, then hands this model the bill &mdash; the OBR's own workflow: static costing in, second-round effects out.</p>
         <h4>The mechanism</h4>
-        <p>Each year's costing enters as <code>HHDI_ADDFACTOR</code>: minus the annual &pound;bn, spread flat across its four quarters (&times;1000&nbsp;&divide;&nbsp;4 &rarr; &pound;m/qtr), held as an add-factor on household disposable income. The emulator then solves income &rarr; consumption &rarr; GDP quarter by quarter against the anchored March 2026 baseline.</p>
+        <p>Each year's costing enters as <code>HHDI_ADDFACTOR</code>: minus the annual &pound;bn, spread flat across its four quarters (&times;1000&nbsp;&divide;&nbsp;4 &rarr; &pound;m/qtr), held as an add-factor on household disposable income. The emulator then solves income &rarr; consumption &rarr; GDP quarter by quarter against the anchored March 2026 baseline. The anchoring add-factors are held fixed in both the baseline and the shocked run, so the reform is scored around the anchored path and they cancel in the difference.</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro score --country uk \
   --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
   --model obr</code></pre></div>
         <div class="callout">
           <strong>Same-breath caveats.</strong> The bridge's own multiplier is
-          about <strong>0.35</strong> against the OBR's published 0.3 for income
-          tax &mdash; the ~1-by-construction problem is on the <em>spending</em>
+          about <strong>0.34</strong> by the twelfth quarter against the OBR's
+          published 0.3 for income tax &mdash; the ~1-by-construction problem is on the <em>spending</em>
           lever, not this one. But no quarter of the solve converges, so read
           the direction and the scale, not single quarters. Corporation tax cannot go
           through the bridge &mdash; it is not household-borne in the microsim, and
@@ -249,9 +249,9 @@ df = run_reform(name="spending", var="CGG", shock=1250, periods=12)</code></pre>
         <p>
           1p on the basic rate of income tax from April 2026:
           direct yield <strong>&pound;6.46bn in 2026</strong>, <strong>&pound;7.38bn by
-          2030</strong>. The second round is a GDP fall that builds to roughly
-          <strong>0.35&times; the revenue raised</strong> by the end of the
-          five-year window &mdash; close to the OBR's published <strong>0.3</strong>
+          2030</strong>. The second round is a GDP fall that builds from about
+          0.15&times; the revenue raised in the first year to roughly
+          <strong>0.34&times;</strong> by the twelfth quarter &mdash; close to the OBR's published <strong>0.3</strong>
           for income tax and NICs. Read the direction and the scale, not the
           individual quarters: <a href="/obr/validation#caveats">no quarter of
           the solve converges to tolerance</a>.
@@ -260,7 +260,7 @@ df = run_reform(name="spending", var="CGG", shock=1250, periods=12)</code></pre>
         <div class="callout">
           <strong>The household route behaves; the spending levers do not.</strong>
           A tax reform through the bridge implies a multiplier of about
-          <strong>0.35</strong> against the OBR's
+          <strong>0.34</strong> by the twelfth quarter against the OBR's
           <a href="https://obr.uk/box/fiscal-multipliers/">published 0.3</a> for
           income tax and NICs. The by-construction problem is elsewhere: a
           <em>spending</em> shock (<code>CGG</code>) lands straight in the GDP
@@ -286,7 +286,7 @@ df = run_reform(name="spending", var="CGG", shock=1250, periods=12)</code></pre>
         <div class="meth-inline">
         <div class="meth-sec-title">1p on the basic rate, April 2026</div>
         <div class="meth-eq"><div class="meth-eq-label">direct yield</div><div class="meth-eq-body">&pound;6.46bn (2026) &rarr; &pound;7.38bn (2030)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">second round</div><div class="meth-eq-body">GDP falls, building to ~0.35&times; the revenue raised</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">second round</div><div class="meth-eq-body">GDP falls, building to ~0.34&times; the revenue raised by quarter 12</div></div>
         <div class="meth-eq"><div class="meth-eq-label">vs OBR</div><div class="meth-eq-body">published 0.3 for income tax &amp; NICs</div></div>
         <div class="meth-eq"><div class="meth-eq-label">per-quarter</div><div class="meth-eq-body">not reliable &mdash; no quarter converges to tolerance</div></div>
         <div class="meth-eq"><div class="meth-eq-label">cross-check</div><div class="meth-eq-body">HMRC ready reckoner &pound;6.9bn (&minus;6.4% gap)</div></div>
@@ -317,7 +317,7 @@ df = run_reform(name="spending", var="CGG", shock=1250, periods=12)</code></pre>
           <div class="meth-panel-head"><span class="meth-panel-title">Worked example</span><span class="meth-panel-badge mono">Step 3</span></div>
           <div class="meth-sec-title">1p on the basic rate, April 2026</div>
           <div class="meth-eq"><div class="meth-eq-label">direct yield</div><div class="meth-eq-body">&pound;6.46bn (2026) &rarr; &pound;7.38bn (2030)</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">second round</div><div class="meth-eq-body">GDP falls, building to ~0.35&times; the revenue raised</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">second round</div><div class="meth-eq-body">GDP falls, building to ~0.34&times; the revenue raised by quarter 12</div></div>
           <div class="meth-eq"><div class="meth-eq-label">vs OBR</div><div class="meth-eq-body">published 0.3 for income tax &amp; NICs</div></div>
           <div class="meth-eq"><div class="meth-eq-label">per-quarter</div><div class="meth-eq-body">not reliable &mdash; no quarter converges to tolerance</div></div>
           <div class="meth-eq"><div class="meth-eq-label">cross-check</div><div class="meth-eq-body">HMRC ready reckoner &pound;6.9bn (&minus;6.4% gap)</div></div>
