@@ -200,8 +200,10 @@ def chart_obr_anchored():
     quarters, gdp, cons = load_obr_anchored()
     W, H = 760, 326
     x0, x1 = 58.0, 724.0
-    zero_y = 175.0
-    per_unit = 55.5 / 0.3          # px per percentage point
+    # Frame runs -0.3pp to +1.2pp: the March 2026 vintage with the recovered
+    # ONS series drifts above the EFO to about +1.2% on consumption by 2027Q4.
+    zero_y = 244.0
+    per_unit = 46.0 / 0.3          # px per percentage point
     step = (x1 - x0) / (len(quarters) - 1)
 
     xs = [x0 + i * step for i in range(len(quarters))]
@@ -210,15 +212,17 @@ def chart_obr_anchored():
 
     mape_g = sum(abs(v) for v in gdp) / len(gdp)
     mape_c = sum(abs(v) for v in cons) / len(cons)
+    over = [q for q, v in zip(quarters, cons) if abs(v) >= 1.0]
+    over_note = (f", and consumption is more than 1% from the EFO in {' and '.join(over)}"
+                 if over else "")
 
     desc = (
         f"Line chart. Quarterly percentage deviation of the anchored emulator from the "
         f"published March 2026 EFO, {quarters[0]} to {quarters[-1]}. Real GDP ranges from "
         f"{min(gdp):+.2f}% to {max(gdp):+.2f}% (mean absolute deviation {mape_g:.2f}%); "
         f"consumption from {min(cons):+.2f}% to {max(cons):+.2f}% (mean absolute deviation "
-        f"{mape_c:.2f}%). Both series stay well inside the plus or minus 1% band at which "
-        f"continuous integration hard-fails the build, which is off the top and bottom of "
-        f"this frame."
+        f"{mape_c:.2f}%). Continuous integration hard-fails the build if either mean absolute "
+        f"deviation reaches 1%; it does not test single quarters{over_note}."
     )
     out = svg_open(W, H, "obr-anchored",
                    "obr-macro: anchored baseline vs March 2026 EFO, quarterly deviation",
@@ -234,7 +238,7 @@ def chart_obr_anchored():
     out.append(f'<text class="vc-lab vc-lab2" x="322" y="30">consumption (peak {max(cons, key=abs):+.2f}%)</text>')
 
     # y grid
-    for tick in (-0.6, -0.3, 0.0, 0.3, 0.6):
+    for tick in (-0.3, 0.0, 0.3, 0.6, 0.9, 1.2):
         y = ymap(tick)
         cls = "vc-axis" if tick == 0 else "vc-grid"
         label = "0" if tick == 0 else f"{tick:+.1f}%".replace("+0.", "+0.").replace("-0.", "-0.")
@@ -459,7 +463,7 @@ def chart_obr_freerun():
     desc = (
         f"Line chart of quarterly real GDP levels in billions of pounds, {quarters[0]} to "
         f"{quarters[-1]}. The published March 2026 EFO path rises from {efo[0]:.1f} to "
-        f"{efo[-1]:.1f}. The anchored emulator is visually indistinguishable from it, running "
+        f"{efo[-1]:.1f}. The anchored emulator tracks it closely, running "
         f"from {anchored[0]:.1f} to {anchored[-1]:.1f} (mean absolute deviation {mad_a:.2f} per "
         f"cent, recomputed here from the plotted series). The free-running emulator, de-seeded "
         f"and with no add-factors, contracts from {freerun[0]:.1f} to {freerun[-1]:.1f} — a gap "
