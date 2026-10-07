@@ -204,7 +204,7 @@ MODEL_QUALITY = {
         ),
         "predictive_validation": _quality(
             "weak",
-            "Free-running GDP and consumption MAPE are 4.48% and 7.49%; the "
+            "Free-running GDP and consumption MAPE are 4.32% and 7.22%; the "
             "anchored fit is by construction.",
             "Pass rolling-origin historical-vintage tests against simple "
             "benchmarks and first-release outturns.",
