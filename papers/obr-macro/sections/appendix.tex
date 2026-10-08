@@ -10,7 +10,7 @@ Table~\ref{tab:glossary} defines every OBR mnemonic used in this paper, with the
 \section{The complete free-running scorecard}
 \label{app:scorecard}
 
-Table~\ref{tab:fullscore} reproduces the complete 21-variable free-running scorecard summarised in Table~\ref{tab:rawscore}, organised by model block, with each variable's metric and passthrough status made explicit. Figures are the March 2026 vintage, reproduced from a fresh \texttt{python -m obr\_macro.calibration\_score} run; the set this appendix carried previously predated the $OSHH$ ONS level anchor. The de-seeding procedure and band definitions are those of Section~\ref{sec:rawscore}: rates within 1.0pp, net balances within 1.5 per cent of GDP, levels within 10 per cent MAPE.
+Table~\ref{tab:fullscore} reproduces the complete 21-variable free-running scorecard summarised in Table~\ref{tab:rawscore}, organised by model block, with each variable's metric and passthrough status made explicit. Figures are the March 2026 vintage with the 355-series ONS snapshot, reproduced from a fresh \texttt{python -m obr\_macro.calibration\_score} run; the previous set (GDP 4.48, consumption 7.49, company profits 63.29 per cent) predated the recovery of eight dropped ONS series, and the set before that predated the $OSHH$ ONS level anchor. The de-seeding procedure and band definitions are those of Section~\ref{sec:rawscore}: rates within 1.0pp, net balances within 1.5 per cent of GDP, levels within 10 per cent MAPE.
 
 \begin{table}[ht]
 \centering
@@ -21,10 +21,10 @@ Table~\ref{tab:fullscore} reproduces the complete 21-variable free-running score
 \toprule
 Block & Variable & Code & Metric & Error & Status \\
 \midrule
-Demand & Real GDP & $GDPM$ & MAPE & 4.48\% & computed --- fair$^{\S}$ \\
- & Consumption & $CONS$ & MAPE & 7.49\% & computed --- fair \\
+Demand & Real GDP & $GDPM$ & MAPE & 4.32\% & computed --- fair$^{\S}$ \\
+ & Consumption & $CONS$ & MAPE & 7.22\% & computed --- fair \\
  & Total investment & $IF$ & MAPE & 0.00\% & passthrough \\
- & Business investment & $IBUS$ & MAPE & 15.73\% & computed --- poor \\
+ & Business investment & $IBUS$ & MAPE & 15.28\% & computed --- poor \\
  & Exports & $X$ & MAPE & 0.00\% & passthrough \\
  & Imports & $M$ & MAPE & 0.00\% & passthrough \\
 \midrule
@@ -39,12 +39,12 @@ Prices \& wages & CPI index & $CPI$ & MAPE & 0.00\% & passthrough \\
  & GDP deflator & $PGDP$ & MAPE & 0.00\% & passthrough \\
  & Wages \& salaries & $WFP$ & MAPE & 0.00\% & passthrough \\
 \midrule
-Incomes & Household income & $HHDI$ & MAPE & 6.27\% & computed --- fair \\
+Incomes & Household income & $HHDI$ & MAPE & 6.18\% & computed --- fair \\
  & Compensation & $COMP$ & MAPE & 0.00\% & passthrough \\
- & Real household income & $RHHDI$ & MAPE & 6.03\% & computed --- fair \\
- & Company profits & $FYCPR$ & MAPE & 63.29\% & computed --- off \\
+ & Real household income & $RHHDI$ & MAPE & 5.94\% & computed --- fair \\
+ & Company profits & $FYCPR$ & MAPE & 82.77\% & computed --- off \\
 \midrule
-External & Current account & $CB$ & \% of GDP & 3.60 & computed --- off \\
+External & Current account & $CB$ & \% of GDP & 3.02 & computed --- off \\
  & Trade balance & $TB$ & \% of GDP & 0.69 & computed --- fair \\
 \bottomrule
 \end{tabular}
@@ -62,7 +62,7 @@ External & Current account & $CB$ & \% of GDP & 3.60 & computed --- off \\
 
 \paragraph{Sequential solve and typical cost.} Quarters solve sequentially forward (lags reference solved history; the few lead references use the seeded path). A twelve-quarter anchored solve of the full system takes roughly 30--40 seconds on a laptop (single-threaded CPython; equations are compiled once and evaluated against a per-iteration variable dictionary); a reform run is two such solves on structurally identical clones.
 
-\paragraph{Add-factor application.} Anchoring residuals (Section~\ref{sec:anchoring}) are added to behavioural equations' solutions in baseline mode and disabled in shock mode, so that shocked runs deviate from an identically structured baseline. A second, separate channel---\emph{structural} add-factors---is applied in baseline and shocked runs alike and therefore cancels in any base-versus-shock delta; the investment closure uses it to hold the reconstructed $\Delta \ln IBUSX$ baseline on the OBR's published path without contaminating the corporation-tax response.
+\paragraph{Add-factor application.} Anchoring residuals (Section~\ref{sec:anchoring}) are added to behavioural equations' solutions and, for a reform, held fixed in both the baseline and the shocked run, so the reform is scored around the anchored path and the residuals cancel in the difference. (Before October 2026 they were disabled in both runs of a reform pair, so reforms were scored around the free-running model.) A second, separate channel---\emph{structural} add-factors---is applied in baseline and shocked runs alike and therefore cancels in any base-versus-shock delta; the investment closure uses it to hold the reconstructed $\Delta \ln IBUSX$ baseline on the OBR's published path without contaminating the corporation-tax response.
 
 \paragraph{The investment closure.} Corporation-tax experiments activate the reconstructed business-investment ECM~\eqref{eq:ibus} (published commented out, with one unbalanced parenthesis restored) in place of the $IBUSX$ residual identity, add the $IF$ and $IBUS$ aggregation identities, and stabilise the result in two moves: market-sector output $MSGVA$ is frozen at a reference path from a tracking solve in which $IBUSX$ is pinned to its published values (breaking an accelerator loop whose closed-loop eigenvalue exceeds one on this databank---the raw loop runs $IBUSX$ from $\sim$\pounds 94{,}000m to $\sim$\pounds 7{,}000{,}000m in twelve quarters), and the equation's level is re-centred on the OBR path by structural add-factors. Because $KSTAR$ still responds to the cost of capital, the $TCPRO$ channel survives intact. Investment-closure solves cap Gauss--Seidel at 25 sweeps: the only variable still moving beyond that point is a rest-of-world financial-accounts series off the corporation-tax chain, and the investment response itself is settled to within $\sim$1 per cent by sweep 25.
 

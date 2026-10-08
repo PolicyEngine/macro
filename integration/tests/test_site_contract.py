@@ -96,7 +96,7 @@ def test_current_obr_outlook_uses_latest_official_efo_window():
     assert rows[-1]["quarter"] == "2031Q1"
     page = _read("obr/index.html") + _read("obr/validation/index.html")
     assert "March 2026 EFO" in page
-    assert "March 2026 detailed forecast tables on 21 July 2026" in page
+    assert "March 2026 detailed forecast tables on 7 October 2026" in page
 
 
 def test_frozen_validation_vintages_are_not_relabelled_as_current_forecasts():
