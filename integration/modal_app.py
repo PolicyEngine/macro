@@ -284,6 +284,20 @@ image = (
         f"pip install -e {OBR_REPO} -e {BOE_REPO} -e {FRB_REPO} "
         f"-e {HOME}/macro/integration"
     )
+    # Refresh the two CA lists that the server's outbound HTTPS (Hugging Face
+    # microdata downloads, PolicyEngine data fetches) verifies against:
+    # Debian's ca-certificates, read by urllib, aiohttp and hf-xet, and certifi,
+    # read by requests and httpx. The cached pip_install layer above was built
+    # on 2026-08-12 with certifi 2026.7.22, on a debian_slim base built before
+    # Debian released ca-certificates 20250419~deb12u2; both lists trusted the
+    # compromised eMudhra root "emSign ECC Root CA - G3"
+    # (https://emudhra.we-have-a-problem.com).
+    # These two steps go at the END of the chain on purpose. Modal caches each
+    # layer by its definition, so appending leaves every layer above cached.
+    # Adding certifi to the pip_install list instead would rebuild that layer,
+    # and the rebuild fails today: policyengine-us==1.764.6 is no longer on PyPI.
+    .apt_install("ca-certificates")
+    .pip_install("certifi>=2026.10.19")
 )
 
 app = modal.App("policyengine-macro-mcp")
