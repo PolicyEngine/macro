@@ -54,12 +54,15 @@ models = [
     "frbus @ git+https://github.com/PolicyEngine/us-frb-model@2508a2d3ee7d078fd82f38bc17567e4433489913",
     "us-hank-model @ git+https://github.com/PolicyEngine/us-hank-model@19a8e5e5cd8e7120fbbd2e3de3c5b63509824f3c",
     # [models] pulls the pinned policyengine-uk / policyengine-us country
-    # packages that pe.uk / pe.us need at runtime.
-    "policyengine[models]>=4,<5",
-    # policyengine's bundled data-release manifest certifies an exact
-    # policyengine-us version; anything newer fails certification at import
-    # (every pe.* call raises). Keep in sync with the manifest pin.
-    "policyengine-us==1.764.6",
+    # packages that pe.uk / pe.us need at runtime. policyengine 6.x needs
+    # Python >= 3.11.
+    "policyengine[models]>=6.10,<7",
+    # policyengine's bundled data-release manifest certifies the US data for
+    # one policyengine-us version (policyengine 6.10.0: 2.2.1; the data release
+    # also accepts >=2.0.0,<2.3). Any other version fails certification when
+    # `import policyengine` runs, so every pe.* call (UK included) raises.
+    # Keep in sync with the [models] pin of the chosen policyengine release.
+    "policyengine-us==2.2.1",
 ]
 
 [project.scripts]
