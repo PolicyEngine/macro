@@ -58,8 +58,18 @@ models = [
     "policyengine[models]>=4,<5",
     # policyengine's bundled data-release manifest certifies an exact
     # policyengine-us version; anything newer fails certification at import
-    # (every pe.* call raises). Keep in sync with the manifest pin.
-    "policyengine-us==1.764.6",
+    # (every pe.* call raises). Keep in sync with the manifest pin, 1.764.6.
+    # PyPI no longer hosts 1.764.6, so it installs from the policyengine-us
+    # commit that set that version (the repository has no release tags); a
+    # wheel built from this archive has the same package files as the PyPI
+    # wheel. It satisfies the policyengine-us==1.764.6 pin in [models].
+    "policyengine-us @ https://github.com/PolicyEngine/policyengine-us/archive/92e6052d3e057c4e03b955d01a7ee4e3c2fb3131.tar.gz",
+    # policyengine-us 1.764.6 declares spm-calculator>=0.2.0 and policyengine
+    # 4.x declares microdf_python>=1.2.1, so a fresh install would take
+    # releases newer than the ones these models were run and certified with.
+    # Pin the versions the deployed image holds.
+    "spm-calculator==0.3.1",
+    "microdf-python==1.3.0",
 ]
 
 [project.scripts]
