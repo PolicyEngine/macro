@@ -54,15 +54,22 @@ models = [
     "frbus @ git+https://github.com/PolicyEngine/us-frb-model@2508a2d3ee7d078fd82f38bc17567e4433489913",
     "us-hank-model @ git+https://github.com/PolicyEngine/us-hank-model@19a8e5e5cd8e7120fbbd2e3de3c5b63509824f3c",
     # [models] pulls the pinned policyengine-uk / policyengine-us country
-    # packages that pe.uk / pe.us need at runtime. policyengine 6.x needs
-    # Python >= 3.11.
-    "policyengine[models]>=6.10,<7",
-    # policyengine's bundled data-release manifest certifies the US data for
-    # one policyengine-us version (policyengine 6.10.0: 2.2.1; the data release
-    # also accepts >=2.0.0,<2.3). Any other version fails certification when
-    # `import policyengine` runs, so every pe.* call (UK included) raises.
-    # Keep in sync with the [models] pin of the chosen policyengine release.
-    "policyengine-us==2.2.1",
+    # packages that pe.uk / pe.us need at runtime.
+    "policyengine[models]>=4,<5",
+    # policyengine's bundled data-release manifest certifies an exact
+    # policyengine-us version; anything newer fails certification at import
+    # (every pe.* call raises). Keep in sync with the manifest pin, 1.764.6.
+    # PyPI no longer hosts 1.764.6, so it installs from the policyengine-us
+    # commit that set that version (the repository has no release tags); a
+    # wheel built from this archive has the same package files as the PyPI
+    # wheel. It satisfies the policyengine-us==1.764.6 pin in [models].
+    "policyengine-us @ https://github.com/PolicyEngine/policyengine-us/archive/92e6052d3e057c4e03b955d01a7ee4e3c2fb3131.tar.gz",
+    # policyengine-us 1.764.6 declares spm-calculator>=0.2.0 and policyengine
+    # 4.x declares microdf_python>=1.2.1, so a fresh install would take
+    # releases newer than the ones these models were run and certified with.
+    # Pin the versions the deployed image holds.
+    "spm-calculator==0.3.1",
+    "microdf-python==1.3.0",
 ]
 
 [project.scripts]
