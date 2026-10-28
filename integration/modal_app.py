@@ -216,14 +216,16 @@ image = (
         # imports it lazily inside the pe_* adapters — module import at
         # container start stays fast; only the first policyengine tool call
         # in a fresh container pays the load.
-        "policyengine[models]>=6.10,<7",  # [models] extra REQUIRED: base install leaves pe.uk/pe.us as None
-        # policyengine's bundled data-release manifest certifies the US data
-        # for one policyengine-us version (policyengine 6.10.0: 2.2.1). Any
-        # other version fails certification when `import policyengine` runs,
-        # so every US and UK call raises. Keep this pin equal to the
-        # policyengine-us pin in the [models] extra of the policyengine
-        # release that resolves, and to integration/pyproject.toml.
+        "policyengine[models]==6.11.1",  # [models] extra REQUIRED: base install leaves pe.uk/pe.us as None
+        # The country packages policyengine 6.11.1's [models] extra pins.
+        # policyengine's bundled data-release manifest certifies the US and
+        # UK microdata for exactly these versions; with any other
+        # policyengine-us, `import policyengine` fails certification and
+        # every US and UK call raises. Keep all four equal to the [models]
+        # extra in integration/pyproject.toml.
         "policyengine-us==2.2.1",
+        "policyengine-uk==2.151.0",
+        "policyengine-core==3.33.3",
         # US HANK (hank_shock / hank_summary). Installed from GitHub as a
         # normal wheel — no data files or repo checkout needed at runtime;
         # the calibration is code. Cost profile: the first hank_shock call
