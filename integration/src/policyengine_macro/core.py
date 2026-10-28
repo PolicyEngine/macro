@@ -2152,7 +2152,8 @@ def pe_household_impact(
 #
 # Runs the reform against the full representative household microdata
 # (UK: enhanced FRS, ~125MB download from a private HuggingFace repo the
-# first time — set HUGGING_FACE_TOKEN; US: CPS-based, public). Measured on
+# first time — set HUGGING_FACE_TOKEN; US: policyengine's certified default,
+# Populace US 2024, a public CPS-based build). Measured on
 # the UK 2026 enhanced FRS (53,508 households): ~6s per simulation run,
 # ~1.8GB peak RSS, ~92MB derived per-year .h5 on disk. The baseline
 # simulation is cached in-process per (country, year, dataset), so repeat
@@ -2331,7 +2332,7 @@ def pe_population_impact(
     """Score a reform against the whole population with PolicyEngine.
 
     Runs baseline and reform microsimulations over representative household
-    microdata (UK: enhanced FRS; US: CPS-based) and returns the budgetary
+    microdata (UK: enhanced FRS; US: Populace US 2024) and returns the budgetary
     impact — the change in government revenue net of spending, in £bn/$bn
     per year (positive = the reform raises revenue) — plus income-decile
     impacts and winner/loser counts.

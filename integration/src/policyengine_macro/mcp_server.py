@@ -758,7 +758,8 @@ def population_reform_impact(
     equalising capital gains tax rates with income tax rates raise?".
 
     Runs baseline and reform simulations over representative household
-    microdata (UK: enhanced FRS, ~54k households; US: CPS-based) and returns:
+    microdata (UK: enhanced FRS, ~54k households; US: Populace US 2024,
+    policyengine's certified CPS-based default) and returns:
     - budgetary_impact_bn: change in government revenue net of spending, in
       £bn (UK) or $bn (US) PER YEAR; positive = the reform raises revenue.
     - household_net_income_change_bn, winner/loser counts, and per-income-
