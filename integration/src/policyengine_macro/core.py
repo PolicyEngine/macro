@@ -1822,56 +1822,183 @@ def _validate_people(people, *, argument: str = "people") -> list[dict]:
     return people
 
 
-US_STATE_CODES = frozenset(
-    "AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN "
-    "MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA "
-    "WV WI WY".split()
+# Two-digit state FIPS codes, used to check that a county FIPS code lies in
+# the household's state: policyengine-us takes the state from the state input
+# and the county from county_fips independently, so a county without a state
+# (or in another state) runs a California household in that county.
+US_STATE_FIPS = {
+    "AL": "01", "AK": "02", "AZ": "04", "AR": "05", "CA": "06", "CO": "08",
+    "CT": "09", "DE": "10", "DC": "11", "FL": "12", "GA": "13", "HI": "15",
+    "ID": "16", "IL": "17", "IN": "18", "IA": "19", "KS": "20", "KY": "21",
+    "LA": "22", "ME": "23", "MD": "24", "MA": "25", "MI": "26", "MN": "27",
+    "MS": "28", "MO": "29", "MT": "30", "NE": "31", "NV": "32", "NH": "33",
+    "NJ": "34", "NM": "35", "NY": "36", "NC": "37", "ND": "38", "OH": "39",
+    "OK": "40", "OR": "41", "PA": "42", "RI": "44", "SC": "45", "SD": "46",
+    "TN": "47", "TX": "48", "UT": "49", "VT": "50", "VA": "51", "WA": "53",
+    "WV": "54", "WI": "55", "WY": "56",
+}
+US_STATE_CODES = frozenset(US_STATE_FIPS)
+
+# Household keys that set the state. policyengine.py documents `state_code`;
+# `state_code_str` is the key this package documented before, and
+# policyengine-us 2.x honours both.
+US_STATE_KEYS = ("state_code", "state_code_str")
+
+US_SPM_GEOGRAPHY_KINDS = ("county", "national", "metro")
+
+_US_GEOGRAPHY_HELP = (
+    "policyengine-us 2.x computes the Supplemental Poverty Measure (SPM) in "
+    "every US household result, and its poverty thresholds depend on where "
+    "the household lives. A state alone does not identify an SPM area, so "
+    "choose one of:\n"
+    "  - the household's county: household={\"state_code\": \"NY\", "
+    '"county_fips": "36061"} (a five-digit county FIPS code as a string, '
+    "with leading zeros, in the household's state)\n"
+    '  - national SPM thresholds: spm={"geography_kind": "national"}\n'
+    '  - a fixed SPM area: spm={"geography_kind": "metro", '
+    '"geography_id": "35620"}\n'
+    "There is no default, as in policyengine.py, the PolicyEngine API and "
+    "the PolicyEngine web app, which all require this choice. The county "
+    "also feeds county-dependent rules (for one New York household, state "
+    "income tax and SNAP differ between New York County and Albany County); "
+    "without a county, policyengine-us applies the first county in the "
+    "state to those rules."
 )
 
 
 def _validate_us_household(household):
-    """Catch US household dicts that would silently be ignored.
+    """Catch US household dicts that would silently be ignored or misread.
 
-    PolicyEngine US takes the state as household-level ``state_code_str``
-    and defaults to CA when it is absent. A misspelled key (``state_code``)
-    or a bad code therefore produced a silently-wrong California answer
-    instead of an error.
+    PolicyEngine US takes the state as household-level ``state_code`` (or
+    ``state_code_str``) and defaults to CA when it is absent, and takes the
+    county from ``county_fips`` without checking it against the state. A bad
+    state code, or a county with no state or in another state, therefore
+    produced a silently wrong California answer instead of an error.
     """
     if household is None:
         return None
     if not isinstance(household, dict):
         raise ValueError(
-            "household must be a dict, e.g. {\"state_code_str\": \"CA\"}."
+            'household must be a dict, e.g. {"state_code": "NY", '
+            '"county_fips": "36061"}.'
         )
     household = dict(household)
-    if "state_code" in household and "state_code_str" not in household:
-        raise ValueError(
-            "US household uses the key 'state_code_str', not 'state_code'. "
-            'Example: {"state_code_str": "TX"}. (Passing the wrong key would '
-            "silently fall back to the CA default and return the wrong "
-            "state income tax.)"
-        )
-    state = household.get("state_code_str")
-    if state is not None:
+    states = {}
+    for key in US_STATE_KEYS:
+        state = household.get(key)
+        if state is None:
+            continue
         if not isinstance(state, str) or state.upper() not in US_STATE_CODES:
             raise ValueError(
-                f"state_code_str must be a two-letter US state or DC code, "
-                f"got {state!r}. Example: {{\"state_code_str\": \"TX\"}}."
+                f"{key} must be a two-letter US state or DC code, got "
+                f'{state!r}. Example: {{"state_code": "TX"}}.'
             )
-        household["state_code_str"] = state.upper()
+        household[key] = states[key] = state.upper()
+    if len(set(states.values())) > 1:
+        raise ValueError(
+            f"household sets two different states ({states}); give the state "
+            'once, e.g. {"state_code": "NY"}.'
+        )
+    county_fips = household.get("county_fips")
+    if county_fips is not None:
+        if not isinstance(county_fips, str) or not re.fullmatch(
+            r"\d{5}", county_fips
+        ):
+            raise ValueError(
+                "county_fips must be a five-digit county FIPS code given as a "
+                f"string, with leading zeros, got {county_fips!r}. Example: "
+                '{"state_code": "CA", "county_fips": "06037"}.'
+            )
+        if not states:
+            raise ValueError(
+                "county_fips needs the household's state as well: "
+                "policyengine-us does not derive the state from the county, "
+                "so it would calculate state taxes for California. Example: "
+                '{"state_code": "NY", "county_fips": "36061"}.'
+            )
+        state = next(iter(states.values()))
+        if county_fips[:2] != US_STATE_FIPS[state]:
+            raise ValueError(
+                f"county_fips {county_fips!r} is not in {state}: county FIPS "
+                f"codes in {state} start with {US_STATE_FIPS[state]}."
+            )
     return household
 
 
-def _pe_run(country, people, year, reform, benunit, tax_unit, household):
-    # Validate country before importing PolicyEngine so bad input fails fast
-    # with a clear ValueError even where PE is not installed (matches
-    # pe_population_impact and lets the wiring tests run without the heavy dep).
+def _validate_us_spm(spm, household):
+    """Check that a US household has an SPM geography, before PE is imported.
+
+    ``spm`` is passed to policyengine.py's ``calculate_household(spm=...)``
+    unchanged; policyengine.py validates its full schema. Its default
+    ``geography_kind`` is ``county``, which reads the household's
+    ``county_fips``: without one, every default output raises
+    SPM_GEOGRAPHY_REQUIRED from inside the model run. This check fails first
+    with the choices spelled out.
+    """
+    if spm is not None and not isinstance(spm, dict):
+        raise ValueError(
+            "spm must be a dict, e.g. {\"geography_kind\": \"national\"}.\n"
+            + _US_GEOGRAPHY_HELP
+        )
+    geography_kind = (spm or {}).get("geography_kind", "county")
+    if geography_kind not in US_SPM_GEOGRAPHY_KINDS:
+        raise ValueError(
+            f"spm geography_kind must be one of {list(US_SPM_GEOGRAPHY_KINDS)}"
+            f", got {geography_kind!r}.\n" + _US_GEOGRAPHY_HELP
+        )
+    if geography_kind == "county" and not (household or {}).get("county_fips"):
+        raise ValueError(
+            "US households need an SPM geography.\n" + _US_GEOGRAPHY_HELP
+        )
+    return dict(spm) if spm else None
+
+
+def _pe_spm_summary(result) -> dict:
+    """The SPM selection a US household run used, from policyengine.py's
+    receipt. The full receipt is several hundred kilobytes per household (it
+    carries the whole forecast artifact's diagnostics), so only the resolved
+    selection and the SPM area each year was measured in are returned."""
+    provenance = result["provenance"]
+    receipt = provenance.get("spm") or {}
+    return {
+        "selection": dict(provenance.get("spm_config") or {}),
+        "forecast_id": receipt.get("forecast_id"),
+        "areas": [
+            {
+                "year": entry.get("year"),
+                "kind": entry.get("geography", {}).get("kind"),
+                "area_id": entry.get("geography", {}).get("area_id"),
+                "name": entry.get("geography", {}).get("name"),
+            }
+            for entry in receipt.get("geographies", [])
+        ],
+    }
+
+
+def _validate_household_inputs(country, people, household, spm):
+    """Validate everything a household run needs that is checkable without
+    importing PolicyEngine, so bad input fails fast with a clear ValueError
+    even where PE is not installed (matches pe_population_impact and lets the
+    wiring tests run without the heavy dependency)."""
     country = _validate_country(country)
     people = _validate_people(people)
-    if reform is not None:
-        reform = validate_reform(reform)
     if country == "us":
         household = _validate_us_household(household)
+        spm = _validate_us_spm(spm, household)
+    elif spm is not None:
+        raise ValueError(
+            "spm selects the US Supplemental Poverty Measure geography and is "
+            "US only; leave it out for UK households."
+        )
+    return country, people, household, spm
+
+
+def _pe_run(country, people, year, reform, benunit, tax_unit, household, spm=None):
+    country, people, household, spm = _validate_household_inputs(
+        country, people, household, spm
+    )
+    if reform is not None:
+        reform = validate_reform(reform)
     pe = _import_pe()
     if country == "uk":
         return pe.uk.calculate_household(
@@ -1881,7 +2008,7 @@ def _pe_run(country, people, year, reform, benunit, tax_unit, household):
     if country == "us":
         return pe.us.calculate_household(
             people=people, tax_unit=tax_unit, household=household,
-            year=int(year), reform=reform,
+            year=int(year), reform=reform, spm=spm,
         )
     raise ValueError(f"country must be 'uk' or 'us', got {country!r}")
 
@@ -1921,6 +2048,7 @@ def pe_household(
     benunit: dict | None = None,
     tax_unit: dict | None = None,
     household: dict | None = None,
+    spm: dict | None = None,
 ) -> dict:
     """Calculate taxes and benefits for a custom household with PolicyEngine.
 
@@ -1928,10 +2056,15 @@ def pe_household(
     [{"age": 35, "employment_income": 50000}]. reform: optional
     {"gov.param.path": value} dict. UK groups people into a benunit; US uses
     tax_unit (e.g. {"filing_status": "SINGLE"}) and household
-    (e.g. {"state_code_str": "CA"}; defaults to CA if omitted).
+    (e.g. {"state_code": "NY", "county_fips": "36061"}; the state defaults
+    to CA if omitted). A US household needs an SPM geography: either its
+    county_fips, or spm={"geography_kind": "national"} (or a "metro" SPM
+    area); spm is passed to policyengine.py's calculate_household.
     """
     country = _validate_country(country)
-    result = _pe_run(country, people, year, reform, benunit, tax_unit, household)
+    result = _pe_run(
+        country, people, year, reform, benunit, tax_unit, household, spm
+    )
     out = {
         "country": country,
         "year": int(year),
@@ -1952,6 +2085,7 @@ def pe_household(
     else:
         out["tax_unit"] = _pe_entity_dict(result.tax_unit)
         out["spm_unit"] = _pe_entity_dict(result.spm_unit)
+        out["spm"] = _pe_spm_summary(result)
     return out
 
 
@@ -1963,17 +2097,23 @@ def pe_household_impact(
     benunit: dict | None = None,
     tax_unit: dict | None = None,
     household: dict | None = None,
+    spm: dict | None = None,
 ) -> dict:
     """Baseline vs reform for one household: what does this reform do to
-    this family? Returns baseline and reform summaries plus their deltas."""
+    this family? Returns baseline and reform summaries plus their deltas.
+    Arguments are as in pe_household; a US household needs an SPM geography
+    (county_fips in household, or spm)."""
     reform = validate_reform(reform)
-    country = _validate_country(country)
-    people = _validate_people(people)
-    base = _pe_summary(
-        country, _pe_run(country, people, year, None, benunit, tax_unit, household)
+    country, people, household, spm = _validate_household_inputs(
+        country, people, household, spm
     )
+    base_result = _pe_run(
+        country, people, year, None, benunit, tax_unit, household, spm
+    )
+    base = _pe_summary(country, base_result)
     ref = _pe_summary(
-        country, _pe_run(country, people, year, reform, benunit, tax_unit, household)
+        country,
+        _pe_run(country, people, year, reform, benunit, tax_unit, household, spm),
     )
 
     def _delta(b, r):
@@ -1984,7 +2124,7 @@ def pe_household_impact(
         return None
 
     deltas = {k: _delta(base[k], ref[k]) for k in base}
-    return {
+    out = {
         "country": country,
         "year": int(year),
         "currency": "GBP" if country == "uk" else "USD",
@@ -2000,6 +2140,10 @@ def pe_household_impact(
             baseline="current law compared with submitted reform",
         ),
     }
+    if country == "us":
+        # Both runs use the same selection; report it once.
+        out["spm"] = _pe_spm_summary(base_result)
+    return out
 
 
 # ---------------------------------------------------------------------------

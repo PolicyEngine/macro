@@ -742,7 +742,12 @@ def _pe_common_options(fn):
         click.option("--tax-unit", "tax_unit", default=None,
                      help='US only: JSON tax unit dict, e.g. \'{"filing_status":"SINGLE"}\'.'),
         click.option("--household", default=None,
-                     help='JSON household dict, e.g. \'{"state_code_str":"CA"}\' (US).'),
+                     help='JSON household dict, e.g. '
+                          '\'{"state_code":"NY","county_fips":"36061"}\' (US).'),
+        click.option("--spm", default=None,
+                     help='US only: JSON SPM geography selection, e.g. '
+                          '\'{"geography_kind":"national"}\'. A US household '
+                          'needs this or a county_fips in --household.'),
         click.option("--json", "as_json", is_flag=True, help="Emit JSON."),
     ]):
         fn = opt(fn)
@@ -762,7 +767,7 @@ def _echo_summary(label: str, summary: dict, sym: str) -> None:
 @main.command()
 @_pe_common_options
 @click.option("--reform", default=None, help=_REFORM_HELP)
-def household(country, people, year, benunit, tax_unit, household, as_json, reform):
+def household(country, people, year, benunit, tax_unit, household, spm, as_json, reform):
     """Calculate taxes and benefits for a household (PolicyEngine)."""
     res = core.pe_household(
         country=country,
@@ -772,6 +777,7 @@ def household(country, people, year, benunit, tax_unit, household, as_json, refo
         benunit=_json_opt(benunit, "benunit"),
         tax_unit=_json_opt(tax_unit, "tax-unit"),
         household=_json_opt(household, "household"),
+        spm=_json_opt(spm, "spm"),
     )
     if as_json:
         _emit_json(res)
@@ -785,7 +791,7 @@ def household(country, people, year, benunit, tax_unit, household, as_json, refo
 @main.command("household-impact")
 @_pe_common_options
 @click.option("--reform", required=True, help=_REFORM_HELP)
-def household_impact(country, people, year, benunit, tax_unit, household, as_json, reform):
+def household_impact(country, people, year, benunit, tax_unit, household, spm, as_json, reform):
     """Baseline-vs-reform impact of a reform on one household (PolicyEngine)."""
     res = core.pe_household_impact(
         country=country,
@@ -795,6 +801,7 @@ def household_impact(country, people, year, benunit, tax_unit, household, as_jso
         benunit=_json_opt(benunit, "benunit"),
         tax_unit=_json_opt(tax_unit, "tax-unit"),
         household=_json_opt(household, "household"),
+        spm=_json_opt(spm, "spm"),
     )
     if as_json:
         _emit_json(res)
