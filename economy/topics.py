@@ -1376,6 +1376,9 @@ def route_row(title: str, chain: list[str], line: str, comment: str) -> str:
 UK_REFORM = '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}'
 US_REFORM = '{"gov.irs.credits.ctc.amount.adult_dependent":1000}'
 PEOPLE = '[{"age":35,"employment_income":50000}]'
+# policyengine-us 2.x needs a county (or an explicit SPM selection) for every
+# US household result; a state alone is rejected.
+US_HOUSEHOLD = '{"state_code":"CA","county_fips":"06037"}'
 
 
 def uk_platform() -> str:
@@ -1475,7 +1478,8 @@ def us_platform() -> str:
         route_row(
             "One household, exactly",
             ["pe-microsim"],
-            f"pe-macro household-impact --country us --people '{PEOPLE}' --reform '{US_REFORM}'",
+            f"pe-macro household-impact --country us --people '{PEOPLE}' "
+            f"--household '{US_HOUSEHOLD}' --reform '{US_REFORM}'",
             "arithmetic over the statutory rules; no sampling, no weights",
         ),
         route_row(
