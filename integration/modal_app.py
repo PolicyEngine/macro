@@ -216,22 +216,14 @@ image = (
         # imports it lazily inside the pe_* adapters — module import at
         # container start stays fast; only the first policyengine tool call
         # in a fresh container pays the load.
-        "policyengine[models]>=4,<5",  # [models] extra REQUIRED: base install leaves pe.uk/pe.us as None
-        # policyengine's bundled data-release manifest certifies an exact
-        # country-package version; a newer policyengine-us makes every US
-        # (and via import, UK) call raise at import time. Keep this pin in
-        # sync with the manifest version reported by the certification error
-        # (1.764.6) and with integration/pyproject.toml. PyPI no longer hosts
-        # 1.764.6, so it installs from the policyengine-us commit that set
-        # that version; a wheel built from this archive has the same package
-        # files as the PyPI wheel. Tarball URL, not git+, for the same reason
-        # as us-hank-model below.
-        "policyengine-us @ https://github.com/PolicyEngine/policyengine-us/archive/92e6052d3e057c4e03b955d01a7ee4e3c2fb3131.tar.gz",
-        # Unpinned upstream (policyengine-us 1.764.6 declares
-        # spm-calculator>=0.2.0, policyengine 4.x microdf_python>=1.2.1), so a
-        # rebuild would take newer releases than the image has run with.
-        "spm-calculator==0.3.1",
-        "microdf-python==1.3.0",
+        "policyengine[models]>=6.10,<7",  # [models] extra REQUIRED: base install leaves pe.uk/pe.us as None
+        # policyengine's bundled data-release manifest certifies the US data
+        # for one policyengine-us version (policyengine 6.10.0: 2.2.1). Any
+        # other version fails certification when `import policyengine` runs,
+        # so every US and UK call raises. Keep this pin equal to the
+        # policyengine-us pin in the [models] extra of the policyengine
+        # release that resolves, and to integration/pyproject.toml.
+        "policyengine-us==2.2.1",
         # US HANK (hank_shock / hank_summary). Installed from GitHub as a
         # normal wheel — no data files or repo checkout needed at runtime;
         # the calibration is code. Cost profile: the first hank_shock call
@@ -302,11 +294,11 @@ image = (
     # released ca-certificates 20250419~deb12u2; both lists trusted the
     # compromised eMudhra root "emSign ECC Root CA - G3"
     # (https://emudhra.we-have-a-problem.com).
-    # The pip_install layer now rebuilds (its policyengine-us requirement
-    # changed), which would pull the current certifi on its own; these two
-    # explicit steps keep the fixed minimums enforced for any later rebuild,
-    # whatever the layers above resolve to, and refresh the Debian package
-    # regardless of how old Modal's cached debian_slim base layer is.
+    # The pip_install layer now rebuilds (its policyengine pins changed), which
+    # would pull the current certifi on its own; these two explicit steps
+    # keep the fixed minimums enforced for any later rebuild, whatever the
+    # layers above resolve to, and refresh the Debian package regardless of
+    # how old Modal's cached debian_slim base layer is.
     .apt_install("ca-certificates")
     .pip_install("certifi>=2026.10.19")
 )
