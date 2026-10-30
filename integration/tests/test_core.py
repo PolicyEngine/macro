@@ -163,59 +163,127 @@ def test_pe_household_us():
         "us",
         [{"age": 35, "employment_income": 60_000}],
         tax_unit={"filing_status": "SINGLE"},
-        household={"state_code_str": "CA"},
+        household={"state_code": "CA", "county_fips": "06037"},
     )
     s = res["summary"]
     assert s["federal_income_tax"] > 0
     assert s["employee_payroll_tax"] > 0
     assert 35_000 < s["household_net_income"] < 60_000
     assert res["currency"] == "USD"
+    assert res["spm"]["selection"]["geography_kind"] == "county"
     json.dumps(res)
+
+
+@pytest.mark.slow
+def test_pe_household_us_national_spm_selection():
+    """An explicit national SPM selection runs a state-only household."""
+    res = core.pe_household(
+        "us",
+        [{"age": 35, "employment_income": 60_000}],
+        tax_unit={"filing_status": "SINGLE"},
+        household={"state_code": "CA"},
+        spm={"geography_kind": "national"},
+    )
+    assert res["spm"]["selection"]["geography_kind"] == "national"
+    assert res["summary"]["federal_income_tax"] > 0
 
 
 @pytest.mark.slow
 def test_pe_household_us_state_code_changes_state_income_tax():
     """CA and TX must differ: TX levies no state income tax.
 
-    Regression guard — the state is a HOUSEHOLD-level `state_code_str` and
-    PolicyEngine US silently defaults to CA, so a dropped state would return
-    a plausible-looking (but wrong) California answer for every state.
+    Regression guard — the state is HOUSEHOLD-level and PolicyEngine US
+    silently defaults to CA, so a dropped state would return a
+    plausible-looking (but wrong) California answer for every state. Both
+    documented state keys are checked.
     """
     people = [{"age": 40, "employment_income": 200_000}]
     tax_unit = {"filing_status": "SINGLE"}
 
-    def state_tax(code):
+    def state_tax(state_key, code):
         return core.pe_household(
             "us", people, tax_unit=tax_unit,
-            household={"state_code_str": code},
+            household={state_key: code},
+            spm={"geography_kind": "national"},
         )["summary"]["state_income_tax"]
 
-    ca, tx = state_tax("CA"), state_tax("TX")
-    assert tx == 0, f"TX has no state income tax, got {tx}"
-    assert ca > 0, f"CA should levy state income tax, got {ca}"
-    assert ca != tx
+    for state_key in core.US_STATE_KEYS:
+        ca, tx = state_tax(state_key, "CA"), state_tax(state_key, "TX")
+        assert tx == 0, f"TX has no state income tax, got {tx} ({state_key})"
+        assert ca > 0, f"CA should levy state income tax, got {ca} ({state_key})"
 
 
-def test_pe_household_us_rejects_wrong_state_key():
-    # `state_code` (person-level name) would be silently ignored by PE and
-    # fall back to the CA default; it must raise instead.
-    with pytest.raises(ValueError, match="state_code_str"):
-        core.pe_household("us", [{"age": 30}], household={"state_code": "TX"})
+def test_pe_household_us_requires_spm_geography():
+    # policyengine-us 2.x raises SPM_GEOGRAPHY_REQUIRED for a state-only
+    # household; the adapter rejects it first, before importing PolicyEngine,
+    # and names the choices.
+    for spm in (None, {"geography_kind": "county"}):
+        with pytest.raises(ValueError, match="county_fips") as error:
+            core.pe_household(
+                "us", [{"age": 30}], household={"state_code": "TX"}, spm=spm
+            )
+        assert '"geography_kind": "national"' in str(error.value)
+    with pytest.raises(ValueError, match="county_fips"):
+        core.pe_household_impact(
+            "us", [{"age": 30}], reform={"gov.irs.credits.ctc.amount.base[0].amount": 3000},
+        )
+
+
+def test_pe_household_us_rejects_bad_spm_selection():
+    with pytest.raises(ValueError, match="geography_kind must be one of"):
+        core.pe_household(
+            "us", [{"age": 30}], household={"state_code": "TX"},
+            spm={"geography_kind": "state"},
+        )
+    with pytest.raises(ValueError, match="spm must be a dict"):
+        core.pe_household(
+            "us", [{"age": 30}], household={"state_code": "TX"}, spm="national",
+        )
+
+
+def test_pe_household_uk_rejects_spm_selection():
+    with pytest.raises(ValueError, match="US only"):
+        core.pe_household(
+            "uk", [{"age": 30}], spm={"geography_kind": "national"}
+        )
 
 
 def test_pe_household_us_rejects_invalid_state_code():
-    with pytest.raises(ValueError, match="two-letter US state"):
-        core.pe_household(
-            "us", [{"age": 30}], household={"state_code_str": "Texas"}
-        )
-    with pytest.raises(ValueError, match="two-letter US state"):
-        core.pe_household("us", [{"age": 30}], household={"state_code_str": "ZZ"})
+    for state_key in core.US_STATE_KEYS:
+        with pytest.raises(ValueError, match="two-letter US state"):
+            core.pe_household("us", [{"age": 30}], household={state_key: "Texas"})
+        with pytest.raises(ValueError, match="two-letter US state"):
+            core.pe_household("us", [{"age": 30}], household={state_key: "ZZ"})
+
+
+def test_pe_household_us_rejects_two_different_states():
+    with pytest.raises(ValueError, match="two different states"):
+        core._validate_us_household({"state_code": "TX", "state_code_str": "CA"})
+
+
+def test_pe_household_us_validates_county_fips():
+    # A county without a state, or in another state, would run a California
+    # household in that county: policyengine-us does not derive one from the
+    # other.
+    with pytest.raises(ValueError, match="needs the household's state"):
+        core._validate_us_household({"county_fips": "36061"})
+    with pytest.raises(ValueError, match="is not in TX"):
+        core._validate_us_household({"state_code": "TX", "county_fips": "36061"})
+    # An integer drops the leading zero (06037 -> 6037).
+    for bad_county in (6037, "6037", "060370", "LA"):
+        with pytest.raises(ValueError, match="five-digit county FIPS"):
+            core._validate_us_household(
+                {"state_code": "CA", "county_fips": bad_county}
+            )
 
 
 def test_validate_us_household_normalises_case():
     assert core._validate_us_household({"state_code_str": "tx"}) == {
         "state_code_str": "TX"
     }
+    assert core._validate_us_household(
+        {"state_code": "ny", "county_fips": "36061"}
+    ) == {"state_code": "NY", "county_fips": "36061"}
     assert core._validate_us_household(None) is None
 
 

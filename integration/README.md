@@ -15,11 +15,15 @@ one CLI and one MCP server:
   model — monetary, fiscal, and productivity shock experiments via
   `hank_shock`, with distributional readouts (MPC by wealth quartile).
   Does not score reforms.
-- **PolicyEngine microsimulation** (`policyengine` from PyPI, v4): full
+- **PolicyEngine microsimulation** (`policyengine` from PyPI, 6.11.1, with
+  policyengine-us 2.2.1 and policyengine-uk 2.151.0): full
   UK/US tax-benefit rules — household calculator, baseline-vs-reform
-  impacts, and population-level reform scoring over representative
-  microdata (UK data is private: set `HUGGING_FACE_TOKEN`; the hosted
-  deployment provisions it server-side).
+  impacts, and population-level reform scoring over the microdata that
+  policyengine release certifies (UK data is private: set
+  `HUGGING_FACE_TOKEN`; the hosted deployment provisions it server-side).
+  A US household needs a Supplemental Poverty Measure geography: its
+  five-digit `county_fips`, or an explicit `spm` selection such as
+  `{"geography_kind": "national"}`. There is no default.
 - **OG-UK** (`oguk`, optional/local-only): overlapping-generations
   steady-state scoring through `pe-macro score --model og`.
 
@@ -190,13 +194,24 @@ pe-macro household --country uk \
 pe-macro household-impact --country uk \
     --people '[{"age":35,"employment_income":50000}]' \
     --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.25}'
+pe-macro household --country us \
+    --people '[{"age":35,"employment_income":50000}]' \
+    --household '{"state_code":"CA","county_fips":"06037"}'
+pe-macro household --country us \
+    --people '[{"age":35,"employment_income":50000}]' \
+    --household '{"state_code":"CA"}' --spm '{"geography_kind":"national"}'
 pe-macro population-impact --country uk \
     --reform '{"gov.hmrc.cgt.basic_rate":0.20,"gov.hmrc.cgt.higher_rate":0.40}'
 ```
 
-`--people`/`--benunit`/`--tax-unit`/`--household`/`--reform` take JSON.
-Money amounts are annual GBP (uk) or USD (us); reform rates are decimals
-(0.25 = 25%). The first PolicyEngine call in a process pays a ~20 s model
+`--people`/`--benunit`/`--tax-unit`/`--household`/`--spm`/`--reform` take
+JSON. Money amounts are annual GBP (uk) or USD (us); reform rates are
+decimals (0.25 = 25%). A US household needs either a `county_fips` (five
+digits, as a string, in the household's `state_code`) or an `--spm`
+selection: policyengine-us 2.x computes the Supplemental Poverty Measure in
+every household result, and a state alone does not identify an SPM area.
+The same choice is required by policyengine.py, the PolicyEngine API and
+the PolicyEngine web app. The first PolicyEngine call in a process pays a ~20 s model
 import (it is loaded lazily).
 
 Add `--json` to any command for machine-readable output. Units: CGG/CGIPS

@@ -648,6 +648,7 @@ def calculate_household(
     benunit: dict | None = None,
     tax_unit: dict | None = None,
     household: dict | None = None,
+    spm: dict | None = None,
 ) -> dict:
     """Calculate taxes and benefits for a custom household with the
     PolicyEngine microsimulation model (full UK/US tax-benefit rules).
@@ -669,22 +670,32 @@ def calculate_household(
         benunit: UK only, optional benefit-unit dict, e.g.
             {"would_claim_uc": true, "would_claim_child_benefit": true}.
         tax_unit: US only, optional, e.g. {"filing_status": "SINGLE"} or "JOINT".
-        household: Optional household dict. US: {"state_code_str": "CA"} --
-            the state is HOUSEHOLD-level and must use the key
-            `state_code_str` (two-letter code). If omitted, PolicyEngine US
-            defaults to CA, which materially changes state income tax
-            (e.g. TX and FL levy none), so always set it for US households.
-            UK: {"rent": 12000, "region": "NORTH_WEST"}.
+        household: Optional household dict. US: {"state_code": "NY",
+            "county_fips": "36061"} -- the state is HOUSEHOLD-level, a
+            two-letter code under `state_code` (`state_code_str` is also
+            accepted). If omitted, PolicyEngine US defaults to CA, which
+            materially changes state income tax (e.g. TX and FL levy none),
+            so always set it for US households. `county_fips` is the
+            five-digit county FIPS code as a string, with leading zeros, in
+            that state. UK: {"rent": 12000, "region": "NORTH_WEST"}.
+        spm: US only. Selects the Supplemental Poverty Measure geography,
+            passed to policyengine.py unchanged. A US household needs either
+            `county_fips` in `household` (local SPM thresholds for that
+            county) or an explicit selection here:
+            {"geography_kind": "national"} for national thresholds, or
+            {"geography_kind": "metro", "geography_id": "<SPM area id>"}.
+            There is no default; with neither, the call is rejected.
 
     Returns a dict with a headline `summary` (UK: per-person income tax and
     National Insurance in £, household net income, tax, benefits, Universal
     Credit, Child Benefit; US: federal income tax, payroll tax, state income
     tax, CTC, EITC, household net income in $) plus full per-entity variable
-    dicts. Takes a few seconds per call.
+    dicts, and for the US the SPM selection used (`spm`). Takes a few seconds
+    per call.
     """
     return core.pe_household(
         country=country, people=people, year=year, reform=reform,
-        benunit=benunit, tax_unit=tax_unit, household=household,
+        benunit=benunit, tax_unit=tax_unit, household=household, spm=spm,
     )
 
 
@@ -697,6 +708,7 @@ def household_reform_impact(
     benunit: dict | None = None,
     tax_unit: dict | None = None,
     household: dict | None = None,
+    spm: dict | None = None,
 ) -> dict:
     """What does a tax/benefit reform do to a specific family? Runs the
     PolicyEngine household calculation twice (baseline and reform) and
@@ -708,11 +720,13 @@ def household_reform_impact(
     £15,000/year. Rates are decimals (0.25 = 25%); amounts are annual £/$
     unless list_reform_parameters says otherwise (e.g. Child Benefit is
     £/week). The `change` dict and `net_income_change` are reform minus
-    baseline, so a positive net_income_change means the family gains.
+    baseline, so a positive net_income_change means the family gains. A US
+    household needs `county_fips` in `household` or an `spm` selection, as
+    in calculate_household.
     """
     return core.pe_household_impact(
         country=country, people=people, reform=reform, year=year,
-        benunit=benunit, tax_unit=tax_unit, household=household,
+        benunit=benunit, tax_unit=tax_unit, household=household, spm=spm,
     )
 
 
@@ -744,7 +758,8 @@ def population_reform_impact(
     equalising capital gains tax rates with income tax rates raise?".
 
     Runs baseline and reform simulations over representative household
-    microdata (UK: enhanced FRS, ~54k households; US: CPS-based) and returns:
+    microdata (UK: enhanced FRS, ~54k households; US: Populace US 2024,
+    policyengine's certified CPS-based default) and returns:
     - budgetary_impact_bn: change in government revenue net of spending, in
       £bn (UK) or $bn (US) PER YEAR; positive = the reform raises revenue.
     - household_net_income_change_bn, winner/loser counts, and per-income-

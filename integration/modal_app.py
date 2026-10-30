@@ -216,12 +216,16 @@ image = (
         # imports it lazily inside the pe_* adapters — module import at
         # container start stays fast; only the first policyengine tool call
         # in a fresh container pays the load.
-        "policyengine[models]>=4,<5",  # [models] extra REQUIRED: base install leaves pe.uk/pe.us as None
-        # policyengine's bundled data-release manifest certifies an exact
-        # country-package version; a newer policyengine-us makes every US
-        # (and via import, UK) call raise at import time. Keep this pin in
-        # sync with the manifest version reported by the certification error.
-        "policyengine-us==1.764.6",
+        "policyengine[models]==6.11.1",  # [models] extra REQUIRED: base install leaves pe.uk/pe.us as None
+        # The country packages policyengine 6.11.1's [models] extra pins.
+        # policyengine's bundled data-release manifest certifies the US and
+        # UK microdata for exactly these versions; with any other
+        # policyengine-us, `import policyengine` fails certification and
+        # every US and UK call raises. Keep all four equal to the [models]
+        # extra in integration/pyproject.toml.
+        "policyengine-us==2.2.1",
+        "policyengine-uk==2.151.0",
+        "policyengine-core==3.33.3",
         # US HANK (hank_shock / hank_summary). Installed from GitHub as a
         # normal wheel — no data files or repo checkout needed at runtime;
         # the calibration is code. Cost profile: the first hank_shock call
@@ -284,6 +288,21 @@ image = (
         f"pip install -e {OBR_REPO} -e {BOE_REPO} -e {FRB_REPO} "
         f"-e {HOME}/macro/integration"
     )
+    # Refresh the two CA lists that the server's outbound HTTPS (Hugging Face
+    # microdata downloads, PolicyEngine data fetches) verifies against:
+    # Debian's ca-certificates, read by urllib, aiohttp and hf-xet, and certifi,
+    # read by requests and httpx. The pip_install layer built on 2026-08-12
+    # held certifi 2026.7.22, on a debian_slim base built before Debian
+    # released ca-certificates 20250419~deb12u2; both lists trusted the
+    # compromised eMudhra root "emSign ECC Root CA - G3"
+    # (https://emudhra.we-have-a-problem.com).
+    # The pip_install layer now rebuilds (its policyengine pins changed), which
+    # would pull the current certifi on its own; these two explicit steps
+    # keep the fixed minimums enforced for any later rebuild, whatever the
+    # layers above resolve to, and refresh the Debian package regardless of
+    # how old Modal's cached debian_slim base layer is.
+    .apt_install("ca-certificates")
+    .pip_install("certifi>=2026.10.19")
 )
 
 app = modal.App("policyengine-macro-mcp")

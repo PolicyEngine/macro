@@ -131,7 +131,7 @@ pip install "policyengine[us]"      <span class="cm"># US model only</span></cod
       <div class="meth-step" id="code-household" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Calculate a household</h3></div>
         <h4>Describe, pick a year, read</h4>
-        <p>Describe the people, pick a year, read the results — no data access or credentials needed. Pass a <code>reform</code> dict to apply parameter changes.</p>
+        <p>Describe the people, pick a year, read the results — no data access or credentials needed. Pass a <code>reform</code> dict to apply parameter changes. A US household also needs its five-digit <code>county_fips</code>, or an explicit <code>spm={"geography_kind": "national"}</code>: US results include the Supplemental Poverty Measure, and a state alone does not identify its geography.</p>
         <h4>Household-level reform impact</h4>
         <p class="opt-note">
           differencing runs with and without <code>reform</code> gives the
@@ -153,11 +153,11 @@ uk = pe.uk.calculate_household(
 <span class="kw">print</span>(uk.person[0].national_insurance)           <span class="cm"># £2,994</span>
 <span class="kw">print</span>(uk.household.hbai_household_net_income)    <span class="cm"># £39,520</span>
 
-<span class="cm"># US: single filer in California, with a reform applied</span>
+<span class="cm"># US: single filer in Los Angeles County, California, with a reform applied</span>
 us = pe.us.calculate_household(
     people=[{<span class="kw">"age"</span>: 35, <span class="kw">"employment_income"</span>: 60_000}],
     tax_unit={<span class="kw">"filing_status"</span>: <span class="kw">"SINGLE"</span>},
-    household={<span class="kw">"state_code"</span>: <span class="kw">"CA"</span>},
+    household={<span class="kw">"state_code"</span>: <span class="kw">"CA"</span>, <span class="kw">"county_fips"</span>: <span class="kw">"06037"</span>},
     year=2026,
     reform={<span class="kw">"gov.irs.credits.ctc.amount.adult_dependent"</span>: 1000},
 )
@@ -218,11 +218,11 @@ uk = pe.uk.calculate_household(
 <span class="kw">print</span>(uk.person[0].national_insurance)           <span class="cm"># £2,994</span>
 <span class="kw">print</span>(uk.household.hbai_household_net_income)    <span class="cm"># £39,520</span>
 
-<span class="cm"># US: single filer in California, with a reform applied</span>
+<span class="cm"># US: single filer in Los Angeles County, California, with a reform applied</span>
 us = pe.us.calculate_household(
     people=[{<span class="kw">"age"</span>: 35, <span class="kw">"employment_income"</span>: 60_000}],
     tax_unit={<span class="kw">"filing_status"</span>: <span class="kw">"SINGLE"</span>},
-    household={<span class="kw">"state_code"</span>: <span class="kw">"CA"</span>},
+    household={<span class="kw">"state_code"</span>: <span class="kw">"CA"</span>, <span class="kw">"county_fips"</span>: <span class="kw">"06037"</span>},
     year=2026,
     reform={<span class="kw">"gov.irs.credits.ctc.amount.adult_dependent"</span>: 1000},
 )
