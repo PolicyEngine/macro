@@ -93,7 +93,7 @@ def note_page(series: dict, vintage: str) -> str:
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css" />
+<link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>

@@ -1,80 +1,140 @@
+/* =====================================================================
+   PolicyEngine Macro — style.css
+   Binding spec: DESIGN.md at the repo root. Read §2 (tokens) before adding
+   a colour, a size or a shadow here; read §4 before adding a component.
+
+   Layout of this file
+     0. Tokens            (:root — the only place a hex value may appear,
+                           apart from the dark-theme block and legacy notes)
+     1. Base              (reset, focus, body, type)
+     2. Shell             (header band + view tabs, pathway, title band,
+                           section sub-tabs, footer)
+     3. Components        (card, stat tile, chip, callout, expander, rail,
+                           entry cards, numbered steps, StepPanel)
+     4. Page sections     (legacy page-specific rules, restyled through the
+                           tokens; prune them as phase 2/3 migrate pages)
+     5. Design system v2  (appended at the end so it wins the cascade over
+                           legacy page rules without !important)
+   ===================================================================== */
 :root {
   color-scheme: light dark;
 
-  /* populace.dev consumes the PolicyEngine design system: @policyengine/ui-kit
-     tokens.css is loaded via CDN in the page <head> (light theme — PE default,
-     no .dark class). The site's original local var names are aliased onto the
-     PE semantic tokens here, so the existing component CSS keeps working. */
-  --ink: var(--background); /* page background */
-  --ink-2: var(--muted); /* raised surface (cards) */
-  --paper: var(--foreground); /* primary text */
-  --paper-dim: var(--muted-foreground);
-  /* --text-tertiary (#64748B) measures 4.47:1 on the translucent .panel-card
-     used by /connect/ — just under AA. Darkened one step so faint text clears
-     4.5:1 on every surface the site paints. */
-  --paper-faint: #5B6878;
-  /* Accent. Named --brand* because these are teal, not amber: the old
-     --amber/--amber-soft names were left over from a previous palette and
-     invited reaching for the wrong colour. --chart-1 (#319795) was 3.51:1 on
-     white and failed AA as the site's main link colour, so the emphasis accent
-     now resolves to --primary (#2C7A7B, 5.03:1). */
+  /* ---------- 0.1 brand + neutral scales (from vendor/ui-kit-tokens.css) ----
+     The vendored ui-kit exposes its teal and gray scales only in the Tailwind
+     @theme layer, which a no-build page cannot read, so the values the site
+     uses are restated here once, under site names. */
+  --teal-50: #E6FFFA;
+  --teal-100: #B2F5EA;
+  --teal-200: #81E6D9;
+  --teal-300: #4FD1C5;   /* fills/strokes only: fails AA as text on white */
+  --teal-500: #319795;   /* = --chart-1; fills/strokes only (3.5:1) */
+  --teal-600: #2C7A7B;   /* = --primary: links, active tab, KPI value (5.0:1) */
+  --teal-700: #285E61;   /* hover, emphasis text (7.3:1) */
+  --teal-800: #234E52;   /* header band */
+  --teal-900: #1D4044;   /* header band, deepest */
+  --gray-50: #F7F9FB;    /* page canvas (site value; ui-kit gray-50 is a blue tint) */
+  --gray-100: #F2F4F7;   /* sunken surface, track, table stripe */
+  --gray-200: #E2E8F0;   /* hairline, card border */
+  --gray-300: #CBD5E1;   /* stronger border, axis */
+  --gray-400: #94A3B8;   /* strokes and ticks only — never text */
+  --gray-500: #5B6878;   /* floor for small text: 5.6:1 on white, 5.3:1 on canvas */
+  --gray-600: #475569;   /* secondary text */
+  --gray-700: #344054;   /* body text */
+  --gray-900: #101828;   /* headings, zero line */
+  --warn-bg: #FFF7ED;
+  --warn-line: #FDBA74;
+  --warn-ink: #9A3412;   /* 6.9:1 on --warn-bg */
+
+  /* ---------- 0.2 semantic roles (use these, not the scales) ---------- */
+  --canvas: var(--gray-50);            /* page background behind cards */
+  --surface-card: var(--card);         /* white card */
+  --surface-sunken: var(--gray-100);
+  --surface-tint: color-mix(in srgb, var(--primary) 7%, var(--card)); /* info callout, active tab fill */
+  --hairline: var(--border);
+  --hairline-strong: var(--gray-300);
+  --text-strong: var(--gray-900);
+  --text-body: var(--gray-700);
+  --text-muted: var(--gray-600);
+  --text-faint: var(--gray-500);
+  --link: var(--primary);
+  --link-hover: var(--teal-700);
+  --band-bg: var(--teal-800);
+  --band-bg-2: var(--teal-700);
+  --band-text: #FFFFFF;                /* 9.9:1 on --teal-800 */
+  --band-text-dim: var(--teal-100);    /* 7.6:1 on --teal-800 */
+  --band-accent: var(--teal-200);      /* active-tab underline on the band */
+  --focus-ring: var(--teal-700);
+
+  /* ---------- 0.3 chart series roles (DESIGN.md §6) ----------
+     Colour identifies a series, never a judgement. Two series plus neutrals
+     per chart; a third only with a direct label. */
+  --series-ours: var(--primary);       /* our model / forecast (vc-s1) */
+  --series-official: #334155;          /* official or published counterpart (vc-s2) */
+  --series-uk: var(--primary);         /* UK when UK and US share a chart */
+  --series-us: #026AA2;                /* US (ui-kit blue-700, 6.0:1) */
+  --series-median: var(--teal-700);    /* fan median line */
+  --series-outturn: var(--gray-900);   /* realised data: dots/marks */
+  --band-50: color-mix(in srgb, var(--primary) 38%, transparent);
+  --band-68: color-mix(in srgb, var(--primary) 26%, transparent);
+  --band-90: color-mix(in srgb, var(--primary) 13%, transparent);
+  --chart-grid: var(--gray-200);
+  --chart-axis: var(--gray-300);
+  --chart-zero: var(--gray-600);
+  --chart-tick: var(--gray-500);
+  /* model families, for chips and badges only */
+  --family-micro: var(--primary);      /* pe-microsim, the core */
+  --family-structural: #026AA2;        /* obr-macro, frb-us */
+  --family-empirical: #475569;         /* boe-svar */
+  --family-ge: #285E61;                /* us-hank, psl-og, define-uk */
+
+  /* ---------- 0.4 legacy aliases ----------
+     The page CSS below and ~100 page-local <style> blocks still use these
+     names. They now resolve onto the roles above, so restyling the roles
+     restyles the legacy rules. New CSS uses the role names. */
+  --ink: var(--background);            /* white: text on filled controls, inner fills */
+  --ink-2: var(--surface-sunken);      /* sunken surface (code blocks) */
+  --paper: var(--text-strong);
+  --paper-dim: var(--text-muted);
+  --paper-faint: var(--text-faint);
   --brand: var(--primary);
   --brand-strong: var(--primary);
-  /* deeper teal for hover/pressed states, so hover still reads as a change now
-     that --brand and --brand-strong resolve to the same AA-passing value.
-     #285E61 = teal-700, 7.33:1 on white. */
-  --brand-deep: #285E61;
-  /* Chart series 2. --brand-strong collapsed onto --primary for AA, which
-     left .vc-s1 and .vc-s2 the same colour, distinguished only by a dash
-     pattern -- while .vc-lab/.vc-lab2 styled the legend as two colours.
-     A dark slate keeps the two-series-plus-neutrals restraint and reads
-     apart from teal in greyscale. 10.4:1 on white. */
-  --chart-s2: #334155;
-  /* AA-safe warning text. --text-warning (#c2410c) is only 4.10:1 against the
-     16%-tinted chip .tag-local paints behind it; #9A3412 is 5.63:1 there. */
-  --brand-warning: #9A3412;
-  /* Back-compat aliases: page-level inline <style> blocks still reference
-     --amber/--amber-soft. Keep them pointed at the accent tokens. */
+  --brand-deep: var(--teal-700);
+  --chart-s2: var(--series-official);
+  --brand-warning: var(--warn-ink);
   --amber: var(--brand);
   --amber-soft: var(--brand-strong);
-  --line: var(--border);
-  --line-soft: var(--border-light);
-  /* aliases so the content-page component CSS uses design-system colors
-     instead of hard-coded light-mode fallbacks (theme-safe). */
-  --text: var(--foreground);
-  --surface: color-mix(in srgb, var(--background) 72%, transparent);
-  /* PE ships its font families in the Tailwind @theme layer (not :root), which a
-     no-build static page can't read; the families below mirror ui-kit tokens.css
-     and resolve to --font-sans/--font-mono if a build ever exposes them. */
+  --line: var(--hairline-strong);
+  --line-soft: var(--hairline);
+  --text: var(--text-strong);
+  --surface: var(--surface-card);
+  --brand-wash: color-mix(in srgb, var(--primary) 8%, transparent);
+
+  /* ---------- 0.5 type ---------- */
   --display: var(--font-sans, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   --body: var(--font-sans, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   --mono: var(--font-mono, "JetBrains Mono", "Fira Code", Consolas, monospace);
-  --max: 1320px;
+  /* h1/h2 only. No serif is vendored: Georgia is on every desktop OS and
+     iOS; the stack ends in the generic family elsewhere. */
+  --serif: "Source Serif 4", "Source Serif Pro", Georgia, Cambria, "Times New Roman", serif;
+  --max: 1280px;
 
-  /* ---------- type scale (single source of truth for font sizes) ---------- */
-  /* Steps are ~1.3x apart so h1 > h2 > h3 > body reads as four distinct
-     levels. The old scale topped out at 3.9rem/3.2rem: h1 and h2 were close
-     enough to compete, and both were loud enough to fight the body copy. */
-  --fs-hero: clamp(1.9rem, 3.8vw, 2.7rem);     /* homepage h1 */
-  --fs-hero-sub: clamp(1.9rem, 4vw, 2.7rem);   /* interior-page h1 */
-  --fs-h2: clamp(1.5rem, 2.6vw, 1.95rem);      /* band headings */
-  --fs-h3: 1.2rem;                             /* card h3 */
-  --fs-h3-sm: 1.1rem;                          /* compact card h3 */
-  --fs-h4: 16px;                               /* step / minor headings */
-  --fs-lede: clamp(1.05rem, 1.8vw, 1.25rem);   /* hero ledes */
-  --fs-stat: 2.4rem;                           /* big metric numerals */
-  --fs-body: 17px;                             /* prose + card body text */
-  --fs-body-sm: 14px;                          /* secondary text, notes, tables */
-  --fs-small: 13px;                            /* captions, nav, fine print */
-  --fs-mono: 13px;                             /* code blocks */
-  --fs-label: 12px;                            /* uppercase mono micro-labels */
-  --fs-code-inline: 0.9em;                     /* inline code, relative to its text */
-  --ls-label: 0.08em;                          /* letter-spacing for micro-labels */
+  --fs-hero: clamp(1.75rem, 3.2vw, 2.4rem);    /* homepage h1 */
+  --fs-hero-sub: clamp(1.45rem, 2.6vw, 2rem);  /* title-band h1 */
+  --fs-h2: clamp(1.3rem, 2vw, 1.6rem);         /* section/card title (serif) */
+  --fs-h3: 1.125rem;                           /* sub-heading in a card */
+  --fs-h3-sm: 1.05rem;
+  --fs-h4: 15px;
+  --fs-lede: 1.0625rem;                        /* intro sentence */
+  --fs-stat: 2rem;                             /* KPI value */
+  --fs-body: 16px;
+  --fs-body-sm: 14px;
+  --fs-small: 13px;                            /* labels, chips, tabs on phone */
+  --fs-mono: 13px;
+  --fs-label: 12px;                            /* minimum size: eyebrows, ticks */
+  --fs-code-inline: 0.9em;
+  --ls-label: 0.08em;
 
-  /* ---------- spacing scale (single source of truth for rhythm) ----------
-     One geometric-ish ramp. Component margins/padding pick a step from here
-     instead of inventing a number, so seams between sections are consistent
-     and the eye can find them. */
+  /* ---------- 0.6 spacing, radius, elevation ---------- */
   --s-1: 4px;
   --s-2: 8px;
   --s-3: 12px;
@@ -84,21 +144,20 @@
   --s-7: 48px;
   --s-8: 64px;
   --s-9: 96px;
-  /* band gutter + vertical band rhythm */
-  --gutter: clamp(20px, 5vw, 56px);
-  --band-y: clamp(48px, 6vw, 80px);
+  --gutter: clamp(12px, 3vw, 40px);            /* canvas gutter outside cards */
+  --card-pad: clamp(16px, 2.6vw, 32px);        /* padding inside a card */
+  --band-y: var(--card-pad);
+  --gap-cards: clamp(16px, 2vw, 24px);         /* vertical gap between cards */
+  --radius: 10px;                              /* callouts, inner panels, code */
+  --radius-card: 14px;                         /* cards, stat tiles */
+  --radius-sm: 6px;                            /* bars, tracks, small controls */
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, .05), 0 6px 16px -6px rgba(16, 24, 40, .08);
+  --shadow-raised: 0 2px 4px rgba(16, 24, 40, .06), 0 12px 28px -8px rgba(16, 24, 40, .16);
 
-  /* ---------- one border radius, one border colour ----------
-     Cards, code blocks, charts and panels used 2px/3px/6px/8px in different
-     places for the same job. One value now. */
-  --radius: 8px;
-  /* Referenced by the model navs, .contact-email, .comparison-table row hover
-     and .verification-tag, but never defined --
-     so those backgrounds resolved to nothing and the PUBLISHED ANCHOR chips
-     rendered as bare text while STATUTE/CALIBRATED rendered as pills. */
-  --brand-wash: color-mix(in srgb, var(--primary) 8%, transparent);
-  --radius-card: var(--radius);
-  --radius-sm: 4px;
+  /* ---------- 0.7 shell geometry (sticky offsets read these) ---------- */
+  --nav-h: 56px;          /* header band height = top of the sub-tab row */
+  --subnav-h: 48px;       /* sub-tab row height */
+  --sticky-top: calc(var(--nav-h) + var(--subnav-h) + 16px); /* StepPanel, rail */
 }
 
 .skip-link {
@@ -155,6 +214,15 @@
   outline-offset: -5px;
   box-shadow: 0 0 0 3px var(--foreground);
 }
+/* On the dark header band, title band and footer the roles swap too: a
+   white outline with the band colour as the inner gap. */
+.nav :focus-visible,
+.crumbs :focus-visible,
+.doc .hero.model-hero :focus-visible,
+.foot :focus-visible {
+  outline-color: var(--band-text);
+  box-shadow: 0 0 0 6px var(--band-bg);
+}
 /* Never let a clipping ancestor eat the ring. */
 :focus-visible { position: relative; z-index: 1; }
 
@@ -170,11 +238,11 @@
    instead of tucked underneath it. */
 :target,
 section[id],
-[id]:not(body) { scroll-margin-top: clamp(88px, 12vh, 112px); }
+[id]:not(body) { scroll-margin-top: calc(var(--nav-h) + var(--subnav-h) + 16px); }
 
 body {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--canvas);
+  color: var(--text-body);
   font-family: var(--body);
   font-size: var(--fs-body);
   line-height: 1.6;
@@ -205,22 +273,10 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
    never animated, no second layer. It is a texture you notice once and then
    stop seeing, which is the whole difference from the dot field. The character
    is spent in the hero fan chart below; everything else stays quiet. */
-.grain {
-  display: block;
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    repeating-linear-gradient(to right,
-      color-mix(in srgb, var(--brand) 4.5%, transparent) 0 1px, transparent 1px 64px),
-    repeating-linear-gradient(to bottom,
-      color-mix(in srgb, var(--brand) 4.5%, transparent) 0 1px, transparent 1px 64px);
-  /* fade the lattice out down the page so long reference pages end on plain
-     paper rather than carrying texture under 4,900 words of prose */
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 26vh, transparent 96vh);
-  mask-image: linear-gradient(to bottom, #000 0, #000 26vh, transparent 96vh);
-}
+/* The fixed 64px plot lattice is retired with the redesign: a grey canvas
+   with white cards is the surface now, and a lattice behind cards reads as
+   noise. The <div class="grain"> markup stays on every page (harmless). */
+.grain { display: none; }
 
 /* ---------- hero fan chart: the signature element ----------
    The old background depicted a field of synthetic households — a
@@ -280,171 +336,263 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   }
 }
 
-/* ---------- nav ---------- */
-.nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--s-4) var(--gutter);
-  backdrop-filter: blur(10px);
-  background: color-mix(in srgb, var(--ink) 88%, transparent);
-  border-bottom: 1px solid var(--line-soft);
-}
+/* =====================================================================
+   2. SHELL (DESIGN.md §3). Emitted by site_nav.py on every page:
+      header band (brand + primary view tabs, sticky)
+      → pathway (.crumbs, painted as the band's first line)
+      → title band (the page's own .hero, first child of <main>)
+      → section sub-tabs (.model-tabs / .economy-subnav, sticky under the
+        header) → cards on the canvas → footer.
+   ===================================================================== */
 
+/* ---------- 2.1 header band + primary view tabs ---------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: var(--s-4);
+  height: var(--nav-h);
+  padding: 0 var(--gutter);
+  background: var(--band-bg);
+  color: var(--band-text);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .18);
+}
 .brand {
-  font-family: var(--mono);
-  font-size: var(--fs-body);
-  letter-spacing: 0.02em;
-  color: var(--paper);
-  text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-}
-.brand-dot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  background: var(--brand);
+  gap: 10px;
+  flex: 0 0 auto;
+  color: var(--band-text);
+  font-family: var(--serif);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-decoration: none;
+  white-space: nowrap;
 }
 .brand-logo {
   display: block;
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   flex: 0 0 auto;
+  padding: 3px;
+  border-radius: 6px;
+  background: #FFFFFF;   /* the mark is teal-on-transparent: give it a chip */
 }
-
+.brand-name { display: none; }
 .nav-links {
   display: flex;
-  align-items: center;
-  gap: clamp(14px, 2.4vw, 30px);
-  font-family: var(--mono);
-  font-size: var(--fs-small);
-  letter-spacing: 0.01em;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  font-family: var(--body);
+  font-size: var(--fs-body-sm);
 }
+.nav-links::-webkit-scrollbar { display: none; }
 .nav-links a {
-  color: var(--paper-dim);
-  text-decoration: none;
-  transition: color 0.25s;
-}
-.nav-links a:hover { color: var(--brand-strong); }
-.nav-links a[aria-current="page"] {
-  color: var(--brand-strong);
-  font-weight: 600;
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 8px;
-}
-.nav-gh { color: var(--paper) !important; display: inline-flex; align-items: center; }
-.nav-gh svg { width: 18px; height: 18px; display: block; }
-.nav-links a:not(.nav-gh) { display: none; }
-
-/* Keep the two primary journeys available on small screens. The previous
-   mobile header reduced the entire site navigation to a GitHub icon. */
-.nav-links a.nav-mobile { display: inline-flex; }
-.nav-links .nav-start {
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  min-height: 34px;
+  gap: 7px;
+  flex: 0 0 auto;
   padding: 0 10px;
-  border: 1px solid var(--brand);
-  border-radius: 4px;
-  color: var(--brand-strong);
+  color: var(--band-text-dim);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 150ms, color 150ms;
 }
-.nav-links .nav-start:hover { background: var(--ink-2); }
-
-@media (min-width: 940px) {
-  .nav-links .nav-start { min-height: auto; padding: 0; border: 0; }
-  .nav-links .nav-start:hover { background: transparent; }
-  .nav-links a:not(.nav-gh) { display: inline; }
+.nav-links a svg { width: 16px; height: 16px; flex: 0 0 auto; display: none; }
+.nav-links a:hover { color: var(--band-text); background: rgba(255, 255, 255, .06); }
+/* Chosen view: lighter fill + 3px underline on the band's bottom edge.
+   Fill and border only — never a tick (DESIGN.md §1). aria-current="page"
+   is the section's own index page; "true" is any page inside the section. */
+.nav-links a[aria-current] {
+  color: var(--band-text);
+  background: rgba(255, 255, 255, .10);
+  font-weight: 600;
+}
+.nav-links a[aria-current]::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--band-accent);
+}
+.nav-links a.nav-gh { padding: 0 8px; margin-left: 6px; color: var(--band-text); }
+.nav-links a.nav-gh svg { display: block; width: 18px; height: 18px; }
+.nav-links a.nav-gh::after { display: none; }
+@media (max-width: 419px) {
+  /* GitHub stays in the footer row; the four views keep the room. */
+  .nav-links a.nav-gh { display: none; }
+  .nav-links a { padding: 0 8px; }
+}
+@media (min-width: 640px) {
+  .brand-name { display: inline; }
+}
+@media (min-width: 880px) {
+  .nav-links a { padding: 0 14px; }
+  .nav-links a svg { display: block; }
 }
 
-/* Economy subnav: one sticky bar for the whole section. The country scope
-   sits on the left as a segmented capsule; topic anchors read as quiet
-   underline tabs on the right and scroll horizontally when cramped. */
+/* ---------- 2.2 pathway (crumbs) — first line of the title band ---------- */
+.crumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 0;
+  padding: 14px var(--gutter) 0;
+  background: var(--band-bg-2);
+  color: var(--band-text-dim);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+}
+.crumbs > * { max-width: 100%; }
+.crumbs a { color: var(--band-text-dim); text-decoration: underline; text-decoration-color: rgba(178, 245, 234, .45); text-underline-offset: 3px; }
+.crumbs a:hover { color: var(--band-text); text-decoration-color: currentColor; }
+.crumbs a::after { content: "/"; display: inline-block; margin: 0 8px; color: var(--band-text-dim); text-decoration: none; opacity: .7; }
+.crumbs span[aria-current] { color: var(--band-text); }
+@media (min-width: 1360px) {
+  /* line the pathway up with the title and the cards below it */
+  .crumbs { padding-inline: calc((100% - var(--max)) / 2 + var(--card-pad)); }
+}
+
+/* ---------- 2.3 section sub-tabs (second sticky row) ----------
+   Two markups, one look: .model-tabs (model pages, /models, /connect, paper
+   pages) and .economy-subnav (Forecasts + UK/US data + topic pages, emitted
+   by economy/topics.py between forecasts-section-nav markers). White strip,
+   hairline below, chosen tab = tinted fill + 3px teal underline. */
+.model-tabs,
 .economy-subnav {
   position: sticky;
-  top: calc(var(--nav-h, 62px) - 8px);
-  z-index: 8;
-  border-top: 1px solid var(--line-soft);
-  border-bottom: 1px solid var(--line-soft);
-  background: color-mix(in srgb, var(--ink) 94%, transparent);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 10px 24px color-mix(in srgb, var(--paper) 6%, transparent);
+  top: var(--nav-h);
+  z-index: 15;
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--hairline);
+  box-shadow: 0 6px 16px -12px rgba(16, 24, 40, .25);
 }
+.model-tabs-row,
 .economy-subnav-row {
   display: flex;
   align-items: stretch;
-  justify-content: center;
-  gap: var(--s-5);
-  max-width: var(--max);
+  justify-content: flex-start;
+  gap: 0;
+  max-width: calc(var(--max) + 2 * var(--gutter));
+  min-height: var(--subnav-h);
   margin: 0 auto;
-  padding: 7px var(--gutter) 0;
+  padding: 0 calc(var(--gutter) + var(--card-pad) - 12px);
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.model-tabs-row::-webkit-scrollbar,
+.economy-subnav-row::-webkit-scrollbar { display: none; }
+.model-tabs-link,
+.economy-topics a,
+.economy-topics button,
+.model-tabs-set button {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-family: var(--body);
+  font-size: var(--fs-body-sm);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 150ms, color 150ms;
+}
+.model-tabs-link:hover,
+.economy-topics a:hover,
+.economy-topics button:hover,
+.model-tabs-set button:hover { color: var(--link-hover); background: var(--gray-100); }
+.model-tabs-link[aria-current],
+.economy-topics a[aria-current],
+.economy-topics button[aria-selected="true"],
+.model-tabs-set button.is-current,
+.model-tabs-set button[aria-selected="true"] {
+  color: var(--teal-700);
+  background: var(--surface-tint);
+  font-weight: 600;
+}
+.model-tabs-link[aria-current]::after,
+.economy-topics a[aria-current]::after,
+.economy-topics button[aria-selected="true"]::after,
+.model-tabs-set button.is-current::after,
+.model-tabs-set button[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--primary);
+}
+/* the forecasts/economy row: country scope, a divider, then the topics */
 .economy-subnav-scope {
   display: flex;
-  align-items: center;
-  gap: var(--s-5);
+  align-items: stretch;
   flex: 0 0 auto;
 }
 .economy-subnav-scope::after {
   content: "";
   width: 1px;
-  align-self: stretch;
-  margin: 10px 0;
-  background: var(--line-soft);
+  margin: 12px 8px;
+  background: var(--hairline);
 }
 .economy-subnav-label {
-  color: var(--paper-faint);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px 0 12px;
+  color: var(--text-faint);
   font-size: var(--fs-label);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
 }
 .economy-topics {
   display: flex;
-  gap: var(--s-5);
+  align-items: stretch;
+  max-width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
 }
 .economy-topics::-webkit-scrollbar { display: none; }
-/* Buttons join the anchors so an in-page tablist (role="tab" needs buttons,
-   not links) renders in the same idiom instead of a second component. */
-.economy-topics a,
-.economy-topics button {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  padding: var(--s-3) 2px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: none;
-  color: var(--paper-dim);
-  font-family: var(--mono);
-  font-size: var(--fs-small);
-  text-decoration: none;
-  white-space: nowrap;
-}
-.economy-topics button { cursor: pointer; }
-.economy-topics a:hover,
-.economy-topics button:hover { color: var(--brand-strong); }
-.economy-topics a[aria-current="location"],
-.economy-topics button[aria-selected="true"] {
-  color: var(--paper);
-  border-bottom-color: var(--brand-strong);
-}
+/* /forecasts builds an in-card chart switch with this class (fc-chart-tabs):
+   it scrolls inside itself; inside the sticky row the row does the scrolling. */
+.economy-subnav .economy-topics { flex: 0 0 auto; max-width: none; overflow: visible; }
+.fc-chart-tabs { min-height: 40px; border-bottom: 1px solid var(--hairline); }
+.economy-subnav-countries a span { display: none; }
 @media (max-width: 720px) {
-  .economy-subnav-row { flex-wrap: wrap; gap: 0 var(--s-5); }
-  .economy-subnav-scope { padding-bottom: 0; }
-  .economy-topics { margin-left: 0; width: 100%; }
-  .economy-subnav-countries a span { display: none; }
-  .economy-subnav-countries a small { font-size: var(--fs-small); color: inherit; }
+  .economy-subnav-label { display: none; }
+  .model-tabs-row, .economy-subnav-row { padding-inline: 4px; }
+  .model-tabs-link, .economy-topics a, .economy-topics button { padding: 0 10px; font-size: var(--fs-small); }
 }
+.economy-page section[id] { scroll-margin-top: var(--sticky-top); }
 
-/* Homepage at-a-glance country toggle: same capsule language as the
-   economy country switch, in button form. The head is a flex row with the
-   heading left and the toggle sitting on its baseline, wrapping on small
-   screens. */
+/* In-card view switches (.model-tabs-set buttons, the homepage glance
+   switch): same underline idiom, inside a card rather than a sticky row. */
+.model-tabs-set {
+  display: inline-flex;
+  align-items: stretch;
+  min-height: 40px;
+  border-bottom: 1px solid var(--hairline);
+}
+.model-tabs-spacer { flex: 1 1 auto; }
+@media (max-width: 720px) { .model-tabs-spacer { display: none; } }
+
 .glance-head {
   display: flex;
   align-items: flex-end;
@@ -455,176 +603,116 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
 }
 .glance-head > div:first-child { max-width: 60ch; }
 .glance-head h2 { margin-bottom: 0; }
-.glance-switch { display: inline-flex; flex-shrink: 0; }
+/* Segmented chip switch: selected = filled, never a tick. */
+.glance-switch { display: inline-flex; flex-shrink: 0; padding: 3px; gap: 2px; border: 1px solid var(--hairline); border-radius: 999px; background: var(--gray-100); }
 .glance-switch button {
-  padding: 7px 18px;
-  border: 1px solid var(--line-soft);
+  min-height: 32px;
+  padding: 0 16px;
+  border: 0;
   border-radius: 999px;
-  color: var(--paper-dim);
-  background: var(--surface);
+  color: var(--text-muted);
+  background: transparent;
   font: inherit;
   font-size: var(--fs-small);
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
 }
-.glance-switch button + button { margin-left: -1px; }
-.glance-switch button:first-of-type {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-.glance-switch button:last-of-type {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-.glance-switch button:hover {
-  color: var(--brand-strong);
-  border-color: var(--brand);
-  background: var(--brand-wash);
-  position: relative;
-  z-index: 1;
-}
+.glance-switch button:hover { color: var(--link-hover); }
 .glance-switch button[aria-selected="true"] {
-  color: var(--ink);
-  border-color: var(--brand-strong);
-  background: var(--brand-strong);
+  color: var(--teal-700);
+  background: var(--surface-card);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .12);
   font-weight: 600;
-  position: relative;
-  z-index: 1;
 }
 
-.economy-page section[id] { scroll-margin-top: 132px; }
-
-/* Per-model page tabs (olg pilot): the .glance-switch capsule inside a
-   sticky bar in the .economy-subnav idiom. Panels are plain sections with
-   role=tabpanel toggled by a tiny inline script. */
-.model-tabs {
-  position: sticky;
-  top: calc(var(--nav-h, 62px) - 8px);
-  z-index: 8;
-  border-top: 1px solid var(--line-soft);
-  border-bottom: 1px solid var(--line-soft);
-  background: color-mix(in srgb, var(--ink) 94%, transparent);
-  backdrop-filter: blur(12px);
-}
-.model-tabs-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-5);
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 7px var(--gutter) 0;
-}
-.model-tabs-link {
-  flex: 0 0 auto;
-  padding: 10px 2px;
-  border-bottom: 2px solid transparent;
-  color: var(--paper-dim);
-  font-family: var(--mono);
-  font-size: var(--fs-small);
-  text-decoration: none;
-  white-space: nowrap;
-}
-.model-tabs-link:hover { color: var(--brand-strong); }
-.model-tabs-link[aria-current="location"],
-.model-tabs-link[aria-current="page"] {
-  color: var(--paper);
-  border-bottom-color: var(--brand-strong);
-}
-.model-tabs-set {
-  display: inline-flex;
-  gap: var(--s-5);
-}
-.model-tabs-set button {
-  flex: 0 0 auto;
-  padding: 9px 2px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: none;
-  color: var(--paper-dim);
-  font-family: var(--mono);
-  font-size: var(--fs-label);
-  white-space: nowrap;
-  cursor: pointer;
-}
-.model-tabs-set button:hover { color: var(--brand-strong); }
-.model-tabs-set button.is-current {
-  color: var(--paper);
-  border-bottom-color: var(--brand-strong);
-}
-.model-tabs-spacer { flex: 1 1 auto; }
-
-/* Methodology scrollytelling: narrative steps left, a sticky formal-
-   structure panel right that swaps content with the step in view. */
+/* ---------- 2.4 StepPanel: numbered steps left, sticky figures panel right
+   (DESIGN.md §4.9). Markup: .scrolly-wrap > .scrolly-steps > .meth-step[data-step]
+   + aside.scrolly-sticky > .meth-panel[data-step]; each step repeats its panel
+   as .meth-inline, shown only below 900px where the aside is hidden — one of
+   the two is visible at any width, so the figures still appear once. ---- */
 .scrolly-wrap {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 460px);
-  gap: var(--s-7);
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 440px);
+  gap: var(--s-6);
   align-items: start;
-  max-width: min(1400px, 100%);
-  margin: var(--s-7) auto 0;
-  padding: 0 var(--gutter);
+  margin: var(--s-5) 0 0;
+  padding: 0;
 }
-.scrolly-steps { min-width: 0; }
+.scrolly-steps { min-width: 0; counter-reset: none; }
 .meth-step {
-  min-height: 90vh;
-  padding: var(--s-6) 0 var(--s-6) var(--s-5);
-  border-left: 2px solid var(--line-soft);
-  opacity: .28;
-  transition: opacity .5s ease, border-color .5s ease;
+  position: relative;
+  min-height: 70vh;
+  padding: 0 0 var(--s-7) 52px;
+  border-left: 0;
+  opacity: 1;
 }
-.meth-step.active { opacity: 1; border-left-color: var(--brand-strong); }
-.meth-step:first-child { padding-top: 0; }
-.meth-step:last-child { min-height: auto; padding-bottom: 100px; }
+/* the rail: a hairline joining the numbered discs, teal for the active step */
+.meth-step::before {
+  content: "";
+  position: absolute;
+  left: 17px;
+  top: 40px;
+  bottom: 4px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--hairline);
+  transition: background-color 300ms;
+}
+.meth-step.active::before { background: var(--primary); }
+.meth-step:last-child { min-height: auto; padding-bottom: var(--s-5); }
+.meth-step:last-child::before { display: none; }
 .meth-step-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--s-3);
-  margin-bottom: var(--s-3);
+  margin: 0 0 var(--s-3) -52px;
 }
 .meth-step-num {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: var(--brand-strong);
-  color: var(--ink);
+  border: 2px solid var(--primary);
+  background: var(--surface-card);
+  color: var(--teal-700);
+  font-family: var(--mono);
   font-size: var(--fs-small);
   font-weight: 700;
+  transition: background-color 300ms, color 300ms;
 }
-.meth-step-head h3 { margin: 0; }
+.meth-step.active .meth-step-num { background: var(--primary); color: #FFFFFF; }
+.meth-step-head h3 { margin: 0; font-size: var(--fs-h3); }
 .scrolly-sticky {
   position: sticky;
-  top: calc(var(--nav-h, 62px) + 56px);
+  top: var(--sticky-top);
   min-width: 0;
 }
 .meth-panel-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--s-3);
-  margin-bottom: var(--s-3);
-  padding-bottom: var(--s-3);
-  border-bottom: 1px solid var(--line-soft);
 }
-.meth-panel-title { font-weight: 600; }
-.meth-panel-badge { color: var(--paper-faint); font-size: var(--fs-label); }
+.meth-panel-title { font-weight: 600; color: var(--text-strong); }
 .meth-inline { display: none; }
 @media (max-width: 899px) {
   .scrolly-wrap { grid-template-columns: 1fr; }
   .scrolly-sticky { display: none; }
   .meth-inline { display: block; }
-  .meth-step { opacity: 1; }
+  .meth-step { min-height: 0; }
+  .meth-step::before { background: var(--hairline); }
+  .meth-step .meth-step-num { background: var(--surface-card); color: var(--teal-700); }
 }
-@media (max-width: 720px) {
-  .model-tabs-row { gap: var(--s-3); overflow-x: auto; scrollbar-width: none; }
-  .model-tabs-row::-webkit-scrollbar { display: none; }
-  .model-tabs-spacer { display: none; }
+@media (max-width: 480px) {
+  .meth-step { padding-left: 0; }
+  .meth-step::before { display: none; }
+  .meth-step-head { margin-left: 0; }
 }
-[role="tabpanel"][id] { scroll-margin-top: 132px; }
+[role="tabpanel"][id] { scroll-margin-top: var(--sticky-top); }
 
 /* Methodology-tab formal panels: labelled equations inside a callout. */
 .prose h4 {
@@ -632,56 +720,57 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   font-size: var(--fs-small);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--paper-dim);
+  color: var(--text-muted);
 }
 .formal-label {
   font-size: var(--fs-label);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--paper-faint);
+  color: var(--text-faint);
 }
 .formal-eq-label {
   display: inline-block;
   min-width: 12ch;
   margin-right: var(--s-3);
   font-size: var(--fs-label);
-  color: var(--paper-faint);
+  color: var(--text-faint);
 }
 .callout.formal { overflow-x: auto; }
 
+/* In-page model switcher on /validation-style pages: a chip row. */
 .model-local-nav,
 .validation-model-nav {
   display: flex;
-  gap: 8px;
-  padding: 0 var(--gutter) var(--s-5);
-  max-width: calc(980px + (2 * var(--gutter)));
+  gap: 6px;
+  max-width: var(--max);
   margin: 0 auto;
+  padding: 0 var(--gutter) var(--s-4);
   overflow-x: auto;
   scrollbar-width: none;
 }
 .validation-model-nav {
   position: sticky;
-  top: 116px;
+  top: calc(var(--nav-h) + 8px);
   z-index: 5;
   width: max-content;
   max-width: calc(100% - (2 * var(--gutter)));
-  margin-top: 12px;
-  padding: 5px;
-  gap: 3px;
-  background: color-mix(in srgb, var(--ink) 96%, transparent);
-  border: 1px solid var(--line-soft);
+  margin-top: var(--s-3);
+  padding: 4px;
+  gap: 2px;
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
   border-radius: 999px;
-  box-shadow: 0 8px 24px rgba(20, 45, 52, .06);
+  box-shadow: var(--shadow-card);
 }
 .model-local-nav::-webkit-scrollbar,
 .validation-model-nav::-webkit-scrollbar { display: none; }
 .model-local-nav a,
 .validation-model-nav a {
   flex: 0 0 auto;
-  padding: 9px 14px;
+  padding: 7px 14px;
   border: 1px solid transparent;
   border-radius: 999px;
-  color: var(--paper-dim);
+  color: var(--text-muted);
   font-family: var(--mono);
   font-size: var(--fs-label);
   text-decoration: none;
@@ -689,172 +778,214 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
 .model-local-nav a:hover,
 .validation-model-nav a:hover,
 .validation-model-nav a[aria-current="location"] {
-  color: var(--brand-strong);
-  border-color: color-mix(in srgb, var(--brand) 34%, var(--line-soft));
-  background: var(--brand-wash);
+  color: var(--teal-700);
+  border-color: color-mix(in srgb, var(--primary) 34%, var(--hairline));
+  background: var(--surface-tint);
 }
 .validation-model-nav a[aria-current="location"] { font-weight: 600; }
-/* Pathway line under the global header, generated by site_nav.py. */
-.crumbs {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px 0;
-  padding: 10px clamp(20px, 5vw, 56px);
-  border-bottom: 1px solid var(--line-soft);
-  color: var(--paper-faint);
-  font-size: var(--fs-label);
-}
-.crumbs a { color: var(--paper-dim); }
-.crumbs a:hover { color: var(--brand-strong); }
-.crumbs a::after { content: "/"; margin: 0 8px; color: var(--line); }
-.crumbs span[aria-current] { color: var(--paper); }
 
 
-/* ---------- hero ---------- */
+/* ---------- 2.5 title band (the page's own .hero, first child of <main>) ----
+   One band per page: serif h1, then ONE subtitle line of key facts (the
+   .eyebrow, moved under the title by `order`), then the lede. The band
+   continues the pathway's teal so pathway + title read as one block.
+   The homepage hero (.hero without .model-hero) is an intro card instead —
+   see "Homepage" in section 5. */
 .hero {
-  display: flex;
-  align-items: center;
-  padding: clamp(120px, 16vh, 168px) var(--gutter) var(--s-9);
+  display: block;
+  padding: var(--s-5) var(--gutter) var(--s-6);
 }
-.hero-inner { max-width: 980px; margin: 0 auto; width: 100%; }
+.hero-inner { max-width: var(--max); margin: 0 auto; width: 100%; }
+.doc .hero.model-hero {
+  min-height: 0;
+  padding: var(--s-3) var(--gutter) var(--s-6);
+  background: var(--band-bg-2);
+  color: var(--band-text);
+}
+.doc .hero.model-hero .hero-inner {
+  display: flex;
+  flex-direction: column;
+  padding-inline: var(--card-pad);
+}
+.doc .model-hero .eyebrow {
+  order: 2;
+  margin: var(--s-2) 0 0;
+  color: var(--band-text-dim);
+  font-size: var(--fs-small);
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+.doc .model-hero h1 {
+  order: 1;
+  margin: 0;
+  color: var(--band-text);
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: var(--fs-hero-sub);
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+.doc .model-hero .lede {
+  order: 3;
+  max-width: 80ch;
+  margin: var(--s-3) 0 0;
+  color: rgba(255, 255, 255, .92);   /* 6.4:1 on --teal-700 */
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+.doc .model-hero > .hero-inner > :not(.eyebrow):not(h1):not(.lede) { order: 4; margin-top: var(--s-4); }
+.doc .model-hero a:not(.btn) { color: var(--band-text); text-decoration-color: rgba(255, 255, 255, .5); }
+.doc .model-hero .lede strong { color: var(--band-text); }
+.doc .model-hero code { color: var(--band-text); background: rgba(255, 255, 255, .12); }
+@media (min-width: 1360px) {
+  .doc .hero.model-hero .hero-inner { padding-inline: var(--card-pad); }
+}
 
 .eyebrow {
   font-family: var(--mono);
-  font-size: var(--fs-small);
-  letter-spacing: 0.18em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--brand);
-  margin-bottom: var(--s-4);
+  color: var(--teal-700);
+  margin-bottom: var(--s-3);
 }
 
 h1 {
-  font-family: var(--display);
-  font-weight: 400;
+  font-family: var(--serif);
+  font-weight: 600;
   font-size: var(--fs-hero);
-  line-height: 1.08;
-  letter-spacing: -0.015em;
-  font-optical-sizing: auto;
-  margin-bottom: var(--s-5);
+  line-height: 1.15;
+  letter-spacing: 0;
+  color: var(--text-strong);
+  margin-bottom: var(--s-4);
 }
-h1 em {
-  font-style: italic;
-  color: var(--brand-strong);
-  font-weight: 500;
-}
+h1 em { font-style: italic; font-weight: 600; }
 
 .lede {
   font-size: var(--fs-lede);
-  line-height: 1.55;
-  color: var(--paper);
+  line-height: 1.6;
+  color: var(--text-body);
   max-width: 78ch;
-  margin-bottom: var(--s-6);
+  margin-bottom: var(--s-5);
 }
-.lede strong { color: var(--brand-strong); font-weight: 600; }
+.lede strong { color: var(--text-strong); font-weight: 600; }
 
 .hero-cta { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-bottom: 0; }
 
+/* Buttons: one primary (filled teal, white text) and one secondary (white,
+   hairline) per view. Radius 999 like the AB "Explore →" button. */
 .btn {
-  font-family: var(--mono);
-  font-size: var(--fs-body-sm);
-  letter-spacing: 0.01em;
-  text-decoration: none;
-  padding: 12px 22px;
-  border-radius: var(--radius-sm);
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
-  display: inline-block;
-  /* some buttons are labelled with a full repo URL; let the label break
-     rather than push the page sideways at 375px */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
   max-width: 100%;
+  padding: 9px 18px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: var(--body);
+  font-size: var(--fs-body-sm);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-decoration: none;
   overflow-wrap: anywhere;
+  transition: background-color 150ms, color 150ms, border-color 150ms;
 }
-.btn-primary {
-  background: var(--brand);
-  color: var(--ink);
-  font-weight: 500;
-}
-.btn-primary:hover { background: var(--brand-deep); }
-.btn-secondary {
-  color: var(--brand-strong);
-  border: 1px solid var(--brand);
-  background: var(--brand-wash);
-}
-.btn-secondary:hover { border-color: var(--brand-strong); background: var(--surface); }
+.btn-primary { background: var(--primary); color: #FFFFFF; }
+.btn-primary:hover { background: var(--teal-700); }
+.btn-secondary,
 .btn-ghost {
-  color: var(--paper);
-  border: 1px solid var(--line);
+  color: var(--teal-700);
+  border-color: var(--hairline-strong);
+  background: var(--surface-card);
 }
-.btn-ghost:hover { border-color: var(--brand); color: var(--brand-strong); }
+.btn-secondary:hover,
+.btn-ghost:hover { border-color: var(--primary); background: var(--surface-tint); }
 .mono { font-family: var(--mono); }
 
-/* ---------- bands ---------- */
+/* ---------- 2.6 sections are cards on the canvas ----------
+   Every .band (624 of them across the site) is a white card with a hairline
+   border and a soft shadow, separated by --gap-cards. This is the one change
+   that turns the long-scroll pages into the dashboard look; nothing in the
+   markup moves. .band-alt, .band-stack and .band-wide are the same card. */
 .band {
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: var(--band-y) var(--gutter);
   position: relative;
+  width: min(var(--max), calc(100% - 2 * var(--gutter)));
+  max-width: none;
+  margin: var(--gap-cards) auto 0;
+  padding: var(--card-pad);
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
 }
-.band + .band { border-top: 1px solid var(--line-soft); }
-.band-wide { max-width: min(1400px, 100%); }
+main > .band:last-child,
+main > :last-child { margin-bottom: var(--s-7); }
+.band + .band { border-top: 1px solid var(--hairline); }
+.band-wide { max-width: none; }
+.band-alt { background: var(--surface-card); }
+.band .band { box-shadow: none; width: 100%; margin-top: var(--s-5); }
 
-/* Alternating band. Used on 43 pages — the economy hub and topics, the
-   forecast record, and every release note — but never defined, so all of
-   them rendered it as a plain .band. The tint is derived from the border
-   colour rather than a fixed value, so it follows the light and dark
-   palettes without a second rule, matching how --brand-wash is built. It is
-   deliberately faint: these bands separate sections, they do not compete
-   with them. */
-.band-alt { background: color-mix(in srgb, var(--border-light) 22%, transparent); }
-
-/* Used on /, /models and /connect. It lived only in connect's page-local
-   <style>, so the other two rendered it as a default paragraph. */
+/* One-sentence section lede under a section title. */
 .section-intro {
-  margin-top: 10px;
-  color: var(--paper-dim);
+  margin-top: var(--s-2);
+  max-width: 80ch;
+  color: var(--text-muted);
   font-size: var(--fs-body);
   line-height: 1.55;
 }
 
-.band-head { margin-bottom: var(--s-6); }
+/* Section head: eyebrow (.kicker), serif title, one-line lede. */
+.band-head { margin-bottom: var(--s-5); }
 .kicker {
-  display: block;
-  font-size: var(--fs-small);
-  letter-spacing: 0.14em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--brand);
-  margin-bottom: var(--s-3);
+  color: var(--teal-700);
+  margin-bottom: var(--s-2);
 }
 h2 {
-  font-family: var(--display);
-  font-weight: 400;
+  font-family: var(--serif);
+  font-weight: 600;
   font-size: var(--fs-h2);
-  line-height: 1.2;
-  letter-spacing: -0.012em;
-  max-width: 26ch;
+  line-height: 1.25;
+  letter-spacing: 0;
+  color: var(--text-strong);
+  max-width: 48ch;
 }
+h3 { color: var(--text-strong); font-weight: 600; }
 
 .prose { max-width: none; }
 /* Long unbreakable tokens — file paths, package names, URLs printed inline in
-   the prose — are wider than a 375px column at this body size and pushed the
-   page 2–3px sideways on /validation/. Break them instead of shrinking the
-   type. <pre>/.codeblock keep their own horizontal scroll and are untouched. */
+   the prose — are wider than a 375px column. Break them instead of shrinking
+   the type. <pre>/.codeblock keep their own horizontal scroll. */
 .prose p, .prose li, .prose td, .prose figcaption { overflow-wrap: break-word; }
-.prose p { margin-bottom: var(--s-5); color: var(--paper); font-size: var(--fs-body); line-height: 1.7; }
+.prose p { margin-bottom: var(--s-4); color: var(--text-body); font-size: var(--fs-body); line-height: 1.7; }
 .prose p:last-child { margin-bottom: 0; }
-.prose em { font-style: italic; color: var(--brand-strong); }
-.prose strong { font-weight: 600; color: var(--paper); }
+.prose em { font-style: italic; }
+.prose strong { font-weight: 600; color: var(--text-strong); }
 
 /* ---------- cards ---------- */
 .card-id { font-size: var(--fs-small); color: var(--brand); letter-spacing: 0.04em; }
 /* ONE chip form. Variants differ only by colour, never by shape or size. */
 .tag {
-  display: inline-block;
-  font-family: var(--mono);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  font-family: var(--body);
   font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  padding: 3px 9px;
-  border-radius: var(--radius-sm);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  padding: 2px 10px;
+  border-radius: 999px;
   border: 1px solid transparent;
   white-space: nowrap;
 }
@@ -876,28 +1007,27 @@ h2 {
 .metrics {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0;
-  margin: var(--s-7) 0 var(--s-6);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
-  overflow: hidden;
+  gap: var(--s-4);
+  margin: var(--s-5) 0;
 }
 @media (min-width: 720px) { .metrics { grid-template-columns: repeat(3, 1fr); } }
 
+/* .metric is the legacy name of the stat tile (DESIGN.md §4.2). */
 .metric {
-  padding: 30px 28px;
-  border-bottom: 1px solid var(--line-soft);
+  padding: 18px 20px;
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
 }
-@media (min-width: 720px) {
-  .metric { border-bottom: none; border-right: 1px solid var(--line-soft); }
-  .metric:last-child { border-right: none; }
-}
-.metric-label { display: block; font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--paper-faint); margin-bottom: 14px; }
+.metric-label { display: block; font-size: var(--fs-small); font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
 .metric-val {
-  font-family: var(--display);
+  font-family: var(--body);
   font-size: var(--fs-stat);
-  font-weight: 500;
-  color: var(--brand-strong);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary);
   line-height: 1;
   display: flex;
   align-items: baseline;
@@ -923,9 +1053,10 @@ h2 {
 .foot {
   width: 100%;
   max-width: none;
-  margin: 0;
-  padding: 48px var(--gutter) 64px;
-  border-top: 1px solid var(--line-soft);
+  margin: var(--s-7) 0 0;
+  padding: 20px var(--gutter);
+  background: var(--band-bg);
+  color: var(--band-text-dim);
 }
 .foot-pe { display: inline-flex; align-items: center; }
 .foot-pe img { height: 20px; width: auto; display: block; opacity: 0.82; transition: opacity 0.2s; }
@@ -1155,10 +1286,32 @@ h2 {
   padding: 11px 16px 11px 0; border-bottom: 1px solid var(--line-soft); vertical-align: top;
 }
 .opt-note { font-size: var(--fs-body-sm); line-height: 1.55; color: var(--paper-faint); }
+/* Callout (DESIGN.md §4.4): tinted box, 3px left accent. Default = info;
+   .callout-warn for caution/provisional; .callout-neutral for asides. */
 .callout {
-  border-left: 2px solid var(--brand);
-  padding: var(--s-1) 0 var(--s-1) var(--s-5); margin: var(--s-6) 0;
-  font-size: var(--fs-body-sm); line-height: 1.6; color: var(--paper-dim); max-width: none;
+  margin: var(--s-5) 0;
+  padding: 12px 16px;
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--hairline));
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--surface-tint);
+  font-size: var(--fs-body-sm);
+  line-height: 1.6;
+  color: var(--text-body);
+  max-width: none;
+}
+.callout strong:first-child { color: var(--text-strong); }
+.callout-warn {
+  border-color: var(--warn-line);
+  border-left-color: var(--warn-ink);
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+}
+.callout-warn strong:first-child { color: var(--warn-ink); }
+.callout-neutral {
+  border-color: var(--hairline);
+  border-left-color: var(--gray-400);
+  background: var(--gray-100);
 }
 
 /* ---------- section divider after hero + grid footer ---------- */
@@ -1219,81 +1372,57 @@ h2 {
 .pipeline a.pl-node:hover { border-color: var(--brand); }
 
 @media (max-width: 620px) {
-  .nav {
-    min-height: 112px;
-    align-content: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding-block: 10px;
-  }
-  .brand { width: 100%; font-size: 12px; }
-  .nav-links {
-    width: 100%;
-    justify-content: flex-start;
-    gap: 18px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .nav-links a { flex: 0 0 auto; white-space: nowrap; }
-  .nav-links::-webkit-scrollbar { display: none; }
-  .nav-links .nav-gh { display: none; }
-  .nav-links a.nav-mobile:first-child { display: inline-flex; }
-  .nav-links .nav-start { min-height: 44px; padding-inline: 12px; }
-  .nav-gh { min-width: 44px; min-height: 44px; justify-content: center; }
   .question-list a { grid-template-columns: 1fr 18px; gap: 8px 14px; }
   .question-list strong { grid-column: 1; grid-row: 2; }
   .question-list a::after { grid-column: 2; grid-row: 1 / span 2; }
 }
 
-/* slim footer bar */
-.foot-bar { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding-top: 26px; padding-bottom: 30px; }
-/* wraps like .foot-bar above it — without this the nav pushed every page
-   68px sideways at a 375px viewport. */
-.foot-nav { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 12px 22px; }
-.foot-nav a { font-family: var(--mono); font-size: var(--fs-small); color: var(--paper-dim); text-decoration: none; }
-.foot-nav a:hover { color: var(--brand-strong); }
-.foot-nav .foot-pe img { height: 18px; }
-.footer-brand,
-.footer-links,
-.footer-links a { display: inline-flex; align-items: center; }
-.footer-brand {
-  gap: 10px;
-  color: var(--paper);
-  font-family: var(--mono);
-  font-size: var(--fs-body-sm);
-  text-decoration: none;
+/* ---------- 2.7 footer: one row on the band colour (#133 kept it small) ----
+   PolicyEngine mark, the four views' neighbours (Models, Forecasts, Use),
+   GitHub, Contact; the legal line wraps under it on a phone. */
+.foot-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 24px;
+  flex-wrap: wrap;
 }
-.footer-brand img { width: 20px; height: 20px; }
+.foot-bar > * { max-width: var(--max); }
+.foot-head { display: block; font-family: var(--mono); font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--band-text-dim); margin-bottom: 12px; }
+.foot-nav { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 12px 22px; }
+.foot-nav a { font-size: var(--fs-small); color: var(--band-text-dim); text-decoration: none; }
+.foot-nav a:hover { color: var(--band-text); }
 .footer-legal {
+  order: 2;
   margin: 0;
-  color: var(--paper-faint);
-  font-family: var(--mono);
+  color: var(--band-text-dim);
   font-size: var(--fs-small);
   line-height: 1.5;
 }
-.footer-links { flex-wrap: wrap; gap: 10px; }
-.footer-links a {
-  justify-content: center;
-  width: 30px;
-  height: 34px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  color: var(--paper-dim);
-  font-family: var(--mono);
-  font-size: var(--fs-small);
-  text-decoration: none;
+.footer-links {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 4px;
 }
-.footer-links a:hover { color: var(--brand-strong); background: transparent; transform: translateY(-1px); }
+.footer-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 8px;
+  color: var(--band-text);
+  font-size: var(--fs-body-sm);
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+.footer-links a:hover { background: rgba(255, 255, 255, .08); text-decoration: underline; text-underline-offset: 3px; }
 .footer-links img,
 .footer-links svg { width: 17px; height: 17px; flex: 0 0 auto; }
-.footer-links svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.footer-links .footer-icon-fill { fill: currentColor; stroke: none; }
-.footer-links .footer-text {
-  width: auto;
-  padding-inline: 8px;
-}
-.footer-links .footer-policyengine { gap: 7px; }
+.footer-links .footer-policyengine img { padding: 2px; border-radius: 4px; background: #FFFFFF; width: 20px; height: 20px; }
+.footer-links .footer-policyengine { font-weight: 600; margin-right: 8px; }
+.footer-links .footer-sep { width: 1px; height: 18px; margin: 0 6px; background: rgba(255, 255, 255, .25); }
 
 /* Homepage: one compact path section replaces two overlapping explainers. */
 .home-page .band { padding-block: clamp(48px, 6vw, 72px); }
@@ -2526,7 +2655,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 
 /* Subtab bar as the first element of <main> (paper pages): clear the fixed
    header instead of sliding under it. */
-.model-tabs-first { margin-top: calc(var(--nav-h, 62px) + 34px); }
+.model-tabs-first { margin-top: 0; }
 .model-tabs-first + .paper-viewer { padding-top: clamp(28px, 5vh, 48px); }
 
 /* Methodology freeze-box, structured like the dashboard: bordered card,
@@ -2534,11 +2663,14 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
    uppercase section titles with a trailing rule, one white sub-card per
    labelled equation, and arrow output-lines. */
 .meth-panel, .meth-inline {
-  border: 2px solid var(--brand-strong);
-  border-radius: 14px;
+  border: 1px solid var(--hairline);
+  border-top: 3px solid var(--primary);
+  border-radius: var(--radius-card);
   overflow: hidden;
-  background: var(--surface);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-raised);
 }
+.meth-inline { box-shadow: var(--shadow-card); }
 .meth-inline { margin-top: var(--s-4); }
 .meth-panel .meth-panel-head, .meth-inline .meth-panel-head {
   margin: 0;
@@ -2553,10 +2685,10 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 }
 .meth-panel > :last-child, .meth-inline > :last-child { margin-bottom: 18px; }
 .meth-panel-badge {
-  padding: 4px 11px;
-  border-radius: 6px;
-  background: var(--brand-strong);
-  color: var(--ink);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #FFFFFF;
   font-size: var(--fs-label);
   font-weight: 600;
 }
@@ -2575,10 +2707,10 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 .meth-sec-title::after { content: ""; flex: 1; height: 1px; background: var(--line-soft); }
 .meth-eq {
   margin: 8px 0;
-  padding: 12px 16px;
-  border: 1px solid var(--line-soft);
-  border-radius: 8px;
-  background: var(--ink);
+  padding: 10px 14px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--gray-50);
   overflow-x: auto;
 }
 .meth-eq-label {
@@ -2590,7 +2722,8 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
-.meth-eq-body { text-align: center; }
+.meth-eq-body { text-align: left; color: var(--text-strong); font-size: var(--fs-body-sm); font-variant-numeric: tabular-nums; }
+.meth-eq-body:has(> mjx-container, > .MathJax, > math) { text-align: center; }
 /* Narrative sub-headings: bold sentence case, not uppercase micro-labels. */
 .meth-step h4 {
   margin: var(--s-5) 0 var(--s-2);
@@ -2604,7 +2737,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 /* The sticky freeze-box never grows past the viewport: overflowing panel
    content scrolls inside the card. */
 .scrolly-sticky .meth-panel {
-  max-height: calc(100vh - var(--nav-h, 62px) - 110px);
+  max-height: calc(100vh - var(--sticky-top) - 16px);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -2612,7 +2745,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   position: sticky;
   top: 0;
   z-index: 1;
-  background: color-mix(in srgb, var(--brand-wash) 60%, var(--ink));
+  background: var(--surface-tint);
 }
 
 /* ============================================================
@@ -3938,4 +4071,341 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   /* The map is a two-dimensional layout; below this width it stops being
      readable at all, so the evidence lines carry the section on their own. */
   .mm-figure { display: none; }
+}
+
+/* =====================================================================
+   5. DESIGN SYSTEM v2 (DESIGN.md §4–§6)
+   Appended last on purpose: these rules restyle legacy page sections above
+   through the cascade, with no !important. New components live here too.
+   ===================================================================== */
+
+/* ---------- 5.1 base fixes the shell depends on ---------- */
+a { color: var(--link); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+a:hover { color: var(--link-hover); }
+code, pre, kbd, samp { font-family: var(--mono); }
+.num, td, .metric-val, .stat-value { font-variant-numeric: tabular-nums; }
+
+/* The title band is a column, left-aligned at every width: the legacy
+   two-column hero grid (align-items: center at ≥1000px) must not centre it. */
+.doc .hero.model-hero .hero-inner { align-items: flex-start; text-align: left; gap: 0; }
+
+/* ---------- 5.2 homepage: AB-style intro card instead of a title band ---- */
+.home-page .hero {
+  padding: var(--gap-cards) var(--gutter) 0;
+}
+.home-page .hero > .hero-inner {
+  width: min(var(--max), 100%);
+  padding: var(--card-pad);
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+.home-page .hero h1 { font-size: var(--fs-hero); text-wrap: balance; }
+.home-page .hero .lede { margin-bottom: var(--s-5); }
+.home-page .band { padding: var(--card-pad); }
+.home-page .hero-fig figcaption { color: var(--text-muted); }
+
+/* The verdict band: the one tinted card, marked by a left accent rule like
+   the intro card, not by a full-width wash. */
+.band.band-result,
+.band + .band.band-result {
+  background: var(--surface-card);
+  border-top: 1px solid var(--hairline);
+  border-left: 4px solid var(--primary);
+}
+@media (prefers-color-scheme: dark) {
+  .band-result { background: var(--surface-card); }
+}
+
+/* ---------- 5.3 card (DESIGN.md §4.1) ----------
+   .band is already a card; .card is the same surface for blocks inside a
+   band or in a grid. */
+.card {
+  padding: var(--s-5);
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+.card-flat { box-shadow: none; }
+.card-grid { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+
+/* ---------- 5.4 stat tile / KPI (DESIGN.md §4.2) ---------- */
+.stat-row { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); margin: var(--s-5) 0; }
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 16px 18px;
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+.stat-us { border-left-color: var(--series-us); }
+.stat-neutral { border-left-color: var(--gray-400); }
+.stat-label { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: var(--fs-small); font-weight: 600; }
+.stat-label .icon-badge { width: 28px; height: 28px; }
+.stat-value { color: var(--primary); font-size: var(--fs-stat); font-weight: 650; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat-sub { color: var(--text-faint); font-size: var(--fs-label); }
+.stat-foot { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--hairline); }
+
+/* ---------- 5.5 chip (DESIGN.md §4.3) ---------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 2px 11px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  line-height: 1.3;
+  text-decoration: none;
+  white-space: nowrap;
+}
+a.chip { min-height: 30px; }
+a.chip:hover { border-color: var(--primary); color: var(--teal-700); }
+.chip svg { width: 14px; height: 14px; flex: 0 0 auto; }
+.chip-brand { border-color: color-mix(in srgb, var(--primary) 30%, var(--hairline)); background: var(--surface-tint); color: var(--teal-700); }
+.chip-warn { border-color: var(--warn-line); background: var(--warn-bg); color: var(--warn-ink); }
+.chip-us { border-color: color-mix(in srgb, var(--series-us) 35%, var(--hairline)); color: var(--series-us); }
+/* selected = fill + border. Never a tick (DESIGN.md §1.5). */
+.chip[aria-pressed="true"],
+.chip[aria-selected="true"],
+.chip.is-selected { background: var(--surface-tint); border-color: var(--primary); color: var(--teal-700); font-weight: 600; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ---------- 5.6 icon badge (used by entry cards, stat labels, kickers) ---- */
+.icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--surface-tint);
+  color: var(--teal-700);
+}
+.icon-badge svg { width: 55%; height: 55%; }
+
+/* ---------- 5.7 expander (DESIGN.md §4.5) — native <details> ---------- */
+details.expander,
+details.about {
+  margin: var(--s-4) 0 0;
+  border-top: 1px solid var(--hairline);
+}
+details.expander > summary,
+details.about > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--teal-700);
+  font-size: var(--fs-body-sm);
+  font-weight: 600;
+}
+details.expander > summary::-webkit-details-marker,
+details.about > summary::-webkit-details-marker { display: none; }
+details.expander > summary::after,
+details.about > summary::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 150ms;
+}
+details[open].expander > summary::after,
+details[open].about > summary::after { transform: rotate(225deg) translate(-2px, -2px); }
+details.expander > summary .expander-meta { margin-left: auto; color: var(--text-faint); font-weight: 400; font-size: var(--fs-label); }
+details.expander > :not(summary),
+details.about > :not(summary) { padding-bottom: var(--s-4); color: var(--text-body); font-size: var(--fs-body-sm); }
+
+/* ---------- 5.8 "On this page" rail (DESIGN.md §4.6) ----------
+   <div class="with-rail"><nav class="page-rail" aria-label="On this page">
+   <p class="page-rail-title">On this page</p><a href="#id">…</a>…</nav>
+   <div>…cards…</div></div>. Sticky from 1100px; a chip row above that. */
+.with-rail { display: block; }
+.page-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: var(--gap-cards) auto 0;
+  width: min(var(--max), calc(100% - 2 * var(--gutter)));
+}
+.page-rail-title { display: none; }
+.page-rail a {
+  padding: 5px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  text-decoration: none;
+}
+.page-rail a[aria-current] { border-color: var(--primary); background: var(--surface-tint); color: var(--teal-700); font-weight: 600; }
+@media (min-width: 1100px) {
+  .with-rail {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: var(--s-5);
+    width: min(var(--max), calc(100% - 2 * var(--gutter)));
+    margin: 0 auto;
+  }
+  .with-rail > :not(.page-rail) > .band { width: 100%; }
+  .page-rail {
+    position: sticky;
+    top: var(--sticky-top);
+    align-self: start;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 0;
+    width: auto;
+    margin-top: var(--gap-cards);
+    padding-left: 0;
+  }
+  .page-rail-title { display: block; margin-bottom: 6px; color: var(--text-faint); font-family: var(--mono); font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--ls-label); }
+  .page-rail a { padding: 6px 12px; border: 0; border-left: 2px solid var(--hairline); border-radius: 0; background: none; }
+  .page-rail a[aria-current] { border-left-color: var(--primary); background: none; }
+}
+
+/* ---------- 5.9 entry cards (AB "Explore →", DESIGN.md §4.7) ---------- */
+.entry-grid { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
+.entry-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: var(--s-5);
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  border-top: 3px solid var(--primary);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  color: var(--text-body);
+  text-decoration: none;
+  transition: box-shadow 150ms, border-color 150ms;
+}
+.entry-card:hover { box-shadow: var(--shadow-raised); color: var(--text-body); }
+.entry-card h3 { margin: 6px 0 0; font-size: var(--fs-h3); color: var(--text-strong); }
+.entry-card p { margin: 0; color: var(--text-muted); font-size: var(--fs-body-sm); }
+.entry-cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #FFFFFF;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+.entry-card:hover .entry-cta { background: var(--teal-700); }
+
+/* ---------- 5.10 numbered steps (DESIGN.md §4.8) ---------- */
+ol.steps { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); margin: var(--s-5) 0; padding: 0; list-style: none; counter-reset: step; }
+ol.steps > li { position: relative; display: grid; grid-template-columns: 36px 1fr; gap: 4px 12px; align-items: start; counter-increment: step; }
+ol.steps > li::before {
+  content: counter(step);
+  grid-row: span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-tint);
+  color: var(--teal-700);
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+ol.steps > li > strong { color: var(--text-strong); font-size: var(--fs-body-sm); }
+ol.steps > li > span { color: var(--text-muted); font-size: var(--fs-small); }
+
+/* ---------- 5.11 intro card (AB, DESIGN.md §4.10) ---------- */
+.intro-card {
+  width: min(var(--max), calc(100% - 2 * var(--gutter)));
+  margin: var(--gap-cards) auto 0;
+  padding: var(--s-5) var(--card-pad);
+  background: color-mix(in srgb, var(--primary) 5%, var(--surface-card));
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--hairline));
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-card);
+}
+.intro-card p { max-width: 80ch; color: var(--text-body); }
+
+/* ---------- 5.12 chart house style (DESIGN.md §6) ----------
+   Generated SVGs keep their class vocabulary (vc-*, hf-*, mm-*); the roles
+   map onto the series tokens here. */
+.vchart .vc-grid, .hero-fan .hf-grid { stroke: var(--chart-grid); stroke-width: 1; }
+.vchart .vc-axis { stroke: var(--chart-axis); stroke-width: 1.25; }
+.vchart .vc-zero, .hero-fan .hf-zero { stroke: var(--chart-zero); stroke-width: 1.25; }
+.vchart .vc-tick, .hero-fan text { fill: var(--chart-tick); font-family: var(--mono); }
+.vchart .vc-lab { fill: var(--text-muted); font-family: var(--body); font-weight: 600; }
+.vchart .vc-s1 { stroke: var(--series-ours); stroke-width: 2.25; }
+.vchart .vc-s1-dot { fill: var(--series-ours); }
+.vchart .vc-s2 { stroke: var(--series-official); }
+.vchart .vc-s2-dot { fill: var(--series-official); }
+.vchart .vc-band90, .hero-fan .hf-b90 { fill: var(--band-90); stroke: none; }
+.vchart .vc-band68, .hero-fan .hf-b68 { fill: var(--band-68); stroke: none; }
+.hero-fan .hf-med { stroke: var(--series-median); }
+.hero-fan .hf-dot { fill: var(--series-median); }
+.ln-s1 { background: var(--series-ours); }
+.mo-figcard, .vfig { border-radius: var(--radius); }
+figure figcaption { color: var(--text-muted); font-size: var(--fs-small); line-height: 1.5; }
+
+/* Bare definition lists (release-note provenance, generated by
+   notes/generate_release_notes.py): a two-column key/value grid. */
+.band dl:not([class]) {
+  display: grid;
+  grid-template-columns: minmax(8rem, max-content) minmax(0, 1fr);
+  gap: 0;
+  margin: var(--s-4) 0;
+  border-top: 1px solid var(--hairline);
+  font-size: var(--fs-body-sm);
+}
+.band dl:not([class]) > dt,
+.band dl:not([class]) > dd { padding: 8px 16px 8px 0; border-bottom: 1px solid var(--hairline); }
+.band dl:not([class]) > dt { color: var(--text-muted); font-weight: 600; }
+.band dl:not([class]) > dd { color: var(--text-strong); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+
+/* ---------- 5.13 dark theme for the v2 roles ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gray-50: #0B0E14;
+    --gray-100: #141A26;
+    --gray-200: #263042;
+    --gray-300: #334155;
+    --gray-500: #A9B4C4;
+    --gray-600: #CBD5E1;
+    --gray-700: #E2E8F0;
+    --gray-900: #F5F5F5;
+    --teal-700: #81E6D9;
+    --canvas: #0B0E14;
+    --band-bg: #10282B;
+    --band-bg-2: #163538;
+    --series-official: #CBD5E1;
+    --series-us: #7DD3FC;
+    --warn-bg: #2A1A0C;
+    --warn-line: #7C4A1E;
+    --warn-ink: #FFB066;
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, .4);
+    --shadow-raised: 0 8px 24px rgba(0, 0, 0, .5);
+  }
 }

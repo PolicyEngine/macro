@@ -16,6 +16,14 @@ HEADER = re.compile(
     re.DOTALL,
 )
 FOOTER_DIR = re.compile(r'<nav class="footer-dir".*?</nav>\s*', re.DOTALL)
+STYLESHEET = re.compile(r'href="/style\.css(?:\?v=[0-9]+)?"')
+
+# Cache buster for the one shared stylesheet. Bump it whenever style.css
+# changes in a way a cached copy would render wrongly; ``render`` writes it
+# into every page and the generators read it from here (economy/topics.py,
+# notes/generate_release_notes.py), so no page can be left on an old copy.
+STYLE_VERSION = 8
+STYLE_HREF = f"/style.css?v={STYLE_VERSION}"
 
 DESTINATIONS = (
     ("home", "/", "Home", "nav-mobile"),
@@ -28,6 +36,24 @@ DESTINATIONS = (
     ("forecasts", "/forecasts", "Forecasts", "nav-mobile"),
     ("use", "/connect", "Use", "nav-mobile nav-start"),
 )
+
+# One 24px stroke icon per view (DESIGN.md §3.1). Decorative: the label is
+# the link text, so every icon is aria-hidden and the tab still reads
+# "Forecasts" to a screen reader and to site_contract's ">Forecasts</a>".
+VIEW_ICONS = {
+    "home": '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/>',
+    "models": '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 16.5 9 5 9-5"/>',
+    "forecasts": '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/>',
+    "use": '<path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/>',
+}
+
+
+def icon(key: str) -> str:
+    return (
+        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" '
+        'stroke="currentColor" stroke-width="1.75" stroke-linecap="round" '
+        f'stroke-linejoin="round" aria-hidden="true">{VIEW_ICONS[key]}</svg>'
+    )
 
 MODEL_ROOTS = {"models", "obr", "svar", "frb-us", "us-hank", "olg", "pe", "define"}
 EVIDENCE_ROOTS = {"papers", "reports"}
@@ -204,7 +230,14 @@ def crumbs(path: Path) -> str:
     )
 
 GITHUB = """    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>"""
+# The footer stays one row (#133 dropped the four-column directory): the
+# PolicyEngine mark, the three views a reader most often jumps between, then
+# GitHub and Contact. Contact lives here, never in the header tabs
+# (site_contract.check_economy_navigation).
 FOOTER_LINKS = """    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/models">Models</a>
+    <a class="footer-text" href="/forecasts">Forecasts</a>
+    <a class="footer-text" href="/connect">Use</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
     <a class="footer-text" href="/contact">Contact</a>"""
 
@@ -222,6 +255,10 @@ def section(path: Path) -> str | None:
     # the Forecasts tab, so a reader on a topic page is never told they are in
     # a section the header no longer offers.
     if root in ("economy", "forecasts"):
+        return "forecasts"
+    # Release notes hang off Forecasts in the pathway (CRUMB_PARENTS), so the
+    # view tab agrees with the crumb instead of leaving no tab chosen.
+    if root == "notes":
         return "forecasts"
     if root == "connect":
         return "use"
@@ -245,11 +282,13 @@ def header(path: Path) -> str:
             current_attr = ' aria-current="true"'
         else:
             current_attr = ""
-        links.append(f"    <a{class_attr} href=\"{href}\"{current_attr}>{label}</a>")
+        links.append(
+            f"    <a{class_attr} href=\"{href}\"{current_attr}>{icon(key)}{label}</a>"
+        )
     links.append(GITHUB)
     return """<header class="nav">
-  <a class="brand" href="/">
-    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  <a class="brand" href="/" aria-label="PolicyEngine Macro home">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="26" height="26" /><span class="brand-name">PolicyEngine Macro</span>
   </a>
   <nav class="nav-links" aria-label="Primary">
 %s
@@ -301,6 +340,7 @@ def render(path: Path) -> str:
     if replacements != 1:
         raise ValueError(f"could not locate navigation in {path.relative_to(ROOT)}")
     updated = updated.replace(" has-section-tabs", "")
+    updated = STYLESHEET.sub(f'href="{STYLE_HREF}"', updated)
     # The footer stays small: a single link row. Strip any directory block a
     # previous revision may have left behind.
     updated = FOOTER_DIR.sub("", updated)

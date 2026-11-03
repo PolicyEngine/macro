@@ -2623,7 +2623,7 @@ def page(topic: dict) -> str:
 <meta name="theme-color" content="#FFFFFF" />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=7" />
+<link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -2653,9 +2653,7 @@ def page(topic: dict) -> str:
 <footer class="foot foot-bar">
   <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
-    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
-    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
-    <a class="footer-text" href="/contact">Contact</a>
+{site_nav.FOOTER_LINKS}
   </nav>
 </footer>
 <script src="/reveal.js?v=2" defer></script>
