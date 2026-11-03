@@ -102,7 +102,8 @@
         <p>
           The <code>pe-macro</code> CLI mirrors the hosted tools one for one:
           shock a variable, list the levers, or score a reform from the
-          terminal.
+          terminal. <code>pe-macro compare</code> runs the same reform through
+          the static and the macro route side by side.
         </p>
         <div class="meth-inline">
           <div class="meth-sec-title">CLI equivalents</div>
@@ -121,9 +122,7 @@ pe-macro score --country uk \
           listing, the March 2026 EFO forecast tables, and the ONS snapshot
           ship inside it, so there is no data step. A reform is one call:
           pick an exogenous variable, apply a shock, read the deviation from
-          baseline. The baseline is the anchored March 2026 path: the
-          anchoring add-factors are held fixed in both the baseline and the
-          shocked run, so they cancel in the deviation.
+          the anchored March 2026 baseline (<a href="/obr/methodology#meth-5">why the deviation is clean</a>).
         </p>
         <p class="opt-note">
           Two solves, so about a minute.
@@ -132,6 +131,11 @@ pe-macro score --country uk \
           and rise, £10bn public real investment (~£3bn nominal
           <code>CGIPS</code> per quarter), and a £10bn austerity cut — with
           charts landing in <code>outputs/</code>.
+        </p>
+        <p class="opt-note">
+          To score a statutory reform end to end from Python, install the
+          suite instead (<code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code>)
+          and call <code>policyengine_macro.score_reform(country="uk", reform={...}, model="obr")</code>.
         </p>
         <div class="meth-inline">
           <div class="meth-sec-title">install and run</div>
@@ -162,6 +166,8 @@ results = run_reform(
         <p class="opt-note">
           The full glossary — all 636 codes with descriptions, ONS series and
           equations — is the model package's variable and equation references.
+          Read each lever&rsquo;s caveat before quoting a result: the
+          <a href="/obr/validation#caveats">limits</a> say which carry behaviour.
         </p>
         <div class="meth-inline">
           <div class="meth-sec-title">levers and readouts</div>
@@ -178,8 +184,8 @@ results = run_reform(
             <div class="dial-name mono">readouts — read these (endogenous)</div>
             <div class="dial-choice"><code>GDPM</code><span class="dial-tradeoff"><strong>GDP at market prices</strong> — headline output</span></div>
             <div class="dial-choice"><code>CONS</code><span class="dial-tradeoff"><strong>Private consumption</strong></span></div>
-            <div class="dial-choice"><code>IBUS / IF</code><span class="dial-tradeoff"><strong>Business / total investment</strong></span></div>
-            <div class="dial-choice"><code>LFSUR</code><span class="dial-tradeoff"><strong>Unemployment rate</strong> — rate, pp</span></div>
+            <div class="dial-choice"><code>IBUS / IF</code><span class="dial-tradeoff"><strong>Business / total investment</strong> — <code>IF</code> has no live equation and moves exactly zero</span></div>
+            <div class="dial-choice"><code>LFSUR</code><span class="dial-tradeoff"><strong>Unemployment rate</strong> — rate, pp. <strong>Does not respond</strong> to any lever tested: no Okun channel</span></div>
           </div>
           </div>
         </div>
@@ -228,8 +234,8 @@ results = run_reform(
             <div class="dial-name mono">readouts — read these (endogenous)</div>
             <div class="dial-choice"><code>GDPM</code><span class="dial-tradeoff"><strong>GDP at market prices</strong> — headline output</span></div>
             <div class="dial-choice"><code>CONS</code><span class="dial-tradeoff"><strong>Private consumption</strong></span></div>
-            <div class="dial-choice"><code>IBUS / IF</code><span class="dial-tradeoff"><strong>Business / total investment</strong></span></div>
-            <div class="dial-choice"><code>LFSUR</code><span class="dial-tradeoff"><strong>Unemployment rate</strong> — rate, pp</span></div>
+            <div class="dial-choice"><code>IBUS / IF</code><span class="dial-tradeoff"><strong>Business / total investment</strong> — <code>IF</code> has no live equation and moves exactly zero</span></div>
+            <div class="dial-choice"><code>LFSUR</code><span class="dial-tradeoff"><strong>Unemployment rate</strong> — rate, pp. <strong>Does not respond</strong> to any lever tested: no Okun channel</span></div>
           </div>
           </div>
         </div>
