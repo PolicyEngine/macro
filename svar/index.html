@@ -69,13 +69,28 @@
   <section id="overview" class="band band-wide">
     <div class="band-head">
       <span class="kicker mono">overview</span>
-      <h2>How it joins the core, what it is, what it can answer.</h2>
+      <h2>The Bank of England&rsquo;s structural VAR, replicated in the open.</h2>
     </div>
     <p class="callout callout-warn verdict-callout">
       <strong>Verdict: replicates the paper&rsquo;s GDP decomposition, short on CPI; no forecast skill.</strong>
       Against a drifting random walk no variable shows skill at any horizon once the tests are adjusted together.
       <a href="/svar/validation#forecasters">How far to trust it &rarr;</a>
     </p>
+
+    <div class="model-card" id="card">
+      <h3 class="model-card-title">Model card</h3>
+      <dl class="model-card-grid">
+        <div><dt>Answers</dt><dd>What is hitting the UK economy now, why the forecast changed, and how uncertain the baseline is</dd></div>
+        <div><dt>Inputs</dt><dd>Eight packaged quarterly series, all public (ONS, Bank of England, FRED)</dd></div>
+        <div><dt>Outputs</dt><dd>GDP and CPI forecasts with bands, identified shocks, decompositions, forecast revisions</dd></div>
+        <div><dt>Horizon</dt><dd>Quarterly short-run forecast</dd></div>
+        <div><dt>Data</dt><dd>Sample 1992Q1&ndash;2025Q1 &middot; conditioning data through 2026Q1</dd></div>
+        <div><dt>Uncertainty</dt><dd>Posterior 68% and 90% intervals, raw rather than calibrated to <a href="/svar/validation#rolling">measured coverage</a></dd></div>
+        <div><dt>Access</dt><dd>Hosted forecast and latest shocks, CLI, Python &middot; minutes per estimation run</dd></div>
+        <div><dt>Status</dt><dd>Validated replication for selected outputs</dd></div>
+        <div class="model-card-wide"><dt>Cannot answer</dt><dd>The effect of a statutory policy reform: <code>score_reform</code> does not accept it (<a href="/svar/validation#caveats">limits</a>)</dd></div>
+      </dl>
+    </div>
 
     <div class="scrolly-wrap">
       <div class="scrolly-steps">
@@ -166,39 +181,7 @@
 </figure>
 <!-- boe-current-outlook:end -->
         </div>
-        <details class="expander" id="sources">
-          <summary>Sources: the paper, the code, the method</summary>
-          <div class="table-scroll mo-tablecard"><table>
-                <caption>Where the SVAR's inputs and outputs live</caption>
-                <thead><tr><th scope="col">what</th><th scope="col">where</th></tr></thead>
-                <tbody>
-                  <tr>
-                    <th scope="row"><strong>The source paper</strong></th>
-                    <td><a href="https://www.bankofengland.co.uk/macro-technical-paper/2025/a-structural-var-model-for-the-uk-economy">Macro Technical Paper No. 3</a> — Brignone &amp; Piffer, Bank of England, July 2025.</td>
-                  </tr>
-                  <tr>
-                    <th scope="row"><strong>Companion paper</strong></th>
-                    <td><a href="https://michelepiffer.github.io/pdf_research/BrignonePiffer_StructuralForecastAnalysis.pdf">Brignone &amp; Piffer, structural forecast analysis</a> — the Section 5 forecast-revision method, later BoE Staff Working Paper No. 1,165 (January 2026).</td>
-                  </tr>
-                  <tr>
-                    <th scope="row"><strong>Our working paper</strong></th>
-                    <td><a href="/papers/boe-svar">papers/boe-svar</a> — the full replication write-up, quarterly forecast scorecard, and enumerated deviations.</td>
-                  </tr>
-                  <tr>
-                    <th scope="row"><strong>This replication</strong></th>
-                    <td><a href="https://github.com/PolicyEngine/boe-var-model">github.com/PolicyEngine/boe-var-model</a> — code, prepared data, figures, and the annotated <code>RESOURCES.md</code>.</td>
-                  </tr>
-                  <tr>
-                    <th scope="row"><strong>Method papers</strong></th>
-                    <td><a href="https://doi.org/10.3982/ECTA14468">Arias, Rubio-Ramírez &amp; Waggoner (2018)</a> — zero/sign identification · <a href="https://arxiv.org/abs/2503.20668">Chan, Matthes &amp; Yu (2025)</a> — permutation-search speedup · <a href="https://doi.org/10.1162/REST_a_00483">Giannone, Lenza &amp; Primiceri (2015)</a> — the prior framework.</td>
-                  </tr>
-                  <tr>
-                    <th scope="row"><strong>Reference toolboxes</strong></th>
-                    <td><a href="https://github.com/bsvars/bsvarSIGNs">bsvarSIGNs</a> (R, the exact Arias et al. machinery) · <a href="https://github.com/european-central-bank/BEAR-toolbox">ECB BEAR</a> · <a href="https://github.com/ambropo/VAR-Toolbox">Cesa-Bianchi VAR-Toolbox</a> — used in the independent econometrics review, which caught and fixed a genuine bias in the zero-restriction importance weights.</td>
-                  </tr>
-                </tbody>
-              </table></div>
-        </details>
+        <p class="vlinks mono"><a href="/svar/methodology#sources">the source paper, method papers and code &rarr;</a></p>
         <div class="meth-inline">
         <div class="meth-sec-title">the replication</div>
         <div class="meth-eq"><div class="meth-eq-label">source</div><div class="meth-eq-body">BoE Macro Technical Paper No.&nbsp;3, July 2025</div></div>
@@ -234,26 +217,16 @@
                   </tr>
                 </tbody>
               </table></div>
-        <p>
-                The current 2026Q1 round reads the latest quarter as most likely hit
-                by negative world-demand (probability <strong>0.71</strong>) and
-                world-energy (<strong>0.90</strong>) shocks, against positive UK
-                demand (<strong>0.81</strong>) and expansionary monetary policy
-                (<strong>0.84</strong>). Source and provenance:
-                <a class="mono" href="/papers/boe-svar/figures/latest_shocks.json" download><code>latest_shocks.json</code></a>,
-                6,000 draws, 430 accepted, ESS 198.
-        </p>
+        <p>The 2026Q1 round reads world demand and world energy shocks as most likely negative, UK demand and both supply shocks as positive, and monetary policy as expansionary; the probabilities are alongside. Source: <a class="mono" href="/papers/boe-svar/figures/latest_shocks.json" download><code>latest_shocks.json</code></a>, 6,000 draws, 430 accepted, ESS 198.</p>
         <p>
                 <strong>Worked example.</strong> UK benefit uprating is CPI-linked, so the
                 <code>svar_inflation_incidence</code> tool prices the gap between
-                this model's CPI path and the official one: for 2027 the median runs
-                <strong>0.94pp above the March 2026 EFO</strong>, and passing that
-                through the April 2028 uprating of a curated slice of CPI-linked
+                this model&rsquo;s median CPI path and the March 2026 EFO through the
+                following April&rsquo;s uprating of a curated slice of CPI-linked
                 benefits (Universal Credit standard allowances and child element,
-                Child Benefit) costs <strong>£0.09bn in 2028</strong>, with the
-                largest relative gains in the second-to-fifth income deciles. A
-                curated slice, not the full fiscal sensitivity — the state pension
-                and frozen tax thresholds are deliberately excluded — and an
+                Child Benefit), and reports the cost and the decile incidence. A
+                curated slice, not the full fiscal sensitivity &mdash; the state pension
+                and frozen tax thresholds are deliberately excluded &mdash; and an
                 experimental illustration built on the forecast median, not a
                 scored reform.
               </p>
@@ -262,10 +235,10 @@
         <div class="meth-sec-title">2026Q1 shock probabilities</div>
         <div class="meth-eq"><div class="meth-eq-label">world demand</div><div class="meth-eq-body">negative, 0.71</div></div>
         <div class="meth-eq"><div class="meth-eq-label">world energy</div><div class="meth-eq-body">negative, 0.90</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">world supply</div><div class="meth-eq-body">positive, 0.87</div></div>
         <div class="meth-eq"><div class="meth-eq-label">UK demand</div><div class="meth-eq-body">positive, 0.81</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">UK supply</div><div class="meth-eq-body">positive, 0.71</div></div>
         <div class="meth-eq"><div class="meth-eq-label">monetary policy</div><div class="meth-eq-body">expansionary, 0.84</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">CPI vs EFO, 2027</div><div class="meth-eq-body">median 0.94pp above</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">uprating cost</div><div class="meth-eq-body">&pound;0.09bn in 2028</div></div>
         </div>
       </div>
 
@@ -295,10 +268,10 @@
           <div class="meth-sec-title">2026Q1 shock probabilities</div>
           <div class="meth-eq"><div class="meth-eq-label">world demand</div><div class="meth-eq-body">negative, 0.71</div></div>
           <div class="meth-eq"><div class="meth-eq-label">world energy</div><div class="meth-eq-body">negative, 0.90</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">world supply</div><div class="meth-eq-body">positive, 0.87</div></div>
           <div class="meth-eq"><div class="meth-eq-label">UK demand</div><div class="meth-eq-body">positive, 0.81</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">UK supply</div><div class="meth-eq-body">positive, 0.71</div></div>
           <div class="meth-eq"><div class="meth-eq-label">monetary policy</div><div class="meth-eq-body">expansionary, 0.84</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">CPI vs EFO, 2027</div><div class="meth-eq-body">median 0.94pp above</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">uprating cost</div><div class="meth-eq-body">&pound;0.09bn in 2028</div></div>
         </div>
       </aside>
     </div>

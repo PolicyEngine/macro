@@ -180,6 +180,7 @@ def test_model_cards_quote_the_capability_registry():
     pages = {
         "pe-microsim": "pe/index.html",
         "obr-macro": "obr/index.html",
+        "boe-svar": "svar/index.html",
     }
     for model, page in pages.items():
         html = _read(page).lower()

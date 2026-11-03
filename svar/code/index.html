@@ -75,8 +75,7 @@
     <div class="prose">
       <p>
         Four routes into the model, hosted to local: MCP tools, CLI mirrors,
-        a pip install, and the development runner scripts. Each step's code
-        follows its narrative.
+        Python, and the runner scripts that rebuild the paper&rsquo;s outputs.
       </p>
     </div>
 
@@ -85,20 +84,28 @@
       <div class="meth-step" id="run-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Hosted MCP tools</h3></div>
         <h4>No install, no credentials</h4>
-        <p>The quickest route is the <a href="/connect">hosted MCP server</a>. Three tools reach this model: <code>forecast_uk</code> (YoY GDP-growth and CPI-inflation fan charts with 68%/90% bands), <code>latest_shocks</code> (posterior sign probabilities of each identified shock in the latest quarter), and <code>model_summary</code> (headline replication results — instant, no estimation).</p>
-        <h4>Where to read the results</h4>
-        <p>What each tool tells you is on the <a href="/svar">overview</a>; the estimation and identification choices behind them are on the <a href="/svar/methodology">methodology</a> page.</p>
+        <p>The quickest route is the <a href="/connect">hosted MCP server</a>. Four tools reach this model: <code>forecast_uk</code> (YoY GDP-growth and CPI-inflation fan charts with 68%/90% bands), <code>latest_shocks</code> (posterior sign probabilities of each identified shock in the latest quarter), <code>model_summary</code> (headline replication results — instant, no estimation), and the experimental <code>svar_inflation_incidence</code> (the CPI gap priced through benefit uprating in the microsimulation).</p>
+        <h4>Draws and runtime</h4>
+        <p>The first call estimates the model, a couple of minutes cold; results are cached in-process. The default 2,000 draws yield about 135 accepted (ESS about 65); about 3,500 reach ESS 100. Every response carries a <code>warnings</code> list when inference is weak.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">hosted tools</div>
+        <div class="meth-eq"><div class="meth-eq-label">forecast</div><div class="meth-eq-body"><code>forecast_uk(horizons=12, draws=2000)</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">shocks</div><div class="meth-eq-body"><code>latest_shocks(draws=2000)</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">headlines</div><div class="meth-eq-body"><code>model_summary()</code>, instant</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">incidence</div><div class="meth-eq-body"><code>svar_inflation_incidence(year=2027)</code>, experimental</div></div>
+        </div>
       </div>
 
       <div class="meth-step" id="run-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>CLI mirrors</h3></div>
         <h4>Same tools from the terminal</h4>
-        <p>The CLI mirrors the three MCP tools one for one: <code>pe-macro forecast</code>, <code>pe-macro shocks</code>, and <code>pe-macro summary</code>. Same outputs, no MCP client required.</p>
+        <p>The CLI mirrors the four MCP tools one for one. Same outputs, no MCP client required.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">CLI commands</div>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro forecast   <span class="cm"># fan charts</span>
-pe-macro shocks     <span class="cm"># latest-quarter shocks</span>
-pe-macro summary    <span class="cm"># replication headlines</span></code></pre></div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro forecast --horizons 12 --draws 2000   <span class="cm"># fan charts</span>
+pe-macro shocks                                <span class="cm"># latest-quarter shocks</span>
+pe-macro summary                               <span class="cm"># replication headlines</span>
+pe-macro svar-inflation-incidence --year 2027  <span class="cm"># experimental</span></code></pre></div>
         </div>
       </div>
 
@@ -108,9 +115,15 @@ pe-macro summary    <span class="cm"># replication headlines</span></code></pre>
         <p>The package installs straight from GitHub with the prepared quarterly dataset inside, so <code>boe_var.data.load_data()</code> works immediately.</p>
         <h4>All inputs are public</h4>
         <p>Every input series is public: ONS (CPI, CPI energy, real GDP), Bank of England (Bank Rate, sterling ERI), and FRED (oil, exchange rates, world components).</p>
+        <h4>Or through the suite, from Python</h4>
+        <p>The same calls as the hosted tools, returning dicts: install the suite (<code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code>) and import them.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">install</div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> policyengine_macro <span class="kw">import</span> svar_forecast, svar_latest_shocks
+
+fc = svar_forecast(horizons=12, draws=2000)   <span class="cm"># median + 68%/90% bands</span>
+shocks = svar_latest_shocks(draws=2000)</code></pre></div>
         </div>
       </div>
 
@@ -134,17 +147,30 @@ python scripts/run_forecast_revision.py</code></pre></div>
       </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Hosted MCP tools</span><span class="meth-panel-badge mono">Code 1</span></div>
+          <div class="meth-sec-title">hosted tools</div>
+          <div class="meth-eq"><div class="meth-eq-label">forecast</div><div class="meth-eq-body"><code>forecast_uk(horizons=12, draws=2000)</code></div></div>
+          <div class="meth-eq"><div class="meth-eq-label">shocks</div><div class="meth-eq-body"><code>latest_shocks(draws=2000)</code></div></div>
+          <div class="meth-eq"><div class="meth-eq-label">headlines</div><div class="meth-eq-body"><code>model_summary()</code>, instant</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">incidence</div><div class="meth-eq-body"><code>svar_inflation_incidence(year=2027)</code>, experimental</div></div>
+        </div>
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">CLI mirrors</span><span class="meth-panel-badge mono">Code 2</span></div>
           <div class="meth-sec-title">CLI commands</div>
-        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pe-macro forecast   <span class="cm"># fan charts</span>
-pe-macro shocks     <span class="cm"># latest-quarter shocks</span>
-pe-macro summary    <span class="cm"># replication headlines</span></code></pre></div>
+        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pe-macro forecast --horizons 12 --draws 2000   <span class="cm"># fan charts</span>
+pe-macro shocks                                <span class="cm"># latest-quarter shocks</span>
+pe-macro summary                               <span class="cm"># replication headlines</span>
+pe-macro svar-inflation-incidence --year 2027  <span class="cm"># experimental</span></code></pre></div>
         </div>
         <div class="meth-panel" data-step="2" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Install locally</span><span class="meth-panel-badge mono">Code 3</span></div>
           <div class="meth-sec-title">install</div>
         <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
+        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code><span class="kw">from</span> policyengine_macro <span class="kw">import</span> svar_forecast, svar_latest_shocks
+
+fc = svar_forecast(horizons=12, draws=2000)   <span class="cm"># median + 68%/90% bands</span>
+shocks = svar_latest_shocks(draws=2000)</code></pre></div>
         </div>
         <div class="meth-panel" data-step="3" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Development runner scripts</span><span class="meth-panel-badge mono">Code 4</span></div>
