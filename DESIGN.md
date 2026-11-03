@@ -232,7 +232,7 @@ reads it. The body is a flex column so the footer sits at the viewport bottom on
 
 ### 3.6 Cache buster
 
-`site_nav.STYLE_VERSION` (now 9). `render()` rewrites every page's stylesheet link to
+`site_nav.STYLE_VERSION` (now 10). `render()` rewrites every page's stylesheet link to
 `/style.css?v=N`; `economy/topics.py` and `notes/generate_release_notes.py` read
 `site_nav.STYLE_HREF`. Bump the number in one place whenever a cached `style.css` would render a
 page wrongly, then run `python3 site_nav.py --write`.
@@ -408,6 +408,20 @@ hero uses the same treatment (§7.1).
 - Icons: 24 px grid, 1.75 stroke, round caps, `currentColor`, no fill, Lucide-style. The view
   icons are home, layers (Models), chart line (Forecasts), plug (Use). No check/tick icon exists
   in this set and none may be added.
+
+
+### 4.12 Phone reading: stacked tables, scroll fades
+
+- `reveal.js` labels every cell of a word-heavy `.table-scroll > table` (single-row `thead`,
+  ≥ 2 columns, ≤ 20 body rows, at least half the cells non-numeric) with `data-label` from its
+  column head and adds `.t-stack`. Below 640 px each row is a small card (first cell as its
+  title, the others labelled). Numeric grids and long registers keep the scroller.
+  `data-stack="yes"` / `"no"` on the table overrides the guess. Without JS every table scrolls.
+- Sub-tab rows, `.table-scroll` and `.step-diagram` get `.fade-l` / `.fade-r` (a 40 px mask)
+  on the side that hides content, and the chosen sub-tab is scrolled into view on load.
+- Hand-drawn methodology diagrams (`figure.step-diagram`, 560–580-unit viewBox, text ≥ 11
+  units) keep their native width below 640 px and scroll inside the figure, so no label renders
+  below 11 px (§1.8). They do not use the §6.3 overlay.
 
 ---
 
