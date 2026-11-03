@@ -74,8 +74,9 @@
     </div>
     <div class="prose">
       <p>
-        Four steps, from statute encoded as a variable graph to the survey
-        microdata population runs rest on.
+        Three steps, from statute encoded as a variable graph to the survey
+        microdata population runs rest on. The full account is in the
+        <a href="/papers/pe-microsim">working paper</a>.
       </p>
     </div>
 
@@ -184,6 +185,8 @@
       <p>Household calculations need no data and no credentials — the inputs are the ones you type. Population results run the same rule graph over a representative survey: for the UK the <strong>enhanced Family Resources Survey</strong> (currently the <code>enhanced_frs_2023_24</code> vintage), for the US the <strong>Current Population Survey</strong>.</p>
       <h4>Imputation and reweighting</h4>
       <p>The UK enhancement imputes under-reported incomes and reweights the survey so aggregates better match administrative totals; the resulting microdata is distributed via a gated Hugging Face repository (<code>policyengine/policyengine-uk-data</code>).</p>
+      <h4>Inherited error</h4>
+      <p>Population estimates therefore inherit sampling, imputation and ageing error that a household calculation, which is deterministic, does not; no interval is computed (<a href="/pe/validation#caveats">limits</a>). The same microdata feeds the <a href="/olg">OLG model</a>&rsquo;s tax functions, and the static costings feed the <a href="/obr">OBR emulator</a> (<a href="/pe#pe-bridge">every join</a>).</p>
         <div class="meth-inline">
         <div class="meth-sec-title">data enhancement</div>
         <div class="meth-eq"><div class="meth-eq-label">UK dataset</div><div class="meth-eq-body">enhanced FRS &middot; <code>enhanced_frs_2023_24</code></div></div>
@@ -192,33 +195,6 @@
         </div>
       </div>
 
-      <div class="meth-step" id="meth-4" data-step="3">
-        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>What rests on the data, and who consumes it</h3></div>
-        <figure class="step-diagram" data-title="Downstream consumers" tabindex="0" role="button" aria-label="Expand diagram: Downstream consumers">
-          <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
-                <defs><marker id="arr-s4" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
-                <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-faint)" font-weight="600">Where the microsim feeds the rest of the suite</text>
-                <rect x="15" y="72" width="170" height="66" rx="8" fill="var(--primary)"/>
-                <text x="100" y="98" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">PE microsim</text>
-                <text x="100" y="116" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">rule graph + enhanced microdata</text>
-                <line x1="185" y1="90" x2="295" y2="66" stroke="var(--primary)" stroke-width="1.5" marker-end="url(#arr-s4)"/>
-                <text x="240" y="62" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-faint)">microdata</text>
-                <line x1="185" y1="120" x2="295" y2="144" stroke="var(--primary)" stroke-width="1.5" marker-end="url(#arr-s4)"/>
-                <text x="240" y="152" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-faint)">static costing</text>
-                <rect x="300" y="36" width="265" height="60" rx="8" fill="#fff" stroke="var(--primary)" stroke-width="2"/>
-                <text x="432" y="60" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--primary)" font-weight="700">OLG model</text>
-                <text x="432" y="80" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-muted)">estimates its tax functions from this microdata</text>
-                <rect x="300" y="118" width="265" height="60" rx="8" fill="#fff" stroke="var(--primary)" stroke-width="2"/>
-                <text x="432" y="142" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--primary)" font-weight="700">OBR emulator</text>
-                <text x="432" y="162" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-muted)">takes static costings as the direct effect</text>
-              </svg>
-          <figcaption class="expand-hint mono">click to expand</figcaption>
-        </figure>
-        <h4>Inherited error</h4>
-      <p>Population estimates rest on survey data, so they inherit sampling error and imputation and ageing assumptions in a way a household calculation, which is deterministic, does not — consequences set out on the <a href="/pe/validation">validation page</a>.</p>
-      <h4>Feeding the suite</h4>
-      <p>This same microdata is what the <a href="/olg">OLG model</a> consumes to estimate its tax functions, and the static costings it produces are what the <a href="/obr">OBR emulator</a> takes as the direct effect.</p>
-      </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">
         <div class="meth-panel" data-step="0">

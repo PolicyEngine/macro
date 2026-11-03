@@ -4658,3 +4658,50 @@ body.doc > main { flex: 1 0 auto; }
   .step-diagram { justify-content: flex-start; overflow-x: auto; cursor: default; }
   .step-diagram svg { max-width: none !important; flex: 0 0 auto; } /* width attribute = viewBox width */
 }
+
+/* === r2:uk-models === */
+/* Model card: the registry facts (integration/src/policyengine_macro/capabilities.py)
+   for one model, under its verdict on the Overview tab. Key/value pairs in a
+   two-column grid from 720px, one column on a phone. */
+.model-card {
+  margin: var(--s-5) 0 var(--s-6);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--surface-card);
+}
+.model-card-title {
+  margin: 0;
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--hairline);
+  font-size: var(--fs-label);
+  font-family: var(--mono);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.model-card-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+}
+.model-card-grid > div {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-4);
+  border-bottom: 1px solid var(--hairline);
+  font-size: var(--fs-body-sm);
+  line-height: 1.45;
+}
+.model-card-grid > div:last-child { border-bottom: 0; }
+.model-card-grid dt { color: var(--text-muted); font-weight: 600; }
+.model-card-grid dd { margin: 0; color: var(--text-strong); overflow-wrap: anywhere; }
+@media (min-width: 720px) {
+  .model-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .model-card-grid > div:nth-child(odd):not(.model-card-wide) { border-right: 1px solid var(--hairline); }
+  .model-card-grid > .model-card-wide { grid-column: 1 / -1; border-bottom: 0; }
+}
+@media (max-width: 420px) {
+  .model-card-grid > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}

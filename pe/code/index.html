@@ -101,11 +101,20 @@
         <p>The third route is the Python package directly — <code>import policyengine as pe</code>, walked through below.</p>
         <div class="callout">
           <strong>Every number from this model is a static score.</strong>
-          Prices, wages and output do not move. For second-round effects on
-          GDP, route the same reform through the <a href="/obr">OBR
-          emulator</a>: <code>score_reform</code> with <code>model="obr"</code>
-          takes this package's static costing as the direct effect and returns
-          the economy-wide feedback.
+          For the GDP feedback, pass the same reform with
+          <code>model="obr"</code> (<a href="/obr/code">OBR emulator code</a>).
+        </div>
+        <div class="meth-inline">
+          <div class="meth-sec-title">CLI mirrors</div>
+          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="cm"># one UK household, current law</span>
+pe-macro household --country uk \
+  --people '[{"age":35,"employment_income":50000}]'
+
+<span class="cm"># the same reform, scored over the population</span>
+pe-macro population-impact --country uk \
+  --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}'
+
+pe-macro parameters   <span class="cm"># the levers you can write reforms against</span></code></pre></div>
         </div>
       </div>
 
@@ -162,7 +171,9 @@ us = pe.us.calculate_household(
       <div class="meth-step" id="code-population" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Score a whole population</h3></div>
         <h4>Representative datasets</h4>
-        <p>The same package runs whole representative datasets — the enhanced UK Family Resources Survey, the US CPS — aggregating any variable by decile, entity or demographic.</p>
+        <p>The same package runs whole representative datasets — the enhanced UK Family Resources Survey, the US CPS — aggregating any variable by decile, entity or demographic. For the full budgetary, decile, poverty and regional breakdown use <code>pe.uk.economic_impact_analysis</code> (hosted: <code>population_reform_impact</code>).</p>
+        <h4>Reproduce the headline costing</h4>
+        <p>The validation tab&rsquo;s 1p basic-rate figure is re-run by one test, which needs the microdata token: <code>HUGGING_FACE_TOKEN=&hellip; pytest integration/tests/test_population.py -k basic_rate</code>.</p>
         <div class="callout">
           UK population microdata is gated — set
           <code>HUGGING_FACE_TOKEN</code> from an account with access to
@@ -190,6 +201,19 @@ agg.run()
       </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Pick a route</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">CLI mirrors</div>
+          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code><span class="cm"># one UK household, current law</span>
+pe-macro household --country uk \
+  --people '[{"age":35,"employment_income":50000}]'
+
+<span class="cm"># the same reform, scored over the population</span>
+pe-macro population-impact --country uk \
+  --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}'
+
+pe-macro parameters   <span class="cm"># the levers you can write reforms against</span></code></pre></div>
+        </div>
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Install</span><span class="meth-panel-badge mono">Step 2</span></div>
           <div class="meth-sec-title">install</div>
@@ -241,41 +265,6 @@ agg.run()
 <span class="kw">print</span>(f<span class="kw">"Total UC spending: £{agg.result / 1e9:.1f}bn"</span>)</code></pre></div>
         </div>
       </aside>
-    </div>
-  </section>
-
-  <section id="answers" class="band">
-    <div class="band-head">
-      <span class="kicker mono">what it can answer</span>
-      <h2>From one family to the whole distribution.</h2>
-    </div>
-    <div class="prose">
-      <div class="table-scroll"><table>
-        <caption>Common microsimulation questions and how to answer them</caption>
-        <thead><tr><th scope="col">question</th><th scope="col">how</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row"><strong>What does this reform do to this family?</strong></th>
-            <td><code>calculate_household</code> / <code>household_reform_impact</code> — every tax, benefit and income variable at person, benefit-unit/tax-unit and household level. On the hosted MCP server and the <code>pe-macro</code> CLI.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>What does it cost, and who wins?</strong></th>
-            <td><code>population_reform_impact</code> and <code>pe.uk.economic_impact_analysis</code> — budgetary impact, decile changes, winners and losers, poverty, inequality, regional impacts. Hosted, enhanced-FRS credential provisioned server-side.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>What levers exist?</strong></th>
-            <td><code>list_reform_parameters</code> — the parameter tree you can write reforms against.</td>
-          </tr>
-        </tbody>
-      </table></div>
-      <div class="callout">
-        <strong>It cannot</strong> tell you what a reform does to GDP,
-        interest rates, or the fiscal forecast. It is static and
-        partial-equilibrium by design: behavioural responses are optional
-        and post-hoc (e.g. labour-supply elasticities), with no general
-        equilibrium. That second act is what the macro members add —
-        <a href="/obr">short-run</a> and <a href="/olg">long-run</a>.
-      </div>
     </div>
   </section>
 
