@@ -8,7 +8,6 @@ import importlib.util
 import json
 import re
 import sys
-from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -350,97 +349,6 @@ def us_release_dates_absent(names: tuple[str, ...]) -> None:
         )
 
 
-def topic_link(name: str) -> str:
-    """The topic page that reads this series, or a hard failure.
-
-    The hub advertises a topic home for every series it indexes. If a topic
-    stops carrying a series, this raises rather than printing a link into a
-    page where the number is no longer shown.
-    """
-    entry = SERIES_TOPIC.get(name)
-    if entry is None:
-        raise RuntimeError(
-            f"{name} is indexed on an economy hub but no topic page in "
-            f"economy/topics.py reads it — give it a topic home or drop it "
-            f"from the hub index"
-        )
-    url, title = entry
-    return f'<a href="{url}">{title}</a>'
-
-
-def series_index_rows(names: tuple[str, ...], released: bool = True) -> str:
-    """The hub index: what is tracked, which topic reads it, where it came from.
-
-    Deliberately carries no readings. The values, their period comparisons and
-    the model view of each one live on the topic pages; repeating them here is
-    what turned /economy and /economy/topics into two dashboards over one set
-    of numbers.
-
-    ``released`` drops the publisher's release date, which the US hub does: the
-    ONS stamps every series with one, FRED stamps none of them through this
-    site's fetcher, and a column of six identical "not supplied" cells says
-    less than one sentence of prose. ``us_release_dates_absent`` is what keeps
-    that sentence true.
-    """
-    rows = []
-    for name in names:
-        series = load(name)
-        now = latest(series)
-        release = (
-            f"<td>{(series.get('release_updated') or 'not supplied').split('T')[0]}</td>"
-            if released
-            else ""
-        )
-        rows.append(
-            "          <tr>"
-            f'<th scope="row">{public_label(series)}</th>'
-            f"<td>{topic_link(name)}</td>"
-            f"<td>{now['period']}</td>"
-            f"{release}"
-            f"<td>{series['vintage']}</td>"
-            f'<td><a href="{series["url"]}">{series["source"]} · {series["cdid"]}</a></td>'
-            "</tr>"
-        )
-    return "\n".join(rows)
-
-
-def calendar_rows() -> str:
-    names = (
-        "uk_monthly_gva",
-        "uk_unemployment_rate",
-        "uk_average_weekly_earnings",
-        "uk_vacancies",
-        "uk_cpi_yoy",
-        "uk_core_cpi_yoy",
-        "uk_public_sector_net_borrowing",
-        "uk_public_sector_net_debt_gdp",
-        "uk_gdp_cvm",
-        "uk_business_investment",
-    )
-    releases: dict[str, list[dict]] = {}
-    for name in names:
-        series = load(name)
-        date = " ".join((series.get("next_release") or "").split())
-        if date:
-            releases.setdefault(date, []).append(series)
-
-    def sort_key(item: tuple[str, list[dict]]) -> datetime:
-        return datetime.strptime(item[0], "%d %B %Y")
-
-    rows = []
-    for date, series_list in sorted(releases.items(), key=sort_key):
-        labels = ", ".join(public_label(series) for series in series_list)
-        sources = ", ".join(series["cdid"] for series in series_list)
-        rows.append(
-            "          <tr>"
-            f'<th scope="row">{date}</th>'
-            f"<td>{labels}</td>"
-            f"<td>ONS · {sources}</td>"
-            "</tr>"
-        )
-    return "\n".join(rows)
-
-
 def replace(html: str, name: str, value: str) -> str:
     start, end = f"<!-- {name}:begin -->", f"<!-- {name}:end -->"
     updated, count = re.subn(
@@ -455,12 +363,14 @@ def replace(html: str, name: str, value: str) -> str:
 
 
 def render_uk() -> str:
-    """The UK hub. ``economy-topics`` belongs to economy/topics.py, not here."""
+    """The UK hub. ``economy-topics`` belongs to economy/topics.py, not here.
+
+    No series index and no release calendar: both repeated the data store on
+    /forecasts#data, which is their one home (DESIGN.md §7.0). The hub is the
+    topic directory and the long view; a provenance card links to the store.
+    """
     html = PAGE.read_text()
     html = replace(html, "economy-trends-figures", uk_figures())
-    html = replace(html, "economy-series-index", series_index_rows(ONS_SERIES))
-    html = replace(html, "economy-market-index", series_index_rows(MARKET_SERIES))
-    html = replace(html, "economy-calendar", calendar_rows())
     return html
 
 
@@ -475,14 +385,6 @@ def render_us() -> str:
     html = US_PAGE.read_text()
     html = replace(html, "us-economy-trends-note", us_trends_note())
     html = replace(html, "us-economy-trends-figures", us_figures())
-    html = replace(
-        html, "us-economy-series-index", series_index_rows(FRED_SERIES, released=False)
-    )
-    html = replace(
-        html,
-        "us-economy-market-index",
-        series_index_rows(US_MARKET_SERIES, released=False),
-    )
     return html
 
 

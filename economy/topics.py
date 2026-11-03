@@ -733,7 +733,8 @@ def growth_model() -> str:
     quality = model["quality"]["predictive_validation"]
     forecast = facts["forecast"]
     rows = []
-    for period, values in list(forecast["forecast"].items())[:5]:
+    open_rows = [(p, v) for p, v in forecast["forecast"].items() if p >= facts["period"]]
+    for period, values in open_rows[:5]:
         rows.append(
             "          <tr>"
             f'<th scope="row">{esc(period)}</th>'
@@ -772,7 +773,8 @@ def growth_model() -> str:
       </p>
       <p class="chooser-note">
         Every round is archived before the outturn exists, and scored against
-        the vintage it was made on — <a href="/forecasts">see the record →</a>
+        the outturn as published, with the snapshot it was read from recorded
+        — <a href="/forecasts#scored">see the scoreboard →</a>
       </p>
     </div>"""
 
@@ -837,7 +839,10 @@ def inflation_model() -> str:
     model = MODELS["boe-svar"]
     quality = model["quality"]["predictive_validation"]
     rows = []
-    for period, values in list(facts["forecast"]["forecast"].items())[:5]:
+    open_rows = [
+        (p, v) for p, v in facts["forecast"]["forecast"].items() if p >= facts["period"]
+    ]
+    for period, values in open_rows[:5]:
         rows.append(
             "          <tr>"
             f'<th scope="row">{esc(period)}</th>'
@@ -854,8 +859,9 @@ def inflation_model() -> str:
     return f"""    <div class="prose">
       <p>
         <a href="/svar">boe-svar</a> — the {esc(model["display_name"])} — forecasts
-        headline CPI. The round generated {esc(facts["forecast"]["generated"])}
-        starts at {esc(facts["period"])}; its path is in the table below.
+        headline CPI. The table shows the round generated
+        {esc(facts["forecast"]["generated"])} from {esc(facts["period"])}, the
+        first quarter without a published outturn.
         {reaches} And in the same breath:
       </p>
 {limits_list([
