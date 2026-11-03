@@ -93,9 +93,10 @@ def render() -> str:
             gridlines.append(chartkit.ytick(left, y(v), f"{v:.2f}"))
         v += step
     last = len(rows) - 1
-    # Every other quarter is dropped when the chart is narrower than 520 px.
-    xticks = [chartkit.xtick(x(i), top + plot_h, r["period"], i, last, minor=i % 2 == 1)
-              for i, r in enumerate(rows)]
+    # About seven quarter labels when wide, three when the chart is narrower
+    # than 520 px (chartkit.tick_plan).
+    xticks = [chartkit.xtick(x(i), top + plot_h, rows[i]["period"], i, last, minor=minor)
+              for i, minor in chartkit.tick_plan(len(rows))]
 
     desc = (
         f"Fan chart of the UK unemployment rate, percent, from the "

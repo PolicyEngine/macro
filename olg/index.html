@@ -376,7 +376,10 @@
     ymin -= pad; ymax += pad;
     var ystep = niceStep(ymax - ymin, 5);
     var y0 = Math.ceil(ymin / ystep) * ystep;
-    var W = Math.max(280, Math.round(container.clientWidth || 760));
+    // The content box, so the viewBox is exactly the rendered width.
+    var cs = getComputedStyle(container);
+    var inner = container.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    var W = Math.max(280, Math.round(inner || 760));
     var H = Math.round(Math.max(240, Math.min(340, W * 0.5)));
     // Fewer x ticks when narrow: about one per 70 px.
     var maxTicks = Math.max(3, Math.floor((W - ML - MR) / 70));

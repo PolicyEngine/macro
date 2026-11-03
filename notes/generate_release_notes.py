@@ -205,14 +205,12 @@ def note_target(page: Path) -> tuple[dict, str] | None:
 
 
 def render_note(destination: Path, series: dict, vintage: str) -> str:
-    """The page as committed: template, then the canonical shell from site_nav."""
-    previous = destination.read_text() if destination.exists() else None
-    destination.write_text(note_page(series, vintage))
-    try:
-        return site_nav.render(destination)
-    finally:
-        if previous is not None:
-            destination.write_text(previous)
+    """The page as committed: template, then the canonical shell from site_nav.
+
+    Pure: renders the template as if it lived at ``destination`` without
+    touching the file, so ``--check`` has no side effects.
+    """
+    return site_nav.render(destination, note_page(series, vintage))
 
 
 def generated_pages() -> list[Path]:

@@ -452,8 +452,14 @@ def navless_violations() -> list[Path]:
     ]
 
 
-def render(path: Path) -> str:
-    source = path.read_text()
+def render(path: Path, source: str | None = None) -> str:
+    """The page at ``path`` with the shell stamped in.
+
+    ``source`` renders a page body that is not on disk yet (a generator's
+    template) as if it lived at ``path``; nothing is written either way.
+    """
+    if source is None:
+        source = path.read_text()
     updated, replacements = HEADER.subn(header(path), source, count=1)
     if replacements != 1:
         raise ValueError(f"could not locate navigation in {path.relative_to(ROOT)}")

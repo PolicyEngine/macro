@@ -106,6 +106,24 @@ def xtick(x: float, y: float, label: str, i: int, last: int, minor: bool = False
     return f'<text class="{cls}" x="{x:.1f}" y="{y:.1f}" text-anchor="{anchor}">{label}</text>'
 
 
+def tick_plan(n: int, wide: int = 7, narrow: int = 3) -> list[tuple[int, bool]]:
+    """Which of n evenly spaced x positions get a label, and which are minor.
+
+    At most ``wide`` labels on a wide chart and ``narrow`` (first, last and
+    an even spread between) once the minor ones are hidden; a label that would
+    sit closer to the last one than the spacing is dropped so they never touch.
+    """
+    last = n - 1
+    if n <= 1:
+        return [(0, False)]
+    step = max(1, -(-last // (wide - 1)))
+    keep = [i for i in range(0, last + 1, step) if last - i >= step or i == 0]
+    keep.append(last)
+    nstep = max(1, -(-last // (narrow - 1)))
+    major = {0, last} | {i for i in keep if i % nstep == 0 and last - i >= nstep}
+    return [(i, i not in major) for i in keep]
+
+
 def _pct(v: float, total: float) -> str:
     return f"{100 * v / total:.2f}".rstrip("0").rstrip(".") + "%"
 

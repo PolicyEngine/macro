@@ -1133,7 +1133,7 @@ def chart_hank_targets():
         "<tbody>", *body, "</tbody></table></div>",
         f'<p class="vc-notes"><span class="vc-warn">{word(agree).capitalize()} of seven agree '
         f'to the last published digit; {miss["name"].split()[0]} misses by '
-        f'{miss["gap_pct"]:g}%.</span></p>',
+        f'{fmt_signed(miss["gap_pct"], 1)}%.</span></p>',
         '<p class="vc-notes"><strong>Calibration inputs</strong>, held fixed through the solve, '
         'so their deviations are identities:<br />' + "<br />".join(esc(t) for t in notes) + "</p>",
         f"</div>{chartkit.END}",
