@@ -4408,6 +4408,25 @@ body.doc > main { flex: 1 0 auto; }
 .band dl:not([class]) > dt { color: var(--text-muted); font-weight: 600; }
 .band dl:not([class]) > dd { color: var(--text-strong); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 
+/* ---------- 5.14 "where next" row (DESIGN.md §7.3, §8) ----------
+   The last card on every model tab: 2–4 compact entry cards. */
+.band.where-next .band-head { margin-bottom: var(--s-4); }
+.band.where-next .band-head h2 { font-size: var(--fs-h3); font-family: var(--body); }
+.where-next .entry-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.where-next .entry-card { padding: var(--s-4); gap: 4px; }
+.where-next .entry-card .icon-badge { width: 32px; height: 32px; }
+.where-next .entry-card h3 { margin-top: 4px; font-size: var(--fs-body); }
+.where-next .entry-cta { margin-top: var(--s-2); padding: 5px 14px; }
+@media (max-width: 620px) {
+  .where-next .entry-card { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; column-gap: 12px; align-items: center; }
+  .where-next .entry-card .icon-badge { grid-row: span 2; }
+  .where-next .entry-card h3 { margin: 0; }
+  .where-next .entry-card p { grid-column: 2; }
+  .where-next .entry-cta { grid-column: 3; grid-row: 1 / span 2; margin: 0; padding: 0; background: none; color: var(--teal-700); font-size: 0; }
+  .where-next .entry-cta > span { font-size: var(--fs-body); }
+  .where-next .entry-card:hover .entry-cta { background: none; }
+}
+
 /* ---------- 5.13 dark theme for the v2 roles ---------- */
 @media (prefers-color-scheme: dark) {
   :root {

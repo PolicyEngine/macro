@@ -20,10 +20,6 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=8" />
-<style>
-/* page-specific: hero sizing only — shared component styles live in style.css */
-.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-</style>
 <script>
 /* Self-hosted MathJax (vendor/mathjax), used only on this page for the
    methodology tab's formal panels. The CSP allows no CDN loads. */
@@ -36,7 +32,6 @@ window.MathJax = {
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
   <a class="brand" href="/" aria-label="PolicyEngine Macro home">
@@ -66,9 +61,7 @@ window.MathJax = {
         UK fiscal reform, quarter by quarter.
       </h1>
       <p class="lede reveal" style="--d:2">
-        Run selected UK tax and spending scenarios and trace GDP, consumption,
-        and investment over 3–5 years against the March 2026 EFO baseline.
-        Borrowing is not yet returned by the PolicyEngine Macro adapter.
+        How the published EViews listing becomes a model you can solve and shock.
       </p>
     </div>
   </section>
@@ -242,7 +235,7 @@ window.MathJax = {
         <div class="meth-sec-title">anchoring</div>
         <div class="meth-eq"><div class="meth-eq-label">add-factor window</div><div class="meth-eq-body">fit 2024Q1–2025Q4, hold constant, project to 2027Q4</div></div>
         <div class="meth-eq"><div class="meth-eq-label">scenario solves</div><div class="meth-eq-body">12 quarters, 2025Q1–2027Q4</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">anchored horizon</div><div class="meth-eq-body">to 2031Q1; GDP reproduced to 0.67%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">anchored horizon</div><div class="meth-eq-body">to 2031Q1 (fit on the validation tab)</div></div>
         </div>
       </div>
 
@@ -302,7 +295,7 @@ window.MathJax = {
             <text x="490" y="72" text-anchor="middle" font-family="var(--body)" font-size="12" fill="var(--accent)" font-weight="700">obr-macro</text>
             <text x="490" y="92" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--text-mid)">HHDI &rarr; CONS &rarr; GDPM</text>
             <text x="490" y="109" text-anchor="middle" font-family="var(--body)" font-size="10" fill="var(--text-light)">quarterly, vs baseline</text>
-            <text x="290" y="158" text-anchor="middle" font-family="var(--body)" font-size="11" fill="var(--text-light)">1p on the basic rate: &pound;6.46bn in &rarr; GDP falls, building to ~0.34&times; the revenue by quarter 12</text>
+            <text x="290" y="158" text-anchor="middle" font-family="var(--body)" font-size="11" fill="var(--text-light)">1p on the basic rate: static costing in &rarr; GDP feedback out</text>
             <text x="290" y="180" text-anchor="middle" font-family="var(--body)" font-size="10" fill="var(--text-light)">close to the OBR's published 0.3 for income tax &mdash; read the scale, not single quarters</text>
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
@@ -310,9 +303,9 @@ window.MathJax = {
         <h4>Static costing in, second-round effects out</h4>
       <p>The suite's flagship join. <a href="/pe">PolicyEngine's microsimulation</a> costs a statutory reform year by year — who pays and how much — and <code>score_reform(country="uk", reform=..., model="obr")</code> hands this model the bill: each year's costing enters as <code>HHDI_ADDFACTOR</code>, minus the annual &pound;bn spread flat across its four quarters (&times;1000&nbsp;&divide;&nbsp;4 &rarr; &pound;m/qtr), held as an add-factor on household disposable income.</p>
         <h4>What the emulator computes</h4>
-      <p>Lower income moves consumption through the published consumption equation, and consumption moves GDP under the demand closure — the second round, quarter by quarter, against the anchored baseline of step 4. The anchoring add-factors are held fixed in both the baseline and the shocked run, so they cancel in the difference. 1p on the basic rate from April 2026: <strong>&pound;6.46bn</strong> static in 2026, and a GDP fall building from about 0.15&times; the revenue raised in the first year to roughly <strong>0.34&times;</strong> by the twelfth quarter. Individual quarters are not reliable &mdash; no quarter of the solve converges to tolerance.</p>
+      <p>Lower income moves consumption through the published consumption equation, and consumption moves GDP under the demand closure — the second round, quarter by quarter, against the anchored baseline of step 4. The anchoring add-factors are held fixed in both the baseline and the shocked run, so they cancel in the difference. The <a href="/obr#answers">worked example</a> on the Overview shows what this returns for 1p on the basic rate; individual quarters are not reliable &mdash; no quarter of the solve converges to tolerance.</p>
         <h4>Where the bridge stops</h4>
-      <p>This route's implied multiplier is about <strong>0.34</strong> by the twelfth quarter, against the OBR's published <strong>0.3</strong> for income tax and NICs &mdash; the ~1-by-construction problem belongs to the <em>spending</em> lever (<code>CGG</code>, exactly 1.0000 against the OBR's 0.6), not to this one. Corporation tax is refused — not household-borne in the microsim, and the direct <code>TCPRO</code> closure converges only slowly (a 12-quarter run reaches ~40% of its plateau). UK only; no US bridge exists. Every join in the suite → <a href="/models#compose">/models#compose</a>.</p>
+      <p>The household route&rsquo;s multiplier is close to the OBR&rsquo;s published figure for income tax; the by-construction problem belongs to the <em>spending</em> lever (<code>CGG</code>), not to this one (<a href="/obr/validation#caveats">limits</a>). Corporation tax is refused &mdash; not household-borne in the microsim, and the direct <code>TCPRO</code> closure converges only slowly. UK only; no US bridge exists. Every join in the suite &rarr; <a href="/models#compose">combine the models</a>.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">the bridge</div>
         <div class="meth-eq"><div class="meth-eq-label">injection</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code> = &minus;(annual costing) &times; 1000 &divide; 4, &pound;m/qtr, held</div></div>
@@ -345,7 +338,7 @@ window.MathJax = {
           <div class="meth-sec-title">anchoring</div>
         <div class="meth-eq"><div class="meth-eq-label">add-factor window</div><div class="meth-eq-body">fit 2024Q1–2025Q4, hold constant, project to 2027Q4</div></div>
         <div class="meth-eq"><div class="meth-eq-label">scenario solves</div><div class="meth-eq-body">12 quarters, 2025Q1–2027Q4</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">anchored horizon</div><div class="meth-eq-body">to 2031Q1; GDP reproduced to 0.67%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">anchored horizon</div><div class="meth-eq-body">to 2031Q1 (fit on the validation tab)</div></div>
         </div>
         <div class="meth-panel" data-step="4" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Swap the closure, shock, compare</span><span class="meth-panel-badge mono">Step 5</span></div>
@@ -374,6 +367,29 @@ window.MathJax = {
     </div>
   </div>
 
+  <section class="band where-next" id="where-next">
+    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/obr/validation">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
+        <h3>Validation</h3>
+        <p>How far to trust each configuration</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/models#compare">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg></span>
+        <h3>Compare the models</h3>
+        <p>All seven side by side</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/papers/obr-macro">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>
+        <h3>The working paper</h3>
+        <p>Method and results in full</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </div>
+  </section>
 </main>
 
 <footer class="foot foot-bar">

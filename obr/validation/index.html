@@ -20,14 +20,9 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=8" />
-<style>
-/* page-specific: hero sizing only — shared component styles live in style.css */
-.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-</style>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
   <a class="brand" href="/" aria-label="PolicyEngine Macro home">
@@ -57,9 +52,7 @@
         UK fiscal reform, quarter by quarter.
       </h1>
       <p class="lede reveal" style="--d:2">
-        Run selected UK tax and spending scenarios and trace GDP, consumption,
-        and investment over 3–5 years against the March 2026 EFO baseline.
-        Borrowing is not yet returned by the PolicyEngine Macro adapter.
+        How far to trust each configuration, the one independent test, and the limits.
       </p>
     </div>
   </section>
@@ -74,51 +67,47 @@
     </div>
   </nav>
 
-  <section class="band band-wide">
+  <div class="with-rail">
+    <nav class="page-rail" aria-label="On this page">
+      <p class="page-rail-title">On this page</p>
+      <a href="#trust" aria-current="location">Headline numbers</a>
+      <a href="#anchored">Anchored fit</a>
+      <a href="#val-hmrc">Independent test</a>
+      <a href="#val-freerun">Free-running</a>
+      <a href="#caveats">Known limits</a>
+      <a href="#where-next">Where next</a>
+    </nav>
+    <div class="rail-main">
+  <section class="band band-wide" id="trust">
     <div class="band-head">
       <span class="kicker mono">validation</span>
       <h2>How far to trust it, and where it stops.</h2>
+      <p class="section-intro">Excellent anchored. Weak free-running. Both published, as MAPE against the EFO path.</p>
     </div>
-    <div class="prose">
-      <p>
-        What the three configurations score, the anchored fit, the one
-        independent test, what the equations do free-running, and the limits
-        that follow. The panel alongside carries the figures.
-      </p>
-    </div>
-
-    <div class="scrolly-wrap">
-      <div class="scrolly-steps">
-
-      <div class="meth-step" id="trust" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>How far to trust it</h3></div>
-        <p class="mo-lead">Excellent anchored. Weak free-running. Both published.</p>
-    <div class="prose">
-      <p>
-        Three configurations, three levels of trust. Errors are MAPE against
-        the published EFO path.
-      </p>
-    </div>
-    <div class="vmet-strip">
-      <div class="vmet-stat">
-        <span class="vmet-label mono">anchored — real GDP</span>
-        <span class="vmet-val">0.30<span class="vmet-unit">% MAPE</span></span>
-        <span class="vmet-note">by construction, not skill; CI fails at 1%</span>
+    <div class="stat-row">
+      <div class="stat">
+        <span class="stat-label">Anchored, real GDP</span>
+        <span class="stat-value">0.30%</span>
+        <span class="stat-sub">MAPE vs March 2026 EFO</span>
+        <span class="stat-foot"><a class="chip chip-warn" href="#anchored">By construction, not skill</a></span>
       </div>
-      <div class="vmet-stat">
-        <span class="vmet-label mono">anchored — consumption</span>
-        <span class="vmet-val">0.49<span class="vmet-unit">% MAPE</span></span>
-        <span class="vmet-note">not a second test — same &pound;m error as GDP</span>
+      <div class="stat">
+        <span class="stat-label">Anchored, consumption</span>
+        <span class="stat-value">0.49%</span>
+        <span class="stat-sub">MAPE, same &pound;m error</span>
+        <span class="stat-foot"><a class="chip" href="#anchored">Not a second test</a></span>
       </div>
-      <div class="vmet-stat">
-        <span class="vmet-label mono">held-add-factor forecast</span>
-        <span class="vmet-val">0.27<span class="vmet-unit">% MAPE</span></span>
-        <span class="vmet-note">real GDP, 2026Q1–2027Q4; 6 of 8 computed in band</span>
+      <div class="stat">
+        <span class="stat-label">Held add-factors, GDP</span>
+        <span class="stat-value">0.27%</span>
+        <span class="stat-sub">MAPE, 2026Q1&ndash;2027Q4</span>
+        <span class="stat-foot"><span class="chip">6 of 8 computed in band</span></span>
       </div>
-      <div class="vmet-stat">
-        <span class="vmet-label mono">free-running</span>
-        <span class="vmet-val">4.32<span class="vmet-unit">% MAPE</span></span>
-        <span class="vmet-note">real GDP; 6 of 11 computed in band — report-only</span>
+      <div class="stat stat-neutral">
+        <span class="stat-label">Free-running, real GDP</span>
+        <span class="stat-value">4.32%</span>
+        <span class="stat-sub">MAPE, 6 of 11 in band</span>
+        <span class="stat-foot"><a class="chip chip-warn" href="#val-freerun">Weak, report-only</a></span>
       </div>
     </div>
     <div class="prose">
@@ -129,17 +118,17 @@
           <tr>
             <th scope="row"><strong>Anchored</strong></th>
             <td>Add-factors matched to the March 2026 EFO. Every reform score uses it.</td>
-            <td>GDP 0.30%, consumption 0.49% (2025Q1&ndash;2027Q4); GDP 0.67% out to 2031Q1. Unemployment unreliable past 2027Q4. CI gates tolerance, finiteness, the expenditure identity and signs.</td>
+            <td>Tiles above for 2025Q1&ndash;2027Q4; GDP 0.67% out to 2031Q1. Unemployment unreliable past 2027Q4. CI gates tolerance, finiteness, the expenditure identity and signs.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Held add-factors</strong></th>
             <td>Fitted 2024Q1&ndash;2025Q4, held flat, scored 2026Q1&ndash;2027Q4. Initialised at the EFO values it is scored against, and its fitting window contains OBR-forecast quarters &mdash; so it partly encodes &ldquo;agree with the OBR&rdquo;.</td>
-            <td>GDP 0.27%, consumption 0.19%; 6 of 8 in band. The paper&rsquo;s 2.2% / 3.6% is the same window on the November 2025 vintage.</td>
+            <td>Consumption 0.19%; GDP in the tiles above. The paper&rsquo;s 2.2% / 3.6% is the same window on the November 2025 vintage.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Free-running</strong></th>
             <td>De-seeded, add-factors off, and GDP made endogenous &mdash; the emulator&rsquo;s raw structural dynamics. In the OBR&rsquo;s published model GDP is an input, so this is not a measure of OBR forecast error.</td>
-            <td><strong>Weak, and reported as such.</strong> GDP 4.32%, consumption 7.22%, household income 6.18%, business investment 15.28%, company profits 82.77%, current account 3.02% of GDP &mdash; the model contracts while the EFO grows.</td>
+            <td><strong>Weak, and reported as such.</strong> Consumption 7.22%, household income 6.18%, business investment 15.28%, company profits 82.77%, current account 3.02% of GDP &mdash; the model contracts while the EFO grows.</td>
           </tr>
         </tbody>
       </table></div>
@@ -148,23 +137,23 @@
       <p class="vmet-notes-line"><span class="vmet-notes-key">in band</span> <span>rates within 1.0pp · net balances within 1.5% of GDP · levels within 10% MAPE.</span></p>
       <p class="vmet-notes-line"><span class="vmet-notes-key">gated</span> <span>CI enforces the anchored tolerance and the multiplier band; the HMRC comparison and the outturn backtest are computed for the <a href="/papers/obr-macro">working paper</a> and refreshed by hand.</span></p>
     </div>
-    <div class="prose">
-      <p class="callout">
-        An independent implementation built from the OBR's published model
-        code and forecast data. Not produced, maintained or endorsed by the
-        Office for Budget Responsibility, and not official OBR estimates.
-      </p>
+    <p class="callout callout-neutral">
+      An independent implementation built from the OBR's published model
+      code and forecast data. Not produced, maintained or endorsed by the
+      Office for Budget Responsibility, and not official OBR estimates.
+    </p>
+  </section>
+
+  <section class="band band-wide" id="tests">
+    <div class="band-head">
+      <span class="kicker mono">the tests</span>
+      <h2>Anchored fit, the independent test, free-running.</h2>
     </div>
-        <div class="meth-inline">
-        <div class="meth-sec-title">the three configurations</div>
-        <div class="meth-eq"><div class="meth-eq-label">anchored</div><div class="meth-eq-body">GDP 0.30% MAPE, consumption 0.49% &mdash; by construction, not skill</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">held add-factors</div><div class="meth-eq-body">GDP 0.27%, 6 of 8 computed in band</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">free-running</div><div class="meth-eq-body">GDP 4.32%, consumption 7.22% &mdash; report-only</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">CI gate</div><div class="meth-eq-body">the build hard-fails if anchored GDP drifts past 1%</div></div>
-        </div>
-      </div>
-      <div class="meth-step" id="anchored" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Anchored against the EFO</h3></div>
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+
+      <div class="meth-step" id="anchored" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Anchored against the EFO</h3></div>
         <p class="mo-lead">One test, not two.</p>
     <div class="prose">
       <p>
@@ -228,13 +217,14 @@
       </div>
         <div class="meth-inline">
         <div class="meth-sec-title">anchored fit</div>
-        <div class="meth-eq"><div class="meth-eq-label">real GDP</div><div class="meth-eq-body">0.30% MAPE, 2025Q1&ndash;2027Q4</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">consumption</div><div class="meth-eq-body">0.49% &mdash; the same &pound;m error as GDP, not a second test</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">why</div><div class="meth-eq-body">every other demand-identity term is exogenous or pinned</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">window</div><div class="meth-eq-body">2025Q1&ndash;2027Q4, quarterly deviation from the EFO</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">real GDP range</div><div class="meth-eq-body">&minus;0.07% to +0.70%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">consumption range</div><div class="meth-eq-body">&minus;0.11% to +1.16%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">CI gate</div><div class="meth-eq-body">hard-fails if either mean deviation reaches 1%</div></div>
         </div>
       </div>
-      <div class="meth-step" id="val-hmrc" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>The independent test</h3></div>
+      <div class="meth-step" id="val-hmrc" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>The independent test</h3></div>
         <p class="mo-lead">HMRC's own ready reckoner.</p>
       <div class="prose">
       <p>
@@ -305,8 +295,8 @@
         <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">a benchmark, not a validation</div></div>
         </div>
       </div>
-      <div class="meth-step" id="val-freerun" data-step="3">
-        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Free-running</h3></div>
+      <div class="meth-step" id="val-freerun" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Free-running</h3></div>
         <p class="mo-lead">What the emulator does with GDP made endogenous and no add-factors.</p>
       <div class="prose">
       <figure class="vfig">
@@ -337,15 +327,6 @@
 </svg>
         <figcaption>Raw calibration against the March 2026 EFO. The two &ldquo;off&rdquo; variables depend on unpublished OBR constants and are regression-gated, not tuned. Source: <code>docs/calibration_scorecard.md</code> in the obr-macroeconomic-model repository.</figcaption>
       </figure>
-      <p class="vc-warn" id="multiplier">
-        <strong>The spending multiplier is 1.0 by construction, against the
-        OBR's own <a href="https://obr.uk/box/fiscal-multipliers/">published
-        0.6</a></strong> for day-to-day public services and welfare spending.
-        Under the demand closure a spending shock lands straight in the GDP
-        identity with the behavioural second round inactive, so &pound;5bn in
-        returns &pound;5bn of GDP — a <strong>two-thirds overstatement</strong>
-        of every spending-side figure on this page.
-      </p>
       <details class="more">
         <summary>The honest scorecard, outturns, and the March 2026 re-anchoring</summary>
       <p>
@@ -468,32 +449,68 @@
         because changing its forecast vintage would erase the historical
         forecast being tested. Reform effects are differences between
         structurally identical runs, so the re-anchoring leaves the
-        £6.46bn/£7.38bn static costing untouched. The second-round GDP effect
-        is quoted as a ratio to the revenue raised (about <strong>0.15&times;</strong>
-        on average in the first year, <strong>~0.34&times;</strong> by the
-        twelfth quarter) rather than as a per-quarter percentage, because
+        static costing untouched. The second-round GDP effect is quoted as a
+        ratio to the revenue raised (the <a href="/obr#answers">worked
+        example</a>) rather than as a per-quarter percentage, because
         per-quarter values depend on where the solver stops as well as on the
         model (see <a href="#caveats">convergence</a>). Reforms are scored
         around the anchored baseline: the anchoring add-factors are held fixed
         in both the baseline and the shocked run and cancel in the difference.
       </p>
       </details>
-      <p class="vlinks mono">
-        <a href="/papers/obr-macro/main.pdf">working paper (pdf) →</a>
-        <a href="/obr">obr-macro model page →</a>
-      </p>
     </div>
         <div class="meth-inline">
         <div class="meth-sec-title">the honest scorecard</div>
-        <div class="meth-eq"><div class="meth-eq-label">real GDP</div><div class="meth-eq-body">4.32% MAPE &mdash; the model contracts while the EFO grows</div></div>
         <div class="meth-eq"><div class="meth-eq-label">computed</div><div class="meth-eq-body">11 of 21 headline variables; the other 10 are passthrough</div></div>
         <div class="meth-eq"><div class="meth-eq-label">in band</div><div class="meth-eq-body">6 of the 11, and one of those is a trivial identity</div></div>
         <div class="meth-eq"><div class="meth-eq-label">worst</div><div class="meth-eq-body">company profits 82.77%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">current account</div><div class="meth-eq-body">3.02% of GDP</div></div>
         </div>
       </div>
-      <div class="meth-step" id="caveats" data-step="4">
-        <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Known limitations</h3></div>
-        <p class="mo-lead">What it cannot be used for.</p>
+      </div>
+
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Anchored against the EFO</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">anchored fit</div>
+          <div class="meth-eq"><div class="meth-eq-label">window</div><div class="meth-eq-body">2025Q1&ndash;2027Q4, quarterly deviation from the EFO</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">real GDP range</div><div class="meth-eq-body">&minus;0.07% to +0.70%</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">consumption range</div><div class="meth-eq-body">&minus;0.11% to +1.16%</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">CI gate</div><div class="meth-eq-body">hard-fails if either mean deviation reaches 1%</div></div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">The independent test</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">1p on the basic rate</div>
+          <div class="meth-eq"><div class="meth-eq-label">ours, 2026</div><div class="meth-eq-body">&pound;6.46bn</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">HMRC reckoner</div><div class="meth-eq-body">&pound;6.90bn &mdash; a &minus;6.4% gap</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">a benchmark, not a validation</div></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Free-running</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">the honest scorecard</div>
+          <div class="meth-eq"><div class="meth-eq-label">computed</div><div class="meth-eq-body">11 of 21 headline variables; the other 10 are passthrough</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">in band</div><div class="meth-eq-body">6 of the 11, and one of those is a trivial identity</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">worst</div><div class="meth-eq-body">company profits 82.77%</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">current account</div><div class="meth-eq-body">3.02% of GDP</div></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="band band-wide" id="caveats">
+    <div class="band-head">
+      <span class="kicker mono">known limits</span>
+      <h2>What it cannot be used for.</h2>
+    </div>
+    <p class="callout callout-warn" id="multiplier">
+        <strong>The spending multiplier is 1.0 by construction, against the
+        OBR's own <a href="https://obr.uk/box/fiscal-multipliers/">published
+        0.6</a></strong> for day-to-day public services and welfare spending.
+        Under the demand closure a spending shock lands straight in the GDP
+        identity with the behavioural second round inactive, so &pound;5bn in
+        returns &pound;5bn of GDP — a <strong>two-thirds overstatement</strong>
+        of every spending-side figure on this page.
+    </p>
     <div class="prose">
       <div class="table-scroll mo-tablecard"><table>
         <caption>Known limits of the OBR emulator</caption>
@@ -542,61 +559,33 @@
         </tbody>
       </table></div>
     </div>
-        <div class="meth-inline">
-        <div class="meth-sec-title">the headline limits</div>
-        <div class="meth-eq"><div class="meth-eq-label">spending multiplier</div><div class="meth-eq-body"><code>CGG</code> is exactly 1.0000, flat, against the OBR's 0.6</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">capital spending</div><div class="meth-eq-body"><code>CGIPS</code> does not transmit &mdash; do not score it</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">corporation tax</div><div class="meth-eq-body"><code>TCPRO</code> converges slowly: 12 quarters is ~40% of plateau</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">inert blocks</div><div class="meth-eq-body">unemployment, prices and trade never respond to any lever</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">convergence</div><div class="meth-eq-body">no quarter reaches tolerance &mdash; read scale, not quarters</div></div>
-        </div>
-      </div>
+  </section>
 
-      </div>
-
-      <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">How far to trust it</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">the three configurations</div>
-          <div class="meth-eq"><div class="meth-eq-label">anchored</div><div class="meth-eq-body">GDP 0.30% MAPE, consumption 0.49% &mdash; by construction, not skill</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">held add-factors</div><div class="meth-eq-body">GDP 0.27%, 6 of 8 computed in band</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">free-running</div><div class="meth-eq-body">GDP 4.32%, consumption 7.22% &mdash; report-only</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">CI gate</div><div class="meth-eq-body">the build hard-fails if anchored GDP drifts past 1%</div></div>
-        </div>
-        <div class="meth-panel" data-step="1" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Anchored against the EFO</span><span class="meth-panel-badge mono">Step 2</span></div>
-          <div class="meth-sec-title">anchored fit</div>
-          <div class="meth-eq"><div class="meth-eq-label">real GDP</div><div class="meth-eq-body">0.30% MAPE, 2025Q1&ndash;2027Q4</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">consumption</div><div class="meth-eq-body">0.49% &mdash; the same &pound;m error as GDP, not a second test</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">why</div><div class="meth-eq-body">every other demand-identity term is exogenous or pinned</div></div>
-        </div>
-        <div class="meth-panel" data-step="2" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">The independent test</span><span class="meth-panel-badge mono">Step 3</span></div>
-          <div class="meth-sec-title">1p on the basic rate</div>
-          <div class="meth-eq"><div class="meth-eq-label">ours, 2026</div><div class="meth-eq-body">&pound;6.46bn</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">HMRC reckoner</div><div class="meth-eq-body">&pound;6.90bn &mdash; a &minus;6.4% gap</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">a benchmark, not a validation</div></div>
-        </div>
-        <div class="meth-panel" data-step="3" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Free-running</span><span class="meth-panel-badge mono">Step 4</span></div>
-          <div class="meth-sec-title">the honest scorecard</div>
-          <div class="meth-eq"><div class="meth-eq-label">real GDP</div><div class="meth-eq-body">4.32% MAPE &mdash; the model contracts while the EFO grows</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">computed</div><div class="meth-eq-body">11 of 21 headline variables; the other 10 are passthrough</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">in band</div><div class="meth-eq-body">6 of the 11, and one of those is a trivial identity</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">worst</div><div class="meth-eq-body">company profits 82.77%</div></div>
-        </div>
-        <div class="meth-panel" data-step="4" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Known limitations</span><span class="meth-panel-badge mono">Step 5</span></div>
-          <div class="meth-sec-title">the headline limits</div>
-          <div class="meth-eq"><div class="meth-eq-label">spending multiplier</div><div class="meth-eq-body"><code>CGG</code> is exactly 1.0000, flat, against the OBR's 0.6</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">capital spending</div><div class="meth-eq-body"><code>CGIPS</code> does not transmit &mdash; do not score it</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">corporation tax</div><div class="meth-eq-body"><code>TCPRO</code> converges slowly: 12 quarters is ~40% of plateau</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">inert blocks</div><div class="meth-eq-body">unemployment, prices and trade never respond to any lever</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">convergence</div><div class="meth-eq-body">no quarter reaches tolerance &mdash; read scale, not quarters</div></div>
-        </div>
-      </aside>
+  <section class="band where-next" id="where-next">
+    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/obr/code">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span>
+        <h3>Code</h3>
+        <p>Install, run and reproduce each number</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/models#validation">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
+        <h3>Every model&rsquo;s verdict</h3>
+        <p>How the seven are checked</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/papers/obr-macro">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>
+        <h3>The working paper</h3>
+        <p>Method and results in full</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
     </div>
   </section>
+    </div>
+  </div>
 
 </main>
 
@@ -614,39 +603,46 @@
 
 <script src="/reveal.js?v=2" defer></script>
 <script>
-// Validation scrollytelling: highlight the step at the reading line and
-// show its panel in the sticky aside.
+// StepPanel: highlight the step at the reading line and show its panel in
+// the sticky aside (scoped to each .scrolly-wrap).
 (function () {
   "use strict";
-  var steps = Array.from(document.querySelectorAll(".meth-step"));
-  var panels = Array.from(document.querySelectorAll(".meth-panel"));
-  if (!steps.length || !panels.length) return;
-  var current = -1;
+  Array.from(document.querySelectorAll(".scrolly-wrap")).forEach(function (wrap) {
+    var steps = Array.from(wrap.querySelectorAll(".meth-step"));
+    var panels = Array.from(wrap.querySelectorAll(".meth-panel"));
+    if (!steps.length || !panels.length) return;
+    var current = -1;
+    function update() {
+      var offset = window.innerHeight * 0.33, active = 0;
+      steps.forEach(function (step, i) { if (step.getBoundingClientRect().top < offset) active = i; });
+      if (active === current) return;
+      current = active;
+      steps.forEach(function (step, i) { step.classList.toggle("active", i === active); });
+      panels.forEach(function (panel) { panel.hidden = Number(panel.getAttribute("data-step")) !== active; });
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    update();
+  });
+})();
+</script>
+<script>
+// "On this page" rail: mark the section at the reading line.
+(function () {
+  "use strict";
+  var rail = document.querySelector(".page-rail");
+  if (!rail) return;
+  var links = Array.from(rail.querySelectorAll('a[href^="#"]'));
+  var targets = links.map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); });
   function update() {
-    var offset = window.innerHeight * 0.33;
-    var active = 0;
-    steps.forEach(function (step, i) {
-      if (step.getBoundingClientRect().top < offset) active = i;
-    });
-    if (active === current) return;
-    current = active;
-    steps.forEach(function (step, i) {
-      step.classList.toggle("active", i === active);
-    });
-    var want = Math.min.apply(null, panels.map(function (panel) {
-      return Number(panel.getAttribute("data-step"));
-    }));
-    panels.forEach(function (panel) {
-      var ds = Number(panel.getAttribute("data-step"));
-      if (ds <= active && ds > want) want = ds;
-    });
-    panels.forEach(function (panel) {
-      panel.hidden = Number(panel.getAttribute("data-step")) !== want;
+    var line = window.innerHeight * 0.3, current = 0;
+    targets.forEach(function (t, i) { if (t && t.getBoundingClientRect().top < line) current = i; });
+    links.forEach(function (a, i) {
+      if (i === current) a.setAttribute("aria-current", "location"); else a.removeAttribute("aria-current");
     });
   }
   window.addEventListener("scroll", update, { passive: true });
   window.addEventListener("resize", update, { passive: true });
-  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
   update();
 })();
 </script>

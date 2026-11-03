@@ -20,14 +20,9 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=8" />
-<style>
-/* page-specific: hero sizing only — shared component styles live in style.css */
-.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-</style>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
   <a class="brand" href="/" aria-label="PolicyEngine Macro home">
@@ -77,14 +72,12 @@
       <span class="kicker mono">overview</span>
       <h2>How a reform reaches it, what it is, what it can answer.</h2>
     </div>
-    <div class="prose">
-      <p>
-        Three things to know before you run it: how a PolicyEngine reform gets
-        into the model, what the model actually is, and what it will and will
-        not tell you. The panel alongside carries the figures each step
-        refers to.
-      </p>
-    </div>
+    <p class="callout callout-warn verdict-callout">
+      <strong>Verdict: tracks the EFO by construction, weak free-running.</strong>
+      The household tax route behaves; the spending lever&rsquo;s multiplier is
+      fixed by construction and capital spending does not transmit.
+      <a href="/obr/validation">How far to trust it &rarr;</a>
+    </p>
 
     <div class="scrolly-wrap">
       <div class="scrolly-steps">
@@ -111,18 +104,14 @@
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro score --country uk \
   --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
   --model obr</code></pre></div>
-        <div class="callout">
-          <strong>Same-breath caveats.</strong> The bridge's own multiplier is
-          about <strong>0.34</strong> by the twelfth quarter against the OBR's
-          published 0.3 for income tax &mdash; the ~1-by-construction problem is on the <em>spending</em>
-          lever, not this one. But no quarter of the solve converges, so read
-          the direction and the scale, not single quarters. Corporation tax cannot go
-          through the bridge &mdash; it is not household-borne in the microsim, and
-          the direct <code>TCPRO</code> lever converges only slowly (a 12-quarter run is ~40% of its plateau), so the bridge
-          refuses it rather than guessing. UK only: no US bridge exists, so a
-          US reform is scored statically.
-        </div>
-        <h4>Or drive it directly, without the microsimulation</h4>
+        <p class="callout">
+          <strong>Same-breath caveats.</strong> No quarter of the solve
+          converges: read the direction and the scale (<a href="#answers">step 3</a>),
+          not single quarters. Corporation tax is refused, and a US reform is
+          scored statically &mdash; <a href="/obr/validation#caveats">why</a>.
+        </p>
+        <details class="expander">
+          <summary>Or drive it directly, without the microsimulation</summary>
         <p>
           The bridge is one way in, not the only one. You can shock the
           model's own exogenous variables directly, in model units, with no
@@ -147,6 +136,7 @@ df = run_reform(name="spending", var="CGG", shock=1250, periods=12)</code></pre>
           behaviour, and <a href="/obr/validation#caveats">two do not work at
           all</a>.
         </p>
+        </details>
         <p class="vlinks mono">
           <a href="/models#compose">every join in the suite &rarr;</a>
           <a href="/#joins">this join on the landing page &rarr;</a>
@@ -254,28 +244,11 @@ df = run_reform(name="spending", var="CGG", shock=1250, periods=12)</code></pre>
           <strong>0.34&times;</strong> by the twelfth quarter &mdash; close to the OBR's published <strong>0.3</strong>
           for income tax and NICs. Read the direction and the scale, not the
           individual quarters: <a href="/obr/validation#caveats">no quarter of
-          the solve converges to tolerance</a>.
-          Full walkthrough &rarr; <a href="/models#score">/score</a>.
+          the solve converges to tolerance</a>. Checked against HMRC&rsquo;s
+          ready reckoner on the <a href="/obr/validation#val-hmrc">validation tab</a>;
+          the full walkthrough is under <a href="/models#score">score a reform</a>.
         </p>
-        <div class="callout">
-          <strong>The household route behaves; the spending levers do not.</strong>
-          A tax reform through the bridge implies a multiplier of about
-          <strong>0.34</strong> by the twelfth quarter against the OBR's
-          <a href="https://obr.uk/box/fiscal-multipliers/">published 0.3</a> for
-          income tax and NICs. The by-construction problem is elsewhere: a
-          <em>spending</em> shock (<code>CGG</code>) lands straight in the GDP
-          identity with no behavioural equation responding, giving a multiplier
-          of exactly <strong>1.0000</strong>, flat, against the OBR's 0.6 &mdash;
-          and capital spending (<code>CGIPS</code>) is worse still: it does not
-          transmit at all. Total fixed investment moves exactly zero, and
-          business investment moves wrong-signed and
-          <strong>non-proportionally</strong> &mdash; quadrupling the shock
-          changes the response by under a factor of two, so there is no
-          multiplier to quote, against the OBR's published 1.0. The
-          <a href="/obr/validation#caveats">validation page</a> lists the
-          full set of known limits.
-        </div>
-        <div class="callout">
+        <div class="callout callout-neutral">
           <strong>It cannot</strong> tell you who wins and loses &mdash; that is
           <a href="/pe">PolicyEngine</a>'s distributional analysis. Nor a
           long-run structural counterfactual &mdash; that is the
@@ -289,8 +262,6 @@ df = run_reform(name="spending", var="CGG", shock=1250, periods=12)</code></pre>
         <div class="meth-eq"><div class="meth-eq-label">second round</div><div class="meth-eq-body">GDP falls, building to ~0.34&times; the revenue raised by quarter 12</div></div>
         <div class="meth-eq"><div class="meth-eq-label">vs OBR</div><div class="meth-eq-body">published 0.3 for income tax &amp; NICs</div></div>
         <div class="meth-eq"><div class="meth-eq-label">per-quarter</div><div class="meth-eq-body">not reliable &mdash; no quarter converges to tolerance</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">cross-check</div><div class="meth-eq-body">HMRC ready reckoner &pound;6.9bn (&minus;6.4% gap)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">anchored fit</div><div class="meth-eq-body">0.30% GDP MAPE; free-running 4.32%</div></div>
         </div>
       </div>
 
@@ -320,13 +291,34 @@ df = run_reform(name="spending", var="CGG", shock=1250, periods=12)</code></pre>
           <div class="meth-eq"><div class="meth-eq-label">second round</div><div class="meth-eq-body">GDP falls, building to ~0.34&times; the revenue raised by quarter 12</div></div>
           <div class="meth-eq"><div class="meth-eq-label">vs OBR</div><div class="meth-eq-body">published 0.3 for income tax &amp; NICs</div></div>
           <div class="meth-eq"><div class="meth-eq-label">per-quarter</div><div class="meth-eq-body">not reliable &mdash; no quarter converges to tolerance</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">cross-check</div><div class="meth-eq-body">HMRC ready reckoner &pound;6.9bn (&minus;6.4% gap)</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">anchored fit</div><div class="meth-eq-body">0.30% GDP MAPE; free-running 4.32%</div></div>
         </div>
       </aside>
     </div>
   </section>
 
+  <section class="band where-next" id="where-next">
+    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/obr/methodology">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg></span>
+        <h3>Methodology</h3>
+        <p>How the published listing becomes a runnable model</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/models#compare">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg></span>
+        <h3>Compare the models</h3>
+        <p>All seven side by side</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/connect">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg></span>
+        <h3>Run it hosted</h3>
+        <p>MCP, CLI or Python, no account needed</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </div>
+  </section>
 </main>
 
 <footer class="foot foot-bar">
