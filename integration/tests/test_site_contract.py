@@ -74,7 +74,17 @@ def test_mobile_css_does_not_hide_document_overflow():
     css = _read("style.css")
     body = css.split("body {", 1)[1].split("}", 1)[0]
     assert "overflow-x: hidden" not in body
-    assert "min-height: 112px" in css
+    # The two-row 112px mobile header (#70) was replaced by a single
+    # --nav-h band whose view tabs scroll inside themselves (DESIGN.md §2.4,
+    # §3.1). The intent is unchanged: the header never pushes the page wider
+    # and every sticky offset follows the header's real height.
+    assert re.search(r"--nav-h:\s*\d+px", css)
+    nav = css.split("\n.nav {", 1)[1].split("}", 1)[0]
+    assert "height: var(--nav-h)" in nav
+    links = css.split("\n.nav-links {", 1)[1].split("}", 1)[0]
+    assert "overflow-x: auto" in links
+    assert "top: var(--nav-h)" in css
+    assert not re.search(r"top:\s*(112|129|172)px", css)
     assert "min-height: 44px" in css
 
 
