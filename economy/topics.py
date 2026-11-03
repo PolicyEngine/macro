@@ -2552,7 +2552,7 @@ def subnav(country: str, current: str | None) -> str:
     the reader is in.
 
     ``current`` is ``None`` on the section hub (/forecasts), ``"data"`` on the
-    country data hub (/economy), or a topic slug. Overview and Data exist as
+    country data hub (/economy), or a topic slug. Track record and Data exist as
     tabs because the strip is a tab set and a tab set with nothing selected
     tells the reader they are nowhere; they are also the way back.
 
@@ -2583,7 +2583,9 @@ def subnav(country: str, current: str | None) -> str:
     data_attr = ' aria-current="page"' if current == "data" else ""
     links = [
         f'        <a class="model-tabs-link"{overview_attr} '
-        f'href="{entry["hub"]}">Overview</a>',
+        # "Track record", not "Overview": the hub is the scored record,
+        # and a forecaster's reader looks for the record by that name.
+        f'href="{entry["hub"]}">Track record</a>',
         f'        <a class="model-tabs-link"{data_attr} '
         f'href="{entry["data"]}">Data</a>',
     ]
