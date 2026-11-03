@@ -4418,13 +4418,14 @@ body.doc > main { flex: 1 0 auto; }
 .where-next .entry-card h3 { margin-top: 4px; font-size: var(--fs-body); }
 .where-next .entry-cta { margin-top: var(--s-2); padding: 5px 14px; }
 @media (max-width: 620px) {
-  .where-next .entry-card { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; column-gap: 12px; align-items: center; }
-  .where-next .entry-card .icon-badge { grid-row: span 2; }
-  .where-next .entry-card h3 { margin: 0; }
-  .where-next .entry-card p { grid-column: 2; }
-  .where-next .entry-cta { grid-column: 3; grid-row: 1 / span 2; margin: 0; padding: 0; background: none; color: var(--teal-700); font-size: 0; }
-  .where-next .entry-cta > span { font-size: var(--fs-body); }
-  .where-next .entry-card:hover .entry-cta { background: none; }
+  .where-next .entry-card, #start .entry-card { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; column-gap: 12px; align-items: center; }
+  .where-next .entry-card .icon-badge, #start .entry-card .icon-badge { grid-row: span 2; width: 32px; height: 32px; }
+  #start .entry-card { padding: var(--s-4); }
+  .where-next .entry-card h3, #start .entry-card h3 { margin: 0; }
+  .where-next .entry-card p, #start .entry-card p { grid-column: 2; }
+  .where-next .entry-cta, #start .entry-cta { grid-column: 3; grid-row: 1 / span 2; margin: 0; padding: 0; background: none; color: var(--teal-700); font-size: 0; }
+  .where-next .entry-cta > span, #start .entry-cta > span { font-size: var(--fs-body); }
+  .where-next .entry-card:hover .entry-cta, #start .entry-card:hover .entry-cta { background: none; }
 }
 
 /* ---------- 5.15 StepPanel body polish (phase 2) ----------
@@ -4462,6 +4463,13 @@ body.doc > main { flex: 1 0 auto; }
   .qa summary::after { grid-column: 2; grid-row: 1; }
   .qa summary strong { grid-column: 1 / -1; grid-row: 2; justify-self: start; white-space: normal; }
 }
+
+/* ---------- 5.17 homepage h1: one balanced headline at every width ----------
+   The two spans stay in the markup but run inline, so text-wrap: balance
+   sets the break instead of a forced third line at 1440px. */
+.home-page .hero .hero-h1 { white-space: normal; text-wrap: balance; max-width: 22ch; }
+.home-page .hero .hero-h1 span { display: inline; }
+#start .entry-grid { margin-top: var(--s-2); }
 
 /* ---------- 5.13 dark theme for the v2 roles ---------- */
 @media (prefers-color-scheme: dark) {
