@@ -122,6 +122,32 @@ def esc(text: str) -> str:
     return html.escape(str(text), quote=True)
 
 
+_TOPIC_HOMES: dict[str, tuple[str, str]] | None = None
+
+
+def topic_home(name: str) -> tuple[str, str] | None:
+    """(url, title) of the topic page that reads a series, from economy/topics.py.
+
+    The /economy hubs used to carry this series-to-topic index; the store is
+    its home now (DESIGN.md §7.0).
+    """
+    global _TOPIC_HOMES
+    if _TOPIC_HOMES is None:
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "economy_topics", ROOT / "economy" / "topics.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _TOPIC_HOMES = {
+            series: (module.topic_url(topic), topic["title"])
+            for topic in module.TOPICS
+            for series in topic["series"]
+        }
+    return _TOPIC_HOMES.get(name)
+
+
 def catalogue_rows() -> str:
     """One <tbody> per series: a scannable row plus an expandable detail row.
 
@@ -152,11 +178,15 @@ def catalogue_rows() -> str:
             for vintage in vintages
         )
         next_release = series.get("next_release")
+        released = series.get("release_updated")
+        home = topic_home(name)
         facts = [
+            ("Topic", f'<a href="{home[0]}">{esc(home[1])}</a>' if home else "none"),
             ("Units", esc(series["units"])),
             ("Coverage", f"{esc(first)} – {esc(last)}"),
             ("Observations", f"{len(series['observations']):,}"),
             ("Store path", f'<span class="mono">{esc(source_dir)}/{esc(name)}</span>'),
+            ("Released", esc(released[:10]) if released else "not supplied by the source"),
             ("Next release", esc(next_release) if next_release else "not announced"),
             ("Official source",
              f'<a href="{esc(display_url(series["url"]))}">'
@@ -207,6 +237,24 @@ def upcoming() -> list[tuple[datetime, str, dict]]:
     return sorted(releases, key=lambda row: (row[0], row[1]))
 
 
+def last_fetch() -> str:
+    """Newest snapshot date anywhere in the store: the store's own 'as of'."""
+    return max(entry["latest_vintage"] for entry in manifest()["series"].values())
+
+
+def release_status(when: datetime, series: dict) -> str:
+    """Whether an announced date is still ahead of the store, or has passed.
+
+    Deterministic: compares the announcement with the store's own newest
+    snapshot, never the clock. A date before the last fetch with no newer
+    snapshot of the series means the release has not been captured yet.
+    """
+    fetched = datetime.strptime(last_fetch(), "%Y-%m-%d")
+    if when > fetched:
+        return "ahead of the last fetch"
+    return f"passed; not in the store as of {fetched:%Y-%m-%d}"
+
+
 def calendar_rows() -> str:
     rows = []
     for when, name, series in upcoming():
@@ -217,6 +265,7 @@ def calendar_rows() -> str:
             f'<td><span class="mono">{esc(name)}</span></td>'
             f'<td><a href="{esc(display_url(series["url"]))}">'
             f'{esc(series["source"])} · {esc(series["cdid"])}</a></td>'
+            f"<td>{esc(release_status(when, series))}</td>"
             "</tr>"
         )
     return "\n".join(rows)
@@ -365,6 +414,9 @@ def render_calendar() -> str:
 def render_fragment() -> str:
     """The data-store block inside /forecasts, between the markers.
 
+    The one home of data provenance (DESIGN.md §7.0): the /economy hubs used
+    to repeat its series list and calendar, and now link here instead.
+
     Not a page of its own. The vintage store exists to make the forecast
     record reproducible, so it lives in the section that explains what a
     round is scored against rather than as a sixth destination competing
@@ -420,8 +472,8 @@ def render_fragment() -> str:
       <h3>Announced releases</h3>
       <div class="table-scroll">
         <table>
-          <caption>{calendar_count} announced releases, from the committed snapshots. Only the ONS publishes the field; dates are the publisher's and can move. Also an iCalendar feed: <a href="/data/calendar.ics">/data/calendar.ics</a>.</caption>
-          <thead><tr><th scope="col">Date</th><th scope="col">Series</th><th scope="col">Source</th></tr></thead>
+          <caption>{calendar_count} announced releases, from the committed snapshots; the store was last updated {last_fetch()}. Only the ONS publishes the field; dates are the publisher's and can move. Also an iCalendar feed: <a href="/data/calendar.ics">/data/calendar.ics</a>.</caption>
+          <thead><tr><th scope="col">Date</th><th scope="col">Series</th><th scope="col">Store id</th><th scope="col">Source</th><th scope="col">Status</th></tr></thead>
           <tbody>
 {calendar_rows()}
           </tbody>
