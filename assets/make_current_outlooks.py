@@ -45,11 +45,15 @@ def obr_chart() -> str:
             f'<line class="vc-grid" x1="{x0}" y1="{y:.1f}" x2="{x1}" y2="{y:.1f}"/>',
             chartkit.ytick(x0, y, str(tick)),
         ]
+    # Both series are the OBR's published outlook, nothing here is "ours":
+    # GDP in the official ink, drawn solid (no model to contrast it with),
+    # consumption as the neutral. A legend, not end labels: the two paths
+    # cross and end close together, both rising into the edge.
     out += [
-        f'<polyline class="vc-s1" points="{points(g, xs, ymap)}"/>',
-        f'<polyline class="vc-s2" points="{points(c, xs, ymap)}"/>',
-        f'<circle class="vc-s1-dot" cx="{xs[-1]:.1f}" cy="{ymap(g[-1]):.1f}" r="3.5"/>',
-        f'<circle class="vc-s2-dot" cx="{xs[-1]:.1f}" cy="{ymap(c[-1]):.1f}" r="3.5"/>',
+        f'<polyline class="vc-s2 vc-solid" points="{points(g, xs, ymap)}"/>',
+        f'<polyline class="vc-s3" points="{points(c, xs, ymap)}"/>',
+        f'<circle class="vc-s2-dot" cx="{xs[-1]:.1f}" cy="{ymap(g[-1]):.1f}" r="3.5"/>',
+        f'<circle class="vc-s3-dot" cx="{xs[-1]:.1f}" cy="{ymap(c[-1]):.1f}" r="3.5"/>',
     ]
     ticks_at = (0, 4, 8, 12, 16, 20)
     for j, i in enumerate(ticks_at):
@@ -59,9 +63,8 @@ def obr_chart() -> str:
     out.append("</svg>")
     return "\n".join([
         '<figure class="vfig current-outlook">',
-        chartkit.figure("\n".join(out), legend=[
-            ("ln-s1", "Real GDP"), ("ln-s2", "Household consumption"),
-        ], notes=["March 2026 EFO outlook, 2026Q1 = 100."]),
+        chartkit.figure("\n".join(out), unit="March 2026 EFO outlook, index, 2026Q1 = 100",
+                        legend=[("ln-s2s", "Real GDP"), ("ln-s3", "Household consumption")]),
         "</figure>",
     ])
 
@@ -120,7 +123,8 @@ def boe_chart() -> str:
         '<figure class="vfig current-outlook">',
         chartkit.figure("\n".join(out), legend=[
             ("ln-s1", "median"), ("sw-band68", "68% band"), ("sw-band90", "90% band"),
-        ], notes=[f"Current forecast from {data['data_edge']}, year-on-year %."]),
+        ], unit="UK real GDP, % change on a year earlier",
+            notes=[f"Current forecast from {data['data_edge']}."]),
         f"<figcaption>Bands are the model&rsquo;s raw posterior quantiles, not rescaled to measured coverage &mdash; the calibrated version is on the <a href='/forecasts'>forecast record</a>. Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through {data['data_edge']}; forecast begins {data['forecast_start']}. Estimated on {data['estimation_sample'].replace('-', '&ndash;')}; {data['draws']:,} posterior draws, {data['accepted']} accepted; five stochastic paths per accepted draw. Source and provenance: <code>papers/boe-svar/figures/current_forecast.json</code>.</figcaption>",
         "</figure>",
     ])

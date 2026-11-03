@@ -227,23 +227,44 @@ def chart_obr_anchored():
         tick_idx.insert(0, 0)
     if len(quarters) - 1 not in tick_idx:
         tick_idx.append(len(quarters) - 1)
-    for i in tick_idx:
-        out.append(chartkit.xtick(xs[i], y_bot + 6, quarters[i], i, len(quarters) - 1))
+    for j, i in enumerate(tick_idx):
+        out.append(chartkit.xtick(xs[i], y_bot + 6, quarters[i], j, len(tick_idx) - 1,
+                                  minor=_crowds_last(tick_idx, j)))
 
-    for cls, series in (("vc-s1", gdp), ("vc-s2", cons)):
+    # Both lines are this emulator (the EFO is the zero line), so neither is
+    # drawn in the dashed "official" style: GDP is the headline series,
+    # consumption the labelled neutral, and each is named at its last point.
+    for cls, dot, series in (("vc-s1", "vc-s1-dot", gdp), ("vc-s3", "vc-s3-dot", cons)):
         pts = " L".join(f"{n(xs[i])} {n(ymap(v))}" for i, v in enumerate(series))
         out.append(f'<path class="{cls}" d="M{pts}"/>')
         for i, v in enumerate(series):
-            out.append(f'<circle class="{cls}-dot" cx="{n(xs[i])}" cy="{n(ymap(v))}" r="3"/>')
-
-    out.append("</svg>")
+            out.append(f'<circle class="{dot}" cx="{n(xs[i])}" cy="{n(ymap(v))}" r="3"/>')
     # "peak" is the largest deviation in either direction, not the largest
     # positive one: max() would quietly report the least-negative value on a
     # series that never rose above the EFO.
-    return chartkit.figure("\n".join(out), legend=[
-        ("ln-s1", f"real GDP (peak {fmt_signed(max(gdp, key=abs))}%)"),
-        ("ln-s2", f"consumption (peak {fmt_signed(max(cons, key=abs))}%)"),
-    ])
+    # Both labels sit above their own line's end: each line rises into the
+    # right edge, so the space above the end point is clear of it.
+    for series, name, ink in ((gdp, "real GDP", "s1"), (cons, "consumption", "s3")):
+        out.append(chartkit.endlabel(
+            xs[-1] - 8, ymap(series[-1]),
+            f"{name}, peak {fmt_signed(max(series, key=abs))}%", ink))
+
+    out.append("</svg>")
+    return chartkit.figure("\n".join(out), unit="% deviation from the March 2026 EFO")
+
+
+def _crowds_last(tick_idx: list[int], j: int) -> bool:
+    """True for an x tick too close to the last one to share a phone-width axis.
+
+    The quarterly charts label each Q1 plus the final quarter; when the final
+    quarter is Q4 its label lands three quarters after the last Q1 and the two
+    touch below 520 px. Marking the earlier one minor keeps first and last.
+    """
+    last = len(tick_idx) - 1
+    if j in (0, last) or last < 2:
+        return False
+    spacing = (tick_idx[last] - tick_idx[0]) / last
+    return j == last - 1 and tick_idx[last] - tick_idx[j] < spacing
 
 
 def fmt_signed(v: float, places: int = 2) -> str:
@@ -251,7 +272,7 @@ def fmt_signed(v: float, places: int = 2) -> str:
     return f"{v:+.{places}f}".replace("-", "\u2212")
 
 
-def grouped_bars(chart_id, title, desc, groups, y_max, y_step, fmt, unit_suffix=""):
+def grouped_bars(chart_id, title, desc, groups, y_max, y_step, fmt, unit_suffix="", unit=None):
     """Two side-by-side bars per group, shared layout for the OBR and SVAR charts.
 
     The bars' names go in the HTML legend (series 1 = ours, 2 = the published
@@ -280,7 +301,9 @@ def grouped_bars(chart_id, title, desc, groups, y_max, y_step, fmt, unit_suffix=
             x = centre - 87.1 + k * 91.1
             h = bar["value"] * scale
             y = base_y - h
-            out.append(f'<rect class="vc-b{bar["series"]}" x="{n(x)}" y="{n(y)}" width="{bar_w}" height="{n(h)}"/>')
+            # An interpolated value is not a scored one: outline it (vc-interp).
+            cls = "vc-interp" if bar.get("interpolated") else f'vc-b{bar["series"]}'
+            out.append(f'<rect class="{cls}" x="{n(x)}" y="{n(y)}" width="{bar_w}" height="{n(h)}"/>')
             cx = x + 39.6
             out.append(f'<text class="vc-val" x="{n(cx)}" y="{n(y - 6)}" text-anchor="middle">{fmt(bar["value"])}</text>')
         out.append(f'<text class="vc-lab vc-x" x="{n(centre)}" y="{n(base_y + 6)}" '
@@ -288,7 +311,9 @@ def grouped_bars(chart_id, title, desc, groups, y_max, y_step, fmt, unit_suffix=
 
     out.append("</svg>")
     legend = [(f'sw-b{bar["series"]}', esc(bar["name"])) for bar in groups[0]["bars"]]
-    return chartkit.figure("\n".join(out), legend=legend, wrap_class="vc-two-rows")
+    if any(bar.get("interpolated") for g in groups for bar in g["bars"]):
+        legend.append(("sw-interp", "interpolated between scored years"))
+    return chartkit.figure("\n".join(out), legend=legend, wrap_class="vc-two-rows", unit=unit)
 
 
 def _reform_costing(chart_id: str, title: str):
@@ -313,7 +338,8 @@ def _reform_costing(chart_id: str, title: str):
             " The 2028–29 emulator figure is interpolated between the scored endpoints "
             "£6.46bn in 2026 and £7.38bn in 2030.")
     return grouped_bars(
-        chart_id, title, desc, groups, y_max=10, y_step=2, fmt=lambda v: f"{v:.2f}")
+        chart_id, title, desc, groups, y_max=10, y_step=2, fmt=lambda v: f"{v:.2f}",
+        unit="Static revenue, £bn a year")
 
 
 def chart_obr_reform():
@@ -365,19 +391,18 @@ def chart_svar_fevd():
     return grouped_bars(
         "svar-fevd",
         "boe-svar: global-shock FEVD shares, ours vs Brignone & Piffer (2025)",
-        desc, groups, y_max=60, y_step=20, fmt=lambda v: f"{v:.1f}", unit_suffix="%")
+        desc, groups, y_max=60, y_step=20, fmt=lambda v: f"{v:.1f}", unit_suffix="%",
+        unit="Share of forecast-error variance from global shocks, %")
 
 
 def chart_frbus_residuals():
-    """Residuals against the Fed's own pyfrbus, on a log axis.
+    """Residuals against the Fed's own pyfrbus, on a log axis, as a dot strip.
 
-    The fills used to run brand / faint / brand / brand / mid down the rows,
-    which encoded nothing a reader could recover: the tracking identity — the
-    row the page itself says is *not* evidence — was painted in the accent
-    colour and read as the headline. The three fills now name three kinds of
-    comparison, each row label carries the same distinction as text, and the
-    two identity rows also carry a dashed outline so the grouping survives
-    without colour.
+    Three kinds of comparison, each named in its row label and by its mark:
+    ours vs the Fed (filled, series colour), the Fed's two releases vs each
+    other (filled slate, and a dashed rule down the chart), and the tracking
+    identity rows the page says are *not* evidence (hollow rings), so the
+    grouping survives without colour.
     """
     data = load_transcribed()["frbus_residuals"]
     rows = data["rows"]
@@ -390,8 +415,8 @@ def chart_frbus_residuals():
         return {1: "ours vs the Fed", 2: "the Fed vs itself"}.get(
             r["series"], "tracking identity")
 
-    desc = ("Horizontal bar chart on a base-10 logarithmic axis of maximum absolute residuals; "
-            "shorter is closer. The rows fall into three kinds. " +
+    desc = ("Dot chart on a base-10 logarithmic axis of maximum absolute residuals; "
+            "further left is closer. The rows fall into three kinds. " +
             "; ".join(f"{r['label']}: {r['value']:.1e} ({group(r)})" for r in rows) +
             ". The two tracking rows are an identity — init_trac defines the add-factors as "
             "minus the residuals at the input data, so re-solving reproduces the input for any "
@@ -401,38 +426,53 @@ def chart_frbus_residuals():
             "so our agreement sits at the scale of the reference implementation's own "
             "numerical noise rather than at a chosen tolerance.")
 
-    # Rows: the label (with its value) sits above a full-width bar, so a long
-    # label wraps instead of squeezing the bars into the right half.
+    # A dot strip, not bars: on a log axis a bar's length is measured from an
+    # arbitrary origin (1e-18 here) and encodes nothing. Each row is a track
+    # with one dot at the residual; the label (with its value) sits above it.
+    # The identity rows are hollow rings, the Fed-vs-itself row sets a dashed
+    # reference rule down the whole chart: the scale of the reference
+    # implementation's own numerical noise.
     x0, x1 = 0.0, 700.0
     per_decade = (x1 - x0) / (hi_exp - lo_exp)
-    pitch, bar_h, top = 64.0, 22.0, 40.0
-    base = top + pitch * (len(rows) - 1) + bar_h
+    pitch, top = 64.0, 40.0
+    track = 16.0                       # dot centre below the row label
+    base = top + pitch * (len(rows) - 1) + track + 14
     out = svg_open(x1 - x0, base - 4, "frbus-residuals",
                    "frb-us: residuals against the Fed’s pyfrbus, log scale", desc,
                    origin=(x0, 4))
+
+    def xpos(v):
+        return x0 + (math.log10(v) - lo_exp) * per_decade
 
     for k in range(6):
         e = lo_exp + 2 * k
         x = x0 + (e - lo_exp) * per_decade
         out.append(f'<line class="vc-grid" x1="{n(x)}" y1="{n(top - 30)}" x2="{n(x)}" y2="{n(base)}"/>')
-        out.append(chartkit.xtick(x, base, f"1e{e}".replace("-", "\u2212"), k, 5))
+        out.append(chartkit.xtick(x, base, f"10<sup>{str(e).replace('-', chr(0x2212))}</sup>", k, 5))
+
+    fed = [r for r in rows if r["series"] == 2]
+    if fed:
+        xf = xpos(fed[0]["value"])
+        out.append(f'<line class="vc-ref" x1="{n(xf)}" y1="{n(top - 30)}" x2="{n(xf)}" y2="{n(base)}"/>')
 
     for i, r in enumerate(rows):
         y = top + pitch * i
-        w = (math.log10(r["value"]) - lo_exp) * per_decade
         value = f'{r["value"]:.1e}'.replace("-", "\u2212")
         out.append(f'<text class="vc-rowlab vc-y" x="{n(x0)}" y="{n(y)}" data-w="{x1 - x0:g}">'
                    f'{esc(r["label"])} <b class="vc-num">{value}</b></text>')
-        outline = " vc-outline" if r["series"] == 3 else ""
-        out.append(f'<rect class="vc-b{r["series"]}{outline}" x="{n(x0)}" y="{n(y)}" '
-                   f'width="{n(w)}" height="{bar_h:g}"/>')
+        yd = y + track
+        out.append(f'<line class="vc-track" x1="{n(x0)}" y1="{n(yd)}" x2="{n(x1)}" y2="{n(yd)}"/>')
+        if r["series"] == 3:
+            out.append(f'<circle cx="{n(xpos(r["value"]))}" cy="{n(yd)}" r="5" fill="none" stroke-width="1.5"/>')
+        else:
+            out.append(f'<circle class="vc-s{r["series"]}-dot" cx="{n(xpos(r["value"]))}" cy="{n(yd)}" r="6"/>')
 
     out.append("</svg>")
     return chartkit.figure("\n".join(out), min_h=330, legend=[
-        ("sw-b1", "ours vs the Fed&rsquo;s pyfrbus, under shock"),
-        ("sw-b2", "the Fed&rsquo;s two releases vs each other"),
-        ("sw-b3d", "tracking identity &mdash; round-off, not fidelity"),
-    ])
+        ("sw-dot1", "ours vs the Fed&rsquo;s pyfrbus, under shock"),
+        ("sw-dot2", "the Fed&rsquo;s two releases vs each other (dashed rule)"),
+        ("sw-ring", "tracking identity &mdash; round-off, not fidelity"),
+    ], unit="Maximum absolute residual, log scale; further left is closer")
 
 
 def chart_obr_freerun():
@@ -481,7 +521,10 @@ def chart_obr_freerun():
         out.append(chartkit.ytick(x0, y, f"{tick:g}"))
         tick += 20
 
-    for cls, series in (("vc-s3", efo), ("vc-s1", anchored), ("vc-s2", freerun)):
+    # Roles (DESIGN.md §6.2): the published EFO is the dashed official line;
+    # the anchored emulator is ours, solid; the free-running emulator is a
+    # variant of ours, drawn as the neutral.
+    for cls, series in (("vc-s2", efo), ("vc-s3", freerun), ("vc-s1", anchored)):
         pts = " L".join(f"{n(xs[i])} {n(ymap(v))}" for i, v in enumerate(series))
         out.append(f'<path class="{cls}" d="M{pts}"/>')
 
@@ -490,16 +533,18 @@ def chart_obr_freerun():
         tick_idx.insert(0, 0)
     if len(quarters) - 1 not in tick_idx:
         tick_idx.append(len(quarters) - 1)
-    for i in tick_idx:
-        out.append(chartkit.xtick(xs[i], base_y, quarters[i], i, len(quarters) - 1))
+    for j, i in enumerate(tick_idx):
+        out.append(chartkit.xtick(xs[i], base_y, quarters[i], j, len(tick_idx) - 1,
+                                  minor=_crowds_last(tick_idx, j)))
 
     out.append("</svg>")
-    # Legend swatches use the classes the marks are actually drawn with: these
-    # three series are plain paths, so no dots, and the EFO swatch is vc-s3.
-    return chartkit.figure("\n".join(out), legend=[
+    # A legend, not end labels: the anchored and EFO paths end a few £bn
+    # apart and both rise into the edge, so a label below either one would sit
+    # on the line.
+    return chartkit.figure("\n".join(out), unit="Real GDP, £bn per quarter", legend=[
         ("ln-s1", f"anchored ({mad_a:.2f}% MAD)"),
-        ("ln-s2", f"free-running ({mad_f:.2f}% MAD)"),
-        ("ln-s3", "EFO Mar 2026"),
+        ("ln-s2", "EFO March 2026"),
+        ("ln-s3", f"free-running ({mad_f:.2f}% MAD)"),
     ])
 
 
@@ -515,7 +560,7 @@ def chart_obr_outturn():
 
     parts = "; ".join(f"{q}: emulator {m:.2f}, EFO {e:.2f}, ONS {o:.2f}" for q, m, e, o in rows)
     desc = (
-        f"Grouped bar chart, percentage quarter-on-quarter real GDP growth for the four "
+        f"Bar chart with outturn markers, percentage quarter-on-quarter real GDP growth for the four "
         f"quarters with ONS outturns since anchoring. {parts}. The emulator tracks the three "
         f"2025 outturns to within 0.06 points; both the emulator and the November EFO it "
         f"inherits miss the strong 0.6 per cent 2026Q1 outturn by roughly a quarter of a point. "
@@ -536,25 +581,36 @@ def chart_obr_outturn():
             out.append(chartkit.ytick(x0, y, f"{t:g}"))
         t += 0.2
 
-    # Three bars per group; the HTML legend names them. Values sit above each
-    # bar where there is room (a chart at least 520 px wide); below that they
-    # cannot fit, and a small table under the chart carries them instead.
+    # The two forecasts are bars; the ONS outturn is what they are judged
+    # against, so it is a dot on a rule across its quarter's pair of bars
+    # (DESIGN.md §6.1: realised data as dots, never a mark that reads as a
+    # third forecast). Values sit above each mark where there is room (a chart
+    # at least 520 px wide); below that a small table under the chart carries
+    # them instead.
+    bar_w, bar_gap = 52.0, 8.0
     for g, (q, m, e, o) in enumerate(rows):
         centre = first_centre + g * group_step
-        for k, (cls, v) in enumerate((("vc-b1", m), ("vc-b3", e), ("vc-b2", o))):
-            x = centre - 60.0 + k * (bar_w + bar_gap)
+        for k, (cls, v) in enumerate((("vc-b1", m), ("vc-b3", e))):
+            x = centre - bar_w - bar_gap / 2 + k * (bar_w + bar_gap)
             h = v * scale
             y = base_y - h
-            cx = x + bar_w / 2
             out.append(f'<rect class="{cls}" x="{n(x)}" y="{n(y)}" width="{bar_w:g}" height="{n(h)}"/>')
-            out.append(f'<text class="vc-val vc-minor" x="{n(cx)}" y="{n(y - 6)}" text-anchor="middle">{v:.2f}</text>')
+            out.append(f'<text class="vc-val vc-minor" x="{n(x + bar_w / 2)}" y="{n(min(y, base_y - o * scale) - 6)}" '
+                       f'text-anchor="middle">{v:.2f}</text>')
+        yo = base_y - o * scale
+        half = bar_w + bar_gap / 2 + 10
+        out.append(f'<line class="vc-out-rule" x1="{n(centre - half)}" y1="{n(yo)}" x2="{n(centre + half)}" y2="{n(yo)}"/>')
+        out.append(f'<circle class="vc-out-dot" cx="{n(centre + half)}" cy="{n(yo)}" r="4.5"/>')
+        out.append(f'<text class="vc-val vc-out-val vc-minor" x="{n(centre + half)}" y="{n(yo - 8)}" '
+                   f'text-anchor="middle">{o:.2f}</text>')
         out.append(f'<text class="vc-lab vc-x" x="{n(centre)}" y="{n(base_y + 6)}" text-anchor="middle">{q}</text>')
 
     out.append("</svg>")
     return chartkit.figure("\n".join(out), legend=[
-        ("sw-b1", "emulator"), ("sw-b3", "EFO Nov 2025"), ("sw-b2", "ONS outturn"),
-    ], narrow_table=(["% q/q", "emulator", "EFO", "ONS"],
-                     [[q, f"{m:.2f}", f"{e:.2f}", f"{o:.2f}"] for q, m, e, o in rows]))
+        ("sw-b1", "emulator"), ("sw-b3", "EFO Nov 2025"), ("sw-dot-out", "ONS outturn"),
+    ], unit="Real GDP growth, % q/q",
+        narrow_table=(["% q/q", "emulator", "EFO", "ONS"],
+                      [[q, f"{m:.2f}", f"{e:.2f}", f"{o:.2f}"] for q, m, e, o in rows]))
 
 
 def chart_svar_fan():
@@ -664,7 +720,7 @@ def chart_svar_fan():
     return chartkit.figure("\n".join(out), legend=[
         ("ln-s1", "median forecast"), ("sw-band", "68% band"), ("sw-dot-out", "ONS outturn"),
         ("ln-edge", f"last quarter with an outturn ({quarters[n_out - 1]})"),
-    ], notes=[f"Year-on-year, per cent. Each panel starts at the frozen 2024Q2 edge; the "
+    ], unit="% change on a year earlier", notes=[f"Each panel starts at the frozen 2024Q2 edge; the "
               f"{npts - n_out} quarters right of the dashed rule are not evaluated."])
 
 
@@ -853,9 +909,8 @@ def chart_svar_skill_all():
     return chartkit.figure("\n".join(out), min_h=420, legend=[
         ("sw-dot1", "significant at 5%, pairwise"),
         ("sw-ring", "not distinguishable"),
-    ], notes=[
-        "RMSE &divide; drifting-random-walk RMSE, horizons 1&ndash;8 quarters. Left of the "
-        "1.0 rule the model is better; right of it the benchmark is.",
+    ], unit="RMSE &divide; drifting-random-walk RMSE, horizons 1&ndash;8 quarters", notes=[
+        "Left of the 1.0 rule the model is better; right of it the benchmark is.",
         f"The large dot, and the number after each name, is h={last}. Smallest adjusted q "
         f'over the {adj["tests"]} cells: {adj["min_q"]:.2f}.',
     ])
@@ -964,7 +1019,7 @@ def chart_svar_winrate():
     return chartkit.figure("\n".join(out), legend=[
         ("sw-b1", "beats it, p&lt;0.05 unadjusted (count under each column)"),
         ("sw-b2", "beats it, not distinguishable"),
-    ], notes=[
+    ], unit=f"Variables (of {total}) with lower RMSE than a random walk with drift", notes=[
         f"Column height = variables with lower RMSE than a random walk with drift, out of "
         f"{total}; the rest do not beat it.",
         f'<span class="vc-warn">Adjusted together, none of the {adj["tests"]} tests clears a '
@@ -1034,7 +1089,9 @@ def chart_svar_coverage():
         v = k / 10
         out.append(f'<line class="vc-grid" x1="{n(x0)}" y1="{n(ymap(v))}" x2="{n(x1)}" y2="{n(ymap(v))}"/>')
         out.append(chartkit.ytick(x0, ymap(v), f"{v:.0%}"))
-    for lv, cls, dodge in ((90, "vc-s2", 4.0), (68, "vc-s1", -4.0)):
+    # Both bands are this model's, so neither is drawn in the dashed
+    # "official" style: 68% is the headline series, 90% the labelled neutral.
+    for lv, cls, dodge in ((90, "vc-s3", 4.0), (68, "vc-s1", -4.0)):
         # nominal level as a reference line
         out.append(
             f'<line class="vc-ref" x1="{n(x0)}" y1="{n(ymap(lv / 100))}" '
@@ -1055,8 +1112,9 @@ def chart_svar_coverage():
     out.append("</svg>")
     return chartkit.figure("\n".join(out), min_h=260, legend=[
         ("ln-s1", "68% band, mean coverage across variables"),
-        ("ln-s2", "90% band"),
-    ], notes=[f"Vertical bars span the best and worst of the eight variables; lowest cell "
+        ("ln-s3", "90% band"),
+        ("ln-ref", "nominal coverage"),
+    ], unit="Share of outturns inside the band, %", notes=[f"Vertical bars span the best and worst of the eight variables; lowest cell "
               f"{worst_v:.0%} ({worst_var}, {worst_lv}% band, h{worst_h})."])
 
 
@@ -1205,7 +1263,7 @@ def chart_define_emissions():
     out.append("</svg>")
     return chartkit.figure("\n".join(out), legend=[
         ("sw-b1", "pinned run"), ("sw-b2", "published Table 4"),
-    ])
+    ], unit="S1 baseline total UK emissions, MtCO<sub>2</sub>e a year")
 
 
 # chart id -> (builder, page that owns it). Charts live on the validation

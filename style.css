@@ -4804,3 +4804,56 @@ body.doc > main { flex: 1 0 auto; }
 .verdict-callout + .model-card { margin-top: var(--s-4); }
 .trust-card td:nth-child(2) { white-space: nowrap; }
 .trust-card .chip { font-family: var(--mono); font-size: var(--fs-label); }
+/* === r2:charts-use === */
+/* Chart house style, round 2 (DESIGN.md §6). Owned by the charts agent.
+   1. Halo: every overlay label gets a knock-out in the surface colour, so a
+      tick that sits on a line (y labels live inside the plot, §6.3) or a
+      value over a band stays legible; the line breaks behind the label, as
+      in FT and BoE charts. --vc-halo follows the card in dark mode. */
+.vc-fig { --vc-halo: var(--surface-card); }
+.vc-fig .vc-t {
+  text-shadow:
+    0 0 2px var(--vc-halo), 0 0 2px var(--vc-halo),
+    1px 0 0 var(--vc-halo), -1px 0 0 var(--vc-halo),
+    0 1px 0 var(--vc-halo), 0 -1px 0 var(--vc-halo);
+}
+/* 2. The value axis' unit, printed once above the plot (chartkit unit=). */
+.doc .vc-fig .vc-unit, .vc-fig .vc-unit {
+  margin: 0;
+  font: 500 var(--fs-label)/1.3 var(--body);
+  color: var(--text-muted);
+  max-width: none;
+}
+/* 3. Direct labels at a line's last point (chartkit.endlabel). Ink matches
+      the series; the neutral series uses text-muted, not its 45% grey, so the
+      words keep AA contrast. */
+.vc-t.vc-end { font-family: var(--body); font-weight: 600; }
+.vc-t.vc-end.vc-end-up { transform: translate(-100%, calc(-100% - 6px)); }
+.vc-t.vc-end.vc-end-dn { transform: translate(-100%, 6px); }
+.vc-t.vc-end-s1 { color: var(--series-ours); }
+.vc-t.vc-end-s2 { color: var(--series-official); }
+.vc-t.vc-end-s3 { color: var(--text-muted); }
+.vchart .vc-s3-dot { fill: color-mix(in srgb, var(--text-strong) 45%, transparent); }
+.vchart .vc-s3-dot.vc-dotp { fill: none; stroke: color-mix(in srgb, var(--text-strong) 45%, transparent); }
+.vchart .vc-s3 { stroke: color-mix(in srgb, var(--text-strong) 45%, transparent); }
+/* A published series drawn solid where nothing on the chart is "ours"
+   (single-source charts such as the OBR outlook). */
+.vchart .vc-s2.vc-solid { stroke-dasharray: none; }
+.vc-sw.ln-s2s { border-top: 2px solid var(--series-official); }
+/* 4. Reference rules (nominal coverage, parity at 1.0) must read as rules,
+      not as faint gridlines. */
+.vchart .vc-ref { stroke: var(--chart-zero); stroke-width: 1; stroke-dasharray: 4 3; }
+/* 5. An interpolated value is drawn as an outline, not a solid result bar. */
+.vchart .vc-interp { fill: color-mix(in srgb, var(--series-ours) 18%, transparent); stroke: var(--series-ours); stroke-width: 1.25; stroke-dasharray: 4 3; }
+.vc-sw.sw-interp { width: 14px; height: 10px; border: 1.25px dashed var(--series-ours); border-radius: 2px; background: color-mix(in srgb, var(--series-ours) 18%, transparent); }
+/* Outturn rule across a quarter's forecast bars (obr-outturn). */
+.vchart .vc-out-rule { stroke: var(--series-outturn); stroke-width: 1.5; }
+/* 6. Dot-plot marks: a forecast as a short horizontal bar, outturn as a dot. */
+.vchart .vc-mark-s1 { stroke: var(--series-ours); stroke-width: 3; stroke-linecap: butt; }
+.vchart .vc-mark-s2 { stroke: var(--series-official); stroke-width: 3; stroke-linecap: butt; }
+.vchart .vc-stem { stroke: var(--chart-axis); stroke-width: 1; }
+.vc-sw.sw-mark1 { width: 14px; height: 0; border-top: 3px solid var(--series-ours); }
+.vc-sw.sw-mark2 { width: 14px; height: 0; border-top: 3px solid var(--series-official); }
+.vchart .vc-track { stroke: var(--chart-grid); stroke-width: 1; }
+.vc-t sup { font-size: 0.8em; line-height: 0; vertical-align: 0.45em; }
+.vc-sw.ln-ref { border-top: 1px dashed var(--chart-zero); }
