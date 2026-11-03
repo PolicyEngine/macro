@@ -32,15 +32,17 @@
   --teal-700: #285E61;   /* hover, emphasis text (7.3:1) */
   --teal-800: #234E52;   /* header band */
   --teal-900: #1D4044;   /* header band, deepest */
-  --gray-50: #F7F9FB;    /* page canvas (site value; ui-kit gray-50 is a blue tint) */
-  --gray-100: #F2F4F7;   /* sunken surface, track, table stripe */
-  --gray-200: #E2E8F0;   /* hairline, card border */
-  --gray-300: #CBD5E1;   /* stronger border, axis */
-  --gray-400: #94A3B8;   /* strokes and ticks only — never text */
-  --gray-500: #5B6878;   /* floor for small text: 5.6:1 on white, 5.3:1 on canvas */
-  --gray-600: #475569;   /* secondary text */
-  --gray-700: #344054;   /* body text */
-  --gray-900: #101828;   /* headings, zero line */
+  /* The UK Autumn Budget 2026 dashboard's greys (its globals.css --pe-gray-*) */
+  --gray-50: #F9FAFB;    /* page canvas */
+  --gray-100: #F3F4F6;   /* sunken surface, track, table stripe */
+  --gray-200: #E5E7EB;   /* hairline, card border, chart grid */
+  --gray-300: #D1D5DB;   /* stronger border, axis */
+  --gray-400: #9CA3AF;   /* strokes and ticks only — never text */
+  --gray-500: #6B7280;   /* floor for small text: 4.8:1 on white; labels, ticks */
+  --gray-600: #4B5563;   /* secondary text */
+  --gray-700: #374151;   /* body text, chart zero line */
+  --gray-800: #1F2937;   /* section titles */
+  --gray-900: #111827;   /* headings */
   --warn-bg: #FFF7ED;
   --warn-line: #FDBA74;
   --warn-ink: #9A3412;   /* 6.9:1 on --warn-bg */
@@ -50,7 +52,7 @@
   --surface-card: var(--card);         /* white card */
   --surface-sunken: var(--gray-100);
   --surface-tint: color-mix(in srgb, var(--primary) 7%, var(--card)); /* info callout, active tab fill */
-  --hairline: var(--border);
+  --hairline: var(--gray-200);
   --hairline-strong: var(--gray-300);
   --text-strong: var(--gray-900);
   --text-body: var(--gray-700);
@@ -109,30 +111,33 @@
   --surface: var(--surface-card);
   --brand-wash: color-mix(in srgb, var(--primary) 8%, transparent);
 
-  /* ---------- 0.5 type ---------- */
+  /* ---------- 0.5 type ----------
+     Inter for everything, as on the Autumn Budget dashboard. --code is the
+     one monospace, for real code only (code, pre, kbd, samp, .codeblock).
+     --mono and --serif are legacy names kept so the ~100 page-local
+     <style> blocks and SVG labels that still name them read Inter too. */
   --display: var(--font-sans, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   --body: var(--font-sans, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
-  --mono: var(--font-mono, "JetBrains Mono", "Fira Code", Consolas, monospace);
-  /* h1/h2 only. No serif is vendored: Georgia is on every desktop OS and
-     iOS; the stack ends in the generic family elsewhere. */
-  --serif: "Source Serif 4", "Source Serif Pro", Georgia, Cambria, "Times New Roman", serif;
-  --max: 1280px;
+  --code: var(--font-mono, "JetBrains Mono", "Fira Code", Consolas, monospace);
+  --mono: var(--body);
+  --serif: var(--body);
+  --max: 1120px;
 
-  --fs-hero: clamp(1.75rem, 3.2vw, 2.4rem);    /* homepage h1 */
-  --fs-hero-sub: clamp(1.45rem, 2.6vw, 2rem);  /* title-band h1 */
-  --fs-h2: clamp(1.3rem, 2vw, 1.6rem);         /* section/card title (serif) */
-  --fs-h3: 1.125rem;                           /* sub-heading in a card */
+  --fs-hero: clamp(1.75rem, 3vw, 2.25rem);     /* homepage h1 */
+  --fs-hero-sub: 1.5rem;                       /* title-bar h1 (AB --fs-xl) */
+  --fs-h2: 1.25rem;                            /* section title (AB --fs-section) */
+  --fs-h3: 1.125rem;                           /* card title (AB --fs-card-title) */
   --fs-h3-sm: 1.05rem;
   --fs-h4: 15px;
   --fs-lede: 1.0625rem;                        /* intro sentence */
   --fs-stat: 2rem;                             /* KPI value */
-  --fs-body: 16px;
+  --fs-body: 15px;                             /* AB --fs-body */
   --fs-body-sm: 14px;
   --fs-small: 13px;                            /* labels, chips, tabs on phone */
   --fs-mono: 13px;
   --fs-label: 12px;                            /* minimum size: eyebrows, ticks */
   --fs-code-inline: 0.9em;
-  --ls-label: 0.08em;
+  --ls-label: 0;                               /* no tracked labels */
 
   /* ---------- 0.6 spacing, radius, elevation ---------- */
   --s-1: 4px;
@@ -144,18 +149,21 @@
   --s-7: 48px;
   --s-8: 64px;
   --s-9: 96px;
-  --gutter: clamp(12px, 3vw, 40px);            /* canvas gutter outside cards */
-  --card-pad: clamp(16px, 2.6vw, 32px);        /* padding inside a card */
+  --gutter: clamp(16px, 3vw, 40px);            /* canvas gutter outside cards */
+  --card-pad: clamp(16px, 2.2vw, 24px);        /* padding inside a card (AB 24px) */
   --band-y: var(--card-pad);
-  --gap-cards: clamp(16px, 2vw, 24px);         /* vertical gap between cards */
+  --gap-cards: 20px;                           /* gap between cards (AB) */
   --radius: 10px;                              /* callouts, inner panels, code */
-  --radius-card: 14px;                         /* cards, stat tiles */
+  --radius-card: 12px;                         /* cards (AB --card-radius) */
   --radius-sm: 6px;                            /* bars, tracks, small controls */
-  --shadow-card: 0 1px 2px rgba(16, 24, 40, .05), 0 6px 16px -6px rgba(16, 24, 40, .08);
-  --shadow-raised: 0 2px 4px rgba(16, 24, 40, .06), 0 12px 28px -8px rgba(16, 24, 40, .16);
+  --shadow-card: 0 1px 2px rgba(17, 24, 39, .04);   /* AB: a card's edge, no heavy shadow */
+  --shadow-raised: 0 6px 18px rgba(17, 24, 39, .08); /* AB: a card lifted on hover */
+  --band-gradient: linear-gradient(to right, var(--teal-800), var(--teal-600)); /* AB title bar */
+  --c-tick: var(--gray-500);
+  --c-zero: var(--gray-700);
 
   /* ---------- 0.7 shell geometry (sticky offsets read these) ---------- */
-  --nav-h: 56px;          /* header band height = top of the sub-tab row */
+  --nav-h: 58px;          /* header band height (AB/ui-kit 58px) = top of the sub-tab row */
   --subnav-h: 48px;       /* sub-tab row height */
   --sticky-top: calc(var(--nav-h) + var(--subnav-h) + 16px); /* StepPanel, rail */
 }
@@ -559,7 +567,7 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   padding: 0 8px 0 12px;
   color: var(--text-faint);
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: var(--ls-label);
 }
 .economy-topics {
@@ -719,13 +727,13 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
 .prose h4 {
   margin: var(--s-5) 0 var(--s-3);
   font-size: var(--fs-small);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: var(--ls-label);
   color: var(--text-muted);
 }
 .formal-label {
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: var(--ls-label);
   color: var(--text-faint);
 }
@@ -847,7 +855,7 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   font-family: var(--mono);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--teal-700);
   margin-bottom: var(--s-3);
 }
@@ -947,7 +955,7 @@ main > :last-child { margin-bottom: var(--s-7); }
   font-size: var(--fs-label);
   font-weight: 600;
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--teal-700);
   margin-bottom: var(--s-2);
 }
@@ -1181,7 +1189,7 @@ h3 { color: var(--text-strong); font-weight: 600; }
 .doc .prose li { margin: var(--s-2) 0; line-height: 1.7; font-size: var(--fs-body); max-width: none; }
 .doc .prose p code,
 .doc .prose li code,
-.doc .prose td code { font-family: var(--mono); font-size: var(--fs-code-inline); color: var(--brand-strong); }
+.doc .prose td code { font-family: var(--code); font-size: var(--fs-code-inline); color: var(--brand-strong); }
 .doc .prose p code,
 .doc .prose li code,
 .connect-panel p code { overflow-wrap: anywhere; }
@@ -1246,7 +1254,7 @@ h3 { color: var(--text-strong); font-weight: 600; }
 }
 .codeblock pre { margin: 0; }
 .codeblock code,
-.code-window code { font-family: var(--mono); font-size: var(--fs-mono); line-height: 1.7; white-space: pre; }
+.code-window code { font-family: var(--code); font-size: var(--fs-mono); line-height: 1.7; white-space: pre; }
 .codeblock .cb-copy {
   position: absolute; top: 10px; right: 12px;
   border: 0; background: none; cursor: pointer;
@@ -1281,7 +1289,7 @@ h3 { color: var(--text-strong); font-weight: 600; }
 .prose table, .meth-step table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: var(--fs-body-sm); }
 .prose th, .meth-step th {
   text-align: left; font-family: var(--mono); font-size: var(--fs-label);
-  letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--paper-faint);
+  letter-spacing: var(--ls-label); text-transform: none; color: var(--paper-faint);
 }
 .prose th, .prose td, .meth-step th, .meth-step td {
   padding: 11px 16px 11px 0; border-bottom: 1px solid var(--line-soft); vertical-align: top;
@@ -1317,7 +1325,7 @@ h3 { color: var(--text-strong); font-weight: 600; }
 
 /* ---------- section divider after hero + grid footer ---------- */
 .hero + .band { border-top: 1px solid var(--line-soft); }
-.foot-head { display: block; font-family: var(--mono); font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--paper-faint); margin-bottom: 12px; }
+.foot-head { display: block; font-family: var(--mono); font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: none; color: var(--paper-faint); margin-bottom: 12px; }
 .next-invite { margin-top: 30px; text-align: center; font-size: var(--fs-small); color: var(--paper-faint); display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
 .next-invite a { color: var(--text, #111); text-decoration: none; border-bottom: 1px solid var(--line-soft); padding-bottom: 1px; }
 .next-invite a:hover { color: var(--brand-strong); border-bottom-color: var(--brand-strong); }
@@ -1389,7 +1397,7 @@ h3 { color: var(--text-strong); font-weight: 600; }
   flex-wrap: wrap;
 }
 .foot-bar > * { max-width: var(--max); }
-.foot-head { display: block; font-family: var(--mono); font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--band-text-dim); margin-bottom: 12px; }
+.foot-head { display: block; font-family: var(--mono); font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: none; color: var(--band-text-dim); margin-bottom: 12px; }
 .foot-nav { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 12px 22px; }
 .foot-nav a { font-size: var(--fs-small); color: var(--band-text-dim); text-decoration: none; }
 .foot-nav a:hover { color: var(--band-text); }
@@ -1597,7 +1605,7 @@ h3 { color: var(--text-strong); font-weight: 600; }
   background: var(--line-soft);
 }
 .forecast-round dl div { padding: 14px; background: var(--ink); }
-.forecast-round dt { color: var(--paper-faint); font: var(--fs-label)/1.4 var(--mono); text-transform: uppercase; }
+.forecast-round dt { color: var(--paper-faint); font: var(--fs-label)/1.4 var(--mono); text-transform: none; }
 .forecast-round dd { margin: 6px 0 0; color: var(--paper); font-weight: 600; }
 .forecast-round { display: flex; flex-direction: column; }
 .forecast-round dl { width: 100%; }
@@ -1713,7 +1721,7 @@ h3 { color: var(--text-strong); font-weight: 600; }
 .contact-socials > span {
   color: var(--paper-faint);
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: var(--ls-label);
 }
 .contact-socials a {
@@ -1886,7 +1894,7 @@ h3 { color: var(--text-strong); font-weight: 600; }
   color: var(--paper-faint);
   font-size: var(--fs-small);
   letter-spacing: .08em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .economy-stat-value {
   color: var(--paper);
@@ -1978,7 +1986,7 @@ h3 { color: var(--text-strong); font-weight: 600; }
 .economy-model-card > span {
   color: var(--brand-strong);
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: .06em;
 }
 .economy-model-card h3 {
@@ -2002,7 +2010,7 @@ h3 { color: var(--text-strong); font-weight: 600; }
   margin-bottom: 4px;
   color: var(--brand-strong);
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: .06em;
 }
 .economy-note-aside a {
@@ -2124,7 +2132,7 @@ h3 { color: var(--text-strong); font-weight: 600; }
 .trends-related span {
   color: var(--brand-strong);
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: .06em;
 }
 .trends-related h2 {
@@ -2217,7 +2225,7 @@ h3 { color: var(--text-strong); font-weight: 600; }
 .mobile-compare-controls label { display: grid; gap: 7px; color: var(--paper-dim); font-family: var(--mono); font-size: var(--fs-label); }
 .mobile-compare-controls select { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--paper); background: var(--surface); font: inherit; }
 .mobile-compare-row { padding: var(--s-5) 0; border-top: 1px solid var(--line-soft); }
-.mobile-compare-row h4 { margin: 0 0 var(--s-4); color: var(--brand); font-family: var(--mono); font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--ls-label); }
+.mobile-compare-row h4 { margin: 0 0 var(--s-4); color: var(--brand); font-family: var(--mono); font-size: var(--fs-label); text-transform: none; letter-spacing: var(--ls-label); }
 .mobile-compare-row > div { padding: var(--s-3); border: 1px solid var(--line-soft); border-radius: var(--radius-sm); background: var(--surface); }
 .mobile-compare-row > div + div { margin-top: 8px; }
 .mobile-compare-row strong { color: var(--paper); font-size: var(--fs-body-sm); }
@@ -2581,7 +2589,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   border-bottom: 1px solid var(--line-soft);
   color: var(--paper);
   font-size: var(--fs-small);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: var(--ls-label);
 }
 .glance-col table { width: 100%; }
@@ -2610,7 +2618,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   border-radius: 999px;
   background: var(--surface);
   font-family: var(--mono); font-size: var(--fs-label);
-  color: var(--paper-faint); text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--paper-faint); text-transform: none; letter-spacing: 0.06em;
   transition: border-color .15s ease, box-shadow .15s ease;
 }
 .olg-toolbar label:hover, .olg-toolbar label:focus-within {
@@ -2699,7 +2707,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   font-family: var(--mono);
   font-size: var(--fs-label);
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.08em;
 }
 .meth-sec-title::after { content: ""; flex: 1; height: 1px; background: var(--line-soft); }
@@ -2717,7 +2725,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   font-family: var(--mono);
   font-size: var(--fs-label);
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.08em;
 }
 .meth-eq-body { text-align: left; color: var(--text-strong); font-size: var(--fs-body-sm); font-variant-numeric: tabular-nums; }
@@ -3132,7 +3140,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   display: block;
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--paper-faint);
   margin-bottom: 12px;
 }
@@ -3184,7 +3192,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 .vmet-notes-key {
   min-width: 0;
   color: var(--brand-strong);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: var(--ls-label);
   font-weight: 600;
 }
@@ -3267,7 +3275,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   font-family: var(--mono);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
 }
 @media (max-width: 719px) {
   .fc-vmet .forecast-summary { grid-template-columns: 1fr; }
@@ -3382,7 +3390,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   padding: 6px 0;
   color: var(--paper-faint);
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: var(--ls-label);
 }
 .glance-row-head .g-name { font-weight: 500; }
@@ -3440,7 +3448,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   text-align: left;
   font: var(--fs-label)/1.4 var(--mono);
   color: var(--paper-dim);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.04em;
   padding: 0 var(--s-4) 10px 0;
   border-bottom: 1px solid var(--line-soft);
@@ -3566,7 +3574,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   color: var(--brand-strong);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
 }
 /* both panels close on their link, on one baseline */
 .home-page .proof-col .qa-link { margin-top: auto; padding-top: var(--s-5); }
@@ -3647,7 +3655,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   color: var(--brand-strong);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
 }
 .home-page .core-panel + .core-panel .core-panel-head { color: var(--paper-dim); }
 .home-page .core-panel-foot {
@@ -3753,7 +3761,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   font-family: var(--mono);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
 }
 .home-page .xt-tag-warn { color: var(--brand-warning); }
 .home-page .xt-what {
@@ -3824,7 +3832,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   color: var(--paper-faint);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
 }
 .home-page .join-lines dd {
   margin: 0;
@@ -3852,7 +3860,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   color: var(--paper-faint);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
 }
 /* Below ~560px four nodes and three arrows cannot share a row without the
    node text going ragged, so the flow turns vertical and the arrows turn
@@ -3890,7 +3898,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   color: var(--paper-faint);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
 }
 .home-page .rail-lab {
   width: max-content;
@@ -4074,7 +4082,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 /* ---------- 5.1 base fixes the shell depends on ---------- */
 a { color: var(--link); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
 a:hover { color: var(--link-hover); }
-code, pre, kbd, samp { font-family: var(--mono); }
+code, pre, kbd, samp, .codeblock pre, .codeblock code { font-family: var(--code); }
 .num, td, .metric-val, .stat-value { font-variant-numeric: tabular-nums; }
 
 /* The title band is a column, left-aligned at every width: the legacy
@@ -4269,7 +4277,7 @@ details.about > :not(summary) { padding-bottom: var(--s-4); color: var(--text-bo
     margin-top: var(--gap-cards);
     padding-left: 0;
   }
-  .page-rail-title { display: block; margin-bottom: 6px; color: var(--text-faint); font-family: var(--mono); font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--ls-label); }
+  .page-rail-title { display: block; margin-bottom: 6px; color: var(--text-faint); font-family: var(--mono); font-size: var(--fs-label); text-transform: none; letter-spacing: var(--ls-label); }
   .page-rail a { padding: 6px 12px; border: 0; border-left: 2px solid var(--hairline); border-radius: 0; background: none; }
   .page-rail a[aria-current] { border-left-color: var(--primary); background: none; }
 }
@@ -4594,9 +4602,12 @@ body.doc > main { flex: 1 0 auto; }
     --gray-300: #334155;
     --gray-500: #A9B4C4;
     --gray-600: #CBD5E1;
+    --gray-400: #64748B;
     --gray-700: #E2E8F0;
+    --gray-800: #EEF2F6;
     --gray-900: #F5F5F5;
     --teal-700: #81E6D9;
+    --band-gradient: linear-gradient(to right, #10282B, #1D4044);
     --canvas: #0B0E14;
     --band-bg: #10282B;
     --band-bg-2: #163538;
@@ -4645,7 +4656,7 @@ body.doc > main { flex: 1 0 auto; }
     font-size: var(--fs-label);
     font-weight: 500;
     letter-spacing: .04em;
-    text-transform: uppercase;
+    text-transform: none;
   }
   table.t-stack td[data-label=""]::before { display: none; }
   table.t-stack caption { text-align: left; }
@@ -4746,7 +4757,7 @@ body.doc > main { flex: 1 0 auto; }
   font-size: var(--fs-label);
   font-weight: 500;
   letter-spacing: .08em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .model-card dd {
   margin: 0;
@@ -4844,5 +4855,425 @@ body.doc > main { flex: 1 0 auto; }
    :where() keeps it at zero specificity, so any classed table wins. */
 :where(.band) :where(table) { width: 100%; border-collapse: collapse; font-size: var(--fs-body-sm); }
 :where(.band) :where(th, td) { padding: 10px 16px 10px 0; border-bottom: 1px solid var(--hairline); text-align: left; vertical-align: top; }
-:where(.band) :where(thead th) { color: var(--text-faint); font: 500 var(--fs-label)/1.3 var(--mono); letter-spacing: .04em; text-transform: uppercase; }
+:where(.band) :where(thead th) { color: var(--text-faint); font: 500 var(--fs-label)/1.3 var(--mono); letter-spacing: .04em; text-transform: none; }
 :where(.band) :where(caption) { caption-side: top; margin: 0 0 var(--s-2); color: var(--text-muted); font-size: var(--fs-small); text-align: left; }
+
+/* =====================================================================
+   6. AUTUMN BUDGET LOOK (DESIGN.md §2–§4, Nov 2026)
+   The whole site in the UK Autumn Budget 2026 dashboard's visual language
+   (PolicyEngine/uk-autumn-budget-dashboard-2026, src/app/globals.css,
+   SubTabs.css, PolicyCards, ObrDifferencePanel.css, MeasureKey.css):
+   Inter everywhere, the teal gradient title bar, white tab rows with icons,
+   section headers on the canvas above white 12px cards, quiet tints in
+   place of heavy rules. Last in the file so it wins without !important.
+   ===================================================================== */
+
+/* ---------- 6.1 type ---------- */
+body { font-family: var(--body); font-size: var(--fs-body); color: var(--text-body); background: var(--canvas); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4, .brand, .paper-viewer-head h1, .paper-viewer-head .paper-title { font-family: var(--body); letter-spacing: 0; }
+h1 { font-weight: 700; letter-spacing: -0.025em; }
+h2 { font-size: var(--fs-h2); font-weight: 600; line-height: 1.6; color: var(--gray-800); max-width: none; }
+h3 { font-size: var(--fs-h3); font-weight: 600; line-height: 1.35; color: var(--text-strong); }
+.mono { font-family: inherit; }
+code, pre, kbd, samp, .codeblock pre, .codeblock code { font-family: var(--code); }
+.prose p { font-size: var(--fs-body); line-height: 1.6; }
+.prose h4, .formal-label, .meth-sec-title, .meth-eq-label, .economy-subnav-label { letter-spacing: 0; }
+.prose h4 { font-size: var(--fs-body); font-weight: 600; color: var(--text-strong); }
+
+/* ---------- 6.2 site header: policyengine.org's gradient band ---------- */
+.nav {
+  background: var(--band-gradient);
+  border-bottom: 0.5px solid var(--teal-700);
+  box-shadow: none;
+}
+.brand { font-size: 1.0625rem; font-weight: 600; }
+.nav-links { font-size: var(--fs-body); }
+.nav-links a { color: var(--band-text); font-weight: 500; }
+.nav-links a:hover, .nav-links a[aria-current] { background: transparent; }
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 8px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--band-text);
+  transform: scaleX(0);
+  transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.nav-links a:hover::after, .nav-links a[aria-current]::after { transform: scaleX(1); }
+.nav-links a[aria-current]::after { left: 10px; right: 10px; bottom: 8px; height: 2px; background: var(--band-text); }
+.nav-links a.nav-gh::after { display: none; }
+
+/* ---------- 6.3 title bar (AB .title-row) + sub-tabs + section lede ----
+   An interior page's .hero holds the pathway's title, a key-facts line and
+   the lede. The hero and its inner box dissolve (display: contents) so the
+   three become items of <main>'s column and take AB's order: the h1 in the
+   gradient title bar (the pathway, painted the same, sits above it), then
+   the white tab row, then the lede and key facts on the canvas as the
+   page's section header, then the cards. Nothing in the markup moves. */
+.doc main:has(> .hero.model-hero),
+.doc main:has(> .hero.connect-hero) { display: flex; flex-direction: column; }
+.doc main:has(> .hero.model-hero) > *,
+.doc main:has(> .hero.connect-hero) > * { order: 5; }
+.doc .hero.model-hero, .doc .hero.model-hero > .hero-inner,
+.doc .hero.connect-hero, .doc .hero.connect-hero > .hero-inner { display: contents; }
+.doc main > .hero > .hero-inner > * { order: 4; }
+.doc main > .hero > .hero-inner > h1 { order: 1; }
+.doc main > .hero > .hero-inner > .lede { order: 3; }
+.doc main:has(> .hero) > .model-tabs, .doc main:has(> .hero) > .economy-subnav { order: 2; }
+/* the column every bar's content lines up with: the cards' left edge */
+:root { --col-x: max(var(--gutter), calc((100% - var(--max)) / 2)); }
+.crumbs {
+  padding: 10px var(--col-x) 0;
+  background: var(--band-gradient);
+  color: var(--band-text-dim);
+  font-size: var(--fs-small);
+}
+.crumbs a { color: rgba(255, 255, 255, .82); text-decoration: none; }
+.crumbs a:hover { color: var(--band-text); text-decoration: underline; }
+.crumbs a::after { color: rgba(255, 255, 255, .55); }
+@media (min-width: 1360px) { .crumbs { padding-inline: var(--col-x); } }
+.doc main > .hero > .hero-inner > h1 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  margin: 0;
+  padding: 4px var(--col-x) 10px;
+  background: var(--band-gradient);
+  border-bottom: 0.5px solid var(--teal-700);
+  color: var(--band-text);
+  font-size: var(--fs-hero-sub);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.doc main > .hero > .hero-inner > h1::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #FFFFFF url("/assets/policyengine-mark.svg") center / 22px no-repeat;
+}
+.doc main > .hero > .hero-inner > .lede,
+.doc main > .hero > .hero-inner > .eyebrow,
+.doc main > .hero > .hero-inner > :not(h1) {
+  width: min(var(--max), calc(100% - 2 * var(--gutter)));
+  margin-inline: auto;
+}
+.doc main > .hero > .hero-inner > .lede {
+  max-width: none;
+  margin-top: 28px;
+  margin-bottom: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-body-lg, 1rem);
+  line-height: 1.6;
+}
+.doc main > .hero > .hero-inner > .lede > * { max-width: 80ch; }
+.doc main > .hero > .hero-inner > .eyebrow {
+  margin-top: 6px;
+  margin-bottom: 0;
+  color: var(--text-faint);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.doc main > .hero > .hero-inner > :not(h1):not(.lede):not(.eyebrow) { margin-top: var(--s-4); }
+.doc main > .hero a:not(.btn) { color: var(--link); text-decoration-color: color-mix(in srgb, var(--link) 40%, transparent); }
+.doc main > .hero .lede strong { color: var(--text-strong); }
+.doc main > .hero code { color: var(--text-strong); background: var(--surface-sunken); }
+.doc main > .hero :focus-visible { box-shadow: none; }
+
+/* The tab rows: AB's ViewTabs/SubTabs. White, one rule, 48px, 16px/600,
+   an icon before each label; chosen = teal ink, teal-50 tint, 3px teal
+   underline on the rule. */
+:root { --tab-teal: var(--teal-700); }
+.model-tabs, .economy-subnav {
+  border-top: 1px solid var(--hairline);
+  box-shadow: 0 1px 2px rgba(17, 24, 39, .04);
+}
+.model-tabs-row, .economy-subnav-row {
+  gap: 8px;
+  max-width: none;
+  padding: 0 calc(var(--col-x) - 12px);
+}
+.model-tabs-link, .economy-topics a, .economy-topics button, .model-tabs-set button {
+  gap: 8px;
+  height: 48px;
+  min-height: 48px;
+  padding: 0 12px;
+  color: var(--gray-600);
+  font-size: 1rem;
+  font-weight: 600;
+}
+.model-tabs-link:hover, .economy-topics a:hover, .economy-topics button:hover, .model-tabs-set button:hover { color: var(--tab-teal); background: var(--surface-tint); }
+.model-tabs-link[aria-current], .economy-topics a[aria-current], .economy-topics button[aria-selected="true"],
+.model-tabs-set button.is-current, .model-tabs-set button[aria-selected="true"] { color: var(--tab-teal); background: var(--surface-tint); font-weight: 600; }
+.model-tabs-link[aria-current]::after, .economy-topics a[aria-current]::after, .economy-topics button[aria-selected="true"]::after,
+.model-tabs-set button.is-current::after, .model-tabs-set button[aria-selected="true"]::after { background: var(--tab-teal); }
+/* icons, keyed to the tab's target (masks take currentColor) */
+.model-tabs-link::before, .economy-topics a::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  opacity: .8;
+  -webkit-mask: var(--tab-icon, var(--i-doc)) center / contain no-repeat;
+  mask: var(--tab-icon, var(--i-doc)) center / contain no-repeat;
+}
+.model-tabs-link[aria-current]::before, .economy-topics a[aria-current]::before { opacity: 1; }
+:root {
+  --i-doc: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h6'/%3E%3C/svg%3E");
+  --i-home: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10.5 12 3l9 7.5'/%3E%3Cpath d='M5 9.5V21h14V9.5'/%3E%3C/svg%3E");
+  --i-book: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/%3E%3C/svg%3E");
+  --i-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z'/%3E%3Cpath d='m9 12 2 2 4-4'/%3E%3C/svg%3E");
+  --i-code: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m16 18 6-6-6-6M8 6l-6 6 6 6'/%3E%3C/svg%3E");
+  --i-chart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v18h18'/%3E%3Cpath d='m7 15 4-4 3 3 6-7'/%3E%3C/svg%3E");
+  --i-layers: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 3 9 5-9 5-9-5z'/%3E%3Cpath d='m3 12.5 9 5 9-5M3 16.5l9 5 9-5'/%3E%3C/svg%3E");
+  --i-plug: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4'/%3E%3C/svg%3E");
+  --i-globe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18'/%3E%3C/svg%3E");
+  --i-list: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'/%3E%3C/svg%3E");
+}
+.model-tabs-row > .model-tabs-link:first-child { --tab-icon: var(--i-home); }
+.model-tabs-link[href$="/methodology"] { --tab-icon: var(--i-book); }
+.model-tabs-link[href$="/validation"] { --tab-icon: var(--i-check); }
+.model-tabs-link[href$="/code"] { --tab-icon: var(--i-code); }
+.model-tabs-link[href^="/papers/"], .model-tabs-link[href^="/reports/"] { --tab-icon: var(--i-doc); }
+.economy-topics a { --tab-icon: var(--i-chart); }
+.economy-subnav-countries a { --tab-icon: var(--i-globe); }
+.economy-subnav-label { font-size: var(--fs-small); font-weight: 500; color: var(--text-faint); }
+
+/* ---------- 6.4 section header on the canvas, card below (AB) ----------
+   A top-level .band that opens with a .band-head is drawn as AB draws a
+   section: round tinted icon badge + 20px title + one grey line, on the
+   canvas, then the white card. The band itself has no surface; the head's
+   ::after paints the card from just under the head to the band's end
+   (clipped by the band's rounded bottom), and the band's ::after draws the
+   card's bottom edge. */
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) {
+  position: relative;
+  z-index: 0;
+  margin-top: 40px;
+  padding-top: 0;
+  background: none;
+  border: 0;
+  border-radius: 0 0 var(--radius-card) var(--radius-card);
+  box-shadow: none;
+  overflow: clip;
+  overflow-clip-margin: 0;
+}
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band)::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--radius-card);
+  border: 1px solid var(--hairline);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-card) var(--radius-card);
+  pointer-events: none;
+}
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: start;
+  max-width: none;
+  margin: 0 calc(-1 * var(--card-pad)) calc(20px + var(--card-pad));
+  padding: 0;
+}
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child::before {
+  content: "";
+  grid-column: 1;
+  grid-row: 2;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--surface-tint);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 18%, var(--card));
+  background-image: var(--sec-icon);
+  background-position: center;
+  background-size: 16px;
+  background-repeat: no-repeat;
+}
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: calc(100% + 20px);
+  left: 0;
+  right: 0;
+  height: 200000px;
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  border-bottom: 0;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  box-shadow: var(--shadow-card);
+  pointer-events: none;
+}
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child > * { grid-column: 2; margin-top: 0; }
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child > .kicker { grid-row: 1; }
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child > h2 { grid-row: 2; margin: 0; line-height: 32px; }
+.band-head .section-intro, .band-head > p { margin-top: 4px; color: var(--text-faint); font-size: var(--fs-body); line-height: 1.5; }
+/* section icon: the view the page belongs to */
+:root { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h6'/%3E%3C/svg%3E"); }
+body:has(.nav-links a[href="/models"][aria-current]) { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 3 9 5-9 5-9-5z'/%3E%3Cpath d='m3 12.5 9 5 9-5M3 16.5l9 5 9-5'/%3E%3C/svg%3E"); }
+body:has(.nav-links a[href="/forecasts"][aria-current]) { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v18h18'/%3E%3Cpath d='m7 15 4-4 3 3 6-7'/%3E%3C/svg%3E"); }
+body:has(.nav-links a[href="/connect"][aria-current]) { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4'/%3E%3C/svg%3E"); }
+body.home-page { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10.5 12 3l9 7.5'/%3E%3Cpath d='M5 9.5V21h14V9.5'/%3E%3C/svg%3E"); }
+
+/* The kicker: a small sentence-case teal label, never tracked capitals */
+.kicker {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--tab-teal);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.kicker::first-letter, .eyebrow::first-letter, .meth-panel-badge::first-letter, .page-rail-title::first-letter, .foot-head::first-letter { text-transform: uppercase; }
+.eyebrow { font-size: var(--fs-small); font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--text-faint); }
+
+/* ---------- 6.5 cards and panels (AB: white, 1px gray-200, 12px) ---------- */
+.band { border-color: var(--hairline); border-radius: var(--radius-card); box-shadow: var(--shadow-card); }
+.card, .entry-card, .meth-panel, .meth-inline, .class-glossary > div, .mo-figcard, .vfig { border-color: var(--hairline); box-shadow: var(--shadow-card); }
+.entry-card, .policy-like { border-top: 3px solid var(--primary); }
+.entry-card:hover { box-shadow: var(--shadow-raised); transform: translateY(-2px); }
+.entry-card { transition: box-shadow 200ms ease, transform 200ms ease; }
+/* homepage intro card and the verdict band: no left rule, a 3px top band */
+.home-page .hero > .hero-inner, .band.band-result, .band + .band.band-result, .intro-card {
+  border: 1px solid var(--hairline);
+  border-top: 3px solid var(--primary);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+.home-page .hero h1 { font-weight: 700; letter-spacing: -0.03em; color: var(--text-strong); }
+
+/* Buttons: AB's dark teal solid (.policy-card-effect) and its outline twin */
+.btn { border-radius: 8px; padding: 9px 16px; font-size: var(--fs-body); font-weight: 600; }
+.btn-primary { background: var(--teal-700); }
+.btn-primary:hover { background: var(--teal-800); }
+.entry-cta { border-radius: 8px; padding: 8px 14px; background: var(--teal-700); font-size: var(--fs-body-sm); }
+.entry-card:hover .entry-cta { background: var(--teal-800); }
+@media (prefers-color-scheme: dark) {
+  .btn-primary, .entry-cta { background: #2C7A7B; color: #FFFFFF; }
+  .btn-primary:hover, .entry-card:hover .entry-cta { background: #319795; }
+}
+
+/* Key/value rows (model card, bare dl): AB's policy-card rows */
+.model-card dt, .band dl:not([class]) > dt {
+  margin: 0 0 2px;
+  color: var(--text-faint);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.model-card dd { color: var(--text-strong); font-size: var(--fs-body); line-height: 1.5; }
+.model-card > div { padding: 12px 0; }
+:where(.band) :where(thead th) { color: var(--text-faint); font: 500 var(--fs-small)/1.3 var(--body); letter-spacing: 0; }
+
+/* Stat tiles: AB's tinted teal boxes ("Duty saved on a 50-litre fill") */
+.stat, .metric {
+  gap: 4px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--primary) 6%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--card));
+  border-radius: 8px;
+  box-shadow: none;
+}
+.stat-us { border-color: color-mix(in srgb, var(--series-us) 30%, var(--card)); background: color-mix(in srgb, var(--series-us) 5%, var(--card)); }
+.stat-neutral { border-color: var(--hairline); background: var(--gray-50); }
+.stat-label, .metric-label { color: var(--text-muted); font-size: var(--fs-small); font-weight: 500; }
+.stat-value, .metric-val { color: var(--tab-teal); font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+.stat-us .stat-value { color: var(--series-us); }
+.stat-neutral .stat-value { color: var(--text-strong); }
+.stat-foot { border-top-color: color-mix(in srgb, var(--primary) 18%, var(--card)); }
+
+/* Chips: AB's pills — light border, white, icon slot */
+.chip, .tag { min-height: 28px; padding: 3px 12px; border-radius: 999px; font-size: var(--fs-small); font-weight: 500; }
+.trust-card .chip { font-family: var(--body); font-size: var(--fs-small); }
+
+/* Callouts: a calm tinted panel, 1px all round, no thick left rule */
+.callout {
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--card));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary) 5%, var(--card));
+  font-size: var(--fs-body);
+}
+.callout-warn { border: 1px solid var(--warn-line); background: var(--warn-bg); }
+.callout-neutral { border: 1px solid var(--hairline); background: var(--gray-50); }
+.home-page .record-now { border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--card)); border-radius: 10px; background: color-mix(in srgb, var(--primary) 5%, var(--card)); }
+
+/* Expanders: AB's "About this chart" foot — title, grey subline, chevron */
+details.expander, details.about { border-top: 1px solid var(--hairline); }
+details.expander > summary, details.about > summary { min-height: 52px; color: var(--gray-800); font-size: var(--fs-body); font-weight: 600; }
+details.expander > summary:hover, details.about > summary:hover { color: var(--tab-teal); }
+details.expander > summary .expander-meta { color: var(--text-faint); font-size: var(--fs-small); font-weight: 400; }
+
+/* ---------- 6.6 StepPanel in AB language ----------
+   Left: clean numbered rows. Right: AB's selected-policy panel — 1.5px
+   teal border, 10px radius, no shadow, a quiet head. */
+.meth-step-num { width: 28px; height: 28px; border: 0; border-radius: 8px; background: var(--surface-tint); color: var(--tab-teal); font-size: var(--fs-small); font-weight: 600; }
+.meth-step.active .meth-step-num { background: var(--teal-700); color: #FFFFFF; }
+.meth-step::before { left: 13px; top: 36px; width: 1px; }
+.meth-step { padding-left: 44px; }
+.meth-step-head { margin-left: -44px; }
+.meth-step-head h3 { font-size: var(--fs-h3); }
+.meth-panel, .meth-inline { border: 1.5px solid var(--primary); border-radius: 10px; box-shadow: none; }
+.meth-panel .meth-panel-head, .meth-inline .meth-panel-head { padding: 14px 16px 12px; background: transparent; border-bottom: 1px solid var(--hairline); }
+.scrolly-sticky .meth-panel .meth-panel-head { background: var(--surface-card); }
+.meth-panel-badge { padding: 2px 10px; background: var(--surface-tint); color: var(--tab-teal); border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--card)); font-size: var(--fs-small); font-weight: 600; }
+.meth-sec-title, .meth-eq-label { color: var(--text-faint); font-size: var(--fs-small); font-weight: 500; }
+.meth-sec-title::after { background: var(--hairline); }
+@media (max-width: 480px) { .meth-step { padding-left: 0; } .meth-step-head { margin-left: 0; } }
+
+/* ---------- 6.7 "On this page" rail: a clean Inter list ---------- */
+.page-rail a { font-size: var(--fs-body-sm); font-weight: 500; }
+@media (min-width: 1100px) {
+  .page-rail-title { font-family: var(--body); font-size: var(--fs-small); font-weight: 600; color: var(--text-faint); letter-spacing: 0; }
+  .page-rail a { padding: 7px 12px; border-left: 2px solid var(--hairline); color: var(--text-muted); }
+  .page-rail a:hover { color: var(--tab-teal); background: var(--surface-tint); }
+  .page-rail a[aria-current] { color: var(--tab-teal); border-left-color: var(--tab-teal); background: var(--surface-tint); }
+  .with-rail { width: min(var(--max) + 224px, calc(100% - 2 * var(--gutter))); }
+}
+
+/* ---------- 6.8 charts: AB's Recharts look ----------
+   Dashed gray-200 grid, gray-500 12px Inter ticks, a solid gray-700 zero
+   line, legends as pill chips under the plot. */
+.vchart .vc-grid, .hero-fan .hf-grid { stroke: var(--gray-200); stroke-dasharray: 3 3; }
+.vchart .vc-axis { stroke: var(--gray-300); stroke-width: 1; }
+.vchart .vc-zero, .hero-fan .hf-zero { stroke: var(--c-zero); stroke-width: 1; stroke-dasharray: none; }
+.vchart .vc-tick, .hero-fan text { fill: var(--c-tick); font-family: var(--body); }
+.vc-t { font: 400 12px/1 var(--body); color: var(--c-tick); }
+.vc-t .vc-num { font-family: var(--body); }
+.doc .vc-fig .vc-unit, .vc-fig .vc-unit { font: 500 12px/1.3 var(--body); color: var(--gray-600); }
+.vc-table thead th, .vc-narrow-table thead th { font: 500 var(--fs-small)/1.3 var(--body); color: var(--text-faint); }
+.doc .vc-legend, .doc ul.vc-legend, .doc .sb-legend, .doc ul.sb-legend { gap: 6px; justify-content: flex-start; margin-top: var(--s-4); font-size: 12.5px; }
+.doc .vc-legend li, .doc .sb-legend li {
+  gap: 8px;
+  min-height: 32px;
+  padding: 3px 12px 3px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--surface-card);
+  color: var(--c-text, var(--text-body));
+  font-size: 12.5px;
+}
+:root { --c-text: var(--gray-700); }
+.doc .vc-fig .vc-notes { color: var(--text-faint); font-size: var(--fs-small); }
+
+/* ---------- 6.9 dark mode for the section above ---------- */
+@media (prefers-color-scheme: dark) {
+  :root, body:has(.nav-links a[aria-current]), body.home-page { --sec-icon: none; }
+  .crumbs a { color: rgba(255, 255, 255, .8); }
+}
