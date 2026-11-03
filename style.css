@@ -4658,3 +4658,65 @@ body.doc > main { flex: 1 0 auto; }
   .step-diagram { justify-content: flex-start; overflow-x: auto; cursor: default; }
   .step-diagram svg { max-width: none !important; flex: 0 0 auto; } /* width attribute = viewBox width */
 }
+
+/* === r2:ia === */
+/* Homepage story (what it is, start, why trust it, the record, which model,
+   how it connects, use) and the /models router. Role tokens only. */
+
+/* why trust it: one verdict row per model, the class as a chip */
+.home-page .trust-list { list-style: none; margin: var(--s-5) 0 0; padding: 0; display: grid; gap: 0; }
+.home-page .trust-row {
+  display: grid; grid-template-columns: 9rem 10.5rem minmax(0, 1fr); gap: var(--s-2) var(--s-4);
+  align-items: baseline; padding: var(--s-3) 0; border-top: 1px solid var(--hairline);
+}
+.home-page .trust-row:first-child { border-top: 0; }
+.home-page .trust-model { font-weight: 600; font-size: var(--fs-body-sm); color: var(--link); }
+.home-page .trust-class { justify-self: start; white-space: nowrap; }
+.home-page .trust-verdict { color: var(--text-body); font-size: var(--fs-body-sm); line-height: 1.55; }
+.home-page .trust-verdict strong { color: var(--text-strong); }
+@media (max-width: 760px) {
+  .home-page .trust-row { grid-template-columns: auto 1fr; }
+  .home-page .trust-verdict { grid-column: 1 / -1; }
+}
+
+/* the forecast record */
+.home-page .record-steps { margin: var(--s-5) 0; }
+.home-page .record-now {
+  margin: var(--s-5) 0; padding: var(--s-4) var(--s-5);
+  background: var(--surface-tint); border-left: 3px solid var(--primary); border-radius: var(--radius);
+}
+.home-page .record-now .proof-head { margin-bottom: var(--s-2); }
+.home-page .record-now .scored-subject { margin: 0 0 var(--s-2); color: var(--text-strong); }
+.home-page .record-now .scored-verdict { margin: 0; color: var(--text-body); font-size: var(--fs-body-sm); }
+.home-page #record .hero-cta { margin: var(--s-4) 0 0; }
+
+/* which model: the map on wide screens, a question list on phones
+   (one of the two is visible at any width, as the panel/inline pair) */
+.home-page .mm-list { display: none; list-style: none; margin: var(--s-4) 0 0; padding: 0; }
+.home-page .mm-list li {
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-2);
+  padding: var(--s-3) 0; border-top: 1px solid var(--hairline);
+}
+.home-page .mm-list li:first-child { border-top: 0; }
+.home-page .mm-list-q { color: var(--text-strong); font-size: var(--fs-body-sm); font-weight: 600; }
+@media (max-width: 720px) { .home-page .mm-list { display: block; } }
+
+/* how it connects: three pipeline strips, mechanics on /models#compose */
+.home-page .join-list { list-style: none; margin: var(--s-5) 0 0; padding: 0; display: grid; gap: var(--s-5); }
+.home-page .join-list h3 { margin: 0 0 var(--s-3); font-size: var(--fs-body); }
+.home-page .join-list .pipeline { flex-wrap: wrap; }
+@media (max-width: 560px) {
+  .home-page .join-list .pipeline { flex-direction: column; align-items: stretch; }
+  .home-page .join-list .pipeline .pl-node { text-align: center; }
+  .home-page .join-list .pipeline .pl-arrow { display: block; text-align: center; rotate: 90deg; }
+}
+
+/* /models: comparison heads must not break inside a word; ids >= 12px */
+.comparison-table thead th { text-transform: none; letter-spacing: 0; overflow-wrap: normal; word-break: normal; hyphens: none; vertical-align: bottom; }
+.comparison-table thead th a { display: block; font-family: var(--body); font-size: var(--fs-small); font-weight: 600; letter-spacing: 0; text-transform: none; overflow-wrap: normal; word-break: normal; hyphens: manual; }
+.comparison-table thead th a span { display: block; margin-top: 4px; font-family: var(--mono); font-size: var(--fs-label); font-weight: 400; }
+.router-gap { margin-top: var(--s-5); }
+.class-glossary { display: grid; gap: var(--s-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); margin: var(--s-4) 0 var(--s-5); }
+.class-glossary > div { padding: var(--s-3) var(--s-4); border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface-card); }
+.class-glossary dt { color: var(--text-strong); font-size: var(--fs-body-sm); font-weight: 600; }
+.class-glossary dd { margin: 4px 0 0; color: var(--text-muted); font-size: var(--fs-small); line-height: 1.5; }

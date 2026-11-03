@@ -162,7 +162,8 @@ Order on every page:
 - One dark row (`--band-bg`, `--nav-h` high), sticky. Left: the PolicyEngine mark on a white
   chip + "PolicyEngine Macro" in serif (the word mark hides below 640 px; the link keeps
   `aria-label="PolicyEngine Macro home"`). Right: the four views from `site_nav.DESTINATIONS`
-  (Home, Models, Forecasts, Use, in that order; `site_contract` enforces Home first and the
+  (Home, Forecasts, Models, Use, in that order — Forecasts moved ahead of Models in r2 because the
+  scored, vintage-controlled record is the product's differentiator; `site_contract` enforces Home first and the
   `>Forecasts</a>` label) and the GitHub icon (hidden below 420 px; GitHub is in the footer).
 - Each view tab: 16 px stroke icon (`site_nav.VIEW_ICONS`, `aria-hidden`, shown from 880 px) +
   label. Chosen view = `rgba(255,255,255,.10)` fill + 3 px `--band-accent` underline on the
@@ -178,7 +179,8 @@ Order on every page:
 
 Mono 12 px on `--band-bg-2`, links underlined in teal-100, current page white, `/` separators.
 Hierarchy comes from `CRUMB_PARENTS` / `PAGE_NAMES` (reading order, not URL order: model and
-paper pages under Models, the data hubs and notes under Forecasts). Maximum four segments. Not
+paper pages under their model — Home / Models / OBR emulator / Paper — the data hubs and notes
+  under Forecasts). Maximum four segments. Not
 emitted on the homepage.
 
 ### 3.3 Title band (the page's own `.hero.model-hero`, first child of `<main>`)
@@ -212,7 +214,7 @@ render identically:
 | Markup | Where | Items | Source |
 |---|---|---|---|
 | `.model-tabs > .model-tabs-row > a.model-tabs-link[aria-current="page"]` | each model's 4 pages + its paper | Overview · Methodology · Validation · Code · Paper | `site_nav.SUBTABS` (written by `python3 site_nav.py --write`) |
-| same, in-page anchors (`aria-current="location"` set by script) | `/models` | Models · Combine · Compare · Validation · Papers | `models/index.html` |
+| same, in-page anchors (`aria-current="location"` set by script) | `/models` | Which model · Compare · Combine · Validation · Papers | `models/index.html` |
 | same, in-page anchors | `/connect` | MCP · CLI · Python | `connect/index.html` |
 | `.economy-subnav` (scope + topics) | `/forecasts`, `/forecasts/us`, `/economy`, `/economy/us`, 11 topic pages | **Forecasts** UK · US │ Overview · Data · Growth · Inflation · Jobs · Rates · Public finances · Reform | `economy/topics.py` between `forecasts-section-nav:begin/end` markers |
 | `.model-tabs-set` buttons / `.glance-switch` | inside a card (view switches) | e.g. Validation views on `/models` | page HTML |
@@ -386,7 +388,7 @@ The site's signature layout; keep it. Markup (already on 16 pages):
 
 **Where it is used (required):** every model's Overview, Methodology and Code tab; each model's
 Validation tab (OBR already; phase 2 converts the other six: svar, frb-us, us-hank, olg, pe,
-define); the homepage "How the models connect" card (§7.1); `/models#compose` (Combine); the
+define); `/models#compose` (Combine); the
 `/connect` flow (MCP → CLI → Python, one step each, the panel showing the command for the chosen
 route). Overview pages that are not StepPanels today (svar, frb-us, us-hank, olg, pe, define)
 are converted in phase 2.
@@ -549,24 +551,36 @@ viewBox, so it keeps its CSS size (12 px, `--fs-label`) at every width. Block co
 
 ### 7.1 Home (`/`)
 
-No title band. Header band → intro card (`.home-page .hero`: left accent, h1, one-sentence lede
-naming the seven models with links, two buttons, the fan figure on the right ≥ 1000 px) →
-**entry cards** (Models · Forecasts · Use, §4.7: one line each) → verdicts card
-(`.band-result`: the three grades as words, each linking to a model's Validation tab; the scored
-period as a link to `/forecasts#scored`, not a restated number) → "How the models connect" as a
-**StepPanel** (step per join; the panel shows the pipeline and the join's entry point; the join
-results link to their homes) → "Which model for which question" (the map, with the evidence lines
-as links to each Validation tab) → start card (Connect button + client chips). Today's
-`.vmet-notes` evidence lines and the join results repeat validation figures: phase 2 turns them
-into links (§7.0).
+No title band. The page tells the product's story in a fixed order (r2): **what it is → where to
+start → why trust it → the forecast record → which model → how they connect → how to use it.**
+
+1. Intro card (`.home-page .hero`: left accent, h1, one-sentence lede naming the seven models
+   with links, buttons "Run a hosted model" + "See the forecast record", the generated fan on the
+   right ≥ 1000 px).
+2. `#start`: four **reader** entry cards (§4.7) — cost a reform, check the forecasts, pick a
+   model, run it yourself. They route by job, not by header tab.
+3. `#trust` (`.band-result`): one row per model — id, verification class chip, the verdict in
+   words, "Evidence →" to its Validation tab. All seven, no figures (§7.0).
+4. `#record`: the forecast record as method — `ol.steps` (archive · wait for the outturn ·
+   score against outturn, naive and official · keep the data as published), the scored period
+   named in words with its caveat, buttons to `/forecasts#scored` and `#open`. The counts and
+   the scores live on `/forecasts`; this card never restates them.
+5. `#extend`: the model map (≥ 720 px) or, below 720 px, the same questions as a list with
+   model chips (one of the two is visible, as the panel/inline pair).
+6. `#joins`: the three joins as pipeline strips only; entry points, calls and results live on
+   `/models#compose` and are linked, not repeated. (This replaces the earlier StepPanel here:
+   its panels restated the `/models#compose` panels line for line, which broke §1.1.)
+7. `#workflow`: start card (Connect button + client chips).
 
 ### 7.2 Models hub (`/models`)
 
-Title band (title, subtitle "7 models · UK and US · micro + macro") → sub-tabs Models · Combine ·
-Compare · Validation · Papers (in-page anchors) → one card per anchor. Models = the question
-list (each row: question, model chip, expand for the one-line verdict + "Open model →"). Combine =
-StepPanel of the joins. Compare = the comparison table (`.table-scroll`). Validation = per-model
-verdict rows linking to each Validation tab (no figures restated). Papers = paper cards linking to
+Title band (title, subtitle "7 models · UK and US · micro + macro") → sub-tabs Which model ·
+Compare · Combine · Validation · Papers (in-page anchors) → one card per anchor, in that order.
+Which model = the question router (ends with the one question no model answers and the
+`recommend_model` tool) (each row: question, model chip, expand for the one-line verdict + "Open model →"). Combine =
+StepPanel of the joins. Compare = the comparison table (`.table-scroll`, every row shown; no
+clamp). Validation = a four-entry glossary of the verification classes (`dl.class-glossary`) then
+per-model verdict rows linking to each Validation tab (no figures restated). Papers = paper cards linking to
 `/papers/<id>`. At 375 the question rows stack the chip under the question (phase 2: today the
 chip squeezes the question to one word per line).
 
