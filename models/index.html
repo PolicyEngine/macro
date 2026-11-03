@@ -487,10 +487,13 @@
       else visible.delete(entry.target.id);
     });
     var current = sections.find(function (section) { return visible.has(section.id); });
+    // Above the first section (the title band) the first tab is chosen,
+    // so the row always shows where the reader is.
     if (current) mark(current.id);
-    else links.forEach(function (link) { link.removeAttribute('aria-current'); });
+    else if (sections[0] && sections[0].getBoundingClientRect().top > 0) mark(sections[0].id);
   }, { rootMargin: '-25% 0px -60% 0px' });
   sections.forEach(function (section) { observer.observe(section); });
+  if (sections[0]) mark(sections[0].id);
 }());
 </script>
 <script>

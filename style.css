@@ -4612,3 +4612,49 @@ body.doc > main { flex: 1 0 auto; }
     --shadow-raised: 0 8px 24px rgba(0, 0, 0, .5);
   }
 }
+
+/* =====================================================================
+   5.15 Phone reading (phase 4). reveal.js marks scroll rows with
+   .fade-l/.fade-r when content sits past an edge, and marks word-heavy
+   tables .t-stack (cells carry data-label). DESIGN.md §1.7, §4.12.
+   ===================================================================== */
+.fade-r { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); }
+.fade-l { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent); }
+.fade-l.fade-r { -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); }
+@media (max-width: 400px) {
+  .model-tabs-link, .economy-topics a, .economy-topics button { padding: 0 8px; }
+}
+@media (max-width: 640px) {
+  .table-scroll.has-t-stack { overflow-x: visible; -webkit-mask-image: none; mask-image: none; }
+  table.t-stack { min-width: 0 !important; width: 100%; border-collapse: separate; border-spacing: 0; }
+  table.t-stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  table.t-stack tbody, table.t-stack tr, table.t-stack th, table.t-stack td { display: block; width: auto; }
+  table.t-stack tr {
+    padding: var(--s-3) 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  table.t-stack tbody tr:first-child { border-top: 1px solid var(--hairline); }
+  table.t-stack th, table.t-stack td { padding: 2px 0; border: 0; text-align: left; white-space: normal; overflow-wrap: anywhere; min-width: 0; }
+  table.t-stack code, table.t-stack .mono { white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
+  table.t-stack tr > :first-child { font-weight: 600; color: var(--text-strong); padding-bottom: var(--s-1); }
+  table.t-stack tr > :first-child[data-label]::before { display: none; }
+  table.t-stack td[data-label]::before,
+  table.t-stack th[data-label]:not(:first-child)::before {
+    content: attr(data-label);
+    display: block;
+    margin-top: var(--s-1);
+    color: var(--text-faint);
+    font-family: var(--mono);
+    font-size: var(--fs-label);
+    font-weight: 500;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  table.t-stack td[data-label=""]::before { display: none; }
+  table.t-stack caption { text-align: left; }
+  /* Hand-drawn method diagrams (580-unit viewBox, 11px text) keep their
+     native width and scroll inside the figure, so no label drops below 11px
+     (§1.8); the fade marks the hidden side. */
+  .step-diagram { justify-content: flex-start; overflow-x: auto; cursor: default; }
+  .step-diagram svg { max-width: none !important; width: 580px; flex: 0 0 auto; }
+}

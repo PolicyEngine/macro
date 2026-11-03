@@ -98,3 +98,91 @@
     });
   });
 })();
+
+/* Phone reading (DESIGN.md §1.7, §4.12).
+   1. Scroll rows (sub-tab rows, table scrollers, diagram scrollers) get a
+      fade on the edge that has more content behind it, so a tab or a column
+      past the edge is discoverable; the chosen sub-tab is scrolled into view.
+   2. Tables whose cells are mostly words are labelled cell by cell
+      (data-label from the column head) and marked .t-stack: below 640px the
+      CSS turns each row into a small card instead of a 720px side-scroll.
+      Numeric grids keep the scroller. data-stack="no" / "yes" on a table
+      overrides the guess. Without JS every table simply scrolls. */
+(function () {
+  "use strict";
+  var NUM = /^[\s(]*[−\-+~≈<>]?[£$€]?[\d.,  ]+(%|pp|bn|m|k|x|×|\*|\))*[\s*)]*$/i;
+  function simpleHead(table) {
+    var thead = table.tHead;
+    if (!thead || thead.rows.length !== 1) return null;
+    var cells = thead.rows[0].cells, labels = [];
+    for (var i = 0; i < cells.length; i++) {
+      if (cells[i].colSpan > 1 || cells[i].rowSpan > 1) return null;
+      labels.push(cells[i].textContent.replace(/\s+/g, " ").trim());
+    }
+    return labels;
+  }
+  function wordy(table) {
+    var cells = table.querySelectorAll("tbody td"), words = 0, n = 0;
+    for (var i = 0; i < cells.length; i++) {
+      var t = cells[i].textContent.trim();
+      if (!t || t === "—" || t === "–") continue;
+      n++;
+      if (!NUM.test(t)) words++;
+    }
+    return n > 0 && words / n >= 0.5;
+  }
+  document.querySelectorAll(".table-scroll > table").forEach(function (table) {
+    var mode = table.getAttribute("data-stack");
+    if (mode === "no" || table.classList.contains("vc-table") ||
+        table.classList.contains("vc-narrow-table")) return;
+    var labels = simpleHead(table);
+    if (!labels || labels.length < 2) return;
+    var nrows = 0;
+    for (var t = 0; t < table.tBodies.length; t++) nrows += table.tBodies[t].rows.length;
+    // long registers (the 41-series data table) stay a scroller: as cards
+    // they would run to many screens.
+    if (mode !== "yes" && (nrows > 20 || !wordy(table))) return;
+    // a two-column key/detail table reads as cards without column labels
+    if (labels.length === 2) labels = ["", ""];
+    var rows;
+    for (var b = 0; b < table.tBodies.length; b++) {
+      rows = table.tBodies[b].rows;
+      for (var r = 0; r < rows.length; r++) {
+        var col = 0, cells = rows[r].cells;
+        for (var c = 0; c < cells.length; c++) {
+          if (cells[c].colSpan > 1) { col += cells[c].colSpan; continue; }
+          if (labels[col] !== undefined && !cells[c].hasAttribute("data-label")) {
+            cells[c].setAttribute("data-label", labels[col]);
+          }
+          col++;
+        }
+      }
+    }
+    table.classList.add("t-stack");
+    table.parentElement.classList.add("has-t-stack");
+  });
+
+  var rows = document.querySelectorAll(
+    ".model-tabs-row, .economy-subnav-row, .table-scroll, .step-diagram"
+  );
+  function fade(el) {
+    var max = el.scrollWidth - el.clientWidth;
+    el.classList.toggle("fade-r", max > 2 && el.scrollLeft < max - 2);
+    el.classList.toggle("fade-l", max > 2 && el.scrollLeft > 2);
+  }
+  rows.forEach(function (el) {
+    var cur = el.querySelector("[aria-current='page']");
+    if (cur && el.scrollWidth > el.clientWidth) {
+      var all = el.querySelectorAll("[aria-current='page']");
+      cur = all[all.length - 1];
+      var box = el.getBoundingClientRect(), r = cur.getBoundingClientRect();
+      if (r.right > box.right || r.left < box.left) {
+        el.scrollLeft = Math.max(0, r.left - box.left + el.scrollLeft -
+          (el.clientWidth - r.width) / 2);
+      }
+    }
+    fade(el);
+    el.addEventListener("scroll", function () { fade(el); }, { passive: true });
+  });
+  window.addEventListener("resize", function () { rows.forEach(fade); }, { passive: true });
+})();

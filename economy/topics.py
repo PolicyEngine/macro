@@ -1441,20 +1441,8 @@ def uk_platform() -> str:
     ]
     return f"""    <div class="prose">
       <p>
-        The engine underneath this section is
-        {model_link("pe-microsim")} — PolicyEngine's own
-        {esc(microsim["model_class"])}, {only_household_member()} and
-        {only_two_country_member()}. It applies a reform to household microdata
-        and reports {registry_terms(microsim["outputs"])} over a
-        {esc(microsim["horizon"])}. {distribution_members()}
-      </p>
-      <p>
-        The macro members are what it cannot do on its own. pe-microsim
-        cannot answer {(cannot('pe-microsim'))} — so every macro number in this
-        section comes from a member that produces one, and the table says which,
-        in the order they run. Four of the six routes below put pe-microsim in
-        the chain; two are a macro model standing alone, which is also a fine
-        thing to publish.
+        Each route names the models it runs, in order; the household engine,
+        {model_link("pe-microsim")}, sits in four of the six.
       </p>
       <div class="table-scroll">
         <table>
@@ -1465,6 +1453,25 @@ def uk_platform() -> str:
           </tbody>
         </table>
       </div>
+      <details class="about">
+        <summary>About the engine and the macro members</summary>
+        <p>
+          The engine underneath this section is
+          {model_link("pe-microsim")} — PolicyEngine's own
+          {esc(microsim["model_class"])}, {only_household_member()} and
+          {only_two_country_member()}. It applies a reform to household microdata
+          and reports {registry_terms(microsim["outputs"])} over a
+          {esc(microsim["horizon"])}. {distribution_members()}
+        </p>
+        <p>
+          The macro members are what it cannot do on its own. pe-microsim
+          cannot answer {(cannot('pe-microsim'))} — so every macro number in this
+          section comes from a member that produces one, and the table says which,
+          in the order they run. Four of the six routes put pe-microsim in
+          the chain; two are a macro model standing alone, which is also a fine
+          thing to publish.
+        </p>
+      </details>
       <p class="callout">
         <strong>pe-microsim does not forecast, and this section does not
         pretend it does.</strong> Its question types are
@@ -1645,7 +1652,7 @@ def us_hub_forecast_note() -> str:
     """
     frbus = MODELS["frb-us"]["quality"]["predictive_validation"]
     hank = MODELS["us-hank"]["quality"]["predictive_validation"]
-    return f"""      <p class="lede">
+    return f"""      <p>
         <strong>{no_us_forecaster()}</strong> Both US members are shock models
         and the registry says so in their own words:
         <a href="/frb-us">frb-us</a> records predictive validation
@@ -2609,11 +2616,19 @@ def topic_lede(topic: dict) -> str:
     The readings live once, in the stat row below (DESIGN.md §7.0); the hook
     that used to be the lede restated them and stays as the meta description.
     """
-    names = [esc(label(load(name)).lower()) for name in topic["series"]]
+    names = [esc(sentence_case_inline(label(load(name)))) for name in topic["series"]]
     if not names:
         return "What the models can score here, and how to run it yourself."
-    return (f"The latest {listed(names)} as the snapshot stores them, what the "
+    return (f"The latest {listed(names)} as stored, what the "
             "models make of them, and how to run it yourself.")
+
+
+def sentence_case_inline(text: str) -> str:
+    """A label as it reads mid-sentence: lower the first letter of an
+    ordinary word, keep acronyms and proper nouns ("UK", "CPI", "Bank Rate")."""
+    if len(text) > 1 and text[0].isupper() and text[1].islower():
+        return text[0].lower() + text[1:]
+    return text
 
 
 def topic_where_next(topic: dict) -> str:
