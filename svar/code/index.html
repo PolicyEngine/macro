@@ -197,48 +197,6 @@ python scripts/run_forecast_revision.py</code></pre></div>
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
-<script>
-// Code scrollytelling: highlight the step at the reading line and
-// show its code panel in the sticky aside.
-(function () {
-  "use strict";
-  var steps = Array.from(document.querySelectorAll(".meth-step"));
-  var panels = Array.from(document.querySelectorAll(".meth-panel"));
-  if (!steps.length || !panels.length) return;
-  var current = -1;
-  function update() {
-    var offset = window.innerHeight * 0.33;
-    var active = 0;
-    steps.forEach(function (step, i) {
-      if (step.getBoundingClientRect().top < offset) active = i;
-    });
-    if (active === current) return;
-    current = active;
-    steps.forEach(function (step, i) {
-      step.classList.toggle("active", i === active);
-    });
-    // Panels pair to steps by data-step. A step with no panel of its own
-    // keeps the nearest earlier panel pinned rather than blanking the column.
-    // Start at the FIRST panel, not -1: several pages have no panel for
-    // step 0, and seeding -1 left the sticky column empty for the whole of
-    // the opening step before popping in. Pinning the earliest panel means
-    // the column is populated from the top and only ever moves forward.
-    var want = Math.min.apply(null, panels.map(function (panel) {
-      return Number(panel.getAttribute("data-step"));
-    }));
-    panels.forEach(function (panel) {
-      var ds = Number(panel.getAttribute("data-step"));
-      if (ds <= active && ds > want) want = ds;
-    });
-    panels.forEach(function (panel) {
-      panel.hidden = Number(panel.getAttribute("data-step")) !== want;
-    });
-  }
-  window.addEventListener("scroll", update, { passive: true });
-  window.addEventListener("resize", update, { passive: true });
-  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
-  update();
-})();
-</script>
+<script src="/stepper.js" defer></script>
 </body>
 </html>

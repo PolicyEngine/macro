@@ -159,6 +159,92 @@ CRUMB_PARENTS = {
 }
 
 
+# Model sub-tab rows (DESIGN.md §3.4), keyed by model root: the aria-label
+# and the five tabs in order. ``render`` writes the row on every page whose
+# URL is one of the tabs, so the rows are generated rather than hand-kept.
+# The row sits below the title band, outside ``</header>``, so HEADER above
+# never reaches it. /models and /connect keep hand-kept rows of in-page
+# anchors: their labels do not end in " pages" and SUBTAB_ROW skips them.
+SUBTABS = {
+    "obr": ("OBR emulator pages", (
+        ("/obr", "Overview"), ("/obr/methodology", "Methodology"),
+        ("/obr/validation", "Validation"), ("/obr/code", "Code"),
+        ("/papers/obr-macro", "Paper"))),
+    "svar": ("BoE SVAR pages", (
+        ("/svar", "Overview"), ("/svar/methodology", "Methodology"),
+        ("/svar/validation", "Validation"), ("/svar/code", "Code"),
+        ("/papers/boe-svar", "Paper"))),
+    "frb-us": ("FRB-US pages", (
+        ("/frb-us", "Overview"), ("/frb-us/methodology", "Methodology"),
+        ("/frb-us/validation", "Validation"), ("/frb-us/code", "Code"),
+        ("/papers/frb-us", "Paper"))),
+    "us-hank": ("US HANK pages", (
+        ("/us-hank", "Overview"), ("/us-hank/methodology", "Methodology"),
+        ("/us-hank/validation", "Validation"), ("/us-hank/code", "Code"),
+        # us-hank has no paper; its fifth tab is the open-models survey.
+        ("/reports/us-hank-open-source", "Open models"))),
+    "olg": ("OG-UK pages", (
+        ("/olg", "Overview"), ("/olg/methodology", "Methodology"),
+        ("/olg/validation", "Validation"), ("/olg/code", "Code"),
+        ("/papers/psl-og", "Paper"))),
+    "pe": ("PolicyEngine microsim pages", (
+        ("/pe", "Overview"), ("/pe/methodology", "Methodology"),
+        ("/pe/validation", "Validation"), ("/pe/code", "Code"),
+        ("/papers/pe-microsim", "Paper"))),
+    "define": ("DEFINE-UK pages", (
+        ("/define", "Overview"), ("/define/methodology", "Methodology"),
+        ("/define/validation", "Validation"), ("/define/code", "Code"),
+        ("/papers/define-uk", "Paper"))),
+}
+# Pages that belong to a model's row without being one of its five URLs:
+# the replication report is read as DEFINE-UK's Paper tab, so on that page
+# the Paper tab points at the report itself and is the chosen one.
+SUBTAB_EXTRA = {"/reports/define-uk-replication": ("define", "Paper")}
+SUBTAB_ROW = re.compile(r'<nav class="model-tabs" aria-label="[^"]* pages">.*?</nav>', re.DOTALL)
+
+
+def subtab_owner(url: str) -> tuple[str, str] | None:
+    """(model root, chosen tab label) for a page that carries a model row."""
+    if url in SUBTAB_EXTRA:
+        return SUBTAB_EXTRA[url]
+    for key, (_, tabs) in SUBTABS.items():
+        for href, label in tabs:
+            if href == url:
+                return key, label
+    return None
+
+
+def subtabs(url: str) -> str | None:
+    owner = subtab_owner(url)
+    if owner is None:
+        return None
+    key, chosen = owner
+    aria, tabs = SUBTABS[key]
+    rows = []
+    for href, label in tabs:
+        if label == chosen:
+            href = url
+            rows.append(f'      <a class="model-tabs-link" href="{href}" aria-current="page">{label}</a>')
+        else:
+            rows.append(f'      <a class="model-tabs-link" href="{href}">{label}</a>')
+    return (
+        f'<nav class="model-tabs" aria-label="{aria}">\n'
+        '    <div class="model-tabs-row">\n'
+        + "\n".join(rows)
+        + "\n    </div>\n  </nav>"
+    )
+
+
+# Every page with a StepPanel or an "On this page" rail loads the one shared
+# script; the inline copies it replaced must not come back.
+STEPPER_TAG = '<script src="/stepper.js" defer></script>'
+INLINE_STEPPER = re.compile(r"<script>(?:(?!</script>).)*?(?:\.meth-step|\.page-rail)", re.DOTALL)
+
+
+def needs_stepper(source: str) -> bool:
+    return 'class="scrolly-wrap' in source or 'class="page-rail' in source
+
+
 def page_url(path: Path) -> str:
     rel = path.relative_to(ROOT)
     if rel == Path("index.html"):
@@ -352,6 +438,19 @@ def render(path: Path) -> str:
     )
     if footer_replacements != 1:
         raise ValueError(f"could not locate footer navigation in {path.relative_to(ROOT)}")
+    url = page_url(path)
+    row = subtabs(url)
+    found = SUBTAB_ROW.findall(updated)
+    if row is None and found:
+        raise ValueError(f"model sub-tab row on a page SUBTABS does not list: {url}")
+    if row is not None:
+        if len(found) != 1:
+            raise ValueError(f"expected one model sub-tab row in {path.relative_to(ROOT)}, found {len(found)}")
+        updated = SUBTAB_ROW.sub(lambda _m: row, updated, count=1)
+    if INLINE_STEPPER.search(updated):
+        raise ValueError(f"inline StepPanel/rail script in {path.relative_to(ROOT)}: use {STEPPER_TAG}")
+    if needs_stepper(updated) and STEPPER_TAG not in updated:
+        updated = updated.replace("</body>", f"{STEPPER_TAG}\n</body>", 1)
     return updated
 
 

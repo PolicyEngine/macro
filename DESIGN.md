@@ -214,14 +214,16 @@ render identically:
 
 | Markup | Where | Items | Source |
 |---|---|---|---|
-| `.model-tabs > .model-tabs-row > a.model-tabs-link[aria-current="page"]` | each model's 4 pages + its paper | Overview · Methodology · Validation · Code · Paper | page HTML (hand-edited) |
+| `.model-tabs > .model-tabs-row > a.model-tabs-link[aria-current="page"]` | each model's 4 pages + its paper | Overview · Methodology · Validation · Code · Paper | `site_nav.SUBTABS` (written by `python3 site_nav.py --write`) |
 | same, in-page anchors (`aria-current="location"` set by script) | `/models` | Models · Combine · Compare · Validation · Papers | `models/index.html` |
 | same, in-page anchors | `/connect` | MCP · CLI · Python | `connect/index.html` |
 | `.economy-subnav` (scope + topics) | `/forecasts`, `/forecasts/us`, `/economy`, `/economy/us`, 11 topic pages | **Forecasts** UK · US │ Overview · Data · Growth · Inflation · Jobs · Rates · Public finances · Reform | `economy/topics.py` between `forecasts-section-nav:begin/end` markers |
 | `.model-tabs-set` buttons / `.glance-switch` | inside a card (view switches) | e.g. Validation views on `/models` | page HTML |
 
-Phase 3 moves the model sub-tab rows into one table in `site_nav.py` (`SUBTABS`, keyed by model
-root) so they are generated, not hand-kept. They must stay outside `</header>`.
+The model sub-tab rows are generated from one table in `site_nav.py` (`SUBTABS`, keyed by model
+root; `SUBTAB_EXTRA` maps the DEFINE-UK replication report onto that model's Paper tab). Edit the
+table, not the page, then run `python3 site_nav.py --write`. The rows stay outside `</header>`;
+rows whose `aria-label` does not end in " pages" (`/models`, `/connect`) are hand-kept.
 
 ### 3.5 Footer (`.foot.foot-bar`)
 
@@ -369,8 +371,9 @@ The site's signature layout; keep it. Markup (already on 16 pages):
 </div>
 ```
 
-- Left: steps joined by a 2 px rail; the step at the reading line gets `.active` (the page's
-  inline script; one copy per page, phase 3 moves it to a shared `/stepper.js`): the rail turns
+- Left: steps joined by a 2 px rail; the step at the reading line gets `.active` (the shared
+  `/stepper.js`, loaded by every page with a `.scrolly-wrap` or a `.page-rail`; `site_nav.py`
+  adds the tag and fails on an inline copy): the rail turns
   `--primary` and the number disc fills. **Inactive steps are not dimmed** (the old 28% opacity
   failed AA).
 - Right (≥ 900 px): one white panel, 3 px teal top rule, `--shadow-raised`, sticky at

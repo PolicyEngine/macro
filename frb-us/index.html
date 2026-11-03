@@ -251,29 +251,6 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
-<script>
-// StepPanel: highlight the step at the reading line and show its panel in
-// the sticky aside (scoped to each .scrolly-wrap).
-(function () {
-  "use strict";
-  Array.from(document.querySelectorAll(".scrolly-wrap")).forEach(function (wrap) {
-    var steps = Array.from(wrap.querySelectorAll(".meth-step"));
-    var panels = Array.from(wrap.querySelectorAll(".meth-panel"));
-    if (!steps.length || !panels.length) return;
-    var current = -1;
-    function update() {
-      var offset = window.innerHeight * 0.33, active = 0;
-      steps.forEach(function (step, i) { if (step.getBoundingClientRect().top < offset) active = i; });
-      if (active === current) return;
-      current = active;
-      steps.forEach(function (step, i) { step.classList.toggle("active", i === active); });
-      panels.forEach(function (panel) { panel.hidden = Number(panel.getAttribute("data-step")) !== active; });
-    }
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update, { passive: true });
-    update();
-  });
-})();
-</script>
+<script src="/stepper.js" defer></script>
 </body>
 </html>
