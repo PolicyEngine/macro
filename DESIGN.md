@@ -234,7 +234,7 @@ reads it. The body is a flex column so the footer sits at the viewport bottom on
 
 ### 3.6 Cache buster
 
-`site_nav.STYLE_VERSION` (now 10). `render()` rewrites every page's stylesheet link to
+`site_nav.STYLE_VERSION` (now 12). `render()` rewrites every page's stylesheet link to
 `/style.css?v=N`; `economy/topics.py` and `notes/generate_release_notes.py` read
 `site_nav.STYLE_HREF`. Bump the number in one place whenever a cached `style.css` would render a
 page wrongly, then run `python3 site_nav.py --write`.
