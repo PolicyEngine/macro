@@ -576,8 +576,9 @@ start → why trust it → the forecast record → which model → how they conn
 
 Title band (title, subtitle "7 models · UK and US · micro + macro") → sub-tabs Which model ·
 Compare · Combine · Validation · Papers (in-page anchors) → one card per anchor, in that order.
-Which model = the question router (ends with the one question no model answers and the
-`recommend_model` tool) (each row: question, model chip, expand for the one-line verdict + "Open model →"). Combine =
+Which model = the question router: each row is a question, a model chip, and an expander for the
+one-line verdict + "Open model →"; it ends with the one question no model answers and the
+`recommend_model` tool. Combine =
 StepPanel of the joins. Compare = the comparison table (`.table-scroll`, every row shown; no
 clamp). Validation = a four-entry glossary of the verification classes (`dl.class-glossary`) then
 per-model verdict rows linking to each Validation tab (no figures restated). Papers = paper cards linking to
