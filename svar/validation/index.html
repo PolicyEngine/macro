@@ -336,13 +336,11 @@
                 is not evidence of broad forecast superiority.
               </p>
               <p>
-                <strong>The svar-unemployment satellite.</strong> Unemployment is not a
-                VAR variable: its published outlook comes from a regression of the
-                quarterly change in the ONS rate on year-on-year GDP growth, fitted
-                1992Q1&ndash;2025Q1 with furlough dummies. It beats no-change only at
-                horizons 1&ndash;4 (relative RMSE 0.82&ndash;0.99, not significant), so
-                the published path is capped there, and its bands carry GDP-forecast
-                uncertainty only. Specification and skill table:
+                <strong>The svar-unemployment satellite.</strong> It beats
+                no-change only at horizons 1&ndash;4 (relative RMSE 0.82&ndash;0.99,
+                not significant), so the published path is capped there. Its
+                specification is on the <a href="/svar/methodology#meth-5">methodology
+                tab</a>; skill table:
                 <a href="https://github.com/PolicyEngine/boe-var-model/blob/main/results/unemployment_satellite_validation.json">unemployment_satellite_validation.json</a>.
               </p>
               <figure class="vfig">
@@ -440,7 +438,7 @@
                 horizon.
               </p>
               <details class="more">
-              <summary>Benchmark and sample diagnostics</summary>
+              <summary>Benchmark diagnostics, and what official forecasters report</summary>
               <h4>boe-svar against a random walk, computed from our own runs</h4>
               <p>
                 Expanding-window design: 49 quarterly origins
@@ -474,6 +472,38 @@
                 collapse. Every benchmark carries a <code>worst_origin_mse_share</code>
                 diagnostic for that reason.
               </p>
+              <h4>What the OBR and external forecasters report about themselves</h4>
+              <p>
+                Cited, not recomputed: the OBR's
+                <a href="https://obr.uk/fer/forecast-evaluation-report-july-2025/">Forecast
+                Evaluation Report (July 2025)</a> reports its own real-time errors on
+                annual growth rates since 2010, beside the HM Treasury median of
+                external forecasters.
+              </p>
+              <div class="table-scroll mo-tablecard">
+              <table>
+                <caption>Median absolute forecast errors reported in the OBR Forecast Evaluation Report, July 2025 (annual rates, percentage points, forecasts since 2010)</caption>
+                <thead><tr><th scope="col">variable &middot; horizon</th><th scope="col">OBR</th><th scope="col">external median</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Real GDP growth &middot; 1 year ahead</th><td>0.6pp</td><td>0.6pp</td></tr>
+                  <tr><th scope="row">Real GDP growth &middot; 2 years ahead</th><td>0.4pp</td><td>0.4pp</td></tr>
+                  <tr><th scope="row">CPI inflation &middot; 1 year ahead</th><td>0.3pp</td><td>0.3pp</td></tr>
+                  <tr><th scope="row">CPI inflation &middot; 2 years ahead</th><td>0.9pp</td><td>0.9pp</td></tr>
+                </tbody>
+              </table>
+              </div>
+              <p>
+                The nearest in-house analogue is the frozen-edge RMSE above — a different statistic, frequency and
+                origin count, so it sits beside these numbers, not against them. For the Bank of England the only sourceable comparison is a matched-vintage episode: the <a href="https://www.bankofengland.co.uk/-/media/boe/files/monetary-policy-report/2024/august/monetary-policy-report-august-2024.pdf">BoE MPR (Aug 2024)</a> put late-2025 CPI at ~2.4% modal against a 3.8% outturn, a ~1.4pp miss; the MPR publishes no RMSE-by-horizon table. The <a href="https://obr.uk/fer/forecast-evaluation-report-july-2025/">OBR FER (July 2025)</a> also reports its one-year GDP growth forecasts under by 0.4pp on average.
+              </p>
+              <div class="callout">
+                Omitted for lack of a defensible source: NIESR or consensus RMSE tables
+                by horizon, a Bank of England RMSE-by-horizon table, and an AR(1)
+                benchmark for this exercise. The authors' companion paper (Staff
+                Working Paper No. 1,165) is a methods paper on a different SVAR and
+                publishes no errors, so the frozen-edge RMSEs stand without an official
+                yardstick.
+              </div>
               </details>
               <figure class="vfig">
         <div class="vc-fig" data-chart="svar-skill-all" style="--vc-min-h:420px">
@@ -669,42 +699,10 @@
               <p class="chart-note" style="max-width: 80ch;">
                 These are quarterly, level-basis ratios computed with hindsight-final
                 data. They are <strong>not</strong> comparable with the real-time
-                annual-growth errors the OBR publishes, which is why those get a
-                separate table.
+                annual-growth errors the OBR publishes, which is why those sit in
+                a separate table (in the diagnostics above).
               </p>
 
-              <h4>What the OBR and external forecasters report about themselves</h4>
-              <p>
-                Cited, not recomputed: the OBR's
-                <a href="https://obr.uk/fer/forecast-evaluation-report-july-2025/">Forecast
-                Evaluation Report (July 2025)</a> reports its own real-time errors on
-                annual growth rates since 2010, beside the HM Treasury median of
-                external forecasters.
-              </p>
-              <div class="table-scroll mo-tablecard">
-              <table>
-                <caption>Median absolute forecast errors reported in the OBR Forecast Evaluation Report, July 2025 (annual rates, percentage points, forecasts since 2010)</caption>
-                <thead><tr><th scope="col">variable &middot; horizon</th><th scope="col">OBR</th><th scope="col">external median</th></tr></thead>
-                <tbody>
-                  <tr><th scope="row">Real GDP growth &middot; 1 year ahead</th><td>0.6pp</td><td>0.6pp</td></tr>
-                  <tr><th scope="row">Real GDP growth &middot; 2 years ahead</th><td>0.4pp</td><td>0.4pp</td></tr>
-                  <tr><th scope="row">CPI inflation &middot; 1 year ahead</th><td>0.3pp</td><td>0.3pp</td></tr>
-                  <tr><th scope="row">CPI inflation &middot; 2 years ahead</th><td>0.9pp</td><td>0.9pp</td></tr>
-                </tbody>
-              </table>
-              </div>
-              <p>
-                The nearest in-house analogue is the frozen-edge RMSE above — a different statistic, frequency and
-                origin count, so it sits beside these numbers, not against them. For the Bank of England the only sourceable comparison is a matched-vintage episode: the <a href="https://www.bankofengland.co.uk/-/media/boe/files/monetary-policy-report/2024/august/monetary-policy-report-august-2024.pdf">BoE MPR (Aug 2024)</a> put late-2025 CPI at ~2.4% modal against a 3.8% outturn, a ~1.4pp miss; the MPR publishes no RMSE-by-horizon table. The <a href="https://obr.uk/fer/forecast-evaluation-report-july-2025/">OBR FER (July 2025)</a> also reports its one-year GDP growth forecasts under by 0.4pp on average.
-              </p>
-              <div class="callout">
-                Omitted for lack of a defensible source: NIESR or consensus RMSE tables
-                by horizon, a Bank of England RMSE-by-horizon table, and an AR(1)
-                benchmark for this exercise. The authors' companion paper (Staff
-                Working Paper No. 1,165) is a methods paper on a different SVAR and
-                publishes no errors, so the frozen-edge RMSEs stand without an official
-                yardstick.
-              </div>
         <div class="meth-inline">
         <div class="meth-sec-title">ratio to drift, h=1</div>
         <div class="meth-eq"><div class="meth-eq-label">Bank Rate</div><div class="meth-eq-body">0.79, the closest to a win</div></div>

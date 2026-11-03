@@ -167,3 +167,24 @@ def test_paper_landings_publish_the_page_count_of_the_pdf_they_link():
         landing = _read(f"papers/{slug}/index.html")
         assert re.search(rf"{re.escape(slug)} · [^<]* · {pages} pages", landing)
         assert f'href="/papers/{slug}"' in hub
+
+
+def test_model_cards_quote_the_capability_registry():
+    """Each model Overview's model card restates its registry horizon and
+    status, so the card cannot drift from capabilities.py silently.
+
+    Scoped to the UK model pages that carry a card today; extend the mapping
+    as other model Overviews gain one."""
+    from policyengine_macro.capabilities import MODELS
+
+    pages = {
+        "pe-microsim": "pe/index.html",
+        "obr-macro": "obr/index.html",
+        "boe-svar": "svar/index.html",
+    }
+    for model, page in pages.items():
+        html = _read(page).lower()
+        assert 'id="card"' in html, f"{page}: no model card"
+        for field in ("horizon", "status"):
+            value = MODELS[model][field].lower()
+            assert value in html, f"{page}: model card does not quote {field} {value!r}"
