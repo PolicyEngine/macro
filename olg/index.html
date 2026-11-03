@@ -20,14 +20,9 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=8" />
-<style>
-/* page-specific: hero sizing only — shared component styles live in style.css */
-.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-</style>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
   <a class="brand" href="/" aria-label="PolicyEngine Macro home">
@@ -71,98 +66,103 @@
       <a class="model-tabs-link" href="/papers/psl-og">Paper</a>
     </div>
   </nav>
-  <section id="pe-bridge" class="band">
+  <section id="overview" class="band band-wide">
     <div class="band-head">
-      <span class="kicker mono">with the microsimulation</span>
-      <h2>The only two-way bridge: statute in, dynamic household-level score out.</h2>
+      <span class="kicker mono">overview</span>
+      <h2>How it joins the core, what it is, what it can answer.</h2>
     </div>
-    <div class="prose">
-      <div class="qa-facts">
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Connection.</strong> Two-way: tax functions are estimated on <a href="/pe">PolicyEngine</a> microdata and a reform is the same parameter dict the microsimulation uses, so the model scores statute directly; <code>score_reform</code> with <code>model="og+microsim"</code> then feeds the long-run wage and labour-supply changes back into a second microsimulation run for a dynamic, household-resolution score.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Worked example.</strong> A 1pp basic-rate rise: the long-run macro effects on this page, then re-simulated at household level — the <a href="/models#score">score a reform</a> page walks it end to end.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Validation.</strong> <a href="/olg/validation">Calibrated, not outcome-validated</a> — ONS/OBR aggregates are targets met by construction; no ground truth exists for this model class.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Results.</strong> Long-run and transition-path results run locally from the package; the workflow is documented on <a href="/models#score">score a reform</a>.</span></div>
+    <p class="callout callout-warn verdict-callout">
+      <strong>Verdict: calibrated, not outcome-validated.</strong>
+      ONS and OBR aggregates are targets met by construction; no independent outcome benchmark exists for this model class.
+      <a href="/olg/validation">How far to trust it &rarr;</a>
+    </p>
+
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+
+      <div class="meth-step" id="pe-bridge" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>With the microsimulation</h3></div>
+        <p class="mo-lead">The only two-way bridge: statute in, dynamic household-level score out.</p>
+        <div class="pipeline">
+          <span class="pl-node"><strong>Reform</strong></span>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <span class="pl-node"><strong>OG-UK</strong><span class="mono">long-run wages</span></span>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <a class="pl-node" href="/pe"><strong>pe-microsim</strong><span class="mono">second run</span></a>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <span class="pl-node pl-node-out"><strong>Dynamic score</strong></span>
+        </div>
+        <p>Two-way: tax functions are estimated on <a href="/pe">PolicyEngine</a> microdata and a reform is the same parameter dict the microsimulation uses, so the model scores statute directly; <code>score_reform</code> with <code>model="og+microsim"</code> then feeds the long-run wage and labour-supply changes back into a second microsimulation run for a dynamic, household-resolution score. The end-to-end workflow is on the <a href="/models#score">score a reform</a> page.</p>
+        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">both directions</div>
+        <div class="meth-eq"><div class="meth-eq-label">in</div><div class="meth-eq-body">tax functions estimated on PolicyEngine microdata</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">reform</div><div class="meth-eq-body">the same parameter dict as the microsim</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">out</div><div class="meth-eq-body">long-run wage and labour-supply changes</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">second run</div><div class="meth-eq-body"><code>score_reform</code>, <code>model="og+microsim"</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">access</div><div class="meth-eq-body">local only, experimental</div></div>
+        </div>
       </div>
-    </div>
-  </section>
 
+      <div class="meth-step" id="what" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it is</h3></div>
+        <p class="mo-lead">Households age, the economy clears.</p>
+              <p>
+                The model tracks <strong>80 annual cohorts</strong> — households aged
+                20 to 99, entering at 20 and facing age-specific mortality. Each
+                cohort chooses labour supply and saving over its remaining lifetime;
+                firms rent that capital and labour; the government taxes, spends and
+                issues debt. Two solves are on offer: the <strong>steady state</strong>
+                ("where does the economy settle under this policy?") and the
+                <strong>transition path</strong> — a multi-decade, year-by-year solve of
+                how it gets there, which is what a budget profile needs.
+              </p>
+              <p>
+                It is the suite's <strong>long-run structural member</strong>. Where
+                the <a href="/obr">OBR emulator</a> answers "what does this do to
+                the next twelve quarters of the official forecast?", this one answers
+                "where does the economy end up, and why?" — with the behavioural
+                mechanism visible rather than estimated.
+              </p>
+              <p>
+                OG-UK is the UK calibration of
+                <a href="https://github.com/PSLmodels/OG-Core">OG-Core</a>, the
+                open-source overlapping-generations framework maintained by the
+                <a href="https://pslmodels.org">Policy Simulation Library</a>.
+              </p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">overlapping generations</div>
+        <div class="meth-eq"><div class="meth-eq-label">cohorts</div><div class="meth-eq-body">80 annual, ages 20 to 99</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">solves</div><div class="meth-eq-body">steady state and transition path</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">framework</div><div class="meth-eq-body">OG-Core, Policy Simulation Library</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">microdata</div><div class="meth-eq-body">Enhanced FRS, via PolicyEngine</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">role</div><div class="meth-eq-body">long-run structural member</div></div>
+        </div>
+      </div>
 
-  <section id="what" class="band">
-    <div class="band-head">
-      <span class="kicker mono">01 — what it is</span>
-      <h2>Households age, the economy clears.</h2>
-    </div>
-    <div class="prose">
-      <p class="mo-lead">
-        The model tracks <strong>80 annual cohorts</strong> — households aged
-        20 to 99, entering at 20 and facing age-specific mortality. Each
-        cohort chooses labour supply and saving over its remaining lifetime;
-        firms rent that capital and labour; the government taxes, spends and
-        issues debt. Two solves are on offer: the <strong>steady state</strong>
-        ("where does the economy settle under this policy?") and the
-        <strong>transition path</strong> — a multi-decade, year-by-year solve of
-        how it gets there, which is what a budget profile needs.
-      </p>
-      <p>
-        It is the suite's <strong>long-run structural member</strong>. Where
-        the <a href="/obr">OBR emulator</a> answers "what does this do to
-        the next twelve quarters of the official forecast?", this one answers
-        "where does the economy end up, and why?" — with the behavioural
-        mechanism visible rather than estimated.
-      </p>
-      <p>
-        It is coupled to the <a href="/pe">PolicyEngine microsimulation</a>
-        in both directions: its tax functions are estimated from effective
-        and marginal rates the microsimulation computes on Enhanced FRS
-        microdata, and a reform is the same flat parameter dict the
-        microsimulation uses — so the model scores statute, not a stylised
-        stand-in. Going the other way, <code>score_reform</code> with
-        <code>model="og+microsim"</code> feeds the long-run wage and
-        labour-supply changes back into a second microsimulation run for a
-        dynamic, household-resolution score. The end-to-end workflow is on
-        the <a href="/models#score">score a reform</a> page.
-      </p>
-      <p>
-        The rest of this page walks through a worked
-        <a href="#showcase">showcase</a> reform with charts; the
-        <a href="/olg/methodology">methodology</a> underneath, the model's
-        <a href="/olg/validation">validation</a>, the
-        <a href="/olg/code">code</a> you would actually run, and the full
-        <a href="/papers/psl-og">paper</a> each have a tab of their own above.
-        OG-UK is the UK calibration of
-        <a href="https://github.com/PSLmodels/OG-Core">OG-Core</a>, the
-        open-source overlapping-generations framework maintained by the
-        <a href="https://pslmodels.org">Policy Simulation Library</a>.
-      </p>
-    </div>
-  </section>
-
-  <section id="showcase" class="band">
-    <div class="band-head">
-      <span class="kicker mono">02 — showcase</span>
-      <h2>A worked example: 1pp on the basic rate.</h2>
-    </div>
-    <div class="prose">
-      <p class="mo-lead">
-        A static tax model holds the economy fixed and totals up who pays more
-        or less; an overlapping-generations model also captures how people and
-        firms respond:
-      </p>
-      <ul>
-        <li>Lower after-tax wages &rarr; households work and save less; higher cost of capital &rarr; firms invest less</li>
-        <li>The model returns a year-by-year path for GDP, wages, interest rates, investment, debt and tax revenue — with and without the reform</li>
-        <li>The difference between the two paths is the reform's macroeconomic effect</li>
-      </ul>
-      <p>The worked reform:</p>
-      <ul>
-        <li><strong>+1pp on the basic rate</strong> (20% &rarr; 21%) from tax year <strong>2027&ndash;28</strong>, holding thereafter — a stylised illustration, not a forecast of announced policy</li>
-        <li>Baseline: the OBR's November 2025 EFO (history plus forecast)</li>
-        <li>Data: the committed transition-path result <code>olg/figures/tpi_data.json</code> — the first five years (2026&ndash;2030) of the 60-period solve, which is what the charts show</li>
-      </ul>
-      <div class="table-scroll mo-tablecard"><table>
-        <caption>Reform vs baseline in 2030, the last committed transition year. Values from olg/figures/tpi_data.json; the table is regenerated (and CI-checked) by olg/figures/make_showcase.py.</caption>
-        <thead><tr><th scope="col">aggregate</th><th scope="col">baseline 2030</th><th scope="col">reform 2030</th><th scope="col">change</th></tr></thead>
-        <tbody>
+      <div class="meth-step" id="showcase" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
+        <p class="mo-lead">A worked example: 1pp on the basic rate.</p>
+              <p>
+                A static tax model holds the economy fixed and totals up who pays more
+                or less; an overlapping-generations model also captures how people and
+                firms respond:
+              </p>
+              <ul>
+                <li>Lower after-tax wages &rarr; households work and save less; higher cost of capital &rarr; firms invest less</li>
+                <li>The model returns a year-by-year path for GDP, wages, interest rates, investment, debt and tax revenue — with and without the reform</li>
+                <li>The difference between the two paths is the reform's macroeconomic effect</li>
+              </ul>
+              <p>The worked reform:</p>
+              <ul>
+                <li><strong>+1pp on the basic rate</strong> (20% &rarr; 21%) from tax year <strong>2027&ndash;28</strong>, holding thereafter — a stylised illustration, not a forecast of announced policy</li>
+                <li>Baseline: the OBR's November 2025 EFO (history plus forecast)</li>
+                <li>Data: the committed transition-path result <code>olg/figures/tpi_data.json</code> — the first five years (2026&ndash;2030) of the 60-period solve, which is what the charts show</li>
+              </ul>
+              <div class="table-scroll mo-tablecard"><table>
+                <caption>Reform vs baseline in 2030, the last committed transition year. Values from olg/figures/tpi_data.json; the table is regenerated (and CI-checked) by olg/figures/make_showcase.py.</caption>
+                <thead><tr><th scope="col">aggregate</th><th scope="col">baseline 2030</th><th scope="col">reform 2030</th><th scope="col">change</th></tr></thead>
+                <tbody>
 <!-- olg-stats:begin -->
 <tr><th scope="row">GDP (£bn, current prices)</th><td>3,627.9</td><td>3,622.8</td><td>-5.0 (-0.14%)</td></tr>
 <tr><th scope="row">Tax revenue (% of GDP)</th><td>32.06%</td><td>32.35%</td><td>+0.29pp</td></tr>
@@ -171,90 +171,155 @@
 <tr><th scope="row">Government consumption (% of GDP)</th><td>44.28%</td><td>44.67%</td><td>+0.38pp</td></tr>
 <tr><th scope="row">Debt (% of GDP)</th><td>94.50%</td><td>94.42%</td><td>-0.08pp</td></tr>
 <!-- olg-stats:end -->
-        </tbody>
-      </table></div>
-      <p>
-        The pattern is the classic dynamic-scoring one: revenue rises by less
-        than a static costing would suggest because investment, consumption
-        and — with a lag — GDP all drift below baseline as households and
-        firms adjust.
-      </p>
-      <div class="mo-chartcard">
-      <div class="olg-toolbar">
-        <label for="olg-macro-select">Show<select id="olg-macro-select">
-          <option value="consumption" selected>Consumption</option>
-          <option value="investment">Investment</option>
-          <option value="government">Government</option>
-          <option value="tax_revenue">Tax revenue</option>
-          <option value="debt">Debt</option>
-          <option value="gdp">GDP</option>
-        </select></label>
+                </tbody>
+              </table></div>
+              <p>
+                The pattern is the classic dynamic-scoring one: revenue rises by less
+                than a static costing would suggest because investment, consumption
+                and — with a lag — GDP all drift below baseline as households and
+                firms adjust.
+              </p>
+              <div class="mo-chartcard">
+              <div class="olg-toolbar">
+                <label for="olg-macro-select">Show<select id="olg-macro-select">
+                  <option value="consumption" selected>Consumption</option>
+                  <option value="investment">Investment</option>
+                  <option value="government">Government</option>
+                  <option value="tax_revenue">Tax revenue</option>
+                  <option value="debt">Debt</option>
+                  <option value="gdp">GDP</option>
+                </select></label>
+              </div>
+              <div class="olg-chart" id="olg-macro-chart"></div>
+              <div class="olg-legend">
+                <span class="li"><span class="ln"></span>OBR outturn / forecast</span>
+                <span class="li"><span class="ln dashed"></span>Reform +1&#8202;pp basic rate</span>
+                <span class="li"><span class="ln dotted grey"></span>Outturn / forecast boundary (2023)</span>
+                <span class="li"><span class="ln dashed gold"></span>Reform start (2027)</span>
+              </div>
+              </div>
+              <noscript><p class="chart-note">Charts need JavaScript; the series are in <a href="/olg/figures/tpi_data.json">olg/figures/tpi_data.json</a> and the headline numbers are in the table above.</p></noscript>
+              <p>
+                With <code>multi_sector=True</code> the same solve reports the eight
+                UK industry sectors. The incidence is close to uniform: seven of the
+                eight contract by roughly 0.3–0.4% as private demand falls, while
+                <strong>public &amp; other</strong> alone expands, tracking the extra
+                government consumption the revenue finances.
+              </p>
+              <div class="mo-chartcard">
+              <div class="olg-toolbar">
+                <label for="olg-sector-select">Show<select id="olg-sector-select">
+                  <option value="output" selected>Output</option>
+                  <option value="capital">Capital</option>
+                  <option value="labour">Labour</option>
+                </select></label>
+              </div>
+              <div class="olg-chart" id="olg-sector-chart"></div>
+              <div class="olg-legend" id="olg-sector-legend"></div>
+              </div>
+              <p>
+                The finest-grained view is a single sector × variable cell with its
+                history for context — here, energy output, indexed to 2000. The
+                reform's dent is barely visible at this scale, which is itself the
+                honest reading: a 1pp basic-rate rise is a small shock to any one
+                industry.
+              </p>
+              <div class="mo-chartcard">
+              <div class="olg-toolbar">
+                <label for="olg-detail-var">Variable<select id="olg-detail-var">
+                  <option value="output" selected>Output</option>
+                  <option value="capital">Capital</option>
+                  <option value="labour">Labour</option>
+                </select></label>
+                <label for="olg-detail-sector">Sector<select id="olg-detail-sector">
+                  <option value="energy" selected>Energy</option>
+                  <option value="manufacturing">Manufacturing</option>
+                  <option value="construction">Construction</option>
+                  <option value="trade_transport">Trade &amp; Transport</option>
+                  <option value="info_finance">Info &amp; Finance</option>
+                  <option value="real_estate">Real Estate</option>
+                  <option value="business_services">Business Services</option>
+                  <option value="public_other">Public &amp; Other</option>
+                </select></label>
+              </div>
+              <div class="olg-chart" id="olg-detail-chart"></div>
+              <div class="olg-legend">
+                <span class="li"><span class="ln" id="olg-detail-ln-base"></span>ONS outturn / forecast</span>
+                <span class="li"><span class="ln dashed" id="olg-detail-ln-reform"></span>Reform +1&#8202;pp basic rate</span>
+                <span class="li"><span class="ln dotted grey"></span>Outturn / forecast boundary (2023)</span>
+                <span class="li"><span class="ln dashed gold"></span>Reform start (2027)</span>
+              </div>
+              </div>
+              <p class="chart-note">
+                Read these as model-consistent magnitudes and signs, not forecasts —
+                the <a href="/olg/validation">Validation tab</a> explains why there
+                is no ground truth to score them against.
+              </p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">the showcase reform</div>
+        <div class="meth-eq"><div class="meth-eq-label">reform</div><div class="meth-eq-body">+1pp basic rate (20% &rarr; 21%) from 2027&ndash;28</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">baseline</div><div class="meth-eq-body">OBR November 2025 EFO</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">window shown</div><div class="meth-eq-body">2026&ndash;2030 of a 60-period solve</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sectors</div><div class="meth-eq-body">eight UK industries</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">source</div><div class="meth-eq-body"><code>olg/figures/tpi_data.json</code></div></div>
+        </div>
       </div>
-      <div class="olg-chart" id="olg-macro-chart"></div>
-      <div class="olg-legend">
-        <span class="li"><span class="ln"></span>OBR outturn / forecast</span>
-        <span class="li"><span class="ln dashed"></span>Reform +1&#8202;pp basic rate</span>
-        <span class="li"><span class="ln dotted grey"></span>Outturn / forecast boundary (2023)</span>
-        <span class="li"><span class="ln dashed gold"></span>Reform start (2027)</span>
+
       </div>
-      </div>
-      <noscript><p class="chart-note">Charts need JavaScript; the series are in <a href="/olg/figures/tpi_data.json">olg/figures/tpi_data.json</a> and the headline numbers are in the table above.</p></noscript>
-      <p>
-        With <code>multi_sector=True</code> the same solve reports the eight
-        UK industry sectors. The incidence is close to uniform: seven of the
-        eight contract by roughly 0.3–0.4% as private demand falls, while
-        <strong>public &amp; other</strong> alone expands, tracking the extra
-        government consumption the revenue finances.
-      </p>
-      <div class="mo-chartcard">
-      <div class="olg-toolbar">
-        <label for="olg-sector-select">Show<select id="olg-sector-select">
-          <option value="output" selected>Output</option>
-          <option value="capital">Capital</option>
-          <option value="labour">Labour</option>
-        </select></label>
-      </div>
-      <div class="olg-chart" id="olg-sector-chart"></div>
-      <div class="olg-legend" id="olg-sector-legend"></div>
-      </div>
-      <p>
-        The finest-grained view is a single sector × variable cell with its
-        history for context — here, energy output, indexed to 2000. The
-        reform's dent is barely visible at this scale, which is itself the
-        honest reading: a 1pp basic-rate rise is a small shock to any one
-        industry.
-      </p>
-      <div class="mo-chartcard">
-      <div class="olg-toolbar">
-        <label for="olg-detail-var">Variable<select id="olg-detail-var">
-          <option value="output" selected>Output</option>
-          <option value="capital">Capital</option>
-          <option value="labour">Labour</option>
-        </select></label>
-        <label for="olg-detail-sector">Sector<select id="olg-detail-sector">
-          <option value="energy" selected>Energy</option>
-          <option value="manufacturing">Manufacturing</option>
-          <option value="construction">Construction</option>
-          <option value="trade_transport">Trade &amp; Transport</option>
-          <option value="info_finance">Info &amp; Finance</option>
-          <option value="real_estate">Real Estate</option>
-          <option value="business_services">Business Services</option>
-          <option value="public_other">Public &amp; Other</option>
-        </select></label>
-      </div>
-      <div class="olg-chart" id="olg-detail-chart"></div>
-      <div class="olg-legend">
-        <span class="li"><span class="ln" id="olg-detail-ln-base"></span>ONS outturn / forecast</span>
-        <span class="li"><span class="ln dashed" id="olg-detail-ln-reform"></span>Reform +1&#8202;pp basic rate</span>
-        <span class="li"><span class="ln dotted grey"></span>Outturn / forecast boundary (2023)</span>
-        <span class="li"><span class="ln dashed gold"></span>Reform start (2027)</span>
-      </div>
-      </div>
-      <p class="chart-note">
-        Read these as model-consistent magnitudes and signs, not forecasts —
-        the <a href="/olg/validation">Validation tab</a> explains why there
-        is no ground truth to score them against.
-      </p>
+
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">The join</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">both directions</div>
+          <div class="meth-eq"><div class="meth-eq-label">in</div><div class="meth-eq-body">tax functions estimated on PolicyEngine microdata</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">reform</div><div class="meth-eq-body">the same parameter dict as the microsim</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">out</div><div class="meth-eq-body">long-run wage and labour-supply changes</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">second run</div><div class="meth-eq-body"><code>score_reform</code>, <code>model="og+microsim"</code></div></div>
+          <div class="meth-eq"><div class="meth-eq-label">access</div><div class="meth-eq-body">local only, experimental</div></div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Model at a glance</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">overlapping generations</div>
+          <div class="meth-eq"><div class="meth-eq-label">cohorts</div><div class="meth-eq-body">80 annual, ages 20 to 99</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">solves</div><div class="meth-eq-body">steady state and transition path</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">framework</div><div class="meth-eq-body">OG-Core, Policy Simulation Library</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">microdata</div><div class="meth-eq-body">Enhanced FRS, via PolicyEngine</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">role</div><div class="meth-eq-body">long-run structural member</div></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Worked example</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">the showcase reform</div>
+          <div class="meth-eq"><div class="meth-eq-label">reform</div><div class="meth-eq-body">+1pp basic rate (20% &rarr; 21%) from 2027&ndash;28</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">baseline</div><div class="meth-eq-body">OBR November 2025 EFO</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">window shown</div><div class="meth-eq-body">2026&ndash;2030 of a 60-period solve</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">sectors</div><div class="meth-eq-body">eight UK industries</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">source</div><div class="meth-eq-body"><code>olg/figures/tpi_data.json</code></div></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="band where-next" id="where-next">
+    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/olg/methodology">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg></span>
+        <h3>Methodology</h3>
+        <p>Households, firms, government and the solve</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/models#compare">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg></span>
+        <h3>Compare the models</h3>
+        <p>All seven side by side</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/olg/code">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span>
+        <h3>Run it locally</h3>
+        <p>Install, calibrate and solve</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
     </div>
   </section>
 
@@ -434,5 +499,29 @@
 </script>
 <script src="/reveal.js?v=2" defer></script>
 
+<script>
+// StepPanel: highlight the step at the reading line and show its panel in
+// the sticky aside (scoped to each .scrolly-wrap).
+(function () {
+  "use strict";
+  Array.from(document.querySelectorAll(".scrolly-wrap")).forEach(function (wrap) {
+    var steps = Array.from(wrap.querySelectorAll(".meth-step"));
+    var panels = Array.from(wrap.querySelectorAll(".meth-panel"));
+    if (!steps.length || !panels.length) return;
+    var current = -1;
+    function update() {
+      var offset = window.innerHeight * 0.33, active = 0;
+      steps.forEach(function (step, i) { if (step.getBoundingClientRect().top < offset) active = i; });
+      if (active === current) return;
+      current = active;
+      steps.forEach(function (step, i) { step.classList.toggle("active", i === active); });
+      panels.forEach(function (panel) { panel.hidden = Number(panel.getAttribute("data-step")) !== active; });
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    update();
+  });
+})();
+</script>
 </body>
 </html>

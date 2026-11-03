@@ -20,14 +20,9 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=8" />
-<style>
-/* page-specific: hero sizing only — shared component styles live in style.css */
-.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-</style>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
   <a class="brand" href="/" aria-label="PolicyEngine Macro home">
@@ -57,10 +52,7 @@
         See who responds to a US shock, not just how much.
       </h1>
       <p class="lede reveal" style="--d:2">
-        Run stylized monetary, fiscal-spending, and productivity shocks through
-        a two-asset heterogeneous-agent New Keynesian model — aggregate
-        impulse responses plus first-order distributional output: MPCs by
-        wealth quartile and the hand-to-mouth share.
+        The parameters it solves against the paper, what is imposed, and the limits.
       </p>
     </div>
   </section>
@@ -74,31 +66,76 @@
       <a class="model-tabs-link" href="/reports/us-hank-open-source">Open models</a>
     </div>
   </nav>
-
-  <section id="trust" class="band">
+  <div class="with-rail">
+    <nav class="page-rail" aria-label="On this page">
+      <p class="page-rail-title">On this page</p>
+      <a href="#trust" aria-current="location">Headline numbers</a>
+      <a href="#solved">Solved parameters</a>
+      <a href="#gated">What is gated</a>
+      <a href="#caveats">Limits</a>
+      <a href="#where-next">Where next</a>
+    </nav>
+    <div class="rail-main">
+  <section class="band band-wide" id="trust">
     <div class="band-head">
       <span class="kicker mono">how far to trust it</span>
       <h2>A replication gate, not a forecast-accuracy claim.</h2>
+      <p class="section-intro">Solved parameters against the paper&rsquo;s Table B.III; the headline targets are inputs, not results.</p>
     </div>
-    <div class="prose">
-      <p>
-        The ground truth is the published paper, not data. The parameters the
-        model solves for internally reproduce Auclert et al. (2021)
-        Table&nbsp;B.III to the last published digit on six of seven:
-        &beta;&nbsp;0.9762739 against 0.976, &chi;<sub>1</sub>&nbsp;6.4164196
-        against 6.416 — solved numerically from a 6.5 starting guess, the
-        strongest single check — and Z, &alpha;, &mu;<sub>p</sub> and &tau;
-        analytically. The seventh is <strong>unresolved</strong>: this
-        implementation returns <code>vphi</code> (the wage Phillips curve
-        disutility scale) of 1.7135 where Table&nbsp;B.III publishes 2.073,
-        &minus;17.3%, left unasserted in the test suite rather than laundered.
-      </p>
-      <p>
-        Signs and timing of the shock responses are gated too.
-        <strong>Magnitudes are not</strong> — the paper publishes no impulse
-        response to match them against.
-      </p>
-      <figure class="vfig" id="targets">
+    <div class="stat-row">
+      <div class="stat">
+        <span class="stat-label">Solved parameters</span>
+        <span class="stat-value">6 of 7</span>
+        <span class="stat-sub">to the last published digit</span>
+        <span class="stat-foot"><a class="chip" href="#solved">Table B.III</a></span>
+      </div>
+      <div class="stat stat-neutral">
+        <span class="stat-label"><code>vphi</code> vs the paper</span>
+        <span class="stat-value">&minus;17.3%</span>
+        <span class="stat-sub">1.7135 against 2.073</span>
+        <span class="stat-foot"><a class="chip chip-warn" href="#solved">Unresolved</a></span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Goods-market clearing</span>
+        <span class="stat-value">3.3e&minus;08</span>
+        <span class="stat-sub">untargeted, by Walras&rsquo; law</span>
+        <span class="stat-foot"><span class="chip">The honest measure</span></span>
+      </div>
+      <div class="stat stat-neutral">
+        <span class="stat-label">IRF magnitudes</span>
+        <span class="stat-value">none</span>
+        <span class="stat-sub">published to match against</span>
+        <span class="stat-foot"><a class="chip chip-warn" href="#gated">Not validated</a></span>
+      </div>
+    </div>
+    <p class="callout callout-neutral">An independent replication of a published academic model, built on the
+        authors' own <a href="https://github.com/shade-econ/sequence-jacobian">sequence-jacobian</a>
+        toolkit — not produced or endorsed by them. Results are model
+        counterfactuals, not official estimates or forecasts.</p>
+  </section>
+
+  <section class="band band-wide" id="tests">
+    <div class="band-head">
+      <span class="kicker mono">the evidence</span>
+      <h2>What it solves, and what is imposed.</h2>
+    </div>
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+
+      <div class="meth-step" id="solved" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>The parameters it solves for</h3></div>
+        <p class="mo-lead">The ground truth is the published paper, not data.</p>
+              <p>
+                The ground truth is the published paper, not data. The parameters the
+                model solves for internally reproduce Auclert et al. (2021)
+                Table&nbsp;B.III to the last published digit on six of seven:
+                &beta;&nbsp;0.9762739 against 0.976, &chi;<sub>1</sub>&nbsp;6.4164196
+                against 6.416 — solved numerically from a 6.5 starting guess, the
+                strongest single check — and Z, &alpha;, &mu;<sub>p</sub> and &tau;
+                analytically. The seventh is <strong>unresolved</strong>: this
+                implementation returns a <code>vphi</code> (the wage Phillips curve disutility scale) that misses Table&nbsp;B.III (tile above), left unasserted in the test suite rather than laundered.
+              </p>
+              <figure class="vfig" id="targets">
         <svg class="vchart" data-chart="hank-targets" viewBox="0 0 760 402" role="img" aria-labelledby="hank-targets-t hank-targets-d">
 <title id="hank-targets-t">us-hank: internally solved parameters vs Auclert et al. (2021) Table B.III</title>
 <desc id="hank-targets-d">Table-style chart of the parameters the us-hank two-asset model solves for internally, against the values Auclert, Bardóczy, Rognlie and Straub (2021) print in Table B.III. These are not imposed: two are solved numerically and four analytically from the calibration inputs, so they had somewhere to miss. beta (discount factor): published 0.976, ours 0.9762739, solved numerically; chi1 (portfolio adjustment cost scale): published 6.416, ours 6.41642, solved numerically; Z (TFP): published 0.468, ours 0.4677898, solved analytically; alpha (capital share): published 0.33, ours 0.3299492, solved analytically; mu_p (price markup): published 1.015, ours 1.015228, solved analytically; tau (labour tax rate): published 0.356, ours 0.3560606, solved analytically. All six agree to the last digit the paper prints. The seventh, vphi (wage Phillips curve disutility scale), does not: the paper publishes 2.073 and this implementation returns 1.713476, a gap of -17.3 per cent, left unasserted in the upstream test suite rather than laundered. Separately, the 5 rows Output Y, Capital K, Real rate r (quarterly), Government spending G, Government debt Bg are calibration inputs held fixed through the solve, so their zero deviations are identities and carry no information, and Total wealth A+B and Liquid assets B are reached by the solver, so their residuals of 2.7e-13 and 9.5e-14 are tolerances rather than accuracies. Market clearing: goods 3.3e-08, which is untargeted and holds only by Walras' law, and assets 3.1e-13, which is the root-finder's own convergence target.</desc>
@@ -158,22 +195,64 @@
 <text class="vc-note" x="24" y="354.0">accuracies.</text>
 <text class="vc-note" x="24" y="370.0">Market clearing: goods 3.3e-08 untargeted (Walras’ law), assets 3.1e-13 is the solver’s own target.</text>
 </svg>
-        <figcaption><strong>Calibration, not replication.</strong> Y, K, r, G, Bg and the wealth rows are imposed and held fixed through the solve, so their deviations are identities or solver tolerances rather than accuracies; The rows the model solves for are the replication: six reproduce Table&nbsp;B.III to the last published digit and <code>vphi</code> misses by 17.3%. Same for the residuals: asset-market clearing at 3.1e&minus;13 is the solver's own target, while goods-market clearing at 3.3e&minus;08 is untargeted — it holds only by Walras' law, which makes it the honest measure. Solved 2026-07-29 at production grids (n<sub>B</sub>=50, n<sub>A</sub>=70, n<sub>K</sub>=50), re-solved independently 2026-08-13. Source: <code>papers/us-hank/figures/replication.json</code>.</figcaption>
-      </figure>
-      <p class="callout">
-        An independent replication of a published academic model, built on the
-        authors' own <a href="https://github.com/shade-econ/sequence-jacobian">sequence-jacobian</a>
-        toolkit — not produced or endorsed by them. Results are model
-        counterfactuals, not official estimates or forecasts.
-      </p>
-      <p class="opt-note">
-        where this sits among other open HANK implementations:
-        <a href="/reports/us-hank-open-source">the landscape report</a>.
-      </p>
+                <figcaption><strong>Calibration, not replication.</strong> Y, K, r, G, Bg and the wealth rows are imposed and held fixed through the solve, so their deviations are identities or solver tolerances rather than accuracies; The rows the model solves for are the replication: six reproduce Table&nbsp;B.III to the last published digit and <code>vphi</code> misses (tile above). Same for the residuals: asset-market clearing at 3.1e&minus;13 is the solver's own target, while goods-market clearing is untargeted — it holds only by Walras' law, which makes it the honest measure. Solved 2026-07-29 at production grids (n<sub>B</sub>=50, n<sub>A</sub>=70, n<sub>K</sub>=50), re-solved independently 2026-08-13. Source: <code>papers/us-hank/figures/replication.json</code>.</figcaption>
+              </figure>
+        <div class="meth-inline">
+        <div class="meth-sec-title">what had somewhere to miss</div>
+        <div class="meth-eq"><div class="meth-eq-label">&beta;</div><div class="meth-eq-body">0.9762739 vs 0.976</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">&chi;<sub>1</sub></div><div class="meth-eq-body">6.4164196 vs 6.416, from a 6.5 guess</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Z, &alpha;, &mu;<sub>p</sub>, &tau;</div><div class="meth-eq-body">analytic, to the last digit</div></div>
+        <div class="meth-eq"><div class="meth-eq-label"><code>vphi</code></div><div class="meth-eq-body">unresolved, left unasserted</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="gated" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What is gated, and what is not</h3></div>
+        <p class="mo-lead">Imposed inputs carry no information; signs and timing are gated, magnitudes are not.</p>
+              <p>
+                Signs and timing of the shock responses are gated too.
+                <strong>Magnitudes are not</strong> — the paper publishes no impulse
+                response to match them against.
+              </p>
+              <p class="opt-note">
+                where this sits among other open HANK implementations:
+                <a href="/reports/us-hank-open-source">the landscape report</a>.
+              </p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">read the rows correctly</div>
+        <div class="meth-eq"><div class="meth-eq-label">imposed</div><div class="meth-eq-body">Y, K, r, G, Bg &mdash; identities</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">solver-reached</div><div class="meth-eq-body">total wealth, liquid assets &mdash; tolerances</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">asset clearing</div><div class="meth-eq-body">3.1e&minus;13, the solver&rsquo;s own target</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">IRF signs, timing</div><div class="meth-eq-body">gated</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">IRF magnitudes</div><div class="meth-eq-body">not gated</div></div>
+        </div>
+      </div>
+
+      </div>
+
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Solved vs Table B.III</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">what had somewhere to miss</div>
+          <div class="meth-eq"><div class="meth-eq-label">&beta;</div><div class="meth-eq-body">0.9762739 vs 0.976</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">&chi;<sub>1</sub></div><div class="meth-eq-body">6.4164196 vs 6.416, from a 6.5 guess</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">Z, &alpha;, &mu;<sub>p</sub>, &tau;</div><div class="meth-eq-body">analytic, to the last digit</div></div>
+          <div class="meth-eq"><div class="meth-eq-label"><code>vphi</code></div><div class="meth-eq-body">unresolved, left unasserted</div></div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Imposed vs solved</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">read the rows correctly</div>
+          <div class="meth-eq"><div class="meth-eq-label">imposed</div><div class="meth-eq-body">Y, K, r, G, Bg &mdash; identities</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">solver-reached</div><div class="meth-eq-body">total wealth, liquid assets &mdash; tolerances</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">asset clearing</div><div class="meth-eq-body">3.1e&minus;13, the solver&rsquo;s own target</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">IRF signs, timing</div><div class="meth-eq-body">gated</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">IRF magnitudes</div><div class="meth-eq-body">not gated</div></div>
+        </div>
+      </aside>
     </div>
   </section>
 
-  <section id="caveats" class="band">
+  <section class="band band-wide" id="caveats">
     <div class="band-head">
       <span class="kicker mono">limits</span>
       <h2>Known limitations.</h2>
@@ -208,6 +287,32 @@
     </div>
   </section>
 
+  <section class="band where-next" id="where-next">
+    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/us-hank/code">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span>
+        <h3>Code</h3>
+        <p>Install, run and reproduce each number</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/models#validation">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
+        <h3>Every model&rsquo;s verdict</h3>
+        <p>How the seven are checked</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/reports/us-hank-open-source">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>
+        <h3>The landscape report</h3>
+        <p>Other open HANK implementations</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </div>
+  </section>
+    </div>
+  </div>
+
 </main>
 
 <footer class="foot foot-bar">
@@ -224,5 +329,49 @@
 
 <script src="/reveal.js?v=2" defer></script>
 
+<script>
+// StepPanel: highlight the step at the reading line and show its panel in
+// the sticky aside (scoped to each .scrolly-wrap).
+(function () {
+  "use strict";
+  Array.from(document.querySelectorAll(".scrolly-wrap")).forEach(function (wrap) {
+    var steps = Array.from(wrap.querySelectorAll(".meth-step"));
+    var panels = Array.from(wrap.querySelectorAll(".meth-panel"));
+    if (!steps.length || !panels.length) return;
+    var current = -1;
+    function update() {
+      var offset = window.innerHeight * 0.33, active = 0;
+      steps.forEach(function (step, i) { if (step.getBoundingClientRect().top < offset) active = i; });
+      if (active === current) return;
+      current = active;
+      steps.forEach(function (step, i) { step.classList.toggle("active", i === active); });
+      panels.forEach(function (panel) { panel.hidden = Number(panel.getAttribute("data-step")) !== active; });
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    update();
+  });
+})();
+</script>
+<script>
+// "On this page" rail: mark the section at the reading line.
+(function () {
+  "use strict";
+  var rail = document.querySelector(".page-rail");
+  if (!rail) return;
+  var links = Array.from(rail.querySelectorAll('a[href^="#"]'));
+  var targets = links.map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); });
+  function update() {
+    var line = window.innerHeight * 0.3, current = 0;
+    targets.forEach(function (t, i) { if (t && t.getBoundingClientRect().top < line) current = i; });
+    links.forEach(function (a, i) {
+      if (i === current) a.setAttribute("aria-current", "location"); else a.removeAttribute("aria-current");
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  update();
+})();
+</script>
 </body>
 </html>

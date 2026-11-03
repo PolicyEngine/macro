@@ -20,14 +20,9 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=8" />
-<style>
-/* page-specific: hero sizing only — shared component styles live in style.css */
-.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-</style>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
   <a class="brand" href="/" aria-label="PolicyEngine Macro home">
@@ -57,8 +52,7 @@
         Model long-run behavioural change.
       </h1>
       <p class="lede reveal" style="--d:2">
-        Estimate how reforms affect work, saving, investment, and public
-        finances over decades, for the UK.
+        Calibration targets, the nearest external benchmark, the OBR&rsquo;s own OLG model, and the limits.
       </p>
     </div>
   </section>
@@ -72,279 +66,332 @@
       <a class="model-tabs-link" href="/papers/psl-og">Paper</a>
     </div>
   </nav>
-
-  <section id="obr-overview" class="band">
+  <div class="with-rail">
+    <nav class="page-rail" aria-label="On this page">
+      <p class="page-rail-title">On this page</p>
+      <a href="#trust" aria-current="location">Headline</a>
+      <a href="#targets">Calibration targets</a>
+      <a href="#benchmark">External benchmark</a>
+      <a href="#obr-overview">OBR comparison</a>
+      <a href="#caveats">Limits</a>
+      <a href="#where-next">Where next</a>
+    </nav>
+    <div class="rail-main">
+  <section class="band band-wide" id="trust">
     <div class="band-head">
-      <span class="kicker mono">obr comparison</span>
-      <h2>Two UK overlapping-generations models, side by side.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        <strong>OG-UK</strong> — the UK calibration of
-        <a href="https://github.com/PSLmodels/OG-Core">OG-Core</a>, maintained by the
-        <a href="https://pslmodels.org">Policy Simulation Library</a> — against the
-        <strong>OBR UK OLG</strong> model of
-        <a href="/papers/obr-working-paper-22.pdf">OBR Working Paper No.&nbsp;22</a>
-        (Brzezinski, Hantzsche &amp; Watson, April&nbsp;2025), the closest available
-        external check for a model of this kind.
-      </p>
-      <div class="table-scroll mo-tablecard cmp-compare"><table>
-        <thead><tr><th scope="col">Dimension</th><th scope="col">OG-UK strength</th><th scope="col">OBR UK OLG strength</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Transition dynamics</th><td>Full year-by-year paths</td><td>Steady-state only</td></tr>
-          <tr><th scope="row">UK institutional detail</th><td>Smooth approximations</td><td>Explicit bands and rates</td></tr>
-          <tr><th scope="row">Within-cohort inequality</th><td>Permanent types</td><td>Stochastic earnings</td></tr>
-          <tr><th scope="row">Production structure</th><td>Multi-sector CES</td><td>Single-sector Cobb-Douglas</td></tr>
-          <tr><th scope="row">Tax instruments</th><td>5 instruments</td><td>3 instruments (more detailed)</td></tr>
-          <tr><th scope="row">Fiscal policy levers</th><td>G, TR, UBI, I<sub>g</sub></td><td>RBI, age-dependent transfers</td></tr>
-          <tr><th scope="row">Openness</th><td>Open-source, Python</td><td>MATLAB, closed toolkit</td></tr>
-        </tbody>
-      </table></div>
-    </div>
-  </section>
-
-  <section id="obr-1" class="band">
-    <div class="band-head">
-      <span class="kicker mono">production</span>
-      <h2>Production technology.</h2>
-    </div>
-    <div class="prose">
-      <div class="table-scroll mo-tablecard cmp-compare"><table>
-        <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Production function</th><td>CES (nests Cobb-Douglas as special case)</td><td>Cobb-Douglas only</td></tr>
-          <tr><th scope="row">Industries</th><td>M industries (multi-sector)</td><td>Single sector</td></tr>
-          <tr><th scope="row">Public capital</th><td>Yes — generates rents to private capital</td><td>No</td></tr>
-          <tr><th scope="row">Capital share</th><td>Configurable per industry</td><td>α = 0.33</td></tr>
-          <tr><th scope="row">Labour input</th><td>Efficiency-weighted across permanent types</td><td>Efficiency-weighted by age + stochastic shocks</td></tr>
-          <tr><th scope="row">TFP</th><td>Varies by industry and over time</td><td>Normalised to 1, with labour-augmenting growth g = 1.2%</td></tr>
-          <tr><th scope="row">Depreciation</th><td>Configurable per industry</td><td>δ = 5%</td></tr>
-        </tbody>
-      </table></div>
-    </div>
-  </section>
-
-  <section id="obr-2" class="band">
-    <div class="band-head">
-      <span class="kicker mono">households</span>
-      <h2>Household heterogeneity.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        How households differ within each cohort — the deepest structural
-        difference between the two models.
-      </p>
-      <div class="table-scroll mo-tablecard cmp-compare"><table>
-        <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Within-cohort variation</th><td>J <strong>permanent ability types</strong> (deterministic)</td><td><strong>Stochastic earnings shocks</strong> (AR(1) persistent + i.i.d. transitory)</td></tr>
-          <tr><th scope="row">Income inequality driver</th><td>Fixed type assignment at birth</td><td>Random shocks each period (ρ<sup>z</sup> = 0.9, σ<sub>z</sub> = 0.05, σ<sub>e</sub> = 0.7)</td></tr>
-          <tr><th scope="row">Precautionary savings</th><td>Not a primary channel</td><td>Yes — driven by earnings uncertainty</td></tr>
-          <tr><th scope="row">Utility function</th><td>CRRA on consumption; elliptical labour disutility</td><td>Cobb-Douglas over consumption and leisure (non-separable)</td></tr>
-          <tr><th scope="row">Labour disutility</th><td><strong>Elliptical function</strong> — always interior solutions</td><td>Implicit in Cobb-Douglas composite — corner solutions possible</td></tr>
-          <tr><th scope="row">Risk aversion parameter</th><td>σ = 1.5 on consumption only</td><td>σ₂ = 2 on consumption-leisure composite</td></tr>
-          <tr><th scope="row">Consumption aggregation</th><td>Stone-Geary Cobb-Douglas (subsistence levels, I goods)</td><td>Single consumption good</td></tr>
-          <tr><th scope="row">Discount factor</th><td>β = 0.965, fixed and uniform (per-type β<sub>j</sub> supported, not used here)</td><td>β = 0.99, calibrated to the WAS asset profile</td></tr>
-        </tbody>
-      </table></div>
-    </div>
-  </section>
-
-  <section id="obr-3" class="band">
-    <div class="band-head">
-      <span class="kicker mono">bequests</span>
-      <h2>Bequest motive.</h2>
-    </div>
-    <div class="prose">
-      <div class="table-scroll mo-tablecard cmp-compare"><table>
-        <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Motive</th><td>"Warm glow" weighted by mortality probability ρ<sub>s</sub></td><td>"Warm glow" with target level, kicks in at age j* = 91</td></tr>
-          <tr><th scope="row">Varies by type</th><td>Yes — χ<sup>b</sup><sub>j</sub> calibrated per ability type</td><td>Uniform (φ₁ = 10, φ₂ = 4.55)</td></tr>
-          <tr><th scope="row">Distribution</th><td>To surviving households</td><td>Equal distribution to ages 55–75</td></tr>
-        </tbody>
-      </table></div>
-    </div>
-  </section>
-
-  <section id="obr-4" class="band">
-    <div class="band-head">
-      <span class="kicker mono">taxes</span>
-      <h2>Tax system.</h2>
-    </div>
-    <div class="prose">
-      <div class="vs-grid">
-        <div class="vs-card">
-          <div class="vs-card-head">OG-UK — estimated tax functions</div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>Smooth Gouveia&ndash;Strauss, DEP or linear forms fitted to PolicyEngine UK microdata, folding in income tax and NICs</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>Consumption, wealth, corporate and bequest taxes modelled separately on top</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>Any PolicyEngine-representable reform — rate, threshold, allowance — flows through after re-estimating on post-reform microdata</span></div>
-        </div>
-        <div class="vs-card">
-          <div class="vs-card-head">OBR UK OLG — statutory schedule</div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>Income tax as explicit bands: PA £12,570, HRT £50,270, ART £125,140 at 20&nbsp;/&nbsp;40&nbsp;/&nbsp;45%</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>NICs separate (£12,570 / £50,270 at 8&nbsp;/&nbsp;2%); VAT effective 9.3%; explicit pension relief and drawdown taxation</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>"+1&nbsp;pp basic rate from 2027&ndash;28" is one parameter — less flexible for reforms that reshape the schedule</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="obr-5" class="band">
-    <div class="band-head">
-      <span class="kicker mono">government</span>
-      <h2>Government &amp; fiscal policy.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        The fiscal closure rule — which item adjusts to keep debt sustainable — determines
-        who bears the long-run burden of any reform.
-      </p>
-      <div class="table-scroll mo-tablecard cmp-compare"><table>
-        <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Budget constraint</th><td>Revenue + new debt = debt service + G + I<sub>g</sub> + pensions + TR + UBI</td><td>Revenue = welfare transfers + RBI + debt service (growth-adjusted)</td></tr>
-          <tr><th scope="row">Fiscal closure rule</th><td><strong>Configurable</strong>: adjust G, TR, or combination after period T<sub>G1</sub></td><td><strong>Residual Budgetary Item (RBI)</strong> adjusts to stabilise debt/GDP at 100%</td></tr>
-          <tr><th scope="row">Debt target</th><td>Configurable</td><td>Fixed at 100% of GDP</td></tr>
-          <tr><th scope="row">Public investment</th><td>Explicit (I<sub>g</sub> contributes to public capital stock)</td><td>Not modelled as productive</td></tr>
-          <tr><th scope="row">Welfare transfers</th><td>Lump-sum TR</td><td><strong>Age-dependent</strong> transfers (γ<sup>j</sup> scaling) calibrated to OBR welfare spending projections</td></tr>
-          <tr><th scope="row">State pension</th><td>Part of transfers</td><td><strong>Explicitly modelled</strong> as age-dependent welfare transfer from state pension age onwards</td></tr>
-          <tr><th scope="row">Spending categories</th><td>G (public goods) + I<sub>g</sub> (infrastructure) + pensions + TR + UBI</td><td>Welfare transfers + residual non-interest spending (G⁰)</td></tr>
-        </tbody>
-      </table></div>
-    </div>
-  </section>
-
-  <section id="obr-6" class="band">
-    <div class="band-head">
-      <span class="kicker mono">open economy</span>
-      <h2>Open economy.</h2>
-    </div>
-    <div class="prose">
-      <div class="table-scroll mo-tablecard cmp-compare"><table>
-        <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Approach</th><td><strong>Parameterised capital mobility</strong> (ζ<sub>K</sub> for capital, ζ<sub>D</sub> for debt)</td><td><strong>Binary switch</strong>: fully open (r = 5% exogenous) or fully closed (r endogenous)</td></tr>
-          <tr><th scope="row">Foreign capital</th><td>Continuous degree of openness</td><td>Either all or nothing</td></tr>
-          <tr><th scope="row">Net foreign assets</th><td>Derived from capital mobility parameters</td><td>NFA residually determined in open economy</td></tr>
-          <tr><th scope="row">Interest rate</th><td>Endogenous (influenced by openness parameters)</td><td>Either fixed at 5% (open) or MPK − δ (closed)</td></tr>
-        </tbody>
-      </table></div>
-    </div>
-  </section>
-
-  <section id="obr-7" class="band">
-    <div class="band-head">
-      <span class="kicker mono">solution</span>
-      <h2>Solution method &amp; calibration.</h2>
-    </div>
-    <div class="prose">
-      <p>Both are rational-expectations dynamic general equilibrium; they solve different problems.</p>
-      <div class="vs-grid">
-        <div class="vs-card">
-          <div class="vs-card-head">OG-UK — Time Path Iteration</div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>Households' Euler equations solved directly</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>Full year-by-year transition path; continuous state space, expectations over the whole path</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>~17-minute solve</span></div>
-        </div>
-        <div class="vs-card">
-          <div class="vs-card-head">OBR UK OLG — Value Function Iteration</div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>Kirkby's VFI toolkit; assets and stochastic earnings on a grid</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>Compares long-run steady states only — no adjustment path</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>Under two minutes — a difference in method, not ambition</span></div>
-        </div>
-      </div>
-      <p>Calibration differs mainly in data sources and anchors.</p>
-      <div class="vs-grid">
-        <div class="vs-card">
-          <div class="vs-card-head">OG-UK</div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>UN World Population Prospects demographics (country 826)</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>Age-earnings profiles via permanent ability types</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>Tax functions from PolicyEngine-UK's Enhanced FRS (HMRC SPI, LCFS, WAS)</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>ONS GDP anchors the aggregates; modeller-set fiscal targets and growth</span></div>
-        </div>
-        <div class="vs-card">
-          <div class="vs-card-head">OBR UK OLG</div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>ONS mortality; ASHE + HMRC earnings distribution</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>HMRC&nbsp;/&nbsp;GOV.UK tax parameters directly</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>Pinned to the OBR March 2024 EFO — GDP per person £35,100 (S&nbsp;=&nbsp;19.81)</span></div>
-          <div class="vs-line"><span class="icon">&rarr;</span><span>n&nbsp;=&nbsp;0.75%, g&nbsp;=&nbsp;1.2%, debt&nbsp;/&nbsp;GDP at 100%</span></div>
-        </div>
-      </div>
-      <p class="chart-note">
-        Sources: <a href="/papers/obr-working-paper-22.pdf">OBR Working Paper
-        No.&nbsp;22</a>; OG-Core documentation and OG-UK calibration code.
-      </p>
-    </div>
-  </section>
-
-  <section id="targets" class="band">
-    <div class="band-head">
-      <span class="kicker mono">calibration</span>
+      <span class="kicker mono">how far to trust it</span>
       <h2>No ground truth. Calibration targets instead.</h2>
+      <p class="section-intro">Calibrated, not outcome-validated: an imposed target cannot disagree.</p>
     </div>
-    <div class="prose">
-      <div class="callout">
-        <strong>No published replication target exists</strong> for this model
-        class. The table compares calibration <em>inputs</em> with official UK
-        aggregates. Nothing in it is a model output.
+    <div class="stat-row">
+      <div class="stat stat-neutral">
+        <span class="stat-label">Outcome benchmark</span>
+        <span class="stat-value">none</span>
+        <span class="stat-sub">for this model class</span>
+        <span class="stat-foot"><a class="chip chip-warn" href="#targets">No ground truth</a></span>
       </div>
-      <div class="table-scroll mo-tablecard">
-      <table>
-        <caption>psl-og calibration targets against official UK aggregates</caption>
-        <thead><tr><th scope="col">Quantity</th><th scope="col">Official UK value</th><th scope="col">Source</th><th scope="col">Model treatment</th><th scope="col">Deviation</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Government debt-to-GDP</th><td>94.9% (June 2026)</td><td>ONS &middot; HF6X, vintage 2026-07-26</td><td class="vc-warn">imposed via closure target</td><td>+0.1pp vs latest ONS (target 95.0%)</td></tr>
-          <tr><th scope="row">Household saving ratio</th><td>8.9% (2026Q1, down from 9.6%)</td><td>ONS quarterly sector accounts</td><td class="vc-warn">not targeted &mdash; &beta; = 0.965 fixed, not estimated</td><td>no model-produced value to compare</td></tr>
-          <tr><th scope="row">Potential growth</th><td>≈1.1% / yr</td><td>OBR EFO</td><td class="vc-warn">imposed, g<sub>y</sub> = 0.011</td><td>≈0</td></tr>
-          <tr><th scope="row">Depreciation / capital</th><td>≈6&ndash;7% (CFC / net stock)</td><td>ONS capital stocks bulletin</td><td class="vc-warn">imposed, δ = 0.065</td><td>within range</td></tr>
-          <tr><th scope="row">Labour share of income</th><td>≈0.59&ndash;0.60, rising in 2024</td><td>ONS labour-share series / Blue Book 2025</td><td class="vc-warn">imposed, γ = 0.35 (OG-Core default)</td><td>≈5pp — the capital share is not yet re-anchored to ONS factor shares</td></tr>
-          <tr><th scope="row">Net capital stock</th><td>£5.6tn (2024) whole-economy net stock; the model's K maps to the narrower business-capital concept</td><td>ONS capital stocks bulletin</td><td><strong>emergent</strong> — checked, not imposed</td><td>concept-adjusted; no published reconciliation</td></tr>
-        </tbody>
-      </table>
+      <div class="stat stat-neutral">
+        <span class="stat-label">Imposed targets</span>
+        <span class="stat-value">anchors</span>
+        <span class="stat-sub">met by construction</span>
+        <span class="stat-foot"><a class="chip" href="#targets">Not evidence</a></span>
       </div>
-      <p>
-        <strong>An imposed target cannot disagree</strong>, so a zero
-        deviation above is an anchor, not evidence. Only the emergent row is
-        a check.
-      </p>
-      <p>
-        The nearest external benchmark is
-        <a href="https://obr.uk/docs/dlm_uploads/Working_paper_22_A_new_UK_overlapping_generations_model.pdf">OBR
-        Working Paper 22</a>, Table 5.1 — a 1pp basic-rate rise in the long
-        run: GDP/person &minus;0.1%, labour supply &minus;0.2%, productivity
-        +0.1%. Those are the figures a future OG-UK run will be judged
-        against, not a match claimed today.
-      </p>
-      <details class="more">
-        <summary>What would count as over-identifying evidence, and the dating and structural caveats</summary>
-      <p>
-        The genuinely over-identifying checks are the ones the steady state
-        must <em>deliver</em>: the capital&ndash;output ratio and the interest
-        rate implied by the calibrated (γ, δ, β) triple. Both emerge in an
-        economically sensible range, but <strong>no systematic published
-        reconciliation of achieved-versus-target moments exists</strong> for
-        OG-UK 0.3.2. Producing one from logged solves is the most valuable
-        next step for this member.
-      </p>
-      <p>
-        Two dating caveats: the official column reports mid-2026 figures
-        while the deployed calibration was frozen against slightly earlier
-        vintages, and the saving ratio is volatile quarter to quarter, so the
-        fixed β was set against a smoothed level rather than the latest
-        print. Two structural caveats from OG-Core: the ability types and
-        lifetime earnings profiles are still the US tax-microdata estimates,
-        and UK re-estimation is open.
-      </p>
-      </details>
-      <p class="vlinks mono">
-        <a href="/papers/psl-og/main.pdf">working paper (pdf) →</a>
-        <a href="/olg">psl-og model page →</a>
-      </p>
+      <div class="stat">
+        <span class="stat-label">Emergent checks</span>
+        <span class="stat-value">1 row</span>
+        <span class="stat-sub">net capital stock</span>
+        <span class="stat-foot"><a class="chip" href="#targets">No published reconciliation</a></span>
+      </div>
     </div>
   </section>
 
-  <section id="caveats" class="band">
+  <section class="band band-wide" id="tests">
+    <div class="band-head">
+      <span class="kicker mono">the evidence</span>
+      <h2>Targets, the nearest benchmark, the OBR&rsquo;s model.</h2>
+    </div>
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+
+      <div class="meth-step" id="targets" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Calibration targets, not outcomes</h3></div>
+        <p class="mo-lead">Calibration inputs against official UK aggregates; nothing here is a model output.</p>
+              <div class="callout">
+                <strong>No published replication target exists</strong> for this model
+                class. The table compares calibration <em>inputs</em> with official UK
+                aggregates. Nothing in it is a model output.
+              </div>
+              <div class="table-scroll mo-tablecard">
+              <table>
+                <caption>psl-og calibration targets against official UK aggregates</caption>
+                <thead><tr><th scope="col">Quantity</th><th scope="col">Official UK value</th><th scope="col">Source</th><th scope="col">Model treatment</th><th scope="col">Deviation</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Government debt-to-GDP</th><td>94.9% (June 2026)</td><td>ONS &middot; HF6X, vintage 2026-07-26</td><td class="vc-warn">imposed via closure target</td><td>+0.1pp vs latest ONS (target 95.0%)</td></tr>
+                  <tr><th scope="row">Household saving ratio</th><td>8.9% (2026Q1, down from 9.6%)</td><td>ONS quarterly sector accounts</td><td class="vc-warn">not targeted &mdash; &beta; = 0.965 fixed, not estimated</td><td>no model-produced value to compare</td></tr>
+                  <tr><th scope="row">Potential growth</th><td>≈1.1% / yr</td><td>OBR EFO</td><td class="vc-warn">imposed, g<sub>y</sub> = 0.011</td><td>≈0</td></tr>
+                  <tr><th scope="row">Depreciation / capital</th><td>≈6&ndash;7% (CFC / net stock)</td><td>ONS capital stocks bulletin</td><td class="vc-warn">imposed, δ = 0.065</td><td>within range</td></tr>
+                  <tr><th scope="row">Labour share of income</th><td>≈0.59&ndash;0.60, rising in 2024</td><td>ONS labour-share series / Blue Book 2025</td><td class="vc-warn">imposed, γ = 0.35 (OG-Core default)</td><td>≈5pp — the capital share is not yet re-anchored to ONS factor shares</td></tr>
+                  <tr><th scope="row">Net capital stock</th><td>£5.6tn (2024) whole-economy net stock; the model's K maps to the narrower business-capital concept</td><td>ONS capital stocks bulletin</td><td><strong>emergent</strong> — checked, not imposed</td><td>concept-adjusted; no published reconciliation</td></tr>
+                </tbody>
+              </table>
+              </div>
+              <p>
+                <strong>An imposed target cannot disagree</strong>, so a zero
+                deviation above is an anchor, not evidence. Only the emergent row is
+                a check.
+              </p>
+              <details class="more">
+                <summary>What would count as over-identifying evidence, and the dating and structural caveats</summary>
+              <p>
+                The genuinely over-identifying checks are the ones the steady state
+                must <em>deliver</em>: the capital&ndash;output ratio and the interest
+                rate implied by the calibrated (γ, δ, β) triple. Both emerge in an
+                economically sensible range, but <strong>no systematic published
+                reconciliation of achieved-versus-target moments exists</strong> for
+                OG-UK 0.3.2. Producing one from logged solves is the most valuable
+                next step for this member.
+              </p>
+              <p>
+                Two dating caveats: the official column reports mid-2026 figures
+                while the deployed calibration was frozen against slightly earlier
+                vintages, and the saving ratio is volatile quarter to quarter, so the
+                fixed β was set against a smoothed level rather than the latest
+                print. Two structural caveats from OG-Core: the ability types and
+                lifetime earnings profiles are still the US tax-microdata estimates,
+                and UK re-estimation is open.
+              </p>
+              </details>
+        <div class="meth-inline">
+        <div class="meth-sec-title">input vs official aggregate</div>
+        <div class="meth-eq"><div class="meth-eq-label">debt-to-GDP</div><div class="meth-eq-body">imposed, +0.1pp vs latest ONS</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">saving ratio</div><div class="meth-eq-body">not targeted, &beta; fixed</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">potential growth</div><div class="meth-eq-body">imposed, &asymp;0</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">labour share</div><div class="meth-eq-body">imposed, &asymp;5pp gap</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">net capital stock</div><div class="meth-eq-body">emergent, concept-adjusted</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="benchmark" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>The nearest external benchmark</h3></div>
+        <p class="mo-lead">The figures a future run will be judged against, not a match claimed today.</p>
+              <p>
+                The nearest external benchmark is
+                <a href="https://obr.uk/docs/dlm_uploads/Working_paper_22_A_new_UK_overlapping_generations_model.pdf">OBR
+                Working Paper 22</a>, Table 5.1 — a 1pp basic-rate rise in the long
+                run: GDP/person &minus;0.1%, labour supply &minus;0.2%, productivity
+                +0.1%. Those are the figures a future OG-UK run will be judged
+                against, not a match claimed today.
+              </p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">1pp basic rate, long run</div>
+        <div class="meth-eq"><div class="meth-eq-label">GDP per person</div><div class="meth-eq-body">&minus;0.1%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">labour supply</div><div class="meth-eq-body">&minus;0.2%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">productivity</div><div class="meth-eq-body">+0.1%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">future benchmark</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="obr-overview" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Against the OBR&rsquo;s own OLG model</h3></div>
+        <p class="mo-lead">Two UK overlapping-generations models, side by side, dimension by dimension.</p>
+              <p>
+                <strong>OG-UK</strong> — the UK calibration of
+                <a href="https://github.com/PSLmodels/OG-Core">OG-Core</a>, maintained by the
+                <a href="https://pslmodels.org">Policy Simulation Library</a> — against the
+                <strong>OBR UK OLG</strong> model of
+                <a href="/papers/obr-working-paper-22.pdf">OBR Working Paper No.&nbsp;22</a>
+                (Brzezinski, Hantzsche &amp; Watson, April&nbsp;2025), the closest available
+                external check for a model of this kind.
+              </p>
+              <div class="table-scroll mo-tablecard cmp-compare"><table>
+                <thead><tr><th scope="col">Dimension</th><th scope="col">OG-UK strength</th><th scope="col">OBR UK OLG strength</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Transition dynamics</th><td>Full year-by-year paths</td><td>Steady-state only</td></tr>
+                  <tr><th scope="row">UK institutional detail</th><td>Smooth approximations</td><td>Explicit bands and rates</td></tr>
+                  <tr><th scope="row">Within-cohort inequality</th><td>Permanent types</td><td>Stochastic earnings</td></tr>
+                  <tr><th scope="row">Production structure</th><td>Multi-sector CES</td><td>Single-sector Cobb-Douglas</td></tr>
+                  <tr><th scope="row">Tax instruments</th><td>5 instruments</td><td>3 instruments (more detailed)</td></tr>
+                  <tr><th scope="row">Fiscal policy levers</th><td>G, TR, UBI, I<sub>g</sub></td><td>RBI, age-dependent transfers</td></tr>
+                  <tr><th scope="row">Openness</th><td>Open-source, Python</td><td>MATLAB, closed toolkit</td></tr>
+                </tbody>
+              </table></div>
+        <details class="expander" id="obr-1">
+          <summary>Production technology</summary>
+              <div class="table-scroll mo-tablecard cmp-compare"><table>
+                <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Production function</th><td>CES (nests Cobb-Douglas as special case)</td><td>Cobb-Douglas only</td></tr>
+                  <tr><th scope="row">Industries</th><td>M industries (multi-sector)</td><td>Single sector</td></tr>
+                  <tr><th scope="row">Public capital</th><td>Yes — generates rents to private capital</td><td>No</td></tr>
+                  <tr><th scope="row">Capital share</th><td>Configurable per industry</td><td>α = 0.33</td></tr>
+                  <tr><th scope="row">Labour input</th><td>Efficiency-weighted across permanent types</td><td>Efficiency-weighted by age + stochastic shocks</td></tr>
+                  <tr><th scope="row">TFP</th><td>Varies by industry and over time</td><td>Normalised to 1, with labour-augmenting growth g = 1.2%</td></tr>
+                  <tr><th scope="row">Depreciation</th><td>Configurable per industry</td><td>δ = 5%</td></tr>
+                </tbody>
+              </table></div>
+        </details>
+        <details class="expander" id="obr-2">
+          <summary>Household heterogeneity</summary>
+              <p>
+                How households differ within each cohort — the deepest structural
+                difference between the two models.
+              </p>
+              <div class="table-scroll mo-tablecard cmp-compare"><table>
+                <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Within-cohort variation</th><td>J <strong>permanent ability types</strong> (deterministic)</td><td><strong>Stochastic earnings shocks</strong> (AR(1) persistent + i.i.d. transitory)</td></tr>
+                  <tr><th scope="row">Income inequality driver</th><td>Fixed type assignment at birth</td><td>Random shocks each period (ρ<sup>z</sup> = 0.9, σ<sub>z</sub> = 0.05, σ<sub>e</sub> = 0.7)</td></tr>
+                  <tr><th scope="row">Precautionary savings</th><td>Not a primary channel</td><td>Yes — driven by earnings uncertainty</td></tr>
+                  <tr><th scope="row">Utility function</th><td>CRRA on consumption; elliptical labour disutility</td><td>Cobb-Douglas over consumption and leisure (non-separable)</td></tr>
+                  <tr><th scope="row">Labour disutility</th><td><strong>Elliptical function</strong> — always interior solutions</td><td>Implicit in Cobb-Douglas composite — corner solutions possible</td></tr>
+                  <tr><th scope="row">Risk aversion parameter</th><td>σ = 1.5 on consumption only</td><td>σ₂ = 2 on consumption-leisure composite</td></tr>
+                  <tr><th scope="row">Consumption aggregation</th><td>Stone-Geary Cobb-Douglas (subsistence levels, I goods)</td><td>Single consumption good</td></tr>
+                  <tr><th scope="row">Discount factor</th><td>β = 0.965, fixed and uniform (per-type β<sub>j</sub> supported, not used here)</td><td>β = 0.99, calibrated to the WAS asset profile</td></tr>
+                </tbody>
+              </table></div>
+        </details>
+        <details class="expander" id="obr-3">
+          <summary>Bequest motive</summary>
+              <div class="table-scroll mo-tablecard cmp-compare"><table>
+                <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Motive</th><td>"Warm glow" weighted by mortality probability ρ<sub>s</sub></td><td>"Warm glow" with target level, kicks in at age j* = 91</td></tr>
+                  <tr><th scope="row">Varies by type</th><td>Yes — χ<sup>b</sup><sub>j</sub> calibrated per ability type</td><td>Uniform (φ₁ = 10, φ₂ = 4.55)</td></tr>
+                  <tr><th scope="row">Distribution</th><td>To surviving households</td><td>Equal distribution to ages 55–75</td></tr>
+                </tbody>
+              </table></div>
+        </details>
+        <details class="expander" id="obr-4">
+          <summary>Tax system</summary>
+              <div class="vs-grid">
+                <div class="vs-card">
+                  <div class="vs-card-head">OG-UK — estimated tax functions</div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>Smooth Gouveia&ndash;Strauss, DEP or linear forms fitted to PolicyEngine UK microdata, folding in income tax and NICs</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>Consumption, wealth, corporate and bequest taxes modelled separately on top</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>Any PolicyEngine-representable reform — rate, threshold, allowance — flows through after re-estimating on post-reform microdata</span></div>
+                </div>
+                <div class="vs-card">
+                  <div class="vs-card-head">OBR UK OLG — statutory schedule</div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>Income tax as explicit bands: PA £12,570, HRT £50,270, ART £125,140 at 20&nbsp;/&nbsp;40&nbsp;/&nbsp;45%</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>NICs separate (£12,570 / £50,270 at 8&nbsp;/&nbsp;2%); VAT effective 9.3%; explicit pension relief and drawdown taxation</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>"+1&nbsp;pp basic rate from 2027&ndash;28" is one parameter — less flexible for reforms that reshape the schedule</span></div>
+                </div>
+              </div>
+        </details>
+        <details class="expander" id="obr-5">
+          <summary>Government &amp; fiscal policy</summary>
+              <p>
+                The fiscal closure rule — which item adjusts to keep debt sustainable — determines
+                who bears the long-run burden of any reform.
+              </p>
+              <div class="table-scroll mo-tablecard cmp-compare"><table>
+                <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Budget constraint</th><td>Revenue + new debt = debt service + G + I<sub>g</sub> + pensions + TR + UBI</td><td>Revenue = welfare transfers + RBI + debt service (growth-adjusted)</td></tr>
+                  <tr><th scope="row">Fiscal closure rule</th><td><strong>Configurable</strong>: adjust G, TR, or combination after period T<sub>G1</sub></td><td><strong>Residual Budgetary Item (RBI)</strong> adjusts to stabilise debt/GDP at 100%</td></tr>
+                  <tr><th scope="row">Debt target</th><td>Configurable</td><td>Fixed at 100% of GDP</td></tr>
+                  <tr><th scope="row">Public investment</th><td>Explicit (I<sub>g</sub> contributes to public capital stock)</td><td>Not modelled as productive</td></tr>
+                  <tr><th scope="row">Welfare transfers</th><td>Lump-sum TR</td><td><strong>Age-dependent</strong> transfers (γ<sup>j</sup> scaling) calibrated to OBR welfare spending projections</td></tr>
+                  <tr><th scope="row">State pension</th><td>Part of transfers</td><td><strong>Explicitly modelled</strong> as age-dependent welfare transfer from state pension age onwards</td></tr>
+                  <tr><th scope="row">Spending categories</th><td>G (public goods) + I<sub>g</sub> (infrastructure) + pensions + TR + UBI</td><td>Welfare transfers + residual non-interest spending (G⁰)</td></tr>
+                </tbody>
+              </table></div>
+        </details>
+        <details class="expander" id="obr-6">
+          <summary>Open economy</summary>
+              <div class="table-scroll mo-tablecard cmp-compare"><table>
+                <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Approach</th><td><strong>Parameterised capital mobility</strong> (ζ<sub>K</sub> for capital, ζ<sub>D</sub> for debt)</td><td><strong>Binary switch</strong>: fully open (r = 5% exogenous) or fully closed (r endogenous)</td></tr>
+                  <tr><th scope="row">Foreign capital</th><td>Continuous degree of openness</td><td>Either all or nothing</td></tr>
+                  <tr><th scope="row">Net foreign assets</th><td>Derived from capital mobility parameters</td><td>NFA residually determined in open economy</td></tr>
+                  <tr><th scope="row">Interest rate</th><td>Endogenous (influenced by openness parameters)</td><td>Either fixed at 5% (open) or MPK − δ (closed)</td></tr>
+                </tbody>
+              </table></div>
+        </details>
+        <details class="expander" id="obr-7">
+          <summary>Solution method &amp; calibration</summary>
+              <p>Both are rational-expectations dynamic general equilibrium; they solve different problems.</p>
+              <div class="vs-grid">
+                <div class="vs-card">
+                  <div class="vs-card-head">OG-UK — Time Path Iteration</div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>Households' Euler equations solved directly</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>Full year-by-year transition path; continuous state space, expectations over the whole path</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>~17-minute solve</span></div>
+                </div>
+                <div class="vs-card">
+                  <div class="vs-card-head">OBR UK OLG — Value Function Iteration</div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>Kirkby's VFI toolkit; assets and stochastic earnings on a grid</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>Compares long-run steady states only — no adjustment path</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>Under two minutes — a difference in method, not ambition</span></div>
+                </div>
+              </div>
+              <p>Calibration differs mainly in data sources and anchors.</p>
+              <div class="vs-grid">
+                <div class="vs-card">
+                  <div class="vs-card-head">OG-UK</div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>UN World Population Prospects demographics (country 826)</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>Age-earnings profiles via permanent ability types</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>Tax functions from PolicyEngine-UK's Enhanced FRS (HMRC SPI, LCFS, WAS)</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>ONS GDP anchors the aggregates; modeller-set fiscal targets and growth</span></div>
+                </div>
+                <div class="vs-card">
+                  <div class="vs-card-head">OBR UK OLG</div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>ONS mortality; ASHE + HMRC earnings distribution</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>HMRC&nbsp;/&nbsp;GOV.UK tax parameters directly</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>Pinned to the OBR March 2024 EFO — GDP per person £35,100 (S&nbsp;=&nbsp;19.81)</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>n&nbsp;=&nbsp;0.75%, g&nbsp;=&nbsp;1.2%, debt&nbsp;/&nbsp;GDP at 100%</span></div>
+                </div>
+              </div>
+              <p class="chart-note">
+                Sources: <a href="/papers/obr-working-paper-22.pdf">OBR Working Paper
+                No.&nbsp;22</a>; OG-Core documentation and OG-UK calibration code.
+              </p>
+        </details>
+        <div class="meth-inline">
+        <div class="meth-sec-title">the main differences</div>
+        <div class="meth-eq"><div class="meth-eq-label">OBR model</div><div class="meth-eq-body">Working Paper No.&nbsp;22, April 2025</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">dynamics</div><div class="meth-eq-body">full paths vs steady state only</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">production</div><div class="meth-eq-body">multi-sector CES vs single-sector Cobb-Douglas</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">households</div><div class="meth-eq-body">permanent types vs stochastic earnings</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">solve</div><div class="meth-eq-body">~17 minutes vs under two minutes</div></div>
+        </div>
+      </div>
+
+      </div>
+
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Calibration targets</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">input vs official aggregate</div>
+          <div class="meth-eq"><div class="meth-eq-label">debt-to-GDP</div><div class="meth-eq-body">imposed, +0.1pp vs latest ONS</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">saving ratio</div><div class="meth-eq-body">not targeted, &beta; fixed</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">potential growth</div><div class="meth-eq-body">imposed, &asymp;0</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">labour share</div><div class="meth-eq-body">imposed, &asymp;5pp gap</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">net capital stock</div><div class="meth-eq-body">emergent, concept-adjusted</div></div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">OBR Working Paper 22</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">1pp basic rate, long run</div>
+          <div class="meth-eq"><div class="meth-eq-label">GDP per person</div><div class="meth-eq-body">&minus;0.1%</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">labour supply</div><div class="meth-eq-body">&minus;0.2%</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">productivity</div><div class="meth-eq-body">+0.1%</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">future benchmark</div></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">OG-UK vs OBR UK OLG</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">the main differences</div>
+          <div class="meth-eq"><div class="meth-eq-label">OBR model</div><div class="meth-eq-body">Working Paper No.&nbsp;22, April 2025</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">dynamics</div><div class="meth-eq-body">full paths vs steady state only</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">production</div><div class="meth-eq-body">multi-sector CES vs single-sector Cobb-Douglas</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">households</div><div class="meth-eq-body">permanent types vs stochastic earnings</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">solve</div><div class="meth-eq-body">~17 minutes vs under two minutes</div></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="band band-wide" id="caveats">
     <div class="band-head">
       <span class="kicker mono">limits</span>
       <h2>Experimental limitations.</h2>
@@ -379,6 +426,32 @@
     </div>
   </section>
 
+  <section class="band where-next" id="where-next">
+    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/olg/code">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span>
+        <h3>Code</h3>
+        <p>Install, calibrate and solve locally</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/models#validation">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
+        <h3>Every model&rsquo;s verdict</h3>
+        <p>How the seven are checked</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/papers/psl-og">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>
+        <h3>The working paper</h3>
+        <p>Method and calibration in full</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </div>
+  </section>
+    </div>
+  </div>
+
 </main>
 
 <footer class="foot foot-bar">
@@ -394,5 +467,49 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
+<script>
+// StepPanel: highlight the step at the reading line and show its panel in
+// the sticky aside (scoped to each .scrolly-wrap).
+(function () {
+  "use strict";
+  Array.from(document.querySelectorAll(".scrolly-wrap")).forEach(function (wrap) {
+    var steps = Array.from(wrap.querySelectorAll(".meth-step"));
+    var panels = Array.from(wrap.querySelectorAll(".meth-panel"));
+    if (!steps.length || !panels.length) return;
+    var current = -1;
+    function update() {
+      var offset = window.innerHeight * 0.33, active = 0;
+      steps.forEach(function (step, i) { if (step.getBoundingClientRect().top < offset) active = i; });
+      if (active === current) return;
+      current = active;
+      steps.forEach(function (step, i) { step.classList.toggle("active", i === active); });
+      panels.forEach(function (panel) { panel.hidden = Number(panel.getAttribute("data-step")) !== active; });
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    update();
+  });
+})();
+</script>
+<script>
+// "On this page" rail: mark the section at the reading line.
+(function () {
+  "use strict";
+  var rail = document.querySelector(".page-rail");
+  if (!rail) return;
+  var links = Array.from(rail.querySelectorAll('a[href^="#"]'));
+  var targets = links.map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); });
+  function update() {
+    var line = window.innerHeight * 0.3, current = 0;
+    targets.forEach(function (t, i) { if (t && t.getBoundingClientRect().top < line) current = i; });
+    links.forEach(function (a, i) {
+      if (i === current) a.setAttribute("aria-current", "location"); else a.removeAttribute("aria-current");
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  update();
+})();
+</script>
 </body>
 </html>
