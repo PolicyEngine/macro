@@ -20,14 +20,9 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=8" />
-<style>
-/* page-specific: hero sizing only — shared component styles live in style.css */
-.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-</style>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
   <a class="brand" href="/" aria-label="PolicyEngine Macro home">
@@ -57,8 +52,7 @@
         Explain UK growth and inflation.
       </h1>
       <p class="lede reveal" style="--d:2">
-        Decompose UK GDP and inflation into six structural shocks, forecast
-        with credible bands, and explain revisions between quarters.
+        How the replication and the forecasts score, and where it departs from the Bank&rsquo;s model.
       </p>
     </div>
   </section>
@@ -72,105 +66,110 @@
       <a class="model-tabs-link" href="/papers/boe-svar">Paper</a>
     </div>
   </nav>
-
-  <section id="trust" class="band">
+  <div class="with-rail">
+    <nav class="page-rail" aria-label="On this page">
+      <p class="page-rail-title">On this page</p>
+      <a href="#trust" aria-current="location">Headline numbers</a>
+      <a href="#paper">Replication</a>
+      <a href="#frozen">Frozen origin</a>
+      <a href="#rolling">49 origins</a>
+      <a href="#forecasters">Forecast skill</a>
+      <a href="#caveats">Limits</a>
+      <a href="#where-next">Where next</a>
+    </nav>
+    <div class="rail-main">
+  <section class="band band-wide" id="trust">
     <div class="band-head">
       <span class="kicker mono">how far to trust it</span>
       <h2>Replicates the paper; forecast evidence remains limited.</h2>
+      <p class="section-intro">Two checks: replication against the published paper, and forecasts scored against outturns.</p>
     </div>
-    <div class="prose">
-      <p>
-        Two independent checks: replication against the published paper, and a
-        forecast study frozen at the 2024Q2 data edge and scored against the
-        ONS outturns that arrived since.
-      </p>
-      <div class="table-scroll mo-tablecard"><table>
-        <caption>Check by check against Brignone &amp; Piffer (2025); the forecast evidence is below</caption>
-        <thead><tr><th scope="col">check</th><th scope="col">this replication</th><th scope="col">the paper</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row">Global shocks' share of UK GDP variance (4 quarters)</th>
-            <td><strong>37.4%</strong> <span class="mono">[23.4, 52.2]</span> 68%</td>
-            <td>~40%</td>
-          </tr>
-          <tr>
-            <th scope="row">Global shocks' share of UK CPI variance (4 quarters)</th>
-            <td><strong>42.3%</strong> <span class="mono">[25.5, 60.3]</span> 68% &mdash; about 8pp short</td>
-            <td>~50%</td>
-          </tr>
-          <tr>
-            <th scope="row">Identified shocks' total share, UK GDP / UK CPI</th>
-            <td>76.3% / 78.9%</td>
-            <td>&ldquo;around 80%&rdquo;</td>
-          </tr>
-          <tr>
-            <th scope="row">IRFs, FEVDs, shocks, historical decompositions</th>
-            <td>Figures 2–6 replicate</td>
-            <td>qualitative match</td>
-          </tr>
-          <tr>
-            <th scope="row">Forecast-revision adding-up identity</th>
-            <td>exact per draw (max abs error 5.23e-12)</td>
-            <td>holds by construction &mdash; a regression check, not an agreement</td>
-          </tr>
-        </tbody>
-      </table></div>
-    </div>
-    <div class="metrics">
-      <div class="metric">
-        <span class="metric-label mono">out-of-sample RMSE</span>
-        <span class="metric-val">0.32<span class="metric-vs">pp</span></span>
-        <span class="metric-note">GDP growth and CPI, 7 quarters from a frozen edge</span>
+    <div class="stat-row">
+      <div class="stat">
+        <span class="stat-label">Out-of-sample RMSE</span>
+        <span class="stat-value">0.32pp</span>
+        <span class="stat-sub">GDP growth and CPI, 7 quarters</span>
+        <span class="stat-foot"><a class="chip" href="#frozen">One frozen origin</a></span>
       </div>
-      <div class="metric">
-        <span class="metric-label mono">68% band coverage</span>
-        <span class="metric-val">14<span class="metric-vs">/14</span></span>
-        <span class="metric-note">over-dispersion, not a pass &mdash; a correct 68% band should hold about 9.5</span>
+      <div class="stat">
+        <span class="stat-label">68% band coverage</span>
+        <span class="stat-value">14/14</span>
+        <span class="stat-sub">outturns inside the band</span>
+        <span class="stat-foot"><a class="chip chip-warn" href="#frozen">Over-dispersion, not a pass</a></span>
       </div>
-      <div class="metric">
-        <span class="metric-label mono">vs a drifting random walk</span>
-        <span class="metric-val">0.36<span class="metric-vs">min q</span></span>
-        <span class="metric-note">no variable beats it at any horizon once the <a href="#forecasters">64 tests</a> are adjusted together</span>
+      <div class="stat stat-neutral">
+        <span class="stat-label">Vs a drifting random walk</span>
+        <span class="stat-value">0.36</span>
+        <span class="stat-sub">smallest adjusted q, 64 tests</span>
+        <span class="stat-foot"><a class="chip chip-warn" href="#forecasters">No skill</a></span>
       </div>
     </div>
-    <p class="chart-note" style="max-width: 80ch;">
-      The model was right that the 2025 inflation hump would mean-revert and
-      wrong about its peak by up to 0.6pp — outturns of 3.5 and 3.8% against
-      medians of 3.2%, inside the 68% band but on its upper half. It never saw
-      the Ofgem cap increases or the April 2025 administered price rises. Full
-      quarterly scorecard in the <a href="/papers/boe-svar">working paper</a>.
-    </p>
-      <div class="callout">
-        This is an independent replication built from Bank of England Macro
+    <p class="callout callout-neutral">This is an independent replication built from Bank of England Macro
         Technical Paper No. 3 and public data. It is not produced,
         maintained, or endorsed by the Bank of England, and its results
-        should not be presented as Bank of England estimates.
-      </div>
-      <div class="callout">
-        <strong>Gated in CI:</strong> the replication invariants and the
+        should not be presented as Bank of England estimates.</p>
+    <details class="expander">
+      <summary>What CI gates, and what is refreshed by hand</summary>
+      <p><strong>Gated in CI:</strong> the replication invariants and the
         forecast archive's append-only rule. <strong>Computed once and
         refreshed by hand:</strong> the 49-origin rolling evaluation and the
         coverage study. The sign and zero restrictions are <em>imposed</em> by
         the identification scheme, so that gate protects the software and
-        cannot be evidence about the economy.
-      </div>
+        cannot be evidence about the economy.</p>
+    </details>
   </section>
 
-  <section id="paper" class="band">
+  <section class="band band-wide" id="tests">
     <div class="band-head">
-      <span class="kicker mono">evidence — replication</span>
-      <h2>Against a Bank of England paper, and against outturns.</h2>
+      <span class="kicker mono">the evidence</span>
+      <h2>Replication, one frozen origin, 49 origins, the benchmark.</h2>
     </div>
-    <div class="prose">
-      <p>
-        On the paper's own definition — the posterior mean of the per-draw
-        group share of <em>total</em> four-quarter-ahead variance, which leaves
-        about a fifth unexplained — identified global shocks explain
-        <strong>37.4%</strong> of UK GDP forecast-error variance against
-        Brignone &amp; Piffer's ~40%, and <strong>42.3%</strong> of UK CPI
-        against ~50%.
-      </p>
-      <figure class="vfig">
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+
+      <div class="meth-step" id="paper" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Against the Bank of England paper</h3></div>
+        <p class="mo-lead">Global shocks&rsquo; variance shares, against Brignone &amp; Piffer (2025).</p>
+        <div class="table-scroll mo-tablecard"><table>
+                <caption>Check by check against Brignone &amp; Piffer (2025); the forecast evidence is below</caption>
+                <thead><tr><th scope="col">check</th><th scope="col">this replication</th><th scope="col">the paper</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Global shocks' share of UK GDP variance (4 quarters)</th>
+                    <td><strong>37.4%</strong> <span class="mono">[23.4, 52.2]</span> 68%</td>
+                    <td>~40%</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Global shocks' share of UK CPI variance (4 quarters)</th>
+                    <td><strong>42.3%</strong> <span class="mono">[25.5, 60.3]</span> 68% &mdash; about 8pp short</td>
+                    <td>~50%</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Identified shocks' total share, UK GDP / UK CPI</th>
+                    <td>76.3% / 78.9%</td>
+                    <td>&ldquo;around 80%&rdquo;</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">IRFs, FEVDs, shocks, historical decompositions</th>
+                    <td>Figures 2–6 replicate</td>
+                    <td>qualitative match</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Forecast-revision adding-up identity</th>
+                    <td>exact per draw (max abs error 5.23e-12)</td>
+                    <td>holds by construction &mdash; a regression check, not an agreement</td>
+                  </tr>
+                </tbody>
+              </table></div>
+              <p>
+                On the paper's own definition — the posterior mean of the per-draw
+                group share of <em>total</em> four-quarter-ahead variance, which leaves
+                about a fifth unexplained — identified global shocks explain
+                <strong>37.4%</strong> of UK GDP forecast-error variance against
+                Brignone &amp; Piffer's ~40%, and <strong>42.3%</strong> of UK CPI
+                against ~50%.
+              </p>
+              <figure class="vfig">
         <svg class="vchart" data-chart="svar-fevd" viewBox="0 0 760 304" role="img" aria-labelledby="svar-fevd-t svar-fevd-d">
 <title id="svar-fevd-t">boe-svar: global-shock FEVD shares, ours vs Brignone &amp; Piffer (2025)</title>
 <desc id="svar-fevd-d">Grouped bar chart. Share of UK forecast-error variance attributed to identified global shocks (world demand, energy and supply) four quarters ahead, as a share of total variance — the statistic the paper's Figure 4 plots. For GDP, our production artifact gives 37.4% against the paper's 40.0%, 2.6 points short; for CPI, 42.3% against 50.0%, 7.7 points short. Neither gap is resolvable: on the 600-draw check configuration the 68 per cent posterior band on the same share runs 25 to 56 per cent for GDP and 22 to 47 per cent for CPI, both far wider than the shortfall, and the paper's values are read off its figure and approximate. This comparison and the fan chart elsewhere on this page are different runs: the fan chart is the frozen 2024Q2-edge run of 3,000 draws at seed 20250717.</desc>
@@ -197,35 +196,46 @@
 <text class="vc-tick" x="602.6" y="276" text-anchor="middle">paper</text>
 <text class="vc-lab" x="559.0" y="296" text-anchor="middle">UK CPI, 1-yr horizon</text>
 </svg>
-        <figcaption>Global-shock (world demand + energy + supply) FEVD shares four quarters ahead: the production run against the paper's approximate published values. No committed artifact records that run's draw count, so none is claimed. Source: <code>papers/boe-svar/figures/comparison_numbers.json</code>.</figcaption>
-      </figure>
-      <details class="more">
-        <summary>How noisy that comparison is</summary>
-      <p>
-        The 68% posterior band is about &plusmn;14pp wide, so the 8pp CPI
-        shortfall sits inside a single interval: a real gap on the paper's
-        definition, reported as one, but not resolvable at this sample size.
-      </p>
-      <p>
-        The CI gate uses a cheap ~50-draw configuration whose global GDP share
-        moves about &plusmn;6.5pp across sampling seeds, checked against a wide
-        [30, 60]% band. It catches gross regressions; it is not a second
-        opinion on the production run.
-      </p>
-      </details>
-      <p>
-        <strong>Out-of-sample.</strong> Seven quarters ahead from the frozen
-        2024Q2 edge, RMSE is <strong>0.32pp</strong> for both GDP growth and
-        CPI inflation.
-      </p>
-      <p>
-        <strong>Fourteen of fourteen outturns inside the 68% band is
-        over-dispersion, not a pass</strong> — a correct interval should
-        contain about 9.5 of 14. One frozen origin yields two or three
-        effectively independent observations, so the reading to weight is the
-        49-origin coverage below, which finds the opposite problem.
-      </p>
-      <figure class="vfig">
+                <figcaption>Global-shock (world demand + energy + supply) FEVD shares four quarters ahead: the production run against the paper's approximate published values. No committed artifact records that run's draw count, so none is claimed. Source: <code>papers/boe-svar/figures/comparison_numbers.json</code>.</figcaption>
+              </figure>
+              <details class="more">
+                <summary>How noisy that comparison is</summary>
+              <p>
+                The 68% posterior band is about &plusmn;14pp wide, so the 8pp CPI
+                shortfall sits inside a single interval: a real gap on the paper's
+                definition, reported as one, but not resolvable at this sample size.
+              </p>
+              <p>
+                The CI gate uses a cheap ~50-draw configuration whose global GDP share
+                moves about &plusmn;6.5pp across sampling seeds, checked against a wide
+                [30, 60]% band. It catches gross regressions; it is not a second
+                opinion on the production run.
+              </p>
+              </details>
+        <div class="meth-inline">
+        <div class="meth-sec-title">four-quarter FEVD, ours vs paper</div>
+        <div class="meth-eq"><div class="meth-eq-label">global, UK GDP</div><div class="meth-eq-body">37.4% vs ~40%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">global, UK CPI</div><div class="meth-eq-body">42.3% vs ~50%, about 8pp short</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">identified total</div><div class="meth-eq-body">76.3% / 78.9% vs &ldquo;around 80%&rdquo;</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">figures 2&ndash;6</div><div class="meth-eq-body">replicate qualitatively</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">adding-up identity</div><div class="meth-eq-body">exact per draw, by construction</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="frozen" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>One frozen origin, scored against outturns</h3></div>
+        <p class="mo-lead">Seven quarters from the 2024Q2 edge, against the ONS outturns since.</p>
+              <p>
+                <strong>Out-of-sample.</strong> Seven quarters ahead from the frozen
+                2024Q2 edge, the RMSE in the tiles above holds for both GDP growth and CPI inflation.
+              </p>
+              <p>
+                <strong>Every outturn inside the 68% band is over-dispersion, not a pass</strong> — a correct interval should
+                contain about 9.5 of 14. One frozen origin yields two or three
+                effectively independent observations, so the reading to weight is the
+                49-origin coverage below, which finds the opposite problem.
+              </p>
+              <figure class="vfig">
         <svg class="vchart" data-chart="svar-fan" viewBox="0 0 760 360" role="img" aria-labelledby="svar-fan-t svar-fan-d">
 <title id="svar-fan-t">boe-svar: out-of-sample forecast fan from the frozen 2024Q2 edge vs ONS outturns</title>
 <desc id="svar-fan-d">Two-panel fan chart. Left panel: year-on-year UK GDP growth; right panel: year-on-year UK CPI inflation. Each shows the posterior median forecast from the frozen 2024Q2 data edge as a line, the 68 per cent credible band as a shaded region over thirteen quarters 2024Q3 to 2027Q3, and ONS outturns for the seven evaluated quarters 2024Q3 to 2026Q1 as dots. All fourteen outturn dots fall inside the 68 per cent band; RMSE 0.32 percentage points on GDP and 0.32 on CPI. GDP medians run 1.3, 1.8, 1.3, 0.9, 0.8, 0.9, 0.9 per cent over the evaluated quarters against outturns of 1.0, 1.5, 1.3, 1.4, 1.3, 1.0, 0.9; CPI medians 2.3, 2.7, 2.8, 3.2, 3.2, 3.2, 3.2 against outturns of 2.0, 2.5, 2.8, 3.5, 3.8, 3.4, 3.1. A dashed rule in each panel marks 2026Q1, the last quarter with an outturn: the six quarters to its right are forecast with nothing yet to check them against, so the fit shown covers seven of the thirteen quarters plotted. This run is 3,000 posterior draws at seed 20250717, 217 of which were accepted by the sign restrictions; it is a different run from the FEVD comparison elsewhere on this page, which comes from the production artifact. Medians and 68 per cent bands from papers/boe-svar/figures/figure_numbers.json (forecast_table, entries [median, lo68, hi68]); ONS outturns from papers/boe-svar/figures/make_figures.py. Coordinates: GDP panel maps value v to y = 292 - (v + 1) * 59 for the -1 to 3 per cent axis; CPI panel y = 292 - (v - 1) * 59 for the 1 to 5 per cent axis; quarter i of 13 maps to x = 58 + i * 25.667 (GDP) or 416 + i * 25.667 (CPI).</desc>
@@ -284,26 +294,46 @@
 <text class="vc-tick" x="724.0" y="334" text-anchor="middle">27Q3</text>
 <text class="vc-note" x="58" y="352">dashed rule = last quarter with an ONS outturn (2026Q1); the 6 quarters to its right are not evaluated</text>
 </svg>
-        <figcaption>14/14 inside the 68% band &mdash; see the over-dispersion caveat above. Frozen 2024Q2 data edge; source: <code>papers/boe-svar/figures/figure_numbers.json</code>.</figcaption>
-      </figure>
-      <p>
-        <strong>Rolling-origin audit.</strong> Across 49 expanding-window
-        origins, no variable beats a drifting random walk at any horizon once
-        the 64 tests are adjusted together — the
-        <a href="#forecasters">benchmark section below</a>. One frozen origin
-        is not evidence of broad forecast superiority.
-      </p>
-      <p>
-        <strong>The svar-unemployment satellite.</strong> Unemployment is not a
-        VAR variable: its published outlook comes from a regression of the
-        quarterly change in the ONS rate on year-on-year GDP growth, fitted
-        1992Q1&ndash;2025Q1 with furlough dummies. It beats no-change only at
-        horizons 1&ndash;4 (relative RMSE 0.82&ndash;0.99, not significant), so
-        the published path is capped there, and its bands carry GDP-forecast
-        uncertainty only. Specification and skill table:
-        <a href="https://github.com/PolicyEngine/boe-var-model/blob/main/results/unemployment_satellite_validation.json">unemployment_satellite_validation.json</a>.
-      </p>
-      <figure class="vfig">
+                <figcaption>Every outturn inside the 68% band &mdash; see the over-dispersion caveat above. Frozen 2024Q2 data edge; source: <code>papers/boe-svar/figures/figure_numbers.json</code>.</figcaption>
+              </figure>
+            <p class="chart-note">
+              The model was right that the 2025 inflation hump would mean-revert and
+              wrong about its peak by up to 0.6pp — outturns of 3.5 and 3.8% against
+              medians of 3.2%, inside the 68% band but on its upper half. It never saw
+              the Ofgem cap increases or the April 2025 administered price rises. Full
+              quarterly scorecard in the <a href="/papers/boe-svar">working paper</a>.
+            </p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">seven scored quarters</div>
+        <div class="meth-eq"><div class="meth-eq-label">window</div><div class="meth-eq-body">2024Q3&ndash;2026Q1</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">a correct 68% band</div><div class="meth-eq-body">holds about 9.5 of 14</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">2025 CPI outturns</div><div class="meth-eq-body">3.5% and 3.8%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">medians then</div><div class="meth-eq-body">3.2%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">peak miss</div><div class="meth-eq-body">up to 0.6pp</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="rolling" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Across 49 origins</h3></div>
+        <p class="mo-lead">The rolling evaluation, and the reading to weight over the single origin.</p>
+              <p>
+                <strong>Rolling-origin audit.</strong> Across 49 expanding-window
+                origins, no variable beats a drifting random walk at any horizon once
+                the 64 tests are adjusted together — the
+                <a href="#forecasters">benchmark section below</a>. One frozen origin
+                is not evidence of broad forecast superiority.
+              </p>
+              <p>
+                <strong>The svar-unemployment satellite.</strong> Unemployment is not a
+                VAR variable: its published outlook comes from a regression of the
+                quarterly change in the ONS rate on year-on-year GDP growth, fitted
+                1992Q1&ndash;2025Q1 with furlough dummies. It beats no-change only at
+                horizons 1&ndash;4 (relative RMSE 0.82&ndash;0.99, not significant), so
+                the published path is capped there, and its bands carry GDP-forecast
+                uncertainty only. Specification and skill table:
+                <a href="https://github.com/PolicyEngine/boe-var-model/blob/main/results/unemployment_satellite_validation.json">unemployment_satellite_validation.json</a>.
+              </p>
+              <figure class="vfig">
         <svg class="vchart" data-chart="svar-coverage" viewBox="0 0 760 330" role="img" aria-labelledby="svar-coverage-t svar-coverage-d">
 <title id="svar-coverage-t">boe-svar: empirical band coverage across 49 origins</title>
 <desc id="svar-coverage-d">Line chart of empirical interval coverage by forecast horizon, averaged across the eight model variables, against the nominal 68 and 90 percent levels; a vertical bar at each horizon spans the best and worst variable. 68% band, mean coverage at horizons one to eight: 71%, 68%, 64%, 61%, 60%, 60%, 58%, 57%; 90% band, mean coverage at horizons one to eight: 87%, 81%, 81%, 76%, 76%, 73%, 72%, 72%. The 68 per cent band covers 71% at one quarter, just above nominal, and falls below nominal from horizon two onward to 57% at eight; the 90 per cent band under-covers at every horizon, from 87% down to 72%. The mean hides how bad the worst variable is: the lowest cell in the grid is CPI energy at the 68 per cent band, horizon 4, covering 29%. The window includes the Covid quarters and the evaluation model carries no Covid dummies, which depresses coverage.</desc>
@@ -359,77 +389,75 @@
 <text class="vc-tick" x="628.9" y="316" text-anchor="middle">h7</text>
 <text class="vc-tick" x="724.0" y="316" text-anchor="middle">h8</text>
 </svg>
-        <figcaption>Empirical interval coverage across 49 expanding-window origins, mean across the eight variables, by horizon. The 68% band <em>over</em>-covers at one quarter (71%) and falls below nominal from two onward; the 90% band <strong>under-covers</strong> at every horizon. Both worsen with horizon — the opposite of the frozen-origin reading above, and the one to weight. The evaluation model carries no Covid dummies over a window that includes the Covid quarters, which depresses coverage. Source: <code>papers/boe-svar/figures/coverage_evaluation.json</code>.</figcaption>
-      </figure>
-      <p class="vlinks mono">
-        <a href="/papers/boe-svar/main.pdf">working paper (pdf) →</a>
-        <a href="/svar">boe-svar model page →</a>
-      </p>
-    </div>
-  </section>
+                <figcaption>Empirical interval coverage across 49 expanding-window origins, mean across the eight variables, by horizon. The 68% band <em>over</em>-covers at one quarter (71%) and falls below nominal from two onward; the 90% band <strong>under-covers</strong> at every horizon. Both worsen with horizon — the opposite of the frozen-origin reading above, and the one to weight. The evaluation model carries no Covid dummies over a window that includes the Covid quarters, which depresses coverage. Source: <code>papers/boe-svar/figures/coverage_evaluation.json</code>.</figcaption>
+              </figure>
+        <div class="meth-inline">
+        <div class="meth-sec-title">49 expanding-window origins</div>
+        <div class="meth-eq"><div class="meth-eq-label">68% band, h=1</div><div class="meth-eq-body">71%, just above nominal</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">68% band, h=8</div><div class="meth-eq-body">57%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">90% band</div><div class="meth-eq-body">under-covers at every horizon</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">unemployment satellite</div><div class="meth-eq-body">beats no-change at h=1&ndash;4 only, not significant</div></div>
+        </div>
+      </div>
 
-  <section id="forecasters" class="band">
-    <div class="band-head">
-      <span class="kicker mono">evidence — forecast accuracy</span>
-      <h2>How does it compare to other forecasters?</h2>
-    </div>
-    <div class="prose">
-      <p>
-        Three statistics answer three different questions and are
-        <strong>not averaged or ranked</strong>: this SVAR's
-        pseudo-out-of-sample accuracy against naive benchmarks (computed here,
-        quarterly), the OBR's and external forecasters' published real-time
-        errors (cited, annual), and the <a href="/obr/validation">OBR
-        emulator's</a> tracking of the official forecast (replication, not
-        forecasting).
-      </p>
+      <div class="meth-step" id="forecasters" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Against a drifting random walk</h3></div>
+        <p class="mo-lead">No forecasting win survives the number of tests run.</p>
+              <p>
+                Three statistics answer three different questions and are
+                <strong>not averaged or ranked</strong>: this SVAR's
+                pseudo-out-of-sample accuracy against naive benchmarks (computed here,
+                quarterly), the OBR's and external forecasters' published real-time
+                errors (cited, annual), and the <a href="/obr/validation">OBR
+                emulator's</a> tracking of the official forecast (replication, not
+                forecasting).
+              </p>
 
-      <p>
-        <strong>No forecasting win survives the number of tests run.</strong>
-        Bank Rate comes closest — 0.79 against a drifting random walk at one
-        quarter, and the smallest of 64 variable&times;horizon tests at
-        p&nbsp;=&nbsp;0.018 — but adjusted together
-        (Benjamini&ndash;Hochberg) the minimum q is <strong>0.36</strong>, so
-        nothing clears a 10% false-discovery rate on any variable at any
-        horizon.
-      </p>
-      <details class="more">
-      <summary>Benchmark and sample diagnostics</summary>
-      <h3>boe-svar against a random walk, computed from our own runs</h3>
-      <p>
-        Expanding-window design: 49 quarterly origins
-        (2012Q1&ndash;2024Q1), estimation from 1992Q1, data through 2026Q1,
-        horizons 1&ndash;8. A ratio below 1.0 beats the benchmark.
-      </p>
-      <p>
-        <strong>The benchmark decides the answer.</strong> A no-change walk on
-        a trending log level forfeits the whole trend as error, so beating it
-        on a price index is close to uninformative: UK CPI's 0.63 at one
-        quarter becomes <strong>0.83</strong> against a walk <em>with
-        drift</em>, and 0.67 at eight becomes <strong>1.03</strong>. Bank Rate
-        is the one series that does not trend, and the one that improves under
-        the harder benchmark.
-      </p>
-      <p>
-        <strong>Covid dummies matter for GDP, not for inflation.</strong> The
-        rolling evaluation omits the six Covid dummies (2020Q1&ndash;2021Q2)
-        that every published forecast here carries. On the published
-        specification UK GDP against drift goes <strong>1.06 &rarr; 0.99</strong>
-        at one quarter and <strong>1.12 &rarr; 0.95</strong> at eight, while
-        CPI and Bank Rate move by less than 0.02. Level with a naive benchmark
-        is still not beating it: UK GDP is statistically inseparable from drift
-        at every horizon (p&nbsp;=&nbsp;0.33&ndash;0.43) in both
-        specifications.
-      </p>
-      <p class="vc-note">
-        The AR(1) comparison in the source file is <strong>not usable at long
-        horizons</strong>: 94.5% of its eight-step squared error for UK GDP
-        comes from one origin, because an AR(1) extrapolates the Covid
-        collapse. Every benchmark carries a <code>worst_origin_mse_share</code>
-        diagnostic for that reason.
-      </p>
-      </details>
-      <figure class="vfig">
+              <p>
+                <strong>No forecasting win survives the number of tests run.</strong>
+                Bank Rate comes closest — 0.79 against a drifting random walk at one
+                quarter, and the smallest of 64 variable&times;horizon tests at
+                p&nbsp;=&nbsp;0.018 — but adjusted together
+                (Benjamini&ndash;Hochberg) nothing clears a 10% false-discovery rate on any variable at any
+                horizon.
+              </p>
+              <details class="more">
+              <summary>Benchmark and sample diagnostics</summary>
+              <h4>boe-svar against a random walk, computed from our own runs</h4>
+              <p>
+                Expanding-window design: 49 quarterly origins
+                (2012Q1&ndash;2024Q1), estimation from 1992Q1, data through 2026Q1,
+                horizons 1&ndash;8. A ratio below 1.0 beats the benchmark.
+              </p>
+              <p>
+                <strong>The benchmark decides the answer.</strong> A no-change walk on
+                a trending log level forfeits the whole trend as error, so beating it
+                on a price index is close to uninformative: UK CPI's 0.63 at one
+                quarter becomes <strong>0.83</strong> against a walk <em>with
+                drift</em>, and 0.67 at eight becomes <strong>1.03</strong>. Bank Rate
+                is the one series that does not trend, and the one that improves under
+                the harder benchmark.
+              </p>
+              <p>
+                <strong>Covid dummies matter for GDP, not for inflation.</strong> The
+                rolling evaluation omits the six Covid dummies (2020Q1&ndash;2021Q2)
+                that every published forecast here carries. On the published
+                specification UK GDP against drift goes <strong>1.06 &rarr; 0.99</strong>
+                at one quarter and <strong>1.12 &rarr; 0.95</strong> at eight, while
+                CPI and Bank Rate move by less than 0.02. Level with a naive benchmark
+                is still not beating it: UK GDP is statistically inseparable from drift
+                at every horizon (p&nbsp;=&nbsp;0.33&ndash;0.43) in both
+                specifications.
+              </p>
+              <p class="vc-note">
+                The AR(1) comparison in the source file is <strong>not usable at long
+                horizons</strong>: 94.5% of its eight-step squared error for UK GDP
+                comes from one origin, because an AR(1) extrapolates the Covid
+                collapse. Every benchmark carries a <code>worst_origin_mse_share</code>
+                diagnostic for that reason.
+              </p>
+              </details>
+              <figure class="vfig">
         <svg class="vchart" data-chart="svar-skill-all" viewBox="0 0 760 420" role="img" aria-labelledby="svar-skill-all-t svar-skill-all-d">
 <title id="svar-skill-all-t">boe-svar forecast skill against a random walk with drift, all eight variables</title>
 <desc id="svar-skill-all-d">Dot matrix of forecast error relative to a random walk with drift, eight variables by eight quarterly horizons, from 49 expanding-window origins. Position alone carries better or worse: a dot left of the 1.0 rule means the model beats the benchmark, right of it means the benchmark wins. Filled dots mark differences significant at 5 per cent by a Diebold-Mariano test, hollow dots differences that are not statistically distinguishable; those p-values are pairwise and the grid runs 64 tests, none of which clears a 10 per cent false-discovery rate once adjusted together — the smallest adjusted q-value is 0.36. Bank Rate runs 0.79 at one quarter to 0.85 at 8; UK CPI runs 0.83 at one quarter to 1.03 at 8; World CPI runs 0.94 at one quarter to 1.07 at 8; Oil price runs 1.01 at one quarter to 0.98 at 8; CPI energy runs 0.98 at one quarter to 1.11 at 8; UK real GDP runs 1.06 at one quarter to 1.12 at 8; World GDP runs 1.07 at one quarter to 1.10 at 8; Exchange rate runs 1.03 at one quarter to 1.33 at 8. Bank Rate is the best at the longest horizon and Exchange rate the worst. Against this harder benchmark only four of eight variables beat naive at one quarter and two at 8. The number at the end of each row is that row's ratio at horizon 8.</desc>
@@ -539,9 +567,9 @@
 <circle cx="661.1" cy="360.0" r="4.0" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.7"/>
 <text class="vc-val" x="671.1" y="364.0">1.33</text>
 </svg>
-        <figcaption>Error ratios against a random walk <strong>with drift</strong>, on the level of each series — the fair benchmark for a trending series. Estimated without the Covid dummies the published specification carries; no-change ratios are in the table below. Estimation uses final revised data, so this is pseudo- rather than real-time out-of-sample. The ratios rest on fewer effective observations than 49 origins suggests: in 16 of the 64 cells one origin contributes over 35% of the squared error, peaking at <strong>63% for UK GDP at h=1</strong>. Source: <code>papers/boe-svar/figures/rolling_evaluation.json</code> (<code>worst_origin_mse_share.drift</code>).</figcaption>
-      </figure>
-      <figure class="vfig">
+                <figcaption>Error ratios against a random walk <strong>with drift</strong>, on the level of each series — the fair benchmark for a trending series. Estimated without the Covid dummies the published specification carries; no-change ratios are in the table below. Estimation uses final revised data, so this is pseudo- rather than real-time out-of-sample. The ratios rest on fewer effective observations than 49 origins suggests: in 16 of the 64 cells one origin contributes over 35% of the squared error, peaking at <strong>63% for UK GDP at h=1</strong>. Source: <code>papers/boe-svar/figures/rolling_evaluation.json</code> (<code>worst_origin_mse_share.drift</code>).</figcaption>
+              </figure>
+              <figure class="vfig">
         <svg class="vchart" data-chart="svar-winrate" viewBox="0 0 760 344" role="img" aria-labelledby="svar-winrate-t svar-winrate-d">
 <title id="svar-winrate-t">How many of eight variables beat a drifting random walk, by horizon</title>
 <desc id="svar-winrate-d">Column chart, one column per forecast horizon from one to eight quarters. Column height is the number of the model's eight forecast variables whose root mean squared error is below that of a random walk with drift; a dashed reference line across the top marks all eight. The counts are 4, 4, 3, 2, 3, 3, 2, 2, so between 2 and 4 of the 8 beat the benchmark at any horizon and the remaining 4, 4, 5, 6, 5, 5, 6, 6 do not. The shaded lower part of each column is the subset whose difference is significant at 5 per cent on an unadjusted pairwise Diebold-Mariano test: 2, 1, 1, 1, 1, 0, 0, 0. Those p-values are pairwise and the grid runs 64 tests; under a Benjamini-Hochberg adjustment none of them reaches a 10 per cent false-discovery rate and the smallest adjusted q-value is 0.36, so on the adjusted reading the significant-win count is zero at every horizon. At horizons 7 and 8 one variable is significantly worse than the benchmark.</desc>
@@ -600,76 +628,124 @@
 <rect class="vc-b2" x="330" y="302" width="14" height="10"/><text class="vc-note" x="350" y="311">beats it, not distinguishable</text>
 <text class="vc-val" x="64" y="336">Adjusted together, none of the 64 tests clears a 10% false-discovery rate (smallest q = 0.36).</text>
 </svg>
-        <figcaption>A win is a ratio strictly below 1.0 — a hard cut that counts 0.99 and rejects 1.01 though neither is distinguishable from the benchmark, so the significance split matters more than the count. That significance is pairwise: under a Benjamini&ndash;Hochberg adjustment the significant-win count is <strong>zero at every horizon</strong>. Same origins and benchmark as above. Source: <code>papers/boe-svar/figures/rolling_evaluation.json</code>.</figcaption>
-      </figure>
-      <div class="table-scroll mo-tablecard">
-      <table>
-        <caption>Forecast error relative to two naive benchmarks (below 1.0 beats it). Bold marks a significant win, <abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr> any significant difference — unadjusted, so read a star as "worth a second look". Ratios omit the Covid dummies the published specification carries (see the diagnostics above). The ex-Covid column is against no-change — UK GDP's 0.77 there is 1.21 against drift — and neither it nor the full-sample figure is preferred.</caption>
-        <thead><tr><th scope="col" rowspan="2">variable</th><th scope="col" colspan="2">h=1</th><th scope="col" colspan="2">h=2</th><th scope="col" colspan="2">h=4</th><th scope="col" colspan="2">h=8</th><th scope="col" rowspan="2">h=1 ex-Covid<br/>(vs no-change)</th></tr>
-        <tr><th scope="col">vs drift</th><th scope="col">vs no-change</th><th scope="col">vs drift</th><th scope="col">vs no-change</th><th scope="col">vs drift</th><th scope="col">vs no-change</th><th scope="col">vs drift</th><th scope="col">vs no-change</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Bank Rate</th><td><strong>0.79</strong><abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">0.88</td><td><strong>0.85</strong><abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">0.96</td><td><strong>0.89</strong><abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">1.02</td><td>0.85</td><td class="vc-note">1.03</td><td class="vc-note">0.86</td></tr>
-          <tr><th scope="row">UK CPI (level)</th><td><strong>0.83</strong><abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">0.63</td><td>0.85</td><td class="vc-note">0.62</td><td>0.94</td><td class="vc-note">0.66</td><td>1.03</td><td class="vc-note">0.67</td><td class="vc-note">0.62</td></tr>
-          <tr><th scope="row">World CPI (level)</th><td>0.94</td><td class="vc-note">0.73</td><td>0.95</td><td class="vc-note">0.68</td><td>1.00</td><td class="vc-note">0.69</td><td>1.07</td><td class="vc-note">0.67</td><td class="vc-note">0.73</td></tr>
-          <tr><th scope="row">Oil price</th><td>1.01</td><td class="vc-note">1.03</td><td>1.02</td><td class="vc-note">1.05</td><td>1.01</td><td class="vc-note">1.06</td><td>0.98</td><td class="vc-note">1.08</td><td class="vc-note">1.05</td></tr>
-          <tr><th scope="row">CPI energy</th><td>0.98</td><td class="vc-note">0.98</td><td>0.97</td><td class="vc-note">0.98</td><td>1.03</td><td class="vc-note">1.04</td><td>1.11<abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">1.13</td><td class="vc-note">0.97</td></tr>
-          <tr><th scope="row">UK real GDP (level)</th><td>1.06</td><td class="vc-note">1.06</td><td>1.09</td><td class="vc-note">1.08</td><td>1.10</td><td class="vc-note">1.09</td><td>1.12</td><td class="vc-note">1.06</td><td class="vc-note">0.77</td></tr>
-          <tr><th scope="row">World GDP (level)</th><td>1.07</td><td class="vc-note">1.04</td><td>1.10</td><td class="vc-note">1.03</td><td>1.11</td><td class="vc-note">0.93</td><td>1.10</td><td class="vc-note">0.71</td><td class="vc-note">0.51</td></tr>
-          <tr><th scope="row">Exchange rate</th><td>1.03</td><td class="vc-note">1.04</td><td>1.09</td><td class="vc-note">1.11</td><td>1.19</td><td class="vc-note">1.22</td><td>1.33</td><td class="vc-note">1.41</td><td class="vc-note">1.05</td></tr>
-        </tbody>
-      </table>
-      </div>
-      <p class="chart-note" style="max-width: 80ch;">
-        These are quarterly, level-basis ratios computed with hindsight-final
-        data. They are <strong>not</strong> comparable with the real-time
-        annual-growth errors the OBR publishes, which is why those get a
-        separate table.
-      </p>
+                <figcaption>A win is a ratio strictly below 1.0 — a hard cut that counts 0.99 and rejects 1.01 though neither is distinguishable from the benchmark, so the significance split matters more than the count. That significance is pairwise: under a Benjamini&ndash;Hochberg adjustment the significant-win count is <strong>zero at every horizon</strong>. Same origins and benchmark as above. Source: <code>papers/boe-svar/figures/rolling_evaluation.json</code>.</figcaption>
+              </figure>
+              <div class="table-scroll mo-tablecard">
+              <table>
+                <caption>Forecast error relative to two naive benchmarks (below 1.0 beats it). Bold marks a significant win, <abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr> any significant difference — unadjusted, so read a star as "worth a second look". Ratios omit the Covid dummies the published specification carries (see the diagnostics above). The ex-Covid column is against no-change — UK GDP's 0.77 there is 1.21 against drift — and neither it nor the full-sample figure is preferred.</caption>
+                <thead><tr><th scope="col" rowspan="2">variable</th><th scope="col" colspan="2">h=1</th><th scope="col" colspan="2">h=2</th><th scope="col" colspan="2">h=4</th><th scope="col" colspan="2">h=8</th><th scope="col" rowspan="2">h=1 ex-Covid<br/>(vs no-change)</th></tr>
+                <tr><th scope="col">vs drift</th><th scope="col">vs no-change</th><th scope="col">vs drift</th><th scope="col">vs no-change</th><th scope="col">vs drift</th><th scope="col">vs no-change</th><th scope="col">vs drift</th><th scope="col">vs no-change</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Bank Rate</th><td><strong>0.79</strong><abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">0.88</td><td><strong>0.85</strong><abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">0.96</td><td><strong>0.89</strong><abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">1.02</td><td>0.85</td><td class="vc-note">1.03</td><td class="vc-note">0.86</td></tr>
+                  <tr><th scope="row">UK CPI (level)</th><td><strong>0.83</strong><abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">0.63</td><td>0.85</td><td class="vc-note">0.62</td><td>0.94</td><td class="vc-note">0.66</td><td>1.03</td><td class="vc-note">0.67</td><td class="vc-note">0.62</td></tr>
+                  <tr><th scope="row">World CPI (level)</th><td>0.94</td><td class="vc-note">0.73</td><td>0.95</td><td class="vc-note">0.68</td><td>1.00</td><td class="vc-note">0.69</td><td>1.07</td><td class="vc-note">0.67</td><td class="vc-note">0.73</td></tr>
+                  <tr><th scope="row">Oil price</th><td>1.01</td><td class="vc-note">1.03</td><td>1.02</td><td class="vc-note">1.05</td><td>1.01</td><td class="vc-note">1.06</td><td>0.98</td><td class="vc-note">1.08</td><td class="vc-note">1.05</td></tr>
+                  <tr><th scope="row">CPI energy</th><td>0.98</td><td class="vc-note">0.98</td><td>0.97</td><td class="vc-note">0.98</td><td>1.03</td><td class="vc-note">1.04</td><td>1.11<abbr title="difference significant at 5% (Diebold-Mariano)">*</abbr></td><td class="vc-note">1.13</td><td class="vc-note">0.97</td></tr>
+                  <tr><th scope="row">UK real GDP (level)</th><td>1.06</td><td class="vc-note">1.06</td><td>1.09</td><td class="vc-note">1.08</td><td>1.10</td><td class="vc-note">1.09</td><td>1.12</td><td class="vc-note">1.06</td><td class="vc-note">0.77</td></tr>
+                  <tr><th scope="row">World GDP (level)</th><td>1.07</td><td class="vc-note">1.04</td><td>1.10</td><td class="vc-note">1.03</td><td>1.11</td><td class="vc-note">0.93</td><td>1.10</td><td class="vc-note">0.71</td><td class="vc-note">0.51</td></tr>
+                  <tr><th scope="row">Exchange rate</th><td>1.03</td><td class="vc-note">1.04</td><td>1.09</td><td class="vc-note">1.11</td><td>1.19</td><td class="vc-note">1.22</td><td>1.33</td><td class="vc-note">1.41</td><td class="vc-note">1.05</td></tr>
+                </tbody>
+              </table>
+              </div>
+              <p class="chart-note" style="max-width: 80ch;">
+                These are quarterly, level-basis ratios computed with hindsight-final
+                data. They are <strong>not</strong> comparable with the real-time
+                annual-growth errors the OBR publishes, which is why those get a
+                separate table.
+              </p>
 
-      <h3>What the OBR and external forecasters report about themselves</h3>
-      <p>
-        Cited, not recomputed: the OBR's
-        <a href="https://obr.uk/fer/forecast-evaluation-report-july-2025/">Forecast
-        Evaluation Report (July 2025)</a> reports its own real-time errors on
-        annual growth rates since 2010, beside the HM Treasury median of
-        external forecasters.
-      </p>
-      <div class="table-scroll mo-tablecard">
-      <table>
-        <caption>Median absolute forecast errors reported in the OBR Forecast Evaluation Report, July 2025 (annual rates, percentage points, forecasts since 2010)</caption>
-        <thead><tr><th scope="col">variable &middot; horizon</th><th scope="col">OBR</th><th scope="col">external median</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Real GDP growth &middot; 1 year ahead</th><td>0.6pp</td><td>0.6pp</td></tr>
-          <tr><th scope="row">Real GDP growth &middot; 2 years ahead</th><td>0.4pp</td><td>0.4pp</td></tr>
-          <tr><th scope="row">CPI inflation &middot; 1 year ahead</th><td>0.3pp</td><td>0.3pp</td></tr>
-          <tr><th scope="row">CPI inflation &middot; 2 years ahead</th><td>0.9pp</td><td>0.9pp</td></tr>
-        </tbody>
-      </table>
+              <h4>What the OBR and external forecasters report about themselves</h4>
+              <p>
+                Cited, not recomputed: the OBR's
+                <a href="https://obr.uk/fer/forecast-evaluation-report-july-2025/">Forecast
+                Evaluation Report (July 2025)</a> reports its own real-time errors on
+                annual growth rates since 2010, beside the HM Treasury median of
+                external forecasters.
+              </p>
+              <div class="table-scroll mo-tablecard">
+              <table>
+                <caption>Median absolute forecast errors reported in the OBR Forecast Evaluation Report, July 2025 (annual rates, percentage points, forecasts since 2010)</caption>
+                <thead><tr><th scope="col">variable &middot; horizon</th><th scope="col">OBR</th><th scope="col">external median</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Real GDP growth &middot; 1 year ahead</th><td>0.6pp</td><td>0.6pp</td></tr>
+                  <tr><th scope="row">Real GDP growth &middot; 2 years ahead</th><td>0.4pp</td><td>0.4pp</td></tr>
+                  <tr><th scope="row">CPI inflation &middot; 1 year ahead</th><td>0.3pp</td><td>0.3pp</td></tr>
+                  <tr><th scope="row">CPI inflation &middot; 2 years ahead</th><td>0.9pp</td><td>0.9pp</td></tr>
+                </tbody>
+              </table>
+              </div>
+              <p>
+                The nearest in-house analogue is the frozen-edge RMSE above — a different statistic, frequency and
+                origin count, so it sits beside these numbers, not against them. For
+                the Bank of England the only sourceable comparison is the
+                matched-vintage episode on the
+                <a href="/models#validation">validation index</a>; the MPR publishes no
+                RMSE-by-horizon table.
+              </p>
+              <div class="callout">
+                Omitted for lack of a defensible source: NIESR or consensus RMSE tables
+                by horizon, a Bank of England RMSE-by-horizon table, and an AR(1)
+                benchmark for this exercise. The authors' companion paper (Staff
+                Working Paper No. 1,165) is a methods paper on a different SVAR and
+                publishes no errors, so the frozen-edge RMSEs stand without an official
+                yardstick.
+              </div>
+        <div class="meth-inline">
+        <div class="meth-sec-title">ratio to drift, h=1</div>
+        <div class="meth-eq"><div class="meth-eq-label">Bank Rate</div><div class="meth-eq-body">0.79, the closest to a win</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">UK CPI</div><div class="meth-eq-body">0.83 (0.63 vs no-change)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">UK real GDP</div><div class="meth-eq-body">1.06</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">smallest p</div><div class="meth-eq-body">0.018, unadjusted</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">adjusted wins</div><div class="meth-eq-body">zero at every horizon</div></div>
+        </div>
       </div>
-      <p>
-        The nearest in-house analogue is the frozen-edge
-        <strong>0.32pp</strong> above — a different statistic, frequency and
-        origin count, so it sits beside these numbers, not against them. For
-        the Bank of England the only sourceable comparison is the
-        matched-vintage episode on the
-        <a href="/models#validation">validation index</a>; the MPR publishes no
-        RMSE-by-horizon table.
-      </p>
-      <div class="callout">
-        Omitted for lack of a defensible source: NIESR or consensus RMSE tables
-        by horizon, a Bank of England RMSE-by-horizon table, and an AR(1)
-        benchmark for this exercise. The authors' companion paper (Staff
-        Working Paper No. 1,165) is a methods paper on a different SVAR and
-        publishes no errors, so the frozen-edge RMSEs stand without an official
-        yardstick.
+
       </div>
+
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Replication</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">four-quarter FEVD, ours vs paper</div>
+          <div class="meth-eq"><div class="meth-eq-label">global, UK GDP</div><div class="meth-eq-body">37.4% vs ~40%</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">global, UK CPI</div><div class="meth-eq-body">42.3% vs ~50%, about 8pp short</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">identified total</div><div class="meth-eq-body">76.3% / 78.9% vs &ldquo;around 80%&rdquo;</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">figures 2&ndash;6</div><div class="meth-eq-body">replicate qualitatively</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">adding-up identity</div><div class="meth-eq-body">exact per draw, by construction</div></div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Frozen 2024Q2 edge</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">seven scored quarters</div>
+          <div class="meth-eq"><div class="meth-eq-label">window</div><div class="meth-eq-body">2024Q3&ndash;2026Q1</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">a correct 68% band</div><div class="meth-eq-body">holds about 9.5 of 14</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">2025 CPI outturns</div><div class="meth-eq-body">3.5% and 3.8%</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">medians then</div><div class="meth-eq-body">3.2%</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">peak miss</div><div class="meth-eq-body">up to 0.6pp</div></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Rolling coverage</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">49 expanding-window origins</div>
+          <div class="meth-eq"><div class="meth-eq-label">68% band, h=1</div><div class="meth-eq-body">71%, just above nominal</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">68% band, h=8</div><div class="meth-eq-body">57%</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">90% band</div><div class="meth-eq-body">under-covers at every horizon</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">unemployment satellite</div><div class="meth-eq-body">beats no-change at h=1&ndash;4 only, not significant</div></div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Forecast skill</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <div class="meth-sec-title">ratio to drift, h=1</div>
+          <div class="meth-eq"><div class="meth-eq-label">Bank Rate</div><div class="meth-eq-body">0.79, the closest to a win</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">UK CPI</div><div class="meth-eq-body">0.83 (0.63 vs no-change)</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">UK real GDP</div><div class="meth-eq-body">1.06</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">smallest p</div><div class="meth-eq-body">0.018, unadjusted</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">adjusted wins</div><div class="meth-eq-body">zero at every horizon</div></div>
+        </div>
+      </aside>
     </div>
   </section>
 
-  <section id="caveats" class="band">
+  <section class="band band-wide" id="caveats">
     <div class="band-head">
       <span class="kicker mono">limits</span>
-      <h2>Where this departs from the Bank's model.</h2>
+      <h2>Where this departs from the Bank&rsquo;s model.</h2>
     </div>
     <div class="prose">
       <div class="table-scroll mo-tablecard"><table>
@@ -705,6 +781,32 @@
     </div>
   </section>
 
+  <section class="band where-next" id="where-next">
+    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/svar/code">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span>
+        <h3>Code</h3>
+        <p>Install, run and reproduce each number</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/models#validation">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
+        <h3>Every model&rsquo;s verdict</h3>
+        <p>How the seven are checked</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/papers/boe-svar">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>
+        <h3>The working paper</h3>
+        <p>The full quarterly scorecard</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </div>
+  </section>
+    </div>
+  </div>
+
 </main>
 
 <footer class="foot foot-bar">
@@ -720,5 +822,49 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
+<script>
+// StepPanel: highlight the step at the reading line and show its panel in
+// the sticky aside (scoped to each .scrolly-wrap).
+(function () {
+  "use strict";
+  Array.from(document.querySelectorAll(".scrolly-wrap")).forEach(function (wrap) {
+    var steps = Array.from(wrap.querySelectorAll(".meth-step"));
+    var panels = Array.from(wrap.querySelectorAll(".meth-panel"));
+    if (!steps.length || !panels.length) return;
+    var current = -1;
+    function update() {
+      var offset = window.innerHeight * 0.33, active = 0;
+      steps.forEach(function (step, i) { if (step.getBoundingClientRect().top < offset) active = i; });
+      if (active === current) return;
+      current = active;
+      steps.forEach(function (step, i) { step.classList.toggle("active", i === active); });
+      panels.forEach(function (panel) { panel.hidden = Number(panel.getAttribute("data-step")) !== active; });
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    update();
+  });
+})();
+</script>
+<script>
+// "On this page" rail: mark the section at the reading line.
+(function () {
+  "use strict";
+  var rail = document.querySelector(".page-rail");
+  if (!rail) return;
+  var links = Array.from(rail.querySelectorAll('a[href^="#"]'));
+  var targets = links.map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); });
+  function update() {
+    var line = window.innerHeight * 0.3, current = 0;
+    targets.forEach(function (t, i) { if (t && t.getBoundingClientRect().top < line) current = i; });
+    links.forEach(function (a, i) {
+      if (i === current) a.setAttribute("aria-current", "location"); else a.removeAttribute("aria-current");
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  update();
+})();
+</script>
 </body>
 </html>

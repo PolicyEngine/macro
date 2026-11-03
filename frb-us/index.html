@@ -20,14 +20,9 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=8" />
-<style>
-/* page-specific: hero sizing only — shared component styles live in style.css */
-.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-</style>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
   <a class="brand" href="/" aria-label="PolicyEngine Macro home">
@@ -71,107 +66,176 @@
       <a class="model-tabs-link" href="/papers/frb-us">Paper</a>
     </div>
   </nav>
-  <section id="pe-bridge" class="band">
+  <section id="overview" class="band band-wide">
     <div class="band-head">
-      <span class="kicker mono">with the microsimulation</span>
-      <h2>Its labour-market path tells the microsimulation who bears a shock.</h2>
+      <span class="kicker mono">overview</span>
+      <h2>How it joins the core, what it is, what it can answer.</h2>
     </div>
-    <div class="prose">
-      <div class="qa-facts">
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Connection.</strong> Shock-to-incidence bridge: <code>frbus_shock_incidence</code> scales the US <a href="/pe">microsimulation</a>'s employment income with the wage and hours deviations a shock produces. Uniform scaling — an experimental illustration, and labelled as such. <code>score_reform</code> refuses <code>model="frbus"</code>: no mapping from statute exists.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Worked example.</strong> The 100bp tightening below moves the 2027 wage bill &minus;0.65%; the microsimulation then shows how much the federal and state tax system absorbs and what SNAP and the EITC give back, decile by decile.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Validation.</strong> <a href="/frb-us/validation">Shocked paths match the Fed's own pyfrbus at its version-to-version noise floor</a>, CI-gated, plus a weekly baseline-vs-outturn backtest. The baseline tracking residual is an <strong>add-factor identity</strong>, not evidence.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Results.</strong> Run <code>frbus_shock</code> from <a href="/connect">any connected client</a>, or <code>pe-macro frbus-shock</code> locally.</span></div>
+    <p class="callout callout-warn verdict-callout">
+      <strong>Verdict: matches the Fed&rsquo;s own solver; no predictive claim.</strong>
+      Baseline agreement is an identity, not evidence, and the baseline itself misses core inflation.
+      <a href="/frb-us/validation">How far to trust it &rarr;</a>
+    </p>
+
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+
+      <div class="meth-step" id="pe-bridge" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>With the microsimulation</h3></div>
+        <p class="mo-lead">Its labour-market path tells the microsimulation who bears a shock.</p>
+        <div class="pipeline">
+          <span class="pl-node"><strong>frb-us</strong><span class="mono">wages &middot; hours</span></span>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <a class="pl-node" href="/pe"><strong>pe-microsim</strong><span class="mono">US employment income</span></a>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <span class="pl-node pl-node-out"><strong>Who bears it</strong></span>
+        </div>
+        <p>Shock-to-incidence bridge: <code>frbus_shock_incidence</code> scales the US <a href="/pe">microsimulation</a>'s employment income with the wage and hours deviations a shock produces. Uniform scaling — an experimental illustration, and labelled as such. <code>score_reform</code> refuses <code>model="frbus"</code>: no mapping from statute exists.</p>
+        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">shock to incidence</div>
+        <div class="meth-eq"><div class="meth-eq-label">tool</div><div class="meth-eq-body"><code>frbus_shock_incidence</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">what moves</div><div class="meth-eq-body">wage and hours deviations from a shock</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">enters</div><div class="meth-eq-body">US employment income, scaled uniformly</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">experimental</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">refused</div><div class="meth-eq-body"><code>score_reform</code> refuses <code>model="frbus"</code></div></div>
+        </div>
       </div>
+
+      <div class="meth-step" id="what" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it is</h3></div>
+        <p class="mo-lead">The US counterpart to the OBR emulator.</p>
+              <p>
+                The Federal Reserve Board has used this large-scale macroeconometric
+                model for policy analysis and forecasting since 1996, and publishes it
+                whole in the public domain — the equation system as
+                <code>model.xml</code>, the <code>LONGBASE</code> historical and
+                projection database, the documentation, and a reference Python solver,
+                <code>pyfrbus</code> — but no modern, readable, dependency-light
+                implementation.
+              </p>
+              <p>
+                This is that: a from-scratch build on numpy, scipy and sympy under
+                Python 3.10+, parsing the Board's own model file rather than
+                re-specifying it — <strong>284 endogenous variables and their
+                equations</strong>, split into behavioural and identity blocks exactly
+                as the Board's file declares them, solved as one simultaneous system
+                per quarter.
+              </p>
+              <p>
+                In the suite it is the US counterpart of the <a href="/obr">OBR
+                emulator</a>: it reproduces the estimated equation system an official
+                institution actually relies on, rather than deriving behaviour from
+                first principles like the <a href="/olg">overlapping-generations
+                model</a>. One divergence shapes everything below: the OBR emulator
+                has a bridge from statute; this one does not.
+              </p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">the Board&rsquo;s model, rebuilt</div>
+        <div class="meth-eq"><div class="meth-eq-label">source</div><div class="meth-eq-body">Federal Reserve Board, in use since 1996</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">equations</div><div class="meth-eq-body">284 endogenous variables</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">solve</div><div class="meth-eq-body">one simultaneous system per quarter</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">build</div><div class="meth-eq-body">numpy, scipy and sympy, Python 3.10+</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">input file</div><div class="meth-eq-body">the Board&rsquo;s own <code>model.xml</code></div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="answers" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
+        <p class="mo-lead">US monetary and fiscal shocks, quarter by quarter.</p>
+              <p>
+                The model's designed job is the US economy's dynamic response to a
+                policy impulse. A <strong>100bp funds-rate tightening</strong> in
+                2026Q1 moves the policy rate <strong>+1.000pp</strong> on impact, pushes
+                real GDP to a trough of <strong>&minus;0.55%</strong> in 2027Q4, raises
+                unemployment by a peak <strong>+0.26pp</strong>, and takes core
+                inflation down <strong>0.034pp</strong> at its trough — signs,
+                magnitudes and timing consistent with the Board's own documented
+                simulation properties.
+              </p>
+              <p>Fiscal impulses land in the published cross-model ranges (<a href="/frb-us/validation#multipliers">multipliers</a>).</p>
+              <p>
+                What it <em>can</em> hand the microsimulation is its labour-market
+                path. The <code>frbus_shock_incidence</code> tool takes the wage
+                and hours deviations a shock produces (the 100bp tightening above moves the 2027 wage bill <strong>&minus;0.65%</strong>) and scales
+                the <a href="/pe">US microsimulation</a>'s employment income with
+                them, so the automatic stabilizers answer who bears it: how much of
+                the earnings loss the federal and state tax system absorbs, and
+                what SNAP and the EITC give back, decile by decile. Uniform
+                scaling, an experimental illustration — real incidence concentrates
+                in job losers, and the caveats say so.
+              </p>
+        <p class="callout callout-neutral"><strong>It cannot</strong> score a PolicyEngine reform &mdash; see the <a href="/frb-us/validation#caveats">known limits</a>. It cannot do forward guidance or anything needing model-consistent
+                expectations. It cannot score a reform:
+                <code>score_reform</code> refuses <code>model="frbus"</code> rather
+                than return a plausible-but-wrong number, because no mapping exists
+                from a <a href="/pe">PolicyEngine</a> reform to FRB/US levers. And
+                it says nothing about the UK.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">100bp tightening, 2026Q1</div>
+        <div class="meth-eq"><div class="meth-eq-label">funds rate</div><div class="meth-eq-body">+1.000pp on impact</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">real GDP</div><div class="meth-eq-body">trough &minus;0.55%, 2027Q4</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">unemployment</div><div class="meth-eq-body">peak +0.26pp</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">core inflation</div><div class="meth-eq-body">trough &minus;0.034pp</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">2027 wage bill</div><div class="meth-eq-body">&minus;0.65%</div></div>
+        </div>
+      </div>
+
+      </div>
+
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">The join</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">shock to incidence</div>
+          <div class="meth-eq"><div class="meth-eq-label">tool</div><div class="meth-eq-body"><code>frbus_shock_incidence</code></div></div>
+          <div class="meth-eq"><div class="meth-eq-label">what moves</div><div class="meth-eq-body">wage and hours deviations from a shock</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">enters</div><div class="meth-eq-body">US employment income, scaled uniformly</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">experimental</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">refused</div><div class="meth-eq-body"><code>score_reform</code> refuses <code>model="frbus"</code></div></div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Model at a glance</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">the Board&rsquo;s model, rebuilt</div>
+          <div class="meth-eq"><div class="meth-eq-label">source</div><div class="meth-eq-body">Federal Reserve Board, in use since 1996</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">equations</div><div class="meth-eq-body">284 endogenous variables</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">solve</div><div class="meth-eq-body">one simultaneous system per quarter</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">build</div><div class="meth-eq-body">numpy, scipy and sympy, Python 3.10+</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">input file</div><div class="meth-eq-body">the Board&rsquo;s own <code>model.xml</code></div></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Worked example</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">100bp tightening, 2026Q1</div>
+          <div class="meth-eq"><div class="meth-eq-label">funds rate</div><div class="meth-eq-body">+1.000pp on impact</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">real GDP</div><div class="meth-eq-body">trough &minus;0.55%, 2027Q4</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">unemployment</div><div class="meth-eq-body">peak +0.26pp</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">core inflation</div><div class="meth-eq-body">trough &minus;0.034pp</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">2027 wage bill</div><div class="meth-eq-body">&minus;0.65%</div></div>
+        </div>
+      </aside>
     </div>
   </section>
 
-
-  <section id="what" class="band">
-    <div class="band-head">
-      <span class="kicker mono">01 — what it is</span>
-      <h2>The US counterpart to the OBR emulator.</h2>
-    </div>
-    <div class="prose">
-      <p class="mo-lead">
-        The Federal Reserve Board has used this large-scale macroeconometric
-        model for policy analysis and forecasting since 1996, and publishes it
-        whole in the public domain — the equation system as
-        <code>model.xml</code>, the <code>LONGBASE</code> historical and
-        projection database, the documentation, and a reference Python solver,
-        <code>pyfrbus</code> — but no modern, readable, dependency-light
-        implementation.
-      </p>
-      <p>
-        This is that: a from-scratch build on numpy, scipy and sympy under
-        Python 3.10+, parsing the Board's own model file rather than
-        re-specifying it — <strong>284 endogenous variables and their
-        equations</strong>, split into behavioural and identity blocks exactly
-        as the Board's file declares them, solved as one simultaneous system
-        per quarter.
-      </p>
-      <p>
-        In the suite it is the US counterpart of the <a href="/obr">OBR
-        emulator</a>: it reproduces the estimated equation system an official
-        institution actually relies on, rather than deriving behaviour from
-        first principles like the <a href="/olg">overlapping-generations
-        model</a>. One divergence shapes everything below: the OBR emulator
-        has a bridge from statute; this one does not.
-      </p>
-    </div>
-  </section>
-
-  <section id="answers" class="band">
-    <div class="band-head">
-      <span class="kicker mono">02 — what it can answer</span>
-      <h2>US monetary and fiscal shocks, quarter by quarter.</h2>
-    </div>
-    <div class="prose">
-      <p class="mo-lead">
-        The model's designed job is the US economy's dynamic response to a
-        policy impulse. A <strong>100bp funds-rate tightening</strong> in
-        2026Q1 moves the policy rate <strong>+1.000pp</strong> on impact, pushes
-        real GDP to a trough of <strong>&minus;0.55%</strong> in 2027Q4, raises
-        unemployment by a peak <strong>+0.26pp</strong>, and takes core
-        inflation down <strong>0.034pp</strong> at its trough — signs,
-        magnitudes and timing consistent with the Board's own documented
-        simulation properties.
-      </p>
-      <p>
-        Fiscal impulses land in the published cross-model ranges.
-      </p>
-      <div class="mo-facts">
-        <p class="mo-fact"><span class="icon" aria-hidden="true">&rarr;</span><span>A
-        government-purchases shock worth 1% of GDP gives a year-one multiplier
-        of <strong>0.72</strong> under the inertial Taylor rule, inside the
-        0.7–1.0 no-accommodation range in Coenen et al. (2012); with the funds
-        rate fixed, the year-two multiplier is <strong>0.90</strong>.</span></p>
-        <p class="mo-fact"><span class="icon" aria-hidden="true">&rarr;</span><span>A
-        personal tax cut worth 1% of GDP ex ante gives <strong>0.22 rising to
-        0.32</strong> over years one and two, inside both the 0.2–0.4
-        cross-model range and CBO's central estimate of about 0.3.</span></p>
-      </div>
-      <div class="callout">
-        <strong>It cannot</strong> score a PolicyEngine reform — see the <a href="/frb-us/validation#caveats">known limits</a>.
-        It cannot do forward guidance or anything needing model-consistent
-        expectations. It cannot score a reform:
-        <code>score_reform</code> refuses <code>model="frbus"</code> rather
-        than return a plausible-but-wrong number, because no mapping exists
-        from a <a href="/pe">PolicyEngine</a> reform to FRB/US levers. And
-        it says nothing about the UK.
-      </div>
-      <p>
-        What it <em>can</em> hand the microsimulation is its labour-market
-        path. The <code>frbus_shock_incidence</code> tool takes the wage
-        and hours deviations a shock produces — the 100bp tightening above
-        moves the 2027 wage bill <strong>&minus;0.65%</strong> — and scales
-        the <a href="/pe">US microsimulation</a>'s employment income with
-        them, so the automatic stabilizers answer who bears it: how much of
-        the earnings loss the federal and state tax system absorbs, and
-        what SNAP and the EITC give back, decile by decile. Uniform
-        scaling, an experimental illustration — real incidence concentrates
-        in job losers, and the caveats say so.
-      </p>
+  <section class="band where-next" id="where-next">
+    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/frb-us/methodology">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg></span>
+        <h3>Methodology</h3>
+        <p>How the Board&rsquo;s file is parsed and solved</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/models#compare">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg></span>
+        <h3>Compare the models</h3>
+        <p>All seven side by side</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/connect">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg></span>
+        <h3>Run it hosted</h3>
+        <p>MCP, CLI or Python, no account needed</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
     </div>
   </section>
 
@@ -190,5 +254,29 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
+<script>
+// StepPanel: highlight the step at the reading line and show its panel in
+// the sticky aside (scoped to each .scrolly-wrap).
+(function () {
+  "use strict";
+  Array.from(document.querySelectorAll(".scrolly-wrap")).forEach(function (wrap) {
+    var steps = Array.from(wrap.querySelectorAll(".meth-step"));
+    var panels = Array.from(wrap.querySelectorAll(".meth-panel"));
+    if (!steps.length || !panels.length) return;
+    var current = -1;
+    function update() {
+      var offset = window.innerHeight * 0.33, active = 0;
+      steps.forEach(function (step, i) { if (step.getBoundingClientRect().top < offset) active = i; });
+      if (active === current) return;
+      current = active;
+      steps.forEach(function (step, i) { step.classList.toggle("active", i === active); });
+      panels.forEach(function (panel) { panel.hidden = Number(panel.getAttribute("data-step")) !== active; });
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    update();
+  });
+})();
+</script>
 </body>
 </html>
