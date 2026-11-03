@@ -30,6 +30,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+import chartkit  # noqa: E402  (stdlib-only, repo root)
 HERE = Path(__file__).resolve().parent
 ROUNDS = HERE / "rounds"
 OUTTURNS = HERE / "outturns.json"
@@ -479,56 +481,57 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
     median = " ".join(f"{x(i):.1f},{y(r['median']):.1f}" for i, r in enumerate(rows))
     efo = " ".join(f"{x(i):.1f},{y(r['efo']):.1f}" for i, r in enumerate(rows))
 
-    gridlines, ticks = [], []
-    step = 0.5
+    gridlines = []
+    # One labelled gridline per point: at 0.5 the labels stacked on a phone.
+    step = 1.0
     v = (int(lo / step)) * step
     while v <= hi:
         if v >= lo:
+            cls = "vc-zero" if abs(v) < 1e-9 else "vc-grid"
             gridlines.append(
-                f'          <line class="vc-grid" x1="{left}" y1="{y(v):.1f}" '
+                f'<line class="{cls}" x1="{left}" y1="{y(v):.1f}" '
                 f'x2="{width - right}" y2="{y(v):.1f}"/>'
             )
-            ticks.append(
-                f'          <text class="vc-tick" x="{left - 8}" y="{y(v) + 4:.1f}" '
-                f'text-anchor="end">{v:g}</text>'
-            )
+            gridlines.append(chartkit.ytick(left, y(v), f"{v:g}".replace("-", "\u2212")))
         v += step
-    xticks = [
-        f'          <text class="vc-tick" x="{x(i):.1f}" y="{height - 14}" '
-        f'text-anchor="middle">{r["period"]}</text>'
-        for i, r in enumerate(rows)
-    ]
+    last = len(rows) - 1
+    # Every other quarter is dropped when the chart is narrower than 520 px.
+    xticks = [chartkit.xtick(x(i), top + plot_h, r["period"], i, last, minor=i % 2 == 1)
+              for i, r in enumerate(rows)]
 
     svg = "\n".join(
         [
-            '      <p class="chart-intro">'
-            f'{spec["intro"].format(round_id=SVAR_ROUND.parent.name)}</p>',
-            '      <figure class="vchart-figure">',
-            f'        <svg class="vchart" data-chart="{chart_id}" viewBox="0 0 {width} {height}" '
+            f'<svg class="vchart" data-chart="{chart_id}" viewBox="{left - 4} {top - 4} '
+            f'{plot_w + 8} {plot_h + 8}" '
             f'role="img" aria-labelledby="{chart_id}-t {chart_id}-d">',
-            f'          <title id="{chart_id}-t">boe-svar {spec["name"]} forecast vs '
+            f'<title id="{chart_id}-t">boe-svar {spec["name"]} forecast vs '
             "OBR March 2026 EFO</title>",
-            f'          <desc id="{chart_id}-d">Fan chart of {spec["series"]}. '
+            f'<desc id="{chart_id}-d">Fan chart of {spec["series"]}. '
             "The boe-svar archived median with its 68 and 90 percent bands, "
             "empirically re-calibrated for measured under-coverage, is shown beside "
             "the OBR March 2026 EFO path over the overlapping quarters.</desc>",
             *gridlines,
-            *ticks,
-            f'          <polygon class="vc-band90" points="{band90}"/>',
-            f'          <polygon class="vc-band68" points="{band}"/>',
-            f'          <polyline class="vc-s1" points="{median}"/>',
-            f'          <polyline class="vc-s2" points="{efo}"/>',
+            f'<polygon class="vc-band90" points="{band90}"/>',
+            f'<polygon class="vc-band68" points="{band}"/>',
+            f'<polyline class="vc-s1" points="{median}"/>',
+            f'<polyline class="vc-s2" points="{efo}"/>',
             *xticks,
-            "        </svg>",
-            '        <div class="olg-legend">'
-            '<span class="li"><span class="ln ln-s1"></span>boe-svar median (68% and 90% bands, '
-            "empirically re-calibrated)</span>"
-            '<span class="li"><span class="ln ln-s2"></span>OBR March 2026 EFO</span>'
-            "</div>",
-            "      </figure>",
+            "</svg>",
         ]
     )
-    return svg
+    block = chartkit.figure(svg, legend=[
+        ("ln-s1", "boe-svar median"),
+        ("sw-band68", "68% band"),
+        ("sw-band90", "90% band (both empirically re-calibrated)"),
+        ("ln-s2", "OBR March 2026 EFO"),
+    ])
+    return "\n".join([
+        '      <p class="chart-intro">'
+        f'{spec["intro"].format(round_id=SVAR_ROUND.parent.name)}</p>',
+        '      <figure class="vchart-figure">',
+        block,
+        "      </figure>",
+    ])
 
 
 # ---------------------------------------------------------------- page

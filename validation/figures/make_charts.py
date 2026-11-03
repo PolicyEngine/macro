@@ -31,32 +31,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
+import chartkit  # noqa: E402  (stdlib-only, repo root)
 
 
 # ---------------------------------------------------------------- helpers
 
 def esc(s: str) -> str:
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-
-
-def wrap(text: str, width: int = 105):
-    """Greedy word wrap for a run of <text> lines.
-
-    SVG text does not wrap, and these charts carry no foreignObject, so a note
-    long enough to overflow the viewBox silently spills outside the card border
-    (.vchart sets overflow: visible). Anything variable-length gets wrapped.
-    """
-    lines, cur = [], ""
-    for w in text.split():
-        trial = f"{cur} {w}".strip()
-        if len(trial) > width and cur:
-            lines.append(cur)
-            cur = w
-        else:
-            cur = trial
-    if cur:
-        lines.append(cur)
-    return lines
 
 
 def n(x: float) -> str:
@@ -186,10 +168,12 @@ def word(k):
 
 # ---------------------------------------------------------------- chart builders
 
-def svg_open(view_w, view_h, chart_id, title, desc):
+def svg_open(view_w, view_h, chart_id, title, desc, origin=(0, 0)):
+    """Open a chart. ``origin`` crops the viewBox's top-left (min-x, min-y)."""
     tid, did = f"{chart_id}-t", f"{chart_id}-d"
+    ox, oy = origin
     return [
-        f'<svg class="vchart" data-chart="{chart_id}" viewBox="0 0 {view_w} {view_h}" '
+        f'<svg class="vchart" data-chart="{chart_id}" viewBox="{ox:g} {oy:g} {view_w} {view_h}" '
         f'role="img" aria-labelledby="{tid} {did}">',
         f'<title id="{tid}">{esc(title)}</title>',
         f'<desc id="{did}">{esc(desc)}</desc>',
@@ -224,33 +208,27 @@ def chart_obr_anchored():
         f"{mape_c:.2f}%). Continuous integration hard-fails the build if either mean absolute "
         f"deviation reaches 1%; it does not test single quarters{over_note}."
     )
-    out = svg_open(W, H, "obr-anchored",
+    y_top, y_bot = ymap(1.2), ymap(-0.3)
+    out = svg_open(x1 - x0 + 12, y_bot - y_top + 12, "obr-anchored",
                    "obr-macro: anchored baseline vs March 2026 EFO, quarterly deviation",
-                   desc)
+                   desc, origin=(x0 - 6, y_top - 6))
 
-    # legend
-    out.append('<line class="vc-s1" x1="58" y1="26" x2="84" y2="26"/><circle class="vc-s1-dot" cx="71" cy="26" r="3"/>')
-    # "peak" is the largest deviation in either direction, not the largest
-    # positive one: max() would quietly report the least-negative value on a
-    # series that never rose above the EFO.
-    out.append(f'<text class="vc-lab" x="92" y="30">real GDP (peak {max(gdp, key=abs):+.2f}%)</text>')
-    out.append('<line class="vc-s2" x1="288" y1="26" x2="314" y2="26"/><circle class="vc-s2-dot" cx="301" cy="26" r="3"/>')
-    out.append(f'<text class="vc-lab vc-lab2" x="322" y="30">consumption (peak {max(cons, key=abs):+.2f}%)</text>')
-
-    # y grid
+    # y grid: labels inside the plot, above their gridline; zero is vc-zero.
     for tick in (-0.3, 0.0, 0.3, 0.6, 0.9, 1.2):
         y = ymap(tick)
-        cls = "vc-axis" if tick == 0 else "vc-grid"
-        label = "0" if tick == 0 else f"{tick:+.1f}%".replace("+0.", "+0.").replace("-0.", "-0.")
+        cls = "vc-zero" if tick == 0 else "vc-grid"
+        label = "0" if tick == 0 else f"{tick:+.1f}%".replace("-", "\u2212")
         out.append(f'<line class="{cls}" x1="{x0:.0f}" y1="{n(y)}" x2="{x1:.0f}" y2="{n(y)}"/>')
-        out.append(f'<text class="vc-tick" x="48" y="{n(y + 4)}" text-anchor="end">{label}</text>')
+        out.append(chartkit.ytick(x0, y, label))
 
     # x ticks: first, and each subsequent Q1, plus the last point
     tick_idx = [i for i, q in enumerate(quarters) if q.endswith("Q1")]
+    if 0 not in tick_idx:
+        tick_idx.insert(0, 0)
     if len(quarters) - 1 not in tick_idx:
         tick_idx.append(len(quarters) - 1)
     for i in tick_idx:
-        out.append(f'<text class="vc-tick" x="{n(xs[i])}" y="306" text-anchor="middle">{quarters[i]}</text>')
+        out.append(chartkit.xtick(xs[i], y_bot + 6, quarters[i], i, len(quarters) - 1))
 
     for cls, series in (("vc-s1", gdp), ("vc-s2", cons)):
         pts = " L".join(f"{n(xs[i])} {n(ymap(v))}" for i, v in enumerate(series))
@@ -259,25 +237,42 @@ def chart_obr_anchored():
             out.append(f'<circle class="{cls}-dot" cx="{n(xs[i])}" cy="{n(ymap(v))}" r="3"/>')
 
     out.append("</svg>")
-    return "\n".join(out)
+    # "peak" is the largest deviation in either direction, not the largest
+    # positive one: max() would quietly report the least-negative value on a
+    # series that never rose above the EFO.
+    return chartkit.figure("\n".join(out), legend=[
+        ("ln-s1", f"real GDP (peak {fmt_signed(max(gdp, key=abs))}%)"),
+        ("ln-s2", f"consumption (peak {fmt_signed(max(cons, key=abs))}%)"),
+    ])
+
+
+def fmt_signed(v: float, places: int = 2) -> str:
+    """+0.70 / \u22120.30: a signed number with a true minus sign."""
+    return f"{v:+.{places}f}".replace("-", "\u2212")
 
 
 def grouped_bars(chart_id, title, desc, groups, y_max, y_step, fmt, unit_suffix=""):
-    """Two side-by-side bars per group, shared layout for the OBR and SVAR charts."""
-    W, H = 760, 304
+    """Two side-by-side bars per group, shared layout for the OBR and SVAR charts.
+
+    The bars' names go in the HTML legend (series 1 = ours, 2 = the published
+    counterpart); each group's label wraps under its own pair.
+    """
+    W = 760
     base_y, top_y = 258.0, 26.0
     scale = (base_y - top_y) / y_max
     bar_w = 79.2
     centres = (229.0, 559.0)
+    x0, x1 = 64.0, 724.0
 
-    out = svg_open(W, H, chart_id, title, desc)
+    out = svg_open(x1 - x0, base_y - top_y + 12, chart_id, title, desc, origin=(x0, top_y - 6))
 
     t = 0.0
     while t <= y_max + 1e-9:
         y = base_y - t * scale
-        cls = "vc-axis" if t == 0 else "vc-grid"
-        out.append(f'<line class="{cls}" x1="64" y1="{n(y)}" x2="724" y2="{n(y)}"/>')
-        out.append(f'<text class="vc-tick" x="54" y="{n(y + 4)}" text-anchor="end">{t:g}{unit_suffix}</text>')
+        cls = "vc-zero" if t == 0 else "vc-grid"
+        out.append(f'<line class="{cls}" x1="{x0:g}" y1="{n(y)}" x2="{x1:g}" y2="{n(y)}"/>')
+        if t:
+            out.append(chartkit.ytick(x0, y, f"{t:g}{unit_suffix}"))
         t += y_step
 
     for centre, group in zip(centres, groups):
@@ -287,12 +282,13 @@ def grouped_bars(chart_id, title, desc, groups, y_max, y_step, fmt, unit_suffix=
             y = base_y - h
             out.append(f'<rect class="vc-b{bar["series"]}" x="{n(x)}" y="{n(y)}" width="{bar_w}" height="{n(h)}"/>')
             cx = x + 39.6
-            out.append(f'<text class="vc-val" x="{n(cx)}" y="{n(y - 8)}" text-anchor="middle">{fmt(bar["value"])}</text>')
-            out.append(f'<text class="vc-tick" x="{n(cx)}" y="276" text-anchor="middle">{esc(bar["name"])}</text>')
-        out.append(f'<text class="vc-lab" x="{n(centre - 0.0)}" y="296" text-anchor="middle">{esc(group["label"])}</text>')
+            out.append(f'<text class="vc-val" x="{n(cx)}" y="{n(y - 6)}" text-anchor="middle">{fmt(bar["value"])}</text>')
+        out.append(f'<text class="vc-lab vc-x" x="{n(centre)}" y="{n(base_y + 6)}" '
+                   f'text-anchor="middle" data-w="320">{esc(group["label"])}</text>')
 
     out.append("</svg>")
-    return "\n".join(out)
+    legend = [(f'sw-b{bar["series"]}', esc(bar["name"])) for bar in groups[0]["bars"]]
+    return chartkit.figure("\n".join(out), legend=legend, wrap_class="vc-two-rows")
 
 
 def _reform_costing(chart_id: str, title: str):
@@ -405,38 +401,38 @@ def chart_frbus_residuals():
             "so our agreement sits at the scale of the reference implementation's own "
             "numerical noise rather than at a chosen tolerance.")
 
-    out = svg_open(W, H, "frbus-residuals",
-                   "frb-us: residuals against the Fed’s pyfrbus, log scale", desc)
+    # Rows: the label (with its value) sits above a full-width bar, so a long
+    # label wraps instead of squeezing the bars into the right half.
+    x0, x1 = 0.0, 700.0
+    per_decade = (x1 - x0) / (hi_exp - lo_exp)
+    pitch, bar_h, top = 64.0, 22.0, 40.0
+    base = top + pitch * (len(rows) - 1) + bar_h
+    out = svg_open(x1 - x0, base - 4, "frbus-residuals",
+                   "frb-us: residuals against the Fed’s pyfrbus, log scale", desc,
+                   origin=(x0, 4))
 
     for k in range(6):
         e = lo_exp + 2 * k
         x = x0 + (e - lo_exp) * per_decade
-        out.append(f'<line class="vc-grid" x1="{n(x)}" y1="26" x2="{n(x)}" y2="264.0"/>')
-        out.append(f'<text class="vc-tick" x="{n(x)}" y="284.0" text-anchor="middle">1e{e}</text>')
+        out.append(f'<line class="vc-grid" x1="{n(x)}" y1="{n(top - 30)}" x2="{n(x)}" y2="{n(base)}"/>')
+        out.append(chartkit.xtick(x, base, f"1e{e}".replace("-", "\u2212"), k, 5))
 
     for i, r in enumerate(rows):
-        y = 34.0 + 48 * i
-        ty = y + 21
+        y = top + pitch * i
         w = (math.log10(r["value"]) - lo_exp) * per_decade
-        dash = (' stroke="currentColor" stroke-dasharray="3 2" stroke-width="1"'
-                if r["series"] == 3 else "")
-        out.append(f'<text class="vc-lab vc-rowlab" x="366" y="{n(ty)}" text-anchor="end">{esc(r["label"])}</text>')
-        out.append(f'<rect class="vc-b{r["series"]}" x="380" y="{n(y)}" width="{n(w)}" '
-                   f'height="34"{dash}/>')
-        out.append(f'<text class="vc-val" x="{n(380 + w + 8)}" y="{n(ty)}">{r["value"]:.1e}</text>')
+        value = f'{r["value"]:.1e}'.replace("-", "\u2212")
+        out.append(f'<text class="vc-rowlab vc-y" x="{n(x0)}" y="{n(y)}" data-w="{x1 - x0:g}">'
+                   f'{esc(r["label"])} <b class="vc-num">{value}</b></text>')
+        outline = " vc-outline" if r["series"] == 3 else ""
+        out.append(f'<rect class="vc-b{r["series"]}{outline}" x="{n(x0)}" y="{n(y)}" '
+                   f'width="{n(w)}" height="{bar_h:g}"/>')
 
-    out.append('<rect class="vc-b1" x="64" y="292" width="14" height="10"/>'
-               '<text class="vc-note" x="84" y="301">ours vs the Fed&rsquo;s pyfrbus, '
-               'under shock</text>')
-    out.append('<rect class="vc-b2" x="380" y="292" width="14" height="10"/>'
-               '<text class="vc-note" x="400" y="301">the Fed&rsquo;s two releases vs each '
-               'other</text>')
-    out.append('<rect class="vc-b3" x="64" y="310" width="14" height="10" '
-               'stroke="currentColor" stroke-dasharray="3 2" stroke-width="1"/>'
-               '<text class="vc-note" x="84" y="319">tracking identity &mdash; round-off, '
-               'not fidelity</text>')
     out.append("</svg>")
-    return "\n".join(out)
+    return chartkit.figure("\n".join(out), min_h=330, legend=[
+        ("sw-b1", "ours vs the Fed&rsquo;s pyfrbus, under shock"),
+        ("sw-b2", "the Fed&rsquo;s two releases vs each other"),
+        ("sw-b3d", "tracking identity &mdash; round-off, not fidelity"),
+    ])
 
 
 def chart_obr_freerun():
@@ -474,24 +470,15 @@ def chart_obr_freerun():
         f"to y = {base_y:g} - (v - {lo:g}) * {per_unit:g} on a {lo:g} to {hi:g} axis; quarter i "
         f"of {len(quarters)} maps to x = {x0:g} + i * {step:.3f}."
     )
-    out = svg_open(W, H, "obr-freerun",
+    out = svg_open(x1 - x0 + 12, base_y - top_y + 12, "obr-freerun",
                    "obr-macro: real GDP level, anchored vs free-running vs the March 2026 EFO (£bn/qtr)",
-                   desc)
-
-    # Legend swatches use the classes the marks are actually drawn with: these
-    # three series are plain paths, so no dots, and the EFO swatch is vc-s3 —
-    # it was drawn as a hairline vc-grid, which is not the line on the chart.
-    out.append('<line class="vc-s1" x1="58" y1="26" x2="84" y2="26"/>')
-    out.append(f'<text class="vc-lab" x="92" y="30">anchored ({mad_a:.2f}% MAD)</text>')
-    out.append('<line class="vc-s2" x1="288" y1="26" x2="314" y2="26"/>')
-    out.append(f'<text class="vc-lab vc-lab2" x="322" y="30">free-running ({mad_f:.2f}% MAD)</text>')
-    out.append('<line class="vc-s3" x1="540" y1="26" x2="566" y2="26"/><text class="vc-lab" x="574" y="30">EFO Mar 2026</text>')
+                   desc, origin=(x0 - 6, top_y - 6))
 
     tick = lo
     while tick <= hi + 1e-9:
         y = ymap(tick)
         out.append(f'<line class="vc-grid" x1="{x0:.0f}" y1="{n(y)}" x2="{x1:.0f}" y2="{n(y)}"/>')
-        out.append(f'<text class="vc-tick" x="48" y="{n(y + 4)}" text-anchor="end">{tick:g}</text>')
+        out.append(chartkit.ytick(x0, y, f"{tick:g}"))
         tick += 20
 
     for cls, series in (("vc-s3", efo), ("vc-s1", anchored), ("vc-s2", freerun)):
@@ -499,13 +486,21 @@ def chart_obr_freerun():
         out.append(f'<path class="{cls}" d="M{pts}"/>')
 
     tick_idx = [i for i, q in enumerate(quarters) if q.endswith("Q1")]
+    if 0 not in tick_idx:
+        tick_idx.insert(0, 0)
     if len(quarters) - 1 not in tick_idx:
         tick_idx.append(len(quarters) - 1)
     for i in tick_idx:
-        out.append(f'<text class="vc-tick" x="{n(xs[i])}" y="312" text-anchor="middle">{quarters[i]}</text>')
+        out.append(chartkit.xtick(xs[i], base_y, quarters[i], i, len(quarters) - 1))
 
     out.append("</svg>")
-    return "\n".join(out)
+    # Legend swatches use the classes the marks are actually drawn with: these
+    # three series are plain paths, so no dots, and the EFO swatch is vc-s3.
+    return chartkit.figure("\n".join(out), legend=[
+        ("ln-s1", f"anchored ({mad_a:.2f}% MAD)"),
+        ("ln-s2", f"free-running ({mad_f:.2f}% MAD)"),
+        ("ln-s3", "EFO Mar 2026"),
+    ])
 
 
 def chart_obr_outturn():
@@ -527,39 +522,39 @@ def chart_obr_outturn():
         f"Data from papers/obr-macro/figures/fig_outturn_data.csv. Coordinates: value v maps to "
         f"y = {base_y:g} - v * {scale:.1f} on a 0 to {y_max:g} axis."
     )
-    out = svg_open(W, H, "obr-outturn",
+    x0, x1 = 24.0, 724.0      # room for the y labels left of the first bar
+    out = svg_open(x1 - x0, base_y - top_y + 12, "obr-outturn",
                    "obr-macro: quarterly real GDP growth — emulator vs EFO Nov 2025 vs ONS outturn (% q/q)",
-                   desc)
-
-    out.append('<rect class="vc-b1" x="64" y="8" width="14" height="10"/><text class="vc-lab" x="84" y="17">emulator</text>')
-    out.append('<rect class="vc-b3" x="196" y="8" width="14" height="10"/><text class="vc-lab" x="216" y="17">EFO Nov 2025</text>')
-    out.append('<rect class="vc-b2" x="356" y="8" width="14" height="10"/><text class="vc-lab" x="376" y="17">ONS outturn</text>')
+                   desc, origin=(x0, top_y - 6))
 
     t = 0.0
     while t <= 0.6 + 1e-9:
         y = base_y - t * scale
-        cls = "vc-axis" if t == 0 else "vc-grid"
-        out.append(f'<line class="{cls}" x1="64" y1="{n(y)}" x2="724" y2="{n(y)}"/>')
-        out.append(f'<text class="vc-tick" x="54" y="{n(y + 4)}" text-anchor="end">{t:g}</text>')
+        cls = "vc-zero" if t == 0 else "vc-grid"
+        out.append(f'<line class="{cls}" x1="{x0:g}" y1="{n(y)}" x2="{x1:g}" y2="{n(y)}"/>')
+        if t:
+            out.append(chartkit.ytick(x0, y, f"{t:g}"))
         t += 0.2
 
-    # Three bars per group, two of them neutral greys: the legend is not enough
-    # on its own, so each bar also carries its own name under it.
+    # Three bars per group; the HTML legend names them. Values sit above each
+    # bar where there is room (a chart at least 520 px wide); below that they
+    # cannot fit, and a small table under the chart carries them instead.
     for g, (q, m, e, o) in enumerate(rows):
         centre = first_centre + g * group_step
-        for k, (cls, name, v) in enumerate((("vc-b1", "emul.", m), ("vc-b3", "EFO", e),
-                                            ("vc-b2", "ONS", o))):
+        for k, (cls, v) in enumerate((("vc-b1", m), ("vc-b3", e), ("vc-b2", o))):
             x = centre - 60.0 + k * (bar_w + bar_gap)
             h = v * scale
             y = base_y - h
             cx = x + bar_w / 2
             out.append(f'<rect class="{cls}" x="{n(x)}" y="{n(y)}" width="{bar_w:g}" height="{n(h)}"/>')
-            out.append(f'<text class="vc-val" x="{n(cx)}" y="{n(y - 6)}" text-anchor="middle">{v:.2f}</text>')
-            out.append(f'<text class="vc-tick" x="{n(cx)}" y="274" text-anchor="middle">{name}</text>')
-        out.append(f'<text class="vc-lab" x="{n(centre)}" y="294" text-anchor="middle">{q}</text>')
+            out.append(f'<text class="vc-val vc-minor" x="{n(cx)}" y="{n(y - 6)}" text-anchor="middle">{v:.2f}</text>')
+        out.append(f'<text class="vc-lab vc-x" x="{n(centre)}" y="{n(base_y + 6)}" text-anchor="middle">{q}</text>')
 
     out.append("</svg>")
-    return "\n".join(out)
+    return chartkit.figure("\n".join(out), legend=[
+        ("sw-b1", "emulator"), ("sw-b3", "EFO Nov 2025"), ("sw-b2", "ONS outturn"),
+    ], narrow_table=(["% q/q", "emulator", "EFO", "ONS"],
+                     [[q, f"{m:.2f}", f"{e:.2f}", f"{o:.2f}"] for q, m, e, o in rows]))
 
 
 def chart_svar_fan():
@@ -610,24 +605,28 @@ def chart_svar_fan():
         f"quarter i of {npts} maps to x = 58 + i * {panels['gdp']['step']:.3f} (GDP) or "
         f"416 + i * {panels['cpi']['step']:.3f} (CPI)."
     )
-    out = svg_open(W, H, "svar-fan",
+    out = svg_open(724 - 58 + 12, base_y - top_y + 12, "svar-fan",
                    "boe-svar: out-of-sample forecast fan from the frozen 2024Q2 edge vs ONS outturns",
-                   desc)
+                   desc, origin=(52, top_y - 6))
 
-    out.append('<line class="vc-s1" x1="58" y1="26" x2="84" y2="26"/><text class="vc-lab" x="92" y="30">median forecast + 68% band</text>')
-    out.append('<circle class="vc-s2-dot" cx="300" cy="26" r="3.5"/><text class="vc-lab vc-lab2" x="310" y="30">ONS outturn</text>')
-    out.append('<text class="vc-note" x="410" y="30">frozen 2024Q2 edge at left of each panel</text>')
-
-    gdp_labels = {-1: "-1%", 0: "0", 1: "+1%", 2: "+2%", 3: "+3%"}
+    gdp_labels = {-1: "\u22121%", 0: "0", 1: "+1%", 2: "+2%", 3: "+3%"}
     for var, labels in (("gdp", gdp_labels), ("cpi", None)):
         p = panels[var]
         for k in range(5):
             v = p["v_lo"] + k
             y = p["ymap"](v)
-            cls = "vc-axis" if var == "gdp" and v == 0 else "vc-grid"
+            cls = "vc-zero" if var == "gdp" and v == 0 else "vc-grid"
             out.append(f'<line class="{cls}" x1="{p["x0"]:.0f}" y1="{n(y)}" x2="{p["x1"]:.0f}" y2="{n(y)}"/>')
             label = labels[v] if labels else f"{v:g}%"
-            out.append(f'<text class="vc-tick" x="{p["x0"] - 6:.0f}" y="{n(y + 4)}" text-anchor="end">{label}</text>')
+            # The panel title takes the top-left corner; the top tick moves
+            # to the right-hand end of its gridline.
+            if k == 4:
+                out.append(f'<text class="vc-tick vc-y" x="{p["x1"]:.0f}" y="{n(y)}" '
+                           f'text-anchor="end">{label}</text>')
+            else:
+                out.append(chartkit.ytick(p["x0"], y, label))
+    out.append(f'<text class="vc-lab vc-y" x="58" y="{n(top_y)}">GDP growth</text>')
+    out.append(f'<text class="vc-lab vc-y" x="416" y="{n(top_y)}">CPI inflation</text>')
 
     for var in ("gdp", "cpi"):
         p = panels[var]
@@ -654,20 +653,19 @@ def chart_svar_fan():
     for var in ("gdp", "cpi"):
         p = panels[var]
         for i, v in enumerate(outturns[var]):
-            out.append(f'<circle class="vc-s2-dot" cx="{n(p["xs"][i])}" cy="{n(p["ymap"](v))}" r="3.5"/>')
+            out.append(f'<circle class="vc-out-dot" cx="{n(p["xs"][i])}" cy="{n(p["ymap"](v))}" r="3.5"/>')
 
-    out.append('<text class="vc-lab" x="212" y="318" text-anchor="middle">GDP growth (YoY, %)</text>')
-    out.append('<text class="vc-lab" x="570" y="318" text-anchor="middle">CPI inflation (YoY, %)</text>')
     for var in ("gdp", "cpi"):
         p = panels[var]
-        for i in (0, (npts - 1) // 2, npts - 1):
-            out.append(f'<text class="vc-tick" x="{n(p["xs"][i])}" y="334" text-anchor="middle">{quarters[i][2:]}</text>')
-    out.append(f'<text class="vc-note" x="58" y="352">dashed rule = last quarter with an ONS '
-               f'outturn ({quarters[n_out - 1]}); the {npts - n_out} quarters to its right are '
-               f'not evaluated</text>')
+        for j, i in enumerate((0, npts - 1)):
+            out.append(chartkit.xtick(p["xs"][i], base_y, quarters[i], j, 1))
 
     out.append("</svg>")
-    return "\n".join(out)
+    return chartkit.figure("\n".join(out), legend=[
+        ("ln-s1", "median forecast"), ("sw-band", "68% band"), ("sw-dot-out", "ONS outturn"),
+        ("ln-edge", f"last quarter with an outturn ({quarters[n_out - 1]})"),
+    ], notes=[f"Year-on-year, per cent. Each panel starts at the frozen 2024Q2 edge; the "
+              f"{npts - n_out} quarters right of the dashed rule are not evaluated."])
 
 
 def chart_obr_computed_share():
@@ -697,11 +695,7 @@ def chart_obr_computed_share():
         f"calibration scorecard, {computed} are actually computed by the model and "
         f"{passthrough} are passthrough, held at the OBR published value and therefore "
         f"scoring zero error trivially. Of the {computed} computed, "
-        + ", ".join(
-            f"{g['count']} {'is' if g['count'] == 1 else 'are'} "
-            f"{'an identity' if g['count'] == 1 and g['key'] == 'identity' else g['label']}"
-            for g in grades
-        )
+        + ", ".join(f"{g['count']} {grade_phrase(g)}" for g in grades)
         + f". {in_band} of the {computed}, or {100 * in_band / computed:.0f} per cent, land "
         f"within band, but {word(trivial)} of those is an accounting identity that closes "
         f"over passthrough inputs, so {in_band - trivial} of the {nontrivial} non-trivial "
@@ -710,54 +704,60 @@ def chart_obr_computed_share():
         + "."
     )
 
-    out = svg_open(W, H, "obr-computed-share",
-                   "How much of the OBR emulator scorecard the model actually computes", desc)
+    rows_y = (40.0, 132.0)
+    bar_h = 40.0
+    out = svg_open(x1 - x0, rows_y[1] + bar_h - 4, "obr-computed-share",
+                   "How much of the OBR emulator scorecard the model actually computes", desc,
+                   origin=(x0, 4))
 
     # Row 1 — computed vs passthrough, out of the full scorecard. Segment labels
-    # sit below their segment rather than on it: a label printed over a filled
-    # bar has to clear the fill in both themes, and these did not.
+    # sit under their segment, at the two ends of the bar, rather than on it.
     split = x0 + computed * per_var
-    out.append(f'<text class="vc-lab" x="64" y="30">{total} headline scorecard variables</text>')
-    out.append(f'<rect class="vc-b1" x="{n(x0)}" y="44" width="{n(split - x0 - 2)}" height="40"/>')
-    out.append(f'<rect class="vc-b3" x="{n(split)}" y="44" width="{n(x1 - split)}" height="40"/>')
-    out.append(f'<text class="vc-val" x="{n((x0 + split) / 2)}" y="99" text-anchor="middle">'
+    y = rows_y[0]
+    out.append(f'<text class="vc-lab vc-y" x="{n(x0)}" y="{n(y)}">{total} headline scorecard variables</text>')
+    out.append(f'<rect class="vc-b1" x="{n(x0)}" y="{n(y)}" width="{n(split - x0 - 2)}" height="{bar_h:g}"/>')
+    out.append(f'<rect class="vc-b3" x="{n(split)}" y="{n(y)}" width="{n(x1 - split)}" height="{bar_h:g}"/>')
+    out.append(f'<text class="vc-val vc-x" x="{n(x0)}" y="{n(y + bar_h)}" text-anchor="start">'
                f'{computed} computed</text>')
-    out.append(f'<text class="vc-rowlab" x="{n((split + x1) / 2)}" y="99" text-anchor="middle">'
-               f'{passthrough} passthrough &mdash; held at the OBR value</text>')
-    out.append(f'<line class="vc-edge" x1="{n(x0)}" y1="108" x2="{n(x0)}" y2="132"/>')
-    out.append(f'<line class="vc-edge" x1="{n(split)}" y1="108" x2="{n(split)}" y2="132"/>')
+    out.append(f'<text class="vc-rowlab vc-x" x="{n(x1)}" y="{n(y + bar_h)}" text-anchor="end">'
+               f'{passthrough} passthrough, held at the OBR value</text>')
 
     # Row 2 — the computed variables broken down by grade, on the same scale, so
     # the second bar reads as a zoom into the first bar's left-hand segment.
-    out.append(f'<text class="vc-lab" x="64" y="152">of which, the {computed} the model '
+    # The grades are named in the HTML legend: a one-variable segment is too
+    # narrow on a phone to carry its own label.
+    y = rows_y[1]
+    out.append(f'<text class="vc-lab vc-y" x="{n(x0)}" y="{n(y)}">of which, the {computed} the model '
                f'computes</text>')
     x = x0
-    for i, g in enumerate(grades):
+    for g in grades:
         w = g["count"] * per_var
-        cx = x + w / 2
-        # 'poor' and 'off' share a fill, so 'off' also carries a dashed outline
-        # and both carry their label as text under the segment. Labels alternate
-        # between two baselines with a leader on the lower one: a one-variable
-        # segment is 31px wide and its label is not, so on a single baseline the
-        # narrow ones run into their neighbours.
-        dash = ' stroke="currentColor" stroke-dasharray="3 2" stroke-width="1"' if g["key"] == "off" else ""
-        out.append(f'<rect class="vc-b{g["series"]}" x="{n(x)}" y="164" width="{n(w - 2)}" '
-                   f'height="40"{dash}/>')
-        ly = 219 if i % 2 == 0 else 237
-        if ly > 219:
-            out.append(f'<line class="vc-edge" x1="{n(cx)}" y1="206" x2="{n(cx)}" y2="228"/>')
-        out.append(f'<text class="vc-rowlab" x="{n(cx)}" y="{ly}" text-anchor="middle">'
-                   f'{esc(g["label"])} {g["count"]}</text>')
+        # The last two grades share a fill, so 'off' also carries a dashed
+        # outline (and its own legend swatch).
+        outline = " vc-outline" if g["key"] == "off" else ""
+        out.append(f'<rect class="vc-b{g["series"]}{outline}" x="{n(x)}" y="{n(y)}" '
+                   f'width="{n(w - 2)}" height="{bar_h:g}"/>')
         x += w
-
-    out.append(f'<text class="vc-warn" x="64" y="262">Only {in_band - trivial} of the '
-               f'{nontrivial} non-trivial computed variables are in band.</text>')
-    out.append(f'<text class="vc-note" x="64" y="282">{word(trivial).capitalize()} of the '
-               f'{in_band} in-band passes is an accounting identity over passthrough '
-               f'inputs.</text>')
-    out.append(f'<text class="vc-note" x="64" y="302">{esc(d["bands_note"])}</text>')
     out.append("</svg>")
-    return "\n".join(out)
+    legend = [((f'sw-b{g["series"]}d' if g["key"] == "off" else f'sw-b{g["series"]}'),
+               f'{esc(g["label"])} {g["count"]}') for g in grades]
+    notes = [
+        f'<span class="vc-warn">Only {in_band - trivial} of the {nontrivial} non-trivial '
+        f'computed variables are in band.</span>',
+        f'{word(trivial).capitalize()} of the {in_band} in-band passes is an accounting '
+        f'identity over passthrough inputs.',
+        esc(d["bands_note"]),
+    ]
+    return chartkit.figure("\n".join(out), legend=legend, notes=notes, min_h=170)
+
+
+def grade_phrase(g) -> str:
+    """'are fair', 'is an identity', 'fit badly', 'are off' for the description."""
+    if g["key"] == "identity" and g["count"] == 1:
+        return "is an identity"
+    if g["key"] == "badfit":
+        return g["label"]
+    return f"{'is' if g['count'] == 1 else 'are'} {g['label']}"
 
 
 # Display order and labels for the skill matrix. Ordered roughly best to worst so
@@ -813,32 +813,26 @@ def chart_svar_skill_all():
         f"at the end of each row is that row's ratio at horizon {last}."
     )
 
-    out = svg_open(W, H, "svar-skill-all",
+    # Each row: the variable's name and its h=8 ratio above, the dots below,
+    # across the full width, so names never squeeze the axis on a phone.
+    lo_x, hi_x = xs(0.76), xs(1.36)
+    pitch, top = 50.0, 40.0
+    base = top + pitch * (len(SKILL_ROWS) - 1) + 14
+    out = svg_open(hi_x - lo_x, base - 4, "svar-skill-all",
                    "boe-svar forecast skill against a random walk with drift, "
-                   "all eight variables", desc)
-    out.append('<text class="vc-lab" x="64" y="30">RMSE &divide; drifting-random-walk RMSE '
-               '&middot; horizons 1&ndash;8 quarters</text>')
-    out.append('<text class="vc-note" x="64" y="48">filled = significant at 5% pairwise '
-               '&middot; hollow = not distinguishable</text>')
-    out.append(f'<text class="vc-note" x="64" y="64">large dot and row-end number = h={last} '
-               f'&middot; smallest adjusted q over the {adj["tests"]} cells: '
-               f'{adj["min_q"]:.2f}</text>')
+                   "all eight variables", desc, origin=(lo_x, 4))
 
-    for tick in (0.8, 0.9, 1.1, 1.2, 1.3):
+    for tick in (0.8, 0.9, 1.0, 1.1, 1.2, 1.3):
         x = xs(tick)
-        out.append(f'<line class="vc-grid" x1="{n(x)}" y1="78" x2="{n(x)}" y2="378"/>')
-        out.append(f'<text class="vc-tick" x="{n(x)}" y="394" text-anchor="middle">{tick}</text>')
-    out.append(f'<line class="vc-axis" x1="{n(x_one)}" y1="78" x2="{n(x_one)}" y2="378"/>')
-    out.append(f'<text class="vc-tick" x="{n(x_one)}" y="394" text-anchor="middle">1.0</text>')
-    out.append(f'<text class="vc-note" x="{n(x_one - 8)}" y="412" text-anchor="end">'
-               f'&larr; model better</text>')
-    out.append(f'<text class="vc-note" x="{n(x_one + 8)}" y="412">benchmark better &rarr;</text>')
+        cls = "vc-zero" if tick == 1.0 else "vc-grid"
+        out.append(f'<line class="{cls}" x1="{n(x)}" y1="{n(top - 30)}" x2="{n(x)}" y2="{n(base)}"/>')
+        out.append(f'<text class="vc-tick vc-x" x="{n(x)}" y="{n(base)}" text-anchor="middle">{tick:.1f}</text>')
 
     for i, (key, label) in enumerate(SKILL_ROWS):
-        y = 94.0 + 38 * i
+        y = top + pitch * i
         values = [ratio[h][key] for h in horizons]
-        out.append(f'<text class="vc-rowlab" x="140" y="{n(y + 4)}" text-anchor="end">'
-                   f'{esc(label)}</text>')
+        out.append(f'<text class="vc-rowlab vc-y" x="{n(lo_x)}" y="{n(y - 6)}">'
+                   f'{esc(label)} <b class="vc-num">{ratio[last][key]:.2f}</b></text>')
         out.append(f'<line class="vc-grid" x1="{n(xs(min(values)))}" y1="{n(y)}" '
                    f'x2="{n(xs(max(values)))}" y2="{n(y)}"/>')
         for h in horizons:
@@ -853,12 +847,18 @@ def chart_svar_skill_all():
                            f'r="{r}"/>')
             else:
                 out.append(f'<circle cx="{n(xs(v))}" cy="{n(y)}" r="{r}" fill="none" '
-                           f'stroke="currentColor" stroke-width="1.2" opacity="0.7"/>')
-        out.append(f'<text class="vc-val" x="{n(xs(max(values)) + 10)}" y="{n(y + 4)}">'
-                   f'{ratio[last][key]:.2f}</text>')
+                           f'stroke-width="1.2"/>')
 
     out.append("</svg>")
-    return "\n".join(out)
+    return chartkit.figure("\n".join(out), min_h=420, legend=[
+        ("sw-dot1", "significant at 5%, pairwise"),
+        ("sw-ring", "not distinguishable"),
+    ], notes=[
+        "RMSE &divide; drifting-random-walk RMSE, horizons 1&ndash;8 quarters. Left of the "
+        "1.0 rule the model is better; right of it the benchmark is.",
+        f"The large dot, and the number after each name, is h={last}. Smallest adjusted q "
+        f'over the {adj["tests"]} cells: {adj["min_q"]:.2f}.',
+    ])
 
 
 def chart_svar_winrate():
@@ -921,30 +921,25 @@ def chart_svar_winrate():
            + " one variable is significantly worse than the benchmark." if worse else "")
     )
 
-    out = svg_open(W, H, "svar-winrate",
-                   "How many of eight variables beat a drifting random walk, by horizon", desc)
-    out.append(f'<text class="vc-lab" x="{x0}" y="30">Of {total} forecast variables, how many '
-               f'beat a random walk with drift</text>')
-    out.append(f'<text class="vc-note" x="{x0}" y="48">column height = variables with lower '
-               f'RMSE than the benchmark &middot; the rest do not beat it</text>')
+    out = svg_open(x1 - x0, y_zero - y_full + 30, "svar-winrate",
+                   "How many of eight variables beat a drifting random walk, by horizon", desc,
+                   origin=(x0, y_full - 24))
 
     for k in (2, 4, 6):
         y = y_zero - k * per_var
         out.append(f'<line class="vc-grid" x1="{x0}" y1="{n(y)}" x2="{x1}" y2="{n(y)}"/>')
-        out.append(f'<text class="vc-tick" x="54" y="{n(y + 4)}" text-anchor="end">{k}</text>')
-    out.append(f'<line class="vc-axis" x1="{x0}" y1="{n(y_zero)}" x2="{x1}" y2="{n(y_zero)}"/>')
-    out.append(f'<text class="vc-tick" x="54" y="{n(y_zero + 4)}" text-anchor="end">0</text>')
+        out.append(chartkit.ytick(x0, y, str(k)))
+    out.append(f'<line class="vc-zero" x1="{x0}" y1="{n(y_zero)}" x2="{x1}" y2="{n(y_zero)}"/>')
     # The eight-variable ceiling is a reference, not a segment: no column's
     # height is fixed by it, and the empty space above each column is the
     # count of variables that do not beat the benchmark.
     out.append(f'<line class="vc-edge" x1="{x0}" y1="{n(y_full)}" x2="{x1}" y2="{n(y_full)}"/>')
-    out.append(f'<text class="vc-tick" x="54" y="{n(y_full + 4)}" text-anchor="end">{total}</text>')
-    out.append(f'<text class="vc-note" x="{x1}" y="{n(y_full - 6)}" text-anchor="end">'
-               f'all {total} variables</text>')
+    out.append(chartkit.ytick(x0, y_full, f"all {total} variables"))
 
-    bar_w, pitch = 56, 80
+    # Columns start 40 units in, clear of the y labels inside the plot.
+    bar_w, pitch = 54, 78
     for i, c in enumerate(counts):
-        bx = x0 + 12 + i * pitch
+        bx = x0 + 40 + i * pitch
         mid = bx + bar_w / 2
         y_sig = y_zero - c["sig"] * per_var
         y_win = y_zero - c["wins"] * per_var
@@ -957,23 +952,24 @@ def chart_svar_winrate():
             out.append(f'<rect class="vc-b2" x="{n(bx)}" y="{n(y_win)}" width="{bar_w}" '
                        f'height="{n(top - y_win)}"/>')
         # Above the column it counts, not above a segment it does not.
-        out.append(f'<text class="vc-val" x="{n(mid)}" y="{n(y_win - 8)}" '
+        out.append(f'<text class="vc-val" x="{n(mid)}" y="{n(y_win - 6)}" '
                    f'text-anchor="middle">{c["wins"]}</text>')
-        out.append(f'<text class="vc-tick" x="{n(mid)}" y="266.0" text-anchor="middle">'
+        out.append(f'<text class="vc-tick vc-x" x="{n(mid)}" y="{n(y_zero)}" text-anchor="middle">'
                    f'h={c["h"]}</text>')
-        out.append(f'<text class="vc-note" x="{n(mid)}" y="286.0" text-anchor="middle">'
+        # Second label row: the significant part of the column, as a number,
+        # so the split never rests on fill alone.
+        out.append(f'<text class="vc-tick vc-x2" x="{n(mid)}" y="{n(y_zero)}" text-anchor="middle">'
                    f'{c["sig"]}</text>')
-    out.append('<text class="vc-note" x="54" y="286.0" text-anchor="end">p&lt;0.05</text>')
-
-    out.append('<rect class="vc-b1" x="64" y="302" width="14" height="10"/>'
-               '<text class="vc-note" x="84" y="311">beats it, p&lt;0.05 unadjusted</text>')
-    out.append('<rect class="vc-b2" x="330" y="302" width="14" height="10"/>'
-               '<text class="vc-note" x="350" y="311">beats it, not distinguishable</text>')
-    out.append(f'<text class="vc-val" x="64" y="336">Adjusted together, none of the '
-               f'{adj["tests"]} tests clears a 10% false-discovery rate (smallest q = '
-               f'{adj["min_q"]:.2f}).</text>')
     out.append("</svg>")
-    return "\n".join(out)
+    return chartkit.figure("\n".join(out), legend=[
+        ("sw-b1", "beats it, p&lt;0.05 unadjusted (count under each column)"),
+        ("sw-b2", "beats it, not distinguishable"),
+    ], notes=[
+        f"Column height = variables with lower RMSE than a random walk with drift, out of "
+        f"{total}; the rest do not beat it.",
+        f'<span class="vc-warn">Adjusted together, none of the {adj["tests"]} tests clears a '
+        f'10% false-discovery rate (smallest q = {adj["min_q"]:.2f}).</span>',
+    ], wrap_class="vc-two-rows")
 
 
 def chart_svar_coverage():
@@ -1031,43 +1027,37 @@ def chart_svar_coverage():
             "includes the Covid quarters and the evaluation model carries no Covid "
             "dummies, which depresses coverage.")
 
-    out = svg_open(W, H, "svar-coverage",
-                   "boe-svar: empirical band coverage across 49 origins", desc)
+    out = svg_open(x1 - x0 + 16, base_y - top_y + 12, "svar-coverage",
+                   "boe-svar: empirical band coverage across 49 origins", desc,
+                   origin=(x0 - 8, top_y - 6))
     for k in range(int(math.ceil(lo_v * 10)), 11):
         v = k / 10
         out.append(f'<line class="vc-grid" x1="{n(x0)}" y1="{n(ymap(v))}" x2="{n(x1)}" y2="{n(ymap(v))}"/>')
-        out.append(f'<text class="vc-tick" x="{n(x0 - 8)}" y="{n(ymap(v) + 4)}" text-anchor="end">{v:.0%}</text>')
+        out.append(chartkit.ytick(x0, ymap(v), f"{v:.0%}"))
     for lv, cls, dodge in ((90, "vc-s2", 4.0), (68, "vc-s1", -4.0)):
         # nominal level as a reference line
         out.append(
-            f'<line class="vc-grid" x1="{n(x0)}" y1="{n(ymap(lv / 100))}" '
-            f'x2="{n(x1)}" y2="{n(ymap(lv / 100))}" stroke-dasharray="2 4"/>'
+            f'<line class="vc-ref" x1="{n(x0)}" y1="{n(ymap(lv / 100))}" '
+            f'x2="{n(x1)}" y2="{n(ymap(lv / 100))}"/>'
         )
         for x, (v_lo, v_hi) in zip(xs, spread[lv]):
-            out.append(f'<line class="{cls}" x1="{n(x + dodge)}" y1="{n(ymap(v_hi))}" '
-                       f'x2="{n(x + dodge)}" y2="{n(ymap(v_lo))}" stroke-width="1.2" '
-                       f'opacity="0.55"/>')
+            out.append(f'<line class="{cls} vc-spread" x1="{n(x + dodge)}" y1="{n(ymap(v_hi))}" '
+                       f'x2="{n(x + dodge)}" y2="{n(ymap(v_lo))}"/>')
         pts = " ".join(f"{n(x)},{n(ymap(v))}" for x, v in zip(xs, series[lv]))
         out.append(f'<polyline class="{cls}" points="{pts}"/>')
-        out.append(
-            f'<text class="vc-lab{" vc-lab2" if lv == 90 else ""}" x="{n(x1 + 12)}" '
-            f'y="{n(ymap(series[lv][-1]) + 4)}">{lv}%</text>'
-        )
-    out.append(f'<text class="vc-lab" x="{n(x0)}" y="26">68% band, mean coverage across variables</text>')
-    out.append(f'<text class="vc-lab vc-lab2" x="{n(x1)}" y="26" text-anchor="end">90% band</text>')
-    out.append(f'<text class="vc-note" x="{n(x0)}" y="44">vertical bars span the best and '
-               f'worst of the eight variables &middot; lowest cell {worst_v:.0%} '
-               f'({worst_var}, {worst_lv}% band, h{worst_h})</text>')
     # Mid-plot, where neither reference label can be mistaken for a series
-    # end-label: at the right-hand edge "nominal 68%" landed beside the 90%
-    # line's own label.
+    # end-label.
     x_nom = (xs[3] + xs[4]) / 2
-    out.append(f'<text class="vc-note" x="{n(x_nom)}" y="{n(ymap(0.68) - 6)}" text-anchor="middle">nominal 68%</text>')
-    out.append(f'<text class="vc-note" x="{n(x_nom)}" y="{n(ymap(0.90) - 6)}" text-anchor="middle">nominal 90%</text>')
+    out.append(f'<text class="vc-tick vc-y" x="{n(x_nom)}" y="{n(ymap(0.68))}" text-anchor="middle">nominal 68%</text>')
+    out.append(f'<text class="vc-tick vc-y" x="{n(x_nom)}" y="{n(ymap(0.90))}" text-anchor="middle">nominal 90%</text>')
     for i, h in enumerate(horizons):
-        out.append(f'<text class="vc-tick" x="{n(xs[i])}" y="{H - 14}" text-anchor="middle">h{h}</text>')
+        out.append(chartkit.xtick(xs[i], base_y, f"h{h}", i, len(horizons) - 1))
     out.append("</svg>")
-    return "\n".join(out)
+    return chartkit.figure("\n".join(out), min_h=260, legend=[
+        ("ln-s1", "68% band, mean coverage across variables"),
+        ("ln-s2", "90% band"),
+    ], notes=[f"Vertical bars span the best and worst of the eight variables; lowest cell "
+              f"{worst_v:.0%} ({worst_var}, {worst_lv}% band, h{worst_h})."])
 
 
 def chart_hank_targets():
@@ -1108,14 +1098,10 @@ def chart_hank_targets():
     solver = [t for t in targets if "through a solver" in t["kind"]]
     agree = len(params)
 
-    col_tag, col_pub, col_ours, col_dev = 470, 570, 660, 736
-    row_h = 26.0
-    top = 56.0
     def short(name):
         return name.split(" (")[0]
 
-    notes = []
-    for text in (
+    notes = [
         "Constants equalling themselves: "
         + ", ".join(f'{short(t["name"])} {t["target"]:g}' for t in imposed) + ".",
         "Solver targets: "
@@ -1124,69 +1110,35 @@ def chart_hank_targets():
         + " — tolerances, not accuracies.",
         f'Market clearing: goods {res[0]["value"]:.1e} untargeted (Walras’ law), '
         f'assets {res[1]["value"]:.1e} is the solver’s own target.',
-    ):
-        notes.extend(wrap(text))
-    W = 760
-    H = int(top + row_h * (len(rows) + 2) + 20 + 16 * len(notes) + 12)
+    ]
 
-    desc = (
-        "Table-style chart of the parameters the us-hank two-asset model solves for "
-        "internally, against the values Auclert, Bardóczy, Rognlie and Straub (2021) "
-        "print in Table B.III. These are not imposed: two are solved numerically and "
-        "four analytically from the calibration inputs, so they had somewhere to miss. "
-        + "; ".join(
-            f"{r['name']}: published {r['pub']:g}, ours {r['ours']:.7g}, solved "
-            f"{r['tag']}" for r in rows[:agree]
-        )
-        + f". All {word(agree)} agree to the last digit the paper prints. The seventh, "
-        f"{miss['name']}, does not: the paper publishes {miss['published']:g} and this "
-        f"implementation returns {miss['ours']:.7g}, a gap of {miss['gap_pct']:g} per cent, "
-        "left unasserted in the upstream test suite rather than laundered. Separately, the "
-        f"{len(imposed)} rows "
-        + ", ".join(t["name"] for t in imposed)
-        + " are calibration inputs held fixed through the solve, so their zero deviations are "
-        "identities and carry no information, and "
-        + " and ".join(t["name"] for t in solver)
-        + " are reached by the solver, so their residuals of "
-        + " and ".join(f"{abs(t['achieved'] - t['target']):.1e}" for t in solver)
-        + " are tolerances rather than accuracies. Market clearing: goods "
-        f"{res[0]['value']:.1e}, which is untargeted and holds only by Walras' law, and "
-        f"assets {res[1]['value']:.1e}, which is the root-finder's own convergence target."
-    )
-
-    out = svg_open(W, H, "hank-targets",
-                   "us-hank: internally solved parameters vs Auclert et al. (2021) Table B.III",
-                   desc)
-
-    out.append('<text class="vc-lab" x="24" y="30">Solved by the model, compared against '
-               'the published table</text>')
-    out.append(f'<text class="vc-tick" x="{col_tag}" y="{n(top - 6)}" text-anchor="end">solved</text>')
-    out.append(f'<text class="vc-tick" x="{col_pub}" y="{n(top - 6)}" text-anchor="end">published</text>')
-    out.append(f'<text class="vc-tick" x="{col_ours}" y="{n(top - 6)}" text-anchor="end">ours</text>')
-    out.append(f'<text class="vc-tick" x="{col_dev}" y="{n(top - 6)}" text-anchor="end">|diff|</text>')
-    for i, r in enumerate(rows):
-        y = top + row_h * i
-        ty = y + row_h / 2 + 4
-        out.append(f'<line class="vc-grid" x1="24" y1="{n(y)}" x2="736" y2="{n(y)}"/>')
-        out.append(f'<text class="vc-lab vc-rowlab" x="24" y="{n(ty)}">{esc(r["name"])}</text>')
-        out.append(f'<text class="vc-note" x="{col_tag}" y="{n(ty)}" text-anchor="end">'
-                   f'{r["tag"]}</text>')
-        out.append(f'<text class="vc-val" x="{col_pub}" y="{n(ty)}" text-anchor="end">{r["pub"]:g}</text>')
-        out.append(f'<text class="vc-val" x="{col_ours}" y="{n(ty)}" text-anchor="end">{r["ours"]:.7g}</text>')
-        out.append(f'<text class="vc-tick" x="{col_dev}" y="{n(ty)}" text-anchor="end">'
-                   f'{abs(r["ours"] - r["pub"]):.1e}</text>')
-    last_y = top + row_h * len(rows)
-    out.append(f'<line class="vc-axis" x1="24" y1="{n(last_y)}" x2="736" y2="{n(last_y)}"/>')
-
-    out.append(f'<text class="vc-warn" x="24" y="{n(last_y + 24)}">{word(agree).capitalize()} '
-               f'of seven agree to the last published digit; {miss["name"].split()[0]} misses by '
-               f'{miss["gap_pct"]:g}%.</text>')
-    out.append(f'<text class="vc-lab" x="24" y="{n(last_y + 48)}">Calibration inputs &mdash; '
-               f'held fixed through the solve, so their deviations are identities</text>')
-    for i, line in enumerate(notes):
-        out.append(f'<text class="vc-note" x="24" y="{n(last_y + 68 + 16 * i)}">{line}</text>')
-    out.append("</svg>")
-    return "\n".join(out)
+    # A table, not a drawing: it is rows of numbers, and an HTML table stays
+    # readable at 375 px (it scrolls inside its own wrapper) where an SVG
+    # table's text shrank to 5 px. The description the SVG carried for screen
+    # readers is the table itself now, plus the notes under it.
+    body = []
+    for r in rows:
+        warn = ' class="vc-warn"' if r["tag"] == "unresolved" else ""
+        body.append(
+            f'<tr><th scope="row">{esc(r["name"])}</th><td{warn}>{r["tag"]}</td>'
+            f'<td class="num">{r["pub"]:g}</td><td class="num">{r["ours"]:.7g}</td>'
+            f'<td class="num">{abs(r["ours"] - r["pub"]):.1e}</td></tr>')
+    parts = [
+        '<div class="vc-fig vc-tablefig" data-chart="hank-targets">',
+        '<div class="table-scroll"><table class="vc-table">',
+        "<caption>us-hank: internally solved parameters vs Auclert et al. (2021) Table B.III</caption>",
+        '<thead><tr><th scope="col">parameter</th><th scope="col">solved</th>'
+        '<th scope="col" class="num">published</th><th scope="col" class="num">ours</th>'
+        '<th scope="col" class="num">|diff|</th></tr></thead>',
+        "<tbody>", *body, "</tbody></table></div>",
+        f'<p class="vc-notes"><span class="vc-warn">{word(agree).capitalize()} of seven agree '
+        f'to the last published digit; {miss["name"].split()[0]} misses by '
+        f'{miss["gap_pct"]:g}%.</span></p>',
+        '<p class="vc-notes"><strong>Calibration inputs</strong>, held fixed through the solve, '
+        'so their deviations are identities:<br />' + "<br />".join(esc(t) for t in notes) + "</p>",
+        f"</div>{chartkit.END}",
+    ]
+    return "\n".join(parts)
 
 
 def chart_define_emissions():
@@ -1223,34 +1175,37 @@ def chart_define_emissions():
         "MtCO2e; the percentages are the gated ratios themselves, which is why they "
         "differ slightly from the ratio of the rounded bars."
     )
-    out = svg_open(W, H, "define-emissions",
+    x0, x1 = 24.0, 724.0      # room for the y labels left of the first bar
+    out = svg_open(x1 - x0, base_y - top_y + 12, "define-emissions",
                    "define-uk: S1 baseline total emissions — pinned run vs manual Table 4 (MtCO2e/yr)",
-                   desc)
+                   desc, origin=(x0, top_y - 6))
 
     t = 0.0
     while t <= 400 + 1e-9:
         y = base_y - t * scale
-        cls = "vc-axis" if t == 0 else "vc-grid"
-        out.append(f'<line class="{cls}" x1="64" y1="{n(y)}" x2="724" y2="{n(y)}"/>')
-        out.append(f'<text class="vc-tick" x="54" y="{n(y + 4)}" text-anchor="end">{t:g}</text>')
+        cls = "vc-zero" if t == 0 else "vc-grid"
+        out.append(f'<line class="{cls}" x1="{x0:g}" y1="{n(y)}" x2="{x1:g}" y2="{n(y)}"/>')
+        if t:
+            out.append(chartkit.ytick(x0, y, f"{t:g}"))
         t += 100
 
     for g, (yr, p, m) in enumerate(rows):
         centre = first_centre + g * group_step
-        for k, (name, cls, v) in enumerate((("pinned run", "vc-b1", p),
-                                            ("published", "vc-b2", m))):
+        for k, (cls, v) in enumerate((("vc-b1", p), ("vc-b2", m))):
             x = centre - bar_w - bar_gap / 2 + k * (bar_w + bar_gap)
             h = v * scale
             y = base_y - h
             out.append(f'<rect class="{cls}" x="{n(x)}" y="{n(y)}" width="{bar_w:g}" height="{n(h)}"/>')
             cx = x + bar_w / 2
-            out.append(f'<text class="vc-val" x="{n(cx)}" y="{n(y - 8)}" text-anchor="middle">{v:g}</text>')
-            out.append(f'<text class="vc-tick" x="{n(cx)}" y="276" text-anchor="middle">{name}</text>')
-        out.append(f'<text class="vc-lab" x="{n(centre)}" y="296" text-anchor="middle">'
-                   f'{esc(yr)} ({gap[yr]:+.1f}%)</text>')
+            out.append(f'<text class="vc-val" x="{n(cx)}" y="{n(y - 6)}" text-anchor="middle">{v:g}</text>')
+        gap_txt = f"{gap[yr]:+.1f}%".replace("-", "\u2212")
+        out.append(f'<text class="vc-lab vc-x" x="{n(centre)}" y="{n(base_y)}" '
+                   f'text-anchor="middle">{esc(yr)} ({gap_txt})</text>')
 
     out.append("</svg>")
-    return "\n".join(out)
+    return chartkit.figure("\n".join(out), legend=[
+        ("sw-b1", "pinned run"), ("sw-b2", "published Table 4"),
+    ])
 
 
 # chart id -> (builder, page that owns it). Charts live on the validation
@@ -1276,9 +1231,14 @@ BUILDERS = [
 
 
 def chart_re(chart_id: str) -> re.Pattern:
-    return re.compile(
-        rf'<svg class="vchart" data-chart="{re.escape(chart_id)}".*?</svg>', re.DOTALL
-    )
+    return chartkit.block_re(chart_id)
+
+
+def as_block(built) -> str:
+    """A builder returns a finished vc-fig block, or a bare SVG for figure()."""
+    if built.startswith('<div class="vc-fig'):
+        return built
+    return chartkit.figure(built)
 
 
 def render_page(page: str, html: str) -> str:
@@ -1292,7 +1252,7 @@ def render_page(page: str, html: str) -> str:
                 f'expected exactly one data-chart="{chart_id}" SVG in {page}, '
                 f"found {len(matches)}"
             )
-        svg = build().replace("\\", "\\\\")
+        svg = as_block(build())
         html = pattern.sub(lambda _m: svg, html)
     return html
 

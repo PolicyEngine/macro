@@ -2626,6 +2626,8 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 }
 .olg-toolbar select:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .olg-chart svg { width: 100%; height: auto; display: block; }
+.olg-chart .vchart .vc-tick { font-size: var(--fs-label); fill: var(--chart-tick); }
+.olg-chart .vchart .vc-title { font-family: var(--body); font-size: var(--fs-small); }
 .olg-legend {
   display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 8px 0 2px;
   font-family: var(--mono); font-size: 0.76rem; color: var(--paper-dim);
@@ -4363,6 +4365,116 @@ ol.steps > li > span { color: var(--text-muted); font-size: var(--fs-small); }
 .hero-fan .hf-med { stroke: var(--series-median); }
 .hero-fan .hf-dot { fill: var(--series-median); }
 .ln-s1 { background: var(--series-ours); }
+
+/* Readable labels (DESIGN.md §6.3, chartkit.py). Marks stay in the SVG; every
+   label is an HTML span laid over it at percent coordinates, so it keeps 12 px
+   at any width. The SVG must have no padding or border of its own, or the
+   percentages would no longer land on the viewBox. */
+.vc-fig { container-type: inline-size; margin: 0; padding: var(--s-2) 0 0; }
+/* The viewBox is cropped to the plot area; axis labels hang outside it by a
+   fixed px offset, so the plot keeps room for them above and below. */
+.vc-fig .vc-plot { position: relative; margin: 18px 0 24px; }
+/* The plot stretches to fill its box (preserveAspectRatio="none", set by
+   chartkit) so a phone gets a usable height rather than a 130 px strip; the
+   labels are percent-positioned, so they follow. Strokes and dots keep their
+   screen size: strokes are non-scaling and chartkit draws dots as round-capped
+   zero-length paths, which stay round under a non-uniform stretch. */
+.vc-fig .vchart,
+.vc-fig .hero-fan { display: block; width: 100%; height: auto; min-height: var(--vc-min-h, 210px); padding: 0; border: 0; border-radius: 0; background: none; overflow: visible; }
+.vc-fig svg * { vector-effect: non-scaling-stroke; }
+.vc-fig .vc-dotp { fill: none; stroke-linecap: round; }
+.vchart .vc-s1-dot.vc-dotp { stroke: var(--series-ours); }
+.vchart .vc-s2-dot.vc-dotp { stroke: var(--series-official); }
+.vchart .vc-out-line { fill: none; stroke: var(--series-outturn); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.hero-fan .hf-dot.vc-dotp { stroke: var(--series-median); }
+.vchart .vc-out-dot.vc-dotp { stroke: var(--series-outturn); }
+.vc-fig .vc-ring { stroke: color-mix(in srgb, var(--text-strong) 70%, transparent); }
+.vc-fig .vc-ring-in { stroke: var(--surface-card); }
+.vc-fig .vc-labels { position: absolute; inset: 0; pointer-events: none; }
+.vc-t {
+  position: absolute;
+  transform: translate(0, -0.86em);
+  white-space: nowrap;
+  font: 400 var(--fs-label)/1 var(--mono);
+  color: var(--chart-tick);
+  font-variant-numeric: tabular-nums;
+}
+.vc-t.vc-a-m { transform: translate(-50%, -0.86em); }
+.vc-t.vc-a-e { transform: translate(-100%, -0.86em); }
+/* Axis labels are offset in px from their line, not in viewBox units, so the
+   gap is the same at every width: y labels sit 3 px above their gridline,
+   x labels 6 px below the axis. */
+.vc-t.vc-y { transform: translate(0, calc(-100% - 3px)); }
+.vc-t.vc-y.vc-a-e { transform: translate(-100%, calc(-100% - 3px)); }
+.vc-t.vc-x { transform: translate(-50%, 6px); }
+.vc-t.vc-x.vc-a-s { transform: translate(0, 6px); }
+.vc-t.vc-x.vc-a-e { transform: translate(-100%, 6px); }
+.vc-t.vc-gutter { transform: translate(0, -50%); }
+.vc-fig.vc-hero { padding: 0; }
+.vc-fig.vc-hero .vc-plot { margin: 4px 44px 24px 0; }
+.vc-t.vc-x2 { transform: translate(-50%, 24px); }
+.vc-fig.vc-two-rows .vc-plot { margin-bottom: 44px; }
+.vc-t.vc-lab { font-family: var(--body); font-weight: 600; color: var(--text-muted); }
+.vc-t.vc-lab2 { color: var(--text-muted); }
+.vc-t.vc-rowlab { font-family: var(--body); font-weight: 500; color: var(--text-body); }
+.vc-t.vc-val { font-weight: 600; color: var(--text-strong); }
+.vc-t.vc-warn { color: var(--warn-ink); font-weight: 600; }
+.vc-t.vc-on-dark { color: #fff; }
+.vc-t.vc-wrap { white-space: normal; line-height: 1.3; text-align: center; }
+.vc-t.vc-wrap.vc-a-s { text-align: left; }
+.vc-fig .vc-narrow { display: none; }
+@container (max-width: 520px) {
+  .vc-t.vc-minor { display: none; }
+  .vc-fig .vc-narrow { display: block; margin-top: var(--s-3); }
+}
+.vc-fig .table-scroll { margin: 0; }
+.vc-fig .table-scroll table.vc-narrow-table { min-width: 0; }
+.vc-fig .table-scroll table.vc-table { min-width: 520px; }
+.vc-table { width: 100%; border-collapse: collapse; font-size: var(--fs-body-sm); }
+.vc-table caption { caption-side: top; text-align: left; padding: 0 0 var(--s-2); color: var(--text-muted); font-size: var(--fs-small); font-weight: 600; }
+.vc-table th, .vc-table td { padding: 7px 12px 7px 0; border-bottom: 1px solid var(--hairline); text-align: left; white-space: nowrap; }
+.vc-table thead th { color: var(--text-muted); font: 500 var(--fs-label)/1.3 var(--mono); }
+.vc-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.vc-table tbody th { white-space: normal; min-width: 9rem; font-weight: 500; }
+@media (max-width: 620px) { .vc-table th, .vc-table td { padding-right: 8px; } }
+.vc-table td.vc-warn { color: var(--warn-ink); font-weight: 600; }
+.vc-narrow-table { width: 100%; border-collapse: collapse; font-size: var(--fs-small); }
+.vc-narrow-table th, .vc-narrow-table td { padding: 4px 8px 4px 0; border-bottom: 1px solid var(--hairline); text-align: left; }
+.vc-narrow-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.doc .vc-narrow-table th, .doc .vc-narrow-table td { width: auto; min-width: 0; white-space: nowrap; font-size: var(--fs-small); }
+.vc-narrow-table thead th { color: var(--text-muted); font: 500 var(--fs-label)/1.3 var(--mono); }
+.vc-t .vc-num { font-family: var(--mono); font-weight: 600; color: var(--text-strong); }
+.vchart .vc-ref { stroke: var(--chart-axis); stroke-width: 1; stroke-dasharray: 2 4; }
+.vchart .vc-spread { stroke-width: 1.2; opacity: .55; stroke-dasharray: none; }
+.vc-t.vc-y.vc-a-m { transform: translate(-50%, calc(-100% - 3px)); }
+.vchart .vc-outline { stroke: var(--text-strong); stroke-width: 1; stroke-dasharray: 3 2; }
+.doc .vc-fig .vc-legend {
+  display: flex; flex-wrap: wrap; gap: 6px 18px;
+  margin: var(--s-3) 0 0; padding: 0; list-style: none;
+  font-size: var(--fs-small); color: var(--text-muted);
+}
+.doc .vc-fig .vc-legend li { display: inline-flex; align-items: center; gap: 8px; margin: 0; font-size: var(--fs-small); line-height: 1.4; }
+.vfig figcaption { font-family: var(--body); }
+.vc-sw { display: inline-block; flex: none; width: 22px; height: 0; border-top: 2.25px solid var(--series-ours); }
+.vc-sw.ln-s1 { background: none; border-top-color: var(--series-ours); }
+.vc-sw.ln-s2 { border-top: 2px dashed var(--series-official); }
+.vc-sw.ln-s3 { border-top: 2px solid color-mix(in srgb, var(--text-strong) 45%, transparent); }
+.vc-sw.ln-edge { border-top: 1px dashed var(--chart-axis); }
+.vc-sw.ln-med { border-top: 2.5px solid var(--series-median); }
+.vc-sw[class*="sw-b"], .vc-sw[class*="sw-band"] { width: 14px; height: 10px; border: 0; border-radius: 2px; }
+.vc-sw.sw-b1 { background: var(--series-ours); }
+.vc-sw.sw-b2 { background: color-mix(in srgb, var(--text-strong) 55%, transparent); }
+.vc-sw.sw-b3 { background: color-mix(in srgb, var(--text-strong) 35%, transparent); }
+.vc-sw.sw-b3d { background: color-mix(in srgb, var(--text-strong) 35%, transparent); outline: 1px dashed var(--text-strong); outline-offset: -1px; }
+.vc-sw.sw-band { background: color-mix(in srgb, var(--primary) 16%, transparent); }
+.vc-sw.sw-band68 { background: var(--band-68); }
+.vc-sw.sw-band90 { background: var(--band-90); }
+.vc-sw.sw-dot1, .vc-sw.sw-dot2, .vc-sw.sw-dot-out { width: 8px; height: 8px; border: 0; border-radius: 50%; background: var(--series-ours); }
+.vc-sw.sw-dot2 { background: var(--series-official); }
+.vc-sw.sw-ring { width: 8px; height: 8px; border: 1.5px solid color-mix(in srgb, var(--text-strong) 70%, transparent); border-radius: 50%; background: none; }
+.vc-sw.sw-dot-out { background: var(--series-outturn); }
+.doc .vc-fig .vc-notes { margin: var(--s-2) 0 0; color: var(--text-muted); font-size: var(--fs-small); line-height: 1.5; }
+.vc-notes .vc-warn { color: var(--warn-ink); font-weight: 600; }
 .mo-figcard, .vfig { border-radius: var(--radius); }
 figure figcaption { color: var(--text-muted); font-size: var(--fs-small); line-height: 1.5; }
 

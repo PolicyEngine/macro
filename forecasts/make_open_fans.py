@@ -23,6 +23,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
+import chartkit  # noqa: E402  (stdlib-only, repo root)
 ROUNDS = HERE / "rounds"
 PAGE = HERE / "index.html"
 
@@ -79,25 +81,21 @@ def render() -> str:
 
     median = " ".join(f"{x(i):.1f},{y(r['median']):.1f}" for i, r in enumerate(rows))
 
-    gridlines, ticks = [], []
+    gridlines = []
     step = 0.1 if span > 0.45 else 0.05
     v = round(lo / step) * step
     while v <= hi:
         if v >= lo:
             gridlines.append(
-                f'          <line class="vc-grid" x1="{left}" y1="{y(v):.1f}" '
+                f'<line class="vc-grid" x1="{left}" y1="{y(v):.1f}" '
                 f'x2="{width - right}" y2="{y(v):.1f}"/>'
             )
-            ticks.append(
-                f'          <text class="vc-tick" x="{left - 8}" y="{y(v) + 4:.1f}" '
-                f'text-anchor="end">{v:.2f}</text>'
-            )
+            gridlines.append(chartkit.ytick(left, y(v), f"{v:.2f}"))
         v += step
-    xticks = [
-        f'          <text class="vc-tick" x="{x(i):.1f}" y="{height - 14}" '
-        f'text-anchor="middle">{r["period"]}</text>'
-        for i, r in enumerate(rows)
-    ]
+    last = len(rows) - 1
+    # Every other quarter is dropped when the chart is narrower than 520 px.
+    xticks = [chartkit.xtick(x(i), top + plot_h, r["period"], i, last, minor=i % 2 == 1)
+              for i, r in enumerate(rows)]
 
     desc = (
         f"Fan chart of the UK unemployment rate, percent, from the "
@@ -116,22 +114,24 @@ def render() -> str:
             "coverage evaluation of its own, so no re-calibration is "
             "applied.</p>",
             '      <figure class="vchart-figure">',
-            f'        <svg class="vchart" data-chart="{CHART_ID}" '
-            f'viewBox="0 0 {width} {height}" role="img" '
-            f'aria-labelledby="{CHART_ID}-t {CHART_ID}-d">',
-            f'          <title id="{CHART_ID}-t">svar-unemployment satellite UK '
-            "unemployment rate forecast, median with 68% and 90% bands</title>",
-            f'          <desc id="{CHART_ID}-d">{desc}</desc>',
-            *gridlines,
-            *ticks,
-            f'          <polygon class="vc-band90" points="{band("lo90", "hi90")}"/>',
-            f'          <polygon class="vc-band68" points="{band("lo68", "hi68")}"/>',
-            f'          <polyline class="vc-s1" points="{median}"/>',
-            *xticks,
-            "        </svg>",
-            '        <div class="olg-legend">'
-            '<span class="li"><span class="ln ln-s1"></span>'
-            "svar-unemployment median (raw 68% and 90% bands)</span></div>",
+            chartkit.figure("\n".join([
+                f'<svg class="vchart" data-chart="{CHART_ID}" '
+                f'viewBox="{left - 4} {top - 4} {plot_w + 8} {plot_h + 8}" role="img" '
+                f'aria-labelledby="{CHART_ID}-t {CHART_ID}-d">',
+                f'<title id="{CHART_ID}-t">svar-unemployment satellite UK '
+                "unemployment rate forecast, median with 68% and 90% bands</title>",
+                f'<desc id="{CHART_ID}-d">{desc}</desc>',
+                *gridlines,
+                f'<polygon class="vc-band90" points="{band("lo90", "hi90")}"/>',
+                f'<polygon class="vc-band68" points="{band("lo68", "hi68")}"/>',
+                f'<polyline class="vc-s1" points="{median}"/>',
+                *xticks,
+                "</svg>",
+            ]), legend=[
+                ("ln-s1", "svar-unemployment median"),
+                ("sw-band68", "68% band"),
+                ("sw-band90", "90% band (raw)"),
+            ]),
             "      </figure>",
         ]
     )

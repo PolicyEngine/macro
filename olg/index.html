@@ -19,7 +19,7 @@
 
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=8" />
+<link rel="stylesheet" href="/style.css?v=9" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -342,7 +342,10 @@
   'use strict';
 
   var DASH = { dash: '6 4', dot: '2 3', dashdot: '8 3 2 3' };
-  var W = 760, H = 340, ML = 82, MR = 14, MT = 14, MB = 34;
+  // Drawn at the container's own pixel width (viewBox = rendered size), so
+  // every label renders at its CSS size, 12 px, on a phone and in a narrow
+  // column alike (DESIGN.md §6.3). Margins are px; redrawn on resize.
+  var ML = 8, MR = 8, MT = 30, MB = 26;
 
   function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -373,32 +376,40 @@
     ymin -= pad; ymax += pad;
     var ystep = niceStep(ymax - ymin, 5);
     var y0 = Math.ceil(ymin / ystep) * ystep;
-    var xstep = (xmax - xmin) >= 15 ? 5 : ((xmax - xmin) >= 8 ? 2 : 1);
+    var W = Math.max(280, Math.round(container.clientWidth || 760));
+    var H = Math.round(Math.max(240, Math.min(340, W * 0.5)));
+    // Fewer x ticks when narrow: about one per 70 px.
+    var maxTicks = Math.max(3, Math.floor((W - ML - MR) / 70));
+    var span = xmax - xmin, xstep = 1;
+    [1, 2, 5, 10, 20].some(function (st) { xstep = st; return span / st <= maxTicks; });
     var x0 = Math.ceil(xmin / xstep) * xstep;
 
     function X(x) { return ML + (x - xmin) * (W - ML - MR) / (xmax - xmin); }
     function Y(y) { return H - MB - (y - ymin) * (H - MT - MB) / (ymax - ymin); }
     function n(v) { return v.toFixed(1); }
 
-    var s = ['<svg class="vchart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' +
+    var s = ['<svg class="vchart" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H +
+             '" role="img" aria-label="' +
              esc(panel.title) + ', baseline (solid) vs +1pp basic-rate reform (dashed)">'];
+    s.push('<text class="vc-title" x="' + ML + '" y="14">' + esc(panel.title) + '</text>');
     var v, x, y;
     for (v = y0; v <= ymax + 1e-9; v += ystep) {
       y = Y(v);
-      s.push('<line class="' + (Math.abs(v) < ystep * 1e-6 ? 'vc-axis' : 'vc-grid') +
+      s.push('<line class="' + (Math.abs(v) < ystep * 1e-6 ? 'vc-zero' : 'vc-grid') +
              '" x1="' + ML + '" y1="' + n(y) + '" x2="' + (W - MR) + '" y2="' + n(y) + '"/>');
-      s.push('<text class="vc-tick" x="' + (ML - 8) + '" y="' + n(y + 4) +
-             '" text-anchor="end">' + fmt(v) + '</text>');
+      // Inside the plot, just above its gridline.
+      s.push('<text class="vc-tick" x="' + ML + '" y="' + n(y - 4) + '">' + fmt(v) + '</text>');
     }
     for (v = x0; v <= xmax + 1e-9; v += xstep) {
       x = X(v);
+      var anchor = v === x0 && x - ML < 20 ? 'start' : (W - MR - x < 20 ? 'end' : 'middle');
       s.push('<line class="vc-grid" x1="' + n(x) + '" y1="' + (H - MB) + '" x2="' + n(x) + '" y2="' + (H - MB + 5) + '"/>');
-      s.push('<text class="vc-tick" x="' + n(x) + '" y="' + (H - MB + 16) + '" text-anchor="middle">' + v + '</text>');
+      s.push('<text class="vc-tick" x="' + n(x) + '" y="' + (H - MB + 18) + '" text-anchor="' + anchor + '">' + v + '</text>');
     }
     (panel.shapes || []).forEach(function (sh) {
       if (sh.x0 < xmin || sh.x0 > xmax) return;
       x = X(sh.x0);
-      s.push('<line x1="' + n(x) + '" y1="' + MT + '" x2="' + n(x) + '" y2="' + (H - MB) +
+      s.push('<line class="vc-marker" x1="' + n(x) + '" y1="' + MT + '" x2="' + n(x) + '" y2="' + (H - MB) +
              '" stroke="' + esc(sh.color || '#95a5a6') + '" stroke-width="' + (sh.width || 1) +
              '"' + (DASH[sh.dash] ? ' stroke-dasharray="' + DASH[sh.dash] + '"' : '') + '/>');
     });
@@ -410,10 +421,21 @@
              '" stroke-width="' + (t.width || 2) + '" stroke-linejoin="round"' +
              (DASH[t.dash] ? ' stroke-dasharray="' + DASH[t.dash] + '"' : '') + '/>');
     });
-    s.push('<text class="vc-title" transform="rotate(-90 14 ' + ((MT + H - MB) / 2).toFixed(1) + ')" x="14" y="' + ((MT + H - MB) / 2).toFixed(1) + '" text-anchor="middle">' + esc(panel.title) + '</text>');
     s.push('</svg>');
     container.innerHTML = s.join('\n');
+    container._panel = panel;
   }
+
+  // Redraw at the new width when a chart's box changes size.
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      document.querySelectorAll('.olg-chart').forEach(function (box) {
+        if (box._panel && box.clientWidth) render(box, box._panel);
+      });
+    }, 150);
+  }, { passive: true });
 
   // Panel tagging, ported from the dashboard's ExampleTab.jsx.
   var MACRO_MAP = { 'consumption': 'consumption', 'investment': 'investment',

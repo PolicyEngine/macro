@@ -7,10 +7,13 @@ import argparse
 import importlib.util
 import json
 import re
+import sys
 from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+import chartkit  # noqa: E402  (stdlib-only, repo root)
 PAGE = ROOT / "economy" / "index.html"
 US_PAGE = ROOT / "economy" / "us" / "index.html"
 
@@ -78,7 +81,7 @@ PUBLIC_LABELS = _TOPICS.PUBLIC_LABELS
 def load(name: str) -> dict:
     series = json.loads((ROOT / "data" / "latest" / f"{name}.json").read_text())
     # ONS stores observations behind a JSON `/data` endpoint, but that is a
-    # poor destination for a reader clicking "View source". Keep the API URL
+    # bad destination for a reader clicking "View source". Keep the API URL
     # in the committed vintage and expose the matching human-readable page.
     if "ons.gov.uk/" in series["url"] and series["url"].endswith("/data"):
         series["url"] = series["url"][: -len("/data")]
@@ -200,18 +203,27 @@ def line_chart(
         f"to {last['value']:.1f}{units} in {last['period']}; "
         f"range {window_low:.1f}{units} to {window_high:.1f}{units}."
     )
+    g_hi, g_lo = y(high - padding), y(low + padding)
+    svg = "\n".join([
+        f'<svg class="vchart" data-chart="trend-{title_id}" viewBox="{left - 4} {g_hi - 8:.1f} '
+        f'{width - left - right + 8} {g_lo - g_hi + 16:.1f}" role="img" '
+        f'aria-labelledby="{title_id}-title {title_id}-desc">',
+        f'<title id="{title_id}-title">{title}</title>',
+        f'<desc id="{title_id}-desc">{desc}</desc>',
+        f'<line class="vc-grid" x1="{left}" y1="{g_hi:.1f}" x2="{width - right}" y2="{g_hi:.1f}" />',
+        chartkit.ytick(left, g_hi, f"{high - padding:.1f}{units}".replace("-", "\u2212")),
+        f'<line class="vc-grid" x1="{left}" y1="{g_lo:.1f}" x2="{width - right}" y2="{g_lo:.1f}" />',
+        chartkit.ytick(left, g_lo, f"{low + padding:.1f}{units}".replace("-", "\u2212")),
+        f'<polyline class="vc-out-line" points="{points}" />',
+        f'<circle class="vc-out-dot" cx="{x(len(values) - 1):.1f}" cy="{y(last['value']):.1f}" r="4" />',
+        chartkit.xtick(left, g_lo + 8, first["period"], 0, 1),
+        chartkit.xtick(width - right, g_lo + 8, last["period"], 1, 1),
+        "</svg>",
+    ])
+    # The latest reading is not restated here: it lives on the topic page
+    # (DESIGN.md §7.0). The two gridlines mark the window's range.
     return f"""      <figure class="economy-figure">
-        <svg viewBox="0 0 {width} {height}" role="img" aria-labelledby="{title_id}-title {title_id}-desc">
-          <title id="{title_id}-title">{title}</title>
-          <desc id="{title_id}-desc">{desc}</desc>
-          <line class="economy-chart-grid" x1="{left}" y1="{y(high - padding):.1f}" x2="{width - right}" y2="{y(high - padding):.1f}" />
-          <line class="economy-chart-grid" x1="{left}" y1="{y(low + padding):.1f}" x2="{width - right}" y2="{y(low + padding):.1f}" />
-          <polyline class="economy-chart-line" points="{points}" />
-          <circle class="economy-chart-dot" cx="{x(len(values) - 1):.1f}" cy="{y(last['value']):.1f}" r="4" />
-          <text class="economy-chart-label" x="{left}" y="{height - 12}">{first['period']}</text>
-          <text class="economy-chart-label" x="{width - right}" y="{height - 12}" text-anchor="end">{last['period']}</text>
-          <text class="economy-chart-value" x="{width - right}" y="{max(y(last['value']) - 10, 16):.1f}" text-anchor="end">{last['value']:.1f}{units}</text>
-        </svg>
+{chartkit.figure(svg)}
         <figcaption><strong>{title}</strong><span>{description}</span><a href="{url}">View source · {source} →</a></figcaption>
       </figure>"""
 

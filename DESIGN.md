@@ -50,11 +50,8 @@ on them).
    their own wrapper (`.table-scroll`, `.codeblock`, the tab rows).
 8. **No `<text>` in a scaling SVG that becomes unreadable.** An SVG drawn with a `viewBox` at
    `width: 100%` scales its text with it: an 800-unit chart at 375 px renders 11 px ticks at
-   ~5 px. Rule: any label must render at **≥ 11 px at 375 px**. Either keep labels out of the SVG
-   (HTML positioned over it, or HTML legends/captions), or hide them below a breakpoint and carry
-   the information in the caption (the hero fan does this: `.hf-tick` is hidden below 1000 px,
-   the two year labels `.hf-q` survive, the figcaption carries the rest). Phase 3 owns this for
-   every generator (§6.3).
+   ~5 px. Rule: any label must render at **≥ 11 px at 375 px** (and in a narrow StepPanel
+   column). The site's one approach is §6.3: labels are HTML laid over the SVG.
 9. **Caveats are shortened, never deleted.** Long text may move behind an expander (§4.5).
 
 ---
@@ -235,7 +232,7 @@ reads it. The body is a flex column so the footer sits at the viewport bottom on
 
 ### 3.6 Cache buster
 
-`site_nav.STYLE_VERSION` (now 8). `render()` rewrites every page's stylesheet link to
+`site_nav.STYLE_VERSION` (now 9). `render()` rewrites every page's stylesheet link to
 `/style.css?v=N`; `economy/topics.py` and `notes/generate_release_notes.py` read
 `site_nav.STYLE_HREF`. Bump the number in one place whenever a cached `style.css` would render a
 page wrongly, then run `python3 site_nav.py --write`.
@@ -458,7 +455,7 @@ hero uses the same treatment (§7.1).
 |---|---|---|
 | `vc-grid`, `hf-grid` | gridline | `--chart-grid` |
 | `vc-axis` | axis | `--chart-axis` |
-| `vc-zero` (new), `hf-zero` | zero line | `--chart-zero` |
+| `vc-zero`, `hf-zero` | zero line | `--chart-zero` |
 | `vc-tick`, `hf-tick`, `hf-q` | tick label | `--chart-tick`, mono |
 | `vc-lab` | in-chart label | `--text-muted` |
 | `vc-s1`, `vc-s1-dot`, `ln-s1` | our model / forecast | `--series-ours` |
@@ -470,27 +467,56 @@ hero uses the same treatment (§7.1).
 | `hf-med`, `hf-dot` | median path, end dot | `--series-median` |
 | `vc-b1` / `vc-b2` / `vc-b3` | bar: result / comparison arms | primary / gray 55% / gray 35% |
 | `vc-warn` | honest-warning cell/mark | `--warn-ink` |
+| `vc-out-dot`, `vc-out-line` | realised data (outturn) | `--series-outturn` |
+| `vc-ref`, `vc-edge`, `vc-outline` | reference rule, evidence edge, dashed outline | `--chart-axis` / `--text-strong` |
 | `mm-*` | homepage model map | as above (pill stroke `--primary`, soft = dashed gray) |
 | UK vs US on one chart (new: `vc-uk`, `vc-us`) | country | `--series-uk` / `--series-us` |
 
 Model-family colours (`--family-micro`, `--family-structural`, `--family-empirical`,
 `--family-ge`) are for chips and badges only, not chart series.
 
-### 6.3 What phase 3 must change in the generators
+### 6.3 Readable labels: HTML over the SVG (`chartkit.py`, phase 3)
 
-- `validation/figures/make_charts.py`, `assets/make_current_outlooks.py`, `forecasts/make_open_fans.py`,
-  `forecasts/make_us_baseline.py`, `economy/build.py` / `economy/topics.py` trend figures: their
-  SVGs are 600–800 units wide at `width: 100%`, so ticks render at 5–7 px on a phone (rule
-  §1.8). Fix by moving tick and value labels out of the SVG into HTML positioned over it, or
-  by rendering a narrow variant (`viewBox` ≤ 400 wide) in a `<picture>`-style pair switched by
-  CSS at 620 px.
-- `assets/make_hero.py`: keep hiding `.hf-tick` below 1000 px; also move the value ticks so they
-  do not sit on the median path (they collide at "+1%" at 1440 px), e.g. right-aligned in a
-  gutter outside the band area.
-- Emit `vc-zero` for zero lines instead of a `vc-axis`/`vc-grid` at zero.
-- Stop emitting inline `fill`/`stroke` colours; every mark takes a class from §6.2.
+One approach, used by every generated chart (`validation/figures/make_charts.py`,
+`forecasts/score.py`, `forecasts/make_open_fans.py`, `assets/make_hero.py`,
+`assets/make_current_outlooks.py`, `economy/build.py`): **marks stay in the SVG, words move to
+HTML.** A builder writes ordinary `<text>` at viewBox coordinates; `chartkit.figure()` lifts each
+one into an absolutely positioned `<span class="vc-t …">` at the same point, in percent of the
+viewBox, so it keeps its CSS size (12 px, `--fs-label`) at every width. Block contract:
 
----
+```html
+<div class="vc-fig" data-chart="ID">            container-type: inline-size
+  <div class="vc-plot">
+    <svg class="vchart" viewBox="…" preserveAspectRatio="none" role="img" aria-labelledby="ID-t ID-d">
+      <title id="ID-t">…</title><desc id="ID-d">…</desc>   marks only, no <text>
+    </svg>
+    <div class="vc-labels" aria-hidden="true"><span class="vc-t vc-tick vc-y" style="left:…%;top:…%">…</span>…</div>
+  </div>
+  <ul class="vc-legend">…</ul>   <p class="vc-notes">…</p>
+</div><!-- /vc-fig -->
+```
+
+- The viewBox is cropped to the plot area; axis labels hang outside it by fixed px offsets
+  (`.vc-y`: 3 px above its gridline, inside the plot, left-aligned; `.vc-x`: 6 px under the axis;
+  first x tick left-aligned, last right-aligned: `chartkit.ytick` / `chartkit.xtick`). No
+  left gutter: it would be 25 px on a phone.
+- The plot stretches to a usable height on a phone (`min-height` 210 px, per chart via
+  `min_h`), so the SVG uses `preserveAspectRatio="none"`; strokes are non-scaling and dots are
+  round-capped zero-length paths (chartkit converts `<circle>`), so nothing distorts.
+- In-chart prose (`vc-note`) goes under the chart in `.vc-notes`; legends are `.vc-legend`
+  swatches (`ln-s1` ours solid, `ln-s2` official dashed, `sw-b1…3` bars, `sw-band68/90`,
+  `sw-dot-out` outturn, `sw-ring` hollow).
+- Labels that cannot fit below 520 px of chart width carry `vc-minor` and are hidden by a
+  container query; values a phone needs then come from `narrow_table=` (a small table shown
+  only below 520 px: the panel/inline rule of §1.1, one of the two is visible).
+- A chart that is really a table (`hank-targets`) is an HTML `table.vc-table` in a
+  `.table-scroll`.
+- The overlay is `aria-hidden`; `<title>`/`<desc>` carry the values for screen readers.
+- The hero fan's value ticks sit in a gutter right of the plot (`.vc-gutter`), off the median,
+  at every width; the year labels stay.
+- Runtime charts (the OG-UK showcase, `olg/index.html`) draw at the container's pixel width
+  (viewBox = rendered size) and redraw on resize, which gives the same 12 px labels.
+- Every generator `--check` regenerates and compares, so the blocks cannot drift.
 
 ## 7. Per-page-type layout
 
