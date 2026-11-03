@@ -28,6 +28,7 @@ left gutter; the first x tick is left-aligned and the last right-aligned
 Output contract, one block per chart, keyed by ``data-chart``:
 
     <div class="vc-fig" data-chart="ID">
+      <p class="vc-unit">…</p>            optional: the value axis' unit
       <div class="vc-plot">
         <svg class="vchart …" viewBox="0 0 W H" role="img" aria-labelledby="ID-t ID-d">
           <title id="ID-t">…</title><desc id="ID-d">…</desc>  marks only
@@ -128,6 +129,21 @@ def _pct(v: float, total: float) -> str:
     return f"{100 * v / total:.2f}".rstrip("0").rstrip(".") + "%"
 
 
+def endlabel(x: float, y: float, label: str, series: str = "s1", above: bool = True) -> str:
+    """A direct label at a line's last point, in place of a legend entry.
+
+    Right-aligned on the point and lifted 6 px above it (``above``) or hung
+    6 px below it, in the series' own ink (``s1`` ours, ``s2`` official, ``s3``
+    a labelled neutral), so a reader matches label to line without a key.
+    Use it only where the label cannot sit on a line: a right-aligned label
+    above a line that rises into its end point is always clear of that line;
+    one below it is not. Two lines ending close together get a legend.
+    """
+    pos = "vc-end-up" if above else "vc-end-dn"
+    return (f'<text class="vc-end vc-end-{series} {pos}" x="{x:.1f}" y="{y:.1f}" '
+            f'text-anchor="end">{label}</text>')
+
+
 def swatch(kind: str) -> str:
     """Legend swatch: 'ln-s1'/'ln-s2'/'ln-s3' lines, 'sw-b1'… boxes, 'sw-dot2' dots, etc."""
     return f'<span class="vc-sw {kind}" aria-hidden="true"></span>'
@@ -142,6 +158,7 @@ def figure(
     wrap_class: str = "",
     min_h: int | None = None,
     narrow_table: tuple[list[str], list[list[str]]] | None = None,
+    unit: str | None = None,
 ) -> str:
     """Turn a builder's SVG string into the readable block described above.
 
@@ -151,6 +168,9 @@ def figure(
     label ``vc-minor`` (hidden in a narrow chart).
     ``min_h``: the plot's minimum rendered height in px (default 210, in
     style.css), for charts whose rows need more room on a phone.
+    ``unit``: what the y values are measured in ("% q/q", "£bn a year"),
+    printed once above the plot's top-left corner, the way the BoE and the
+    OBR head a chart's value axis. Words come from the chart's own caption.
     ``narrow_table``: (header cells, rows) shown *instead of* the labels marked
     ``vc-minor`` when the chart is narrower than 520 px: the values a phone
     cannot fit on the bars. Only one of the two is ever visible (the same rule
@@ -202,6 +222,10 @@ def figure(
     parts = [
         f'<div class="vc-fig{(" " + wrap_class) if wrap_class else ""}" data-chart="{chart_id}"'
         + (f' style="--vc-min-h:{min_h}px">' if min_h else ">"),
+    ]
+    if unit:
+        parts.append(f'<p class="vc-unit">{unit}</p>')
+    parts += [
         '<div class="vc-plot">',
         f"<svg {open_attrs}>",
         marks,

@@ -458,7 +458,28 @@ hero uses the same treatment (§7.1).
   `--series-outturn` dots, never a line that could be read as a forecast.
 - Legend: HTML under the chart (`.olg-legend` with `.ln-s1`, `.ln-s2` swatches) or direct
   labels at line ends; never a boxed SVG legend.
-- Caption: `figcaption`, 13 px `--text-muted`: what is plotted, units, source, vintage.
+- **Unit line** (round 2): the value axis' unit is printed once above the plot's top-left
+  corner (`chartkit.figure(unit=…)` → `p.vc-unit`, 12 px `--text-muted`), the way the BoE MPR
+  and OBR EFO head a chart: "% q/q", "£bn a year", "index, 2026Q1 = 100". Words come from the
+  chart's own caption; ticks then need no repeated unit.
+- **Roles are strict.** Dashed `vc-s2` means *official or published* and nothing else. A second
+  series of ours (consumption beside GDP, the 90% band beside the 68%, a free-running variant)
+  is the neutral `vc-s3`, solid. A chart with no "ours" (the OBR's own outlook) draws the
+  official series solid (`vc-s2 vc-solid`, swatch `ln-s2s`).
+- **Direct labels** (`chartkit.endlabel`, `.vc-end-s1/s2/s3`) at a line's last point replace the
+  legend where they cannot touch a line: right-aligned *above* a line that rises into its end
+  is safe; below it is not. Lines that end close together keep the HTML legend.
+- **Halo**: every overlay label is knocked out of the marks in the surface colour
+  (`--vc-halo`, text-shadow), so an in-plot y tick or value stays legible where a line crosses it.
+- **Forecast vs outturn**: forecasts may be bars or lines; the outturn they are judged against
+  is a dot (with a rule across its period, `vc-out-rule`), never a third bar.
+- **Interpolated or imputed values** are an outline (`vc-interp`, swatch `sw-interp`), never a
+  solid result bar.
+- **Log axes** use dots on a track (`vc-track`), not bars: a bar's length on a log axis is
+  measured from an arbitrary origin. Ticks are `10<sup>n</sup>`.
+- **Reference rules** (nominal coverage, parity, a framing benchmark) are `vc-ref`, 1 px
+  `--chart-zero` dashed 4 3, with a `ln-ref` legend swatch or a direct label.
+- Caption: `figcaption`, 13 px `--text-muted`: what is plotted, source, vintage.
 - Every chart: `role="img"` + `aria-labelledby` pointing at a `<title>` and a `<desc>` that
   states the values a sighted reader would take away (the generators already do this; keep it).
 - No colour encodes good/bad; no red/green.
@@ -482,7 +503,14 @@ hero uses the same treatment (§7.1).
 | `vc-b1` / `vc-b2` / `vc-b3` | bar: result / comparison arms | primary / gray 55% / gray 35% |
 | `vc-warn` | honest-warning cell/mark | `--warn-ink` |
 | `vc-out-dot`, `vc-out-line` | realised data (outturn) | `--series-outturn` |
-| `vc-ref`, `vc-edge`, `vc-outline` | reference rule, evidence edge, dashed outline | `--chart-axis` / `--text-strong` |
+| `vc-ref` | reference rule (nominal level, parity, benchmark) | `--chart-zero`, dashed 4 3 |
+| `vc-edge`, `vc-outline` | evidence edge, dashed outline | `--chart-axis` / `--text-strong` |
+| `vc-s3-dot`, `vc-end-s1/s2/s3` | neutral series dots; direct end labels | gray 45%; label ink `--series-ours` / `--series-official` / `--text-muted` |
+| `vc-s2 vc-solid` | official series on a chart with no "ours" | `--series-official`, solid |
+| `vc-out-rule` | outturn rule across a period's forecast bars | `--series-outturn` |
+| `vc-interp` | interpolated value (outline bar) | `--series-ours` 18% fill, dashed stroke |
+| `vc-track` | dot-strip track (log-axis dot charts) | `--chart-grid` |
+| `vc-unit` (HTML) | value-axis unit line above the plot | `--text-muted` |
 | `mm-*` | homepage model map | as above (pill stroke `--primary`, soft = dashed gray) |
 | UK vs US on one chart (new: `vc-uk`, `vc-us`) | country | `--series-uk` / `--series-us` |
 
@@ -622,11 +650,17 @@ and `--check` fails on any note that no longer matches the template.
 
 ### 7.8 Connect / Use (`/connect`)
 
-Title band (`.connect-hero`) → sub-tabs MCP · CLI · Python → MCP card: client switch (segmented
-chips, selected = fill), `ol.steps` (copy URL · add connector · ask), example prompts → CLI card
-and Python card as a StepPanel (step = install / first command / reproduce; panel = the command
-and its output shape) → "what each model can do hosted" table. Every model named links to its
-page.
+Title band (`.connect-hero`) → sub-tabs MCP · CLI · Python · Tools · Limits → routes StepPanel:
+1 MCP (client switch, segmented chips, selected = fill; `ol.steps` copy URL · add connector ·
+ask; example prompts tagged with the tool they call; terminal and local-stdio setup in an
+expander), 2 CLI (install, `model-status`, one command per model), 3 Python (a hosted
+`mcp`-client script with the `start_job` → `get_job_result` loop, and a local
+`policyengine_macro.core` script; then the per-model picker linking to each Code tab) →
+Tools card ("what each model can do hosted": every MCP tool by model, hosted / job / local-only,
+model names link to `/<model>/code#run`) → Limits card (auth, the 150 s request ceiling and
+jobs, concurrency, cold starts, local-only, the `score` block). Every limit there is sourced
+from `integration/` (`jobs.py`, `modal_app.py`, `mcp_server.py`, README); re-check it when
+those change. Every model named links to its page.
 
 ### 7.9 Contact (`/contact`)
 
