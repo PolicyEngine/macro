@@ -20,14 +20,9 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=8" />
-<style>
-/* page-specific: hero sizing only — shared component styles live in style.css */
-.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-</style>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
   <a class="brand" href="/" aria-label="PolicyEngine Macro home">
@@ -57,8 +52,7 @@
         Calculate taxes and benefits.
       </h1>
       <p class="lede reveal" style="--d:2">
-        Compare current law with a reform for a UK or US household, or estimate
-        population-wide revenue and distributional effects.
+        Checked rule by rule, one external costing benchmark, and the limits.
       </p>
     </div>
   </section>
@@ -72,57 +66,120 @@
       <a class="model-tabs-link" href="/papers/pe-microsim">Paper</a>
     </div>
   </nav>
-
-  <section id="trust" class="band">
+  <div class="with-rail">
+    <nav class="page-rail" aria-label="On this page">
+      <p class="page-rail-title">On this page</p>
+      <a href="#trust" aria-current="location">Headline numbers</a>
+      <a href="#rules">Rule by rule</a>
+      <a href="#hmrc">Against HMRC</a>
+      <a href="#caveats">Limits</a>
+      <a href="#where-next">Where next</a>
+    </nav>
+    <div class="rail-main">
+  <section class="band band-wide" id="trust">
     <div class="band-head">
       <span class="kicker mono">how far to trust it</span>
       <h2>Checked rule by rule, not against a forecast.</h2>
+      <p class="section-intro">Household maths is exact; population costings are survey-weighted estimates with no interval.</p>
     </div>
-    <div class="prose">
-      <p>
-        No forecast error to report: the model applies published rules, and
-        the worked £50,000 case on the <a href="/pe/code">code page</a> can be
-        checked with a pencil. That verifies the implemented rules — not that
-        every area of legislation is covered by a test.
-      </p>
-      <p>
-        Population costings are a different kind of number: survey-weighted
-        estimates (<a href="#caveats">limits</a>), published without an
-        interval because the pipeline produces none. The one external
-        comparison is a 1p rise in the UK basic rate, scored at
-        <strong>£6.46bn</strong> in 2026 against HMRC's June 2025 ready
-        reckoner of £6.9bn for 2026&ndash;27 —
-        <strong>&minus;6.4%</strong>. HMRC's
-        estimate is post-behavioural on administrative SPI data where ours is
-        static and survey-based, so this is a benchmark, not a validation.
-        Our second published figure, £7.38bn in 2030, has no counterpart at
-        all: the reckoner stops at 2028&ndash;29. Both endpoints have thin
-        provenance — no scored run is committed for either, and the only
-        executable check pins 2026 within ±5% of £6.46bn and is skipped
-        without microdata access. Full account:
-        <a href="/papers/pe-microsim">the paper</a>.
-      </p>
-    </div>
-    <div class="metrics">
-      <div class="metric">
-        <span class="metric-label mono">1p on the UK basic rate, 2026</span>
-        <span class="metric-val">&minus;6.4%<span class="metric-vs">vs HMRC</span></span>
-        <span class="metric-note">benchmark, not validation — different bases</span>
+    <div class="stat-row">
+      <div class="stat">
+        <span class="stat-label">1p on the UK basic rate, 2026</span>
+        <span class="stat-value">&minus;6.4%</span>
+        <span class="stat-sub">vs HMRC ready reckoner</span>
+        <span class="stat-foot"><a class="chip chip-warn" href="#hmrc">Benchmark, not validation</a></span>
       </div>
-      <div class="metric">
-        <span class="metric-label mono">countries</span>
-        <span class="metric-val">2</span>
-        <span class="metric-note">UK · US tax-benefit systems</span>
+      <div class="stat stat-neutral">
+        <span class="stat-label">Countries</span>
+        <span class="stat-value">2</span>
+        <span class="stat-sub">UK and US tax-benefit systems</span>
       </div>
-      <div class="metric">
-        <span class="metric-label mono">UK / US entities</span>
-        <span class="metric-val">3<span class="metric-vs">/ 6</span></span>
-        <span class="metric-note">benefit unit vs tax unit, SPM unit, family, marital unit</span>
+      <div class="stat stat-neutral">
+        <span class="stat-label">UK / US entities</span>
+        <span class="stat-value">3 / 6</span>
+        <span class="stat-sub">benefit unit vs tax unit, SPM unit&hellip;</span>
       </div>
     </div>
   </section>
 
-  <section id="caveats" class="band">
+  <section class="band band-wide" id="tests">
+    <div class="band-head">
+      <span class="kicker mono">the evidence</span>
+      <h2>The rules, and the one costing benchmark.</h2>
+    </div>
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+
+      <div class="meth-step" id="rules" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Checked rule by rule</h3></div>
+        <p class="mo-lead">No forecast error to report: the model applies published rules.</p>
+              <p>
+                No forecast error to report: the model applies published rules, and
+                the worked £50,000 case on the <a href="/pe/code">code page</a> can be
+                checked with a pencil. That verifies the implemented rules — not that
+                every area of legislation is covered by a test.
+              </p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">exact rule arithmetic</div>
+        <div class="meth-eq"><div class="meth-eq-label">check</div><div class="meth-eq-body">the worked &pound;50,000 case, by pencil</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">where</div><div class="meth-eq-body">the code tab</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">verifies</div><div class="meth-eq-body">the implemented rules</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">does not verify</div><div class="meth-eq-body">that every area is covered by a test</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="hmrc" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>The one external comparison</h3></div>
+        <p class="mo-lead">A survey-weighted costing against HMRC&rsquo;s post-behavioural ready reckoner.</p>
+              <p>
+                Population costings are a different kind of number: survey-weighted
+                estimates (<a href="#caveats">limits</a>), published without an
+                interval because the pipeline produces none. The one external
+                comparison is a 1p rise in the UK basic rate, scored at
+                <strong>£6.46bn</strong> in 2026 against HMRC's June 2025 ready
+                reckoner of £6.9bn for 2026&ndash;27 (the gap is in the tiles above). HMRC's
+                estimate is post-behavioural on administrative SPI data where ours is
+                static and survey-based, so this is a benchmark, not a validation.
+                Our second published figure, £7.38bn in 2030, has no counterpart at
+                all: the reckoner stops at 2028&ndash;29. Both endpoints have thin
+                provenance — no scored run is committed for either, and the only
+                executable check pins 2026 within ±5% of £6.46bn and is skipped
+                without microdata access. Full account:
+                <a href="/papers/pe-microsim">the paper</a>.
+              </p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">1p on the basic rate</div>
+        <div class="meth-eq"><div class="meth-eq-label">ours, 2026</div><div class="meth-eq-body">&pound;6.46bn, static</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">HMRC, 2026&ndash;27</div><div class="meth-eq-body">&pound;6.9bn, post-behavioural</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">ours, 2030</div><div class="meth-eq-body">&pound;7.38bn, no counterpart</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">executable check</div><div class="meth-eq-body">2026 within &plusmn;5%, skipped without microdata</div></div>
+        </div>
+      </div>
+
+      </div>
+
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Household answers</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">exact rule arithmetic</div>
+          <div class="meth-eq"><div class="meth-eq-label">check</div><div class="meth-eq-body">the worked &pound;50,000 case, by pencil</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">where</div><div class="meth-eq-body">the code tab</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">verifies</div><div class="meth-eq-body">the implemented rules</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">does not verify</div><div class="meth-eq-body">that every area is covered by a test</div></div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Against HMRC</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">1p on the basic rate</div>
+          <div class="meth-eq"><div class="meth-eq-label">ours, 2026</div><div class="meth-eq-body">&pound;6.46bn, static</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">HMRC, 2026&ndash;27</div><div class="meth-eq-body">&pound;6.9bn, post-behavioural</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">ours, 2030</div><div class="meth-eq-body">&pound;7.38bn, no counterpart</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">executable check</div><div class="meth-eq-body">2026 within &plusmn;5%, skipped without microdata</div></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="band band-wide" id="caveats">
     <div class="band-head">
       <span class="kicker mono">limits</span>
       <h2>Scope and vintage.</h2>
@@ -163,6 +220,32 @@
     </div>
   </section>
 
+  <section class="band where-next" id="where-next">
+    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/pe/code">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span>
+        <h3>Code</h3>
+        <p>The worked case, and every route to run it</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/models#validation">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
+        <h3>Every model&rsquo;s verdict</h3>
+        <p>How the seven are checked</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/papers/pe-microsim">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>
+        <h3>The paper</h3>
+        <p>Full account of the costing</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </div>
+  </section>
+    </div>
+  </div>
+
 </main>
 
 <footer class="foot foot-bar">
@@ -179,5 +262,49 @@
 
 <script src="/reveal.js?v=2" defer></script>
 
+<script>
+// StepPanel: highlight the step at the reading line and show its panel in
+// the sticky aside (scoped to each .scrolly-wrap).
+(function () {
+  "use strict";
+  Array.from(document.querySelectorAll(".scrolly-wrap")).forEach(function (wrap) {
+    var steps = Array.from(wrap.querySelectorAll(".meth-step"));
+    var panels = Array.from(wrap.querySelectorAll(".meth-panel"));
+    if (!steps.length || !panels.length) return;
+    var current = -1;
+    function update() {
+      var offset = window.innerHeight * 0.33, active = 0;
+      steps.forEach(function (step, i) { if (step.getBoundingClientRect().top < offset) active = i; });
+      if (active === current) return;
+      current = active;
+      steps.forEach(function (step, i) { step.classList.toggle("active", i === active); });
+      panels.forEach(function (panel) { panel.hidden = Number(panel.getAttribute("data-step")) !== active; });
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    update();
+  });
+})();
+</script>
+<script>
+// "On this page" rail: mark the section at the reading line.
+(function () {
+  "use strict";
+  var rail = document.querySelector(".page-rail");
+  if (!rail) return;
+  var links = Array.from(rail.querySelectorAll('a[href^="#"]'));
+  var targets = links.map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); });
+  function update() {
+    var line = window.innerHeight * 0.3, current = 0;
+    targets.forEach(function (t, i) { if (t && t.getBoundingClientRect().top < line) current = i; });
+    links.forEach(function (a, i) {
+      if (i === current) a.setAttribute("aria-current", "location"); else a.removeAttribute("aria-current");
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  update();
+})();
+</script>
 </body>
 </html>

@@ -20,14 +20,9 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=8" />
-<style>
-/* page-specific: hero sizing only — shared component styles live in style.css */
-.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-</style>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
   <a class="brand" href="/" aria-label="PolicyEngine Macro home">
@@ -71,13 +66,82 @@
       <a class="model-tabs-link" href="/papers/pe-microsim">Paper</a>
     </div>
   </nav>
-  <section id="what" class="band">
+  <section id="overview" class="band band-wide">
     <div class="band-head">
-      <span class="kicker mono">01 — what it is</span>
-      <h2>Statute as code, at household resolution.</h2>
+      <span class="kicker mono">overview</span>
+      <h2>The core: how the suite joins it, what it is, what it can answer.</h2>
     </div>
-    <div class="prose">
-      <figure class="vfig">
+    <p class="callout verdict-callout">
+      <strong>Verdict: household maths exact; population estimates add survey error.</strong>
+      Checked against implemented legislation rule by rule; costings are static and carry no interval.
+      <a href="/pe/validation">How far to trust it &rarr;</a>
+    </p>
+
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+
+      <div class="meth-step" id="pe-bridge" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>With the macro models</h3></div>
+        <p class="mo-lead">Every bridge in the suite starts or ends here.</p>
+        <p>This <em>is</em> the microsimulation: the static-costing input to the <a href="/obr">OBR emulator</a>, the incidence engine for the <a href="/svar">SVAR</a>, <a href="/frb-us">FRB/US</a>, and <a href="/us-hank">HANK</a> bridges, and both ends of the <a href="/olg">OLG</a> two-way loop.</p>
+        <p><code>score_reform</code> accepts <code>microsim</code>, <code>obr</code>, <code>og</code> and <code>og+microsim</code>; the other members connect the opposite way, as incidence.</p>
+        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">where each model joins</div>
+        <div class="meth-eq"><div class="meth-eq-label">out to</div><div class="meth-eq-body"><code>obr-macro</code>: the static costing</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">both ways</div><div class="meth-eq-body">OG-UK: statute in, wages back</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">in from</div><div class="meth-eq-body">boe-svar, frb-us, us-hank, define-uk</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">as</div><div class="meth-eq-body">incidence on households, experimental</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="what" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it is</h3></div>
+        <p class="mo-lead">Statute as code, at household resolution.</p>
+              <p>
+                The package encodes UK and US tax-and-benefit rules as parameterised
+                statute and computes every variable for a household you describe —
+                UK: income tax, National Insurance, Universal Credit, Child Benefit,
+                Pension Credit; US: federal and state income tax, payroll tax, SNAP,
+                TANF, EITC, CTC, SSI and Social Security. A reform is a flat dict of
+                parameter path &rarr; new value, identical at household and population
+                level.
+              </p>
+              <p>
+                The limit is structural: it cannot answer GDP, inflation, interest
+                rates or macro feedback. Its costings are static, and the macro members
+                of the suite exist to supply what it cannot see.
+              </p>
+              <details class="more">
+                <summary>The four packages underneath</summary>
+                <p>
+                  <code>policyengine-core</code> (the simulation framework, forked from
+                  OpenFisca), <code>policyengine-uk</code> and
+                  <code>policyengine-us</code> (the statutory rules per country), and
+                  <code>policyengine</code> — the analyst-facing package covered here,
+                  adding dataset management, reforms, structured outputs and
+                  version-pinned release bundles for reproducibility. See also the
+                  <a href="/pe/code">code</a>, the
+                  <a href="/pe/methodology">methodology</a>, and
+                  <a href="/pe/validation">how far to trust it</a>.
+                </p>
+              </details>
+        <div class="meth-inline">
+        <div class="meth-sec-title">the rules engine</div>
+        <div class="meth-eq"><div class="meth-eq-label">countries</div><div class="meth-eq-body">UK and US</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">UK rules</div><div class="meth-eq-body">income tax, NI, Universal Credit, Child Benefit, Pension Credit</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">US rules</div><div class="meth-eq-body">income and payroll tax, SNAP, TANF, EITC, CTC, SSI, Social Security</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">reform</div><div class="meth-eq-body">a flat dict, parameter path &rarr; value</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">limit</div><div class="meth-eq-body">static: no GDP, inflation or rates</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="answers" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
+        <p class="mo-lead">What a reform costs and who pays, for one household or the population.</p>
+        <p><strong>Worked example.</strong> 1p on the basic rate: &pound;6.46bn direct yield in 2026 with decile-by-decile incidence, before the <a href="/obr">macro feedback</a> is added — the full chain on <a href="/models#score">score a reform</a>.</p>
+        <p>Household and population reform impacts from <a href="/connect">any connected client</a> or at <a href="https://policyengine.org">policyengine.org</a>.</p>
+              <figure class="vfig">
         <svg class="vchart" data-chart="pe-costing" viewBox="0 0 760 304" role="img" aria-labelledby="pe-costing-t pe-costing-d">
 <title id="pe-costing-t">pe-microsim: 1p on the UK basic rate, our static costing vs the HMRC ready reckoner (£bn/yr)</title>
 <desc id="pe-costing-d">Grouped bar chart in billions of pounds per year. PolicyEngine's static costing of a 1 percentage point rise in the UK basic rate of income tax, against HMRC's Direct effects of illustrative tax changes ready reckoner, June 2025 vintage. For the basic rate +1pp, 2026–27 group, ours is 6.46 against HMRC’s 6.90, a deviation of -6.4%. For the basic rate +1pp, 2028–29 group, ours is 6.92 against HMRC’s 8.20, a deviation of -15.6%. The 2028–29 emulator figure is interpolated between the scored endpoints £6.46bn in 2026 and £7.38bn in 2030.</desc>
@@ -108,56 +172,73 @@
 <text class="vc-tick" x="602.6" y="276" text-anchor="middle">HMRC</text>
 <text class="vc-lab" x="559.0" y="296" text-anchor="middle">basic rate +1pp, 2028–29</text>
 </svg>
-        <figcaption>&pound;bn/yr. The microsimulation&rsquo;s static costing of a 1pp basic-rate rise, against HMRC&rsquo;s <em>Direct effects of illustrative tax changes</em> (June 2025 vintage). The 2028&ndash;29 figure is interpolated between the scored endpoints. Full evidence: <a href="/pe/validation">validation</a>.</figcaption>
-      </figure>
-      <p class="mo-lead">
-        The package encodes UK and US tax-and-benefit rules as parameterised
-        statute and computes every variable for a household you describe —
-        UK: income tax, National Insurance, Universal Credit, Child Benefit,
-        Pension Credit; US: federal and state income tax, payroll tax, SNAP,
-        TANF, EITC, CTC, SSI and Social Security. A reform is a flat dict of
-        parameter path &rarr; new value, identical at household and population
-        level.
-      </p>
-      <p>
-        The limit is structural: it cannot answer GDP, inflation, interest
-        rates or macro feedback. Its costings are static, and the macro members
-        of the suite exist to supply what it cannot see.
-      </p>
-      <details class="more">
-        <summary>The four packages underneath</summary>
-        <p>
-          <code>policyengine-core</code> (the simulation framework, forked from
-          OpenFisca), <code>policyengine-uk</code> and
-          <code>policyengine-us</code> (the statutory rules per country), and
-          <code>policyengine</code> — the analyst-facing package covered here,
-          adding dataset management, reforms, structured outputs and
-          version-pinned release bundles for reproducibility. See also the
-          <a href="/pe/code">code</a>, the
-          <a href="/pe/methodology">methodology</a>, and
-          <a href="/pe/validation">how far to trust it</a>.
-        </p>
-      </details>
-      <p class="chooser-note"><a href="/models#score">Score a reform end to end &rarr;</a></p>
-    </div>
-  </section>
-
-
-  <section id="pe-bridge" class="band">
-    <div class="band-head">
-      <span class="kicker mono">with the microsimulation</span>
-      <h2>Every bridge in the suite starts or ends here.</h2>
-    </div>
-    <div class="prose">
-      <div class="qa-facts">
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Connection.</strong> This <em>is</em> the microsimulation: the static-costing input to the <a href="/obr">OBR emulator</a>, the incidence engine for the <a href="/svar">SVAR</a>, <a href="/frb-us">FRB/US</a>, and <a href="/us-hank">HANK</a> bridges, and both ends of the <a href="/olg">OLG</a> two-way loop.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Worked example.</strong> 1p on the basic rate: &pound;6.46bn direct yield in 2026 with decile-by-decile incidence, before the <a href="/obr">macro feedback</a> is added — the full chain on <a href="/models#score">score a reform</a>.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Validation.</strong> <a href="/pe/validation">Checked against implemented legislation, rule by rule</a>; household maths exact, population estimates add survey error.</span></div>
-        <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Results.</strong> Household and population reform impacts from <a href="/connect">any connected client</a> or at <a href="https://policyengine.org">policyengine.org</a>.</span></div>
+                <figcaption>&pound;bn/yr. The microsimulation&rsquo;s static costing of a 1pp basic-rate rise, against HMRC&rsquo;s <em>Direct effects of illustrative tax changes</em> (June 2025 vintage). The 2028&ndash;29 figure is interpolated between the scored endpoints. Full evidence: <a href="/pe/validation">validation</a>.</figcaption>
+              </figure>
+        <p class="chooser-note"><a href="/models#score">Score a reform end to end &rarr;</a></p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">1p on the UK basic rate</div>
+        <div class="meth-eq"><div class="meth-eq-label">direct yield</div><div class="meth-eq-body">&pound;6.46bn in 2026</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">incidence</div><div class="meth-eq-body">decile by decile</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">macro feedback</div><div class="meth-eq-body">added by <code>obr-macro</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">against HMRC</div><div class="meth-eq-body">on the validation tab</div></div>
+        </div>
       </div>
+
+      </div>
+
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">The core</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">where each model joins</div>
+          <div class="meth-eq"><div class="meth-eq-label">out to</div><div class="meth-eq-body"><code>obr-macro</code>: the static costing</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">both ways</div><div class="meth-eq-body">OG-UK: statute in, wages back</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">in from</div><div class="meth-eq-body">boe-svar, frb-us, us-hank, define-uk</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">as</div><div class="meth-eq-body">incidence on households, experimental</div></div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Model at a glance</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">the rules engine</div>
+          <div class="meth-eq"><div class="meth-eq-label">countries</div><div class="meth-eq-body">UK and US</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">UK rules</div><div class="meth-eq-body">income tax, NI, Universal Credit, Child Benefit, Pension Credit</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">US rules</div><div class="meth-eq-body">income and payroll tax, SNAP, TANF, EITC, CTC, SSI, Social Security</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">reform</div><div class="meth-eq-body">a flat dict, parameter path &rarr; value</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">limit</div><div class="meth-eq-body">static: no GDP, inflation or rates</div></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Worked example</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">1p on the UK basic rate</div>
+          <div class="meth-eq"><div class="meth-eq-label">direct yield</div><div class="meth-eq-body">&pound;6.46bn in 2026</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">incidence</div><div class="meth-eq-body">decile by decile</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">macro feedback</div><div class="meth-eq-body">added by <code>obr-macro</code></div></div>
+          <div class="meth-eq"><div class="meth-eq-label">against HMRC</div><div class="meth-eq-body">on the validation tab</div></div>
+        </div>
+      </aside>
     </div>
   </section>
 
+  <section class="band where-next" id="where-next">
+    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/pe/methodology">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg></span>
+        <h3>Methodology</h3>
+        <p>Rules, microdata and reforms</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/models#compare">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg></span>
+        <h3>Compare the models</h3>
+        <p>All seven side by side</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/connect">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg></span>
+        <h3>Run it hosted</h3>
+        <p>MCP, CLI or Python, no account needed</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </div>
+  </section>
 
 </main>
 
@@ -174,5 +255,29 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
+<script>
+// StepPanel: highlight the step at the reading line and show its panel in
+// the sticky aside (scoped to each .scrolly-wrap).
+(function () {
+  "use strict";
+  Array.from(document.querySelectorAll(".scrolly-wrap")).forEach(function (wrap) {
+    var steps = Array.from(wrap.querySelectorAll(".meth-step"));
+    var panels = Array.from(wrap.querySelectorAll(".meth-panel"));
+    if (!steps.length || !panels.length) return;
+    var current = -1;
+    function update() {
+      var offset = window.innerHeight * 0.33, active = 0;
+      steps.forEach(function (step, i) { if (step.getBoundingClientRect().top < offset) active = i; });
+      if (active === current) return;
+      current = active;
+      steps.forEach(function (step, i) { step.classList.toggle("active", i === active); });
+      panels.forEach(function (panel) { panel.hidden = Number(panel.getAttribute("data-step")) !== active; });
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    update();
+  });
+})();
+</script>
 </body>
 </html>

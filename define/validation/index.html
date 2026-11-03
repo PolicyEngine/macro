@@ -20,14 +20,9 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=8" />
-<style>
-/* page-specific: hero sizing only — shared component styles live in style.css */
-.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-</style>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
   <a class="brand" href="/" aria-label="PolicyEngine Macro home">
@@ -57,9 +52,7 @@
         Validated where the publications allow it, and no further.
       </h1>
       <p class="lede reveal" style="--d:2">
-        The manual's macro block replicates; the emissions path diverges and
-        is pinned; scenario switch sets are design-gated; the calibration gap
-        to official data is computed. Deltas only, never levels.
+        The replication gates, the baseline against official numbers, the multiplier, and the ceiling.
       </p>
     </div>
   </section>
@@ -73,189 +66,248 @@
       <a class="model-tabs-link" href="/papers/define-uk">Paper</a>
     </div>
   </nav>
-
-  <section id="gates" class="band">
+  <div class="with-rail">
+    <nav class="page-rail" aria-label="On this page">
+      <p class="page-rail-title">On this page</p>
+      <a href="#trust" aria-current="location">Headline numbers</a>
+      <a href="#gates">Gates</a>
+      <a href="#calibration">Calibration</a>
+      <a href="#multiplier">Multiplier</a>
+      <a href="#emissions">Emissions</a>
+      <a href="#ceiling">The ceiling</a>
+      <a href="#where-next">Where next</a>
+    </nav>
+    <div class="rail-main">
+  <section class="band band-wide" id="trust">
     <div class="band-head">
       <span class="kicker mono">how far to trust it</span>
-      <h2>The replication gates, check by check.</h2>
+      <h2>Validated to the ceiling the publications allow. Deltas only.</h2>
+      <p class="section-intro">Partial replication: the macro block replicates the manual; no numeric v1.1 scenario results exist to check.</p>
     </div>
-    <div class="prose">
-      <p>
-        Every row below is enforced by tests against the cached pinned run
-        (upstream commit <code>846081a</code>) and recorded in the adapter's
-        <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/VALIDATION.md">VALIDATION.md</a>,
-        so drift fails loudly.
-      </p>
-      <div class="table-scroll mo-tablecard"><table>
-        <caption>DEFINE-UK replication gates against the manual and the papers</caption>
-        <thead><tr><th scope="col">what is checked</th><th scope="col">tolerance</th><th scope="col">status</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row">Manual Table&nbsp;4, macro block — growth, unemployment, population 16+, labour force, S1 baseline</th>
-            <td>population and labour force &plusmn;0.01m; growth &plusmn;0.31pp; unemployment &plusmn;0.2pp</td>
-            <td><strong>PASS</strong> (2026-08-04) — but 2025 growth misses by &minus;0.30pp, clearing by 0.01pp on a gate set after the run</td>
-          </tr>
-          <tr>
-            <th scope="row">Manual Table&nbsp;4, total emissions, S1 baseline</th>
-            <td>gated at the observed ratios so further drift fails</td>
-            <td><strong>DIVERGENCE</strong> — pinned; see <a href="#emissions">below</a></td>
-          </tr>
-          <tr>
-            <th scope="row">Scenario design — each cached scenario toggles exactly its published policy switches</th>
-            <td>exact flag set per scenario; <code>HOUSING_SUB_RATE=0.4</code> pinned</td>
-            <td><strong>PASS</strong> (2026-08-05, 10 tests)</td>
-          </tr>
-          <tr>
-            <th scope="row">FMM-2023 anchors — green public investment GDP peak; baseline 2030 emissions</th>
-            <td>wide (pre-1.0 vintage): GDP peak 0.7&ndash;1.3%; emissions 330&ndash;352 MtCO2e</td>
-            <td><strong>PASS</strong> — peak +0.92% vs &asymp;+1%; 342.8 vs &ldquo;just under 350&rdquo;. Regression pins, not agreement tests: a band reaching 352 cannot test &ldquo;just under 350&rdquo;</td>
-          </tr>
-          <tr>
-            <th scope="row">Published numeric scenario results for v1.1</th>
-            <td>—</td>
-            <td><strong>CLOSED at the achievable ceiling</strong> — none exist; see <a href="#ceiling">below</a></td>
-          </tr>
-          <tr>
-            <th scope="row">Clean-room reimplementation, milestone 1 — §2.2 matrices on the §5 initial values</th>
-            <td>manual's 4-significant-figure printing precision</td>
-            <td><strong>PASS</strong> (2026-08-04) — 62 tests, 44 of them Table 1/2 row and column identities; 13 defects in the manual pinned as machine-readable <code>MANUAL_GAPS</code> records</td>
-          </tr>
-          <tr>
-            <th scope="row">Calibration vs external observations (ONS/DESNZ/OBR)</th>
-            <td>computed and regression-tested, not tolerance-gated</td>
-            <td><strong>COMPUTED</strong> — gaps are material; see <a href="#calibration">below</a></td>
-          </tr>
-        </tbody>
-      </table></div>
-      <div class="callout">
-        This adapter runs the authors' unmodified code at a pinned commit.
-        DEFINE-UK belongs to George, Dafermos, Nikolaidi and co-authors;
-        nothing here is produced or endorsed by them, and no result is theirs.
+    <div class="stat-row">
+      <div class="stat stat-neutral">
+        <span class="stat-label">Baseline growth, 2025</span>
+        <span class="stat-value">4.66%</span>
+        <span class="stat-sub">vs a 1.31% ONS outturn</span>
+        <span class="stat-foot"><a class="chip chip-warn" href="#calibration">Deltas only, never levels</a></span>
+      </div>
+      <div class="stat stat-neutral">
+        <span class="stat-label">Emissions vs Table 4, 2040</span>
+        <span class="stat-value">&minus;23.3%</span>
+        <span class="stat-sub">pinned run below the manual</span>
+        <span class="stat-foot"><a class="chip chip-warn" href="#emissions">Open divergence</a></span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Green investment multiplier</span>
+        <span class="stat-value">1.78</span>
+        <span class="stat-sub">cumulative to 2040</span>
+        <span class="stat-foot"><a class="chip" href="#multiplier">Upper-leaning</a></span>
+      </div>
+      <div class="stat stat-neutral">
+        <span class="stat-label">v1.1 scenario results</span>
+        <span class="stat-value">none</span>
+        <span class="stat-sub">published to replicate</span>
+        <span class="stat-foot"><a class="chip chip-warn" href="#ceiling">The ceiling</a></span>
       </div>
     </div>
   </section>
 
-  <section id="calibration" class="band">
+  <section class="band band-wide" id="tests">
     <div class="band-head">
-      <span class="kicker mono">evidence — calibration</span>
-      <h2>The baseline against official numbers, computed not prose.</h2>
+      <span class="kicker mono">the evidence</span>
+      <h2>Gates, calibration, the multiplier, emissions.</h2>
     </div>
-    <div class="prose">
-      <p>
-        Every row is recomputed from the cached pinned run against pinned
-        external observations and committed as
-        <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/validation/baseline_vs_external.csv">baseline_vs_external.csv</a>;
-        the suite fails on any drift. The annual-mean convention puts 2025
-        growth at 4.66% where Table&nbsp;4 prints 4.96% — the same
-        &minus;0.30pp anchoring gap as the Table&nbsp;4 gate above.
-      </p>
-      <div class="table-scroll mo-tablecard"><table>
-        <caption>DEFINE-UK baseline (cached pinned run) against external observations, from validation/baseline_vs_external.csv</caption>
-        <thead><tr><th scope="col">quantity</th><th scope="col">model</th><th scope="col">external</th><th scope="col">verdict</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row">Real GDP growth, 2025</th>
-            <td>4.66% y/y</td>
-            <td>1.31% y/y</td>
-            <td>Far above outturn — never a forecast</td>
-          </tr>
-          <tr>
-            <th scope="row">Real GDP growth, mean 2025&ndash;40</th>
-            <td>2.4% y/y</td>
-            <td>&asymp;1.65% y/y</td>
-            <td>High vs official long-run</td>
-          </tr>
-          <tr>
-            <th scope="row">Unemployment, 2025</th>
-            <td>4.39%</td>
-            <td>4.88%</td>
-            <td>Below outturn by &asymp;0.5pp</td>
-          </tr>
-          <tr>
-            <th scope="row">Population 16+, 2025</th>
-            <td>55.66m</td>
-            <td>&asymp;56m</td>
-            <td>Consistent</td>
-          </tr>
-          <tr>
-            <th scope="row">Labour force, 2025</th>
-            <td>35.97m</td>
-            <td>&asymp;34.5m</td>
-            <td>Slightly high</td>
-          </tr>
-          <tr>
-            <th scope="row">Total emissions, 2024</th>
-            <td>401.5 MtCO2e/yr</td>
-            <td>371 MtCO2e/yr</td>
-            <td>Above the actuals it should start from</td>
-          </tr>
-          <tr>
-            <th scope="row">Emissions, 2030, vs NDC path</th>
-            <td>342.8 MtCO2e/yr</td>
-            <td>&asymp;260 MtCO2e/yr</td>
-            <td>Short of the NDC by design — current-policies baseline</td>
-          </tr>
-        </tbody>
-      </table></div>
-      <p class="opt-note">
-        external sources: ONS national accounts and MGSX (2026-07-26
-        vintages), ONS population and labour-force estimates, DESNZ 2024
-        provisional territorial emissions, OBR March 2026 EFO, and the UK
-        NDC — attributed row by row in the committed CSV.
-      </p>
-      <p>
-        So the levels are not forecasts and are never served as such: the
-        manual says the baseline &ldquo;should not be seen as a
-        prediction&rdquo;, and near-term levels are not competitive with the
-        <a href="/obr">OBR emulator</a> or the <a href="/svar">BoE SVAR</a>.
-        Only scenario <em>deltas</em> are defensible, carrying the demand-led
-        caveat.
-      </p>
-    </div>
-  </section>
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
 
-  <section id="multiplier" class="band">
-    <div class="band-head">
-      <span class="kicker mono">evidence — multiplier</span>
-      <h2>The fiscal multiplier, stated honestly.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        The model's cumulative green-public-investment multiplier, on our own
-        computation — nominal cumulative ΔGDP over ΔSPEND_GVT to 2040 — is
-        <strong>1.78</strong>. It is <em>not</em> comparable to the IMF's
-        1.1&ndash;1.5 or the OBR's &asymp;1.0, and three things push the same
-        way: those are short-horizon multipliers where ours is cumulative to
-        2040; the denominator is endogenous (government investment is 12.8% of
-        <code>SPEND_GVT</code>, and social benefits fall as unemployment does,
-        shrinking it); and a demand-led closure with Kaldor&ndash;Verdoorn
-        productivity implies a ratio above 1 anyway. The clean impulse-based
-        version has not been computed, so treat 1.78 as upper-leaning. The
-        caveats travel with every served delta
-        (<code>GPI_MULTIPLIER_CAVEATS</code>, gated by test).
-      </p>
-      <p>
-        Upstream's own <code>Multiplier_Summary.csv</code> is
-        <strong>unusable</strong> and never quoted: its multiplier columns are
-        identical across all eight scenarios and its ΔG matches the cumulative
-        delta of no variable in the scenario file. The &asymp;2.4 derived from
-        it should not be quoted either.
-      </p>
-    </div>
-  </section>
+      <div class="meth-step" id="gates" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>The replication gates</h3></div>
+        <p class="mo-lead">Every row is enforced by tests against the cached pinned run.</p>
+              <p>
+                Every row below is enforced by tests against the cached pinned run
+                (upstream commit <code>846081a</code>) and recorded in the adapter's
+                <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/VALIDATION.md">VALIDATION.md</a>,
+                so drift fails loudly.
+              </p>
+              <div class="table-scroll mo-tablecard"><table>
+                <caption>DEFINE-UK replication gates against the manual and the papers</caption>
+                <thead><tr><th scope="col">what is checked</th><th scope="col">tolerance</th><th scope="col">status</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Manual Table&nbsp;4, macro block — growth, unemployment, population 16+, labour force, S1 baseline</th>
+                    <td>population and labour force &plusmn;0.01m; growth &plusmn;0.31pp; unemployment &plusmn;0.2pp</td>
+                    <td><strong>PASS</strong> (2026-08-04) — but 2025 growth misses by &minus;0.30pp, clearing by 0.01pp on a gate set after the run</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Manual Table&nbsp;4, total emissions, S1 baseline</th>
+                    <td>gated at the observed ratios so further drift fails</td>
+                    <td><strong>DIVERGENCE</strong> — pinned; see <a href="#emissions">below</a></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Scenario design — each cached scenario toggles exactly its published policy switches</th>
+                    <td>exact flag set per scenario; <code>HOUSING_SUB_RATE=0.4</code> pinned</td>
+                    <td><strong>PASS</strong> (2026-08-05, 10 tests)</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">FMM-2023 anchors — green public investment GDP peak; baseline 2030 emissions</th>
+                    <td>wide (pre-1.0 vintage): GDP peak 0.7&ndash;1.3%; emissions 330&ndash;352 MtCO2e</td>
+                    <td><strong>PASS</strong> — peak +0.92% vs &asymp;+1%; 342.8 vs &ldquo;just under 350&rdquo;. Regression pins, not agreement tests: a band reaching 352 cannot test &ldquo;just under 350&rdquo;</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Published numeric scenario results for v1.1</th>
+                    <td>—</td>
+                    <td><strong>CLOSED at the achievable ceiling</strong> — none exist; see <a href="#ceiling">below</a></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Clean-room reimplementation, milestone 1 — §2.2 matrices on the §5 initial values</th>
+                    <td>manual's 4-significant-figure printing precision</td>
+                    <td><strong>PASS</strong> (2026-08-04) — 62 tests, 44 of them Table 1/2 row and column identities; 13 defects in the manual pinned as machine-readable <code>MANUAL_GAPS</code> records</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Calibration vs external observations (ONS/DESNZ/OBR)</th>
+                    <td>computed and regression-tested, not tolerance-gated</td>
+                    <td><strong>COMPUTED</strong> — gaps are material; see <a href="#calibration">below</a></td>
+                  </tr>
+                </tbody>
+              </table></div>
+              <div class="callout">
+                This adapter runs the authors' unmodified code at a pinned commit.
+                DEFINE-UK belongs to George, Dafermos, Nikolaidi and co-authors;
+                nothing here is produced or endorsed by them, and no result is theirs.
+              </div>
+        <div class="meth-inline">
+        <div class="meth-sec-title">check by check</div>
+        <div class="meth-eq"><div class="meth-eq-label">Table 4, macro</div><div class="meth-eq-body">PASS; 2025 growth &minus;0.30pp</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Table 4, emissions</div><div class="meth-eq-body">DIVERGENCE, pinned</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">scenario design</div><div class="meth-eq-body">PASS, 10 tests</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">FMM-2023 anchors</div><div class="meth-eq-body">PASS, regression pins</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">clean-room, milestone 1</div><div class="meth-eq-body">PASS, 62 tests</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">v1.1 scenario results</div><div class="meth-eq-body">none exist</div></div>
+        </div>
+      </div>
 
-  <section id="emissions" class="band">
-    <div class="band-head">
-      <span class="kicker mono">evidence — emissions</span>
-      <h2>The emissions path diverges from the published table.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        The one open divergence: the pinned upstream code runs
-        <em>below</em> the manual's published Table&nbsp;4 emissions by
-        &minus;3.5% in 2025, &minus;10.2% in 2030 and &minus;23.3% in 2040.
-      </p>
-      <figure class="vfig">
+      <div class="meth-step" id="calibration" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>The baseline against official numbers</h3></div>
+        <p class="mo-lead">Computed from the cached run against pinned external observations, not prose.</p>
+              <p>
+                Every row is recomputed from the cached pinned run against pinned
+                external observations and committed as
+                <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/validation/baseline_vs_external.csv">baseline_vs_external.csv</a>;
+                the suite fails on any drift. The annual-mean convention puts 2025 growth (tile above) where Table&nbsp;4 prints 4.96% — the same
+                &minus;0.30pp anchoring gap as the Table&nbsp;4 gate above.
+              </p>
+              <div class="table-scroll mo-tablecard"><table>
+                <caption>DEFINE-UK baseline (cached pinned run) against external observations, from validation/baseline_vs_external.csv</caption>
+                <thead><tr><th scope="col">quantity</th><th scope="col">model</th><th scope="col">external</th><th scope="col">verdict</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Real GDP growth, 2025</th>
+                    <td>4.66% y/y</td>
+                    <td>1.31% y/y</td>
+                    <td>Far above outturn — never a forecast</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Real GDP growth, mean 2025&ndash;40</th>
+                    <td>2.4% y/y</td>
+                    <td>&asymp;1.65% y/y</td>
+                    <td>High vs official long-run</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Unemployment, 2025</th>
+                    <td>4.39%</td>
+                    <td>4.88%</td>
+                    <td>Below outturn by &asymp;0.5pp</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Population 16+, 2025</th>
+                    <td>55.66m</td>
+                    <td>&asymp;56m</td>
+                    <td>Consistent</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Labour force, 2025</th>
+                    <td>35.97m</td>
+                    <td>&asymp;34.5m</td>
+                    <td>Slightly high</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Total emissions, 2024</th>
+                    <td>401.5 MtCO2e/yr</td>
+                    <td>371 MtCO2e/yr</td>
+                    <td>Above the actuals it should start from</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Emissions, 2030, vs NDC path</th>
+                    <td>342.8 MtCO2e/yr</td>
+                    <td>&asymp;260 MtCO2e/yr</td>
+                    <td>Short of the NDC by design — current-policies baseline</td>
+                  </tr>
+                </tbody>
+              </table></div>
+              <p class="opt-note">
+                external sources: ONS national accounts and MGSX (2026-07-26
+                vintages), ONS population and labour-force estimates, DESNZ 2024
+                provisional territorial emissions, OBR March 2026 EFO, and the UK
+                NDC — attributed row by row in the committed CSV.
+              </p>
+              <p>
+                So the levels are not forecasts and are never served as such: the
+                manual says the baseline &ldquo;should not be seen as a
+                prediction&rdquo;, and near-term levels are not competitive with the
+                <a href="/obr">OBR emulator</a> or the <a href="/svar">BoE SVAR</a>.
+                Only scenario <em>deltas</em> are defensible, carrying the demand-led
+                caveat.
+              </p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">model vs external</div>
+        <div class="meth-eq"><div class="meth-eq-label">growth, mean 2025&ndash;40</div><div class="meth-eq-body">2.4% vs &asymp;1.65%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">unemployment, 2025</div><div class="meth-eq-body">4.39% vs 4.88%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">emissions, 2024</div><div class="meth-eq-body">401.5 vs 371 MtCO2e</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">emissions 2030 vs NDC</div><div class="meth-eq-body">342.8 vs &asymp;260 MtCO2e</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="multiplier" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>The fiscal multiplier, stated honestly</h3></div>
+        <p class="mo-lead">Cumulative to 2040, with an endogenous denominator: not comparable to short-horizon figures.</p>
+              <p>
+                The model's cumulative green-public-investment multiplier, on our own
+                computation — nominal cumulative ΔGDP over ΔSPEND_GVT to 2040 — is the tile above. It is <em>not</em> comparable to the IMF's
+                1.1&ndash;1.5 or the OBR's &asymp;1.0, and three things push the same
+                way: those are short-horizon multipliers where ours is cumulative to
+                2040; the denominator is endogenous (government investment is 12.8% of
+                <code>SPEND_GVT</code>, and social benefits fall as unemployment does,
+                shrinking it); and a demand-led closure with Kaldor&ndash;Verdoorn
+                productivity implies a ratio above 1 anyway. The clean impulse-based
+                version has not been computed, so treat it as upper-leaning. The
+                caveats travel with every served delta
+                (<code>GPI_MULTIPLIER_CAVEATS</code>, gated by test).
+              </p>
+              <p>
+                Upstream's own <code>Multiplier_Summary.csv</code> is
+                <strong>unusable</strong> and never quoted: its multiplier columns are
+                identical across all eight scenarios and its ΔG matches the cumulative
+                delta of no variable in the scenario file. The &asymp;2.4 derived from
+                it should not be quoted either.
+              </p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">why it runs high</div>
+        <div class="meth-eq"><div class="meth-eq-label">definition</div><div class="meth-eq-body">cumulative &Delta;GDP over &Delta;SPEND_GVT to 2040</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">not comparable to</div><div class="meth-eq-body">IMF 1.1&ndash;1.5, OBR &asymp;1.0</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">government investment</div><div class="meth-eq-body">12.8% of <code>SPEND_GVT</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">upstream summary</div><div class="meth-eq-body">unusable, never quoted</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="emissions" data-step="3">
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>The emissions divergence</h3></div>
+        <p class="mo-lead">The pinned upstream code runs below the manual&rsquo;s published table.</p>
+              <p>
+                The one open divergence: the pinned upstream code runs
+                <em>below</em> the manual's published Table&nbsp;4 emissions by
+                &minus;3.5% in 2025 and &minus;10.2% in 2030, widening to 2040 (tile above).
+              </p>
+              <figure class="vfig">
         <svg class="vchart" data-chart="define-emissions" viewBox="0 0 760 304" role="img" aria-labelledby="define-emissions-t define-emissions-d">
 <title id="define-emissions-t">define-uk: S1 baseline total emissions — pinned run vs manual Table 4 (MtCO2e/yr)</title>
 <desc id="define-emissions-d">Grouped bar chart of S1 baseline total UK emissions in MtCO2e per year, the cached pinned run of upstream commit 846081a against the manual's published Table 4. 2025: pinned run 393, published table 407, a gated ratio of 0.965, a gap of -3.5 per cent; 2030: pinned run 343, published table 382, a gated ratio of 0.898, a gap of -10.2 per cent; 2040: pinned run 249, published table 324, a gated ratio of 0.767, a gap of -23.3 per cent. The pinned code runs below the published table and the gap widens with horizon; what is gated is the ratio of the two, pinned to plus or minus 0.02, so any further drift fails loudly. Bar heights are the levels in validation/figures/data/define_emissions_divergence.csv, rounded to whole MtCO2e; the percentages are the gated ratios themselves, which is why they differ slightly from the ratio of the rounded bars.</desc>
@@ -291,22 +343,69 @@
 <text class="vc-tick" x="659.5" y="276" text-anchor="middle">published</text>
 <text class="vc-lab" x="614.0" y="296" text-anchor="middle">2040 (-23.3%)</text>
 </svg>
-        <figcaption>S1 baseline total emissions: the cached pinned run (upstream <code>846081a</code>) against the published Table&nbsp;4. What is gated is the ratio of the two — 0.965 / 0.898 / 0.767, pinned to &plusmn;0.02 in the adapter's <code>validation/reference_outputs.json</code>, which is where the percentages above come from; the bar labels round the published levels. Source: <code>validation/figures/data/define_emissions_divergence.csv</code>.</figcaption>
-      </figure>
-      <p>
-        Not an extraction error: the components
-        (<code>EMIS_NELEC</code>&nbsp;+&nbsp;<code>EMIS_ELEC</code>) sum
-        exactly to the total and the baseline is identical across scenario
-        folders, so it is a vintage or calibration gap between the published
-        table and commit <code>846081a</code> — raised with the authors as
-        <a href="https://github.com/DEFINE-model/DEFINE_UK_1.1/issues/1">DEFINE_UK_1.1#1</a>.
-      </p>
+                <figcaption>S1 baseline total emissions: the cached pinned run (upstream <code>846081a</code>) against the published Table&nbsp;4. What is gated is the ratio of the two — 0.965 / 0.898 / 0.767, pinned to &plusmn;0.02 in the adapter's <code>validation/reference_outputs.json</code>, which is where the percentages above come from; the bar labels round the published levels. Source: <code>validation/figures/data/define_emissions_divergence.csv</code>.</figcaption>
+              </figure>
+              <p>
+                Not an extraction error: the components
+                (<code>EMIS_NELEC</code>&nbsp;+&nbsp;<code>EMIS_ELEC</code>) sum
+                exactly to the total and the baseline is identical across scenario
+                folders, so it is a vintage or calibration gap between the published
+                table and commit <code>846081a</code> — raised with the authors as
+                <a href="https://github.com/DEFINE-model/DEFINE_UK_1.1/issues/1">DEFINE_UK_1.1#1</a>.
+              </p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">pinned run vs Table 4</div>
+        <div class="meth-eq"><div class="meth-eq-label">2025</div><div class="meth-eq-body">&minus;3.5%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">2030</div><div class="meth-eq-body">&minus;10.2%</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">gated</div><div class="meth-eq-body">the ratio, pinned to &plusmn;0.02</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">raised</div><div class="meth-eq-body">DEFINE_UK_1.1#1</div></div>
+        </div>
+      </div>
+
+      </div>
+
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Gates</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">check by check</div>
+          <div class="meth-eq"><div class="meth-eq-label">Table 4, macro</div><div class="meth-eq-body">PASS; 2025 growth &minus;0.30pp</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">Table 4, emissions</div><div class="meth-eq-body">DIVERGENCE, pinned</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">scenario design</div><div class="meth-eq-body">PASS, 10 tests</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">FMM-2023 anchors</div><div class="meth-eq-body">PASS, regression pins</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">clean-room, milestone 1</div><div class="meth-eq-body">PASS, 62 tests</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">v1.1 scenario results</div><div class="meth-eq-body">none exist</div></div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Baseline vs outturns</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">model vs external</div>
+          <div class="meth-eq"><div class="meth-eq-label">growth, mean 2025&ndash;40</div><div class="meth-eq-body">2.4% vs &asymp;1.65%</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">unemployment, 2025</div><div class="meth-eq-body">4.39% vs 4.88%</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">emissions, 2024</div><div class="meth-eq-body">401.5 vs 371 MtCO2e</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">emissions 2030 vs NDC</div><div class="meth-eq-body">342.8 vs &asymp;260 MtCO2e</div></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Multiplier</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">why it runs high</div>
+          <div class="meth-eq"><div class="meth-eq-label">definition</div><div class="meth-eq-body">cumulative &Delta;GDP over &Delta;SPEND_GVT to 2040</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">not comparable to</div><div class="meth-eq-body">IMF 1.1&ndash;1.5, OBR &asymp;1.0</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">government investment</div><div class="meth-eq-body">12.8% of <code>SPEND_GVT</code></div></div>
+          <div class="meth-eq"><div class="meth-eq-label">upstream summary</div><div class="meth-eq-body">unusable, never quoted</div></div>
+        </div>
+        <div class="meth-panel" data-step="3" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Emissions</span><span class="meth-panel-badge mono">Step 4</span></div>
+          <div class="meth-sec-title">pinned run vs Table 4</div>
+          <div class="meth-eq"><div class="meth-eq-label">2025</div><div class="meth-eq-body">&minus;3.5%</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">2030</div><div class="meth-eq-body">&minus;10.2%</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">gated</div><div class="meth-eq-body">the ratio, pinned to &plusmn;0.02</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">raised</div><div class="meth-eq-body">DEFINE_UK_1.1#1</div></div>
+        </div>
+      </aside>
     </div>
   </section>
 
-  <section id="ceiling" class="band">
+  <section class="band band-wide" id="ceiling">
     <div class="band-head">
-      <span class="kicker mono">limits — the ceiling</span>
+      <span class="kicker mono">limits</span>
       <h2>No numeric v1.1 scenario results are published. That is the ceiling.</h2>
     </div>
     <div class="prose">
@@ -329,6 +428,32 @@
     </div>
   </section>
 
+  <section class="band where-next" id="where-next">
+    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/define/code">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span>
+        <h3>Code</h3>
+        <p>Run the adapter and reproduce each gate</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/models#validation">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
+        <h3>Every model&rsquo;s verdict</h3>
+        <p>How the seven are checked</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/reports/define-uk-replication">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>
+        <h3>The replication report</h3>
+        <p>The record in full</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </div>
+  </section>
+    </div>
+  </div>
+
 </main>
 
 <footer class="foot foot-bar">
@@ -344,5 +469,49 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
+<script>
+// StepPanel: highlight the step at the reading line and show its panel in
+// the sticky aside (scoped to each .scrolly-wrap).
+(function () {
+  "use strict";
+  Array.from(document.querySelectorAll(".scrolly-wrap")).forEach(function (wrap) {
+    var steps = Array.from(wrap.querySelectorAll(".meth-step"));
+    var panels = Array.from(wrap.querySelectorAll(".meth-panel"));
+    if (!steps.length || !panels.length) return;
+    var current = -1;
+    function update() {
+      var offset = window.innerHeight * 0.33, active = 0;
+      steps.forEach(function (step, i) { if (step.getBoundingClientRect().top < offset) active = i; });
+      if (active === current) return;
+      current = active;
+      steps.forEach(function (step, i) { step.classList.toggle("active", i === active); });
+      panels.forEach(function (panel) { panel.hidden = Number(panel.getAttribute("data-step")) !== active; });
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    update();
+  });
+})();
+</script>
+<script>
+// "On this page" rail: mark the section at the reading line.
+(function () {
+  "use strict";
+  var rail = document.querySelector(".page-rail");
+  if (!rail) return;
+  var links = Array.from(rail.querySelectorAll('a[href^="#"]'));
+  var targets = links.map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); });
+  function update() {
+    var line = window.innerHeight * 0.3, current = 0;
+    targets.forEach(function (t, i) { if (t && t.getBoundingClientRect().top < line) current = i; });
+    links.forEach(function (a, i) {
+      if (i === current) a.setAttribute("aria-current", "location"); else a.removeAttribute("aria-current");
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  update();
+})();
+</script>
 </body>
 </html>
