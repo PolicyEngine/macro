@@ -40,8 +40,9 @@ on them).
    bottom / top income decile, or by wealth. No advocacy, no recommendation dressed as a finding,
    no comparisons framed as wins over another institution.
 5. **Sentence case** for every heading, tab, button, chip and caption. Proper nouns and model ids
-   keep their case (`boe-svar`, `FRB/US`, `OG-UK`). Eyebrows (`.kicker`) are rendered uppercase by
-   CSS; write them in lower case in the markup.
+   keep their case (`boe-svar`, `FRB/US`, `OG-UK`). Eyebrows (`.kicker`, `.eyebrow`) are shown in
+   sentence case (CSS capitalises the first letter, never the whole label); write them in lower
+   case in the markup, with acronyms in capitals (`UK`, `MCP`).
 6. **Accessibility.** AA contrast for all text (§2.2), a visible focus ring on every interactive
    element (including on the dark bands), `aria-label` or `<title>/<desc>` on every chart,
    decorative icons `aria-hidden="true"`, link text that makes sense alone, one `h1` per page and
@@ -106,22 +107,28 @@ series-us #026AA2 on white 6.0:1. `--teal-500`/`--chart-1` is 3.5:1: lines and f
 
 ### 2.3 Type
 
-Inter (vendored) for everything except h1/h2, which are serif (`--serif`: Source Serif 4 if
-present, then Georgia, Cambria, Times; nothing extra is downloaded). JetBrains Mono (vendored)
-for code, ids, eyebrows, ticks and the title band's subtitle line.
+**The Autumn Budget look (Nov 2026).** Every token, the shell and the components follow the
+UK Autumn Budget 2026 dashboard (`PolicyEngine/uk-autumn-budget-dashboard-2026`, `src/app/
+globals.css` and the component CSS): its greys (`#F9FAFB` canvas … `#111827`), ui-kit teals, a
+1px `#E5E7EB` border and 12 px radius on cards with only an edge shadow, Inter everywhere, no
+tracked capitals. `style.css` §6 holds the layer; when a value here and §6 disagree, §6 wins.
+
+Inter (vendored) for **everything**, headings included. `--serif` and `--mono` are legacy names
+that now resolve to Inter, so old page-local styles follow. The one monospace is `--code`
+(JetBrains Mono, vendored), for real code only: `code`, `pre`, `kbd`, `samp`, `.codeblock`.
 
 | Token | Size | Use |
 |---|---|---|
-| `--fs-label` | 12 px | **minimum size**: eyebrows (uppercase, +0.08em), chart ticks, footnotes |
+| `--fs-label` | 12 px | **minimum size**: chart ticks, footnotes (no tracking, no capitals) |
 | `--fs-small` | 13 px | chips, sub-tabs on a phone, stat labels, captions |
 | `--fs-body-sm` | 14 px | tabs, tables, callouts, expander bodies, panel text |
-| `--fs-body` | 16 px | running text, title-band lede |
+| `--fs-body` | 15 px | running text (AB `--fs-body`) |
 | `--fs-lede` | 17 px | intro sentence on the home intro card |
 | `--fs-h3` | 18 px, 600, Inter | sub-heading in a card, step title |
-| `--fs-h2` | 21–26 px, 600, serif | card (section) title |
-| `--fs-hero-sub` | 23–32 px, 600, serif | title-band h1 |
-| `--fs-hero` | 28–38 px, 600, serif | homepage h1 |
-| `--fs-stat` | 32 px, 650, tabular | stat tile value |
+| `--fs-h2` | 20 px, 600, Inter, gray-800 | section title, on the canvas above its card |
+| `--fs-hero-sub` | 24 px, 700, Inter, −0.025em | title-bar h1 (20 px on a phone) |
+| `--fs-hero` | 28–36 px, 700, Inter | homepage h1 |
+| stat value | 24 px, 700, teal-700, tabular | stat tile value |
 
 Numbers in tables, tiles and panels are tabular (`font-variant-numeric: tabular-nums`, `.num`).
 Minus is U+2212 in generated numbers.
@@ -160,7 +167,7 @@ Order on every page:
 ### 3.1 Header band + primary view tabs (`.nav`, `.brand`, `.nav-links`)
 
 - One dark row (`--band-bg`, `--nav-h` high), sticky. Left: the PolicyEngine mark on a white
-  chip + "PolicyEngine Macro" in serif (the word mark hides below 640 px; the link keeps
+  chip + "PolicyEngine Macro" in Inter 600 (the word mark hides below 640 px; the link keeps
   `aria-label="PolicyEngine Macro home"`). Right: the four views from `site_nav.DESTINATIONS`
   (Home, Forecasts, Models, Use, in that order — Forecasts moved ahead of Models in r2 because the
   scored, vintage-controlled record is the product's differentiator; `site_contract` enforces Home first and the
@@ -185,11 +192,15 @@ emitted on the homepage.
 
 ### 3.3 Title band (the page's own `.hero.model-hero`, first child of `<main>`)
 
-Continues the pathway's teal. Content, top to bottom (CSS reorders the existing markup with
-`order`; no markup change is needed):
+AB's title row. `.hero` and `.hero-inner` are `display: contents`, so their children become
+items of `<main>`'s flex column and CSS `order` lays the page out as AB does, with no markup
+change: the pathway and the `h1` share the teal gradient bar (`--band-gradient`, teal-800 →
+teal-600, PE mark before the title, white Inter 700 24 px); then the sub-tab row; then the
+`.lede` (16 px gray-600) and the `.eyebrow` (13 px gray-500) on the canvas as the page's
+section header; then the cards.
 
-1. `h1` (serif, white, `text-wrap: balance`): the page's one heading.
-2. `.eyebrow`: **one subtitle line of key facts**, mono 13 px teal-100, in the tourism pattern
+1. `h1` (Inter, white, `text-wrap: balance`): the page's one heading.
+2. `.eyebrow`: **one subtitle line of key facts**, 13 px Inter grey, in the tourism pattern
    ("Demand system · 2013 Q1 to 2025 Q1, 41 quarters"). For a model: `model id · country ·
    access (hosted/local) · horizon`. For a data page: `country · what it holds · latest vintage`.
    Written in lower case except proper nouns; no sentences.
@@ -256,8 +267,12 @@ adds a 4 px `--primary` left rule: the one emphasised card per page (verdicts on
 `.card` is the same surface for blocks inside a band; `.card-grid` lays cards out
 auto-fit ≥ 260 px; `.card-flat` drops the shadow.
 
-Card head = `.band-head` > `span.kicker.mono` (eyebrow, ≤ 4 words, no ordinal numbers in new
-copy: "how far to trust it", not "03 — how far…") + `h2` (serif, ≤ 12 words) + optional
+Section head = `.band-head` as the band's first child, drawn on the canvas *above* the card as
+AB's section header: a 32 px round tinted icon badge (the view's icon), the kicker as a small teal
+sentence-case label, the `h2` (Inter 20 px), the intro in grey; the white card starts 20 px
+below (the head's `::after` paints it; the band itself has no surface). Copy rules:
+`span.kicker` (≤ 4 words, no ordinal numbers in new
+copy: "how far to trust it", not "03 — how far…") + `h2` (≤ 12 words) + optional
 `p.section-intro` (**one sentence, ≤ 20 words**).
 
 ### 4.2 Stat tile (KPI): `.stat` (new) / `.metric` (legacy)
@@ -379,7 +394,8 @@ The site's signature layout; keep it. Markup (already on 16 pages):
   failed AA).
 - Right (≥ 900 px): one white panel, 3 px teal top rule, `--shadow-raised`, sticky at
   `--sticky-top`, max height = viewport minus that (scrolls inside). Head = title + filled
-  "Step n" pill. Body = `.meth-sec-title` (uppercase eyebrow with a trailing rule) and one
+  "Step n" pill (tinted). The panel is AB's selected-policy panel: 1.5 px teal border, 10 px
+  radius, no shadow. Body = `.meth-sec-title` (small grey label with a trailing rule) and one
   `.meth-eq` per labelled figure (label + value, tabular, left-aligned; centred only for an
   equation).
 - Below 900 px: the aside is hidden and each step shows its `.meth-inline` copy. Below 480 px
@@ -477,7 +493,7 @@ verdict (§2.1): an orange box on six of seven Overviews read as "this model is 
   get its own border (`.mo-figcard` / `.vfig` may add a hairline when two charts share a card).
 - Grid: horizontal only, 1 px `--chart-grid`. Axis: 1.25 px `--chart-axis`. **Zero line**:
   1.25 px `--chart-zero`, drawn whenever the axis crosses zero.
-- Ticks: mono 12 px rendered size, `--chart-tick`; first tick left-aligned, last right-aligned.
+- Ticks: Inter 12 px rendered size, gray-500 (`--c-tick`); grid dashed 3 3 gray-200; zero line solid gray-700; legends as pill chips; first tick left-aligned, last right-aligned.
 - Series (§6.2): our model / forecast solid 2.25 px; the official or published counterpart
   dashed 5 4, 2 px; at most two series plus neutrals; a third series only with a direct label.
 - Fan / uncertainty: nested bands, outer to inner `--band-90` (13%), `--band-68` (26%), `--band-50`
@@ -518,7 +534,7 @@ verdict (§2.1): an orange box on six of seven Overviews read as "this model is 
 | `vc-grid`, `hf-grid` | gridline | `--chart-grid` |
 | `vc-axis` | axis | `--chart-axis` |
 | `vc-zero`, `hf-zero` | zero line | `--chart-zero` |
-| `vc-tick`, `hf-tick`, `hf-q` | tick label | `--chart-tick`, mono |
+| `vc-tick`, `hf-tick`, `hf-q` | tick label | `--c-tick`, Inter |
 | `vc-lab` | in-chart label | `--text-muted` |
 | `vc-s1`, `vc-s1-dot`, `ln-s1` | our model / forecast | `--series-ours` |
 | `vc-s2`, `vc-s2-dot`, `ln-s2` | official / published | `--series-official` (dashed) |

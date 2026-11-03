@@ -5045,7 +5045,10 @@ code, pre, kbd, samp, .codeblock pre, .codeblock code { font-family: var(--code)
 .model-tabs-link[href$="/code"] { --tab-icon: var(--i-code); }
 .model-tabs-link[href^="/papers/"], .model-tabs-link[href^="/reports/"] { --tab-icon: var(--i-doc); }
 .economy-topics a { --tab-icon: var(--i-chart); }
-.economy-subnav-countries a { --tab-icon: var(--i-globe); }
+.economy-topics a[href="/forecasts"], .economy-topics a[href="/forecasts/us"] { --tab-icon: var(--i-check); }
+.economy-topics a[href="/economy"], .economy-topics a[href="/economy/us"] { --tab-icon: var(--i-list); }
+.economy-subnav-scope a { --tab-icon: var(--i-globe); }
+.economy-subnav .model-tabs-link, .economy-subnav .economy-topics a { font-size: var(--fs-body); }
 .economy-subnav-label { font-size: var(--fs-small); font-weight: 500; color: var(--text-faint); }
 
 /* ---------- 6.4 section header on the canvas, card below (AB) ----------
@@ -5244,7 +5247,6 @@ details.expander > summary .expander-meta { color: var(--text-faint); font-size:
   .page-rail a { padding: 7px 12px; border-left: 2px solid var(--hairline); color: var(--text-muted); }
   .page-rail a:hover { color: var(--tab-teal); background: var(--surface-tint); }
   .page-rail a[aria-current] { color: var(--tab-teal); border-left-color: var(--tab-teal); background: var(--surface-tint); }
-  .with-rail { width: min(var(--max) + 224px, calc(100% - 2 * var(--gutter))); }
 }
 
 /* ---------- 6.8 charts: AB's Recharts look ----------
@@ -5274,6 +5276,28 @@ details.expander > summary .expander-meta { color: var(--text-faint); font-size:
 
 /* ---------- 6.9 dark mode for the section above ---------- */
 @media (prefers-color-scheme: dark) {
+  /* the badges' icons, in the dark theme's teal ink */
   :root, body:has(.nav-links a[aria-current]), body.home-page { --sec-icon: none; }
+  .band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child::before {
+    background-image: none;
+    background-color: color-mix(in srgb, var(--primary) 22%, var(--card));
+  }
   .crumbs a { color: rgba(255, 255, 255, .8); }
+}
+
+/* Labels that used to be tracked capitals hold lowercase copy: shown in
+   sentence case now (first letter up), never all caps. */
+:is(.economy-subnav-label, .prose h4, .formal-label, .prose th, .meth-step th, .foot-head,
+  .forecast-round dt, .contact-socials > span, .economy-stat-label, .economy-model-card > span,
+  .economy-note-aside > span.mono, .trends-related span, .mobile-compare-row h4, .glance-title,
+  .olg-toolbar label, .meth-sec-title, .meth-eq-label, .vmet-label, .vmet-notes-key,
+  .fc-vmet .forecast-summary span, .glance-row-head, .series-table thead th, .home-page .proof-head,
+  .home-page .core-panel-head, .home-page .xt-tag, .home-page .join-lines dt, .home-page .rail-cap,
+  .model-card dt, :where(.band) thead th)::first-letter { text-transform: uppercase; }
+:is(.vmet-label, .economy-stat-label, .glance-title, .glance-row-head, .home-page .proof-head,
+  .home-page .core-panel-head, .home-page .rail-cap, .forecast-round dt) { letter-spacing: 0; font-family: var(--body); }
+@media (max-width: 600px) {
+  .doc main > .hero > .hero-inner > h1 { font-size: 1.25rem; gap: 10px; }
+  .doc main > .hero > .hero-inner > h1::before { width: 24px; height: 24px; background-size: 18px; }
+  .model-tabs-link, .economy-topics a { font-size: var(--fs-body); }
 }
