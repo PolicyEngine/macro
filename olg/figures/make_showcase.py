@@ -60,7 +60,8 @@ def stats_tbody():
     rows.append(pp_row("Investment (% GDP)", "Investment"))
     rows.append(pp_row("Gov. Consumption (% GDP)", "Government consumption"))
     rows.append(pp_row("Debt (% GDP)", "Debt"))
-    return "\n".join(rows)
+    # DESIGN.md §2.3: minus is U+2212 in generated numbers.
+    return "\n".join(rows).replace("<td>-", "<td>\u2212").replace("(-", "(\u2212")
 
 
 BLOCKS = [

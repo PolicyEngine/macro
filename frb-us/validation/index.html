@@ -47,7 +47,7 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 04 — Federal Reserve macroeconomic model · frb-us · US · hosted</p>
+      <p class="eyebrow reveal" style="--d:0">model 04 — Fed FRB/US, rebuilt · frb-us · US · hosted · quarterly</p>
       <h1 class="reveal page-title" style="--d:1;">
         Test US monetary and fiscal shocks.
       </h1>
@@ -107,17 +107,21 @@
         <span class="stat-foot"><span class="chip">The yardstick</span></span>
       </div>
     </div>
+    <p>Fidelity to the Fed&rsquo;s baseline is not the baseline being right: against 2026 outturns the LONGBASE baseline misses core PCE inflation (<a href="#caveats">limits</a>).</p>
+    <!-- Levels and next gates: integration/src/policyengine_macro/capabilities.py MODEL_QUALITY["frb-us"]. -->
     <div class="prose">
-      <p>
-        Fidelity to the Fed's baseline is not the baseline being right. Against
-        2026 outturns the April 2026 LONGBASE tracks GDP growth, unemployment
-        and the funds rate within ~0.3pp but <strong>misses core PCE inflation
-        by &minus;1.7pp</strong> (2.7% vs a 4.4% annualized outturn, 2026Q1) —
-        a weekly
-        <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md">outturn
-        backtest</a> that reports rather than gates, because the baseline is
-        the Board's.
-      </p>
+    <div class="table-scroll trust-card"><table data-stack="yes">
+      <caption>Evidence by dimension: the registry&rsquo;s categorical judgement, and what would change it</caption>
+      <thead><tr><th scope="col">dimension</th><th scope="col">level</th><th scope="col">what would change it</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Implementation fidelity</th><td><span class="chip">strong</span></td><td>Like-for-like gates across further official demos, closures and recodes; the MCE expectations path</td></tr>
+        <tr><th scope="row">Predictive validation</th><td><span class="chip">not assessed</span></td><td>A vintage-preserving pseudo-out-of-sample forecast evaluation</td></tr>
+        <tr><th scope="row">Identification</th><td><span class="chip">not applicable</span></td><td>None: a behavioural equation model, not an identified VAR</td></tr>
+        <tr><th scope="row">Policy counterfactuals</th><td><span class="chip">moderate</span></td><td>Model-consistent expectations, cross-validated, before forward-guidance or permanent-policy use</td></tr>
+        <tr><th scope="row">Uncertainty</th><td><span class="chip">weak</span></td><td>Reviewed residual windows and closures, an exposed stochastic surface, published coverage diagnostics</td></tr>
+        <tr><th scope="row">Vintage reproducibility</th><td><span class="chip">moderate</span></td><td>Several historical model and data artefact pairs retained and tested</td></tr>
+      </tbody>
+    </table></div>
     </div>
     <details class="expander">
       <summary>How it is gated, and the uncertainty engine</summary>
@@ -202,7 +206,7 @@
 </div><!-- /vc-fig -->
                 <figcaption>Maximum absolute residuals, log scale — lower is closer. The top two bars are the tracking identity and are <strong>not</strong> a ranking: they compare two implementations' round-off, not their fidelity to the Fed's economics. Source: papers/frb-us validation tables.</figcaption>
               </figure>
-              <div id="trust-table" class="table-scroll"><table>
+              <div id="solver-table" class="table-scroll"><table>
                 <caption>Validation results against the Federal Reserve Board's own artefacts</caption>
                 <thead><tr><th scope="col">test</th><th scope="col">what it checks</th><th scope="col">result</th></tr></thead>
                 <tbody>
@@ -241,6 +245,8 @@
                 <thead><tr><th scope="col">Quantity</th><th scope="col">Ours</th><th scope="col">Published</th><th scope="col">Reading</th></tr></thead>
                 <tbody>
                   <tr><th scope="row">Gov. purchases, yr 1, inertial Taylor rule</th><td>0.72</td><td>0.7&ndash;1.0 (Coenen et al. 2012); Ramey (JEP 2019): "a surprisingly narrow range of 0.6 to 1"</td><td>inside range</td></tr>
+                  <tr><th scope="row">Gov. purchases, yr 2, inertial Taylor rule</th><td>0.64</td><td>no matched published cell</td><td>reported for completeness</td></tr>
+                  <tr><th scope="row">Gov. purchases, yr 1, pegged funds rate</th><td>0.77</td><td>no matched published cell</td><td>reported for completeness</td></tr>
                   <tr><th scope="row">Gov. purchases, yr 2, pegged funds rate</th><td>0.90</td><td>"roughly one" pegged; 1.1&ndash;1.2 with accommodation</td><td><strong>below</strong> the accommodation range</td></tr>
                   <tr><th scope="row">Personal tax cut, yrs 1&ndash;2</th><td>0.22 → 0.32</td><td>0.2&ndash;0.4; CBO central ≈0.3; yr-1 benchmark is a two-year figure</td><td>inside range, horizons unmatched</td></tr>
                 </tbody>
@@ -256,19 +262,15 @@
       <div class="meth-step" id="worked-shock" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>A worked shock, against the Board</h3></div>
         <p class="mo-lead">One command reproduces a 100bp tightening under the inertial Taylor rule.</p>
-              <p>
-                One command reproduces a 100bp funds-rate tightening under the
-                inertial Taylor rule:
-              </p>
               <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code></pre></div>
               <div class="table-scroll mo-tablecard cmp-compare">
               <table>
                 <thead><tr><th scope="col">Response</th><th scope="col">Ours</th><th scope="col">Published Fed reference</th></tr></thead>
                 <tbody>
                   <tr><th scope="row">Funds rate, on impact</th><td><strong>+1.000pp</strong></td><td>+1.00pp by design — exact</td></tr>
-                  <tr><th scope="row">Real GDP, trough</th><td><strong>&minus;0.55%</strong></td><td>right sign, size and timing vs the Board's documented VAR-expectations properties</td></tr>
-                  <tr><th scope="row">Unemployment, peak</th><td><strong>+0.26pp</strong></td><td>right sign and order, same source</td></tr>
-                  <tr><th scope="row">Core inflation, trough</th><td><strong>&minus;0.034pp</strong></td><td>right sign and order, same source</td></tr>
+                  <tr><th scope="row">Real GDP, trough (2027Q4)</th><td><strong>&minus;0.55%</strong></td><td>no published figure: the 2014 FEDS Note reports the output gap, not GDP</td></tr>
+                  <tr><th scope="row">Unemployment, peak</th><td><strong>+0.26pp</strong></td><td>rises, consistent with the output&ndash;unemployment link; peak about half the gap trough</td></tr>
+                  <tr><th scope="row">Core inflation, trough</th><td><strong>&minus;0.034pp</strong></td><td>&asymp;&minus;0.08pp: 0.05pp smaller, a flatter current-vintage Phillips curve</td></tr>
                   <tr><th scope="row">Output gap, trough</th><td><strong>&minus;0.50pp</strong></td><td>~&minus;0.4pp, read off 2014 FEDS Note charts — approximate by nature (<a href="#caveats">limits</a>)</td></tr>
                 </tbody>
               </table>
@@ -280,9 +282,9 @@
         <div class="meth-inline">
         <div class="meth-sec-title">ours vs the Board&rsquo;s documentation</div>
         <div class="meth-eq"><div class="meth-eq-label">funds rate</div><div class="meth-eq-body">+1.000pp, exact by design</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">real GDP trough</div><div class="meth-eq-body">&minus;0.55%, right sign and timing</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">real GDP trough</div><div class="meth-eq-body">&minus;0.55%, 2027Q4; no published GDP figure</div></div>
         <div class="meth-eq"><div class="meth-eq-label">unemployment peak</div><div class="meth-eq-body">+0.26pp</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">core inflation trough</div><div class="meth-eq-body">&minus;0.034pp</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">core inflation trough</div><div class="meth-eq-body">&minus;0.034pp vs &asymp;&minus;0.08pp</div></div>
         <div class="meth-eq"><div class="meth-eq-label">output gap trough</div><div class="meth-eq-body">&minus;0.50pp vs ~&minus;0.4pp</div></div>
         </div>
       </div>
@@ -309,9 +311,9 @@
           <div class="meth-panel-head"><span class="meth-panel-title">The 100bp shock</span><span class="meth-panel-badge mono">Step 3</span></div>
           <div class="meth-sec-title">ours vs the Board&rsquo;s documentation</div>
           <div class="meth-eq"><div class="meth-eq-label">funds rate</div><div class="meth-eq-body">+1.000pp, exact by design</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">real GDP trough</div><div class="meth-eq-body">&minus;0.55%, right sign and timing</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">real GDP trough</div><div class="meth-eq-body">&minus;0.55%, 2027Q4; no published GDP figure</div></div>
           <div class="meth-eq"><div class="meth-eq-label">unemployment peak</div><div class="meth-eq-body">+0.26pp</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">core inflation trough</div><div class="meth-eq-body">&minus;0.034pp</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">core inflation trough</div><div class="meth-eq-body">&minus;0.034pp vs &asymp;&minus;0.08pp</div></div>
           <div class="meth-eq"><div class="meth-eq-label">output gap trough</div><div class="meth-eq-body">&minus;0.50pp vs ~&minus;0.4pp</div></div>
         </div>
       </aside>
@@ -328,6 +330,10 @@
         <caption>Known limits of the frb-us implementation</caption>
         <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
         <tbody>
+          <tr>
+            <th scope="row"><strong>The baseline misses core inflation</strong></th>
+            <td>Against 2026 outturns the April 2026 LONGBASE tracks GDP growth, unemployment and the funds rate within ~0.3pp but <strong>misses core PCE inflation by &minus;1.7pp</strong> (2.7% vs a 4.4% annualized outturn, 2026Q1). A weekly <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md">outturn backtest</a> reports this rather than gating it, because the baseline is the Board&rsquo;s. LONGBASE is an illustrative tracking baseline, not an official Fed forecast.</td>
+          </tr>
           <tr>
             <th scope="row"><strong>VAR expectations only</strong></th>
             <td>Model-consistent expectations are not implemented (<code>mce=</code> raises <code>NotImplementedError</code>), so forward guidance is out of scope.</td>

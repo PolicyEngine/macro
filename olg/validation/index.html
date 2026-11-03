@@ -47,7 +47,7 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 06 — overlapping generations · psl-og · UK · local</p>
+      <p class="eyebrow reveal" style="--d:0">model 06 — OG-UK OLG · psl-og · UK · local · long-run steady state</p>
       <h1 class="reveal page-title" style="--d:1;">
         Model long-run behavioural change.
       </h1>
@@ -102,6 +102,21 @@
         <span class="stat-sub">net capital stock</span>
         <span class="stat-foot"><a class="chip" href="#targets">No published reconciliation</a></span>
       </div>
+    </div>
+    <!-- Levels and next gates: integration/src/policyengine_macro/capabilities.py MODEL_QUALITY["og-uk"]. -->
+    <div class="prose">
+    <div class="table-scroll trust-card"><table data-stack="yes">
+      <caption>Evidence by dimension: the registry&rsquo;s categorical judgement, and what would change it</caption>
+      <thead><tr><th scope="col">dimension</th><th scope="col">level</th><th scope="col">what would change it</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Implementation fidelity</th><td><span class="chip">moderate</span></td><td>A cross-check of the UK calibration against an independent OLG implementation or the OG-Core reference results</td></tr>
+        <tr><th scope="row">Predictive validation</th><td><span class="chip">not applicable</span></td><td>None: a long-run comparative static, not a forecast</td></tr>
+        <tr><th scope="row">Identification</th><td><span class="chip">not applicable</span></td><td>None: behaviour comes from the calibrated lifecycle structure</td></tr>
+        <tr><th scope="row">Policy counterfactuals</th><td><span class="chip">weak</span></td><td>A published UK OLG reform result to score against, or a permanent statement that none exists</td></tr>
+        <tr><th scope="row">Uncertainty</th><td><span class="chip">weak</span></td><td>A published sensitivity sweep over the elasticities the result is most exposed to</td></tr>
+        <tr><th scope="row">Vintage reproducibility</th><td><span class="chip">weak</span></td><td>Demographic and microdata inputs cached, so a solve reproduces from committed artefacts</td></tr>
+      </tbody>
+    </table></div>
     </div>
   </section>
 
@@ -401,6 +416,30 @@
         <caption>Known limits of the overlapping-generations model</caption>
         <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
         <tbody>
+          <tr>
+            <th scope="row"><strong>Smoothed tax functions, not statutory bands</strong></th>
+            <td>A single Gouveia&ndash;Strauss function fitted to PolicyEngine-UK output folds income tax and National Insurance together. Reforms changing <em>average</em> liability flow through cleanly; reforms whose mechanism is the kink itself (a new threshold, an allowance taper change) register only as far as the smoothed function shifts.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Permanent ability types, no earnings risk</strong></th>
+            <td>With J&nbsp;=&nbsp;7 deterministic ability types and no idiosyncratic earnings shock within a type, precautionary savings and earnings-risk-driven inequality are not channels here; the OBR&rsquo;s own UK OLG model (<a href="#obr-overview">above</a>) makes the opposite choice.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>UK as a single entity</strong></th>
+            <td>Calibration is to UK-wide aggregates, with no England / Scotland / Wales / Northern&nbsp;Ireland breakdown; devolved tax differentials and explicitly regional reforms sit below the model&rsquo;s granularity.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Reforms are step changes</strong></th>
+            <td>A PolicyEngine reform sets parameter values from a start date, holding thereafter; phased introductions, sunset clauses or year-on-year indexation changes need explicit scripting.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Truncated horizon</strong></th>
+            <td>The default 60-period transition assumes the steady state arrives by year 60; longer-run effects collapse into the steady-state anchor.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>The dynamic score is a flat overlay</strong></th>
+            <td><code>og+microsim</code> applies the steady-state factor flat to one policy year, so no transition path is represented; the distributional incidence of effective-labour changes is reported, not allocated; and the model is real, so it has no price-level effects.</td>
+          </tr>
           <tr>
             <th scope="row"><strong>Version pin</strong></th>
             <td><code>oguk</code> 0.3.2 pins <code>policyengine-uk==2.88.0</code>. Versions ≥ 2.89 renamed the microdata dataset keys, so mixing them fails with a <code>KeyError</code> at calibration time; the adapter traps it and raises an actionable error. Until the pin lifts, the OLG member scores against an older statute vintage than <a href="/pe">the microsimulation member</a> — a declared inconsistency, not a hidden one.</td>

@@ -46,7 +46,7 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 07 — ecological stock-flow consistent · define-uk · UK · experimental</p>
+      <p class="eyebrow reveal" style="--d:0">model 07 — DEFINE-UK E-SFC · define-uk · UK · local · annual to 2037</p>
       <h1 class="reveal page-title" style="--d:1;">
         Climate policy meets the UK financial system.
       </h1>
@@ -65,17 +65,36 @@
       <a class="model-tabs-link" href="/papers/define-uk">Paper</a>
     </div>
   </nav>
-  <section id="overview" class="band band-wide">
+  <section id="card" class="band band-wide">
     <div class="band-head">
-      <span class="kicker mono">overview</span>
-      <h2>How it joins the core, what it is, what it can answer.</h2>
+      <span class="kicker mono">model card</span>
+      <h2>DEFINE-UK at a glance</h2>
     </div>
     <p class="callout callout-warn verdict-callout">
       <strong>Verdict: partial replication; deltas only, never levels.</strong>
       The baseline sits far from official outturns and no numeric v1.1 scenario results are published, so the gates are the ceiling.
       <a href="/define/validation">How far to trust it &rarr;</a>
     </p>
+    <!-- Fields follow integration/src/policyengine_macro/capabilities.py MODELS["define-uk"]. -->
+    <dl class="model-card">
+      <div><dt>Answers</dt><dd>How a UK climate-policy mix moves output, emissions, unemployment and consumption against the current-policies baseline</dd></div>
+      <div><dt>Horizon</dt><dd>Annual scenario deltas, 2023&ndash;2037</dd></div>
+      <div><dt>Inputs</dt><dd>A curated scenario name from the upstream scenario set</dd></div>
+      <div><dt>Outputs</dt><dd>Scenario minus baseline: real GDP, emissions, unemployment, real consumption</dd></div>
+      <div><dt>Joins pe-microsim</dt><dd>Household income deltas become a UK earnings overlay (<a href="#pe-bridge">step 1</a>, experimental)</dd></div>
+      <div><dt>Cannot answer</dt><dd>Reform scoring (no statute mapping); forecasts or baseline levels (deltas only)</dd></div>
+      <div><dt>Access</dt><dd>Local CLI and Python package; hosted tools return run instructions, never results (<a href="/define/code">Code</a>)</dd></div>
+      <div><dt>Runtime</dt><dd>Instant from the cached upstream run; a fresh run needs local R</dd></div>
+      <div><dt>Data vintage</dt><dd>DEFINE-UK 1.1 upstream at pinned commit <code>846081a</code> (April 2026 manual)</dd></div>
+      <div><dt>Uncertainty</dt><dd>None quantified: deterministic deltas from one calibration</dd></div>
+    </dl>
+  </section>
 
+  <section id="overview" class="band band-wide">
+    <div class="band-head">
+      <span class="kicker mono">overview</span>
+      <h2>How it joins the core, what it is, what it can answer.</h2>
+    </div>
     <div class="scrolly-wrap">
       <div class="scrolly-steps">
 
@@ -166,13 +185,6 @@
       <div class="meth-step" id="status" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
         <p class="mo-lead">How a climate-policy mix moves the UK economy and emissions against the baseline, as deltas.</p>
-              <div class="callout callout-warn">
-                <strong>Experimental; partial replication — deltas only, never
-                levels.</strong> The baseline macro block replicates the manual's
-                Table&nbsp;4 and every scenario toggles exactly its published policy
-                switches, but no numeric v1.1 scenario results are published, so those
-                <a href="/define/validation">gates</a> are the ceiling.
-              </div>
         <p>Two things do not pass: the baseline emissions path runs below the published table, and the baseline sits far from official outturns &mdash; both are on the <a href="/define/validation#calibration">validation tab</a>. Hence deltas only. The green-public-investment multiplier also runs high (<a href="/define/validation#multiplier">why</a>).</p>
         <p><strong>Nothing upstream is hosted.</strong> Hosted tools return run
                   instructions, never results; the path to hosting is a

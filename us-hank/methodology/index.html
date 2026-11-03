@@ -56,7 +56,7 @@ window.MathJax = {
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 05 — US heterogeneous-agent NK model · us-hank · US · hosted</p>
+      <p class="eyebrow reveal" style="--d:0">model 05 — two-asset HANK · us-hank · US · hosted · quarterly IRFs</p>
       <h1 class="reveal page-title" style="--d:1;">
         See who responds to a US shock, not just how much.
       </h1>
@@ -83,10 +83,9 @@ window.MathJax = {
     </div>
     <div class="prose">
       <p>
-        The five stages of the us-hank pipeline, from the heterogeneous-agent
-        structure to the first-order distributional block. The theory is the
-        Auclert–Bardóczy–Rognlie–Straub <em>Econometrica</em> 2021 paper's;
-        the implementation builds on the authors'
+        Five stages, from the household structure to the first-order
+        distributional block. The theory is the Auclert–Bardóczy–Rognlie–Straub
+        <em>Econometrica</em> 2021 paper's; the code builds on the authors'
         <a href="https://github.com/shade-econ/sequence-jacobian">sequence-jacobian</a>
         toolkit.
       </p>
@@ -121,9 +120,9 @@ window.MathJax = {
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
         <h4>Households differ</h4>
-      <p>This is a validated replication of the two-asset heterogeneous-agent New Keynesian (HANK) model of Auclert, Bardóczy, Rognlie and Straub (<em>Econometrica</em> 2021, "Using the Sequence-Space Jacobian to Solve and Estimate Heterogeneous-Agent Models"). Households differ in <strong>liquid and illiquid wealth</strong>, so their marginal propensities to consume differ, and the model carries that whole distribution through the general-equilibrium response — the thing a representative-agent model cannot say.</p>
+      <p>The model is the two-asset heterogeneous-agent New Keynesian (HANK) model of Auclert, Bardóczy, Rognlie and Straub (<em>Econometrica</em> 2021, "Using the Sequence-Space Jacobian to Solve and Estimate Heterogeneous-Agent Models"). Households differ in <strong>liquid and illiquid wealth</strong>, so their marginal propensities to consume differ, and the model carries that whole distribution through the general-equilibrium response — the thing a representative-agent model cannot say.</p>
       <h4>Production grids, not demo grids</h4>
-      <p>The model runs at the paper's <strong>production grid sizes</strong> — 50 liquid × 70 illiquid × 50 capital points — rather than the packaged demo grids. It is a <strong>VAR-free, sequence-space HANK</strong>: no estimated reduced form, no expectations shortcut. A <code>variant</code> option selects the paper's <code>two_asset</code> model (the default) or a fast <code>one_asset</code> textbook variant — no capital, so no investment response, and monetary/productivity shocks only.</p>
+      <p>The model runs at the paper's <strong>production grid sizes</strong> — 50 liquid × 70 illiquid × 50 capital points — rather than the packaged demo grids. It is a <strong>VAR-free, sequence-space HANK</strong>: no estimated reduced form, no expectations shortcut. A fast one-asset textbook variant also exists; the <a href="/us-hank/code#code-3">Code tab</a> says what it drops.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">household structure</div>
         <div class="meth-eq"><div class="meth-eq-label">assets</div><div class="meth-eq-body">liquid + illiquid, per household</div></div>
@@ -214,7 +213,7 @@ window.MathJax = {
         <h4>One linear map</h4>
       <p>The second stage builds the general-equilibrium <strong>sequence-space Jacobian</strong> — the \(T \times T\) linear map from each exogenous path to each outcome path, with <strong>\(T = 300\) quarters</strong>. It takes about <strong>5 seconds</strong> and is cached alongside the steady state.</p>
       <h4>Instant IRFs</h4>
-      <p>With both caches warm, an impulse response is a <strong>matrix–vector product</strong> — effectively instant. The first call per variant pays the steady-state and Jacobian solves, roughly 18 seconds cold; every later call reuses them.</p>
+      <p>With both caches warm, an impulse response is a <strong>matrix–vector product</strong>, effectively instant. The first call per variant pays the steady-state and Jacobian solves; every later call reuses them.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">Jacobian</div>
         <div class="meth-eq"><div class="meth-eq-label">object</div><div class="meth-eq-body">\(T \times T\) map: exogenous path &rarr; outcome path</div></div>
@@ -295,7 +294,7 @@ window.MathJax = {
         <h4>The distributional block</h4>
       <p>From the steady-state joint distribution and consumption policy, the model reports <strong>MPCs by liquid-wealth quartile</strong>, the <strong>hand-to-mouth share</strong>, and a first-order allocation of the impact consumption response across <strong>total-wealth quartiles</strong> — allocated in proportion to steady-state MPCs.</p>
       <h4>What "first-order" means here</h4>
-      <p>Responses are linear in the shock, with no state dependence: the distributional cuts capture the MPC-heterogeneity channel, not full household-level dynamics along the transition. And the model is <strong>not a forecaster</strong> — every result is a deviation around the calibrated steady state, not a projection of the US economy. The <a href="/us-hank/code">code page</a> has the commands and Python API; the <a href="/us-hank/validation">validation page</a> has the replication gate and full limits.</p>
+      <p>Responses are linear in the shock, with no state dependence: the distributional cuts capture the MPC-heterogeneity channel, not full household-level dynamics along the transition. Every result is a deviation around the calibrated steady state. The replication gate and the full limits are on <a href="/us-hank/validation">Validation</a>.</p>
       </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">

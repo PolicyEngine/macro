@@ -46,7 +46,7 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 06 — overlapping generations · psl-og · UK · local</p>
+      <p class="eyebrow reveal" style="--d:0">model 06 — OG-UK OLG · psl-og · UK · local · long-run steady state</p>
       <h1 class="reveal page-title" style="--d:1;">
         Model long-run behavioural change.
       </h1>
@@ -66,17 +66,36 @@
       <a class="model-tabs-link" href="/papers/psl-og">Paper</a>
     </div>
   </nav>
-  <section id="overview" class="band band-wide">
+  <section id="card" class="band band-wide">
     <div class="band-head">
-      <span class="kicker mono">overview</span>
-      <h2>How it joins the core, what it is, what it can answer.</h2>
+      <span class="kicker mono">model card</span>
+      <h2>OG-UK at a glance</h2>
     </div>
     <p class="callout callout-warn verdict-callout">
       <strong>Verdict: calibrated, not outcome-validated.</strong>
       ONS and OBR aggregates are targets met by construction; no independent outcome benchmark exists for this model class.
       <a href="/olg/validation">How far to trust it &rarr;</a>
     </p>
+    <!-- Fields follow integration/src/policyengine_macro/capabilities.py MODELS["og-uk"] and MODELS["og+microsim"]. -->
+    <dl class="model-card">
+      <div><dt>Answers</dt><dd>Where the UK economy settles under a tax reform, and the year-by-year path there</dd></div>
+      <div><dt>Horizon</dt><dd>Long-run steady state; the package also solves transition paths</dd></div>
+      <div><dt>Inputs</dt><dd>A PolicyEngine parameter reform, the same dict the microsimulation takes; calibration parameters</dd></div>
+      <div><dt>Outputs</dt><dd>GDP, work, saving, capital, wages, interest rates, debt</dd></div>
+      <div><dt>Joins pe-microsim</dt><dd>Both ways: tax functions in, long-run wages and labour supply out (<a href="#pe-bridge">step 1</a>)</dd></div>
+      <div><dt>Cannot answer</dt><dd>Short-run forecasts; fast hosted custom scenarios; price-level effects (the model is real)</dd></div>
+      <div><dt>Access</dt><dd>Local CLI steady state and Python package; not hosted (<a href="/olg/code">Code</a>)</dd></div>
+      <div><dt>Runtime</dt><dd>17+ minutes per steady-state solve; transition paths can take hours</dd></div>
+      <div><dt>Calibration</dt><dd>OG-UK packaged calibration inputs, with tax functions from PolicyEngine microdata</dd></div>
+      <div><dt>Uncertainty</dt><dd>None quantified; sensitivity analysis not yet comprehensive</dd></div>
+    </dl>
+  </section>
 
+  <section id="overview" class="band band-wide">
+    <div class="band-head">
+      <span class="kicker mono">overview</span>
+      <h2>How it joins the core, what it is, what it can answer.</h2>
+    </div>
     <div class="scrolly-wrap">
       <div class="scrolly-steps">
 
@@ -164,12 +183,12 @@
                 <thead><tr><th scope="col">aggregate</th><th scope="col">baseline 2030</th><th scope="col">reform 2030</th><th scope="col">change</th></tr></thead>
                 <tbody>
 <!-- olg-stats:begin -->
-<tr><th scope="row">GDP (£bn, current prices)</th><td>3,627.9</td><td>3,622.8</td><td>-5.0 (-0.14%)</td></tr>
+<tr><th scope="row">GDP (£bn, current prices)</th><td>3,627.9</td><td>3,622.8</td><td>−5.0 (−0.14%)</td></tr>
 <tr><th scope="row">Tax revenue (% of GDP)</th><td>32.06%</td><td>32.35%</td><td>+0.29pp</td></tr>
-<tr><th scope="row">Consumption (% of GDP)</th><td>61.33%</td><td>61.10%</td><td>-0.23pp</td></tr>
-<tr><th scope="row">Investment (% of GDP)</th><td>18.50%</td><td>18.28%</td><td>-0.23pp</td></tr>
+<tr><th scope="row">Consumption (% of GDP)</th><td>61.33%</td><td>61.10%</td><td>−0.23pp</td></tr>
+<tr><th scope="row">Investment (% of GDP)</th><td>18.50%</td><td>18.28%</td><td>−0.23pp</td></tr>
 <tr><th scope="row">Government consumption (% of GDP)</th><td>44.28%</td><td>44.67%</td><td>+0.38pp</td></tr>
-<tr><th scope="row">Debt (% of GDP)</th><td>94.50%</td><td>94.42%</td><td>-0.08pp</td></tr>
+<tr><th scope="row">Debt (% of GDP)</th><td>94.50%</td><td>94.42%</td><td>−0.08pp</td></tr>
 <!-- olg-stats:end -->
                 </tbody>
               </table></div>

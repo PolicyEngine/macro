@@ -56,9 +56,9 @@ window.MathJax = {
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 07 — ecological stock-flow consistent · define-uk · UK · experimental</p>
+      <p class="eyebrow reveal" style="--d:0">model 07 — DEFINE-UK E-SFC · define-uk · UK · local · annual to 2037</p>
       <h1 class="reveal page-title" style="--d:1;">
-        How DEFINE-UK works, and how we run it.
+        Climate policy meets the UK financial system.
       </h1>
       <p class="lede reveal" style="--d:2">
         The stock-flow accounting, the blocks and the pinned run.
@@ -83,13 +83,12 @@ window.MathJax = {
     </div>
     <div class="prose">
       <p>
-        Six steps from the accounting discipline to the running system:
-        what stock-flow consistency requires, the sectors and balance
-        sheets that satisfy it, the two UK-specific structural blocks, the
-        demand-led closure and its multipliers, scenarios as verified
-        policy switches, and the adapter that runs the unlicensed upstream
-        at a pinned commit. Each step's formal elements sit alongside its
-        narrative.
+        Six steps from the accounting discipline to the running system; the
+        formal elements sit in the panel beside each step. The specification
+        is the <a href="https://define-model.org/wp-content/uploads/2026/04/define_uk_1.1.pdf">DEFINE-UK 1.1 Model Manual</a>
+        (George &amp; Dafermos, April 2026); the model design belongs to its
+        authors, and our adapter is not endorsed by them. How we run and gate
+        it: the <a href="/papers/define-uk">working paper</a>.
       </p>
     </div>
 
@@ -235,12 +234,11 @@ window.MathJax = {
         <h4>The closure</h4>
       <p>DEFINE-UK is closed demand-led: output adjusts to aggregate demand rather than being pinned to a supply-side potential path. That is the standard post-Keynesian SFC closure, and it has a direct, observable consequence — fiscal expansions are not crowded out by an assumed return to potential, so fiscal multipliers come out larger than in supply-constrained models like the <a href="/obr">OBR emulator</a>.</p>
         <h4>Measured, not asserted</h4>
-      <p>We measure this rather than assert it: our own computation of the model's cumulative green-public-investment multiplier is on the <a href="/define/validation#multiplier">validation tab</a>. It is not comparable to the short-horizon published multipliers it used to be set against: ours is cumulative to 2040, its denominator is endogenous and biases the ratio up, and a demand-led closure implies above 1 anyway. Every surface that quotes a DEFINE-UK delta carries the caveat. The full comparison is on the <a href="/define/validation">validation page</a>.</p>
+      <p>We measure this rather than assert it. Our own computation of the model's cumulative green-public-investment multiplier, and why it is not comparable to short-horizon published multipliers, is on <a href="/define/validation#multiplier">Validation</a>.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">closure and multipliers</div>
         <div class="meth-eq"><div class="meth-eq-label">closure</div><div class="meth-eq-body">demand-led: \(Y\) adjusts to aggregate demand, not a potential path</div></div>
         <div class="meth-eq"><div class="meth-eq-label">our computation</div><div class="meth-eq-body">cumulative green-public-investment multiplier, to 2040</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">comparators</div><div class="meth-eq-body">not comparable to short-horizon published multipliers: ours is cumulative to 2040, its denominator is endogenous and biases the ratio up, and a demand-led closure implies above 1 anyway</div></div>
         </div>
       </div>
 
@@ -309,7 +307,7 @@ window.MathJax = {
         <h4>Deltas only, local only</h4>
       <p><code>pe-macro define-scenarios</code> and <code>pe-macro define-scenario</code> return annualised scenario-minus-baseline delta paths only, framed with mandatory caveats — never levels, because the baseline's calibration gap to ONS/DESNZ/OBR actuals is computed and material. The hosted MCP tools return run instructions instead of results, because the unlicensed upstream is never hosted. <code>score_reform</code> will not accept this model.</p>
         <h4>The clean-room path to hosting</h4>
-      <p>The path to hosting is a <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">clean-room Python reimplementation</a> of the published Model Manual — the same adapted-model approach as the OBR emulator. The protocol: the manual is the specification, and the upstream run is a numerical oracle only — its outputs are compared against ours, but its source code is never read to write equations, and every equation must carry a reference to the manual section and equation number it implements. Five milestones run from the accounting core to the full policy scenarios; milestone 1 — the §2.2 transactions and balance-sheet matrices on the §5 initial values — passed with 44 identity tests of 62 collected, including one documented inconsistency in the manual itself (Table 6 omits a dividend term of Eq. 383 from the interbank-lending row, which the tests pin exactly rather than paper over).</p>
+      <p>The path to hosting is a <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">clean-room Python reimplementation</a> of the published Model Manual — the same adapted-model approach as the OBR emulator. The protocol: the manual is the specification, and the upstream run is a numerical oracle only — its outputs are compared against ours, but its source code is never read to write equations, and every equation must carry a reference to the manual section and equation number it implements. Five milestones run from the accounting core to the full policy scenarios; the gate results are on <a href="/define/validation#gates">Validation</a> and the progress on the <a href="/define/code#run-4">Code tab</a>.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">adapter architecture</div>
         <div class="meth-eq"><div class="meth-eq-label">pinned commit</div><div class="meth-eq-body">runtime fetch at <code>846081a</code>; executed unmodified, in R; nothing vendored or hosted</div></div>
@@ -349,7 +347,6 @@ window.MathJax = {
           <div class="meth-sec-title">closure and multipliers</div>
         <div class="meth-eq"><div class="meth-eq-label">closure</div><div class="meth-eq-body">demand-led: \(Y\) adjusts to aggregate demand, not a potential path</div></div>
         <div class="meth-eq"><div class="meth-eq-label">our computation</div><div class="meth-eq-body">cumulative green-public-investment multiplier, to 2040</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">comparators</div><div class="meth-eq-body">not comparable to short-horizon published multipliers: ours is cumulative to 2040, its denominator is endogenous and biases the ratio up, and a demand-led closure implies above 1 anyway</div></div>
         </div>
         <div class="meth-panel" data-step="4" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Scenarios as policy switches</span><span class="meth-panel-badge mono">Step 5</span></div>
@@ -380,24 +377,6 @@ window.MathJax = {
       <div class="diagram-modal-body"></div>
     </div>
   </div>
-
-  <section id="sources" class="band">
-    <div class="band-head">
-      <span class="kicker mono">sources</span>
-      <h2>Where the references live.</h2>
-    </div>
-    <div class="prose">
-      <p>
-        Sources: the <a href="https://define-model.org/wp-content/uploads/2026/04/define_uk_1.1.pdf">DEFINE-UK 1.1 Model Manual</a>
-        (George &amp; Dafermos, April 2026) and our
-        <a href="https://github.com/PolicyEngine/define-uk-model">adapter repository</a>.
-        The model design belongs to its authors; the adapter and the
-        reimplementation are ours, and neither is endorsed by them. What the
-        validation gates do and do not establish is on the
-        <a href="/define/validation">validation</a> page.
-      </p>
-    </div>
-  </section>
 
   <section class="band where-next" id="where-next">
     <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
