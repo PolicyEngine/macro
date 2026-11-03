@@ -226,8 +226,9 @@ root) so they are generated, not hand-kept. They must stay outside `</header>`.
 ### 3.5 Footer (`.foot.foot-bar`)
 
 **One row** on `--band-bg` (#133 removed the four-column directory on purpose; do not bring it
-back): PolicyEngine (mark), Models, Forecasts, Use, GitHub, Contact, then the legal line. It
-wraps to two lines on a phone. `site_nav.FOOTER_LINKS` is the only source; `economy/topics.py`
+back): PolicyEngine (mark), GitHub, Contact, then the legal line. The views are the header tabs'
+job, not the footer's (phase 1 briefly added Models, Forecasts and Use here; phase 2 reverted
+that to match #133). It wraps to two lines on a phone. `site_nav.FOOTER_LINKS` is the only source; `economy/topics.py`
 reads it. The body is a flex column so the footer sits at the viewport bottom on short pages.
 
 ### 3.6 Cache buster
