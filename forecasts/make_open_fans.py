@@ -59,7 +59,15 @@ def render() -> str:
     width, height = 760, 300
     left, right, top, bottom = 56, 16, 34, 40
     plot_w, plot_h = width - left - right, height - top - bottom
-    values = [v for r in rows for v in (r["lo90"], r["hi90"])]
+    # Realised data as dots (DESIGN.md §6.1), newest stored vintage per period.
+    seen: dict[str, tuple[str, float]] = {}
+    for obs in json.loads((HERE / "outturns.json").read_text())["observations"]:
+        if obs["variable"] == "unemployment":
+            prior = seen.get(obs["period"])
+            if prior is None or obs["vintage"] >= prior[0]:
+                seen[obs["period"]] = (obs["vintage"], obs["value"])
+    dots = [(i, seen[r["period"]][1]) for i, r in enumerate(rows) if r["period"] in seen]
+    values = [v for r in rows for v in (r["lo90"], r["hi90"])] + [v for _, v in dots]
     lo, hi = min(values), max(values)
     span = (hi - lo) or 1.0
     lo -= span * 0.15
@@ -104,6 +112,7 @@ def render() -> str:
         f"with its 68 and 90 percent bands, {rows[0]['period']} to "
         f"{rows[-1]['period']}. The median runs from {rows[0]['median']:.2f}% "
         f"to {rows[-1]['median']:.2f}%."
+        + "".join(f" ONS outturn for {rows[i]['period']}: {v:.2f}%." for i, v in dots)
     )
 
     return "\n".join(
@@ -126,12 +135,15 @@ def render() -> str:
                 f'<polygon class="vc-band90" points="{band("lo90", "hi90")}"/>',
                 f'<polygon class="vc-band68" points="{band("lo68", "hi68")}"/>',
                 f'<polyline class="vc-s1" points="{median}"/>',
+                *(f'<circle class="vc-out-dot" cx="{x(i):.1f}" cy="{y(v):.1f}" r="4"/>'
+                  for i, v in dots),
                 *xticks,
                 "</svg>",
             ]), legend=[
                 ("ln-s1", "svar-unemployment median"),
                 ("sw-band68", "68% band"),
                 ("sw-band90", "90% band (raw)"),
+                *([("sw-dot-out", "ONS outturn")] if dots else []),
             ]),
             "      </figure>",
         ]

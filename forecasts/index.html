@@ -45,13 +45,13 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow">UK · forecasts on the record · scored against outturns</p>
+      <p class="eyebrow">UK · archived before the outturn · scored against it</p>
       <h1 class="page-title">
-        Score a reform. Then ask what it does to the economy.
+        Forecasts on the record, scored against what happened.
       </h1>
       <p class="lede">
-        Every forecast here is archived with a timestamp before the outturn is
-        published, kept unchanged, and scored against realised data, whatever
+        Every round is committed before its outturn is published, never
+        edited, and scored against the official data as published, whatever
         that shows.
       </p>
     </div>
@@ -82,84 +82,18 @@
 <div class="with-rail">
   <nav class="page-rail" aria-label="On this page">
     <p class="page-rail-title">On this page</p>
-      <a href="#run" aria-current="location">What you can run</a>
-      <a href="#status">The record so far</a>
-      <a href="#scored">Scored</a>
+      <a href="#status" aria-current="location">The record so far</a>
+      <a href="#scored">Scoreboard</a>
+      <a href="#how">How we score</a>
       <a href="#open">Open rounds</a>
       <a href="#rounds">The archive</a>
-      <a href="#data">The data store</a>
       <a href="#limits">Limits</a>
+      <a href="#data">The data store</a>
+      <a href="#run">Beyond the record</a>
       <a href="#notes">Dated notes</a>
       <a href="#where-next">Where next</a>
   </nav>
   <div class="rail-body">
-
-  <section id="run" class="band">
-    <div class="band-head">
-      <span class="kicker mono">what you can run</span>
-      <h2>Six outputs, and the models behind each one.</h2>
-    </div>
-<!-- forecasts-platform:begin -->
-    <div class="prose">
-      <p>
-        Each route names the models it runs, in order; the household engine,
-        <a href="/pe">pe-microsim</a>, sits in four of the six.
-      </p>
-      <div class="table-scroll">
-        <table>
-          <caption>What this section can produce for the UK. Every command is checked against <code>cli.py</code> when this page is generated; a route that stopped running would fail the build rather than sit here.</caption>
-          <thead><tr><th scope="col">What you get</th><th scope="col">Models, in the order they run</th><th scope="col">What the chain does</th><th scope="col">Command</th></tr></thead>
-          <tbody>
-          <tr><th scope="row">One household, exactly</th><td><a href="/pe">pe-microsim</a></td><td>arithmetic over the statutory rules; no sampling, no weights</td><td><code class="mono">pe-macro household-impact --country uk --people &#x27;[{&quot;age&quot;:35,&quot;employment_income&quot;:50000}]&#x27; --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27;</code></td></tr>
-          <tr><th scope="row">The whole population, one policy year</th><td><a href="/pe">pe-microsim</a></td><td>revenue and distribution; a static costing</td><td><code class="mono">pe-macro score --country uk --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27; --model microsim</code></td></tr>
-          <tr><th scope="row">The same reform, with a macro second round</th><td><a href="/pe">pe-microsim</a> &rarr; <a href="/obr">obr-macro</a></td><td>the static costing becomes a held add-factor on household income</td><td><code class="mono">pe-macro score --country uk --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27; --model obr</code></td></tr>
-          <tr><th scope="row">The same reform, with long-run general equilibrium</th><td><a href="/olg">psl-og</a> &rarr; <a href="/pe">pe-microsim</a></td><td>steady-state earnings ratio scales the microsim&#x27;s income inputs</td><td><code class="mono">pe-macro dynamic-score --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27;</code></td></tr>
-          <tr><th scope="row">A GDP and CPI forecast, standing alone</th><td><a href="/svar">boe-svar</a></td><td>medians with 68% and 90% bands; archived and scored below</td><td><code class="mono">pe-macro forecast --horizons 8</code></td></tr>
-          <tr><th scope="row">That forecast carried into household incomes</th><td><a href="/svar">boe-svar</a> &rarr; <a href="/pe">pe-microsim</a></td><td>the model-versus-OBR CPI gap, scored as a real uprating reform</td><td><code class="mono">pe-macro svar-inflation-incidence --year 2027 --reference obr</code></td></tr>
-          </tbody>
-        </table>
-      </div>
-      <details class="about">
-        <summary>About the engine and the macro members</summary>
-        <p>
-          The engine underneath this section is
-          <a href="/pe">pe-microsim</a> — PolicyEngine's own
-          microsimulation, the only member whose question types include <span class="mono">household</span> and
-          the only one that covers both countries. It applies a reform to household microdata
-          and reports <span class="mono">taxes</span>, <span class="mono">benefits</span>, <span class="mono">net_income</span>, <span class="mono">revenue</span>, <span class="mono">distribution</span> over a
-          single policy year. The only two members that report a distribution are <a href="/pe">pe-microsim</a> and <a href="/olg">psl-og+microsim</a>, and the second is an overlay that runs the first.
-        </p>
-        <p>
-          The macro members are what it cannot do on its own. pe-microsim
-          cannot answer GDP, inflation, interest rates and macro feedback — so every macro number in this
-          section comes from a member that produces one, and the table says which,
-          in the order they run. Four of the six routes put pe-microsim in
-          the chain; two are a macro model standing alone, which is also a fine
-          thing to publish.
-        </p>
-      </details>
-      <p class="callout">
-        <strong>pe-microsim does not forecast, and this section does not
-        pretend it does.</strong> Its question types are
-        <span class="mono">household</span>, <span class="mono">population</span>, <span class="mono">policy_reform</span> —
-        <span class="mono">forecast</span> is not among them, and its
-        predictive validation is recorded as
-        <span class="mono">not_applicable</span>.
-        The forecast rows are <a href="/svar">boe-svar</a>, whose uncertainty is
-        posterior 68% and 90% intervals; the record below is what those rounds have
-        been worth so far. <a href="/models#score">See how a score is put together →</a>
-      </p>
-      <p>
-        Over MCP the same six routes are <span class="mono">household_reform_impact</span>,
-        <span class="mono">population_reform_impact</span>, <span class="mono">score_reform</span>,
-        <span class="mono">dynamic_reform_impact</span>, <span class="mono">forecast_uk</span> and
-        <span class="mono">svar_inflation_incidence</span>; <span class="mono">recommend_model</span> routes a
-        question to a member, or refuses when none supports it.
-        <a href="/connect">Connect a client →</a>
-      </p>
-    </div>
-<!-- forecasts-platform:end -->
-  </section>
 
   <section id="status" class="band band-alt">
     <div class="band-head">
@@ -173,59 +107,120 @@
         <div class="stat">
           <span class="stat-label">Archived rounds</span>
           <span class="stat-value">3</span>
-          <span class="stat-sub">committed to Git before the outturn existed</span>
+          <span class="stat-sub">committed to Git before the outturn</span>
           <span class="stat-foot"><a class="chip" href="#rounds">The archive</a></span>
         </div>
         <div class="stat">
-          <span class="stat-label">Scored period</span>
-          <span class="stat-value">1</span>
-          <span class="stat-sub">outturn published and scored</span>
-          <span class="stat-foot"><a class="chip" href="#scored">How it scored</a></span>
+          <span class="stat-label">Forecasts scored</span>
+          <span class="stat-value">2</span>
+          <span class="stat-sub">one period and variable each</span>
+          <span class="stat-foot"><a class="chip" href="#scored">The scoreboard</a></span>
         </div>
         <div class="stat stat-neutral">
-          <span class="stat-label">Next scored period</span>
+          <span class="stat-label">Next period to score</span>
           <span class="stat-value">2026Q2</span>
-          <span class="stat-sub">UK real GDP, y/y, unemployment; lands when the ONS publishes it</span>
-          <span class="stat-foot"><a class="chip" href="#open">Open rounds</a></span>
+          <span class="stat-sub">UK real GDP, y/y: not yet in the store, last updated 2026-08-26</span>
+          <span class="stat-foot"><a class="chip" href="#data">The data store</a></span>
         </div>
       </div>
 <!-- scorecard-status:end -->
       </div>
       <p>
-        One scored period is not an accuracy headline. Publishing from day
-        one makes the sparse early record — and any failures — part of the
-        evidence.
+        A handful of scored forecasts is not an accuracy headline. Publishing
+        from day one makes the sparse early record, and any failures, part of
+        the evidence.
       </p>
     </div>
   </section>
 
   <section id="scored" class="band">
     <div class="band-head">
-      <span class="kicker mono">scored</span>
-      <h2>Scored so far: one round.</h2>
+      <span class="kicker mono">the scoreboard</span>
+      <h2>Forecast against outturn, beside the benchmarks.</h2>
     </div>
     <div class="prose">
 <!-- scorecard-results:begin -->
-      <div class="forecast-result-list">
-        <article class="forecast-result">
-          <header>
-            <div><span class="mono">2026Q2</span><h3>UK CPI, y/y</h3></div>
-            <span class="forecast-band">Inside 68% band</span>
-          </header>
-          <div class="forecast-dotplot" aria-label="Forecast 2.68 percent; Outturn 2.80 percent; Naive 3.10 percent; Official 2.14 percent">
-            <div class="fc-axis"></div>
-            <div class="fc-mark fc-mark-forecast fc-up" style="left:55.0%"><i></i><span>Forecast<strong>2.68%</strong></span></div>
-            <div class="fc-mark fc-mark-outturn fc-down" style="left:65.2%"><i></i><span>Outturn<strong>2.80%</strong></span></div>
-            <div class="fc-mark fc-mark-naive fc-up" style="left:90.3%"><i></i><span>Naive<strong>3.10%</strong></span></div>
-            <div class="fc-mark fc-mark-official fc-down" style="left:9.7%"><i></i><span>Official<strong>2.14%</strong></span></div>
-          </div>
-          <footer><span>Error <strong>-0.12pp</strong></span><span>beats driftless-naive error <strong>0.30pp</strong></span><span>OBR March 2026 EFO error <strong>0.66pp</strong></span><span>Round 2026-07-21</span></footer>
-        </article>
+      <div class="table-scroll">
+        <table class="scoreboard" data-stack="yes">
+          <caption>Every scored forecast. Forecast is the archived median; errors are forecast minus outturn, in percentage points.</caption>
+          <thead><tr><th scope="col">Target</th><th scope="col">Round</th><th scope="col">Forecast, 68% band</th><th scope="col">Outturn</th><th scope="col">Error</th><th scope="col">Band</th><th scope="col">Benchmarks: value · abs. error</th></tr></thead>
+          <tbody>
+          <tr><th scope="row"><span class="mono">2026Q2</span> UK CPI, y/y</th><td><a class="mono" href="/forecasts/rounds/2026-07-21/boe-svar.json">2026-07-21</a><br><span class="sb-sub">boe-svar, archived 2026-07-25</span></td><td class="num">2.68%<br><span class="sb-sub">2.24–3.16</span></td><td class="num">2.80%<br><a class="mono" href="/data/vintages/ons/uk_cpi_yoy/2026-07-25.json">vintage 2026-07-25</a></td><td class="num"><strong>−0.12pp</strong></td><td><div class="sb-strip" aria-hidden="true"><span class="sb-b90" style="left:6.9%;width:calc(93.1% - 6.9%)"></span><span class="sb-b68" style="left:23.7%;width:calc(76.5% - 23.7%)"></span><span class="sb-med" style="left:49.0%"></span><span class="sb-out" style="left:56.0%"></span></div>inside 68%</td><td><strong>No change: 3.10% · 0.30</strong><br>BoE Feb 2026 MPR: 2.10% · 0.70<br>OBR March 2026 EFO: 2.14% · 0.66<br>BoE SEF Apr 2026: 2.90% · 0.10</td></tr>
+          <tr><th scope="row"><span class="mono">2026Q2</span> UK unemployment rate</th><td><a class="mono" href="/forecasts/rounds/2026-07-28/okun-unemployment.json">2026-07-28</a><br><span class="sb-sub">svar-unemployment satellite, archived 2026-07-28</span></td><td class="num">4.97%<br><span class="sb-sub">4.94–5.00</span></td><td class="num">4.90%<br><a class="mono" href="/data/vintages/ons/uk_unemployment_rate/2026-08-26.json">vintage 2026-08-26</a></td><td class="num"><strong>+0.07pp</strong></td><td><div class="sb-strip" aria-hidden="true"><span class="sb-b90" style="left:29.8%;width:calc(93.1% - 29.8%)"></span><span class="sb-b68" style="left:40.5%;width:calc(80.3% - 40.5%)"></span><span class="sb-med" style="left:60.6%"></span><span class="sb-out" style="left:6.9%"></span></div>outside 90%</td><td><strong>No change: 5.00% · 0.10</strong><br><span class="sb-sub">no published quarterly path</span></td></tr>
+          </tbody>
+        </table>
       </div>
+      <ul class="vc-legend sb-legend" aria-hidden="true"><li><span class="vc-sw sw-band90"></span>90% band, as archived</li><li><span class="vc-sw sw-band68"></span>68% band</li><li><span class="vc-sw ln-s1"></span>forecast median</li><li><span class="vc-sw sw-dot-out"></span>outturn</li></ul>
       <p class="forecast-note">
-        Errors are signed forecast − outturn, so a positive number means the forecast ran high. Naive baseline: the last outturn at the round's data edge, held flat (read from the current vintage, so revisions can shift it slightly). The official number is the OBR March 2026 EFO — fixed months earlier on less data, so part of its larger error is the information gap.
+        No change is the naive baseline: the last outturn at the round's data edge, held flat (read from the current vintage, so revisions can shift it slightly). This is the driftless walk; against a walk with drift the CPI advantage largely evaporates (see the limits below). Published paths were fixed earlier, on less data: the BoE MPR in February, the OBR EFO in March and the Bank's survey of external forecasters (SEF) in April 2026, against July rounds. They show where views differed, not who forecasts better.
       </p>
 <!-- scorecard-results:end -->
+    </div>
+  </section>
+
+  <section id="how" class="band">
+    <div class="band-head">
+      <span class="kicker mono">how we score</span>
+      <h2>Six rules, each enforced in code.</h2>
+      <p class="section-intro">The record is only evidence if nobody, including us, can move a forecast after the fact.</p>
+    </div>
+    <div class="prose">
+      <ol class="steps">
+        <li><strong>Archive first</strong><span>The round's JSON is committed before the outturn is published.</span></li>
+        <li><strong>Never edit</strong><span>CI rejects any edit or deletion; a correction is a new round.</span></li>
+        <li><strong>No hindsight</strong><span>A round archived after the outturn's snapshot is never scored on it.</span></li>
+        <li><strong>Dated outturns</strong><span>Read from a dated ONS snapshot; revisions are appended, never overwritten.</span></li>
+        <li><strong>Error and coverage</strong><span>Signed error of the median; coverage of the bands as archived.</span></li>
+        <li><strong>Benchmarks</strong><span>Beside a no-change forecast and any published path for that quarter.</span></li>
+      </ol>
+      <details class="about">
+        <summary>The rules in full, and the code behind each</summary>
+        <p>
+          <strong>Archive and freeze.</strong> A round is one JSON file per model
+          under <span class="mono">forecasts/rounds/&lt;date&gt;/</span>, holding the
+          median and the 68% and 90% bands for every quarter, the data edge (the
+          last observation the model saw), and the hash of the artifact it was
+          copied from. The <a href="https://github.com/PolicyEngine/macro/blob/main/.github/workflows/forecast-archive.yml">forecast-archive
+          workflow</a> fails any pull request that edits, renames or deletes one,
+          so the Git timestamp is the proof of when the claim was made.
+        </p>
+        <p>
+          <strong>No hindsight.</strong> <a href="https://github.com/PolicyEngine/macro/blob/main/forecasts/score.py">score.py</a>
+          scores a period only when the round's archive date is on or before the
+          date of the snapshot the outturn was read from; a later round that
+          also covers the quarter stays in the archive but is never scored on
+          it. The test is by date, not by the publisher's release time. The one
+          round where that difference matters is the first, archived after the
+          CPI release from a file committed before it; the
+          <a href="#rounds">archive</a> says so.
+        </p>
+        <p>
+          <strong>Outturns.</strong> <a href="https://github.com/PolicyEngine/macro/blob/main/forecasts/ingest_outturns.py">ingest_outturns.py</a>
+          converts the stored ONS series to the forecasts' units (GDP to
+          year-on-year growth from the ABMI level; CPI and unemployment as
+          published) and appends each value with its snapshot date. When the ONS
+          revises a quarter a second value is appended; the scoreboard uses the
+          newest, and every earlier score stays reproducible from
+          <a class="mono" href="/forecasts/outturns.json" download>outturns.json</a>.
+        </p>
+        <p>
+          <strong>Errors and bands.</strong> Errors are the archived median
+          minus the outturn, so a positive error means the forecast ran high;
+          they are signed because a steady bias and random misses are different
+          problems. Band coverage is scored on the bands exactly as archived,
+          not on the re-calibrated bands drawn in the open-round charts.
+        </p>
+        <p>
+          <strong>Benchmarks.</strong> The minimum bar is a no-change forecast:
+          the last outturn at the round's data edge, held flat. Where a stored
+          quarterly path exists, the Bank of England's February 2026 MPR central
+          projection, the OBR's March 2026 EFO and the Bank's April 2026 survey
+          of external forecasters are shown beside it, from the committed
+          <a href="https://github.com/PolicyEngine/macro/tree/main/forecasts/official">official CSVs</a>.
+          Everything lands in <a class="mono" href="/forecasts/scorecard.json" download>scorecard.json</a>,
+          which is generated, never edited by hand.
+        </p>
+      </details>
     </div>
   </section>
 
@@ -289,7 +284,7 @@
 <div class="vc-plot">
 <svg class="vchart" viewBox="52 30 696 234" role="img" aria-labelledby="svar-vs-efo-cpi-t svar-vs-efo-cpi-d" preserveAspectRatio="none">
 <title id="svar-vs-efo-cpi-t">boe-svar UK CPI inflation forecast vs OBR March 2026 EFO</title>
-<desc id="svar-vs-efo-cpi-d">Fan chart of UK CPI, year-on-year inflation, percent. The boe-svar archived median with its 68 and 90 percent bands, empirically re-calibrated for measured under-coverage, is shown beside the OBR March 2026 EFO path over the overlapping quarters.</desc>
+<desc id="svar-vs-efo-cpi-d">Fan chart of UK CPI, year-on-year inflation, percent. The boe-svar archived median with its 68 and 90 percent bands, empirically re-calibrated for measured under-coverage, is shown beside the OBR March 2026 EFO path over the overlapping quarters. ONS outturn for 2026Q2: 2.80 percent.</desc>
 <line class="vc-grid" x1="56" y1="251.8" x2="744" y2="251.8"/>
 <line class="vc-grid" x1="56" y1="230.9" x2="744" y2="230.9"/>
 <line class="vc-zero" x1="56" y1="210.0" x2="744" y2="210.0"/>
@@ -305,6 +300,7 @@
 <polygon class="vc-band68" points="56.0,143.0 113.3,134.4 170.7,116.1 228.0,100.4 285.3,93.3 342.7,91.9 400.0,97.4 457.3,90.9 514.7,88.8 572.0,93.8 629.3,92.3 686.7,92.3 744.0,89.1 744.0,202.9 686.7,207.0 629.3,204.3 572.0,207.3 514.7,205.1 457.3,205.0 400.0,201.8 342.7,202.7 285.3,204.4 228.0,195.4 170.7,179.2 113.3,178.4 56.0,166.0"/>
 <polyline class="vc-s1" points="56.0,154.8 113.3,156.9 170.7,148.6 228.0,148.0 285.3,146.0 342.7,145.2 400.0,146.6 457.3,149.0 514.7,149.6 572.0,149.2 629.3,149.9 686.7,147.8 744.0,149.4"/>
 <polyline class="vc-s2" points="56.0,165.3 113.3,166.4 170.7,169.8 228.0,170.0 285.3,167.5 342.7,167.9 400.0,170.0 457.3,171.5 514.7,168.7 572.0,167.8 629.3,166.9 686.7,166.5 744.0,168.2"/>
+<path class="vc-out-dot vc-dotp" d="M56 151.5h0" stroke-width="8"/>
 </svg>
 <div class="vc-labels" aria-hidden="true">
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:94.79%">−2</span>
@@ -332,6 +328,7 @@
 <li><span class="vc-sw sw-band68" aria-hidden="true"></span>68% band</li>
 <li><span class="vc-sw sw-band90" aria-hidden="true"></span>90% band (both empirically re-calibrated)</li>
 <li><span class="vc-sw ln-s2" aria-hidden="true"></span>OBR March 2026 EFO</li>
+<li><span class="vc-sw sw-dot-out" aria-hidden="true"></span>ONS outturn</li>
 </ul>
 </div><!-- /vc-fig -->
       </figure>
@@ -343,7 +340,7 @@
 <div class="vc-plot">
 <svg class="vchart" viewBox="52 30 696 234" role="img" aria-labelledby="open-unemployment-fan-t open-unemployment-fan-d" preserveAspectRatio="none">
 <title id="open-unemployment-fan-t">svar-unemployment satellite UK unemployment rate forecast, median with 68% and 90% bands</title>
-<desc id="open-unemployment-fan-d">Fan chart of the UK unemployment rate, percent, from the svar-unemployment satellite round of 2026-07-28: the archived median with its 68 and 90 percent bands, 2026Q2 to 2027Q1. The median runs from 4.97% to 4.93%.</desc>
+<desc id="open-unemployment-fan-d">Fan chart of the UK unemployment rate, percent, from the svar-unemployment satellite round of 2026-07-28: the archived median with its 68 and 90 percent bands, 2026Q2 to 2027Q1. The median runs from 4.97% to 4.93%. ONS outturn for 2026Q2: 4.90%.</desc>
 <line class="vc-grid" x1="56" y1="236.8" x2="744" y2="236.8"/>
 <line class="vc-grid" x1="56" y1="210.4" x2="744" y2="210.4"/>
 <line class="vc-grid" x1="56" y1="184.0" x2="744" y2="184.0"/>
@@ -355,6 +352,7 @@
 <polygon class="vc-band90" points="56.0,127.3 285.3,109.3 514.7,88.7 744.0,60.1 744.0,233.9 514.7,201.1 285.3,170.6 56.0,149.6"/>
 <polygon class="vc-band68" points="56.0,131.8 285.3,122.4 514.7,111.5 744.0,94.4 744.0,201.2 514.7,180.4 285.3,160.3 56.0,145.8"/>
 <polyline class="vc-s1" points="56.0,138.7 285.3,141.1 514.7,146.9 744.0,148.8"/>
+<path class="vc-out-dot vc-dotp" d="M56 157.6h0" stroke-width="8"/>
 </svg>
 <div class="vc-labels" aria-hidden="true">
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:88.38%">4.60</span>
@@ -375,6 +373,7 @@
 <li><span class="vc-sw ln-s1" aria-hidden="true"></span>svar-unemployment median</li>
 <li><span class="vc-sw sw-band68" aria-hidden="true"></span>68% band</li>
 <li><span class="vc-sw sw-band90" aria-hidden="true"></span>90% band (raw)</li>
+<li><span class="vc-sw sw-dot-out" aria-hidden="true"></span>ONS outturn</li>
 </ul>
 </div><!-- /vc-fig -->
       </figure>
@@ -384,6 +383,9 @@
         The EFO was fixed in March and these rounds in July, so the charts show
         where the views differ, not who forecasts better — that evaluation is on
         the <a href="/svar/validation#forecasters">boe-svar validation page</a>.
+        Dots are ONS outturns already in the store; the <a href="#scored">scoreboard</a>
+        says which round each one scores. A round archived after an outturn
+        is drawn beside it but never scored on it.
       </p>
       <details class="more">
         <summary>Band calibration, and where the quarter-by-quarter numbers are</summary>
@@ -402,9 +404,9 @@
           precision of the estimate — 49 overlapping origins carry a standard
           error that moves k far more than its fourth decimal.
           The raw quantiles stay untouched in the round artifacts. The
-          quarter-by-quarter numbers, including the BoE MPR central path and the
-          SEF consensus, are in those round artifacts below and in the committed
-          <a href="https://github.com/PolicyEngine/macro/tree/main/forecasts/official">official CSVs</a>.
+          quarter-by-quarter numbers are in the round artifacts below; the BoE
+          MPR central path and the external forecasters' survey are in the
+          committed <a href="https://github.com/PolicyEngine/macro/tree/main/forecasts/official">official CSVs</a>.
         </p>
       </details>
     </div>
@@ -428,31 +430,34 @@
           <div><span class="mono">2026-07-21</span><strong>boe-svar</strong></div>
           <dl>
             <div><dt>Data edge</dt><dd>2026Q1</dd></div>
+            <div><dt>Archived</dt><dd>2026-07-25</dd></div>
             <div><dt>Periods</dt><dd>13</dd></div>
             <div><dt>Scored</dt><dd>1</dd></div>
           </dl>
           <a class="mono" href="/forecasts/rounds/2026-07-21/boe-svar.json" download>Download <code>boe-svar.json</code> →</a>
-          <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/forecasts/rounds/2026-07-21/boe-svar.json">GitHub commit history →</a>
+          <a class="mono" href="https://github.com/PolicyEngine/macro/commits/main/forecasts/rounds/2026-07-21/boe-svar.json">Commit history →</a>
         </article>
         <article class="forecast-round">
           <div><span class="mono">2026-07-28</span><strong>svar-unemployment satellite</strong></div>
           <dl>
             <div><dt>Data edge</dt><dd>2026Q1</dd></div>
+            <div><dt>Archived</dt><dd>2026-07-28</dd></div>
             <div><dt>Periods</dt><dd>4</dd></div>
-            <div><dt>Scored</dt><dd>0</dd></div>
+            <div><dt>Scored</dt><dd>1</dd></div>
           </dl>
           <a class="mono" href="/forecasts/rounds/2026-07-28/okun-unemployment.json" download>Download <code>okun-unemployment.json</code> →</a>
-          <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/forecasts/rounds/2026-07-28/okun-unemployment.json">GitHub commit history →</a>
+          <a class="mono" href="https://github.com/PolicyEngine/macro/commits/main/forecasts/rounds/2026-07-28/okun-unemployment.json">Commit history →</a>
         </article>
         <article class="forecast-round">
           <div><span class="mono">2026-07-29</span><strong>boe-svar</strong></div>
           <dl>
             <div><dt>Data edge</dt><dd>2026Q1</dd></div>
+            <div><dt>Archived</dt><dd>2026-07-29</dd></div>
             <div><dt>Periods</dt><dd>13</dd></div>
             <div><dt>Scored</dt><dd>0</dd></div>
           </dl>
           <a class="mono" href="/forecasts/rounds/2026-07-29/boe-svar.json" download>Download <code>boe-svar.json</code> →</a>
-          <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/forecasts/rounds/2026-07-29/boe-svar.json">GitHub commit history →</a>
+          <a class="mono" href="https://github.com/PolicyEngine/macro/commits/main/forecasts/rounds/2026-07-29/boe-svar.json">Commit history →</a>
         </article>
       </div>
 <!-- scorecard-rounds:end -->
@@ -473,6 +478,39 @@
           the method is in the <a href="https://github.com/PolicyEngine/macro/blob/main/forecasts/README.md">README</a>.
         </p>
       </details>
+    </div>
+  </section>
+
+  <section id="limits" class="band">
+    <div class="band-head">
+      <span class="kicker mono">what this is not</span>
+      <h2>Limits worth stating plainly.</h2>
+    </div>
+    <div class="prose">
+      <p>
+        <strong>A few scored forecasts prove little</strong>, and there will be no
+        skill claim here until the scored count is well into double figures —
+        at least a year away. <strong>The bands run too narrow</strong>: in
+        hindsight testing both the 68% and the 90% band cover less than they
+        should, worsening with horizon, which is why the fans above are
+        re-calibrated; the coverage study is on the
+        <a href="/svar/validation">validation page</a>.
+        <strong>The unemployment bands understate uncertainty by
+        construction</strong>: they carry GDP-forecast uncertainty only, and
+        the satellite's own residual is not sampled, as its
+        <a class="mono" href="/forecasts/rounds/2026-07-28/okun-unemployment.json">round file</a> states.
+      </p>
+      <p>
+        <strong>CPI does not beat a fair naive benchmark.</strong> Against a
+        random walk with drift the advantage largely evaporates, and
+        <a href="/svar/validation#forecasters">no accuracy gain survives
+        correction for the number of tests run</a>: Bank Rate comes closest, and it is
+        not forecast here yet. What is forecast
+        is <strong>three variables on no fixed calendar</strong> — GDP growth
+        and CPI from boe-svar, unemployment from its satellite — with rounds
+        following data-edge refreshes rather than a schedule, and coefficients
+        not re-estimated every round.
+      </p>
     </div>
   </section>
 
@@ -1182,33 +1220,71 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
     <!-- data-store:end -->
   </section>
 
-  <section id="limits" class="band">
+  <section id="run" class="band">
     <div class="band-head">
-      <span class="kicker mono">what this is not</span>
-      <h2>Limits worth stating plainly.</h2>
+      <span class="kicker mono">beyond the record</span>
+      <h2>Six outputs, and the models behind each one.</h2>
     </div>
+<!-- forecasts-platform:begin -->
     <div class="prose">
       <p>
-        <strong>One scored round proves little</strong>, and there will be no
-        skill claim here until the scored count is well into double figures —
-        at least a year away. <strong>The bands run too narrow</strong>: in
-        hindsight testing both the 68% and the 90% band cover less than they
-        should, worsening with horizon, which is why the fans above are
-        re-calibrated; the coverage study is on the
-        <a href="/svar/validation">validation page</a>.
+        Each route names the models it runs, in order; the household engine,
+        <a href="/pe">pe-microsim</a>, sits in four of the six.
+      </p>
+      <div class="table-scroll">
+        <table>
+          <caption>What this section can produce for the UK. Every command is checked against <code>cli.py</code> when this page is generated; a route that stopped running would fail the build rather than sit here.</caption>
+          <thead><tr><th scope="col">What you get</th><th scope="col">Models, in the order they run</th><th scope="col">What the chain does</th><th scope="col">Command</th></tr></thead>
+          <tbody>
+          <tr><th scope="row">One household, exactly</th><td><a href="/pe">pe-microsim</a></td><td>arithmetic over the statutory rules; no sampling, no weights</td><td><code class="mono">pe-macro household-impact --country uk --people &#x27;[{&quot;age&quot;:35,&quot;employment_income&quot;:50000}]&#x27; --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27;</code></td></tr>
+          <tr><th scope="row">The whole population, one policy year</th><td><a href="/pe">pe-microsim</a></td><td>revenue and distribution; a static costing</td><td><code class="mono">pe-macro score --country uk --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27; --model microsim</code></td></tr>
+          <tr><th scope="row">The same reform, with a macro second round</th><td><a href="/pe">pe-microsim</a> &rarr; <a href="/obr">obr-macro</a></td><td>the static costing becomes a held add-factor on household income</td><td><code class="mono">pe-macro score --country uk --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27; --model obr</code></td></tr>
+          <tr><th scope="row">The same reform, with long-run general equilibrium</th><td><a href="/olg">psl-og</a> &rarr; <a href="/pe">pe-microsim</a></td><td>steady-state earnings ratio scales the microsim&#x27;s income inputs</td><td><code class="mono">pe-macro dynamic-score --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27;</code></td></tr>
+          <tr><th scope="row">A GDP and CPI forecast, standing alone</th><td><a href="/svar">boe-svar</a></td><td>medians with 68% and 90% bands; archived and scored below</td><td><code class="mono">pe-macro forecast --horizons 8</code></td></tr>
+          <tr><th scope="row">That forecast carried into household incomes</th><td><a href="/svar">boe-svar</a> &rarr; <a href="/pe">pe-microsim</a></td><td>the model-versus-OBR CPI gap, scored as a real uprating reform</td><td><code class="mono">pe-macro svar-inflation-incidence --year 2027 --reference obr</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <details class="about">
+        <summary>About the engine and the macro members</summary>
+        <p>
+          The engine underneath this section is
+          <a href="/pe">pe-microsim</a> — PolicyEngine's own
+          microsimulation, the only member whose question types include <span class="mono">household</span> and
+          the only one that covers both countries. It applies a reform to household microdata
+          and reports <span class="mono">taxes</span>, <span class="mono">benefits</span>, <span class="mono">net_income</span>, <span class="mono">revenue</span>, <span class="mono">distribution</span> over a
+          single policy year. The only two members that report a distribution are <a href="/pe">pe-microsim</a> and <a href="/olg">psl-og+microsim</a>, and the second is an overlay that runs the first.
+        </p>
+        <p>
+          The macro members are what it cannot do on its own. pe-microsim
+          cannot answer GDP, inflation, interest rates and macro feedback — so every macro number in this
+          section comes from a member that produces one, and the table says which,
+          in the order they run. Four of the six routes put pe-microsim in
+          the chain; two are a macro model standing alone, which is also a fine
+          thing to publish.
+        </p>
+      </details>
+      <p class="callout">
+        <strong>pe-microsim does not forecast, and this section does not
+        pretend it does.</strong> Its question types are
+        <span class="mono">household</span>, <span class="mono">population</span>, <span class="mono">policy_reform</span> —
+        <span class="mono">forecast</span> is not among them, and its
+        predictive validation is recorded as
+        <span class="mono">not_applicable</span>.
+        The forecast rows are <a href="/svar">boe-svar</a>, whose uncertainty is
+        posterior 68% and 90% intervals; the record below is what those rounds have
+        been worth so far. <a href="/models#score">See how a score is put together →</a>
       </p>
       <p>
-        <strong>CPI does not beat a fair naive benchmark.</strong> Against a
-        random walk with drift the advantage largely evaporates, and
-        <a href="/svar/validation#forecasters">no accuracy gain survives
-        correction for the number of tests run</a>: Bank Rate comes closest, and it is
-        not forecast here yet. What is forecast
-        is <strong>three variables on no fixed calendar</strong> — GDP growth
-        and CPI from boe-svar, unemployment from its satellite — with rounds
-        following data-edge refreshes rather than a schedule, and coefficients
-        not re-estimated every round.
+        Over MCP the same six routes are <span class="mono">household_reform_impact</span>,
+        <span class="mono">population_reform_impact</span>, <span class="mono">score_reform</span>,
+        <span class="mono">dynamic_reform_impact</span>, <span class="mono">forecast_uk</span> and
+        <span class="mono">svar_inflation_incidence</span>; <span class="mono">recommend_model</span> routes a
+        question to a member, or refuses when none supports it.
+        <a href="/connect">Connect a client →</a>
       </p>
     </div>
+<!-- forecasts-platform:end -->
   </section>
 
   <section id="notes" class="band">
@@ -1227,11 +1303,12 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
           <strong>25 July 2026 · inflation</strong>
         </a>
 <!-- generated-release-notes:begin -->
-        <a href="/notes/releases"><span>53 automatic release notes · 2026-08-26 →</span><strong>2026-08-26 · automatic release notes</strong></a>
+        <a href="/notes/releases"><span>8 automated release digests, latest 2026-08-26 →</span><strong>2026-08-26 · automated release digests</strong></a>
 <!-- generated-release-notes:end -->
       </div>
     </div>
   </section>
+
   <section class="band where-next" id="where-next">
     <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
     <div class="entry-grid">

@@ -4658,3 +4658,31 @@ body.doc > main { flex: 1 0 auto; }
   .step-diagram { justify-content: flex-start; overflow-x: auto; cursor: default; }
   .step-diagram svg { max-width: none !important; flex: 0 0 auto; } /* width attribute = viewBox width */
 }
+
+/* === r2:forecasts === */
+/* Scoreboard on /forecasts#scored (forecasts/score.py render_results). The
+   strip in the Band column places the archived 90%/68% bands, the median and
+   the outturn on the row's own scale; it is aria-hidden because every value
+   it places is in the row's cells. */
+.scoreboard { min-width: 860px; }
+.scoreboard th[scope="row"] { min-width: 140px; }
+.scoreboard td, .scoreboard th { vertical-align: top; }
+.scoreboard .sb-sub { color: var(--text-muted); font-size: var(--fs-small); font-weight: 400; }
+.scoreboard td:nth-child(7) { min-width: 230px; font-size: var(--fs-small); }
+.sb-strip { position: relative; width: 120px; height: 18px; margin: 2px 0 6px; }
+.sb-strip > span { position: absolute; top: 50%; transform: translateY(-50%); }
+.sb-b90 { height: 14px; background: var(--band-90); border-radius: 2px; }
+.sb-b68 { height: 14px; background: var(--band-68); border-radius: 2px; }
+.sb-med { width: 2px; height: 18px; margin-left: -1px; background: var(--series-ours); }
+.sb-out { width: 9px; height: 9px; margin-left: -4.5px; border-radius: 50%; background: var(--series-outturn); box-shadow: 0 0 0 2px var(--surface-card); }
+.scoreboard a.mono, .scoreboard .num { white-space: nowrap; }
+.sb-legend { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); margin: var(--s-2) 0 0; padding: 0; list-style: none; color: var(--text-muted); font-size: var(--fs-small); }
+.sb-legend li { display: inline-flex; align-items: center; gap: 6px; margin: 0; }
+.sb-legend li::before { content: none; }
+@media (max-width: 639px) {
+  .scoreboard { min-width: 0; }
+  .scoreboard th[scope="row"] { min-width: 0; }
+  .scoreboard td:nth-child(7) { min-width: 0; }
+}
+/* Release digests (/notes/releases/<date>, notes/generate_release_notes.py). */
+.digest-table td.kind { white-space: nowrap; }

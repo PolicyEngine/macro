@@ -511,8 +511,11 @@ def test_the_suite_actually_found_the_site(pages):
     discovery breaks — a path change, a bad exclusion — the whole module would
     pass with zero assertions and look green forever.
     """
-    assert len(pages) >= 70, (
-        f"only {len(pages)} HTML page(s) discovered; the site has ~78. "
+    # 65 since the 53 per-series release notes were folded into 8 per-date
+    # digests (notes/generate_release_notes.py); the floor guards discovery,
+    # not the page count.
+    assert len(pages) >= 60, (
+        f"only {len(pages)} HTML page(s) discovered; the site has ~65. "
         "Check EXCLUDED_DIRS in tests/conftest.py"
     )
 

@@ -46,12 +46,22 @@ def snapshots(vintage: str) -> list[dict]:
     return found
 
 
+def _decimals(value: float) -> int:
+    text = repr(float(value))
+    return 0 if "e" in text else len(text.split(".")[1].rstrip("0"))
+
+
 def display_value(series: dict, value: float) -> str:
+    """The value at the precision the publisher stored it (never rounded up
+    to look tidier: Bank Rate 3.75 must not print as 3.8). Percent series are
+    capped at two decimals, which is how a gilt yield is quoted."""
     units = series["units"].lower()
     if "percent" in units:
-        return f"{value:,.1f}%"
+        places = max(1, min(2, _decimals(value)))
+        return f"{value:,.{places}f}%"
     if units.startswith("£m"):
-        return f"£{value / 1000:,.1f}bn"
+        text = f"£{abs(value) / 1000:,.1f}bn"
+        return ("\u2212" + text) if value < 0 else text
     if "£ per week" in units:
         return f"£{value:,.0f} per week"
     if "thousands" in units:
@@ -60,7 +70,7 @@ def display_value(series: dict, value: float) -> str:
 
 
 def delta(series: dict) -> str:
-    """The change on the prior stored observation, short enough for a stat tile."""
+    """The change on the prior stored observation, short enough for a cell."""
     observations = series["observations"]
     if len(observations) < 2:
         return "no prior observation stored"
@@ -68,14 +78,50 @@ def delta(series: dict) -> str:
     change = now["value"] - prior["value"]
     units = series["units"].lower()
     if "percent" in units:
-        value = f"{change:+.1f}pp"
+        places = max(1, min(2, max(_decimals(now["value"]), _decimals(prior["value"]))))
+        value = f"{change:+.{places}f}pp"
+        if float(value[:-2]) == 0:
+            value = "unchanged"
     elif units.startswith("£m"):
         value = f"£{abs(change) / 1000:,.1f}bn {'higher' if change > 0 else 'lower'}"
+    elif "£ per week" in units:
+        value = f"£{abs(change):,.0f} per week {'higher' if change > 0 else 'lower'}"
+    elif "thousands" in units:
+        value = f"{change:+,.0f} thousand"
     else:
         value = f"{change:+,.1f}"
     if value.startswith("-"):
         value = "\u2212" + value[1:]
     return f"{value} on {prior['period']}"
+
+
+def prior_snapshot(series: dict, vintage: str) -> dict | None:
+    """The same series' newest committed snapshot before this one."""
+    folder = (ROOT / series["_path"]).parent
+    earlier = sorted(p for p in folder.glob("*.json") if p.stem < vintage)
+    return json.loads(earlier[-1].read_text()) if earlier else None
+
+
+def what_is_new(series: dict, vintage: str) -> str:
+    """What the snapshot added, by comparison with the previous one.
+
+    Factual and mechanical: a later last period is a new observation; the same
+    last period with any changed value is a revision; otherwise the publisher
+    changed only metadata (or nothing the store keeps).
+    """
+    prior = prior_snapshot(series, vintage)
+    if prior is None:
+        return "first snapshot"
+    before = {o["period"]: o["value"] for o in prior["observations"]}
+    now = {o["period"]: o["value"] for o in series["observations"]}
+    added = sorted(set(now) - set(before))
+    revised = sorted(p for p in set(now) & set(before) if now[p] != before[p])
+    parts = []
+    if added:
+        parts.append(f"{len(added)} new observation{'' if len(added) == 1 else 's'}")
+    if revised:
+        parts.append(f"{len(revised)} revised")
+    return ", ".join(parts) or "no value changed"
 
 
 def _topics():
@@ -108,33 +154,84 @@ def topic_home(series: dict) -> tuple[str, str]:
     return "/economy", "UK data"
 
 
-def note_page(series: dict, vintage: str) -> str:
-    """One factual release note (DESIGN.md §7.7). No interpretation, ever.
+def _label(series: dict) -> str:
+    spec = importlib.util.spec_from_file_location(
+        "data_build_page", ROOT / "data" / "build_page.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.PUBLIC_LABELS.get(series["cdid"], series["title"])
 
-    The observation is stated once, in the stat tile: the title band names the
-    series and the release, and every other card links to where the series is
-    read (its topic page), stored (the data store) and scored (the record).
+
+def digest_rows(items: list[dict], vintage: str) -> list[str]:
+    rows = []
+    for series in items:
+        now = series["observations"][-1]
+        topic_url, topic_title = topic_home(series)
+        next_release = " ".join((series.get("next_release") or "not announced").split())
+        rows.append(
+            f'          <tr id="{series["series"]}">'
+            f'<th scope="row">{html.escape(_label(series))}'
+            f'<br><a class="mono" href="{topic_url}#stands">{html.escape(topic_title)}</a></th>'
+            f'<td class="mono">{html.escape(now["period"])}</td>'
+            f'<td class="num">{html.escape(display_value(series, now["value"]))}</td>'
+            f'<td class="num">{html.escape(delta(series))}</td>'
+            f'<td class="kind">{html.escape(what_is_new(series, vintage))}</td>'
+            f"<td>{html.escape(next_release)}</td>"
+            f'<td><a href="https://github.com/PolicyEngine/macro/blob/main/{series["_path"]}">Snapshot</a>'
+            f' · <a href="{html.escape(series["url"])}">{html.escape(series["source"])} · {html.escape(series["cdid"])}</a></td>'
+            "</tr>"
+        )
+    return rows
+
+
+def digest_page(vintage: str) -> str:
+    """One factual digest per stored vintage date (DESIGN.md §7.7). No
+    interpretation, ever.
+
+    Replaces the one-page-per-series notes: a daily gilt fetch produced four
+    near-identical pages a day, and a reader looking for what the ONS
+    published on a date had to open each. Each observation is still stated
+    once, in its row; the row's id is the old page's series slug, so
+    /notes/releases/<date>-<series> redirects to /notes/releases/<date>#<series>.
     """
-    now = series["observations"][-1]
-    title = f"{series['title']}: {now['period']}"
-    value = display_value(series, now["value"])
-    source = series["source"]
-    cdid = series["cdid"]
-    next_release = " ".join((series.get("next_release") or "not supplied").split())
-    canonical = f"https://policyengine-macro.vercel.app/notes/releases/{vintage}-{series['series']}"
-    topic_url, topic_title = topic_home(series)
+    items = sorted(snapshots(vintage), key=lambda s: (s["series"][:3] != "uk_", _label(s)))
+    day = datetime.strptime(vintage, "%Y-%m-%d").strftime("%-d %B %Y")
+    canonical = f"https://policyengine-macro.vercel.app/notes/releases/{vintage}"
+    new = sum(1 for s in items if "new observation" in what_is_new(s, vintage))
+    uk = [s for s in items if s["series"].startswith("uk_")]
+    us = [s for s in items if not s["series"].startswith("uk_")]
+    head = (
+        '          <thead><tr><th scope="col">Series</th><th scope="col">Latest period</th>'
+        '<th scope="col">Value</th><th scope="col">Change</th><th scope="col">What is new</th>'
+        '<th scope="col">Next release</th><th scope="col">Files</th></tr></thead>'
+    )
+    tables = []
+    for title, group, ident in (("UK", uk, "uk"), ("US", us, "us")):
+        if not group:
+            continue
+        tables.append(f"""    <h3 id="{ident}-series">{title} series</h3>
+    <div class="table-scroll">
+        <table class="digest-table" data-stack="yes">
+          <caption>{title} series with a new snapshot on {vintage}. Change is on the prior stored observation; values as the publisher stored them.</caption>
+{head}
+          <tbody>
+{chr(10).join(digest_rows(group, vintage))}
+          </tbody>
+        </table>
+    </div>""")
     where = site_nav.where_next([
-        (topic_url, "topic", html.escape(topic_title), "Where this series stands, and the model that reads it"),
+        ("/notes/releases", "list", "All release digests", "Every stored date, newest first"),
         ("/forecasts#data", "data", "The data store", "Every stored vintage of every series"),
-        ("/forecasts#rounds", "chart", "The forecast record", "Rounds scored against outturns like this one"),
+        ("/forecasts#scored", "chart", "The forecast record", "Rounds scored against outturns like these"),
     ])
     return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>{html.escape(title)} — PolicyEngine Macro</title>
-<meta name="description" content="Factual release note for {html.escape(series['title'])}, observation {now['period']}, from the committed {vintage} vintage." />
+<title>Data stored {day} — PolicyEngine Macro</title>
+<meta name="description" content="Factual digest of the {len(items)} official data series with a new committed snapshot on {vintage}: latest value, change, and whether it is a new observation or a revision." />
 <link rel="canonical" href="{canonical}" />
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
@@ -148,37 +245,16 @@ def note_page(series: dict, vintage: str) -> str:
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow">{vintage} · automated factual release note</p>
-      <h1 class="page-title">{html.escape(series['title'])}</h1>
-      <p class="lede">The {html.escape(now['period'])} observation, as {html.escape(source)} published it and as it entered the record.</p>
+      <p class="eyebrow">{vintage} · automated factual digest · {len(items)} series</p>
+      <h1 class="page-title">Official data stored on {day}</h1>
+      <p class="lede">Every series whose snapshot changed on this date, as the publisher released it, with no interpretation.</p>
     </div>
   </section>
   <section class="band" id="changed">
-    <div class="band-head"><span class="kicker mono">what changed</span><h2>The newest stored observation</h2></div>
-    <div class="stat-row">
-      <div class="stat stat-neutral">
-        <span class="stat-label">{html.escape(series['title'])}, {html.escape(now['period'])}</span>
-        <span class="stat-value">{html.escape(value)}</span>
-        <span class="stat-sub">{html.escape(delta(series))}</span>
-        <span class="stat-foot"><a class="chip" href="{topic_url}#stands">{html.escape(topic_title)}</a></span>
-      </div>
-    </div>
-    <p class="section-intro">Generated from committed data; no editorial or causal interpretation.</p>
-  </section>
-  <section class="band" id="provenance">
-    <div class="band-head"><span class="kicker mono">provenance</span><h2>The release as it entered the record</h2></div>
-    <div class="note-provenance">
-    <dl>
-      <dt>Observation</dt><dd>{html.escape(now['period'])}</dd>
-      <dt>Stored vintage</dt><dd>{vintage}</dd>
-      <dt>Publisher</dt><dd>{html.escape(source)}</dd>
-      <dt>Series</dt><dd>{html.escape(cdid)}</dd>
-      <dt>Next release</dt><dd>{html.escape(next_release)}</dd>
-    </dl>
-    </div>
-    <div class="chip-row">
-      <a class="chip" href="{html.escape(series['url'])}">Publisher series</a>
-      <a class="chip" href="https://github.com/PolicyEngine/macro/blob/main/{series['_path']}">Immutable snapshot</a>
+    <div class="band-head"><span class="kicker mono">what changed</span><h2>{new} of {len(items)} series added an observation</h2>
+    <p class="section-intro">Generated from committed snapshots; no editorial or causal interpretation.</p></div>
+    <div class="prose">
+{chr(10).join(tables)}
     </div>
   </section>
 {where}
@@ -194,54 +270,56 @@ def note_page(series: dict, vintage: str) -> str:
 """
 
 
-def note_target(page: Path) -> tuple[dict, str] | None:
-    """The snapshot a committed note was generated from, by its slug."""
-    slug = page.parent.name
-    vintage, name = slug[:10], slug[11:]
-    for series in snapshots(vintage):
-        if series["series"] == name:
-            return series, vintage
-    return None
+LEGACY = re.compile(r"^(\d{4}-\d{2}-\d{2})-[a-z0-9_]+$")
 
 
-def render_note(destination: Path, series: dict, vintage: str) -> str:
-    """The page as committed: template, then the canonical shell from site_nav.
+def digest_dates() -> list[str]:
+    """Dates with a digest, plus dates still held by legacy per-series notes."""
+    found = set()
+    for page in generated_pages():
+        slug = page.parent.name
+        m = LEGACY.match(slug)
+        found.add(m.group(1) if m else slug)
+    return sorted(found)
 
-    Pure: renders the template as if it lived at ``destination`` without
-    touching the file, so ``--check`` has no side effects.
-    """
-    return site_nav.render(destination, note_page(series, vintage))
+
+def render_digest(destination: Path, vintage: str) -> str:
+    """Pure: template plus the canonical shell, without touching the file."""
+    return site_nav.render(destination, digest_page(vintage))
 
 
 def generated_pages() -> list[Path]:
     return sorted(GENERATED_ROOT.glob("*/index.html")) if GENERATED_ROOT.exists() else []
 
 
+def digest_pages() -> list[Path]:
+    return [p for p in generated_pages() if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.parent.name)]
+
+
 def rebuild_indexes() -> None:
     index_rows = []
     sitemap_rows = []
-    latest = ""
-    for page in reversed(generated_pages()):
-        slug = page.parent.name
-        date, series = slug[:10], slug[11:]
-        latest = max(latest, date)
-        title_match = re.search(r"<h1 class=\"page-title\">(.*?)</h1>", page.read_text())
-        title = title_match.group(1) if title_match else series
+    pages = list(reversed(digest_pages()))
+    for page in pages:
+        vintage = page.parent.name
+        items = snapshots(vintage)
+        kinds = [what_is_new(s, vintage) for s in items]
+        new = sum(1 for k in kinds if "new observation" in k)
+        day = datetime.strptime(vintage, "%Y-%m-%d").strftime("%-d %B %Y")
         index_rows.append(
-            f'        <a href="/notes/releases/{slug}"><span>{title}</span>'
-            f"<strong>{date} · automatic release note</strong></a>"
+            f'        <a href="/notes/releases/{vintage}"><span>{day}: {len(items)} '
+            f"series, {new} with a new observation</span>"
+            f"<strong>{vintage} · automated digest</strong></a>"
         )
         sitemap_rows.append(
-            f"  <url><loc>https://policyengine-macro.vercel.app/notes/releases/{slug}</loc>"
+            f"  <url><loc>https://policyengine-macro.vercel.app/notes/releases/{vintage}</loc>"
             "<priority>0.6</priority></url>"
         )
-    # The full per-note list lives on /notes/releases; the notes section on
-    # /forecasts#notes carries a single collapsed row pointing at it.
-    count = len(index_rows)
+    latest = pages[0].parent.name if pages else ""
     summary_row = (
-        f'        <a href="/notes/releases"><span>{count} automatic release '
-        f"notes · {latest} →</span><strong>{latest} · automatic release "
-        "notes</strong></a>"
+        f'        <a href="/notes/releases"><span>{len(pages)} automated release '
+        f"digests, latest {latest} →</span><strong>{latest} · automated release "
+        "digests</strong></a>"
     )
     marker_replace(NOTES_INDEX, "generated-release-notes", summary_row)
     marker_replace(RELEASES_INDEX, "generated-release-notes", "\n".join(index_rows))
@@ -253,29 +331,38 @@ def check() -> int:
     releases_index = RELEASES_INDEX.read_text()
     sitemap = SITEMAP.read_text()
     if 'href="/notes/releases"' not in NOTES_INDEX.read_text():
-        failures.append(
-            "forecasts index: missing collapsed link to /notes/releases"
-        )
+        failures.append("forecasts index: missing collapsed link to /notes/releases")
     if "/notes/releases</loc>" not in sitemap:
         failures.append("sitemap: missing /notes/releases entry")
     for page in generated_pages():
-        slug = page.parent.name
-        if f"/notes/releases/{slug}" not in releases_index:
-            failures.append(f"{slug}: missing from releases index")
-        if f"/notes/releases/{slug}</loc>" not in sitemap:
-            failures.append(f"{slug}: missing from sitemap")
-    for page in generated_pages():
-        target = note_target(page)
-        if target is None:
-            failures.append(f"{page.parent.name}: no committed snapshot to rebuild it from")
-        elif render_note(page, *target) != page.read_text():
-            failures.append(f"{page.parent.name}: stale; run notes/generate_release_notes.py --rebuild")
+        if page not in digest_pages():
+            failures.append(f"{page.parent.name}: legacy per-series note; run --rebuild")
+    for page in digest_pages():
+        vintage = page.parent.name
+        if f"/notes/releases/{vintage}\"" not in releases_index:
+            failures.append(f"{vintage}: missing from releases index")
+        if f"/notes/releases/{vintage}</loc>" not in sitemap:
+            failures.append(f"{vintage}: missing from sitemap")
+        if not snapshots(vintage):
+            failures.append(f"{vintage}: no committed snapshot to rebuild it from")
+        elif render_digest(page, vintage) != page.read_text():
+            failures.append(f"{vintage}: stale; run notes/generate_release_notes.py --rebuild")
     if failures:
         for failure in failures:
             print(f"FAIL {failure}")
         return 1
-    print(f"OK — {len(generated_pages())} generated release note(s) indexed and current")
+    print(f"OK — {len(digest_pages())} release digest(s) indexed and current")
     return 0
+
+
+def write_digest(vintage: str) -> bool:
+    destination = GENERATED_ROOT / vintage / "index.html"
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    fresh = render_digest(destination, vintage)
+    if destination.exists() and destination.read_text() == fresh:
+        return False
+    destination.write_text(fresh)
+    return True
 
 
 def main() -> int:
@@ -287,37 +374,31 @@ def main() -> int:
     parser.add_argument("--check", action="store_true")
     parser.add_argument(
         "--rebuild", action="store_true",
-        help="rewrite every committed note from its snapshot (after a template change)",
+        help="rewrite every digest from its snapshots (after a template change); "
+             "folds any legacy per-series note into its date's digest",
     )
     args = parser.parse_args()
     if args.check:
         return check()
     if args.rebuild:
         rebuilt = 0
+        for vintage in digest_dates():
+            if not snapshots(vintage):
+                raise SystemExit(f"{vintage}: no committed snapshot to rebuild it from")
+            rebuilt += write_digest(vintage)
         for page in generated_pages():
-            target = note_target(page)
-            if target is None:
-                raise SystemExit(f"{page.parent.name}: no committed snapshot to rebuild it from")
-            fresh = render_note(page, *target)
-            if fresh != page.read_text():
-                page.write_text(fresh)
-                rebuilt += 1
+            if page not in digest_pages():
+                page.unlink()
+                page.parent.rmdir()
         rebuild_indexes()
-        print(f"rebuilt {rebuilt} release note(s)")
+        print(f"rebuilt {rebuilt} release digest(s)")
         return 0
 
     written = 0
-    for series in snapshots(args.vintage):
-        destination = GENERATED_ROOT / f"{args.vintage}-{series['series']}" / "index.html"
-        if destination.exists():
-            continue
-        destination.parent.mkdir(parents=True)
-        # Stamp the canonical header, crumbs, and footer so a fresh page
-        # matches `python3 site_nav.py` exactly.
-        destination.write_text(render_note(destination, series, args.vintage))
-        written += 1
+    if snapshots(args.vintage):
+        written = int(write_digest(args.vintage))
     rebuild_indexes()
-    print(f"generated {written} release note(s) for {args.vintage}")
+    print(f"generated {written} release digest(s) for {args.vintage}")
     return 0
 
 
