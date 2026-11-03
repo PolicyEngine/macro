@@ -27,13 +27,17 @@ STYLE_HREF = f"/style.css?v={STYLE_VERSION}"
 
 DESTINATIONS = (
     ("home", "/", "Home", "nav-mobile"),
-    ("models", "/models", "Models", "nav-mobile"),
+    # Forecasts sits second, ahead of Models (r2 IA): the scored, vintage-
+    # controlled record is what a visitor cannot get anywhere else, and the
+    # homepage tells the story in the same order (what it is, why trust it,
+    # the record, which model, how to use it).
     # Economy was folded into Forecasts: one tab for everything the platform
     # produces and the data it is produced from. /economy and /economy/us keep
     # their URLs — ~200 generated release notes, the homepage and the models
     # hub link to them in prose — but they are Forecasts pages now, and
     # ``section`` and ``CRUMB_PARENTS`` below are what make that true.
     ("forecasts", "/forecasts", "Forecasts", "nav-mobile"),
+    ("models", "/models", "Models", "nav-mobile"),
     ("use", "/connect", "Use", "nav-mobile nav-start"),
 )
 
@@ -110,13 +114,15 @@ PAGE_NAMES = {
     "/olg/methodology": "Methodology",
     "/olg/validation": "Validation",
     "/pe": "PolicyEngine microsim",
-    "/papers/pe-microsim": "pe-microsim",
-    "/papers/obr-macro": "obr-macro",
-    "/papers/boe-svar": "boe-svar",
-    "/papers/frb-us": "frb-us",
-    "/papers/psl-og": "psl-og",
-    "/papers/define-uk": "define-uk",
-    "/reports/define-uk-replication": "define-uk",
+    # Papers are each model's fifth tab, so the leaf reads like the other
+    # tabs ("Paper") and the crumb runs through the model (CRUMB_PARENTS).
+    "/papers/pe-microsim": "Paper",
+    "/papers/obr-macro": "Paper",
+    "/papers/boe-svar": "Paper",
+    "/papers/frb-us": "Paper",
+    "/papers/psl-og": "Paper",
+    "/papers/define-uk": "Paper",
+    "/reports/define-uk-replication": "Replication report",
     "/reports/us-hank-open-source": "Open models",
     "/forecasts": "Forecasts",
     "/forecasts/us": "United States",
@@ -135,13 +141,17 @@ CRUMB_PARENTS = {
     "/olg": "/models",
     "/pe": "/models",
     "/define": "/models",
-    "/papers/pe-microsim": "/models",
-    "/papers/obr-macro": "/models",
-    "/papers/boe-svar": "/models",
-    "/papers/frb-us": "/models",
-    "/papers/psl-og": "/models",
-    "/papers/define-uk": "/models",
-    "/reports/define-uk-replication": "/models",
+    # A paper is read as its model's Paper tab (it carries the model's
+    # sub-tab row), so its pathway runs through the model —
+    # Home / Models / OBR emulator / Paper — not straight to /models, which
+    # left the reader with a tab row for a model the crumb never named.
+    "/papers/pe-microsim": "/pe",
+    "/papers/obr-macro": "/obr",
+    "/papers/boe-svar": "/svar",
+    "/papers/frb-us": "/frb-us",
+    "/papers/psl-og": "/olg",
+    "/papers/define-uk": "/define",
+    "/reports/define-uk-replication": "/define",
     # The open-models survey is one of the five us-hank tabs, so its pathway
     # runs through the model rather than straight to /models.
     "/reports/us-hank-open-source": "/us-hank",
