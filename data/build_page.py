@@ -90,7 +90,7 @@ def public_label(series: dict) -> str:
 
 
 def display_url(url: str) -> str:
-    """ONS serves observations from a JSON `/data` endpoint, which is a poor
+    """ONS serves observations from a JSON `/data` endpoint, which is a bad
     destination for a reader clicking through to the official page. Keep the
     API URL in the committed vintage and link the human-readable page."""
     if "ons.gov.uk/" in url and url.endswith("/data"):
@@ -278,7 +278,11 @@ def recipe_block() -> str:
             )
         else:
             lines.append(esc(code))
-    return "\n".join(lines)
+    # In a code block, not loose in the prose: unwrapped, the recipe ran as
+    # running text and its long unbreakable lines pushed /forecasts 51 px
+    # past a 375 px viewport. The block scrolls inside itself instead.
+    body = "\n".join(lines)
+    return f'      <div class="codeblock"><pre><code>{body}</code></pre></div>'
 
 
 def counts() -> tuple[int, int, str]:

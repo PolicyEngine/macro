@@ -190,7 +190,7 @@ def esc(value) -> str:
 
 def load(name: str) -> dict:
     series = json.loads((ROOT / "data" / "latest" / f"{name}.json").read_text())
-    # ONS observations live behind a JSON `/data` endpoint, which is a poor
+    # ONS observations live behind a JSON `/data` endpoint, which is a bad
     # destination for a reader clicking through to the official series.
     if "ons.gov.uk/" in series["url"] and series["url"].endswith("/data"):
         series["url"] = series["url"][: -len("/data")]
@@ -447,16 +447,14 @@ def satellite_has_no_surface() -> bool:
 # --------------------------------------------------------------- page pieces
 
 def _card(heading: str, value: str, note: str, series: dict, period: str) -> str:
-    return f"""        <article class="economy-stat">
-          <p class="economy-stat-label mono">{heading}</p>
-          <p class="economy-stat-value">{value}</p>
-          <p class="economy-stat-change">{note}</p>
-          <dl>
-            <div><dt>Observation</dt><dd>{esc(period)}</dd></div>
-            <div><dt>Vintage</dt><dd>{esc(series["vintage"])}</dd></div>
-            <div><dt>Source</dt><dd><a href="{esc(series["url"])}">{esc(series["source"])} · {esc(series["cdid"])}</a></dd></div>
-          </dl>
-        </article>"""
+    """A stat tile (DESIGN.md §4.2): this page is the home of the reading."""
+    return f"""      <div class="stat">
+        <span class="stat-label">{heading}</span>
+        <span class="stat-value">{value}</span>
+        <span class="stat-sub">{esc(period)} &middot; vintage {esc(series["vintage"])}</span>
+        <span class="stat-note">{note}</span>
+        <span class="stat-foot"><a class="chip" href="{esc(series["url"])}">{esc(series["source"])} &middot; {esc(series["cdid"])}</a></span>
+      </div>"""
 
 
 def stat_card(series: dict, kind: str | None = None) -> str:
@@ -471,7 +469,7 @@ def stat_card(series: dict, kind: str | None = None) -> str:
     now = latest(series)
     if kind is None:
         return _card(
-            esc(label(series).upper()),
+            esc(label(series)),
             esc(display(series, now["value"])),
             f'stored as {esc(stored(now["value"]))} &middot; {esc(series["units"])}',
             series,
@@ -485,7 +483,7 @@ def stat_card(series: dict, kind: str | None = None) -> str:
         )
     change = 100 * (now["value"] / before["value"] - 1)
     return _card(
-        esc(f"{label(series).upper()} · YEAR ON YEAR"),
+        esc(f"{label(series)}, year on year"),
         f"{change:+.1f}%",
         f'derived here, not stored: {esc(stored(now["value"]))} in '
         f'{esc(now["period"])} against {esc(stored(before["value"]))} in '
@@ -588,7 +586,7 @@ def stands(cards: tuple[tuple[str, str | None], ...], note: str,
     provenance table are keyed on.
     """
     rendered = "\n".join(stat_card(load(name), kind) for name, kind in cards)
-    return f"""    <div class="economy-grid">
+    return f"""    <div class="stat-row">
 {rendered}
     </div>
     <p class="economy-method">{note}</p>
@@ -635,6 +633,23 @@ def data_layer(names: tuple[str, ...], closing: str) -> str:
     </div>"""
 
 
+def verdict_line(evidence: str) -> str:
+    """The verdict part of a registry evidence string, without its figures.
+
+    The figures behind a validation verdict live on the model's Validation
+    tab (DESIGN.md §7.0); a topic page states the verdict in words and links
+    there. Keeps the first clause that carries no digit ("No demonstrated
+    skill against a random walk WITH DRIFT …", "the anchored fit is by
+    construction"), so no failure statement is dropped, only its numbers.
+    """
+    clauses = [c.strip() for c in re.split(r"(?<=[.;])\s+", evidence) if c.strip()]
+    for clause in clauses:
+        if not re.search(r"\d", clause):
+            clause = clause.rstrip(";").rstrip(".") + "."
+            return clause[0].upper() + clause[1:]
+    return "The figures are on the validation page."
+
+
 def limits_list(items: list[str]) -> str:
     entries = "\n".join(f"        <li>{item}</li>" for item in items)
     return f"      <ul>\n{entries}\n      </ul>"
@@ -662,9 +677,12 @@ def registry_terms(items: list[str]) -> str:
 def band(ident: str, number: str, kicker: str, heading: str, body: str,
          alt: bool = False) -> str:
     classes = "band band-alt" if alt else "band"
+    # ``number`` is kept in the signature for the callers; eyebrows carry no
+    # ordinals (DESIGN.md §4.1).
+    del number
     return f"""  <section id="{ident}" class="{classes}">
     <div class="band-head">
-      <span class="kicker mono">{number} — {kicker}</span>
+      <span class="kicker mono">{kicker}</span>
       <h2>{heading}</h2>
     </div>
 {body}
@@ -729,9 +747,8 @@ def growth_model() -> str:
         One model in the suite forecasts UK output: <a href="/svar">boe-svar</a>,
         the {esc(model["display_name"])}. The round generated
         {esc(forecast["generated"])} conditions on data through
-        {esc(forecast["data_edge"])} and puts year-on-year growth at
-        {facts["values"]["median"]:.1f}% in {esc(facts["period"])},
-        68% {band_text(facts["values"])} — and in the same breath:
+        {esc(forecast["data_edge"])}; its path, from {esc(facts["period"])}, is
+        in the table below — and in the same breath:
       </p>
 {limits_list([
         f"Status: {esc(model['status'])}.",
@@ -750,7 +767,7 @@ def growth_model() -> str:
       </div>
       <p class="callout">
         <strong>Predictive validation: {esc(quality["level"])}.</strong>
-        {esc(quality["evidence"])}
+        {esc(verdict_line(quality["evidence"]))}
         <a href="/svar/validation">Read the validation page →</a>
       </p>
       <p class="chooser-note">
@@ -837,10 +854,9 @@ def inflation_model() -> str:
     return f"""    <div class="prose">
       <p>
         <a href="/svar">boe-svar</a> — the {esc(model["display_name"])} — forecasts
-        headline CPI. The round generated {esc(facts["forecast"]["generated"])} puts
-        the first open quarter, {esc(facts["period"])}, at
-        {facts["values"]["median"]:.1f}% with a 68% range of
-        {band_text(facts["values"])}. {reaches} And in the same breath:
+        headline CPI. The round generated {esc(facts["forecast"]["generated"])}
+        starts at {esc(facts["period"])}; its path is in the table below.
+        {reaches} And in the same breath:
       </p>
 {limits_list([
         f"Status: {esc(model['status'])}.",
@@ -859,7 +875,7 @@ def inflation_model() -> str:
       </div>
       <p class="callout">
         <strong>Predictive validation: {esc(quality["level"])}.</strong>
-        {esc(quality["evidence"])}
+        {esc(verdict_line(quality["evidence"]))}
         <a href="/svar/validation">Read the validation page →</a>
       </p>
     </div>"""
@@ -1098,9 +1114,9 @@ def public_finances_model() -> str:
     ])}
       <p class="callout">
         <strong>Predictive validation: {esc(predictive["level"])}.</strong>
-        {esc(predictive["evidence"])}
+        {esc(verdict_line(predictive["evidence"]))}
         <strong>Policy counterfactuals: {esc(counterfactual["level"])}.</strong>
-        {esc(counterfactual["evidence"])}
+        {esc(verdict_line(counterfactual["evidence"]))}
         <a href="/obr/validation">Read the validation page →</a>
       </p>
       <p>
@@ -1629,7 +1645,7 @@ def us_hub_forecast_note() -> str:
     """
     frbus = MODELS["frb-us"]["quality"]["predictive_validation"]
     hank = MODELS["us-hank"]["quality"]["predictive_validation"]
-    return f"""      <p class="lede reveal" style="--d:3">
+    return f"""      <p class="lede">
         <strong>{no_us_forecaster()}</strong> Both US members are shock models
         and the registry says so in their own words:
         <a href="/frb-us">frb-us</a> records predictive validation
@@ -2587,6 +2603,30 @@ def _self_url(country: str, current: str | None) -> str:
     return topic_url(TOPIC_BY_SLUG[(country, current)])
 
 
+def topic_lede(topic: dict) -> str:
+    """One sentence on what the page holds, with no reading in it.
+
+    The readings live once, in the stat row below (DESIGN.md §7.0); the hook
+    that used to be the lede restated them and stays as the meta description.
+    """
+    names = [esc(label(load(name)).lower()) for name in topic["series"]]
+    if not names:
+        return "What the models can score here, and how to run it yourself."
+    return (f"The latest {listed(names)} as the snapshot stores them, what the "
+            "models make of them, and how to run it yourself.")
+
+
+def topic_where_next(topic: dict) -> str:
+    """The where-next row: the record, the data store, the country data hub."""
+    entry = COUNTRIES[topic["country"]]
+    cards = [
+        (entry["hub"], "chart", "Forecasts", "The record, open rounds and how they score"),
+        ("/forecasts#data", "data", "The data store", "Every vintage behind these numbers"),
+        (entry["data"], "list", f'{entry["label"]} data', "Every topic and series in one place"),
+    ]
+    return site_nav.where_next(cards)
+
+
 def page(topic: dict) -> str:
     slug = topic["slug"]
     url = topic_url(topic)
@@ -2627,15 +2667,14 @@ def page(topic: dict) -> str:
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 """
     body = f"""<main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">{esc(topic["eyebrow"])}</p>
-      <h1 class="reveal page-title" style="--d:1">{esc(topic["heading"])}</h1>
-      <p class="lede reveal" style="--d:2">{esc(lede)}</p>
+      <p class="eyebrow">{esc(topic["eyebrow"])}</p>
+      <h1 class="page-title">{esc(topic["heading"])}</h1>
+      <p class="lede">{topic_lede(topic)}</p>
     </div>
   </section>
 
@@ -2648,6 +2687,8 @@ def page(topic: dict) -> str:
 {band("run", "03", "run it yourself", "Every number above is a command away.", topic["run"]())}
 
 {band("data", "04", "the data behind it", "Source, coverage, and the immutable file.", data_body, alt=True)}
+
+{topic_where_next(topic)}
 </main>
 
 <footer class="foot foot-bar">
@@ -2667,11 +2708,15 @@ def page(topic: dict) -> str:
 # --------------------------------------------------- economy page + sitemap
 
 def directory_block(country: str) -> str:
+    """The hub's topic list: each row is the topic's question and a link.
+
+    The readings are not restated here; they live on the topic page.
+    """
     rows = []
     for topic in topics_for(country):
         rows.append(
             f'        <a href="{topic_url(topic)}">'
-            f'<span>{esc(topic["hook"]())}</span>'
+            f'<span>{esc(topic["heading"])}</span>'
             f'<strong>{esc(topic["title"])}</strong></a>'
         )
     return "\n".join(rows)

@@ -45,17 +45,14 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">UK · what the platform produces</p>
-      <h1 class="reveal page-title" style="--d:1;">
+      <p class="eyebrow">UK · forecasts on the record · scored against outturns</p>
+      <h1 class="page-title">
         Score a reform. Then ask what it does to the economy.
       </h1>
-      <p class="lede reveal" style="--d:2">
-        The microsimulation is the engine: a reform goes in, and household
-        incomes, revenue and a distribution come out. The macro models are
-        what it cannot do alone — a second round, a general-equilibrium
-        overlay, a forecast. Every forecast here is archived with a timestamp
-        before the outturn is published, kept immutable, and scored against
-        realised data, whatever that shows.
+      <p class="lede">
+        Every forecast here is archived with a timestamp before the outturn is
+        published, kept unchanged, and scored against realised data, whatever
+        that shows.
       </p>
     </div>
   </section>
@@ -82,9 +79,24 @@
   </nav>
 <!-- forecasts-section-nav:end -->
 
+<div class="with-rail">
+  <nav class="page-rail" aria-label="On this page">
+    <p class="page-rail-title">On this page</p>
+      <a href="#run" aria-current="location">What you can run</a>
+      <a href="#status">The record so far</a>
+      <a href="#scored">Scored</a>
+      <a href="#open">Open rounds</a>
+      <a href="#rounds">The archive</a>
+      <a href="#data">The data store</a>
+      <a href="#limits">Limits</a>
+      <a href="#notes">Dated notes</a>
+      <a href="#where-next">Where next</a>
+  </nav>
+  <div class="rail-body">
+
   <section id="run" class="band">
     <div class="band-head">
-      <span class="kicker mono">01 — what you can run</span>
+      <span class="kicker mono">what you can run</span>
       <h2>Six outputs, and the models behind each one.</h2>
     </div>
 <!-- forecasts-platform:begin -->
@@ -144,20 +156,32 @@
 
   <section id="status" class="band band-alt">
     <div class="band-head">
-      <span class="kicker mono">02 — where this stands</span>
+      <span class="kicker mono">where this stands</span>
       <h2>The record so far.</h2>
     </div>
     <div class="prose">
 <div class="fc-vmet">
 <!-- scorecard-status:begin -->
-      <div class="forecast-summary" aria-label="Current forecast record">
-        <article><strong>3</strong><span>Archived rounds</span><small>committed to Git before the outturn existed</small></article>
-        <article><strong>1</strong><span>Scored period</span><small>quarters whose outturn is now published and scored</small></article>
-        <article><strong>2026Q2</strong><span>Next scored period</span><small>when the record next grows, not how it is doing</small></article>
+      <div class="stat-row" aria-label="Current forecast record">
+        <div class="stat">
+          <span class="stat-label">Archived rounds</span>
+          <span class="stat-value">3</span>
+          <span class="stat-sub">committed to Git before the outturn existed</span>
+          <span class="stat-foot"><a class="chip" href="#rounds">The archive</a></span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Scored period</span>
+          <span class="stat-value">1</span>
+          <span class="stat-sub">outturn published and scored</span>
+          <span class="stat-foot"><a class="chip" href="#scored">How it scored</a></span>
+        </div>
+        <div class="stat stat-neutral">
+          <span class="stat-label">Next scored period</span>
+          <span class="stat-value">2026Q2</span>
+          <span class="stat-sub">UK real GDP, y/y, unemployment; lands when the ONS publishes it</span>
+          <span class="stat-foot"><a class="chip" href="#open">Open rounds</a></span>
+        </div>
       </div>
-      <p class="forecast-next">
-        <strong>Next due:</strong> 2026Q2 (UK real GDP, y/y, unemployment), which lands when the ONS publishes it.
-      </p>
 <!-- scorecard-status:end -->
       </div>
       <p>
@@ -170,7 +194,7 @@
 
   <section id="scored" class="band">
     <div class="band-head">
-      <span class="kicker mono">03 — scored</span>
+      <span class="kicker mono">scored</span>
       <h2>Scored so far: one round.</h2>
     </div>
     <div class="prose">
@@ -200,7 +224,7 @@
 
   <section id="open" class="band">
     <div class="band-head">
-      <span class="kicker mono">04 — open rounds</span>
+      <span class="kicker mono">open rounds</span>
       <h2>On the record, waiting to be scored.</h2>
     </div>
     <div class="prose">
@@ -387,7 +411,7 @@
 
   <section id="rounds" class="band">
     <div class="band-head">
-      <span class="kicker mono">05 — the rounds</span>
+      <span class="kicker mono">the rounds</span>
       <h2>What was claimed, and when.</h2>
     </div>
     <div class="prose">
@@ -453,7 +477,7 @@
 
   <section id="data" class="band band-alt">
     <div class="band-head">
-      <span class="kicker mono">06 — the vintage store</span>
+      <span class="kicker mono">the vintage store</span>
       <h2>Every number, as it was published.</h2>
     </div>
 <!-- data-store:begin -->
@@ -1089,7 +1113,7 @@
         Take the newest snapshot on or before your date. No key, no account,
         standard library only.
       </p>
-import json, urllib.request
+      <div class="codeblock"><pre><code>import json, urllib.request
 
 BASE = &quot;https://policyengine-macro.vercel.app/data&quot;
 
@@ -1105,7 +1129,7 @@ def as_of(source, series, date):
     return get(f&quot;vintages/{source}/{series}/{max(dates)}.json&quot;)   <span class="cm"># immutable file</span>
 
 cpi = as_of(&quot;ons&quot;, &quot;uk_cpi_yoy&quot;, &quot;2026-07-25&quot;)
-print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])                    <span class="cm"># 2026-07-25 {&#x27;period&#x27;: &#x27;2026Q2&#x27;, &#x27;value&#x27;: 2.8}</span>
+print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])                    <span class="cm"># 2026-07-25 {&#x27;period&#x27;: &#x27;2026Q2&#x27;, &#x27;value&#x27;: 2.8}</span></code></pre></div>
       <p>
         Two dates, two snapshots: the difference between them is the revision.
         The store starts 2026-07-25 and runs forward from there — it does not
@@ -1159,7 +1183,7 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
 
   <section id="limits" class="band">
     <div class="band-head">
-      <span class="kicker mono">07 — what this is not</span>
+      <span class="kicker mono">what this is not</span>
       <h2>Limits worth stating plainly.</h2>
     </div>
     <div class="prose">
@@ -1167,9 +1191,9 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
         <strong>One scored round proves little</strong>, and there will be no
         skill claim here until the scored count is well into double figures —
         at least a year away. <strong>The bands run too narrow</strong>: in
-        hindsight testing the 68% band covers about 62% and the 90% band about
-        77%, worsening with horizon, which is why the fans above are
-        re-calibrated; the full study is on the
+        hindsight testing both the 68% and the 90% band cover less than they
+        should, worsening with horizon, which is why the fans above are
+        re-calibrated; the coverage study is on the
         <a href="/svar/validation">validation page</a>.
       </p>
       <p>
@@ -1186,7 +1210,7 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
 
   <section id="notes" class="band">
     <div class="band-head">
-      <span class="kicker mono">08 — dated notes</span>
+      <span class="kicker mono">dated notes</span>
       <h2>What the releases mean, read through the models.</h2>
     </div>
     <div class="prose">
@@ -1205,6 +1229,31 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
       </div>
     </div>
   </section>
+  <section class="band where-next" id="where-next">
+    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/svar/validation">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
+        <h3>boe-svar validation</h3>
+        <p>The model behind the GDP and CPI rounds</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/economy">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></span>
+        <h3>UK data</h3>
+        <p>Every topic and the series it reads</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/notes/releases">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+        <h3>Release notes</h3>
+        <p>One factual page per stored release</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </div>
+  </section>
+  </div>
+</div>
 </main>
 
 <footer class="foot foot-bar">
@@ -1371,5 +1420,6 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
   select(0);
 })();
 </script>
+<script src="/stepper.js" defer></script>
 </body>
 </html>

@@ -546,46 +546,40 @@ def render_status(card: dict) -> str:
     """Visual record totals without turning a one-period sample into a claim."""
     rounds = card["rounds"]
     scored = card["periods_scored"]
-    entries = [
-        entry
-        for detail in card["detail"]
-        for entry in detail["entries"]
-    ]
-    latest_entry = sorted(entries, key=lambda entry: entry["period"])[-1] if entries else None
     pending_card = card.get("pending_detail") or {}
     scored_target = esc(pending_card.get("period") or "—")
-    lines = [
-        '      <div class="forecast-summary" aria-label="Current forecast record">',
-        f"        <article><strong>{rounds}</strong><span>Archived "
-        f"round{'' if rounds == 1 else 's'}</span>"
-        "<small>committed to Git before the outturn existed</small></article>",
-        f"        <article><strong>{scored}</strong><span>Scored "
-        f"period{'' if scored == 1 else 's'}</span>"
-        "<small>quarters whose outturn is now published and scored</small></article>",
-        # NOT the latest error. This module's whole argument is that a
-        # headline accuracy figure derived from one observation is worse than
-        # none, and putting it in the record band — level with the round and
-        # scored counts — was the page doing exactly that, with the "one
-        # scored period is not an accuracy headline" disclaimer underneath it.
-        # The error still appears on the scored card in §02, where it sits
-        # beside its benchmarks and its caveats.
-        f"        <article><strong>{scored_target}</strong><span>Next scored "
-        "period</span>"
-        "<small>when the record next grows, not how it is doing</small></article>",
-        "      </div>",
-        '      <p class="forecast-next">',
-    ]
     pending = card.get("pending_detail")
     if pending:
         who = ", ".join(f"{VARIABLE_LABELS.get(v, v)}" for v in pending["variables"])
-        lines.append(
-            f"        <strong>Next due:</strong> {esc(pending['period'])} "
-            f"({esc(who)}), which lands when the ONS publishes it."
-        )
+        next_sub = f"{esc(who)}; lands when the ONS publishes it"
     else:
-        lines.append("        Every archived period now has an outturn.")
-    lines.append("      </p>")
-    return "\n".join(lines)
+        next_sub = "every archived period has an outturn"
+    # A stat row (DESIGN.md §4.2, §7.5): this is the home of the record's
+    # counts. NOT the latest error: a headline accuracy figure derived from one
+    # observation is worse than none; the error sits on the scored card, beside
+    # its benchmarks and its caveats.
+    return "\n".join([
+        '      <div class="stat-row" aria-label="Current forecast record">',
+        '        <div class="stat">',
+        f"          <span class=\"stat-label\">Archived round{'' if rounds == 1 else 's'}</span>",
+        f'          <span class="stat-value">{rounds}</span>',
+        '          <span class="stat-sub">committed to Git before the outturn existed</span>',
+        '          <span class="stat-foot"><a class="chip" href="#rounds">The archive</a></span>',
+        "        </div>",
+        '        <div class="stat">',
+        f"          <span class=\"stat-label\">Scored period{'' if scored == 1 else 's'}</span>",
+        f'          <span class="stat-value">{scored}</span>',
+        '          <span class="stat-sub">outturn published and scored</span>',
+        '          <span class="stat-foot"><a class="chip" href="#scored">How it scored</a></span>',
+        "        </div>",
+        '        <div class="stat stat-neutral">',
+        '          <span class="stat-label">Next scored period</span>',
+        f'          <span class="stat-value">{scored_target}</span>',
+        f'          <span class="stat-sub">{next_sub}</span>',
+        '          <span class="stat-foot"><a class="chip" href="#open">Open rounds</a></span>',
+        "        </div>",
+        "      </div>",
+    ])
 
 
 def render_rounds(card: dict) -> str:
