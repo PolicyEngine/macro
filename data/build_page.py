@@ -122,6 +122,32 @@ def esc(text: str) -> str:
     return html.escape(str(text), quote=True)
 
 
+_TOPIC_HOMES: dict[str, tuple[str, str]] | None = None
+
+
+def topic_home(name: str) -> tuple[str, str] | None:
+    """(url, title) of the topic page that reads a series, from economy/topics.py.
+
+    The /economy hubs used to carry this series-to-topic index; the store is
+    its home now (DESIGN.md §7.0).
+    """
+    global _TOPIC_HOMES
+    if _TOPIC_HOMES is None:
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "economy_topics", ROOT / "economy" / "topics.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _TOPIC_HOMES = {
+            series: (module.topic_url(topic), topic["title"])
+            for topic in module.TOPICS
+            for series in topic["series"]
+        }
+    return _TOPIC_HOMES.get(name)
+
+
 def catalogue_rows() -> str:
     """One <tbody> per series: a scannable row plus an expandable detail row.
 
@@ -152,11 +178,15 @@ def catalogue_rows() -> str:
             for vintage in vintages
         )
         next_release = series.get("next_release")
+        released = series.get("release_updated")
+        home = topic_home(name)
         facts = [
+            ("Topic", f'<a href="{home[0]}">{esc(home[1])}</a>' if home else "none"),
             ("Units", esc(series["units"])),
             ("Coverage", f"{esc(first)} – {esc(last)}"),
             ("Observations", f"{len(series['observations']):,}"),
             ("Store path", f'<span class="mono">{esc(source_dir)}/{esc(name)}</span>'),
+            ("Released", esc(released[:10]) if released else "not supplied by the source"),
             ("Next release", esc(next_release) if next_release else "not announced"),
             ("Official source",
              f'<a href="{esc(display_url(series["url"]))}">'

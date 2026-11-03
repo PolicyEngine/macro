@@ -273,7 +273,10 @@ def build() -> dict:
         "status": (
             "accumulating — no forecast period has an outturn yet"
             if total_scored == 0
-            else f"{total_scored} forecast period(s) scored"
+            else (
+                f"{sum(len(d['entries']) for d in scored)} forecast(s) scored, "
+                f"{len({e['period'] for d in scored for e in d['entries']})} period(s)"
+            )
         ),
         "detail": scored,
     }
@@ -640,7 +643,7 @@ def render_status(card: dict) -> str:
     fetched = store_last_fetched()
     if pending:
         who = ", ".join(f"{VARIABLE_LABELS.get(v, v)}" for v in pending["variables"])
-        next_sub = f"{esc(who)}: not yet in the store, last updated {esc(fetched)}"
+        next_sub = f"{esc(who)}; store updated {esc(fetched)}"
     else:
         next_sub = "every archived period has an outturn"
     # A stat row (DESIGN.md §4.2, §7.5): this is the home of the record's
