@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import html
 import json
 import re
@@ -59,22 +60,61 @@ def display_value(series: dict, value: float) -> str:
 
 
 def delta(series: dict) -> str:
+    """The change on the prior stored observation, short enough for a stat tile."""
     observations = series["observations"]
     if len(observations) < 2:
-        return "No prior observation is stored for comparison."
+        return "no prior observation stored"
     now, prior = observations[-1], observations[-2]
     change = now["value"] - prior["value"]
     units = series["units"].lower()
     if "percent" in units:
-        value = f"{change:+.1f} percentage points"
+        value = f"{change:+.1f}pp"
     elif units.startswith("£m"):
         value = f"£{abs(change) / 1000:,.1f}bn {'higher' if change > 0 else 'lower'}"
     else:
         value = f"{change:+,.1f}"
-    return f"That is {value} compared with {prior['period']}."
+    if value.startswith("-"):
+        value = "\u2212" + value[1:]
+    return f"{value} on {prior['period']}"
+
+
+def _topics():
+    """economy/topics.py, for its series-to-topic table (the topic home of a series)."""
+    spec = importlib.util.spec_from_file_location(
+        "economy_topics", ROOT / "economy" / "topics.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+_TOPIC_CACHE: dict[str, tuple[str, str]] | None = None
+
+
+def topic_home(series: dict) -> tuple[str, str]:
+    """(url, title) of the topic page that reads this series, else the data hub."""
+    global _TOPIC_CACHE
+    if _TOPIC_CACHE is None:
+        topics = _topics()
+        _TOPIC_CACHE = {
+            name: (topics.topic_url(topic), topic["title"])
+            for topic in topics.TOPICS
+            for name in topic["series"]
+        }
+    if series["series"] in _TOPIC_CACHE:
+        return _TOPIC_CACHE[series["series"]]
+    if series["series"].startswith("us_"):
+        return "/economy/us", "US data"
+    return "/economy", "UK data"
 
 
 def note_page(series: dict, vintage: str) -> str:
+    """One factual release note (DESIGN.md §7.7). No interpretation, ever.
+
+    The observation is stated once, in the stat tile: the title band names the
+    series and the release, and every other card links to where the series is
+    read (its topic page), stored (the data store) and scored (the record).
+    """
     now = series["observations"][-1]
     title = f"{series['title']}: {now['period']}"
     value = display_value(series, now["value"])
@@ -82,6 +122,12 @@ def note_page(series: dict, vintage: str) -> str:
     cdid = series["cdid"]
     next_release = " ".join((series.get("next_release") or "not supplied").split())
     canonical = f"https://policyengine-macro.vercel.app/notes/releases/{vintage}-{series['series']}"
+    topic_url, topic_title = topic_home(series)
+    where = site_nav.where_next([
+        (topic_url, "topic", html.escape(topic_title), "Where this series stands, and the model that reads it"),
+        ("/forecasts#data", "data", "The data store", "Every stored vintage of every series"),
+        ("/forecasts#rounds", "chart", "The forecast record", "Rounds scored against outturns like this one"),
+    ])
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -97,68 +143,76 @@ def note_page(series: dict, vintage: str) -> str:
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 <header class="nav">
-  <a class="brand" href="/">
-    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
-  </a>
-  <nav class="nav-links" aria-label="Primary">
-    <a href="/">Home</a>
-    <a class="nav-mobile" href="/economy">Economy</a>
-    <a href="/models">Models</a>
-    <a href="/forecasts">Forecasts</a>
-    <a href="/models#validation">Evidence</a>
-    <a class="nav-mobile nav-start" href="/connect">Use</a>
-    <a href="/contact">Contact</a>
-    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
-  </nav>
 </header>
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
       <p class="eyebrow">{vintage} · automated factual release note</p>
       <h1 class="page-title">{html.escape(series['title'])}</h1>
-      <p class="lede">{html.escape(now['period'])}: <strong>{html.escape(value)}</strong>.</p>
+      <p class="lede">The {html.escape(now['period'])} observation, as {html.escape(source)} published it and as it entered the record.</p>
     </div>
   </section>
-  <section class="band">
-    <div class="band-head"><span class="kicker mono">01 — what changed</span><h2>The newest stored observation.</h2></div>
-    <div class="prose">
-      <p>{html.escape(delta(series))}</p>
-      <p>This page is generated from committed data and contains no editorial or causal interpretation.</p>
+  <section class="band" id="changed">
+    <div class="band-head"><span class="kicker mono">what changed</span><h2>The newest stored observation</h2></div>
+    <div class="stat-row">
+      <div class="stat stat-neutral">
+        <span class="stat-label">{html.escape(series['title'])}, {html.escape(now['period'])}</span>
+        <span class="stat-value">{html.escape(value)}</span>
+        <span class="stat-sub">{html.escape(delta(series))}</span>
+        <span class="stat-foot"><a class="chip" href="{topic_url}#stands">{html.escape(topic_title)}</a></span>
+      </div>
+    </div>
+    <p class="section-intro">Generated from committed data; no editorial or causal interpretation.</p>
+  </section>
+  <section class="band" id="provenance">
+    <div class="band-head"><span class="kicker mono">provenance</span><h2>The release as it entered the record</h2></div>
+    <div class="note-provenance">
+    <dl>
+      <dt>Observation</dt><dd>{html.escape(now['period'])}</dd>
+      <dt>Stored vintage</dt><dd>{vintage}</dd>
+      <dt>Publisher</dt><dd>{html.escape(source)}</dd>
+      <dt>Series</dt><dd>{html.escape(cdid)}</dd>
+      <dt>Next release</dt><dd>{html.escape(next_release)}</dd>
+    </dl>
+    </div>
+    <div class="chip-row">
+      <a class="chip" href="{html.escape(series['url'])}">Publisher series</a>
+      <a class="chip" href="https://github.com/PolicyEngine/macro/blob/main/{series['_path']}">Immutable snapshot</a>
     </div>
   </section>
-  <section class="band band-alt">
-    <div class="band-head"><span class="kicker mono">02 — provenance</span><h2>The release as it entered the record.</h2></div>
-    <div class="prose">
-      <dl>
-        <dt>Observation</dt><dd>{html.escape(now['period'])}</dd>
-        <dt>Stored vintage</dt><dd>{vintage}</dd>
-        <dt>Publisher</dt><dd>{html.escape(source)}</dd>
-        <dt>Series</dt><dd>{html.escape(cdid)}</dd>
-        <dt>Next release</dt><dd>{html.escape(next_release)}</dd>
-      </dl>
-      <p><a href="{html.escape(series['url'])}">Open the publisher series →</a></p>
-      <p><a href="https://github.com/PolicyEngine/macro/blob/main/{series['_path']}">Open the immutable snapshot →</a></p>
-    </div>
-  </section>
-  <section class="band">
-    <div class="band-head"><span class="kicker mono">03 — model context</span><h2>Outturn first; interpretation separately.</h2></div>
-    <div class="prose">
-      <p>The <a href="/economy">UK data page</a> places this observation beside the other current indicators. If it completes an archived forecast period, the <a href="/forecasts">forecast record</a> is scored by the separate outturn pipeline.</p>
-      <p>A dated research note may add model interpretation after human review. This factual page does not pretend the observation establishes a cause or policy conclusion.</p>
-    </div>
-  </section>
+{where}
 </main>
 <footer class="foot foot-bar">
   <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
   </nav>
 </footer>
-<script src="/reveal.js" defer></script>
+<script src="/reveal.js?v=2" defer></script>
 </body>
 </html>
 """
+
+
+def note_target(page: Path) -> tuple[dict, str] | None:
+    """The snapshot a committed note was generated from, by its slug."""
+    slug = page.parent.name
+    vintage, name = slug[:10], slug[11:]
+    for series in snapshots(vintage):
+        if series["series"] == name:
+            return series, vintage
+    return None
+
+
+def render_note(destination: Path, series: dict, vintage: str) -> str:
+    """The page as committed: template, then the canonical shell from site_nav."""
+    previous = destination.read_text() if destination.exists() else None
+    destination.write_text(note_page(series, vintage))
+    try:
+        return site_nav.render(destination)
+    finally:
+        if previous is not None:
+            destination.write_text(previous)
 
 
 def generated_pages() -> list[Path]:
@@ -212,11 +266,17 @@ def check() -> int:
             failures.append(f"{slug}: missing from releases index")
         if f"/notes/releases/{slug}</loc>" not in sitemap:
             failures.append(f"{slug}: missing from sitemap")
+    for page in generated_pages():
+        target = note_target(page)
+        if target is None:
+            failures.append(f"{page.parent.name}: no committed snapshot to rebuild it from")
+        elif render_note(page, *target) != page.read_text():
+            failures.append(f"{page.parent.name}: stale; run notes/generate_release_notes.py --rebuild")
     if failures:
         for failure in failures:
             print(f"FAIL {failure}")
         return 1
-    print(f"OK — {len(generated_pages())} generated release note(s) indexed")
+    print(f"OK — {len(generated_pages())} generated release note(s) indexed and current")
     return 0
 
 
@@ -227,9 +287,26 @@ def main() -> int:
         default=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
     )
     parser.add_argument("--check", action="store_true")
+    parser.add_argument(
+        "--rebuild", action="store_true",
+        help="rewrite every committed note from its snapshot (after a template change)",
+    )
     args = parser.parse_args()
     if args.check:
         return check()
+    if args.rebuild:
+        rebuilt = 0
+        for page in generated_pages():
+            target = note_target(page)
+            if target is None:
+                raise SystemExit(f"{page.parent.name}: no committed snapshot to rebuild it from")
+            fresh = render_note(page, *target)
+            if fresh != page.read_text():
+                page.write_text(fresh)
+                rebuilt += 1
+        rebuild_indexes()
+        print(f"rebuilt {rebuilt} release note(s)")
+        return 0
 
     written = 0
     for series in snapshots(args.vintage):
@@ -237,10 +314,9 @@ def main() -> int:
         if destination.exists():
             continue
         destination.parent.mkdir(parents=True)
-        destination.write_text(note_page(series, args.vintage))
         # Stamp the canonical header, crumbs, and footer so a fresh page
         # matches `python3 site_nav.py` exactly.
-        destination.write_text(site_nav.render(destination))
+        destination.write_text(render_note(destination, series, args.vintage))
         written += 1
     rebuild_indexes()
     print(f"generated {written} release note(s) for {args.vintage}")

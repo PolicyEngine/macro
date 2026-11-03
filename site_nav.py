@@ -381,6 +381,41 @@ def header(path: Path) -> str:
 %s""" % ("\n".join(links), crumbs(path))
 
 
+# "Where next" row (DESIGN.md §4.7, §8): the last card on generated pages.
+# Icons are 24 px Lucide-style strokes, decorative.
+CARD_ICONS = {
+    "chart": '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/>',
+    "data": '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+    "topic": '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    "list": '<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>',
+    "model": '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 16.5 9 5 9-5"/>',
+    "plug": VIEW_ICONS["use"],
+    "target": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+}
+
+
+def where_next(cards: list[tuple[str, str, str, str]], indent: str = "  ") -> str:
+    """A "where next" card: (href, icon key, title, one line) per entry card."""
+    rows = []
+    for href, key, title, line in cards:
+        rows.append(
+            f'{indent}    <a class="entry-card" href="{href}">\n'
+            f'{indent}      <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" '
+            'fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" '
+            f'stroke-linejoin="round">{CARD_ICONS[key]}</svg></span>\n'
+            f"{indent}      <h3>{title}</h3>\n"
+            f"{indent}      <p>{line}</p>\n"
+            f'{indent}      <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>\n'
+            f"{indent}    </a>"
+        )
+    return (
+        f'{indent}<section class="band where-next" id="where-next">\n'
+        f'{indent}  <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>\n'
+        f'{indent}  <div class="entry-grid">\n' + "\n".join(rows) + "\n"
+        f"{indent}  </div>\n{indent}</section>"
+    )
+
+
 # Standalone documents allowed to ship without the global nav header.
 # Empty: reports/us-hank-open-source was the last one, and a reader clicking
 # through from /us-hank landed on a page with no header, no breadcrumb and no
