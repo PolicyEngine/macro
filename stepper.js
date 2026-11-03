@@ -28,6 +28,11 @@
       steps.forEach(function (step, i) {
         if (step.getBoundingClientRect().top < line) active = i;
       });
+      // At the very end of the page a short last step may never reach the
+      // reading line; once the whole wrap is on screen, it is the one read.
+      var root = document.documentElement;
+      if (window.innerHeight + window.scrollY >= root.scrollHeight - 2 &&
+          wrap.getBoundingClientRect().bottom <= window.innerHeight) active = steps.length - 1;
       if (active === current) return;
       current = active;
       steps.forEach(function (step, i) { step.classList.toggle("active", i === active); });

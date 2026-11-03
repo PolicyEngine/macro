@@ -169,22 +169,71 @@ def test_paper_landings_publish_the_page_count_of_the_pdf_they_link():
         assert f'href="/papers/{slug}"' in hub
 
 
-def test_model_cards_quote_the_capability_registry():
-    """Each model Overview's model card restates its registry horizon and
-    status, so the card cannot drift from capabilities.py silently.
+MODEL_PAGES = {
+    "pe-microsim": "pe",
+    "obr-macro": "obr",
+    "boe-svar": "svar",
+    "frb-us": "frb-us",
+    "us-hank": "us-hank",
+    "og-uk": "olg",
+    "define-uk": "define",
+}
+MODEL_CARD_ORDER = [
+    "Answers", "Inputs", "Outputs", "Horizon", "Data", "Uncertainty",
+    "Access", "Runtime", "Joins pe-microsim", "Status", "Cannot answer",
+]
 
-    Scoped to the UK model pages that carry a card today; extend the mapping
-    as other model Overviews gain one."""
+
+def _model_card(page: str) -> str:
+    html = _read(f"{page}/index.html")
+    section = re.search(r'<section id="card"[^>]*>(.*?)</section>', html, re.S)
+    assert section, f"{page}: no model card section"
+    card = re.search(r'<dl class="model-card">(.*?)</dl>', section.group(1), re.S)
+    assert card, f"{page}: no dl.model-card in #card"
+    return card.group(1)
+
+
+def test_model_cards_quote_the_capability_registry():
+    """Every model Overview carries one model card (DESIGN.md §4.13): the same
+    markup and field order on all seven, a Status row that quotes the
+    registry verbatim, and a Horizon row that quotes it, so the card cannot
+    drift from capabilities.py silently."""
     from policyengine_macro.capabilities import MODELS
 
-    pages = {
-        "pe-microsim": "pe/index.html",
-        "obr-macro": "obr/index.html",
-        "boe-svar": "svar/index.html",
-    }
-    for model, page in pages.items():
-        html = _read(page).lower()
-        assert 'id="card"' in html, f"{page}: no model card"
-        for field in ("horizon", "status"):
-            value = MODELS[model][field].lower()
-            assert value in html, f"{page}: model card does not quote {field} {value!r}"
+    for model, page in MODEL_PAGES.items():
+        card = _model_card(page)
+        rows = dict(re.findall(r"<dt>([^<]+)</dt><dd>(.*?)</dd>", card))
+        labels = re.findall(r"<dt>([^<]+)</dt>", card)
+        assert labels == [f for f in MODEL_CARD_ORDER if f in labels], (
+            f"{page}: model card fields out of order: {labels}"
+        )
+        for field in ("Answers", "Inputs", "Outputs", "Horizon", "Access", "Status", "Cannot answer"):
+            assert field in rows, f"{page}: model card has no {field} row"
+        status = MODELS[model]["status"].lower()
+        assert rows["Status"].lower() == status, f"{page}: Status does not quote the registry"
+        horizon = MODELS[model]["horizon"].lower()
+        if page not in ("pe", "obr", "svar"):
+            # US-agent cards extend the registry horizon in prose; the
+            # registry's own words must still lead the row.
+            horizon = horizon.split(";")[0]
+        value = rows["Horizon"].lower().replace("&ndash;", "-")
+        assert horizon in value, f"{page}: Horizon does not quote the registry {horizon!r}"
+
+
+def test_trust_cards_quote_the_quality_registry():
+    """Every model Validation tab carries the trust card: one row per
+    MODEL_QUALITY dimension, with the registry's level."""
+    from policyengine_macro.capabilities import MODEL_QUALITY
+
+    dims = [
+        "implementation_fidelity", "predictive_validation",
+        "identification_robustness", "policy_counterfactual_validity",
+        "uncertainty_calibration", "vintage_reproducibility",
+    ]
+    for model, page in MODEL_PAGES.items():
+        html = _read(f"{page}/validation/index.html")
+        card = re.search(r'<div class="table-scroll trust-card">(.*?)</table>', html, re.S)
+        assert card, f"{page}/validation: no trust card"
+        levels = re.findall(r'<td><span class="chip">([^<]+)</span></td>', card.group(1))
+        want = [MODEL_QUALITY[model][d]["level"].replace("_", " ") for d in dims]
+        assert levels == want, f"{page}/validation: trust levels {levels} != registry {want}"

@@ -66,30 +66,35 @@
       <a class="model-tabs-link" href="/papers/boe-svar">Paper</a>
     </div>
   </nav>
-  <section id="overview" class="band band-wide">
+  <section id="card" class="band band-wide">
     <div class="band-head">
-      <span class="kicker mono">overview</span>
-      <h2>The Bank of England&rsquo;s structural VAR, replicated in the open.</h2>
+      <span class="kicker mono">model card</span>
+      <h2>BoE SVAR at a glance</h2>
     </div>
-    <p class="callout callout-warn verdict-callout">
+    <p class="callout verdict-callout">
       <strong>Verdict: replicates the paper&rsquo;s GDP decomposition, short on CPI; no forecast skill.</strong>
       Against a drifting random walk no variable shows skill at any horizon once the tests are adjusted together.
       <a href="/svar/validation#forecasters">How far to trust it &rarr;</a>
     </p>
+    <!-- Fields follow integration/src/policyengine_macro/capabilities.py MODELS["boe-svar"]; one field order on all seven Overviews (DESIGN.md §4.13). -->
+    <dl class="model-card">
+      <div><dt>Answers</dt><dd>What is hitting the UK economy now, why the forecast changed, and how uncertain the baseline is</dd></div>
+      <div><dt>Inputs</dt><dd>Eight packaged quarterly series, all public (ONS, Bank of England, FRED)</dd></div>
+      <div><dt>Outputs</dt><dd>GDP and CPI forecasts with bands, identified shocks, decompositions, forecast revisions</dd></div>
+      <div><dt>Horizon</dt><dd>Quarterly short-run forecast</dd></div>
+      <div><dt>Data</dt><dd>Sample 1992Q1&ndash;2025Q1 &middot; conditioning data through 2026Q1</dd></div>
+      <div><dt>Uncertainty</dt><dd>Posterior 68% and 90% intervals, raw rather than calibrated to <a href="/svar/validation#rolling">measured coverage</a></dd></div>
+      <div><dt>Access</dt><dd>Hosted forecast and latest shocks, CLI, Python</dd></div>
+      <div><dt>Runtime</dt><dd>Minutes per estimation run</dd></div>
+      <div class="model-card-wide"><dt>Status</dt><dd>Validated replication for selected outputs</dd></div>
+      <div class="model-card-wide"><dt>Cannot answer</dt><dd>The effect of a statutory policy reform: <code>score_reform</code> does not accept it (<a href="/svar/validation#caveats">limits</a>)</dd></div>
+    </dl>
+  </section>
 
-    <div class="model-card" id="card">
-      <h3 class="model-card-title">Model card</h3>
-      <dl class="model-card-grid">
-        <div><dt>Answers</dt><dd>What is hitting the UK economy now, why the forecast changed, and how uncertain the baseline is</dd></div>
-        <div><dt>Inputs</dt><dd>Eight packaged quarterly series, all public (ONS, Bank of England, FRED)</dd></div>
-        <div><dt>Outputs</dt><dd>GDP and CPI forecasts with bands, identified shocks, decompositions, forecast revisions</dd></div>
-        <div><dt>Horizon</dt><dd>Quarterly short-run forecast</dd></div>
-        <div><dt>Data</dt><dd>Sample 1992Q1&ndash;2025Q1 &middot; conditioning data through 2026Q1</dd></div>
-        <div><dt>Uncertainty</dt><dd>Posterior 68% and 90% intervals, raw rather than calibrated to <a href="/svar/validation#rolling">measured coverage</a></dd></div>
-        <div><dt>Access</dt><dd>Hosted forecast and latest shocks, CLI, Python &middot; minutes per estimation run</dd></div>
-        <div><dt>Status</dt><dd>Validated replication for selected outputs</dd></div>
-        <div class="model-card-wide"><dt>Cannot answer</dt><dd>The effect of a statutory policy reform: <code>score_reform</code> does not accept it (<a href="/svar/validation#caveats">limits</a>)</dd></div>
-      </dl>
+  <section id="overview" class="band band-wide">
+    <div class="band-head">
+      <span class="kicker mono">overview</span>
+      <h2>The Bank of England&rsquo;s structural VAR, replicated in the open.</h2>
     </div>
 
     <div class="scrolly-wrap">

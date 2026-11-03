@@ -640,9 +640,11 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   padding: 0;
 }
 .scrolly-steps { min-width: 0; counter-reset: none; }
+/* No min-height: a 70vh floor left 300-400px blank under short Overview
+   steps. stepper.js activates the last step at the page end, so a short
+   final step still reaches its panel. */
 .meth-step {
   position: relative;
-  min-height: 70vh;
   padding: 0 0 var(--s-7) 52px;
   border-left: 0;
   opacity: 1;
@@ -660,7 +662,7 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   transition: background-color 300ms;
 }
 .meth-step.active::before { background: var(--primary); }
-.meth-step:last-child { min-height: auto; padding-bottom: var(--s-5); }
+.meth-step:last-child { padding-bottom: var(--s-5); }
 .meth-step:last-child::before { display: none; }
 .meth-step-head {
   display: flex;
@@ -703,7 +705,6 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   .scrolly-wrap { grid-template-columns: 1fr; }
   .scrolly-sticky { display: none; }
   .meth-inline { display: block; }
-  .meth-step { min-height: 0; }
   .meth-step::before { background: var(--hairline); }
   .meth-step .meth-step-num { background: var(--surface-card); color: var(--teal-700); }
 }
@@ -1774,7 +1775,6 @@ h3 { color: var(--text-strong); font-weight: 600; }
   line-height: 1.55;
 }
 .comparison-table thead th a { color: var(--paper); text-decoration: none; line-height: 1.45; }
-.comparison-table thead th a span { color: var(--brand-strong); font-size: 10px; letter-spacing: .06em; }
 .comparison-table tbody tr:nth-child(even) { background: color-mix(in srgb, var(--ink-2) 58%, transparent); }
 .comparison-table tbody tr:hover { background: var(--brand-wash); }
 .comparison-table th,
@@ -2861,12 +2861,11 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
    no 90vh minimum, tight rhythm, run-out only after the last step so
    its panel can still activate. */
 .scrolly-code .meth-step {
-  min-height: auto;
   padding-top: 36px;
   padding-bottom: 36px;
 }
 .scrolly-code .meth-step:first-child { padding-top: 0; }
-.scrolly-code .meth-step:last-child { min-height: auto; padding-bottom: 45vh; }
+.scrolly-code .meth-step:last-child { padding-bottom: var(--s-5); }
 .scrolly-code .meth-step > :last-child { margin-bottom: 0; }
 .scrolly-code .meth-step h4:first-of-type { margin-top: var(--s-3); }
 
@@ -3954,16 +3953,10 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   font-size: var(--fs-small);
   line-height: 1.55;
 }
-.home-page .scored-verdict {
-  margin: var(--s-4) 0 0;
-  padding-left: var(--s-4);
-  max-width: 66ch;
-  border-left: 2px solid var(--brand-warning);
-  color: var(--paper-dim);
-  font-size: var(--fs-body-sm);
-  line-height: 1.6;
-}
-.home-page .scored-verdict strong { color: var(--paper); font-weight: 650; }
+/* .scored-verdict sits inside .record-now, whose primary left rule already
+   marks it (r2:ia); no second rule, and never the warn colour (§2.1). */
+.home-page .scored-verdict { max-width: 66ch; line-height: 1.6; }
+.home-page .scored-verdict strong { color: var(--text-strong); font-weight: 650; }
 
 /* --- start-using-it row --- */
 .start-row {
@@ -4058,16 +4051,17 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   fill: var(--paper);
 }
 .mm-what { font-size: 12px; fill: var(--paper-faint); }
-.mm-legend { font-size: 11px; fill: var(--paper-faint); }
+.mm-legend { font-size: var(--fs-label); fill: var(--text-faint); }
 .model-map a { cursor: pointer; }
 .model-map a:hover .mm-pill { fill: color-mix(in srgb, var(--brand) 10%, transparent); stroke-width: 2.5; }
 .model-map a:hover .mm-id { fill: var(--brand-strong); }
 .model-map a:focus-visible .mm-pill { stroke-width: 3; }
 .mm-evidence { margin-top: var(--s-5); }
 
-@media (max-width: 720px) {
-  /* The map is a two-dimensional layout; below this width it stops being
-     readable at all, so the evidence lines carry the section on their own. */
+@media (max-width: 999px) {
+  /* The map is a 940-unit SVG; below a 1000px viewport it renders under
+     ~880px and its 12px labels drop under 11px (DESIGN.md §1.8), so the
+     question list (.mm-list, r2:ia) carries the section instead. */
   .mm-figure { display: none; }
 }
 
@@ -4447,12 +4441,15 @@ ol.steps > li > span { color: var(--text-muted); font-size: var(--fs-small); }
 .vchart .vc-spread { stroke-width: 1.2; opacity: .55; stroke-dasharray: none; }
 .vc-t.vc-y.vc-a-m { transform: translate(-50%, calc(-100% - 3px)); }
 .vchart .vc-outline { stroke: var(--text-strong); stroke-width: 1; stroke-dasharray: 3 2; }
-.doc .vc-fig .vc-legend {
+/* Swatch legends inside or outside a .vc-fig (the scoreboard's .sb-legend
+   is the same component). */
+.doc .vc-legend, .doc ul.vc-legend, .doc .sb-legend, .doc ul.sb-legend {
   display: flex; flex-wrap: wrap; gap: 6px 18px;
   margin: var(--s-3) 0 0; padding: 0; list-style: none;
   font-size: var(--fs-small); color: var(--text-muted);
 }
-.doc .vc-fig .vc-legend li { display: inline-flex; align-items: center; gap: 8px; margin: 0; font-size: var(--fs-small); line-height: 1.4; }
+.doc .vc-legend li, .doc .sb-legend li { display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 0; font-size: var(--fs-small); line-height: 1.4; }
+.doc .vc-legend li::before, .doc .sb-legend li::before { content: none; }
 .vfig figcaption { font-family: var(--body); }
 .vc-sw { display: inline-block; flex: none; width: 22px; height: 0; border-top: 2.25px solid var(--series-ours); }
 .vc-sw.ln-s1 { background: none; border-top-color: var(--series-ours); }
@@ -4699,7 +4696,7 @@ body.doc > main { flex: 1 0 auto; }
 }
 .home-page .mm-list li:first-child { border-top: 0; }
 .home-page .mm-list-q { color: var(--text-strong); font-size: var(--fs-body-sm); font-weight: 600; }
-@media (max-width: 720px) { .home-page .mm-list { display: block; } }
+@media (max-width: 999px) { .home-page .mm-list { display: block; } }
 
 /* how it connects: three pipeline strips, mechanics on /models#compose */
 .home-page .join-list { list-style: none; margin: var(--s-5) 0 0; padding: 0; display: grid; gap: var(--s-5); }
@@ -4714,62 +4711,18 @@ body.doc > main { flex: 1 0 auto; }
 /* /models: comparison heads must not break inside a word; ids >= 12px */
 .comparison-table thead th { text-transform: none; letter-spacing: 0; overflow-wrap: normal; word-break: normal; hyphens: none; vertical-align: bottom; }
 .comparison-table thead th a { display: block; font-family: var(--body); font-size: var(--fs-small); font-weight: 600; letter-spacing: 0; text-transform: none; overflow-wrap: normal; word-break: normal; hyphens: manual; }
-.comparison-table thead th a span { display: block; margin-top: 4px; font-family: var(--mono); font-size: var(--fs-label); font-weight: 400; }
+.comparison-table thead th a span { display: block; margin-top: 4px; color: var(--link); font-family: var(--mono); font-size: var(--fs-label); font-weight: 400; letter-spacing: .02em; }
 .router-gap { margin-top: var(--s-5); }
 .class-glossary { display: grid; gap: var(--s-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); margin: var(--s-4) 0 var(--s-5); }
 .class-glossary > div { padding: var(--s-3) var(--s-4); border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface-card); }
 .class-glossary dt { color: var(--text-strong); font-size: var(--fs-body-sm); font-weight: 600; }
 .class-glossary dd { margin: 4px 0 0; color: var(--text-muted); font-size: var(--fs-small); line-height: 1.5; }
-/* === r2:uk-models === */
-/* Model card: the registry facts (integration/src/policyengine_macro/capabilities.py)
-   for one model, under its verdict on the Overview tab. Key/value pairs in a
-   two-column grid from 720px, one column on a phone. */
-.model-card {
-  margin: var(--s-5) 0 var(--s-6);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-  background: var(--surface-card);
-}
-.model-card-title {
-  margin: 0;
-  padding: var(--s-3) var(--s-4);
-  border-bottom: 1px solid var(--hairline);
-  font-size: var(--fs-label);
-  font-family: var(--mono);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-}
-.model-card-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  margin: 0;
-}
-.model-card-grid > div {
-  display: grid;
-  grid-template-columns: 7.5rem minmax(0, 1fr);
-  gap: var(--s-3);
-  padding: var(--s-2) var(--s-4);
-  border-bottom: 1px solid var(--hairline);
-  font-size: var(--fs-body-sm);
-  line-height: 1.45;
-}
-.model-card-grid > div:last-child { border-bottom: 0; }
-.model-card-grid dt { color: var(--text-muted); font-weight: 600; }
-.model-card-grid dd { margin: 0; color: var(--text-strong); overflow-wrap: anywhere; }
-@media (min-width: 720px) {
-  .model-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .model-card-grid > div:nth-child(odd):not(.model-card-wide) { border-right: 1px solid var(--hairline); }
-  .model-card-grid > .model-card-wide { grid-column: 1 / -1; border-bottom: 0; }
-}
-@media (max-width: 420px) {
-  .model-card-grid > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
-}
-/* === r2:us-models === */
-/* Model card (Overview) and trust card (Validation) on the frb-us, us-hank,
-   olg and define pages. Field values are copied from
-   integration/src/policyengine_macro/capabilities.py (MODELS, MODEL_QUALITY). */
+/* === r2:model-cards === */
+/* Model card (DESIGN.md §4.13): the registry facts for one model on its
+   Overview, in section#card under the verdict. One markup and one field order
+   on all seven models (integration/tests/test_site_contract.py enforces it);
+   values follow integration/src/policyengine_macro/capabilities.py MODELS.
+   Two key/value columns from 760px; .model-card-wide rows span both. */
 .model-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -4782,7 +4735,10 @@ body.doc > main { flex: 1 0 auto; }
   border-bottom: 1px solid var(--hairline);
   min-width: 0;
 }
-@media (min-width: 760px) { .model-card { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 760px) {
+  .model-card { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .model-card > .model-card-wide { grid-column: 1 / -1; }
+}
 .model-card dt {
   margin: 0 0 2px;
   color: var(--text-faint);
@@ -4800,8 +4756,9 @@ body.doc > main { flex: 1 0 auto; }
   overflow-wrap: anywhere;
 }
 .model-card dd a { color: var(--link); }
-.model-card + .verdict-callout,
 .verdict-callout + .model-card { margin-top: var(--s-4); }
+/* Trust card (Validation, DESIGN.md §4.13): one row per MODEL_QUALITY
+   dimension; the level is a neutral chip (no colour for good or bad). */
 .trust-card td:nth-child(2) { white-space: nowrap; }
 .trust-card .chip { font-family: var(--mono); font-size: var(--fs-label); }
 /* === r2:charts-use === */
@@ -4874,9 +4831,6 @@ body.doc > main { flex: 1 0 auto; }
 .sb-med { width: 2px; height: 18px; margin-left: -1px; background: var(--series-ours); }
 .sb-out { width: 9px; height: 9px; margin-left: -4.5px; border-radius: 50%; background: var(--series-outturn); box-shadow: 0 0 0 2px var(--surface-card); }
 .scoreboard a.mono, .scoreboard .num { white-space: nowrap; }
-.sb-legend { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); margin: var(--s-2) 0 0; padding: 0; list-style: none; color: var(--text-muted); font-size: var(--fs-small); }
-.sb-legend li { display: inline-flex; align-items: center; gap: 6px; margin: 0; }
-.sb-legend li::before { content: none; }
 @media (max-width: 639px) {
   .scoreboard { min-width: 0; }
   .scoreboard th[scope="row"] { min-width: 0; }
@@ -4884,3 +4838,11 @@ body.doc > main { flex: 1 0 auto; }
 }
 /* Release digests (/notes/releases/<date>, notes/generate_release_notes.py). */
 .digest-table td.kind { white-space: nowrap; }
+/* === r2:integration === */
+/* Baseline for a table outside .prose and .meth-step (e.g. a generated
+   .table-scroll in a card): the same rules and type as .prose tables.
+   :where() keeps it at zero specificity, so any classed table wins. */
+:where(.band) :where(table) { width: 100%; border-collapse: collapse; font-size: var(--fs-body-sm); }
+:where(.band) :where(th, td) { padding: 10px 16px 10px 0; border-bottom: 1px solid var(--hairline); text-align: left; vertical-align: top; }
+:where(.band) :where(thead th) { color: var(--text-faint); font: 500 var(--fs-label)/1.3 var(--mono); letter-spacing: .04em; text-transform: uppercase; }
+:where(.band) :where(caption) { caption-side: top; margin: 0 0 var(--s-2); color: var(--text-muted); font-size: var(--fs-small); text-align: left; }

@@ -370,6 +370,8 @@ The site's signature layout; keep it. Markup (already on 16 pages):
 </div>
 ```
 
+- Steps have no minimum height (r2: the old 70vh floor left 300–400 px gaps under short
+  steps); `stepper.js` activates the last step at the page end instead.
 - Left: steps joined by a 2 px rail; the step at the reading line gets `.active` (the shared
   `/stepper.js`, loaded by every page with a `.scrolly-wrap` or a `.page-rail`; `site_nav.py`
   adds the tag and fails on an inline copy): the rail turns
@@ -424,6 +426,29 @@ hero uses the same treatment (§7.1).
 - Hand-drawn methodology diagrams (`figure.step-diagram`, 560–580-unit viewBox, text ≥ 11
   units) keep their native width below 640 px and scroll inside the figure, so no label renders
   below 11 px (§1.8). They do not use the §6.3 overlay.
+
+### 4.13 Model card and trust card (r2)
+
+All seven models carry both, in one markup:
+
+- **Model card** (Overview, `section#card` under the verdict): `dl.model-card` of
+  `<div><dt>…</dt><dd>…</dd></div>` rows, two columns from 760 px, in this order (rows a model
+  lacks are omitted): Answers · Inputs · Outputs · Horizon · Data · Uncertainty · Access ·
+  Runtime · Joins pe-microsim · Status · Cannot answer. The last three are `.model-card-wide`.
+  Values follow `integration/src/policyengine_macro/capabilities.py` `MODELS`; Status quotes the
+  registry verbatim and Horizon quotes it
+  (`test_model_cards_quote_the_capability_registry` enforces order, Status and Horizon).
+- **Trust card** (Validation `#trust`, after the stat row): `.table-scroll.trust-card` with one
+  row per `MODEL_QUALITY` dimension (implementation fidelity, predictive validation,
+  identification, policy counterfactuals, uncertainty, vintage reproducibility), the registry's
+  level as a neutral `.chip` (no colour for good or bad) and its next gate
+  (`test_trust_cards_quote_the_quality_registry` enforces the levels). The registry's evidence
+  strings are not shown: they restate validation numbers whose home is the stat row (§1.1).
+
+**Verdict tone.** A verdict callout is the model's one-line assessment, not an alarm: it uses
+the default (brand) `.callout` on every model, whatever the verdict says. `.callout-warn` is for
+real caveats and provisional results (e.g. the OBR multiplier warning). The words carry the
+verdict (§2.1): an orange box on six of seven Overviews read as "this model is broken".
 
 ---
 
@@ -593,7 +618,7 @@ start → why trust it → the forecast record → which model → how they conn
    score against outturn, naive and official · keep the data as published), the scored period
    named in words with its caveat, buttons to `/forecasts#scored` and `#open`. The counts and
    the scores live on `/forecasts`; this card never restates them.
-5. `#extend`: the model map (≥ 720 px) or, below 720 px, the same questions as a list with
+5. `#extend`: the model map (≥ 1000 px viewport, where its labels render ≥ 11 px) or, below that, the same questions as a list with
    model chips (one of the two is visible, as the panel/inline pair).
 6. `#joins`: the three joins as pipeline strips only; entry points, calls and results live on
    `/models#compose` and are linked, not repeated. (This replaces the earlier StepPanel here:
@@ -621,9 +646,9 @@ row (entry cards or chips): the next tab, `/models#compare`, and `/connect` for 
 
 | Tab | Layout | Must carry |
 |---|---|---|
-| Overview | lede (only here) → verdict callout (one line, `.callout-warn` if the verdict is a failure, links to Validation) → StepPanel: 1 With the microsimulation (the join), 2 What it is, 3 What it can answer (worked example = home) | link to the paper, `/models#compose`, Validation caveats |
+| Overview | lede (only here) → `section#card`: verdict callout (one line, default `.callout` tone on every model, links to Validation) + model card (§4.13) → StepPanel: 1 With the microsimulation (the join), 2 What it is, 3 What it can answer (worked example = home) | link to the paper, `/models#compose`, Validation caveats |
 | Methodology | StepPanel, one step per model block; panel = equations (`.meth-eq`) | the model's source paper citation (link to Paper tab) |
-| Validation | stat row (the headline fit numbers: their home) → StepPanel of the tests (OBR is the reference) → limits card (`#caveats`, every failure statement in full) → "On this page" rail ≥ 1100 px | the verdict, every known limit, links to the code that produced each number |
+| Validation | stat row (the headline fit numbers: their home) + trust card (§4.13) → StepPanel of the tests (OBR is the reference) → limits card (`#caveats`, every failure statement in full) → "On this page" rail ≥ 1100 px | the verdict, every known limit, links to the code that produced each number |
 | Code | `.scrolly-code` StepPanel: install → run → reproduce; panel = commands | `/connect` for hosted use, repo paths |
 | Paper (`/papers/<id>`) | `.paper-viewer` card: title, meta line, Download PDF / All papers buttons, embedded PDF, abstract | status chip (draft/preprint/submitted/published), citation |
 
