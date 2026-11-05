@@ -1477,26 +1477,33 @@ def uk_platform() -> str:
           the chain; two are a macro model standing alone, which is also a fine
           thing to publish.
         </p>
+        <p>
+          pe-microsim&rsquo;s question types are
+          {registry_terms(microsim["question_types"])}:
+          <span class="mono">forecast</span> is not among them, and its
+          predictive validation is recorded as
+          {registry_terms([microsim["quality"]["predictive_validation"]["level"]])}.
+          The uncertainty of {model_link("boe-svar")} is
+          {esc(svar["uncertainty"])}.
+        </p>
       </details>
       <p class="callout">
         <strong>pe-microsim does not forecast, and this section does not
-        pretend it does.</strong> Its question types are
-        {registry_terms(microsim["question_types"])} —
-        <span class="mono">forecast</span> is not among them, and its
-        predictive validation is recorded as
-        {registry_terms([microsim["quality"]["predictive_validation"]["level"]])}.
-        The forecast rows are {model_link("boe-svar")}, whose uncertainty is
-        {esc(svar["uncertainty"])}; the record below is what those rounds have
-        been worth so far. <a href="/models#score">See how a score is put together →</a>
+        pretend it does.</strong> The forecast rows are
+        {model_link("boe-svar")}; the scoreboard above is what those rounds
+        have been worth so far. <a href="/models#score">See how a score is put together →</a>
       </p>
-      <p>
-        Over MCP the same six routes are {tool("household_reform_impact")},
-        {tool("population_reform_impact")}, {tool("score_reform")},
-        {tool("dynamic_reform_impact")}, {tool("forecast_uk")} and
-        {tool("svar_inflation_incidence")}; {tool("recommend_model")} routes a
-        question to a member, or refuses when none supports it.
-        <a href="/connect">Connect a client →</a>
-      </p>
+      <details class="about">
+        <summary>The same routes over MCP</summary>
+        <p>
+          Over MCP the same six routes are {tool("household_reform_impact")},
+          {tool("population_reform_impact")}, {tool("score_reform")},
+          {tool("dynamic_reform_impact")}, {tool("forecast_uk")} and
+          {tool("svar_inflation_incidence")}; {tool("recommend_model")} routes a
+          question to a member, or refuses when none supports it.
+          <a href="/connect">Connect a client →</a>
+        </p>
+      </details>
     </div>"""
 
 
@@ -1532,11 +1539,8 @@ def us_platform() -> str:
     ]
     return f"""    <div class="prose">
       <p>
-        The engine underneath this section is
-        {model_link("pe-microsim")} — {only_two_country_member()}, so the two
-        household rows below are the same command as the UK ones with
-        <span class="mono">--country us</span>. It reports
-        {registry_terms(microsim["outputs"])} over a {esc(microsim["horizon"])}.
+        Four routes, each built on {model_link("pe-microsim")}; the household
+        rows are the UK commands with <span class="mono">--country us</span>.
       </p>
       <div class="table-scroll">
         <table>
@@ -1547,9 +1551,18 @@ def us_platform() -> str:
           </tbody>
         </table>
       </div>
+      <details class="about">
+        <summary>About the engine</summary>
+        <p>
+          The engine underneath this section is
+          {model_link("pe-microsim")} — {only_two_country_member()}, so the two
+          household rows above are the same command as the UK ones with
+          <span class="mono">--country us</span>. It reports
+          {registry_terms(microsim["outputs"])} over a {esc(microsim["horizon"])}.
+        </p>
+      </details>
       <p>
-        Two rows that exist on the UK side are missing here, and both absences
-        are the registry's, not an oversight:
+        Two UK rows are missing here; both absences are the registry's, not an oversight:
       </p>
 {limits_list([
         "<strong>No reform with a macro second round.</strong> Both US "
@@ -1563,20 +1576,23 @@ def us_platform() -> str:
         "Forecasts that showed a US path anyway would be the one dishonest "
         "thing on this site.",
     ])}
-      <p>
-        The bridge that does exist runs the other way: the incidence rows take
-        a <em>macro shock</em>, not a reform, and push its earnings
-        consequences through the microsimulation. So this section can answer
-        &ldquo;who bears this shock&rdquo; for the US, and cannot answer
-        &ldquo;what would this reform do to output&rdquo;.
-      </p>
-      <p>
-        Over MCP the four routes are {tool("household_reform_impact")},
-        {tool("population_reform_impact")}, {tool("frbus_shock_incidence")} and
-        {tool("hank_shock_incidence")}; {tool("recommend_model")} refuses a US
-        reform needing macro feedback, which is the correct answer.
-        <a href="/connect">Connect a client →</a>
-      </p>
+      <details class="about">
+        <summary>The bridge that does exist, and the MCP routes</summary>
+        <p>
+          The bridge that does exist runs the other way: the incidence rows take
+          a <em>macro shock</em>, not a reform, and push its earnings
+          consequences through the microsimulation. So this section can answer
+          &ldquo;who bears this shock&rdquo; for the US, and cannot answer
+          &ldquo;what would this reform do to output&rdquo;.
+        </p>
+        <p>
+          Over MCP the four routes are {tool("household_reform_impact")},
+          {tool("population_reform_impact")}, {tool("frbus_shock_incidence")} and
+          {tool("hank_shock_incidence")}; {tool("recommend_model")} refuses a US
+          reform needing macro feedback, which is the correct answer.
+          <a href="/connect">Connect a client →</a>
+        </p>
+      </details>
     </div>"""
 
 
