@@ -22,7 +22,7 @@ STYLESHEET = re.compile(r'href="/style\.css(?:\?v=[0-9]+)?"')
 # changes in a way a cached copy would render wrongly; ``render`` writes it
 # into every page and the generators read it from here (economy/topics.py,
 # notes/generate_release_notes.py), so no page can be left on an old copy.
-STYLE_VERSION = 16
+STYLE_VERSION = 17
 STYLE_HREF = f"/style.css?v={STYLE_VERSION}"
 
 DESTINATIONS = (
@@ -420,7 +420,7 @@ def where_next(cards: list[tuple[str, str, str, str]], indent: str = "  ") -> st
         )
     return (
         f'{indent}<section class="band where-next" id="where-next">\n'
-        f'{indent}  <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>\n'
+        f'{indent}  <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>\n'
         f'{indent}  <div class="entry-grid">\n' + "\n".join(rows) + "\n"
         f"{indent}  </div>\n{indent}</section>"
     )
