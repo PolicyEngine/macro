@@ -5126,13 +5126,8 @@ code, pre, kbd, samp, .codeblock pre, .codeblock code { font-family: var(--code)
 .band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child > .kicker { grid-row: 1; }
 .band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child > h2 { grid-row: 2; align-self: center; margin: 0; padding: 3px 0; line-height: 1.3; }
 .band-head .section-intro, .band-head > p { margin-top: 4px; color: var(--text-faint); font-size: var(--fs-body); line-height: 1.5; }
-/* section icon: the view the page belongs to */
-:root { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h6'/%3E%3C/svg%3E"); }
-body:has(.nav-links a[href="/models"][aria-current]) { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 3 9 5-9 5-9-5z'/%3E%3Cpath d='m3 12.5 9 5 9-5M3 16.5l9 5 9-5'/%3E%3C/svg%3E"); }
-body:has(.nav-links a[href="/forecasts"][aria-current]) { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v18h18'/%3E%3Cpath d='m7 15 4-4 3 3 6-7'/%3E%3C/svg%3E"); }
-body:has(.nav-links a[href="/connect"][aria-current]) { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4'/%3E%3C/svg%3E"); }
-body.home-page { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10.5 12 3l9 7.5'/%3E%3Cpath d='M5 9.5V21h14V9.5'/%3E%3C/svg%3E"); }
-
+/* section icon: chosen per section by data-icon on .band-head (§6.10);
+   a head without one gets no badge (no generic icon). */
 /* The kicker: a small sentence-case teal label, never tracked capitals */
 .kicker {
   display: block;
@@ -5277,10 +5272,10 @@ details.expander > summary .expander-meta { color: var(--text-faint); font-size:
 /* ---------- 6.9 dark mode for the section above ---------- */
 @media (prefers-color-scheme: dark) {
   /* the badges' icons, in the dark theme's teal ink */
-  :root, body:has(.nav-links a[aria-current]), body.home-page { --sec-icon: none; }
+  /* a light teal badge so the teal-ink icon keeps its contrast */
   .band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child::before {
-    background-image: none;
-    background-color: color-mix(in srgb, var(--primary) 22%, var(--card));
+    background-color: #B2F5EA;
+    box-shadow: none;
   }
   .crumbs a { color: rgba(255, 255, 255, .8); }
 }
@@ -5300,4 +5295,147 @@ details.expander > summary .expander-meta { color: var(--text-faint); font-size:
   .doc main > .hero > .hero-inner > h1 { font-size: 1.25rem; gap: 10px; }
   .doc main > .hero > .hero-inner > h1::before { width: 24px; height: 24px; background-size: 18px; }
   .model-tabs-link, .economy-topics a { font-size: var(--fs-body); }
+}
+
+/* ============================================================
+   6.10 Round 3 component vocabulary (DESIGN.md §4.12)
+   The small set every page builds from. One level of card per
+   section; inside it, dividers and spacing only.
+   ============================================================ */
+
+/* --- section header: icon from data-icon, short title, one grey line.
+   <div class="band-head" data-icon="chart"><h2>…</h2><p class="section-intro">…</p></div>
+   No data-icon = no badge (never a generic icon). Eyebrows (.kicker) are
+   not shown unless marked .keep. */
+.band-head[data-icon="chart"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v18h18'/%3E%3Cpath d='m7 15 4-4 3 3 6-7'/%3E%3C/svg%3E"); }
+.band-head[data-icon="table"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Cpath d='M3 9h18M3 15h18M9 3v18'/%3E%3C/svg%3E"); }
+.band-head[data-icon="scale"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3v18M7 21h10M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2'/%3E%3Cpath d='m2 16 3-8 3 8c-.9.7-1.9 1-3 1s-2.1-.3-3-1Z'/%3E%3Cpath d='m16 16 3-8 3 8c-.9.7-1.9 1-3 1s-2.1-.3-3-1Z'/%3E%3C/svg%3E"); }
+.band-head[data-icon="shield"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z'/%3E%3Cpath d='m9 12 2 2 4-4'/%3E%3C/svg%3E"); }
+.band-head[data-icon="code"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m16 18 6-6-6-6M8 6l-6 6 6 6'/%3E%3C/svg%3E"); }
+.band-head[data-icon="book"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z'/%3E%3Cpath d='M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z'/%3E%3C/svg%3E"); }
+.band-head[data-icon="layers"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 3 9 5-9 5-9-5z'/%3E%3Cpath d='m3 12.5 9 5 9-5M3 16.5l9 5 9-5'/%3E%3C/svg%3E"); }
+.band-head[data-icon="clock"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E"); }
+.band-head[data-icon="database"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cellipse cx='12' cy='5' rx='8' ry='3'/%3E%3Cpath d='M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5'/%3E%3Cpath d='M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3'/%3E%3C/svg%3E"); }
+.band-head[data-icon="link"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7'/%3E%3Cpath d='M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7'/%3E%3C/svg%3E"); }
+.band-head[data-icon="play"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='m10 8 6 4-6 4z'/%3E%3C/svg%3E"); }
+.band-head[data-icon="alert"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E"); }
+.band-head[data-icon="list"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'/%3E%3C/svg%3E"); }
+.band-head[data-icon="globe"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M3 12h18'/%3E%3Cpath d='M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18'/%3E%3C/svg%3E"); }
+.band-head[data-icon="calculator"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='2' width='16' height='20' rx='2'/%3E%3Cpath d='M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15v3M8 18h.01M12 18h.01'/%3E%3C/svg%3E"); }
+.band-head[data-icon="flask"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 3h6M10 3v6.5L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9.5V3M7 15h10'/%3E%3C/svg%3E"); }
+.band-head[data-icon="users"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8'/%3E%3C/svg%3E"); }
+.band-head[data-icon="target"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Ccircle cx='12' cy='12' r='1'/%3E%3C/svg%3E"); }
+.band-head[data-icon="doc"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h6'/%3E%3C/svg%3E"); }
+.band-head[data-icon="plug"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4'/%3E%3C/svg%3E"); }
+.band-head[data-icon="money"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='6' width='20' height='12' rx='2'/%3E%3Ccircle cx='12' cy='12' r='2.5'/%3E%3Cpath d='M6 12h.01M18 12h.01'/%3E%3C/svg%3E"); }
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child:not([data-icon]) { grid-template-columns: minmax(0, 1fr); }
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child:not([data-icon])::before { display: none; }
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child:not([data-icon]) > * { grid-column: 1; }
+.band-head > .kicker:not(.keep), .band-head > .eyebrow:not(.keep) { display: none; }
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child > .section-intro,
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child > p { grid-row: 3; max-width: 90ch; margin-top: 2px; }
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child > h2 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.01em; }
+
+/* --- .kv: label/value rows (AB's policy panel). Markup:
+   <dl class="kv"><div><dt>Label</dt><dd>Value</dd></div>…</dl>
+   (bare dt/dd pairs work too). Default: label left, value right — for
+   numbers. .kv.stack: label above value — for short text. .kv.cols-2:
+   stacked pairs in two columns (one on a phone). */
+.kv { display: grid; grid-template-columns: minmax(0, 1fr) auto; margin: var(--s-3) 0; padding: 0; }
+.kv > div { display: contents; }
+.kv dt, .kv dd { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--hairline); }
+.kv > div:last-child > dt, .kv > div:last-child > dd, .kv > dt:nth-last-child(2), .kv > dd:last-child { border-bottom: 0; }
+.kv dt { color: var(--text-muted); font-size: var(--fs-body-sm); font-weight: 500; line-height: 1.45; }
+.kv dd { padding-left: var(--s-4); color: var(--text-strong); font-size: var(--fs-body); font-weight: 600; line-height: 1.45; text-align: right; font-variant-numeric: tabular-nums; }
+.kv.stack, .kv.cols-2 { grid-template-columns: minmax(0, 1fr); }
+.kv.stack > div, .kv.cols-2 > div { display: block; padding: 10px 0; border-bottom: 1px solid var(--hairline); }
+.kv.stack > div:last-child { border-bottom: 0; }
+.kv.stack > div > dt, .kv.stack > div > dd, .kv.cols-2 > div > dt, .kv.cols-2 > div > dd { padding: 0; border: 0; text-align: left; }
+.kv.stack dt, .kv.cols-2 dt { margin-bottom: 2px; font-size: var(--fs-small); color: var(--text-faint); }
+.kv.stack dd, .kv.cols-2 dd { font-weight: 500; }
+@media (min-width: 700px) {
+  .kv.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--s-6); }
+  .kv.cols-2 > div:nth-last-child(-n+2):nth-child(odd), .kv.cols-2 > div:last-child { border-bottom: 0; }
+}
+.kv.cols-2 > div:last-child { border-bottom: 0; }
+
+/* --- .full: a figure, table or chart that spans the whole card width */
+.full { width: 100%; max-width: none !important; margin-inline: 0; grid-column: 1 / -1; }
+.prose > .full, .prose .full { max-width: none !important; }
+
+/* --- one level of card: framed boxes inside a section card lose their
+   frame and keep dividers and spacing. */
+.band :is(.band, .mo-figcard, .mo-chartcard, .mo-facts, .table-scroll.mo-tablecard, .vfig, .card:not(.entry-card), .trust-card) {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.band :is(.mo-figcard, .mo-chartcard, .table-scroll.mo-tablecard, .mo-facts) { max-width: none; padding-left: 0; padding-right: 0; }
+.band .band { padding: 0; margin: var(--s-6) 0 0; }
+.band :is(.mo-figcard, .mo-chartcard) svg { max-height: none; }
+
+/* --- tables: one level, AB rows. Header row in small grey, hairline rows,
+   no tinted header column, numbers right-aligned (td.num). */
+.band table { width: 100%; border-collapse: collapse; }
+.band :is(thead th) { padding: 8px 16px 8px 0; border-bottom: 1px solid var(--hairline); background: none; color: var(--text-faint); font: 500 var(--fs-small)/1.3 var(--body); letter-spacing: 0; text-align: left; vertical-align: bottom; }
+.band :is(tbody th, tbody td) { padding: 10px 16px 10px 0; border-bottom: 1px solid var(--hairline); background: none; font-size: var(--fs-body-sm); line-height: 1.5; vertical-align: top; }
+.band tbody th { color: var(--text-strong); font-weight: 600; font-family: var(--body); letter-spacing: 0; text-transform: none; }
+.band tbody tr:last-child > * { border-bottom: 0; }
+.band :is(td, th).num, .band td.mono { text-align: right; font-variant-numeric: tabular-nums; }
+.band :is(thead th, tbody th, tbody td):last-child { padding-right: 0; }
+
+/* --- step panels (DESIGN.md §4.9). Left: short text, 3:2 of the width.
+   Right: the sticky panel, one .meth-panel[data-step] per step. A wrap
+   that cannot give every step a panel is marked .single (stepper.js does
+   it too, as a safety net): one full-width column, the .meth-inline
+   copies shown in place. */
+.scrolly-wrap { grid-template-columns: minmax(0, 3fr) minmax(320px, 2fr); gap: var(--s-7, 40px); }
+.scrolly-wrap > .scrolly-sticky { align-self: stretch; }
+.scrolly-wrap > .scrolly-sticky > .meth-panel { position: sticky; top: var(--sticky-top); }
+.scrolly-wrap .scrolly-sticky { position: static; }
+.scrolly-wrap.single { grid-template-columns: minmax(0, 1fr); }
+.scrolly-wrap.single > .scrolly-sticky { display: none; }
+.scrolly-wrap.single .meth-inline { display: block; }
+.scrolly-wrap.single .meth-step::before { background: var(--hairline); }
+.scrolly-wrap.single .meth-step .meth-step-num { background: var(--surface-tint); color: var(--tab-teal); }
+/* panel content: label/value rows and charts, not boxes inside the box */
+:is(.meth-panel, .meth-inline) .meth-eq {
+  margin: 0;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  background: none;
+}
+:is(.meth-panel, .meth-inline) .meth-eq:last-child { border-bottom: 0; }
+:is(.meth-panel, .meth-inline) .meth-sec-title { margin-top: var(--s-3); }
+:is(.meth-panel, .meth-inline) .meth-sec-title + .meth-eq { padding-top: 6px; }
+:is(.meth-panel, .meth-inline) :is(.vc-fig, figure, .vfig) { margin: var(--s-3) 0; }
+:is(.meth-panel, .meth-inline) .vc-fig .vchart { min-height: 260px; }
+:is(.meth-panel, .meth-inline) .kv { margin: 0; }
+.scrolly-sticky .meth-panel { max-height: calc(100vh - var(--sticky-top) - 24px); }
+
+/* --- charts: span the card and take a usable height (AB: ~360-420px).
+   The plot is drawn with preserveAspectRatio="none", so a min-height
+   stretches the marks; labels are HTML and stay 12px. */
+@container (min-width: 640px) {
+  .vchart:not(.vc-keep-ratio) { min-height: max(var(--vc-min-h, 0px), 340px); }
+}
+@container (min-width: 900px) {
+  .vchart:not(.vc-keep-ratio) { min-height: max(var(--vc-min-h, 0px), 380px); }
+}
+.vc-fig.vc-hero .vchart { min-height: var(--vc-min-h, 210px); }
+
+/* --- title bar: one PE logo (the nav's), a quiet breadcrumb, the page's
+   name as h1. */
+.doc main > .hero > .hero-inner > h1::before { content: none; display: none; }
+.crumbs { padding-top: 8px; font-size: 12px; color: rgba(255, 255, 255, .7); }
+.crumbs a { color: rgba(255, 255, 255, .72); }
+.crumbs a::after { margin: 0 6px; color: rgba(255, 255, 255, .45); }
+.crumbs span[aria-current] { color: rgba(255, 255, 255, .88); }
+/* the phone card-stack (§5.15) keeps its own cell rhythm over the rows above */
+@media (max-width: 640px) {
+  .band table.t-stack :is(tbody th, tbody td) { padding: 2px 0; border: 0; text-align: left; }
+  .band table.t-stack tr > :first-child { padding-bottom: var(--s-1); }
 }
