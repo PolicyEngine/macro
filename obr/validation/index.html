@@ -47,10 +47,8 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 02 — OBR macroeconometric model · obr-macro · UK · hosted</p>
-      <h1 class="reveal page-title" style="--d:1;">
-        UK fiscal reform, quarter by quarter.
-      </h1>
+      <p class="eyebrow reveal" style="--d:0">OBR macroeconometric model · UK · hosted</p>
+      <h1 class="reveal page-title" style="--d:1;">OBR emulator</h1>
       <p class="lede reveal" style="--d:2">
         How far to trust each configuration, the check against outturns, and the limits.
       </p>
@@ -79,9 +77,8 @@
     </nav>
     <div class="rail-main">
   <section class="band band-wide" id="trust">
-    <div class="band-head">
-      <span class="kicker mono">validation</span>
-      <h2>How far to trust it, and where it stops.</h2>
+    <div class="band-head" data-icon="shield">
+      <h2>How far to trust it, and where it stops</h2>
       <p class="section-intro">Excellent anchored. Weak free-running. Both published, as MAPE against the EFO path.</p>
     </div>
     <div class="stat-row">
@@ -160,23 +157,16 @@
   </section>
 
   <section class="band band-wide" id="tests">
-    <div class="band-head">
-      <span class="kicker mono">the tests</span>
-      <h2>Anchored fit, outturns, free-running.</h2>
+    <div class="band-head" data-icon="chart">
+      <h2>Anchored fit, outturns, free-running</h2>
     </div>
-    <div class="scrolly-wrap">
+    <div class="scrolly-wrap single">
       <div class="scrolly-steps">
 
       <div class="meth-step" id="anchored" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Anchored against the EFO</h3></div>
         <p class="mo-lead">One test, not two.</p>
-    <div class="prose">
-      <p>
-        Anchored GDP and consumption are <strong>one test, not two</strong>:
-        the £m deviation is identical in all twelve quarters, because every
-        other term in the demand identity is exogenous or pinned.
-      </p>
-      <figure class="vfig">
+        <figure class="vfig">
         <div class="vc-fig" data-chart="obr-anchored">
 <p class="vc-unit">% deviation from the March 2026 EFO</p>
 <div class="vc-plot">
@@ -234,7 +224,7 @@
 </div><!-- /vc-fig -->
         <figcaption>Current March 2026 EFO baseline. Quarterly deviation from the published EFO; CI hard-fails if either series&rsquo; mean absolute deviation reaches 1%. Computed from <code>papers/obr-macro/figures/fig_anchored_data.csv</code>, regenerated from the March 2026 detailed forecast tables on 7 October 2026.</figcaption>
       </figure>
-      <div class="table-scroll mo-tablecard">
+        <div class="table-scroll mo-tablecard">
       <table>
         <caption>Anchored levels against the March 2026 EFO, &pound;bn/qtr</caption>
         <thead><tr><td></td><th scope="col">Ours</th><th scope="col">Official</th><th scope="col">Deviation</th></tr></thead>
@@ -246,30 +236,21 @@
         </tbody>
       </table>
       </div>
-      </div>
-        <div class="meth-inline">
-        <div class="meth-sec-title">anchored fit</div>
-        <div class="meth-eq"><div class="meth-eq-label">window</div><div class="meth-eq-body">2025Q1&ndash;2027Q4, quarterly deviation from the EFO</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">real GDP range</div><div class="meth-eq-body">&minus;0.07% to +0.70%</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">consumption range</div><div class="meth-eq-body">&minus;0.11% to +1.16%</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">CI gate</div><div class="meth-eq-body">hard-fails if either mean deviation reaches 1%</div></div>
-        </div>
+        <p class="kv-title">Anchored fit</p>
+        <dl class="kv"><div><dt>Window</dt><dd>2025Q1&ndash;2027Q4, quarterly deviation from the EFO</dd></div><div><dt>Real GDP range</dt><dd>&minus;0.07% to +0.70%</dd></div><div><dt>Consumption range</dt><dd>&minus;0.11% to +1.16%</dd></div><div><dt>CI gate</dt><dd>hard-fails if either mean deviation reaches 1%</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>
+        Anchored GDP and consumption are <strong>one test, not two</strong>:
+        the £m deviation is identical in all twelve quarters, because every
+        other term in the demand identity is exogenous or pinned.
+      </p>
+        </details>
       </div>
       <div class="meth-step" id="outturn" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Against ONS outturns</h3></div>
         <p class="mo-lead">The only test against reality, and mostly a test of the inherited EFO vintage.</p>
-      <div class="prose">
-      <p>
-        <strong>Forecast versus outturn.</strong> Comparing one forecast
-        vintage with another tests agreement, not accuracy. The emulator
-        tracks the three 2025 outturns to within 0.06pp and — like the
-        November EFO it inherits — misses the strong 2026Q1 outturn by
-        roughly a quarter point. It is mostly a test of that November
-        vintage: the emulator's own contribution is the 0.02&ndash;0.13pp gap
-        between the two model rows. ONS quarterly estimates are themselves
-        revised.
-      </p>
-      <figure class="vfig">
+        <figure class="vfig">
         <div class="vc-fig" data-chart="obr-outturn">
 <p class="vc-unit">Real GDP growth, % q/q</p>
 <div class="vc-plot">
@@ -335,14 +316,21 @@
 </div><!-- /vc-fig -->
         <figcaption>November 2025 EFO vintage — the working paper's study; the live baseline is anchored to the March 2026 EFO. % q/q real GDP growth, each bar labelled. Computed from <code>papers/obr-macro/figures/fig_outturn_data.csv</code>.</figcaption>
       </figure>
-      </div>
-        <div class="meth-inline">
-        <div class="meth-sec-title">four quarters of outturn</div>
-        <div class="meth-eq"><div class="meth-eq-label">2025 outturns</div><div class="meth-eq-body">tracked to within 0.06pp</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">2026Q1</div><div class="meth-eq-body">missed by roughly a quarter point, like the EFO</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">own contribution</div><div class="meth-eq-body">0.02&ndash;0.13pp gap between model rows</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">vintage</div><div class="meth-eq-body">November 2025 EFO, kept on purpose</div></div>
-        </div>
+        <p class="kv-title">Four quarters of outturn</p>
+        <dl class="kv"><div><dt>2025 outturns</dt><dd>tracked to within 0.06pp</dd></div><div><dt>2026Q1</dt><dd>missed by roughly a quarter point, like the EFO</dd></div><div><dt>Own contribution</dt><dd>0.02&ndash;0.13pp gap between model rows</dd></div><div><dt>Vintage</dt><dd>November 2025 EFO, kept on purpose</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>
+        <strong>Forecast versus outturn.</strong> Comparing one forecast
+        vintage with another tests agreement, not accuracy. The emulator
+        tracks the three 2025 outturns to within 0.06pp and — like the
+        November EFO it inherits — misses the strong 2026Q1 outturn by
+        roughly a quarter point. It is mostly a test of that November
+        vintage: the emulator's own contribution is the 0.02&ndash;0.13pp gap
+        between the two model rows. ONS quarterly estimates are themselves
+        revised.
+      </p>
+        </details>
       </div>
       <div class="meth-step" id="val-freerun" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Free-running</h3></div>
@@ -451,42 +439,10 @@
       </p>
       </details>
     </div>
-        <div class="meth-inline">
-        <div class="meth-sec-title">the honest scorecard</div>
-        <div class="meth-eq"><div class="meth-eq-label">computed</div><div class="meth-eq-body">11 of 21 headline variables; the other 10 are passthrough</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">in band</div><div class="meth-eq-body">6 of the 11, and one of those is a trivial identity</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">worst</div><div class="meth-eq-body">company profits 82.77%</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">current account</div><div class="meth-eq-body">3.02% of GDP</div></div>
-        </div>
+        <p class="kv-title">The honest scorecard</p>
+        <dl class="kv"><div><dt>Computed</dt><dd>11 of 21 headline variables; the other 10 are passthrough</dd></div><div><dt>In band</dt><dd>6 of the 11, and one of those is a trivial identity</dd></div><div><dt>Worst</dt><dd>company profits 82.77%</dd></div><div><dt>Current account</dt><dd>3.02% of GDP</dd></div></dl>
       </div>
       </div>
-
-      <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">Anchored against the EFO</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">anchored fit</div>
-          <div class="meth-eq"><div class="meth-eq-label">window</div><div class="meth-eq-body">2025Q1&ndash;2027Q4, quarterly deviation from the EFO</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">real GDP range</div><div class="meth-eq-body">&minus;0.07% to +0.70%</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">consumption range</div><div class="meth-eq-body">&minus;0.11% to +1.16%</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">CI gate</div><div class="meth-eq-body">hard-fails if either mean deviation reaches 1%</div></div>
-        </div>
-        <div class="meth-panel" data-step="1" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Against ONS outturns</span><span class="meth-panel-badge mono">Step 2</span></div>
-          <div class="meth-sec-title">four quarters of outturn</div>
-          <div class="meth-eq"><div class="meth-eq-label">2025 outturns</div><div class="meth-eq-body">tracked to within 0.06pp</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">2026Q1</div><div class="meth-eq-body">missed by roughly a quarter point, like the EFO</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">own contribution</div><div class="meth-eq-body">0.02&ndash;0.13pp gap between model rows</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">vintage</div><div class="meth-eq-body">November 2025 EFO, kept on purpose</div></div>
-        </div>
-        <div class="meth-panel" data-step="2" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Free-running</span><span class="meth-panel-badge mono">Step 3</span></div>
-          <div class="meth-sec-title">the honest scorecard</div>
-          <div class="meth-eq"><div class="meth-eq-label">computed</div><div class="meth-eq-body">11 of 21 headline variables; the other 10 are passthrough</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">in band</div><div class="meth-eq-body">6 of the 11, and one of those is a trivial identity</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">worst</div><div class="meth-eq-body">company profits 82.77%</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">current account</div><div class="meth-eq-body">3.02% of GDP</div></div>
-        </div>
-      </aside>
     </div>
     <details class="expander" id="val-hmrc">
       <summary>The costing it is fed: 1p on the basic rate against HMRC</summary>
@@ -529,15 +485,14 @@
 <li><span class="vc-sw sw-interp" aria-hidden="true"></span>interpolated between scored years</li>
 </ul>
 </div><!-- /vc-fig -->
-        <figcaption>£bn/yr, against HMRC's <em>Direct effects of illustrative tax changes</em> (June 2025 vintage). The 2028–29 bar is interpolated between the scored endpoints. Source: obr-macro working paper, comparison table panel B.</figcaption>
+        <figcaption>£bn/yr, against HMRC's <em>Direct effects of illustrative tax changes</em> (June 2025 vintage). The 2028–29 bar is interpolated between the scored endpoints. Source: OBR emulator working paper, comparison table panel B.</figcaption>
       </figure>
     </details>
   </section>
 
   <section class="band band-wide" id="caveats">
-    <div class="band-head">
-      <span class="kicker mono">known limits</span>
-      <h2>What it cannot be used for.</h2>
+    <div class="band-head" data-icon="alert">
+      <h2>What it cannot be used for</h2>
     </div>
     <p class="callout callout-warn" id="multiplier">
         <strong>The spending multiplier is 1.0 by construction, against the
@@ -603,7 +558,7 @@
   </section>
 
   <section class="band where-next" id="where-next">
-    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
     <div class="entry-grid">
       <a class="entry-card" href="/obr/code">
         <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span>

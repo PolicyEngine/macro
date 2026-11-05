@@ -56,10 +56,8 @@ window.MathJax = {
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 02 — OBR macroeconometric model · obr-macro · UK · hosted</p>
-      <h1 class="reveal page-title" style="--d:1;">
-        UK fiscal reform, quarter by quarter.
-      </h1>
+      <p class="eyebrow reveal" style="--d:0">OBR macroeconometric model · UK · hosted</p>
+      <h1 class="reveal page-title" style="--d:1;">OBR emulator</h1>
       <p class="lede reveal" style="--d:2">
         How the published EViews listing becomes a model you can solve and shock.
       </p>
@@ -77,20 +75,12 @@ window.MathJax = {
   </nav>
 
   <section id="how" class="band band-wide">
-    <div class="band-head">
-      <span class="kicker mono">methodology</span>
-      <h2>Transpile, solve, swap the closure.</h2>
+    <div class="band-head" data-icon="flask">
+      <h2>Transpile, solve, swap the closure</h2>
     </div>
     <div class="prose">
-      <p>
-        The pipeline in six steps: the OBR's published EViews equation
-        listing is rewritten in Python, initialised from official data,
-        solved quarter by quarter until the equations agree, anchored so the
-        baseline reproduces the published EFO, shocked against an identical
-        baseline so the difference is the policy effect — and joined to the
-        <a href="/pe">PolicyEngine microsimulation</a>, which supplies the
-        static costing the shock comes from.
-      </p>
+      <p>The pipeline in six steps: transpile, initialise, solve, anchor, shock, and join to the <a href="/pe">PolicyEngine microsimulation</a>.</p>
+<details class="about"><summary>More detail</summary><p>The OBR's published EViews equation listing is rewritten in Python, initialised from official data, solved quarter by quarter until the equations agree, anchored so the baseline reproduces the published EFO, and shocked against an identical baseline so the difference is the policy effect. The microsimulation supplies the static costing the shock comes from.</p></details>
     </div>
 
     <div class="scrolly-wrap">
@@ -122,15 +112,18 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <h4>From EViews to Python</h4>
-      <p>The OBR publishes its full equation listing, but as EViews source that few can run. The transpiler rewrites every EViews line — <code>dlog()</code>, <code>@elem</code>, lags like <code>X(-1)</code>, error-correction terms — into an equivalent Python expression, compiled once per solve.</p>
-      <h4>What comes out</h4>
-      <p>The result is the published listing in open code, runnable without an EViews licence. All 372 equations parse, but it is not a complete working copy of the OBR&rsquo;s model: about 79 are skipped at solve time because inputs they need are not published, some headline variables pass through at their published values rather than being computed, and business investment uses an equation the OBR had commented out of its listing, reconstructed here.</p>
+        <p>The OBR publishes its full equation listing, but as EViews source that few can run. The transpiler rewrites every EViews line — <code>dlog()</code>, <code>@elem</code>, lags like <code>X(-1)</code>, error-correction terms — into an equivalent Python expression, compiled once per solve.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">translation</div>
         <div class="meth-eq"><div class="meth-eq-label">growth rates</div><div class="meth-eq-body">\(\mathrm{dlog}(X) \;\rightarrow\; \log X_t - \log X_{t-1}\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">lags &amp; elements</div><div class="meth-eq-body">\(X_{t-1}\), <code>@elem</code> &rarr; indexed array reads</div></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>From EViews to Python</h4>
+          <h4>What comes out</h4>
+          <p>The result is the published listing in open code, runnable without an EViews licence. All 372 equations parse, but it is not a complete working copy of the OBR&rsquo;s model: about 79 are skipped at solve time because inputs they need are not published, some headline variables pass through at their published values rather than being computed, and business investment uses an equation the OBR had commented out of its listing, reconstructed here.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="meth-2" data-step="1">
@@ -153,15 +146,18 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <h4>Loading history</h4>
-      <p>History loads from the OBR's detailed forecast tables. Of the 261 endogenous variables the listing referenced but the outlook did not print, <strong>199 had ONS series codes</strong>; a vendored 355-series ONS snapshot supplies them.</p>
-      <h4>Why it matters</h4>
-      <p>That snapshot ships inside the package — there is no download step — and it gives the circular fiscal and financial sub-blocks real balancing data rather than guessed starting values.</p>
+        <p>History loads from the OBR's detailed forecast tables. Of the 261 endogenous variables the listing referenced but the outlook did not print, <strong>199 had ONS series codes</strong>; a vendored 355-series ONS snapshot supplies them.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">data sources</div>
         <div class="meth-eq"><div class="meth-eq-label">forecast tables</div><div class="meth-eq-body">OBR detailed forecast tables, March 2026 EFO</div></div>
         <div class="meth-eq"><div class="meth-eq-label">ONS snapshot</div><div class="meth-eq-body">355 vendored series; 199 of 261 unprinted variables matched</div></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>Loading history</h4>
+          <h4>Why it matters</h4>
+          <p>That snapshot ships inside the package — there is no download step — and it gives the circular fiscal and financial sub-blocks real balancing data rather than guessed starting values.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="meth-3" data-step="2">
@@ -191,15 +187,18 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <h4>Simultaneous within a quarter</h4>
-      <p>The equations depend on each other, so each quarter is solved simultaneously: cycle through the equations, update, repeat to convergence. Quarters then solve sequentially forward.</p>
-      <h4>Runtime</h4>
-      <p>A twelve-quarter anchored solve takes roughly <strong>30–40 seconds</strong> single-threaded; a reform run is two such solves.</p>
+        <p>The equations depend on each other, so each quarter is solved simultaneously: cycle through the equations, update, repeat to convergence. Quarters then solve sequentially forward.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">solver</div>
         <div class="meth-eq"><div class="meth-eq-label">within quarter</div><div class="meth-eq-body">cycle &rarr; update &rarr; repeat to convergence</div></div>
         <div class="meth-eq"><div class="meth-eq-label">across quarters</div><div class="meth-eq-body">sequential forward solve</div></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>Simultaneous within a quarter</h4>
+          <h4>Runtime</h4>
+          <p>A twelve-quarter anchored solve takes roughly <strong>30–40 seconds</strong> single-threaded; a reform run is two such solves.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="meth-4" data-step="3">
@@ -225,18 +224,21 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <h4>Add-factors, the OBR's own device</h4>
-      <p>Add-factors — the residuals reconciling each behavioural equation to data — are set so the baseline reproduces the published EFO. This is the OBR's own device, used the OBR's own way.</p>
-      <h4>Forecasting with held add-factors</h4>
-      <p>For forecasting rather than one-off shocks, the emulator fits add-factors over a base window of <strong>2024Q1–2025Q4</strong>, <strong>holds them constant</strong>, and projects to <strong>2027Q4</strong>, with exogenous inputs extrapolated (seasonal cash series at their trailing annual mean). Scenario solves run twelve quarters, 2025Q1–2027Q4.</p>
-      <h4>Horizon limits</h4>
-      <p>The anchored horizon extends to <strong>2031Q1</strong>; how closely it holds there, and where unemployment stops being usable, is on the <a href="/obr/validation#trust">validation tab</a>.</p>
+        <p>Add-factors — the residuals reconciling each behavioural equation to data — are set so the baseline reproduces the published EFO. This is the OBR's own device, used the OBR's own way.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">anchoring</div>
         <div class="meth-eq"><div class="meth-eq-label">add-factor window</div><div class="meth-eq-body">fit 2024Q1–2025Q4, hold constant, project to 2027Q4</div></div>
         <div class="meth-eq"><div class="meth-eq-label">scenario solves</div><div class="meth-eq-body">12 quarters, 2025Q1–2027Q4</div></div>
         <div class="meth-eq"><div class="meth-eq-label">anchored horizon</div><div class="meth-eq-body">to 2031Q1 (fit on the validation tab)</div></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>Add-factors, the OBR's own device</h4>
+          <h4>Forecasting with held add-factors</h4>
+          <p>For forecasting rather than one-off shocks, the emulator fits add-factors over a base window of <strong>2024Q1–2025Q4</strong>, <strong>holds them constant</strong>, and projects to <strong>2027Q4</strong>, with exogenous inputs extrapolated (seasonal cash series at their trailing annual mean). Scenario solves run twelve quarters, 2025Q1–2027Q4.</p>
+          <h4>Horizon limits</h4>
+          <p>The anchored horizon extends to <strong>2031Q1</strong>; how closely it holds there, and where unemployment stops being usable, is on the <a href="/obr/validation#trust">validation tab</a>.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="meth-5" data-step="4">
@@ -264,15 +266,19 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <h4>Closure swap</h4>
-      <p>In the OBR file GDP (<code>GDPM</code>) is an exogenous input and inventories (<code>DINV</code>) are already the residual that closes the expenditure identity. For a shock the emulator removes the <code>DINV</code> equation, holds <code>DINV</code> at its EFO path, and adds a GDP identity so that <code>GDPM</code> is endogenous — output responds to the policy instead of being fixed.</p>
-      <h4>Shock against an identical baseline</h4>
-      <p>The emulator solves shocked and baseline paths with identical structure and reports the difference, isolating the policy effect from the underlying forecast.</p>
+        <p>In the OBR file GDP (<code>GDPM</code>) is an exogenous input and inventories (<code>DINV</code>) are already the residual that closes the expenditure identity.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">closure and shock</div>
         <div class="meth-eq"><div class="meth-eq-label">closure swap</div><div class="meth-eq-body"><code>DINV</code> equation removed and held at EFO; GDP identity added, <code>GDPM</code> endogenous</div></div>
         <div class="meth-eq"><div class="meth-eq-label">policy effect</div><div class="meth-eq-body">\(X_t^{\text{shocked}} - X_t^{\text{baseline}}\), identical structure</div></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>Closure swap</h4>
+          <p>For a shock the emulator removes the <code>DINV</code> equation, holds <code>DINV</code> at its EFO path, and adds a GDP identity so that <code>GDPM</code> is endogenous — output responds to the policy instead of being fixed.</p>
+          <h4>Shock against an identical baseline</h4>
+          <p>The emulator solves shocked and baseline paths with identical structure and reports the difference, isolating the policy effect from the underlying forecast.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="meth-6" data-step="5">
@@ -300,18 +306,22 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <h4>Static costing in, second-round effects out</h4>
-      <p>The suite's flagship join. <a href="/pe">PolicyEngine's microsimulation</a> costs a statutory reform year by year — who pays and how much — and <code>score_reform(country="uk", reform=..., model="obr")</code> hands this model the bill: each year's costing enters as <code>HHDI_ADDFACTOR</code>, minus the annual &pound;bn spread flat across its four quarters (&times;1000&nbsp;&divide;&nbsp;4 &rarr; &pound;m/qtr), held as an add-factor on household disposable income.</p>
-        <h4>What the emulator computes</h4>
-      <p>Lower income moves consumption through the published consumption equation, and consumption moves GDP under the demand closure — the second round, quarter by quarter, against the anchored baseline of step 4. The anchoring add-factors are held fixed in both the baseline and the shocked run, so they cancel in the difference. The <a href="/obr#answers">worked example</a> on the Overview shows what this returns for 1p on the basic rate; individual quarters are not reliable &mdash; no quarter of the solve converges to tolerance.</p>
-        <h4>Where the bridge stops</h4>
-      <p>The household route&rsquo;s multiplier is close to the OBR&rsquo;s published figure for income tax; the by-construction problem belongs to the <em>spending</em> lever (<code>CGG</code>), not to this one (<a href="/obr/validation#caveats">limits</a>). Corporation tax is refused &mdash; not household-borne in the microsim, and the direct <code>TCPRO</code> closure converges only slowly. UK only; no US bridge exists. Every join in the suite &rarr; <a href="/models#compose">combine the models</a>.</p>
+        <p>The suite's flagship join.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">the bridge</div>
         <div class="meth-eq"><div class="meth-eq-label">injection</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code> = &minus;(annual costing) &times; 1000 &divide; 4, &pound;m/qtr, held</div></div>
         <div class="meth-eq"><div class="meth-eq-label">transmission</div><div class="meth-eq-body"><code>HHDI</code> &rarr; <code>RHHDI</code> &rarr; <code>CONS</code> &rarr; <code>GDPM</code></div></div>
         <div class="meth-eq"><div class="meth-eq-label">command</div><div class="meth-eq-body"><code>pe-macro score --country uk --reform '{&hellip;}' --model obr</code></div></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>Static costing in, second-round effects out</h4>
+          <p><a href="/pe">PolicyEngine's microsimulation</a> costs a statutory reform year by year — who pays and how much — and <code>score_reform(country="uk", reform=..., model="obr")</code> hands this model the bill: each year's costing enters as <code>HHDI_ADDFACTOR</code>, minus the annual &pound;bn spread flat across its four quarters (&times;1000&nbsp;&divide;&nbsp;4 &rarr; &pound;m/qtr), held as an add-factor on household disposable income.</p>
+          <h4>What the emulator computes</h4>
+          <p>Lower income moves consumption through the published consumption equation, and consumption moves GDP under the demand closure — the second round, quarter by quarter, against the anchored baseline of step 4. The anchoring add-factors are held fixed in both the baseline and the shocked run, so they cancel in the difference. The <a href="/obr#answers">worked example</a> on the Overview shows what this returns for 1p on the basic rate; individual quarters are not reliable &mdash; no quarter of the solve converges to tolerance.</p>
+          <h4>Where the bridge stops</h4>
+          <p>The household route&rsquo;s multiplier is close to the OBR&rsquo;s published figure for income tax; the by-construction problem belongs to the <em>spending</em> lever (<code>CGG</code>), not to this one (<a href="/obr/validation#caveats">limits</a>). Corporation tax is refused &mdash; not household-borne in the microsim, and the direct <code>TCPRO</code> closure converges only slowly. UK only; no US bridge exists. Every join in the suite &rarr; <a href="/models#compose">combine the models</a>.</p>
+        </details>
       </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">
@@ -368,7 +378,7 @@ window.MathJax = {
   </div>
 
   <section class="band where-next" id="where-next">
-    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
     <div class="entry-grid">
       <a class="entry-card" href="/obr/validation">
         <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>

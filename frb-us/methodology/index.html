@@ -56,10 +56,8 @@ window.MathJax = {
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 04 — Fed FRB/US, rebuilt · frb-us · US · hosted · quarterly</p>
-      <h1 class="reveal page-title" style="--d:1;">
-        Test US monetary and fiscal shocks.
-      </h1>
+      <p class="eyebrow reveal" style="--d:0">Fed FRB/US, rebuilt · US · hosted · quarterly</p>
+      <h1 class="reveal page-title" style="--d:1;">FRB/US</h1>
       <p class="lede reveal" style="--d:2">
         How the Board&rsquo;s model file is parsed, solved and shocked.
       </p>
@@ -77,9 +75,8 @@ window.MathJax = {
   </nav>
 
   <section id="how" class="band band-wide">
-    <div class="band-head">
-      <span class="kicker mono">methodology</span>
-      <h2>Parse, add-factor, solve by Newton.</h2>
+    <div class="band-head" data-icon="flask">
+      <h2>Parse, add-factor, solve by Newton</h2>
     </div>
     <div class="prose">
       <p>
@@ -119,17 +116,20 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <h4>The published artefacts</h4>
-      <p>The Federal Reserve Board publishes FRB/US whole: the equation system as <code>model.xml</code>, the <code>LONGBASE</code> historical and projection database, the documentation, and a reference Python solver, <code>pyfrbus</code> — all in the public domain.</p>
-      <h4>One source of truth</h4>
-      <p>The parse stage reads <code>model.xml</code> directly: variables, equations, per-equation coefficients, and the endogenous / exogenous classification for the VAR-expectations ("standard") equation set — the only equation set this pipeline reads. Nothing is re-typed or re-specified — the XML file is the single source of truth for the model's semantics. That yields <strong>284 endogenous variables and their equations</strong>, classified into behavioural and identity blocks exactly as the Board's file declares them.</p>
-      <h4>Residual form</h4>
-      <p>Each equation is normalised — EViews lag and difference notation rewritten, coefficient references substituted by their published values — flipped to residual form \(F_i(\cdot) = 0\), and augmented with its additive shock term (<code>_aerr</code>) and a tracking residual (<code>_trac</code>), so each equation solves \(F_i + \mathrm{aerr}_i + \mathrm{trac}_i = 0\).</p>
+        <p>The Federal Reserve Board publishes FRB/US whole: the equation system as <code>model.xml</code>, the <code>LONGBASE</code> historical and projection database, the documentation, and a reference Python solver, <code>pyfrbus</code> — all in the public domain.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">parse</div>
         <div class="meth-eq"><div class="meth-eq-label">system</div><div class="meth-eq-body">\(284\) endogenous eqs (behavioural + identities), from <code>model.xml</code></div></div>
         <div class="meth-eq"><div class="meth-eq-label">residual form</div><div class="meth-eq-body">\(F_i(x,\,\text{data}) + \text{aerr}_i + \text{trac}_i = 0\)</div></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>The published artefacts</h4>
+          <h4>One source of truth</h4>
+          <p>The parse stage reads <code>model.xml</code> directly: variables, equations, per-equation coefficients, and the endogenous / exogenous classification for the VAR-expectations ("standard") equation set — the only equation set this pipeline reads. Nothing is re-typed or re-specified — the XML file is the single source of truth for the model's semantics. That yields <strong>284 endogenous variables and their equations</strong>, classified into behavioural and identity blocks exactly as the Board's file declares them.</p>
+          <h4>Residual form</h4>
+          <p>Each equation is normalised — EViews lag and difference notation rewritten, coefficient references substituted by their published values — flipped to residual form \(F_i(\cdot) = 0\), and augmented with its additive shock term (<code>_aerr</code>) and a tracking residual (<code>_trac</code>), so each equation solves \(F_i + \mathrm{aerr}_i + \mathrm{trac}_i = 0\).</p>
+        </details>
       </div>
 
       <div class="meth-step" id="meth-2" data-step="1">
@@ -160,15 +160,18 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <h4>The baseline database</h4>
-      <p>The load stage brings <code>LONGBASE.TXT</code> — the April 2026 vintage — into a pandas frame on a quarterly <code>PeriodIndex</code>. This is the Board's own historical and projection database, and it conditions everything that follows: every simulation is read as a deviation from this baseline.</p>
-      <h4>Tracking residuals (<code>init_trac</code>)</h4>
-      <p><code>init_trac</code> sets each equation's add-factor to minus that equation's residual at the input data, so solving afterwards reproduces the database <strong>identically, for any input</strong>. It is the Fed's own device, the direct analogue of the OBR emulator's anchoring, which is why a baseline match is <a href="/frb-us/validation#trust-table">not evidence</a>. Shocks are imposed on top of the add-factored baseline, where the solver does real work.</p>
+        <p>The load stage brings <code>LONGBASE.TXT</code> — the April 2026 vintage — into a pandas frame on a quarterly <code>PeriodIndex</code>. This is the Board's own historical and projection database, and it conditions everything that follows: every simulation is read as a deviation from this baseline.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">LONGBASE conditioning</div>
         <div class="meth-eq"><div class="meth-eq-label">tracking residual</div><div class="meth-eq-body">\(\text{trac}_i = -F_i(\text{baseline})\) per equation, per quarter</div></div>
         <div class="meth-eq"><div class="meth-eq-label">invariant</div><div class="meth-eq-body">\(\text{solve}(\text{baseline} + \text{trac}) = \text{LONGBASE}\) exactly</div></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>The baseline database</h4>
+          <h4>Tracking residuals (<code>init_trac</code>)</h4>
+          <p><code>init_trac</code> sets each equation's add-factor to minus that equation's residual at the input data, so solving afterwards reproduces the database <strong>identically, for any input</strong>. It is the Fed's own device, the direct analogue of the OBR emulator's anchoring, which is why a baseline match is <a href="/frb-us/validation#trust-table">not evidence</a>. Shocks are imposed on top of the add-factored baseline, where the solver does real work.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="meth-3" data-step="2">
@@ -199,18 +202,21 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <h4>Period by period</h4>
-      <p>Under VAR expectations every expectations term depends only on current and lagged observables, so the model is simultaneous <em>within</em> each quarter but recursive <em>across</em> quarters. The solver therefore works period by period, starting each quarter from the previous quarter's solution.</p>
-      <h4>Analytic sparse Jacobian</h4>
-      <p>Each quarter, a damped Newton iteration solves the full simultaneous system with an <strong>analytic sparse Jacobian</strong> — differentiated symbolically with sympy, factorised with <code>scipy.sparse.linalg.splu</code>. Damping backtracks the step only to stay inside the domain of definition (no logs of non-positive arguments, no NaNs). Defaults are \(\mathrm{xtol} = 10^{-8}\), \(\mathrm{rtol} = 5\times 10^{-4}\).</p>
-      <h4>One block, not many</h4>
-      <p>The reference implementation decomposes each period into recursive and simultaneous blocks; this one solves the whole period at once. Both approaches solve the same \(F(x) = 0\), which is why the two agree to solver tolerance rather than to some negotiated threshold — see <a href="/frb-us/validation">how far to trust it</a>.</p>
+        <p>Under VAR expectations every expectations term depends only on current and lagged observables, so the model is simultaneous <em>within</em> each quarter but recursive <em>across</em> quarters. The solver therefore works period by period, starting each quarter from the previous quarter's solution.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">Newton iteration</div>
         <div class="meth-eq"><div class="meth-eq-label">step</div><div class="meth-eq-body">\(J(x^{(k)})\,\Delta x = -F(x^{(k)})\), sparse LU (SuperLU)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">damping</div><div class="meth-eq-body">halve \(\Delta x\) until \(F, J\) evaluate cleanly</div></div>
         <div class="meth-eq"><div class="meth-eq-label">convergence</div><div class="meth-eq-body">\(\|\Delta x\| \le 10^{-8}\), then \(\|F\| \le 5\times 10^{-4}\)</div></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>Period by period</h4>
+          <h4>Analytic sparse Jacobian</h4>
+          <p>Each quarter, a damped Newton iteration solves the full simultaneous system with an <strong>analytic sparse Jacobian</strong> — differentiated symbolically with sympy, factorised with <code>scipy.sparse.linalg.splu</code>. Damping backtracks the step only to stay inside the domain of definition (no logs of non-positive arguments, no NaNs). Defaults are \(\mathrm{xtol} = 10^{-8}\), \(\mathrm{rtol} = 5\times 10^{-4}\).</p>
+          <h4>One block, not many</h4>
+          <p>The reference implementation decomposes each period into recursive and simultaneous blocks; this one solves the whole period at once. Both approaches solve the same \(F(x) = 0\), which is why the two agree to solver tolerance rather than to some negotiated threshold — see <a href="/frb-us/validation">how far to trust it</a>.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="meth-4" data-step="3">
@@ -240,17 +246,21 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <h4>A modular funds rate</h4>
-      <p>Monetary policy is modular: exogenous 0/1 switches in the model file select which rule sets the funds rate. Three are exposed through <code>frbus_shock</code>: <code>inertial_taylor</code> (the default, the LONGBASE rule and the one the validation numbers use), <code>taylor</code>, and <code>fixed_funds_rate</code>, which holds the funds rate on its baseline path so there is no endogenous monetary offset.</p>
-      <h4>The rule choice is the exercise</h4>
-      <p>The choice is usually the economic point of the exercise: the same government-purchases shock gives a larger output response with the funds rate fixed, and a larger price-level response without the monetary offset. The multipliers under each rule, against published ranges, are on <a href="/frb-us/validation#multipliers">Validation</a>.</p>
-      <h4>Each rule reads its own error term</h4>
-      <p>Each policy rule reads its <em>own</em> add-error. The shock term \(\varepsilon_t\) in the inertial-Taylor rule above is <code>rffintay_aerr</code>; <code>taylor</code> applies the same reaction bracket without the inertia term and reads <code>rfftay_aerr</code> instead. The <a href="/frb-us/code#code-2">Code tab</a> shows what happens if you mix them up.</p>
+        <p>Monetary policy is modular: exogenous 0/1 switches in the model file select which rule sets the funds rate.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">policy rules</div>
         <div class="meth-eq"><div class="meth-eq-label">inertial Taylor</div><div class="meth-eq-body">\(r_t = 0.85\,r_{t-1} + 0.15\bigl[r^{*}_t + \bar\pi_t + 0.5(\bar\pi_t - \pi^{\text{targ}}) + 1.0\,\tilde x_t\bigr] + \varepsilon_t\)</div></div>
         <div class="meth-eq"><div class="meth-eq-label">effective rate</div><div class="meth-eq-body">\(\texttt{rff}_t = \max(\texttt{rffrule}_t,\ \texttt{rffmin}_t)\)</div></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>A modular funds rate</h4>
+          <p>Three are exposed through <code>frbus_shock</code>: <code>inertial_taylor</code> (the default, the LONGBASE rule and the one the validation numbers use), <code>taylor</code>, and <code>fixed_funds_rate</code>, which holds the funds rate on its baseline path so there is no endogenous monetary offset.</p>
+          <h4>The rule choice is the exercise</h4>
+          <p>The choice is usually the economic point of the exercise: the same government-purchases shock gives a larger output response with the funds rate fixed, and a larger price-level response without the monetary offset. The multipliers under each rule, against published ranges, are on <a href="/frb-us/validation#multipliers">Validation</a>.</p>
+          <h4>Each rule reads its own error term</h4>
+          <p>Each policy rule reads its <em>own</em> add-error. The shock term \(\varepsilon_t\) in the inertial-Taylor rule above is <code>rffintay_aerr</code>; <code>taylor</code> applies the same reaction bracket without the inertia term and reads <code>rfftay_aerr</code> instead. The <a href="/frb-us/code#code-2">Code tab</a> shows what happens if you mix them up.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="meth-5" data-step="4">
@@ -280,17 +290,20 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <h4>Shocks are error-term additions</h4>
-      <p>A shock is an addition to an equation's error term (<code>rffintay_aerr</code> for the policy rule, for instance). Solve shocked and baseline paths over the same window and read the difference. Shock units differ by lever; the <a href="/frb-us/code#code-2">Code tab</a> lists them.</p>
-      <h4>What comes out</h4>
-      <p>The difference is an impulse response for every one of the 284 variables. The headline 100bp tightening, and how it compares with the Board's documented simulation properties, is the <a href="/frb-us/validation#worked-shock">worked shock on Validation</a>.</p>
-      <h4>What stays out of scope</h4>
-      <p>The pipeline covers the VAR-expectations model only: the model-consistent-expectations variants, forward guidance, and the reference implementation's <code>mcontrol</code> trajectory-targeting routine are not implemented, and there is no bridge from a PolicyEngine reform to model variables — see the <a href="/frb-us/validation#caveats">known limits</a>.</p>
+        <p>A shock is an addition to an equation's error term (<code>rffintay_aerr</code> for the policy rule, for instance). Solve shocked and baseline paths over the same window and read the difference. Shock units differ by lever; the <a href="/frb-us/code#code-2">Code tab</a> lists them.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">impulse responses</div>
         <div class="meth-eq"><div class="meth-eq-label">shock</div><div class="meth-eq-body">\(\text{aerr} \mathrel{+}= \text{shock}\) on the add-factored baseline</div></div>
         <div class="meth-eq"><div class="meth-eq-label">response</div><div class="meth-eq-body">\(\text{IRF}_t = \text{sim}_t - \text{baseline}_t\) over the same window</div></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>Shocks are error-term additions</h4>
+          <h4>What comes out</h4>
+          <p>The difference is an impulse response for every one of the 284 variables. The headline 100bp tightening, and how it compares with the Board's documented simulation properties, is the <a href="/frb-us/validation#worked-shock">worked shock on Validation</a>.</p>
+          <h4>What stays out of scope</h4>
+          <p>The pipeline covers the VAR-expectations model only: the model-consistent-expectations variants, forward guidance, and the reference implementation's <code>mcontrol</code> trajectory-targeting routine are not implemented, and there is no bridge from a PolicyEngine reform to model variables — see the <a href="/frb-us/validation#caveats">known limits</a>.</p>
+        </details>
       </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">
@@ -341,7 +354,7 @@ window.MathJax = {
   </div>
 
   <section class="band where-next" id="where-next">
-    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
     <div class="entry-grid">
       <a class="entry-card" href="/frb-us/validation">
         <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>

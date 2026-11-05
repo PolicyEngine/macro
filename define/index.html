@@ -46,13 +46,9 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 07 — DEFINE-UK E-SFC · define-uk · UK · local · annual to 2037</p>
-      <h1 class="reveal page-title" style="--d:1;">
-        Climate policy meets the UK financial system.
-      </h1>
-      <p class="lede reveal" style="--d:2">
-        An adapter for DEFINE-UK, the ecological stock-flow consistent model of the UK macrofinancial system, run experimentally for scenario deltas.
-      </p>
+      <p class="eyebrow reveal" style="--d:0">DEFINE-UK E-SFC · UK · local · annual to 2037</p>
+      <h1 class="reveal page-title" style="--d:1;">DEFINE-UK</h1>
+      <p class="lede reveal" style="--d:2">Climate policy meets the UK financial system.</p>
     </div>
   </section>
 
@@ -66,8 +62,7 @@
     </div>
   </nav>
   <section id="card" class="band band-wide">
-    <div class="band-head">
-      <span class="kicker mono">model card</span>
+    <div class="band-head" data-icon="list">
       <h2>DEFINE-UK at a glance</h2>
     </div>
     <p class="callout verdict-callout">
@@ -92,24 +87,29 @@
   </section>
 
   <section id="overview" class="band band-wide">
-    <div class="band-head">
-      <span class="kicker mono">overview</span>
-      <h2>How it joins the core, what it is, what it can answer.</h2>
+    <div class="band-head" data-icon="layers">
+      <h2>How it joins the core, what it is, what it can answer</h2>
+      <p class="section-intro">An adapter for DEFINE-UK, the ecological stock-flow consistent model of the UK macrofinancial system, run experimentally for scenario deltas.</p>
     </div>
-    <div class="scrolly-wrap">
+    <div class="scrolly-wrap single">
       <div class="scrolly-steps">
 
       <div class="meth-step" id="pe-bridge" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>With the microsimulation</h3></div>
         <p class="mo-lead">Connected experimentally: deltas in, incidence out.</p>
         <div class="pipeline">
-          <span class="pl-node"><strong>define-uk</strong><span class="mono">scenario deltas</span></span>
+          <span class="pl-node"><strong>DEFINE-UK</strong><span class="mono">scenario deltas</span></span>
           <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <a class="pl-node" href="/pe"><strong>pe-microsim</strong><span class="mono">UK earnings overlay</span></a>
+          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">UK earnings overlay</span></a>
           <span class="pl-arrow" aria-hidden="true">&rarr;</span>
           <span class="pl-node pl-node-out"><strong>Who gains and loses</strong></span>
         </div>
-        <p><code>define_scenario_incidence</code> turns a scenario's household
+        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
+        <p class="kv-title">Scenario to incidence</p>
+        <dl class="kv"><div><dt>Tool</dt><dd><code>define_scenario_incidence</code></dd></div><div><dt>What moves</dt><dd>household income deltas from a scenario</dd></div><div><dt>Enters</dt><dd>a pre-tax earnings overlay, UK population</dd></div><div><dt>Travels</dt><dd>the numbers only, never upstream code</dd></div><div><dt>Refused</dt><dd><code>score_reform</code> refuses this model</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p><code>define_scenario_incidence</code> turns a scenario's household
                 income deltas into a pre-tax earnings overlay on
                 <a href="/pe">PolicyEngine</a>'s UK population — the same
                 <code>EconomicAssumptions</code> pattern as the SVAR, FRB/US and HANK
@@ -118,36 +118,12 @@
                 only the numbers travel, never the unlicensed upstream code; the
                 output is a delta, not a forecast; and <code>score_reform</code>
                 still refuses this model.</p>
-        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">scenario to incidence</div>
-        <div class="meth-eq"><div class="meth-eq-label">tool</div><div class="meth-eq-body"><code>define_scenario_incidence</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">what moves</div><div class="meth-eq-body">household income deltas from a scenario</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">enters</div><div class="meth-eq-body">a pre-tax earnings overlay, UK population</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">travels</div><div class="meth-eq-body">the numbers only, never upstream code</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">refused</div><div class="meth-eq-body"><code>score_reform</code> refuses this model</div></div>
-        </div>
+        </details>
       </div>
 
       <div class="meth-step" id="what" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it is</h3></div>
         <p class="mo-lead">An ecological stock-flow consistent model of the UK.</p>
-              <p>
-                DEFINE-UK is the ecological stock-flow consistent model of the UK by
-                George, Dafermos, Nikolaidi and co-authors
-                (<a href="https://define-model.org/define-uk">define-model.org/define-uk</a>):
-                the macrofinancial system and its environmental impacts in one closed
-                accounting system, with UK-specific housing and power-sector blocks.
-                Version 1.1 (April 2026) added the regulation policies.
-              </p>
-              <p>
-                The upstream repository is public but carries no licence, so we vendor
-                nothing: our <a href="https://github.com/PolicyEngine/define-uk-model">adapter</a>
-                fetches it at a pinned commit (<code>846081a</code>) and runs it
-                unmodified, in R. The scenario surface reads a cached full notebook
-                run (2026-08-01, R&nbsp;4.3.0).
-                <a href="/define/methodology">How it works &rarr;</a>
-              </p>
         <details class="expander" id="sources">
           <summary>Sources: the model, the paper, the adapter</summary>
           <div class="table-scroll mo-tablecard"><table>
@@ -173,68 +149,50 @@
                 </tbody>
               </table></div>
         </details>
-        <div class="meth-inline">
-        <div class="meth-sec-title">the upstream model</div>
-        <div class="meth-eq"><div class="meth-eq-label">authors</div><div class="meth-eq-body">George, Dafermos, Nikolaidi and co-authors</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">version</div><div class="meth-eq-body">1.1, April 2026</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">runs</div><div class="meth-eq-body">upstream R, unmodified, at <code>846081a</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">cache</div><div class="meth-eq-body">full notebook run, 2026-08-01</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">blocks</div><div class="meth-eq-body">macrofinance, environment, housing, power</div></div>
-        </div>
+        <p class="kv-title">The upstream model</p>
+        <dl class="kv"><div><dt>Authors</dt><dd>George, Dafermos, Nikolaidi and co-authors</dd></div><div><dt>Version</dt><dd>1.1, April 2026</dd></div><div><dt>Runs</dt><dd>upstream R, unmodified, at <code>846081a</code></dd></div><div><dt>Cache</dt><dd>full notebook run, 2026-08-01</dd></div><div><dt>Blocks</dt><dd>macrofinance, environment, housing, power</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>
+                DEFINE-UK is the ecological stock-flow consistent model of the UK by
+                George, Dafermos, Nikolaidi and co-authors
+                (<a href="https://define-model.org/define-uk">define-model.org/define-uk</a>):
+                the macrofinancial system and its environmental impacts in one closed
+                accounting system, with UK-specific housing and power-sector blocks.
+                Version 1.1 (April 2026) added the regulation policies.
+              </p>
+          <p>
+                The upstream repository is public but carries no licence, so we vendor
+                nothing: our <a href="https://github.com/PolicyEngine/define-uk-model">adapter</a>
+                fetches it at a pinned commit (<code>846081a</code>) and runs it
+                unmodified, in R. The scenario surface reads a cached full notebook
+                run (2026-08-01, R&nbsp;4.3.0).
+                <a href="/define/methodology">How it works &rarr;</a>
+              </p>
+        </details>
       </div>
 
       <div class="meth-step" id="status" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
         <p class="mo-lead">How a climate-policy mix moves the UK economy and emissions against the baseline, as deltas.</p>
-        <p>Two things do not pass: the baseline emissions path runs below the published table, and the baseline sits far from official outturns &mdash; both are on the <a href="/define/validation#calibration">validation tab</a>. Hence deltas only. The green-public-investment multiplier also runs high (<a href="/define/validation#multiplier">why</a>).</p>
-        <p><strong>Nothing upstream is hosted.</strong> Hosted tools return run
+        <p class="kv-title">Scenario deltas</p>
+        <dl class="kv"><div><dt>Against</dt><dd>the S1 current-policies baseline</dd></div><div><dt>Scenarios</dt><dd>the papers&rsquo; published policy switches</dd></div><div><dt>Never</dt><dd>levels or forecasts</dd></div><div><dt>Hosted</dt><dd>run instructions only, never results</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>Two things do not pass: the baseline emissions path runs below the published table, and the baseline sits far from official outturns &mdash; both are on the <a href="/define/validation#calibration">validation tab</a>. Hence deltas only. The green-public-investment multiplier also runs high (<a href="/define/validation#multiplier">why</a>).</p>
+          <p><strong>Nothing upstream is hosted.</strong> Hosted tools return run
                   instructions, never results; the path to hosting is a
                   <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">clean-room
                   reimplementation</a> of the published manual.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">scenario deltas</div>
-        <div class="meth-eq"><div class="meth-eq-label">against</div><div class="meth-eq-body">the S1 current-policies baseline</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">scenarios</div><div class="meth-eq-body">the papers&rsquo; published policy switches</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">never</div><div class="meth-eq-body">levels or forecasts</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">hosted</div><div class="meth-eq-body">run instructions only, never results</div></div>
-        </div>
+        </details>
       </div>
 
       </div>
-
-      <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">The join</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">scenario to incidence</div>
-          <div class="meth-eq"><div class="meth-eq-label">tool</div><div class="meth-eq-body"><code>define_scenario_incidence</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">what moves</div><div class="meth-eq-body">household income deltas from a scenario</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">enters</div><div class="meth-eq-body">a pre-tax earnings overlay, UK population</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">travels</div><div class="meth-eq-body">the numbers only, never upstream code</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">refused</div><div class="meth-eq-body"><code>score_reform</code> refuses this model</div></div>
-        </div>
-        <div class="meth-panel" data-step="1" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Model at a glance</span><span class="meth-panel-badge mono">Step 2</span></div>
-          <div class="meth-sec-title">the upstream model</div>
-          <div class="meth-eq"><div class="meth-eq-label">authors</div><div class="meth-eq-body">George, Dafermos, Nikolaidi and co-authors</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">version</div><div class="meth-eq-body">1.1, April 2026</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">runs</div><div class="meth-eq-body">upstream R, unmodified, at <code>846081a</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">cache</div><div class="meth-eq-body">full notebook run, 2026-08-01</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">blocks</div><div class="meth-eq-body">macrofinance, environment, housing, power</div></div>
-        </div>
-        <div class="meth-panel" data-step="2" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">What it returns</span><span class="meth-panel-badge mono">Step 3</span></div>
-          <div class="meth-sec-title">scenario deltas</div>
-          <div class="meth-eq"><div class="meth-eq-label">against</div><div class="meth-eq-body">the S1 current-policies baseline</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">scenarios</div><div class="meth-eq-body">the papers&rsquo; published policy switches</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">never</div><div class="meth-eq-body">levels or forecasts</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">hosted</div><div class="meth-eq-body">run instructions only, never results</div></div>
-        </div>
-      </aside>
     </div>
   </section>
 
   <section class="band where-next" id="where-next">
-    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
     <div class="entry-grid">
       <a class="entry-card" href="/define/methodology">
         <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg></span>

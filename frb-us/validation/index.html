@@ -47,10 +47,8 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 04 — Fed FRB/US, rebuilt · frb-us · US · hosted · quarterly</p>
-      <h1 class="reveal page-title" style="--d:1;">
-        Test US monetary and fiscal shocks.
-      </h1>
+      <p class="eyebrow reveal" style="--d:0">Fed FRB/US, rebuilt · US · hosted · quarterly</p>
+      <h1 class="reveal page-title" style="--d:1;">FRB/US</h1>
       <p class="lede reveal" style="--d:2">
         The shocks against the Fed&rsquo;s own solver, the multipliers, and the limits.
       </p>
@@ -78,9 +76,8 @@
     </nav>
     <div class="rail-main">
   <section class="band band-wide" id="trust">
-    <div class="band-head">
-      <span class="kicker mono">how far to trust it</span>
-      <h2>The baseline agreement is an identity; the shocks are the evidence.</h2>
+    <div class="band-head" data-icon="shield">
+      <h2>The baseline agreement is an identity; the shocks are the evidence</h2>
     </div>
     <div class="stat-row">
       <div class="stat stat-neutral">
@@ -147,26 +144,16 @@
   </section>
 
   <section class="band band-wide" id="tests">
-    <div class="band-head">
-      <span class="kicker mono">the evidence</span>
-      <h2>The solver match, the multipliers, a worked shock.</h2>
+    <div class="band-head" data-icon="chart">
+      <h2>The solver match, the multipliers, a worked shock</h2>
     </div>
-    <div class="scrolly-wrap">
+    <div class="scrolly-wrap single">
       <div class="scrolly-steps">
 
       <div class="meth-step" id="trust-table" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Against the Fed&rsquo;s own solver</h3></div>
         <p class="mo-lead">The same shock in both implementations, at the reference&rsquo;s own noise floor.</p>
-              <p>
-                The Fed-vs-Fed tile frames the other three. The Board's two releases ship a
-                <em>byte-identical</em> <code>model.xml</code> and LONGBASE, differing
-                only in how Newton reuses its LU factorisation, yet disagree by as much as this implementation
-                disagrees with either. Agreement sits at the reference's own numerical
-                noise, not at a chosen tolerance; all three residuals concentrate in
-                the same near-zero expectational-gap series (<code>wpsn</code>,
-                <code>zgap05</code>).
-              </p>
-              <figure class="vfig">
+        <figure class="vfig">
         <div class="vc-fig" data-chart="frbus-residuals" style="--vc-min-h:330px">
 <p class="vc-unit">Maximum absolute residual, log scale; further left is closer</p>
 <div class="vc-plot">
@@ -213,7 +200,7 @@
 </div><!-- /vc-fig -->
                 <figcaption>Maximum absolute residuals, log scale — lower is closer. The top two bars are the tracking identity and are <strong>not</strong> a ranking: they compare two implementations' round-off, not their fidelity to the Fed's economics. Source: papers/frb-us validation tables.</figcaption>
               </figure>
-              <div id="solver-table" class="table-scroll"><table>
+        <div id="solver-table" class="table-scroll"><table>
                 <caption>Validation results against the Federal Reserve Board's own artefacts</caption>
                 <thead><tr><th scope="col">test</th><th scope="col">what it checks</th><th scope="col">result</th></tr></thead>
                 <tbody>
@@ -229,26 +216,27 @@
                   </tr>
                 </tbody>
               </table></div>
-        <div class="meth-inline">
-        <div class="meth-sec-title">what the residuals mean</div>
-        <div class="meth-eq"><div class="meth-eq-label">shock</div><div class="meth-eq-body">100bp <code>rffintay_aerr</code>, all 284 variables</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">scrambled baseline</div><div class="meth-eq-body">still tracks, at 6.7e&minus;9</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">residuals sit in</div><div class="meth-eq-body"><code>wpsn</code>, <code>zgap05</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">tracking rows</div><div class="meth-eq-body">round-off, not a ranking</div></div>
-        </div>
+        <p class="kv-title">What the residuals mean</p>
+        <dl class="kv"><div><dt>Shock</dt><dd>100bp <code>rffintay_aerr</code>, all 284 variables</dd></div><div><dt>Scrambled baseline</dt><dd>still tracks, at 6.7e&minus;9</dd></div><div><dt>Residuals sit in</dt><dd><code>wpsn</code>, <code>zgap05</code></dd></div><div><dt>Tracking rows</dt><dd>round-off, not a ranking</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>
+                The Fed-vs-Fed tile frames the other three. The Board's two releases ship a
+                <em>byte-identical</em> <code>model.xml</code> and LONGBASE, differing
+                only in how Newton reuses its LU factorisation, yet disagree by as much as this implementation
+                disagrees with either. Agreement sits at the reference's own numerical
+                noise, not at a chosen tolerance; all three residuals concentrate in
+                the same near-zero expectational-gap series (<code>wpsn</code>,
+                <code>zgap05</code>).
+              </p>
+        </details>
       </div>
 
       <div class="meth-step" id="multipliers" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Fiscal multipliers</h3></div>
         <p class="mo-lead">Plausibility bands against published ranges, not a test passed.</p>
-              <p>
-                <strong>Multipliers.</strong> Read these as plausibility bands, not as
-                a test passed: the comparisons are not horizon-matched throughout, and
-                Ramey's survey range pools estimates across horizons and monetary
-                regimes.
-              </p>
-              <div class="table-scroll"><table>
-                <caption>frb-us fiscal multipliers (1% of GDP, sustained) against published ranges</caption>
+        <div class="table-scroll"><table>
+                <caption>FRB/US fiscal multipliers (1% of GDP, sustained) against published ranges</caption>
                 <thead><tr><th scope="col">Quantity</th><th scope="col">Ours</th><th scope="col">Published</th><th scope="col">Reading</th></tr></thead>
                 <tbody>
                   <tr><th scope="row">Gov. purchases, yr 1, inertial Taylor rule</th><td>0.72</td><td>0.7&ndash;1.0 (Coenen et al. 2012); Ramey (JEP 2019): "a surprisingly narrow range of 0.6 to 1"</td><td>inside range</td></tr>
@@ -258,12 +246,17 @@
                   <tr><th scope="row">Personal tax cut, yrs 1&ndash;2</th><td>0.22 → 0.32</td><td>0.2&ndash;0.4; CBO central ≈0.3; yr-1 benchmark is a two-year figure</td><td>inside range, horizons unmatched</td></tr>
                 </tbody>
               </table></div>
-        <div class="meth-inline">
-        <div class="meth-sec-title">1% of GDP, sustained</div>
-        <div class="meth-eq"><div class="meth-eq-label">purchases, yr 1</div><div class="meth-eq-body">0.72, inside 0.7&ndash;1.0</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">purchases, yr 2 pegged</div><div class="meth-eq-body">0.90, below 1.1&ndash;1.2</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">personal tax cut</div><div class="meth-eq-body">0.22 &rarr; 0.32, inside 0.2&ndash;0.4</div></div>
-        </div>
+        <p class="kv-title">1% of GDP, sustained</p>
+        <dl class="kv"><div><dt>Purchases, yr 1</dt><dd>0.72, inside 0.7&ndash;1.0</dd></div><div><dt>Purchases, yr 2 pegged</dt><dd>0.90, below 1.1&ndash;1.2</dd></div><div><dt>Personal tax cut</dt><dd>0.22 &rarr; 0.32, inside 0.2&ndash;0.4</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>
+                <strong>Multipliers.</strong> Read these as plausibility bands, not as
+                a test passed: the comparisons are not horizon-matched throughout, and
+                Ramey's survey range pools estimates across horizons and monetary
+                regimes.
+              </p>
+        </details>
       </div>
 
       <div class="meth-step" id="worked-shock" data-step="2">
@@ -286,55 +279,21 @@
                 The exact cross-check is numerical, not chart-reading: the same shock
                 in the Board's own <code>pyfrbus</code> matches to the cross-validation tile above.
               </p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">ours vs the Board&rsquo;s documentation</div>
-        <div class="meth-eq"><div class="meth-eq-label">funds rate</div><div class="meth-eq-body">+1.000pp, exact by design</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">real GDP trough</div><div class="meth-eq-body">&minus;0.55%, 2027Q4; no published GDP figure</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">unemployment peak</div><div class="meth-eq-body">+0.26pp</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">core inflation trough</div><div class="meth-eq-body">&minus;0.034pp vs &asymp;&minus;0.08pp</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">output gap trough</div><div class="meth-eq-body">&minus;0.50pp vs ~&minus;0.4pp</div></div>
-        </div>
+        <p class="kv-title">Ours vs the Board&rsquo;s documentation</p>
+        <dl class="kv"><div><dt>Funds rate</dt><dd>+1.000pp, exact by design</dd></div><div><dt>Real GDP trough</dt><dd>&minus;0.55%, 2027Q4; no published GDP figure</dd></div><div><dt>Unemployment peak</dt><dd>+0.26pp</dd></div><div><dt>Core inflation trough</dt><dd>&minus;0.034pp vs &asymp;&minus;0.08pp</dd></div><div><dt>Output gap trough</dt><dd>&minus;0.50pp vs ~&minus;0.4pp</dd></div></dl>
       </div>
 
       </div>
-
-      <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">Cross-validation</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">what the residuals mean</div>
-          <div class="meth-eq"><div class="meth-eq-label">shock</div><div class="meth-eq-body">100bp <code>rffintay_aerr</code>, all 284 variables</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">scrambled baseline</div><div class="meth-eq-body">still tracks, at 6.7e&minus;9</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">residuals sit in</div><div class="meth-eq-body"><code>wpsn</code>, <code>zgap05</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">tracking rows</div><div class="meth-eq-body">round-off, not a ranking</div></div>
-        </div>
-        <div class="meth-panel" data-step="1" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Multipliers</span><span class="meth-panel-badge mono">Step 2</span></div>
-          <div class="meth-sec-title">1% of GDP, sustained</div>
-          <div class="meth-eq"><div class="meth-eq-label">purchases, yr 1</div><div class="meth-eq-body">0.72, inside 0.7&ndash;1.0</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">purchases, yr 2 pegged</div><div class="meth-eq-body">0.90, below 1.1&ndash;1.2</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">personal tax cut</div><div class="meth-eq-body">0.22 &rarr; 0.32, inside 0.2&ndash;0.4</div></div>
-        </div>
-        <div class="meth-panel" data-step="2" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">The 100bp shock</span><span class="meth-panel-badge mono">Step 3</span></div>
-          <div class="meth-sec-title">ours vs the Board&rsquo;s documentation</div>
-          <div class="meth-eq"><div class="meth-eq-label">funds rate</div><div class="meth-eq-body">+1.000pp, exact by design</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">real GDP trough</div><div class="meth-eq-body">&minus;0.55%, 2027Q4; no published GDP figure</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">unemployment peak</div><div class="meth-eq-body">+0.26pp</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">core inflation trough</div><div class="meth-eq-body">&minus;0.034pp vs &asymp;&minus;0.08pp</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">output gap trough</div><div class="meth-eq-body">&minus;0.50pp vs ~&minus;0.4pp</div></div>
-        </div>
-      </aside>
     </div>
   </section>
 
   <section class="band band-wide" id="caveats">
-    <div class="band-head">
-      <span class="kicker mono">limits</span>
-      <h2>Known limitations.</h2>
+    <div class="band-head" data-icon="alert">
+      <h2>Known limitations</h2>
     </div>
     <div class="prose">
       <div class="table-scroll"><table>
-        <caption>Known limits of the frb-us implementation</caption>
+        <caption>Known limits of the FRB/US implementation</caption>
         <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
         <tbody>
           <tr>
@@ -355,7 +314,7 @@
           </tr>
           <tr>
             <th scope="row"><strong>No PolicyEngine reform bridge</strong></th>
-            <td>Reforms enter as shocks, not statute: <code>score_reform</code> refuses <code>model="frbus"</code>, so US reform scoring stops at <a href="/pe">pe-microsim</a>'s static answer.</td>
+            <td>Reforms enter as shocks, not statute: <code>score_reform</code> refuses <code>model="frbus"</code>, so US reform scoring stops at <a href="/pe">PolicyEngine microsimulation</a>'s static answer.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Approximate published comparisons</strong></th>
@@ -371,7 +330,7 @@
   </section>
 
   <section class="band where-next" id="where-next">
-    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
     <div class="entry-grid">
       <a class="entry-card" href="/frb-us/code">
         <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span>

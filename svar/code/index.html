@@ -47,10 +47,8 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 03 — Bank of England structural VAR · boe-svar · UK · hosted</p>
-      <h1 class="reveal page-title" style="--d:1;">
-        Explain UK growth and inflation.
-      </h1>
+      <p class="eyebrow reveal" style="--d:0">Bank of England structural VAR · UK · hosted</p>
+      <h1 class="reveal page-title" style="--d:1;">BoE SVAR</h1>
       <p class="lede reveal" style="--d:2">
         Run it hosted, from the CLI or in Python, and reproduce its numbers.
       </p>
@@ -68,9 +66,8 @@
   </nav>
 
   <section id="run" class="band band-wide">
-    <div class="band-head">
-      <span class="kicker mono">how to run it</span>
-      <h2>Estimate, identify, decompose.</h2>
+    <div class="band-head" data-icon="play">
+      <h2>Estimate, identify, decompose</h2>
     </div>
     <div class="prose">
       <p>
@@ -83,10 +80,8 @@
       <div class="scrolly-steps">
       <div class="meth-step" id="run-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Hosted MCP tools</h3></div>
-        <h4>No install, no credentials</h4>
-        <p>The quickest route is the <a href="/connect">hosted MCP server</a>. Four tools reach this model: <code>forecast_uk</code> (YoY GDP-growth and CPI-inflation fan charts with 68%/90% bands), <code>latest_shocks</code> (posterior sign probabilities of each identified shock in the latest quarter), <code>model_summary</code> (headline replication results — instant, no estimation), and the experimental <code>svar_inflation_incidence</code> (the CPI gap priced through benefit uprating in the microsimulation).</p>
-        <h4>Draws and runtime</h4>
-        <p>The first call estimates the model, a couple of minutes cold; results are cached in-process. The default 2,000 draws yield about 135 accepted (ESS about 65); about 3,500 reach ESS 100. Every response carries a <code>warnings</code> list when inference is weak.</p>
+        <p>The quickest route is the <a href="/connect">hosted MCP server</a>.</p>
+<details class="about"><summary>More detail</summary><p>Four tools reach this model: <code>forecast_uk</code> (YoY GDP-growth and CPI-inflation fan charts with 68%/90% bands), <code>latest_shocks</code> (posterior sign probabilities of each identified shock in the latest quarter), <code>model_summary</code> (headline replication results — instant, no estimation), and the experimental <code>svar_inflation_incidence</code> (the CPI gap priced through benefit uprating in the microsimulation).</p></details>
         <div class="meth-inline">
         <div class="meth-sec-title">hosted tools</div>
         <div class="meth-eq"><div class="meth-eq-label">forecast</div><div class="meth-eq-body"><code>forecast_uk(horizons=12, draws=2000)</code></div></div>
@@ -94,6 +89,12 @@
         <div class="meth-eq"><div class="meth-eq-label">headlines</div><div class="meth-eq-body"><code>model_summary()</code>, instant</div></div>
         <div class="meth-eq"><div class="meth-eq-label">incidence</div><div class="meth-eq-body"><code>svar_inflation_incidence(year=2027)</code>, experimental</div></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>No install, no credentials</h4>
+          <h4>Draws and runtime</h4>
+          <p>The first call estimates the model, a couple of minutes cold; results are cached in-process. The default 2,000 draws yield about 135 accepted (ESS about 65); about 3,500 reach ESS 100. Every response carries a <code>warnings</code> list when inference is weak.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="run-2" data-step="1">
@@ -111,12 +112,7 @@ pe-macro svar-inflation-incidence --year 2027  <span class="cm"># experimental</
 
       <div class="meth-step" id="run-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Install locally</h3></div>
-        <h4>One pip install</h4>
         <p>The package installs straight from GitHub with the prepared quarterly dataset inside, so <code>boe_var.data.load_data()</code> works immediately.</p>
-        <h4>All inputs are public</h4>
-        <p>Every input series is public: ONS (CPI, CPI energy, real GDP), Bank of England (Bank Rate, sterling ERI), and FRED (oil, exchange rates, world components).</p>
-        <h4>Or through the suite, from Python</h4>
-        <p>The same calls as the hosted tools, returning dicts: install the suite (<code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code>) and import them.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">install</div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
@@ -125,14 +121,19 @@ pe-macro svar-inflation-incidence --year 2027  <span class="cm"># experimental</
 fc = svar_forecast(horizons=12, draws=2000)   <span class="cm"># median + 68%/90% bands</span>
 shocks = svar_latest_shocks(draws=2000)</code></pre></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>One pip install</h4>
+          <h4>All inputs are public</h4>
+          <p>Every input series is public: ONS (CPI, CPI energy, real GDP), Bank of England (Bank Rate, sterling ERI), and FRED (oil, exchange rates, world components).</p>
+          <h4>Or through the suite, from Python</h4>
+          <p>The same calls as the hosted tools, returning dicts: install the suite (<code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code>) and import them.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="run-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Development runner scripts</h3></div>
-        <h4>Clone to rebuild everything</h4>
         <p>The runner scripts are for development — clone the repository to rebuild the dataset or regenerate the paper outputs.</p>
-        <h4>What lands where</h4>
-        <p class="opt-note">outputs land in <code>results/</code> — the replication figures (fig2–fig6), the forecast figures (fig1, fig7–fig9), and two summary reports. runtime scales with draw count; the importance weights are the expensive part — one numerical Jacobian per accepted draw.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">runner scripts</div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>python scripts/download_data.py     <span class="cm"># reassemble the public data</span>
@@ -144,6 +145,12 @@ python scripts/run_replication.py
 <span class="cm"># composite IRFs, and the forecast-revision decomposition</span>
 python scripts/run_forecast_revision.py</code></pre></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>Clone to rebuild everything</h4>
+          <h4>What lands where</h4>
+          <p class="opt-note">outputs land in <code>results/</code> — the replication figures (fig2–fig6), the forecast figures (fig1, fig7–fig9), and two summary reports. runtime scales with draw count; the importance weights are the expensive part — one numerical Jacobian per accepted draw.</p>
+        </details>
       </div>
       </div>
       <aside class="scrolly-sticky" aria-hidden="true">
@@ -189,7 +196,7 @@ python scripts/run_forecast_revision.py</code></pre></div>
   </section>
 
   <section class="band where-next" id="where-next">
-    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
     <div class="entry-grid">
       <a class="entry-card" href="/papers/boe-svar">
         <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>

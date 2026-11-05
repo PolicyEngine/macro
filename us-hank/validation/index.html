@@ -47,10 +47,8 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 05 — two-asset HANK · us-hank · US · hosted · quarterly IRFs</p>
-      <h1 class="reveal page-title" style="--d:1;">
-        See who responds to a US shock, not just how much.
-      </h1>
+      <p class="eyebrow reveal" style="--d:0">two-asset HANK · US · hosted · quarterly IRFs</p>
+      <h1 class="reveal page-title" style="--d:1;">US HANK</h1>
       <p class="lede reveal" style="--d:2">
         The parameters it solves against the paper, what is imposed, and the limits.
       </p>
@@ -77,9 +75,8 @@
     </nav>
     <div class="rail-main">
   <section class="band band-wide" id="trust">
-    <div class="band-head">
-      <span class="kicker mono">how far to trust it</span>
-      <h2>A replication gate, not a forecast-accuracy claim.</h2>
+    <div class="band-head" data-icon="shield">
+      <h2>A replication gate, not a forecast-accuracy claim</h2>
       <p class="section-intro">Solved parameters against the paper&rsquo;s Table B.III; the headline targets are inputs, not results.</p>
     </div>
     <div class="stat-row">
@@ -130,27 +127,16 @@
   </section>
 
   <section class="band band-wide" id="tests">
-    <div class="band-head">
-      <span class="kicker mono">the evidence</span>
-      <h2>What it solves, and what is imposed.</h2>
+    <div class="band-head" data-icon="chart">
+      <h2>What it solves, and what is imposed</h2>
     </div>
-    <div class="scrolly-wrap">
+    <div class="scrolly-wrap single">
       <div class="scrolly-steps">
 
       <div class="meth-step" id="solved" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>The parameters it solves for</h3></div>
         <p class="mo-lead">The ground truth is the published paper, not data.</p>
-              <p>
-                The parameters the
-                model solves for internally reproduce Auclert et al. (2021)
-                Table&nbsp;B.III to the last published digit on six of seven:
-                &beta;&nbsp;0.9762739 against 0.976, &chi;<sub>1</sub>&nbsp;6.4164196
-                against 6.416 — solved numerically from a 6.5 starting guess, the
-                strongest single check — and Z, &alpha;, &mu;<sub>p</sub> and &tau;
-                analytically. The seventh is <strong>unresolved</strong>: this
-                implementation returns a <code>vphi</code> (the wage Phillips curve disutility scale) that misses Table&nbsp;B.III (tile above), left unasserted in the test suite rather than laundered.
-              </p>
-              <figure class="vfig" id="targets">
+        <figure class="vfig" id="targets">
         <div class="vc-fig vc-tablefig" data-chart="hank-targets">
 <div class="table-scroll"><table class="vc-table">
 <caption>us-hank: internally solved parameters vs Auclert et al. (2021) Table B.III</caption>
@@ -169,69 +155,53 @@
 </div><!-- /vc-fig -->
                 <figcaption><strong>Calibration, not replication.</strong> Y, K, r, G, Bg and the wealth rows are imposed and held fixed through the solve, so their deviations are identities or solver tolerances rather than accuracies; The rows the model solves for are the replication: six reproduce Table&nbsp;B.III to the last published digit and <code>vphi</code> misses (tile above). Same for the residuals: asset-market clearing at 3.1e&minus;13 is the solver's own target, while goods-market clearing is untargeted — it holds only by Walras' law, which makes it the honest measure. Solved 2026-07-29 at production grids (n<sub>B</sub>=50, n<sub>A</sub>=70, n<sub>K</sub>=50), re-solved independently 2026-08-13. Source: <code>papers/us-hank/figures/replication.json</code>.</figcaption>
               </figure>
-        <div class="meth-inline">
-        <div class="meth-sec-title">what had somewhere to miss</div>
-        <div class="meth-eq"><div class="meth-eq-label">&beta;</div><div class="meth-eq-body">0.9762739 vs 0.976</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">&chi;<sub>1</sub></div><div class="meth-eq-body">6.4164196 vs 6.416, from a 6.5 guess</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">Z, &alpha;, &mu;<sub>p</sub>, &tau;</div><div class="meth-eq-body">analytic, to the last digit</div></div>
-        <div class="meth-eq"><div class="meth-eq-label"><code>vphi</code></div><div class="meth-eq-body">unresolved, left unasserted</div></div>
-        </div>
+        <p class="kv-title">What had somewhere to miss</p>
+        <dl class="kv"><div><dt>&beta;</dt><dd>0.9762739 vs 0.976</dd></div><div><dt>&chi;<sub>1</sub></dt><dd>6.4164196 vs 6.416, from a 6.5 guess</dd></div><div><dt>Z, &alpha;, &mu;<sub>p</sub>, &tau;</dt><dd>analytic, to the last digit</dd></div><div><dt><code>vphi</code></dt><dd>unresolved, left unasserted</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>
+                The parameters the
+                model solves for internally reproduce Auclert et al. (2021)
+                Table&nbsp;B.III to the last published digit on six of seven:
+                &beta;&nbsp;0.9762739 against 0.976, &chi;<sub>1</sub>&nbsp;6.4164196
+                against 6.416 — solved numerically from a 6.5 starting guess, the
+                strongest single check — and Z, &alpha;, &mu;<sub>p</sub> and &tau;
+                analytically. The seventh is <strong>unresolved</strong>: this
+                implementation returns a <code>vphi</code> (the wage Phillips curve disutility scale) that misses Table&nbsp;B.III (tile above), left unasserted in the test suite rather than laundered.
+              </p>
+        </details>
       </div>
 
       <div class="meth-step" id="gated" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What is gated, and what is not</h3></div>
         <p class="mo-lead">Imposed inputs carry no information; signs and timing are gated, magnitudes are not.</p>
-              <p>
+        <p class="kv-title">Read the rows correctly</p>
+        <dl class="kv"><div><dt>Imposed</dt><dd>Y, K, r, G, Bg &mdash; identities</dd></div><div><dt>Solver-reached</dt><dd>total wealth, liquid assets &mdash; tolerances</dd></div><div><dt>Asset clearing</dt><dd>3.1e&minus;13, the solver&rsquo;s own target</dd></div><div><dt>IRF signs, timing</dt><dd>gated</dd></div><div><dt>IRF magnitudes</dt><dd>not gated</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>
                 Signs and timing of the shock responses are gated too.
                 <strong>Magnitudes are not</strong> — the paper publishes no impulse
                 response to match them against.
               </p>
-              <p class="opt-note">
+          <p class="opt-note">
                 where this sits among other open HANK implementations:
                 <a href="/reports/us-hank-open-source">the landscape report</a>.
               </p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">read the rows correctly</div>
-        <div class="meth-eq"><div class="meth-eq-label">imposed</div><div class="meth-eq-body">Y, K, r, G, Bg &mdash; identities</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">solver-reached</div><div class="meth-eq-body">total wealth, liquid assets &mdash; tolerances</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">asset clearing</div><div class="meth-eq-body">3.1e&minus;13, the solver&rsquo;s own target</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">IRF signs, timing</div><div class="meth-eq-body">gated</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">IRF magnitudes</div><div class="meth-eq-body">not gated</div></div>
-        </div>
+        </details>
       </div>
 
       </div>
-
-      <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">Solved vs Table B.III</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">what had somewhere to miss</div>
-          <div class="meth-eq"><div class="meth-eq-label">&beta;</div><div class="meth-eq-body">0.9762739 vs 0.976</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">&chi;<sub>1</sub></div><div class="meth-eq-body">6.4164196 vs 6.416, from a 6.5 guess</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">Z, &alpha;, &mu;<sub>p</sub>, &tau;</div><div class="meth-eq-body">analytic, to the last digit</div></div>
-          <div class="meth-eq"><div class="meth-eq-label"><code>vphi</code></div><div class="meth-eq-body">unresolved, left unasserted</div></div>
-        </div>
-        <div class="meth-panel" data-step="1" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Imposed vs solved</span><span class="meth-panel-badge mono">Step 2</span></div>
-          <div class="meth-sec-title">read the rows correctly</div>
-          <div class="meth-eq"><div class="meth-eq-label">imposed</div><div class="meth-eq-body">Y, K, r, G, Bg &mdash; identities</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">solver-reached</div><div class="meth-eq-body">total wealth, liquid assets &mdash; tolerances</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">asset clearing</div><div class="meth-eq-body">3.1e&minus;13, the solver&rsquo;s own target</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">IRF signs, timing</div><div class="meth-eq-body">gated</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">IRF magnitudes</div><div class="meth-eq-body">not gated</div></div>
-        </div>
-      </aside>
     </div>
   </section>
 
   <section class="band band-wide" id="caveats">
-    <div class="band-head">
-      <span class="kicker mono">limits</span>
-      <h2>Known limitations.</h2>
+    <div class="band-head" data-icon="alert">
+      <h2>Known limitations</h2>
     </div>
     <div class="prose">
       <div class="table-scroll"><table>
-        <caption>Known limits of the us-hank implementation</caption>
+        <caption>Known limits of the US HANK implementation</caption>
         <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
         <tbody>
           <tr>
@@ -260,7 +230,7 @@
   </section>
 
   <section class="band where-next" id="where-next">
-    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
     <div class="entry-grid">
       <a class="entry-card" href="/us-hank/code">
         <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span>

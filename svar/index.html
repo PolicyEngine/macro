@@ -46,14 +46,9 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 03 — Bank of England structural VAR · boe-svar · UK · hosted</p>
-      <h1 class="reveal page-title" style="--d:1;">
-        Explain UK growth and inflation.
-      </h1>
-      <p class="lede reveal" style="--d:2">
-        Decompose UK GDP and inflation into six structural shocks, forecast
-        with credible bands, and explain revisions between quarters.
-      </p>
+      <p class="eyebrow reveal" style="--d:0">Bank of England structural VAR · UK · hosted</p>
+      <h1 class="reveal page-title" style="--d:1;">BoE SVAR</h1>
+      <p class="lede reveal" style="--d:2">Explain UK growth and inflation.</p>
     </div>
   </section>
 
@@ -67,8 +62,7 @@
     </div>
   </nav>
   <section id="card" class="band band-wide">
-    <div class="band-head">
-      <span class="kicker mono">model card</span>
+    <div class="band-head" data-icon="list">
       <h2>BoE SVAR at a glance</h2>
     </div>
     <p class="callout verdict-callout">
@@ -92,25 +86,24 @@
   </section>
 
   <section id="overview" class="band band-wide">
-    <div class="band-head">
-      <span class="kicker mono">overview</span>
-      <h2>The Bank of England&rsquo;s structural VAR, replicated in the open.</h2>
+    <div class="band-head" data-icon="layers">
+      <h2>The Bank of England&rsquo;s structural VAR, replicated in the open</h2>
+      <p class="section-intro">Decompose UK GDP and inflation into six structural shocks, forecast with credible bands, and explain revisions between quarters.</p>
     </div>
 
-    <div class="scrolly-wrap">
+    <div class="scrolly-wrap single">
       <div class="scrolly-steps">
 
       <div class="meth-step" id="pe-bridge" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>With the microsimulation</h3></div>
         <p class="mo-lead">Its CPI forecast prices CPI-linked benefit uprating; it does not score reforms.</p>
         <div class="pipeline">
-          <span class="pl-node"><strong>boe-svar</strong><span class="mono">CPI path</span></span>
+          <span class="pl-node"><strong>BoE SVAR</strong><span class="mono">CPI path</span></span>
           <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <a class="pl-node" href="/pe"><strong>pe-microsim</strong><span class="mono">benefit uprating</span></a>
+          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">benefit uprating</span></a>
           <span class="pl-arrow" aria-hidden="true">&rarr;</span>
           <span class="pl-node pl-node-out"><strong>Who gains and loses</strong></span>
         </div>
-        <p>Forecast-to-incidence bridge: <code>svar_inflation_incidence</code> passes the gap between this model's CPI path and the official one through the April 2028 uprating of CPI-linked benefits in <a href="/pe">PolicyEngine</a>. Experimental, and labelled as such. No reform scoring — <code>score_reform</code> does not accept this model.</p>
         <p class="callout callout-neutral"><strong>It does not score reforms.</strong> Mapping a policy reform
                 into identified structural innovations is conceptually dubious, not
                 merely unbuilt. For reform scoring use the
@@ -120,32 +113,18 @@
                 the <a href="/models#score">score a reform</a> workflow shows; this model
                 tells you what you are scoring <em>against</em>.</p>
         <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">forecast to incidence</div>
-        <div class="meth-eq"><div class="meth-eq-label">tool</div><div class="meth-eq-body"><code>svar_inflation_incidence</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">what moves</div><div class="meth-eq-body">this model&rsquo;s CPI path minus the official one</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">enters</div><div class="meth-eq-body">April 2028 uprating of CPI-linked benefits</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">experimental</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">refused</div><div class="meth-eq-body"><code>score_reform</code> does not accept it</div></div>
-        </div>
+        <p class="kv-title">Forecast to incidence</p>
+        <dl class="kv"><div><dt>Tool</dt><dd><code>svar_inflation_incidence</code></dd></div><div><dt>What moves</dt><dd>this model&rsquo;s CPI path minus the official one</dd></div><div><dt>Enters</dt><dd>April 2028 uprating of CPI-linked benefits</dd></div><div><dt>Status</dt><dd>experimental</dd></div><div><dt>Refused</dt><dd><code>score_reform</code> does not accept it</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>Forecast-to-incidence bridge: <code>svar_inflation_incidence</code> passes the gap between this model's CPI path and the official one through the April 2028 uprating of CPI-linked benefits in <a href="/pe">PolicyEngine</a>. Experimental, and labelled as such. No reform scoring — <code>score_reform</code> does not accept this model.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="what" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it is</h3></div>
         <p class="mo-lead">The Bank&rsquo;s own empirical lens, replicated in the open.</p>
-        <p>In July 2025 the Bank of England published Macro Technical Paper
-                No.&nbsp;3 — <em>A structural VAR model for the UK economy</em> — with
-                no replication package. This project re-implements the full pipeline
-                in Python — public-source data assembly, Bayesian estimation,
-                identification, and every output figure — validated against the
-                paper's published results.</p>
-        <p>Within the suite it is the <strong>empirical, time-series
-                member</strong> — a structural VAR: a statistical model of a small
-                set of series, with just enough economic structure to name the shocks
-                driving them — and the <strong>baseline/conditioning member</strong>,
-                saying what is hitting the economy and how uncertain the baseline is
-                before you simulate changing it with the structural members.</p>
-        <div class="mo-figcard">
+        <div class="mo-figcard full">
 <!-- boe-current-outlook:begin -->
 <figure class="vfig current-outlook">
 <div class="vc-fig" data-chart="boe-current-outlook">
@@ -188,14 +167,23 @@
 <!-- boe-current-outlook:end -->
         </div>
         <p class="vlinks mono"><a href="/svar/methodology#sources">the source paper, method papers and code &rarr;</a></p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">the replication</div>
-        <div class="meth-eq"><div class="meth-eq-label">source</div><div class="meth-eq-body">BoE Macro Technical Paper No.&nbsp;3, July 2025</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">family</div><div class="meth-eq-body">Bayesian structural VAR</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">shocks</div><div class="meth-eq-body">six named structural shocks</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">identification</div><div class="meth-eq-body">zero and sign restrictions</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">role</div><div class="meth-eq-body">baseline and conditioning member</div></div>
-        </div>
+        <p class="kv-title">The replication</p>
+        <dl class="kv"><div><dt>Source</dt><dd>BoE Macro Technical Paper No.&nbsp;3, July 2025</dd></div><div><dt>Family</dt><dd>Bayesian structural VAR</dd></div><div><dt>Shocks</dt><dd>six named structural shocks</dd></div><div><dt>Identification</dt><dd>zero and sign restrictions</dd></div><div><dt>Role</dt><dd>baseline and conditioning member</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>In July 2025 the Bank of England published Macro Technical Paper
+                No.&nbsp;3 — <em>A structural VAR model for the UK economy</em> — with
+                no replication package. This project re-implements the full pipeline
+                in Python — public-source data assembly, Bayesian estimation,
+                identification, and every output figure — validated against the
+                paper's published results.</p>
+          <p>Within the suite it is the <strong>empirical, time-series
+                member</strong> — a structural VAR: a statistical model of a small
+                set of series, with just enough economic structure to name the shocks
+                driving them — and the <strong>baseline/conditioning member</strong>,
+                saying what is hitting the economy and how uncertain the baseline is
+                before you simulate changing it with the structural members.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="answers" data-step="2">
@@ -223,8 +211,12 @@
                   </tr>
                 </tbody>
               </table></div>
-        <p>The 2026Q1 round reads world demand and world energy shocks as most likely negative, UK demand and both supply shocks as positive, and monetary policy as expansionary; the probabilities are alongside. Source: <a class="mono" href="/papers/boe-svar/figures/latest_shocks.json" download><code>latest_shocks.json</code></a>, 6,000 draws, 430 accepted, ESS 198.</p>
-        <p>
+        <p class="kv-title">2026Q1 shock probabilities</p>
+        <dl class="kv"><div><dt>World demand</dt><dd>negative, 0.71</dd></div><div><dt>World energy</dt><dd>negative, 0.90</dd></div><div><dt>World supply</dt><dd>positive, 0.87</dd></div><div><dt>UK demand</dt><dd>positive, 0.81</dd></div><div><dt>UK supply</dt><dd>positive, 0.71</dd></div><div><dt>Monetary policy</dt><dd>expansionary, 0.84</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>The 2026Q1 round reads world demand and world energy shocks as most likely negative, UK demand and both supply shocks as positive, and monetary policy as expansionary; the probabilities are alongside. Source: <a class="mono" href="/papers/boe-svar/figures/latest_shocks.json" download><code>latest_shocks.json</code></a>, 6,000 draws, 430 accepted, ESS 198.</p>
+          <p>
                 <strong>Worked example.</strong> UK benefit uprating is CPI-linked, so the
                 <code>svar_inflation_incidence</code> tool prices the gap between
                 this model&rsquo;s median CPI path and the March 2026 EFO through the
@@ -236,55 +228,16 @@
                 experimental illustration built on the forecast median, not a
                 scored reform.
               </p>
-        <p>Results: the live UK fan chart on the <a href="/">home page</a> and every archived round under <a href="/forecasts#open">forecasts</a>.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">2026Q1 shock probabilities</div>
-        <div class="meth-eq"><div class="meth-eq-label">world demand</div><div class="meth-eq-body">negative, 0.71</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">world energy</div><div class="meth-eq-body">negative, 0.90</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">world supply</div><div class="meth-eq-body">positive, 0.87</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">UK demand</div><div class="meth-eq-body">positive, 0.81</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">UK supply</div><div class="meth-eq-body">positive, 0.71</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">monetary policy</div><div class="meth-eq-body">expansionary, 0.84</div></div>
-        </div>
+          <p>Results: the live UK fan chart on the <a href="/">home page</a> and every archived round under <a href="/forecasts#open">forecasts</a>.</p>
+        </details>
       </div>
 
       </div>
-
-      <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">The join</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">forecast to incidence</div>
-          <div class="meth-eq"><div class="meth-eq-label">tool</div><div class="meth-eq-body"><code>svar_inflation_incidence</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">what moves</div><div class="meth-eq-body">this model&rsquo;s CPI path minus the official one</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">enters</div><div class="meth-eq-body">April 2028 uprating of CPI-linked benefits</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">experimental</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">refused</div><div class="meth-eq-body"><code>score_reform</code> does not accept it</div></div>
-        </div>
-        <div class="meth-panel" data-step="1" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Model at a glance</span><span class="meth-panel-badge mono">Step 2</span></div>
-          <div class="meth-sec-title">the replication</div>
-          <div class="meth-eq"><div class="meth-eq-label">source</div><div class="meth-eq-body">BoE Macro Technical Paper No.&nbsp;3, July 2025</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">family</div><div class="meth-eq-body">Bayesian structural VAR</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">shocks</div><div class="meth-eq-body">six named structural shocks</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">identification</div><div class="meth-eq-body">zero and sign restrictions</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">role</div><div class="meth-eq-body">baseline and conditioning member</div></div>
-        </div>
-        <div class="meth-panel" data-step="2" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">The latest round</span><span class="meth-panel-badge mono">Step 3</span></div>
-          <div class="meth-sec-title">2026Q1 shock probabilities</div>
-          <div class="meth-eq"><div class="meth-eq-label">world demand</div><div class="meth-eq-body">negative, 0.71</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">world energy</div><div class="meth-eq-body">negative, 0.90</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">world supply</div><div class="meth-eq-body">positive, 0.87</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">UK demand</div><div class="meth-eq-body">positive, 0.81</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">UK supply</div><div class="meth-eq-body">positive, 0.71</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">monetary policy</div><div class="meth-eq-body">expansionary, 0.84</div></div>
-        </div>
-      </aside>
     </div>
   </section>
 
   <section class="band where-next" id="where-next">
-    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
     <div class="entry-grid">
       <a class="entry-card" href="/svar/methodology">
         <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg></span>

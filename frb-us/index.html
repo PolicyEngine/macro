@@ -46,14 +46,9 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 04 — Fed FRB/US, rebuilt · frb-us · US · hosted · quarterly</p>
-      <h1 class="reveal page-title" style="--d:1;">
-        Test US monetary and fiscal shocks.
-      </h1>
-      <p class="lede reveal" style="--d:2">
-        Trace how a funds-rate or fiscal shock affects US output, inflation,
-        and unemployment quarter by quarter using the April 2026 baseline.
-      </p>
+      <p class="eyebrow reveal" style="--d:0">Fed FRB/US, rebuilt · US · hosted · quarterly</p>
+      <h1 class="reveal page-title" style="--d:1;">FRB/US</h1>
+      <p class="lede reveal" style="--d:2">Test US monetary and fiscal shocks.</p>
     </div>
   </section>
 
@@ -67,8 +62,7 @@
     </div>
   </nav>
   <section id="card" class="band band-wide">
-    <div class="band-head">
-      <span class="kicker mono">model card</span>
+    <div class="band-head" data-icon="list">
       <h2>FRB/US at a glance</h2>
     </div>
     <p class="callout verdict-callout">
@@ -93,9 +87,9 @@
   </section>
 
   <section id="overview" class="band band-wide">
-    <div class="band-head">
-      <span class="kicker mono">overview</span>
-      <h2>How it joins the core, what it is, what it can answer.</h2>
+    <div class="band-head" data-icon="layers">
+      <h2>How it joins the core, what it is, what it can answer</h2>
+      <p class="section-intro">Trace how a funds-rate or fiscal shock affects US output, inflation, and unemployment quarter by quarter using the April 2026 baseline.</p>
     </div>
 
     <div class="scrolly-wrap">
@@ -105,14 +99,12 @@
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>With the microsimulation</h3></div>
         <p class="mo-lead">Its labour-market path tells the microsimulation who bears a shock.</p>
         <div class="pipeline">
-          <span class="pl-node"><strong>frb-us</strong><span class="mono">wages &middot; hours</span></span>
+          <span class="pl-node"><strong>FRB/US</strong><span class="mono">wages &middot; hours</span></span>
           <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <a class="pl-node" href="/pe"><strong>pe-microsim</strong><span class="mono">US employment income</span></a>
+          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">US employment income</span></a>
           <span class="pl-arrow" aria-hidden="true">&rarr;</span>
           <span class="pl-node pl-node-out"><strong>Who bears it</strong></span>
         </div>
-        <p><code>frbus_shock_incidence</code> scales the US <a href="/pe">microsimulation</a>&rsquo;s employment income with the wage and hours deviations a shock produces, so the automatic stabilizers answer who bears it: how much of the earnings loss federal and state taxes absorb, and what SNAP and the EITC give back, decile by decile.</p>
-        <p>Uniform scaling is an experimental illustration: real incidence concentrates in job losers. The join runs one way only. <code>score_reform</code> refuses <code>model="frbus"</code> rather than return a plausible-but-wrong number, because no mapping exists from a PolicyEngine reform to FRB/US levers.</p>
         <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
         <div class="meth-inline">
         <div class="meth-sec-title">shock to incidence</div>
@@ -122,19 +114,34 @@
         <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">experimental</div></div>
         <div class="meth-eq"><div class="meth-eq-label">refused</div><div class="meth-eq-body"><code>score_reform</code> refuses <code>model="frbus"</code></div></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <p><code>frbus_shock_incidence</code> scales the US <a href="/pe">microsimulation</a>&rsquo;s employment income with the wage and hours deviations a shock produces, so the automatic stabilizers answer who bears it: how much of the earnings loss federal and state taxes absorb, and what SNAP and the EITC give back, decile by decile.</p>
+          <p>Uniform scaling is an experimental illustration: real incidence concentrates in job losers. The join runs one way only. <code>score_reform</code> refuses <code>model="frbus"</code> rather than return a plausible-but-wrong number, because no mapping exists from a PolicyEngine reform to FRB/US levers.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="what" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it is</h3></div>
         <p class="mo-lead">The Board&rsquo;s own equation system, parsed and solved from scratch in Python.</p>
-              <p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">the Board&rsquo;s model, rebuilt</div>
+        <div class="meth-eq"><div class="meth-eq-label">source</div><div class="meth-eq-body">Federal Reserve Board, in use since 1996</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">equations</div><div class="meth-eq-body">284 endogenous variables</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">solve</div><div class="meth-eq-body">one simultaneous system per quarter</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">build</div><div class="meth-eq-body">numpy, scipy and sympy, Python 3.10+</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">input file</div><div class="meth-eq-body">the Board&rsquo;s own <code>model.xml</code></div></div>
+        </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>
                 The Federal Reserve Board has used FRB/US for policy analysis and
                 forecasting since 1996 and publishes it whole in the public domain:
                 the equations (<code>model.xml</code>), the <code>LONGBASE</code>
                 database, the documentation and a reference solver,
                 <code>pyfrbus</code>.
               </p>
-              <p>
+          <p>
                 This build parses the Board&rsquo;s own file rather than
                 re-specifying it: <strong>284 endogenous variables and their
                 equations</strong>, solved as one simultaneous system per quarter
@@ -145,32 +152,12 @@
                 the OBR emulator, it has no bridge from statute.
                 <a href="/frb-us/methodology">How it is solved &rarr;</a>
               </p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">the Board&rsquo;s model, rebuilt</div>
-        <div class="meth-eq"><div class="meth-eq-label">source</div><div class="meth-eq-body">Federal Reserve Board, in use since 1996</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">equations</div><div class="meth-eq-body">284 endogenous variables</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">solve</div><div class="meth-eq-body">one simultaneous system per quarter</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">build</div><div class="meth-eq-body">numpy, scipy and sympy, Python 3.10+</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">input file</div><div class="meth-eq-body">the Board&rsquo;s own <code>model.xml</code></div></div>
-        </div>
+        </details>
       </div>
 
       <div class="meth-step" id="answers" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
         <p class="mo-lead">A worked example: a 100bp funds-rate tightening in 2026Q1.</p>
-              <p>
-                One command, <code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code>,
-                adds 1pp to the inertial-Taylor-rule error term and returns the
-                quarter-by-quarter paths for the funds rate, real GDP,
-                unemployment and core inflation. What the microsimulation join
-                (step 1) takes in is the labour-market path: in this example the
-                2027 wage bill falls <strong>&minus;0.65%</strong>.
-              </p>
-              <p>
-                The response itself, set against the Board&rsquo;s documented
-                simulation properties, is the <a href="/frb-us/validation#worked-shock">worked shock on Validation</a>;
-                fiscal multipliers are <a href="/frb-us/validation#multipliers">there too</a>.
-              </p>
         <div class="meth-inline">
         <div class="meth-sec-title">100bp tightening, 2026Q1</div>
         <div class="meth-eq"><div class="meth-eq-label">lever</div><div class="meth-eq-body"><code>rffintay_aerr</code>, +1.0pp</div></div>
@@ -178,6 +165,22 @@
         <div class="meth-eq"><div class="meth-eq-label">returns</div><div class="meth-eq-body">funds rate, GDP, unemployment, core inflation</div></div>
         <div class="meth-eq"><div class="meth-eq-label">2027 wage bill</div><div class="meth-eq-body">&minus;0.65%</div></div>
         </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>
+                One command, <code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code>,
+                adds 1pp to the inertial-Taylor-rule error term and returns the
+                quarter-by-quarter paths for the funds rate, real GDP,
+                unemployment and core inflation. What the microsimulation join
+                (step 1) takes in is the labour-market path: in this example the
+                2027 wage bill falls <strong>&minus;0.65%</strong>.
+              </p>
+          <p>
+                The response itself, set against the Board&rsquo;s documented
+                simulation properties, is the <a href="/frb-us/validation#worked-shock">worked shock on Validation</a>;
+                fiscal multipliers are <a href="/frb-us/validation#multipliers">there too</a>.
+              </p>
+        </details>
       </div>
 
       </div>
@@ -214,7 +217,7 @@
   </section>
 
 <section class="band where-next" id="where-next">
-    <div class="band-head"><span class="kicker mono">where next</span><h2>Keep reading</h2></div>
+    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
     <div class="entry-grid">
       <a class="entry-card" href="/frb-us/methodology">
         <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg></span>
