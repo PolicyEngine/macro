@@ -92,7 +92,7 @@
       <p class="section-intro">Trace how a funds-rate or fiscal shock affects US output, inflation, and unemployment quarter by quarter using the April 2026 baseline.</p>
     </div>
 
-    <div class="scrolly-wrap">
+    <div class="scrolly-wrap single single">
       <div class="scrolly-steps">
 
       <div class="meth-step" id="pe-bridge" data-step="0">
@@ -106,14 +106,8 @@
           <span class="pl-node pl-node-out"><strong>Who bears it</strong></span>
         </div>
         <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">shock to incidence</div>
-        <div class="meth-eq"><div class="meth-eq-label">tool</div><div class="meth-eq-body"><code>frbus_shock_incidence</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">what moves</div><div class="meth-eq-body">wage and hours deviations from a shock</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">enters</div><div class="meth-eq-body">US employment income, scaled uniformly</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">experimental</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">refused</div><div class="meth-eq-body"><code>score_reform</code> refuses <code>model="frbus"</code></div></div>
-        </div>
+        <p class="kv-title">Shock to incidence</p>
+        <dl class="kv kv-text"><div><dt>Tool</dt><dd><code>frbus_shock_incidence</code></dd></div><div><dt>What moves</dt><dd>wage and hours deviations from a shock</dd></div><div><dt>Enters</dt><dd>US employment income, scaled uniformly</dd></div><div><dt>Status</dt><dd>experimental</dd></div><div><dt>Refused</dt><dd><code>score_reform</code> refuses <code>model="frbus"</code></dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <p><code>frbus_shock_incidence</code> scales the US <a href="/pe">microsimulation</a>&rsquo;s employment income with the wage and hours deviations a shock produces, so the automatic stabilizers answer who bears it: how much of the earnings loss federal and state taxes absorb, and what SNAP and the EITC give back, decile by decile.</p>
@@ -124,14 +118,8 @@
       <div class="meth-step" id="what" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it is</h3></div>
         <p class="mo-lead">The Board&rsquo;s own equation system, parsed and solved from scratch in Python.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">the Board&rsquo;s model, rebuilt</div>
-        <div class="meth-eq"><div class="meth-eq-label">source</div><div class="meth-eq-body">Federal Reserve Board, in use since 1996</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">equations</div><div class="meth-eq-body">284 endogenous variables</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">solve</div><div class="meth-eq-body">one simultaneous system per quarter</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">build</div><div class="meth-eq-body">numpy, scipy and sympy, Python 3.10+</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">input file</div><div class="meth-eq-body">the Board&rsquo;s own <code>model.xml</code></div></div>
-        </div>
+        <p class="kv-title">The Board&rsquo;s model, rebuilt</p>
+        <dl class="kv kv-text"><div><dt>Source</dt><dd>Federal Reserve Board, in use since 1996</dd></div><div><dt>Equations</dt><dd>284 endogenous variables</dd></div><div><dt>Solve</dt><dd>one simultaneous system per quarter</dd></div><div><dt>Build</dt><dd>numpy, scipy and sympy, Python 3.10+</dd></div><div><dt>Input file</dt><dd>the Board&rsquo;s own <code>model.xml</code></dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <p>
@@ -158,13 +146,8 @@
       <div class="meth-step" id="answers" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
         <p class="mo-lead">A worked example: a 100bp funds-rate tightening in 2026Q1.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">100bp tightening, 2026Q1</div>
-        <div class="meth-eq"><div class="meth-eq-label">lever</div><div class="meth-eq-body"><code>rffintay_aerr</code>, +1.0pp</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">policy rule</div><div class="meth-eq-body"><code>inertial_taylor</code> (default)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">returns</div><div class="meth-eq-body">funds rate, GDP, unemployment, core inflation</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">2027 wage bill</div><div class="meth-eq-body">&minus;0.65%</div></div>
-        </div>
+        <p class="kv-title">100bp tightening, 2026Q1</p>
+        <dl class="kv"><div><dt>Lever</dt><dd><code>rffintay_aerr</code>, +1.0pp</dd></div><div><dt>Policy rule</dt><dd><code>inertial_taylor</code> (default)</dd></div><div><dt>Returns</dt><dd>funds rate, GDP, unemployment, core inflation</dd></div><div><dt>2027 wage bill</dt><dd>&minus;0.65%</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <p>
@@ -184,35 +167,6 @@
       </div>
 
       </div>
-
-      <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">The join</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">shock to incidence</div>
-          <div class="meth-eq"><div class="meth-eq-label">tool</div><div class="meth-eq-body"><code>frbus_shock_incidence</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">what moves</div><div class="meth-eq-body">wage and hours deviations from a shock</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">enters</div><div class="meth-eq-body">US employment income, scaled uniformly</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">experimental</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">refused</div><div class="meth-eq-body"><code>score_reform</code> refuses <code>model="frbus"</code></div></div>
-        </div>
-        <div class="meth-panel" data-step="1" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Model at a glance</span><span class="meth-panel-badge mono">Step 2</span></div>
-          <div class="meth-sec-title">the Board&rsquo;s model, rebuilt</div>
-          <div class="meth-eq"><div class="meth-eq-label">source</div><div class="meth-eq-body">Federal Reserve Board, in use since 1996</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">equations</div><div class="meth-eq-body">284 endogenous variables</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">solve</div><div class="meth-eq-body">one simultaneous system per quarter</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">build</div><div class="meth-eq-body">numpy, scipy and sympy, Python 3.10+</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">input file</div><div class="meth-eq-body">the Board&rsquo;s own <code>model.xml</code></div></div>
-        </div>
-        <div class="meth-panel" data-step="2" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Worked example</span><span class="meth-panel-badge mono">Step 3</span></div>
-          <div class="meth-sec-title">100bp tightening, 2026Q1</div>
-          <div class="meth-eq"><div class="meth-eq-label">lever</div><div class="meth-eq-body"><code>rffintay_aerr</code>, +1.0pp</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">policy rule</div><div class="meth-eq-body"><code>inertial_taylor</code> (default)</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">returns</div><div class="meth-eq-body">funds rate, GDP, unemployment, core inflation</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">2027 wage bill</div><div class="meth-eq-body">&minus;0.65%</div></div>
-        </div>
-      </aside>
     </div>
   </section>
 

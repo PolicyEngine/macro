@@ -76,19 +76,14 @@
       </p>
     </div>
 
-    <div class="scrolly-wrap scrolly-code">
+    <div class="scrolly-wrap scrolly-code single single">
       <div class="scrolly-steps">
       <div class="meth-step" id="run-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Hosted MCP tools</h3></div>
         <p>The quickest route is the <a href="/connect">hosted MCP server</a>.</p>
 <details class="about"><summary>More detail</summary><p>Four tools reach this model: <code>forecast_uk</code> (YoY GDP-growth and CPI-inflation fan charts with 68%/90% bands), <code>latest_shocks</code> (posterior sign probabilities of each identified shock in the latest quarter), <code>model_summary</code> (headline replication results — instant, no estimation), and the experimental <code>svar_inflation_incidence</code> (the CPI gap priced through benefit uprating in the microsimulation).</p></details>
-        <div class="meth-inline">
-        <div class="meth-sec-title">hosted tools</div>
-        <div class="meth-eq"><div class="meth-eq-label">forecast</div><div class="meth-eq-body"><code>forecast_uk(horizons=12, draws=2000)</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">shocks</div><div class="meth-eq-body"><code>latest_shocks(draws=2000)</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">headlines</div><div class="meth-eq-body"><code>model_summary()</code>, instant</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">incidence</div><div class="meth-eq-body"><code>svar_inflation_incidence(year=2027)</code>, experimental</div></div>
-        </div>
+        <p class="kv-title">Hosted tools</p>
+        <dl class="kv"><div><dt>Forecast</dt><dd><code>forecast_uk(horizons=12, draws=2000)</code></dd></div><div><dt>Shocks</dt><dd><code>latest_shocks(draws=2000)</code></dd></div><div><dt>Headlines</dt><dd><code>model_summary()</code>, instant</dd></div><div><dt>Incidence</dt><dd><code>svar_inflation_incidence(year=2027)</code>, experimental</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <h4>No install, no credentials</h4>
@@ -101,26 +96,22 @@
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>CLI mirrors</h3></div>
         <h4>Same tools from the terminal</h4>
         <p>The CLI mirrors the four MCP tools one for one. Same outputs, no MCP client required.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">CLI commands</div>
+        <p class="kv-title">CLI commands</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro forecast --horizons 12 --draws 2000   <span class="cm"># fan charts</span>
 pe-macro shocks                                <span class="cm"># latest-quarter shocks</span>
 pe-macro summary                               <span class="cm"># replication headlines</span>
 pe-macro svar-inflation-incidence --year 2027  <span class="cm"># experimental</span></code></pre></div>
-        </div>
       </div>
 
       <div class="meth-step" id="run-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Install locally</h3></div>
         <p>The package installs straight from GitHub with the prepared quarterly dataset inside, so <code>boe_var.data.load_data()</code> works immediately.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">install</div>
+        <p class="kv-title">Install</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> policyengine_macro <span class="kw">import</span> svar_forecast, svar_latest_shocks
 
 fc = svar_forecast(horizons=12, draws=2000)   <span class="cm"># median + 68%/90% bands</span>
 shocks = svar_latest_shocks(draws=2000)</code></pre></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>One pip install</h4>
@@ -134,8 +125,7 @@ shocks = svar_latest_shocks(draws=2000)</code></pre></div>
       <div class="meth-step" id="run-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Development runner scripts</h3></div>
         <p>The runner scripts are for development — clone the repository to rebuild the dataset or regenerate the paper outputs.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">runner scripts</div>
+        <p class="kv-title">Runner scripts</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>python scripts/download_data.py     <span class="cm"># reassemble the public data</span>
 
 <span class="cm"># the paper's core outputs: IRFs, FEVDs, shocks, historical decompositions</span>
@@ -144,7 +134,6 @@ python scripts/run_replication.py
 <span class="cm"># the forecasting toolkit: fan charts, latest-quarter shock distributions,</span>
 <span class="cm"># composite IRFs, and the forecast-revision decomposition</span>
 python scripts/run_forecast_revision.py</code></pre></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>Clone to rebuild everything</h4>
@@ -153,45 +142,6 @@ python scripts/run_forecast_revision.py</code></pre></div>
         </details>
       </div>
       </div>
-      <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">Hosted MCP tools</span><span class="meth-panel-badge mono">Code 1</span></div>
-          <div class="meth-sec-title">hosted tools</div>
-          <div class="meth-eq"><div class="meth-eq-label">forecast</div><div class="meth-eq-body"><code>forecast_uk(horizons=12, draws=2000)</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">shocks</div><div class="meth-eq-body"><code>latest_shocks(draws=2000)</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">headlines</div><div class="meth-eq-body"><code>model_summary()</code>, instant</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">incidence</div><div class="meth-eq-body"><code>svar_inflation_incidence(year=2027)</code>, experimental</div></div>
-        </div>
-        <div class="meth-panel" data-step="1" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">CLI mirrors</span><span class="meth-panel-badge mono">Code 2</span></div>
-          <div class="meth-sec-title">CLI commands</div>
-        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pe-macro forecast --horizons 12 --draws 2000   <span class="cm"># fan charts</span>
-pe-macro shocks                                <span class="cm"># latest-quarter shocks</span>
-pe-macro summary                               <span class="cm"># replication headlines</span>
-pe-macro svar-inflation-incidence --year 2027  <span class="cm"># experimental</span></code></pre></div>
-        </div>
-        <div class="meth-panel" data-step="2" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Install locally</span><span class="meth-panel-badge mono">Code 3</span></div>
-          <div class="meth-sec-title">install</div>
-        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
-        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code><span class="kw">from</span> policyengine_macro <span class="kw">import</span> svar_forecast, svar_latest_shocks
-
-fc = svar_forecast(horizons=12, draws=2000)   <span class="cm"># median + 68%/90% bands</span>
-shocks = svar_latest_shocks(draws=2000)</code></pre></div>
-        </div>
-        <div class="meth-panel" data-step="3" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Development runner scripts</span><span class="meth-panel-badge mono">Code 4</span></div>
-          <div class="meth-sec-title">runner scripts</div>
-        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>python scripts/download_data.py     <span class="cm"># reassemble the public data</span>
-
-<span class="cm"># the paper's core outputs: IRFs, FEVDs, shocks, historical decompositions</span>
-python scripts/run_replication.py
-
-<span class="cm"># the forecasting toolkit: fan charts, latest-quarter shock distributions,</span>
-<span class="cm"># composite IRFs, and the forecast-revision decomposition</span>
-python scripts/run_forecast_revision.py</code></pre></div>
-        </div>
-      </aside>
     </div>
   </section>
 
