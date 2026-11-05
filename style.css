@@ -5401,7 +5401,7 @@ details.expander > summary .expander-meta { color: var(--text-faint); font-size:
 .scrolly-wrap.single .meth-step .meth-step-num { background: var(--surface-tint); color: var(--tab-teal); }
 /* panel content: label/value rows and charts, not boxes inside the box */
 :is(.meth-panel, .meth-inline) .meth-eq {
-  margin: 0;
+  margin-block: 0;
   padding: 10px 0;
   border: 0;
   border-bottom: 1px solid var(--hairline);
@@ -5452,7 +5452,7 @@ details.expander > summary .expander-meta { color: var(--text-faint); font-size:
 .model-id { margin-left: 6px; color: var(--text-faint); font-size: var(--fs-small); font-weight: 400; letter-spacing: 0; text-decoration: none; white-space: nowrap; }
 a .model-id, a:hover .model-id { text-decoration: none; display: inline-block; }
 .home-page .trust-row { grid-template-columns: minmax(220px, 15rem) 10.5rem minmax(0, 1fr); }
-.home-page .trust-model .model-id { display: block; margin: 2px 0 0; }
+.home-page .trust-model .model-id { display: inline-block; width: 100%; margin: 2px 0 0; }
 @media (max-width: 760px) { .home-page .trust-row { grid-template-columns: auto 1fr; } }
 /* home "how it connects": rows inside one card, divided by hairlines */
 .home-page .join-list { gap: 0; }
@@ -5466,3 +5466,20 @@ a .model-id, a:hover .model-id { text-decoration: none; display: inline-block; }
 }
 /* home #start: the router cards on the canvas, no section card around them */
 .home-page #start.band:not(:has(> .band-head)) { margin-top: var(--s-6); padding: 0; background: none; border: 0; box-shadow: none; }
+/* more frames that sat inside a section card (audit, r3) */
+.band :is(.vchart-figure, .step-diagram, .dial-card, .qa-facts) { border: 0; border-radius: 0; background: none; box-shadow: none; padding-left: 0; padding-right: 0; }
+/* strip charts keep their drawn shape (no tall-plot stretch) */
+.vc-fig[data-chart="obr-computed-share"] .vchart { min-height: var(--vc-min-h, 210px); }
+/* .kv.kv-text: rows whose values are phrases or sentences — label column
+   left (~35%), value left-aligned in body weight; stacked on phones */
+.kv.kv-text { grid-template-columns: minmax(0, 35%) minmax(0, 1fr); column-gap: var(--s-4); }
+.kv.kv-text dt { color: var(--text-strong); font-size: var(--fs-body-sm); font-weight: 600; }
+.kv.kv-text dd { padding-left: 0; color: var(--text-body); font-size: var(--fs-body-sm); font-weight: 400; text-align: left; font-variant-numeric: normal; }
+:is(.meth-panel, .meth-inline, .scrolly-sticky) .kv.kv-text { grid-template-columns: minmax(0, 1fr); }
+:is(.meth-panel, .meth-inline, .scrolly-sticky) .kv.kv-text dt { padding-bottom: 0; border-bottom: 0; font-size: var(--fs-small); color: var(--text-faint); font-weight: 500; }
+:is(.meth-panel, .meth-inline, .scrolly-sticky) .kv.kv-text dd { padding-top: 2px; }
+@media (max-width: 600px) {
+  .kv.kv-text { grid-template-columns: minmax(0, 1fr); }
+  .kv.kv-text dt { padding-bottom: 0; border-bottom: 0; }
+  .kv.kv-text dd { padding-top: 2px; }
+}

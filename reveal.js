@@ -186,3 +186,28 @@
   });
   window.addEventListener("resize", function () { rows.forEach(fade); }, { passive: true });
 })();
+
+// Numeric columns right-aligned (DESIGN.md §4.12): a body column whose every
+// filled cell reads as a number ("703.8", "+0.70%", "−£520m", "2.1pp") gets
+// .num on its cells and its head, so figures line up on the decimal side
+// without each page marking them by hand.
+(function () {
+  "use strict";
+  var NUM = /^[\s(]*[+\-−±~≈]?\s*[£$€]?\s*\d[\d,]*(\.\d+)?\s*(%|pp|bp|bn|m|k|x|×)?[\s)]*$/i;
+  document.querySelectorAll("main .band table").forEach(function (table) {
+    var rows = Array.from(table.tBodies).reduce(function (all, body) {
+      return all.concat(Array.from(body.rows));
+    }, []);
+    if (!rows.length) return;
+    var width = Math.max.apply(null, rows.map(function (r) { return r.cells.length; }));
+    for (var c = 1; c < width; c++) {
+      var cells = rows.map(function (r) { return r.cells[c]; }).filter(Boolean);
+      var filled = cells.filter(function (cell) { return cell.textContent.trim() && cell.textContent.trim() !== "—"; });
+      if (!filled.length || !filled.every(function (cell) { return NUM.test(cell.textContent.trim()); })) continue;
+      cells.forEach(function (cell) { cell.classList.add("num"); });
+      if (table.tHead) Array.from(table.tHead.rows).forEach(function (r) {
+        if (r.cells.length === width && r.cells[c]) r.cells[c].classList.add("num");
+      });
+    }
+  });
+})();

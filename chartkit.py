@@ -159,6 +159,7 @@ def figure(
     min_h: int | None = None,
     narrow_table: tuple[list[str], list[list[str]]] | None = None,
     unit: str | None = None,
+    keep_ratio: bool = False,
 ) -> str:
     """Turn a builder's SVG string into the readable block described above.
 
@@ -168,6 +169,9 @@ def figure(
     label ``vc-minor`` (hidden in a narrow chart).
     ``min_h``: the plot's minimum rendered height in px (default 210, in
     style.css), for charts whose rows need more room on a phone.
+    ``keep_ratio``: opt this chart out of the tall-plot rule (style.css
+    §6.10: a plot ≥ 640 px wide is drawn at least 340-380 px tall); for a
+    chart whose shape must not stretch (a strip, a sparkline).
     ``unit``: what the y values are measured in ("% q/q", "£bn a year"),
     printed once above the plot's top-left corner, the way the BoE and the
     OBR head a chart's value axis. Words come from the chart's own caption.
@@ -218,6 +222,8 @@ def figure(
     # Drop blank lines the lifted <text> elements leave behind.
     marks = "\n".join(line for line in marks.split("\n") if line.strip())
     attrs.setdefault("preserveAspectRatio", "none")
+    if keep_ratio:
+        attrs["class"] = (attrs.get("class", "") + " vc-keep-ratio").strip()
     open_attrs = " ".join(f'{k}="{v}"' for k, v in attrs.items())
     parts = [
         f'<div class="vc-fig{(" " + wrap_class) if wrap_class else ""}" data-chart="{chart_id}"'
