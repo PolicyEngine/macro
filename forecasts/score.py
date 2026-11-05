@@ -812,7 +812,12 @@ def render_results(card: dict) -> str:
             "forecasters (SEF) in April 2026, against July rounds. They show where views "
             "differed, not who forecasts better."
         )
-    body.append('      <p class="forecast-note">\n        ' + " ".join(notes) + "\n      </p>")
+    if notes:
+        body.append(
+            '      <details class="about">\n        <summary>About the benchmarks</summary>\n'
+            + "".join(f"        <p>{n}</p>\n" for n in notes)
+            + "      </details>"
+        )
     return "\n".join(body)
 
 

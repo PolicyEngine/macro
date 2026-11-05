@@ -427,16 +427,10 @@ def render_fragment() -> str:
     return f"""{BEGIN}
     <div class="prose">
       <p>
-        Rounds are scored against official data, and official data gets
-        revised. Every series this site reads is therefore archived as dated
-        snapshots that are never edited and never deleted — {series_count}
-        series, {snapshot_count} snapshots since {earliest} — so a score can
-        be reproduced against the data as it stood, not as it was later
-        revised. Reading only the current value would make look-ahead bias
-        undetectable, because only one version of the past would ever exist.
+        Every series this site reads is archived as dated snapshots, never
+        edited or deleted: {series_count} series, {snapshot_count} snapshots
+        since {earliest}.
       </p>
-
-      <h3>What is tracked</h3>
       <div class="table-scroll">
         <table id="series-table" class="series-table">
           <caption>Values come from the committed snapshot, not a live call. Expand a row for its snapshot history and store path.</caption>
@@ -457,7 +451,19 @@ def render_fragment() -> str:
                 aria-controls="series-table" aria-expanded="false"></button>
       </p>
 
-      <h3>Read a series as it was published on a date</h3>
+      <details class="about">
+        <summary>Why the store exists</summary>
+        <p>
+          Rounds are scored against official data, and official data gets
+          revised. Dated snapshots let a score be reproduced against the data
+          as it stood, not as it was later revised. Reading only the current
+          value would make look-ahead bias undetectable, because only one
+          version of the past would ever exist.
+        </p>
+      </details>
+
+      <details class="about">
+        <summary>Read a series as it was published on a date</summary>
       <p>
         Take the newest snapshot on or before your date. No key, no account,
         standard library only.
@@ -468,8 +474,10 @@ def render_fragment() -> str:
         The store starts {earliest} and runs forward from there — it does not
         reconstruct vintages older than itself.
       </p>
+      </details>
 
-      <h3>Announced releases</h3>
+      <details class="about">
+        <summary>Announced releases</summary>
       <div class="table-scroll">
         <table>
           <caption>{calendar_count} announced releases, from the committed snapshots; the store was last updated {last_fetch()}. Only the ONS publishes the field; dates are the publisher's and can move. Also an iCalendar feed: <a href="/data/calendar.ics">/data/calendar.ics</a>.</caption>
@@ -479,8 +487,10 @@ def render_fragment() -> str:
           </tbody>
         </table>
       </div>
+      </details>
 
-      <h3>Endpoints</h3>
+      <details class="about">
+        <summary>Endpoints and file format</summary>
       <div class="table-scroll">
         <table>
           <caption>Static files over HTTPS, GET and HEAD only — there is no API to authenticate against. Everything under <code>/data/</code> is served with <code>Access-Control-Allow-Origin: *</code>, so a browser-side notebook or dashboard on any origin can read it directly.</caption>
@@ -501,6 +511,7 @@ def render_fragment() -> str:
         <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>;
         US series come via FRED with their original BEA, BLS and Federal Reserve attribution.
       </p>
+      </details>
     </div>
     {END}"""
 
