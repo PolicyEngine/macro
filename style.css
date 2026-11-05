@@ -5341,7 +5341,7 @@ details.expander > summary .expander-meta { color: var(--text-faint); font-size:
    (bare dt/dd pairs work too). Default: label left, value right — for
    numbers. .kv.stack: label above value — for short text. .kv.cols-2:
    stacked pairs in two columns (one on a phone). */
-.kv { display: grid; grid-template-columns: minmax(0, 1fr) auto; margin: var(--s-3) 0; padding: 0; }
+.kv { display: grid; grid-template-columns: fit-content(45%) minmax(0, 1fr); margin: var(--s-3) 0; padding: 0; }
 .kv > div { display: contents; }
 .kv dt, .kv dd { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--hairline); }
 .kv > div:last-child > dt, .kv > div:last-child > dd, .kv > dt:nth-last-child(2), .kv > dd:last-child { border-bottom: 0; }
@@ -5439,3 +5439,30 @@ details.expander > summary .expander-meta { color: var(--text-faint); font-size:
   .band table.t-stack :is(tbody th, tbody td) { padding: 2px 0; border: 0; text-align: left; }
   .band table.t-stack tr > :first-child { padding-bottom: var(--s-1); }
 }
+
+/* --- requests from the page agents (r3) --- */
+/* a small grey label above a .kv block */
+.kv-title { margin: var(--s-4) 0 0; color: var(--text-faint); font-size: var(--fs-small); font-weight: 500; letter-spacing: 0; text-transform: none; }
+.kv-title::first-letter { text-transform: uppercase; }
+.kv-title + .kv { margin-top: 2px; }
+/* "About this step" at the end of a step: no card, a hairline on top */
+.meth-step details.about { margin-top: var(--s-4); padding: 0; background: none; border: 0; border-top: 1px solid var(--hairline); border-radius: 0; box-shadow: none; }
+.meth-step details.about > summary { padding-inline: 0; }
+/* a model id kept as secondary text after the human name */
+.model-id { margin-left: 6px; color: var(--text-faint); font-size: var(--fs-small); font-weight: 400; letter-spacing: 0; text-decoration: none; white-space: nowrap; }
+a .model-id, a:hover .model-id { text-decoration: none; display: inline-block; }
+.home-page .trust-row { grid-template-columns: minmax(220px, 15rem) 10.5rem minmax(0, 1fr); }
+.home-page .trust-model .model-id { display: block; margin: 2px 0 0; }
+@media (max-width: 760px) { .home-page .trust-row { grid-template-columns: auto 1fr; } }
+/* home "how it connects": rows inside one card, divided by hairlines */
+.home-page .join-list { gap: 0; }
+.home-page .join { padding: var(--s-4) 0; border-top: 1px solid var(--hairline); border-bottom: 0; }
+.home-page .join:first-child { border-top: 0; padding-top: 0; }
+.home-page .join:last-child { border-bottom: 0; padding-bottom: 0; }
+@media (max-width: 560px) {
+  .home-page .join-list .pipeline { flex-direction: column; align-items: stretch; }
+  .home-page .join-list .pipeline .pl-node { text-align: center; }
+  .home-page .join-list .pipeline .pl-arrow { display: block; text-align: center; rotate: 90deg; }
+}
+/* home #start: the router cards on the canvas, no section card around them */
+.home-page #start.band:not(:has(> .band-head)) { margin-top: var(--s-6); padding: 0; background: none; border: 0; box-shadow: none; }
