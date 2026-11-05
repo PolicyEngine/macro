@@ -245,13 +245,12 @@ def digest_page(vintage: str) -> str:
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow">{vintage} · automated factual digest · {len(items)} series</p>
       <h1 class="page-title">Official data stored on {day}</h1>
-      <p class="lede">Every series whose snapshot changed on this date, as the publisher released it, with no interpretation.</p>
+      <p class="lede">An automated factual digest of the <span class="mono">{vintage}</span> snapshot: every series that changed, as the publisher released it, with no interpretation.</p>
     </div>
   </section>
   <section class="band" id="changed">
-    <div class="band-head"><span class="kicker mono">what changed</span><h2>{new} of {len(items)} series added an observation</h2>
+    <div class="band-head" data-icon="table"><h2>{new} of {len(items)} series added an observation</h2>
     <p class="section-intro">Generated from committed snapshots; no editorial or causal interpretation.</p></div>
     <div class="prose">
 {chr(10).join(tables)}

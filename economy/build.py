@@ -314,18 +314,23 @@ def us_trends_note() -> str:
     )
     uk_start = min(index[name]["coverage"][0] for name in ONS_SERIES)
     return f"""    <p class="economy-method">
-      The topic pages carry the current reading and, where one exists, the
-      conditioning baseline beside it; these three charts are the one place the
-      whole path is drawn. Each is generated from the same committed
-      point-in-time observations, and the source link opens the corresponding
-      official series. Two of the three are shorter than their UK counterparts:
-      GDPC1 is quarterly, so twenty points span {gdp[0]['period']}–{gdp[-1]['period']}, but CPIAUCSL
-      and UNRATE are monthly, so the same twenty-point window covers only
-      {cpi[0]['period']}–{cpi[-1]['period']} and {unemployment[0]['period']}–{unemployment[-1]['period']}. And no US series in this store
-      starts before {us_start}, where the ONS series behind the UK charts reach
-      back to {uk_start}: the long view here is as long as the store, not as long
-      as the published record.
-    </p>"""
+      The one place the whole path is drawn, from the committed point-in-time
+      observations; each source link opens the official series.
+    </p>
+    <details class="about">
+      <summary>Why the US charts are shorter</summary>
+      <p>
+        The topic pages carry the current reading and, where one exists, the
+        conditioning baseline beside it. Two of the three charts are shorter
+        than their UK counterparts: GDPC1 is quarterly, so twenty points span
+        {gdp[0]['period']}–{gdp[-1]['period']}, but CPIAUCSL and UNRATE are
+        monthly, so the same twenty-point window covers only
+        {cpi[0]['period']}–{cpi[-1]['period']} and {unemployment[0]['period']}–{unemployment[-1]['period']}.
+        And no US series in this store starts before {us_start}, where the ONS
+        series behind the UK charts reach back to {uk_start}: the long view here
+        is as long as the store, not as long as the published record.
+      </p>
+    </details>"""
 
 
 def us_release_dates_absent(names: tuple[str, ...]) -> None:

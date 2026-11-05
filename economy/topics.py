@@ -674,16 +674,25 @@ def registry_terms(items: list[str]) -> str:
     return ", ".join(f'<span class="mono">{esc(item)}</span>' for item in items)
 
 
+BAND_ICONS = {"stands": "chart", "model": "layers", "run": "code", "data": "database"}
+
+
 def band(ident: str, number: str, kicker: str, heading: str, body: str,
          alt: bool = False) -> str:
+    """A section: the short ``kicker`` is the title, ``heading`` the grey line.
+
+    No eyebrows and no ordinals (DESIGN.md §4.1); the icon is chosen by the
+    section's meaning, from BAND_ICONS.
+    """
     classes = "band band-alt" if alt else "band"
-    # ``number`` is kept in the signature for the callers; eyebrows carry no
-    # ordinals (DESIGN.md §4.1).
     del number
+    title = kicker[0].upper() + kicker[1:]
+    line = heading.rstrip(".") + "."
+    icon = BAND_ICONS.get(ident, "list")
     return f"""  <section id="{ident}" class="{classes}">
-    <div class="band-head">
-      <span class="kicker mono">{kicker}</span>
-      <h2>{heading}</h2>
+    <div class="band-head" data-icon="{icon}">
+      <h2>{title}</h2>
+      <p class="section-intro">{line}</p>
     </div>
 {body}
   </section>"""
@@ -2711,9 +2720,8 @@ def page(topic: dict) -> str:
     body = f"""<main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow">{esc(topic["eyebrow"])}</p>
-      <h1 class="page-title">{esc(topic["heading"])}</h1>
-      <p class="lede">{topic_lede(topic)}</p>
+      <h1 class="page-title">{esc(topic["country"].upper())} {esc(topic["title"][0].lower() + topic["title"][1:])}</h1>
+      <p class="lede">{esc(topic["heading"])} {topic_lede(topic)}</p>
     </div>
   </section>
 
@@ -2721,7 +2729,7 @@ def page(topic: dict) -> str:
 
 {band("stands", "01", "where it stands", "The numbers, as the snapshot stores them.", stands_body)}
 
-{band("model", "02", "what the models see", "The model view, and the same breath its limits.", topic["model"](), alt=True)}
+{band("model", "02", "what the models see", "The model view, with its limits beside it.", topic["model"](), alt=True)}
 
 {band("run", "03", "run it yourself", "Every number above is a command away.", topic["run"]())}
 
