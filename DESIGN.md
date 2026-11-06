@@ -726,13 +726,17 @@ long prose: cards per section + "On this page" rail.
 
 Title band (subtitle `UK · archived before the outturn · scored against it`; the h1 names the
 record, not reform scoring) → `.economy-subnav` (Forecasts UK · US │ Track record · Data · topics)
-→ "On this page" rail (status · scored · how · open · rounds · limits · data · run · notes) →
-cards. Status = stat row (rounds archived, forecasts scored, next period and the store's last
-update): the home of those counts. Scored = **the scoreboard**, one table row per scored
+→ "On this page" rail (scored · open · rounds · limits · data · run · notes) →
+cards. Status = stat row summarising the record (outturns inside the archived 68% band, mean
+absolute error beside the no-change mean over the same forecasts, and forecasts scored with the
+rounds archived, next period and the store's last update, chip to the limits): aggregates
+computed by `score.py` at render time from scorecard.json, never stored; the third tile keeps
+the sample size beside the first two so they never read as a skill claim (r5). Scored = **the scoreboard**, one table row per scored
 forecast (target, round + archive date, median + archived 68% band, outturn + its immutable
 snapshot link, signed error, band verdict with a decorative strip, no-change baseline and every
-stored published path for that quarter): the home of every scored number. How = six numbered
-rules (`ol.steps`) and the rules in full behind an expander, describing the code as it runs.
+stored published path for that quarter): the home of every scored number. How = an expander at the foot of the
+scoreboard card holding the six numbered rules (`ol.steps`) and the rules in full (r5: method
+detail behind expanders, so the page leads with the record).
 Open = fan charts with ONS outturns as dots. Rounds = the archive cards. Limits keeps every
 limit. The platform table ("beyond the record") sits below the data store. US: the no-record
 verdict is the title and the first card; "what a record takes" second.

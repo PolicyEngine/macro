@@ -337,33 +337,44 @@ def next_open(forecast: dict, variable: str, last_observed: str) -> tuple[str, d
 
 
 def path_chart(chart_id: str, variable: str, name: str, unit: str,
-               open_rows: list[tuple[str, dict]], generated: str) -> str:
-    """Fan chart of the archived boe-svar path the table beneath it lists.
+               open_rows: list[tuple[str, dict]], generated: str,
+               history: list[dict] | None = None, vintage: str = "",
+               history_note: str = "") -> str:
+    """Fan chart of the archived boe-svar path, joined to the outturns before it.
 
-    Marks only in the SVG, words in HTML (chartkit). The quarter-by-quarter
-    table moves into an expander under it, so the numbers are stated once in
-    view and once as the chart's data table, never twice on screen.
+    ``history`` is the last few published quarters from the committed ONS
+    snapshot (``vintage``), drawn as a solid line that the median picks up
+    from, so the fan reads as a continuation of the data the way BoE and OBR
+    fans do. The two are labelled with their own dates: the snapshot the
+    outturns were read from, and the round the fan was archived in. Marks only
+    in the SVG, words in HTML (chartkit). The quarter-by-quarter table sits in
+    an expander under it, so the numbers are stated once in view and once as
+    the chart's data table, never twice on screen.
     """
     import chartkit  # repo root, on sys.path above
 
+    hist = list(history or [])
     vals = [r[variable] for _, r in open_rows]
+    labels = [h["period"] for h in hist] + [p for p, _ in open_rows]
+    n = len(labels)
     width, height = 760, 300
     left, right, top, bottom = 56, 16, 34, 40
     plot_w, plot_h = width - left - right, height - top - bottom
-    lo = min(0.0, min(v["lo90"] for v in vals))
-    hi = max(v["hi90"] for v in vals)
+    lo = min([0.0] + [v["lo90"] for v in vals] + [h["value"] for h in hist])
+    hi = max([v["hi90"] for v in vals] + [h["value"] for h in hist])
     pad = (hi - lo) * 0.08 or 1.0
     lo, hi = lo - pad, hi + pad
+    k = len(hist)
 
     def x(i: int) -> float:
-        return left + plot_w * i / max(1, len(vals) - 1)
+        return left + plot_w * i / max(1, n - 1)
 
     def y(v: float) -> float:
         return top + plot_h * (1 - (v - lo) / (hi - lo))
 
     def band(a: str, b: str) -> str:
-        up = " ".join(f"{x(i):.1f},{y(v[b]):.1f}" for i, v in enumerate(vals))
-        dn = " ".join(f"{x(i):.1f},{y(v[a]):.1f}" for i, v in reversed(list(enumerate(vals))))
+        up = " ".join(f"{x(k + i):.1f},{y(v[b]):.1f}" for i, v in enumerate(vals))
+        dn = " ".join(f"{x(k + i):.1f},{y(v[a]):.1f}" for i, v in reversed(list(enumerate(vals))))
         return up + " " + dn
 
     grid = []
@@ -376,35 +387,55 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
                         f'x2="{width - right}" y2="{y(g):.1f}"/>')
             grid.append(chartkit.ytick(left, y(g), f"{g:g}".replace("-", "\u2212")))
         g += step
-    last = len(vals) - 1
-    ticks = [chartkit.xtick(x(i), top + plot_h, esc(open_rows[i][0]), i, last)
-             for i in range(len(vals))]
-    median = " ".join(f"{x(i):.1f},{y(v['median']):.1f}" for i, v in enumerate(vals))
+    last = n - 1
+    ticks = [chartkit.xtick(x(i), top + plot_h, esc(labels[i]), i, last, minor=minor)
+             for i, minor in chartkit.tick_plan(n)]
+    # The median starts at the last outturn, so the fan visibly continues the data.
+    joined = ([(x(k - 1), y(hist[-1]["value"]))] if hist else []) + [
+        (x(k + i), y(v["median"])) for i, v in enumerate(vals)]
+    median = " ".join(f"{a:.1f},{b:.1f}" for a, b in joined)
     first, end = open_rows[0], open_rows[-1]
+    marks = []
+    if hist:
+        outturn = " ".join(f"{x(i):.1f},{y(h['value']):.1f}" for i, h in enumerate(hist))
+        edge = x(k - 1)
+        marks = [
+            f'<line class="vc-edge" x1="{edge:.1f}" y1="{top}" x2="{edge:.1f}" y2="{top + plot_h}"/>',
+            f'<polyline class="vc-out-line" points="{outturn}"/>',
+            f'<circle class="vc-out-dot" cx="{edge:.1f}" cy="{y(hist[-1]["value"]):.1f}" r="3"/>',
+        ]
+    hist_desc = (
+        f"ONS outturns from the {esc(vintage)} snapshot run {esc(hist[0]['period'])} to "
+        f"{esc(hist[-1]['period'])} ({hist[-1]['value']:.1f}% at the end); "
+        if hist else ""
+    )
     svg = "\n".join([
         f'<svg class="vchart" data-chart="{chart_id}" viewBox="{left - 4} {top - 4} '
         f'{plot_w + 8} {plot_h + 8}" role="img" aria-labelledby="{chart_id}-t {chart_id}-d">',
-        f'<title id="{chart_id}-t">boe-svar {esc(name)} forecast, median with 68% and 90% bands</title>',
-        f'<desc id="{chart_id}-d">Fan chart of {esc(name)}, {esc(unit)}, from the boe-svar '
+        f'<title id="{chart_id}-t">{esc(name)}: ONS outturns, then the boe-svar forecast, median with 68% and 90% bands</title>',
+        f'<desc id="{chart_id}-d">{hist_desc}fan chart of {esc(name)}, {esc(unit)}, from the boe-svar '
         f"round generated {esc(generated)}: median {vals[0]['median']:.2f}% in {esc(first[0])} "
         f"and {vals[-1]['median']:.2f}% in {esc(end[0])}; the quarter-by-quarter values are "
         "in the table under the chart.</desc>",
         *grid,
         f'<polygon class="vc-band90" points="{band("lo90", "hi90")}"/>',
         f'<polygon class="vc-band68" points="{band("lo68", "hi68")}"/>',
+        *marks,
         f'<polyline class="vc-s1" points="{median}"/>',
         *ticks,
         "</svg>",
     ])
-    return chartkit.figure(
-        svg,
-        legend=[("ln-s1", "boe-svar median"), ("sw-band68", "68% band"),
-                ("sw-band90", "90% band")],
-        unit=f"{name}, {unit}",
-        source=(f"boe-svar round generated {esc(generated)}, "
-                '<a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/'
-                'papers/boe-svar/figures/current_forecast.json">current_forecast.json</a>'),
-    )
+    legend = []
+    if hist:
+        legend.append(("ln-out", f"ONS outturn, snapshot {esc(vintage)}"))
+    legend += [("ln-s1", f"boe-svar median, round {esc(generated)}"),
+               ("sw-band68", "68% band"), ("sw-band90", "90% band")]
+    source = (f"boe-svar round generated {esc(generated)}, "
+              '<a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/'
+              'papers/boe-svar/figures/current_forecast.json">current_forecast.json</a>')
+    if hist:
+        source = f"ONS, {history_note} snapshot {esc(vintage)}; " + source
+    return chartkit.figure(svg, legend=legend, unit=f"{name}, {unit}", source=source)
 
 
 def band_text(values: dict) -> str:
@@ -831,7 +862,7 @@ def growth_model() -> str:
         the {esc(model["display_name"])}. The round generated
         {esc(forecast["generated"])} conditions on data through
         {esc(forecast["data_edge"])}; its path, from {esc(facts["period"])}, is
-        in the chart below — and in the same breath:
+        in the chart below, after the last two years of ONS outturns — and in the same breath:
       </p>
 {limits_list([
         f"Status: {esc(model['status'])}.",
@@ -840,7 +871,7 @@ def growth_model() -> str:
         f"Estimated on {esc(model['estimation_sample'])} but conditioned on {esc(model['data_edge'])} data, so the estimation sample stops well short of the quarters being forecast.",
     ])}
       <figure class="vchart-figure">
-{path_chart("topic-gdp-path", "gdp", "UK real GDP", "% change on a year earlier", open_rows[:5], forecast["generated"])}
+{path_chart("topic-gdp-path", "gdp", "UK real GDP", "% change on a year earlier", open_rows[:5], forecast["generated"], history=yoy(facts["gdp"], 4)[-8:], vintage=facts["gdp"]["vintage"], history_note="ABMI, growth derived from the stored level,")}
       </figure>
       <details class="about">
         <summary>Quarter by quarter</summary>
@@ -947,9 +978,9 @@ def inflation_model() -> str:
     return f"""    <div class="prose">
       <p>
         <a href="/svar">boe-svar</a> — the {esc(model["display_name"])} — forecasts
-        headline CPI. The chart shows the round generated
-        {esc(facts["forecast"]["generated"])} from {esc(facts["period"])}, the
-        first quarter without a published outturn.
+        headline CPI. The chart joins the last two years of ONS outturns to
+        the round generated {esc(facts["forecast"]["generated"])}, from
+        {esc(facts["period"])}, the first quarter without a published outturn.
         {reaches} And in the same breath:
       </p>
 {limits_list([
@@ -959,7 +990,7 @@ def inflation_model() -> str:
         f"Uncertainty is {esc(model['uncertainty'])}; the sample ends {esc(model['estimation_sample'].split('-')[-1])} while the conditioning data run to {esc(model['data_edge'])}.",
     ])}
       <figure class="vchart-figure">
-{path_chart("topic-cpi-path", "cpi", "UK CPI", "% change on a year earlier", open_rows[:5], facts["forecast"]["generated"])}
+{path_chart("topic-cpi-path", "cpi", "UK CPI", "% change on a year earlier", open_rows[:5], facts["forecast"]["generated"], history=facts["cpi"]["observations"][-8:], vintage=facts["cpi"]["vintage"], history_note="D7G7,")}
       </figure>
       <details class="about">
         <summary>Quarter by quarter</summary>
@@ -1544,6 +1575,8 @@ def uk_platform() -> str:
         Each route names the models it runs, in order; the household engine,
         {model_link("pe-microsim")}, sits in four of the six.
       </p>
+      <details class="about route-details">
+        <summary>The routes, with the command for each</summary>
       <div class="table-scroll">
         <table class="route-table">
           <caption>What this section can produce for the UK. Every command is checked against <code>cli.py</code> when this page is generated; a route that stopped running would fail the build rather than sit here.</caption>
@@ -1553,6 +1586,7 @@ def uk_platform() -> str:
           </tbody>
         </table>
       </div>
+      </details>
       <details class="about">
         <summary>About the engine and the macro members</summary>
         <p>
@@ -1636,6 +1670,8 @@ def us_platform() -> str:
         Four routes, each built on {model_link("pe-microsim")}; the household
         rows are the UK commands with <span class="mono">--country us</span>.
       </p>
+      <details class="about route-details">
+        <summary>The routes, with the command for each</summary>
       <div class="table-scroll">
         <table class="route-table">
           <caption>What this section can produce for the US. Every command is checked against <code>cli.py</code> when this page is generated.</caption>
@@ -1645,6 +1681,7 @@ def us_platform() -> str:
           </tbody>
         </table>
       </div>
+      </details>
       <details class="about">
         <summary>About the engine</summary>
         <p>

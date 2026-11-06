@@ -549,7 +549,11 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
                 f'<line class="{cls}" x1="{left}" y1="{y(v):.1f}" '
                 f'x2="{width - right}" y2="{y(v):.1f}"/>'
             )
-            gridlines.append(chartkit.ytick(left, y(v), f"{v:g}".replace("-", "\u2212")))
+            # More than six labels: odd ones are minor, hidden on a phone,
+            # where the plot is ~170 px tall and they crowded the median.
+            odd = (hi - lo) > 6 and round(v) % 2 != 0
+            gridlines.append(chartkit.ytick(left, y(v), f"{v:g}".replace("-", "\u2212"),
+                                            "vc-minor" if odd else ""))
         v += step
     last = len(rows) - 1
     # About seven quarter labels when wide, three when the chart is narrower
@@ -642,40 +646,60 @@ def scored_entries(card: dict) -> list[tuple[dict, dict]]:
 
 
 def render_status(card: dict) -> str:
-    """Visual record totals without turning a two-entry sample into a claim."""
+    """The record in three tiles: band coverage, mean error against no change,
+    and how much there is to go on.
+
+    Every figure is an aggregate of the per-forecast values in scorecard.json
+    (``in_68``/``in_90``, ``abs_error``, ``naive_abs_error``), computed here at
+    render time; scorecard.json itself is untouched. The third tile carries the
+    sample size and links to the limits, so the first two are never read as a
+    skill claim on their own (DESIGN.md §7.5).
+    """
     rounds = card["rounds"]
-    scored = len(scored_entries(card))
+    entries = [e for _, e in scored_entries(card)]
+    scored = len(entries)
     pending = card.get("pending_detail")
-    scored_target = esc((pending or {}).get("period") or "—")
     fetched = store_last_fetched()
     if pending:
         who = ", ".join(f"{VARIABLE_LABELS.get(v, v)}" for v in pending["variables"])
-        next_sub = f"{esc(who)}; store updated {esc(fetched)}"
+        next_sub = f"next {esc(pending['period'])}, {esc(who)}; store updated {esc(fetched)}"
     else:
         next_sub = "every archived period has an outturn"
-    # A stat row (DESIGN.md §4.2, §7.5): this is the home of the record's
-    # counts. NOT the latest error: a headline accuracy figure derived from two
-    # observations is worse than none; the errors sit in the scoreboard, beside
-    # their benchmarks and their caveats.
+    rounds_sub = f"from {rounds} archived round{'' if rounds == 1 else 's'}; {next_sub}"
+    if scored:
+        in68 = sum(1 for e in entries if e["in_68"])
+        in90 = sum(1 for e in entries if e["in_90"])
+        mae = sum(e["abs_error"] for e in entries) / scored
+        naive = [e["naive_abs_error"] for e in entries if e.get("naive_abs_error") is not None]
+        cover_value = f"{in68} of {scored}"
+        cover_sub = f"bands as archived; {in90} of {scored} inside the 90% band"
+        mae_value = f"{mae:.2f}pp"
+        mae_sub = (
+            f"no change: {sum(naive) / len(naive):.2f}pp over the same {scored} forecasts"
+            if len(naive) == scored else "no complete no-change baseline"
+        )
+    else:
+        cover_value, cover_sub = "—", "nothing scored yet"
+        mae_value, mae_sub = "—", "nothing scored yet"
     return "\n".join([
-        '      <div class="stat-row" aria-label="Current forecast record">',
+        '      <div class="stat-row" aria-label="The record so far">',
         '        <div class="stat">',
-        f"          <span class=\"stat-label\">Archived round{'' if rounds == 1 else 's'}</span>",
-        f'          <span class="stat-value">{rounds}</span>',
-        '          <span class="stat-sub">committed to Git before the outturn</span>',
-        '          <span class="stat-foot"><a class="chip" href="#rounds">The archive</a></span>',
+        '          <span class="stat-label">Outturns inside the 68% band</span>',
+        f'          <span class="stat-value">{cover_value}</span>',
+        f'          <span class="stat-sub">{cover_sub}</span>',
+        '          <span class="stat-foot"><a class="chip" href="#record">The record</a></span>',
         "        </div>",
         '        <div class="stat">',
-        f"          <span class=\"stat-label\">Forecast{'' if scored == 1 else 's'} scored</span>",
-        f'          <span class="stat-value">{scored}</span>',
-        '          <span class="stat-sub">one period and variable each</span>',
+        '          <span class="stat-label">Mean absolute error</span>',
+        f'          <span class="stat-value">{mae_value}</span>',
+        f'          <span class="stat-sub">{mae_sub}</span>',
         '          <span class="stat-foot"><a class="chip" href="#benchmarks">Against the benchmarks</a></span>',
         "        </div>",
         '        <div class="stat stat-neutral">',
-        '          <span class="stat-label">Next period to score</span>',
-        f'          <span class="stat-value">{scored_target}</span>',
-        f'          <span class="stat-sub">{next_sub}</span>',
-        '          <span class="stat-foot"><a class="chip" href="#data">The data store</a></span>',
+        f"          <span class=\"stat-label\">Forecast{'' if scored == 1 else 's'} scored</span>",
+        f'          <span class="stat-value">{scored}</span>',
+        f'          <span class="stat-sub">{rounds_sub}</span>',
+        '          <span class="stat-foot"><a class="chip" href="#limits">Too few to show skill</a></span>',
         "        </div>",
         "      </div>",
     ])
@@ -775,7 +799,7 @@ def render_results(card: dict) -> str:
         return "      <!-- nothing scored yet -->"
 
     body = [
-        '      <h3 class="sb-h">The record</h3>',
+        '      <h3 class="sb-h" id="record">The record</h3>',
         '      <div class="table-scroll">',
         '        <table class="scoreboard" data-stack="yes">',
         "          <caption>Every scored forecast. Forecast is the archived median; "

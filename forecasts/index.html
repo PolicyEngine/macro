@@ -79,7 +79,6 @@
   <nav class="page-rail" aria-label="On this page">
     <p class="page-rail-title">On this page</p>
       <a href="#scored" aria-current="location">Scoreboard</a>
-      <a href="#how">How we score</a>
       <a href="#open">Open rounds</a>
       <a href="#rounds">The archive</a>
       <a href="#limits">Limits</a>
@@ -97,30 +96,30 @@
     </div>
     <div id="status" class="fc-vmet">
 <!-- scorecard-status:begin -->
-      <div class="stat-row" aria-label="Current forecast record">
+      <div class="stat-row" aria-label="The record so far">
         <div class="stat">
-          <span class="stat-label">Archived rounds</span>
-          <span class="stat-value">3</span>
-          <span class="stat-sub">committed to Git before the outturn</span>
-          <span class="stat-foot"><a class="chip" href="#rounds">The archive</a></span>
+          <span class="stat-label">Outturns inside the 68% band</span>
+          <span class="stat-value">1 of 2</span>
+          <span class="stat-sub">bands as archived; 1 of 2 inside the 90% band</span>
+          <span class="stat-foot"><a class="chip" href="#record">The record</a></span>
         </div>
         <div class="stat">
-          <span class="stat-label">Forecasts scored</span>
-          <span class="stat-value">2</span>
-          <span class="stat-sub">one period and variable each</span>
+          <span class="stat-label">Mean absolute error</span>
+          <span class="stat-value">0.10pp</span>
+          <span class="stat-sub">no change: 0.20pp over the same 2 forecasts</span>
           <span class="stat-foot"><a class="chip" href="#benchmarks">Against the benchmarks</a></span>
         </div>
         <div class="stat stat-neutral">
-          <span class="stat-label">Next period to score</span>
-          <span class="stat-value">2026Q2</span>
-          <span class="stat-sub">UK real GDP, y/y; store updated 2026-08-26</span>
-          <span class="stat-foot"><a class="chip" href="#data">The data store</a></span>
+          <span class="stat-label">Forecasts scored</span>
+          <span class="stat-value">2</span>
+          <span class="stat-sub">from 3 archived rounds; next 2026Q2, UK real GDP, y/y; store updated 2026-08-26</span>
+          <span class="stat-foot"><a class="chip" href="#limits">Too few to show skill</a></span>
         </div>
       </div>
 <!-- scorecard-status:end -->
     </div>
 <!-- scorecard-results:begin -->
-      <h3 class="sb-h">The record</h3>
+      <h3 class="sb-h" id="record">The record</h3>
       <div class="table-scroll">
         <table class="scoreboard" data-stack="yes">
           <caption>Every scored forecast. Forecast is the archived median; errors are forecast minus outturn, in percentage points.</caption>
@@ -157,17 +156,9 @@
         the evidence.
       </p>
     </details>
-  </section>
-
-
-
-  <section id="how" class="band">
-    <div class="band-head" data-icon="list">
-      <h2>How we score</h2>
-      <p class="section-intro">Six rules, each enforced in code, so nobody can move a forecast after the fact.</p>
-    </div>
-    <div class="prose">
-      <ol class="steps">
+    <details class="about" id="how">
+      <summary>How we score: six rules, each enforced in code</summary>
+      <ol class="steps sb-rules">
         <li><strong>Archive first</strong><span>The round's JSON is committed before the outturn is published.</span></li>
         <li><strong>Never edit</strong><span>CI rejects any edit or deletion; a correction is a new round.</span></li>
         <li><strong>No hindsight</strong><span>A round archived after the outturn's snapshot is never scored on it.</span></li>
@@ -175,8 +166,6 @@
         <li><strong>Error and coverage</strong><span>Signed error of the median; coverage of the bands as archived.</span></li>
         <li><strong>Benchmarks</strong><span>Beside a no-change forecast and any published path for that quarter.</span></li>
       </ol>
-      <details class="about">
-        <summary>The rules in full, and the code behind each</summary>
         <p>
           <strong>Archive and freeze.</strong> A round is one JSON file per model
           under <span class="mono">forecasts/rounds/&lt;date&gt;/</span>, holding the
@@ -222,9 +211,10 @@
           Everything lands in <a class="mono" href="/forecasts/scorecard.json" download>scorecard.json</a>,
           which is generated, never edited by hand.
         </p>
-      </details>
-    </div>
+    </details>
   </section>
+
+
 
   <section id="open" class="band">
     <div class="band-head" data-icon="chart">
@@ -257,13 +247,13 @@
 </svg>
 <div class="vc-labels" aria-hidden="true">
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:94.66%">−2</span>
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:81.75%">−1</span>
+<span class="vc-t vc-tick vc-y vc-minor vc-a-s" style="left:0.57%;top:81.75%">−1</span>
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:68.85%">0</span>
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:55.94%">1</span>
+<span class="vc-t vc-tick vc-y vc-minor vc-a-s" style="left:0.57%;top:55.94%">1</span>
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:43.08%">2</span>
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:30.17%">3</span>
+<span class="vc-t vc-tick vc-y vc-minor vc-a-s" style="left:0.57%;top:30.17%">3</span>
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:17.26%">4</span>
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:4.4%">5</span>
+<span class="vc-t vc-tick vc-y vc-minor vc-a-s" style="left:0.57%;top:4.4%">5</span>
 <span class="vc-t vc-tick vc-x vc-a-s" style="left:0.57%;top:98.29%">2026Q2</span>
 <span class="vc-t vc-tick vc-x vc-minor vc-a-m" style="left:17.05%;top:98.29%">2026Q3</span>
 <span class="vc-t vc-tick vc-x vc-minor vc-a-m" style="left:33.52%;top:98.29%">2026Q4</span>
@@ -309,15 +299,15 @@
 </svg>
 <div class="vc-labels" aria-hidden="true">
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:94.79%">−2</span>
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:85.85%">−1</span>
+<span class="vc-t vc-tick vc-y vc-minor vc-a-s" style="left:0.57%;top:85.85%">−1</span>
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:76.92%">0</span>
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:67.99%">1</span>
+<span class="vc-t vc-tick vc-y vc-minor vc-a-s" style="left:0.57%;top:67.99%">1</span>
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:59.06%">2</span>
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:50.13%">3</span>
+<span class="vc-t vc-tick vc-y vc-minor vc-a-s" style="left:0.57%;top:50.13%">3</span>
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:41.2%">4</span>
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:32.26%">5</span>
+<span class="vc-t vc-tick vc-y vc-minor vc-a-s" style="left:0.57%;top:32.26%">5</span>
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:23.33%">6</span>
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:14.44%">7</span>
+<span class="vc-t vc-tick vc-y vc-minor vc-a-s" style="left:0.57%;top:14.44%">7</span>
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0.57%;top:5.51%">8</span>
 <span class="vc-t vc-tick vc-x vc-a-s" style="left:0.57%;top:98.29%">2026Q2</span>
 <span class="vc-t vc-tick vc-x vc-minor vc-a-m" style="left:17.05%;top:98.29%">2026Q4</span>
@@ -1152,7 +1142,7 @@
         </table>
       </div>
       <p class="table-controls">
-        <button type="button" id="show-all" class="series-show-all" hidden
+        <button type="button" id="show-all" class="btn btn-secondary series-show-all" hidden
                 aria-controls="series-table" aria-expanded="false"></button>
       </p>
 
@@ -1257,6 +1247,8 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
         Each route names the models it runs, in order; the household engine,
         <a href="/pe">pe-microsim</a>, sits in four of the six.
       </p>
+      <details class="about route-details">
+        <summary>The routes, with the command for each</summary>
       <div class="table-scroll">
         <table class="route-table">
           <caption>What this section can produce for the UK. Every command is checked against <code>cli.py</code> when this page is generated; a route that stopped running would fail the build rather than sit here.</caption>
@@ -1271,6 +1263,7 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
           </tbody>
         </table>
       </div>
+      </details>
       <details class="about">
         <summary>About the engine and the macro members</summary>
         <p>

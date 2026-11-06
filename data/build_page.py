@@ -447,7 +447,7 @@ def render_fragment() -> str:
         </table>
       </div>
       <p class="table-controls">
-        <button type="button" id="show-all" class="series-show-all" hidden
+        <button type="button" id="show-all" class="btn btn-secondary series-show-all" hidden
                 aria-controls="series-table" aria-expanded="false"></button>
       </p>
 
