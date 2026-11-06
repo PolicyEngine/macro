@@ -111,7 +111,7 @@ MODELS = {
         ],
         "horizon": "quarterly impulse responses, typically 5 years",
         "access": ["hosted stylized shocks", "CLI", "Python"],
-        "runtime": "~18s cold per variant (steady state + jacobian, cached); instant warm",
+        "runtime": "about 10 seconds cold on a laptop (steady state plus Jacobian, then cached); instant warm",
         "uncertainty": "none quantified; deterministic linear IRFs",
         "status": (
             # us-hank-model README "Validation status": only the solved
@@ -143,7 +143,7 @@ MODELS = {
         "cannot_answer": ["short-run forecast", "fast hosted custom scenario"],
         "horizon": "long-run steady state; package also supports transition paths",
         "access": ["local CLI steady state", "Python package"],
-        "runtime": "17+ minutes per steady-state solve; transition paths can take hours",
+        "runtime": "a steady-state solve takes many minutes and transition paths far longer (not timed)",
         "uncertainty": "sensitivity analysis not yet comprehensive",
         "status": "research prototype; calibrated counterfactual",
         "data_vintage": "OG-UK packaged calibration inputs",
