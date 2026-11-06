@@ -445,7 +445,7 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
     if hist:
         legend.append(("ln-out", f"ONS outturn, snapshot {esc(vintage)}"))
     legend += [("ln-s1", f"{esc(model)} median, round {esc(generated)}"),
-               ("sw-band68", "68% band"), ("sw-band90", "90% band")]
+               ("sw-band68", "68% band (raw)"), ("sw-band90", "90% band (raw)")]
     source = source or (f"BoE SVAR round generated {esc(generated)}, "
                         '<a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/'
                         'papers/boe-svar/figures/current_forecast.json">current_forecast.json</a>')

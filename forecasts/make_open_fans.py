@@ -141,7 +141,7 @@ def render() -> str:
                 "</svg>",
             ]), legend=[
                 ("ln-s1", "BoE SVAR unemployment satellite median"),
-                ("sw-band68", "68% band"),
+                ("sw-band68", "68% band (raw)"),
                 ("sw-band90", "90% band (raw)"),
                 *([("sw-dot-out", "ONS outturn")] if dots else []),
             ], unit="UK unemployment rate, %", y_gutter=True,

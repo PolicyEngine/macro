@@ -602,8 +602,8 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
     )
     block = chartkit.figure(svg, legend=[
         ("ln-s1", "BoE SVAR median"),
-        ("sw-band68", "68% band"),
-        ("sw-band90", "90% band (both empirically re-calibrated)"),
+        ("sw-band68", "68% band (re-calibrated)"),
+        ("sw-band90", "90% band (re-calibrated)"),
         ("ln-s2", "OBR March 2026 EFO"),
         *([("sw-dot-out", "ONS outturn")] if dots else []),
     ], unit=spec["unit"], y_gutter=True, source=(
