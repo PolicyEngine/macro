@@ -15,6 +15,8 @@ from pathlib import Path
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
+from policyengine_macro.capabilities import MODELS
+
 # Fallback checkout of boe-var-model for svar_summary when the boe_var
 # package is not installed; unset means no fallback.
 BOE_VAR_REPO_ENV = "POLICYENGINE_MACRO_BOE_VAR_REPO"
@@ -23,6 +25,18 @@ BOE_VAR_REPO_ENV = "POLICYENGINE_MACRO_BOE_VAR_REPO"
 # name against the loaded dataset's own columns, so an upstream reorder can
 # never silently mislabel a series.
 _COL_CPI, _COL_GDP = "cpisa", "uk_gdp"
+
+
+MACRO_SOURCE_URL = "https://github.com/PolicyEngine/macro"
+
+# Model ids recorded by the shock-incidence overlays. They are not registry
+# members: each composes a registry member with the microsim, in this repo.
+INCIDENCE_OVERLAY_MODEL_IDS = {
+    "frbus+microsim": "frb-us",
+    "hank+microsim": "us-hank",
+    "svar+microsim": "boe-svar",
+    "define+microsim": "define-uk",
+}
 
 
 def _package_version(distribution: str) -> str:
@@ -43,15 +57,9 @@ def _provenance(
 ) -> dict:
     """Common model/run provenance returned by every public adapter."""
     package_version = _package_version(distribution)
-    source_urls = {
-        "og-uk": "https://github.com/PolicyEngine/og-uk",
-        "pe-microsim": "https://github.com/PolicyEngine/policyengine",
-        "obr-macro": "https://github.com/PolicyEngine/obr-macroeconomic-model",
-        "boe-svar": "https://github.com/PolicyEngine/boe-var-model",
-        "frb-us": "https://github.com/PolicyEngine/us-frb-model",
-        "og+microsim": "https://github.com/PolicyEngine/macro",
-        "us-hank": "https://github.com/PolicyEngine/us-hank-model",
-    }
+    # The registry is the one home for each member's repo URL; the composite
+    # incidence overlays (frbus+microsim, ...) are code in this repo.
+    source_url = MODELS.get(model_id, {}).get("source_url", MACRO_SOURCE_URL)
     revision_env = {
         "obr-macro": "POLICYENGINE_MACRO_SOURCE_REVISION_OBR",
         "boe-svar": "POLICYENGINE_MACRO_SOURCE_REVISION_BOE",
@@ -76,7 +84,7 @@ def _provenance(
         "package_version": package_version,
         "model_version": package_version,
         "adapter_version": _package_version("policyengine-macro"),
-        "source_url": source_urls.get(model_id, "https://github.com/PolicyEngine/macro"),
+        "source_url": source_url,
         "source_revision": source_revision,
         "data_vintage": data_vintage,
         "baseline_vintage": baseline,
@@ -299,7 +307,7 @@ def obr_shock(
     result = {
         "name": name,
         "provenance": _provenance(
-            model_id="obr-emulator",
+            model_id="obr-macro",
             distribution="obr-macro-model",
             data_vintage="March 2026 EFO",
             baseline="March 2026 EFO anchored baseline",
@@ -4350,7 +4358,7 @@ def svar_summary() -> dict:
         "source": str(rdir),
         "provenance": _provenance(
             model_id="boe-svar",
-            distribution="boe-var-model",
+            distribution="boe_var",
             data_vintage="estimation through 2025Q1; conditioning data through 2026Q1",
             baseline="committed replication and forecast artefacts",
         ),
@@ -4515,6 +4523,14 @@ def define_scenario(
         raise
     result["model"] = "define-uk"
     result["available"] = True
+    # Every other member records provenance; DEFINE-UK returned none, so a
+    # served scenario carried no package version or source URL at all.
+    result.setdefault("provenance", _provenance(
+        model_id="define-uk",
+        distribution="define-uk-model",
+        data_vintage="cached upstream DEFINE-UK scenario solves",
+        baseline="DEFINE-UK model baseline",
+    ))
     return result
 
 

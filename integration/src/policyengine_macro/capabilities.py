@@ -12,6 +12,8 @@ from copy import deepcopy
 MODELS = {
     "pe-microsim": {
         "display_name": "PolicyEngine tax-benefit microsimulation",
+        "source_url": "https://github.com/PolicyEngine/policyengine",
+        "package": "policyengine",
         "model_class": "microsimulation",
         "geography": ["uk", "us"],
         "question_types": ["household", "population", "policy_reform"],
@@ -28,6 +30,8 @@ MODELS = {
     "og+microsim": {
         "site_id": "psl-og+microsim",
         "display_name": "OG-UK overlay dynamic scoring (og+microsim)",
+        "source_url": "https://github.com/PolicyEngine/macro",
+        "package": "policyengine-macro",
         "model_class": "olg-ge overlay on microsimulation",
         "geography": ["uk"],
         "question_types": ["dynamic_scoring", "policy_reform"],
@@ -51,6 +55,8 @@ MODELS = {
     },
     "obr-macro": {
         "display_name": "OBR macroeconometric emulator",
+        "source_url": "https://github.com/PolicyEngine/obr-macroeconomic-model",
+        "package": "obr-macro-model",
         "model_class": "macroeconometric",
         "geography": ["uk"],
         "question_types": ["economic_shock", "translated_policy_scenario"],
@@ -66,6 +72,8 @@ MODELS = {
     },
     "boe-svar": {
         "display_name": "Bank of England structural VAR replication",
+        "source_url": "https://github.com/PolicyEngine/boe-var-model",
+        "package": "boe_var",
         "model_class": "structural VAR",
         "geography": ["uk"],
         "question_types": ["forecast", "economic_diagnosis"],
@@ -83,6 +91,8 @@ MODELS = {
     },
     "frb-us": {
         "display_name": "Federal Reserve FRB-US implementation",
+        "source_url": "https://github.com/PolicyEngine/us-frb-model",
+        "package": "frbus",
         "model_class": "macroeconometric",
         "geography": ["us"],
         "question_types": ["economic_shock"],
@@ -98,6 +108,8 @@ MODELS = {
     },
     "us-hank": {
         "display_name": "US two-asset HANK (Auclert-Bardóczy-Rognlie-Straub 2021)",
+        "source_url": "https://github.com/PolicyEngine/us-hank-model",
+        "package": "us-hank-model",
         "model_class": "heterogeneous-agent New Keynesian (sequence-space)",
         "geography": ["us"],
         "question_types": ["economic_shock"],
@@ -135,6 +147,8 @@ MODELS = {
         # must use site_id, or the site ends up calling one model four things.
         "site_id": "psl-og",
         "display_name": "OG-UK overlapping generations model",
+        "source_url": "https://github.com/PSLmodels/OG-UK",
+        "package": "oguk",
         "model_class": "overlapping-generations general equilibrium",
         "geography": ["uk"],
         "question_types": ["policy_reform", "structural_change"],
@@ -150,6 +164,8 @@ MODELS = {
     },
     "define-uk": {
         "display_name": "DEFINE-UK ecological stock-flow consistent model",
+        "source_url": "https://github.com/PolicyEngine/define-uk-model",
+        "package": "define-uk-model",
         "model_class": "ecological stock-flow consistent (E-SFC)",
         "geography": ["uk"],
         "question_types": ["climate_policy_scenario"],
@@ -620,7 +636,7 @@ for _model_id, _model in MODELS.items():
 REQUIRED_CAPABILITY_FIELDS = {
     "display_name", "model_class", "geography", "question_types", "inputs",
     "outputs", "cannot_answer", "horizon", "access", "runtime", "uncertainty",
-    "status", "data_vintage", "quality",
+    "status", "data_vintage", "quality", "source_url", "package",
 }
 
 
