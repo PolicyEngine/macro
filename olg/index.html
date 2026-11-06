@@ -152,7 +152,7 @@
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
         <p class="mo-lead">A worked example: 1pp on the basic rate.</p>
         <div class="table-scroll mo-tablecard"><table>
-                <caption>Reform vs baseline in 2030, the last committed transition year. Values from olg/figures/tpi_data.json; the table is regenerated (and CI-checked) by olg/figures/make_showcase.py.</caption>
+                <caption>Reform vs baseline in 2030, the last committed transition year. Values from olg/figures/tpi_data.json, the 28 April 2026 run, which predates OG-UK's July 2026 labour-tax-rate fix (<a href="https://github.com/PolicyEngine/og-model-dashboard/issues/2">og-model-dashboard #2</a>); the table is regenerated (and CI-checked) by olg/figures/make_showcase.py.</caption>
                 <thead><tr><th scope="col">aggregate</th><th scope="col">baseline 2030</th><th scope="col">reform 2030</th><th scope="col">change</th></tr></thead>
                 <tbody>
 <!-- olg-stats:begin -->
@@ -160,7 +160,7 @@
 <tr><th scope="row">Tax revenue (% of GDP)</th><td>32.06%</td><td>32.35%</td><td>+0.29pp</td></tr>
 <tr><th scope="row">Consumption (% of GDP)</th><td>61.33%</td><td>61.10%</td><td>−0.23pp</td></tr>
 <tr><th scope="row">Investment (% of GDP)</th><td>18.50%</td><td>18.28%</td><td>−0.23pp</td></tr>
-<tr><th scope="row">Government consumption (% of GDP)</th><td>44.28%</td><td>44.67%</td><td>+0.38pp</td></tr>
+<tr><th scope="row">Total public spending (% of GDP)</th><td>44.28%</td><td>44.67%</td><td>+0.38pp</td></tr>
 <tr><th scope="row">Debt (% of GDP)</th><td>94.50%</td><td>94.42%</td><td>−0.08pp</td></tr>
 <!-- olg-stats:end -->
                 </tbody>
@@ -170,7 +170,7 @@
                 <label for="olg-macro-select">Show<select id="olg-macro-select">
                   <option value="consumption" selected>Consumption</option>
                   <option value="investment">Investment</option>
-                  <option value="government">Government</option>
+                  <option value="government">Total public spending</option>
                   <option value="tax_revenue">Tax revenue</option>
                   <option value="debt">Debt</option>
                   <option value="gdp">GDP</option>
@@ -368,8 +368,8 @@
 
     var s = ['<svg class="vchart" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H +
              '" role="img" aria-label="' +
-             esc(panel.title) + ', baseline (solid) vs +1pp basic-rate reform (dashed)">'];
-    s.push('<text class="vc-title" x="' + ML + '" y="14">' + esc(panel.title) + '</text>');
+             esc(shownTitle(panel)) + ', baseline (solid) vs +1pp basic-rate reform (dashed)">'];
+    s.push('<text class="vc-title" x="' + ML + '" y="14">' + esc(shownTitle(panel)) + '</text>');
     var v, x, y;
     for (v = y0; v <= ymax + 1e-9; v += ystep) {
       y = Y(v);
@@ -414,6 +414,13 @@
       });
     }, 150);
   }, { passive: true });
+
+  // The source file titles this series "Gov. Consumption", but its baseline
+  // (44% of GDP in 2024, 52% in 2020) is total public spending, not
+  // government consumption (about 20%). Relabel for display only; the
+  // tagging below still keys on the source title.
+  var TITLE_FIX = { 'Gov. Consumption (% GDP)': 'Total public spending (% GDP)' };
+  function shownTitle(p) { return TITLE_FIX[p.title] || p.title; }
 
   // Panel tagging, ported from the dashboard's ExampleTab.jsx.
   var MACRO_MAP = { 'consumption': 'consumption', 'investment': 'investment',
