@@ -8,12 +8,6 @@ The version below tracks the `policyengine-macro` package in `integration/`.
 `CITATION.cff` and `integration/pyproject.toml` must agree with the topmost
 heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
-## [Unreleased]
-
-### Changed
-
-- **BoE SVAR replication figures** are labelled with their run vintage (boe-var-model `845e2a4`) and their `results/` links are pinned to it. No number changes.
-
 ## [0.2.0] — 2026-08-11
 
 Access and verification release. Nothing about any model's behaviour or any
