@@ -130,7 +130,8 @@ def test_every_fact_moves_to_details_not_out():
     import html as _html
     text = _html.unescape(PAGE)
     for q in DATA["questions"]:
-        section = _html.unescape(_section(q["id"]))
+        # Glossary first-use links wrap a word in an <a>; the fact is unchanged.
+        section = _html.unescape(re.sub(r'<a class="gloss-link" href="[^"]*">(.*?)</a>', r"\1", _section(q["id"])))
         for cell in q["cells"]:
             if cell["status"] != "answered":
                 continue
