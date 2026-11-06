@@ -13,7 +13,6 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 ### Changed
 
 - **Site redesign.** Every page uses the Autumn Budget 2026 layout (header band, title band, sub-tabs, cards with expanders), with `DESIGN.md` as the spec. URLs, numbers and data are unchanged.
-- **Hosted OBR pin** `1ed742c` → `e4d7faa` (obr-macroeconomic-model main). After a redeploy, hosted Bank Rate +100bp ΔGDP q4/q8/q12 moves −446/−525/−490 → −431/−482/−416 £m, matching the site, and the default `score_reform` cumulative ΔGDP for a basic-rate rise moves +£5.6bn → −£18.3bn.
 
 ### Fixed
 
