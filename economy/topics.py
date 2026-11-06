@@ -3262,7 +3262,10 @@ GLOSSARY_LINKS = {
         ("impulse responses", "irf"),
         ("model-consistent", "expectations"),
     ),
-    ("us", "reform"): (("impulse responses", "irf"), ("endogenous", "exogenous")),
+    # "impulse responses" on the US reform page sits in the HANK card next to
+    # the runtime line #206 regenerates; add ("impulse responses", "irf") here
+    # once #206 is in, so the two branches merge without a conflict.
+    ("us", "reform"): (("endogenous", "exogenous"),),
     "us-platform": (("impulse responses", "irf"), ("endogenous", "exogenous")),
     "uk-routes": (("posterior", "prior-posterior"),),
 }
