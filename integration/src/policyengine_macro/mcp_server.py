@@ -197,7 +197,7 @@ def score_reform(
 def obr_shock(
     var: str,
     shock: float,
-    periods: Annotated[int, Field(ge=1, le=40)] = 12,
+    periods: Annotated[int, Field(ge=1, le=25)] = 12,
     name: str | None = None,
     investment_closure: bool | None = None,
 ) -> dict:
@@ -214,8 +214,9 @@ def obr_shock(
         shock: Shock size, applied each quarter. UNITS DEPEND ON THE VARIABLE:
             CGG and CGIPS are in £ million per quarter (e.g. 1250 = £5bn/year);
             TCPRO is a rate change in decimal (e.g. -0.05 = 5 percentage point cut).
-        periods: Number of quarters the shock is applied (1-40; default 12 =
-            3 years).
+        periods: Number of quarters the shock is applied from 2025Q1 (1-25;
+            default 12 = 3 years). The solve runs to 2027Q4 or to the last
+            shocked quarter if later; the databank ends 2031Q1.
         name: Optional label for the reform.
         investment_closure: Omit to use the safe per-variable default (True
             for TCPRO, False otherwise). It activates the cost-of-capital
@@ -355,8 +356,8 @@ def hank_shock(
     Rognlie & Straub, Econometrica 2021 — two-asset heterogeneous-agent New
     Keynesian, solved in the sequence space) and return the impulse responses.
 
-    HONEST FRAMING: a validated replication scoring STYLIZED shocks — a
-    VAR-free sequence-space HANK. It is NOT a forecaster and does NOT score
+    HONEST FRAMING: a replication (steady state validated, IRF magnitudes
+    not) scoring STYLIZED shocks. It is NOT a forecaster and does NOT score
     detailed tax reforms (score_reform rejects model='hank'); distributional
     outputs are first-order approximations. Responses are linear deviations
     around a calibrated steady state and scale exactly with the shock size.
@@ -403,10 +404,10 @@ def hank_summary() -> dict:
     """Metadata and validation provenance for the US HANK member (instant,
     no solve).
 
-    States what the model is (a validated replication of Auclert, Bardóczy,
+    States what the model is (a replication of Auclert, Bardóczy,
     Rognlie & Straub, Econometrica 2021, at the paper's production grids),
     the available shock kinds and their units, the two variants, and the
-    scope limits: stylized shocks only, VAR-free sequence-space HANK, not a
+    scope limits: stylized shocks only, IRF magnitudes not validated, not a
     forecaster, no PolicyEngine-reform bridge (hank_shock is the supported
     entry point), distributional outputs are first-order approximations, and
     there is no transfer or tax-rate instrument because the labor tax is

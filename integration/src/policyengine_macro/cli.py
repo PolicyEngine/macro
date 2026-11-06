@@ -224,7 +224,7 @@ def compare(country, reform, models, year, as_json):
 @click.option("--var", required=True, help="Policy variable to shock (see `pe-macro variables`).")
 @click.option("--shock", required=True, type=float,
               help="Shock size; units depend on the variable (£m/quarter for CGG, decimal for TCPRO).")
-@click.option("--periods", default=12, show_default=True, help="Quarters the shock is applied.")
+@click.option("--periods", default=12, show_default=True, help="Quarters the shock is applied from 2025Q1 (1-25; the databank ends 2031Q1).")
 @click.option("--name", default=None, help="Label for the reform.")
 @click.option("--investment-closure/--no-investment-closure", default=None,
               help="Cost-of-capital investment channel; omit for the safe "

@@ -1,80 +1,145 @@
+/* =====================================================================
+   PolicyEngine Macro — style.css
+   Binding spec: DESIGN.md at the repo root. Read §2 (tokens) before adding
+   a colour, a size or a shadow here; read §4 before adding a component.
+
+   Layout of this file
+     0. Tokens            (:root — the only place a hex value may appear,
+                           apart from the dark-theme block and legacy notes)
+     1. Base              (reset, focus, body, type)
+     2. Shell             (header band + view tabs, pathway, title band,
+                           section sub-tabs, footer)
+     3. Components        (card, stat tile, chip, callout, expander, rail,
+                           entry cards, numbered steps, StepPanel)
+     4. Page sections     (legacy page-specific rules, restyled through the
+                           tokens; prune them as phase 2/3 migrate pages)
+     5. Design system v2  (appended at the end so it wins the cascade over
+                           legacy page rules without !important)
+   ===================================================================== */
 :root {
   color-scheme: light dark;
 
-  /* populace.dev consumes the PolicyEngine design system: @policyengine/ui-kit
-     tokens.css is loaded via CDN in the page <head> (light theme — PE default,
-     no .dark class). The site's original local var names are aliased onto the
-     PE semantic tokens here, so the existing component CSS keeps working. */
-  --ink: var(--background); /* page background */
-  --ink-2: var(--muted); /* raised surface (cards) */
-  --paper: var(--foreground); /* primary text */
-  --paper-dim: var(--muted-foreground);
-  /* --text-tertiary (#64748B) measures 4.47:1 on the translucent .panel-card
-     used by /connect/ — just under AA. Darkened one step so faint text clears
-     4.5:1 on every surface the site paints. */
-  --paper-faint: #5B6878;
-  /* Accent. Named --brand* because these are teal, not amber: the old
-     --amber/--amber-soft names were left over from a previous palette and
-     invited reaching for the wrong colour. --chart-1 (#319795) was 3.51:1 on
-     white and failed AA as the site's main link colour, so the emphasis accent
-     now resolves to --primary (#2C7A7B, 5.03:1). */
+  /* ---------- 0.1 brand + neutral scales (from vendor/ui-kit-tokens.css) ----
+     The vendored ui-kit exposes its teal and gray scales only in the Tailwind
+     @theme layer, which a no-build page cannot read, so the values the site
+     uses are restated here once, under site names. */
+  --teal-50: #E6FFFA;
+  --teal-100: #B2F5EA;
+  --teal-200: #81E6D9;
+  --teal-300: #4FD1C5;   /* fills/strokes only: fails AA as text on white */
+  --teal-500: #319795;   /* = --chart-1; fills/strokes only (3.5:1) */
+  --teal-600: #2C7A7B;   /* = --primary: links, active tab, KPI value (5.0:1) */
+  --teal-700: #285E61;   /* hover, emphasis text (7.3:1) */
+  --teal-800: #234E52;   /* header band */
+  --teal-900: #1D4044;   /* header band, deepest */
+  /* The UK Autumn Budget 2026 dashboard's greys (its globals.css --pe-gray-*) */
+  --gray-50: #F9FAFB;    /* page canvas */
+  --gray-100: #F3F4F6;   /* sunken surface, track, table stripe */
+  --gray-200: #E5E7EB;   /* hairline, card border, chart grid */
+  --gray-300: #D1D5DB;   /* stronger border, axis */
+  --gray-400: #9CA3AF;   /* strokes and ticks only — never text */
+  --gray-500: #6B7280;   /* floor for small text: 4.8:1 on white; labels, ticks */
+  --gray-600: #4B5563;   /* secondary text */
+  --gray-700: #374151;   /* body text, chart zero line */
+  --gray-800: #1F2937;   /* section titles */
+  --gray-900: #111827;   /* headings */
+  --warn-bg: #FFF7ED;
+  --warn-line: #FDBA74;
+  --warn-ink: #9A3412;   /* 6.9:1 on --warn-bg */
+
+  /* ---------- 0.2 semantic roles (use these, not the scales) ---------- */
+  --canvas: var(--gray-50);            /* page background behind cards */
+  --surface-card: var(--card);         /* white card */
+  --surface-sunken: var(--gray-100);
+  --surface-tint: color-mix(in srgb, var(--primary) 7%, var(--card)); /* info callout, active tab fill */
+  --hairline: var(--gray-200);
+  --hairline-strong: var(--gray-300);
+  --text-strong: var(--gray-900);
+  --text-body: var(--gray-700);
+  --text-muted: var(--gray-600);
+  --text-faint: var(--gray-500);
+  --link: var(--primary);
+  --link-hover: var(--teal-700);
+  --band-bg: var(--teal-800);
+  --band-bg-2: var(--teal-700);
+  --band-text: #FFFFFF;                /* 9.9:1 on --teal-800 */
+  --band-text-dim: var(--teal-100);    /* 7.6:1 on --teal-800 */
+  --band-accent: var(--teal-200);      /* active-tab underline on the band */
+  --focus-ring: var(--teal-700);
+
+  /* ---------- 0.3 chart series roles (DESIGN.md §6) ----------
+     Colour identifies a series, never a judgement. Two series plus neutrals
+     per chart; a third only with a direct label. */
+  --series-ours: var(--primary);       /* our model / forecast (vc-s1) */
+  --series-official: #334155;          /* official or published counterpart (vc-s2) */
+  --series-uk: var(--primary);         /* UK when UK and US share a chart */
+  --series-us: #026AA2;                /* US (ui-kit blue-700, 6.0:1) */
+  --series-median: var(--teal-700);    /* fan median line */
+  --series-outturn: var(--gray-900);   /* realised data: dots/marks */
+  --band-50: color-mix(in srgb, var(--primary) 38%, transparent);
+  --band-68: color-mix(in srgb, var(--primary) 26%, transparent);
+  --band-90: color-mix(in srgb, var(--primary) 13%, transparent);
+  --chart-grid: var(--gray-200);
+  --chart-axis: var(--gray-300);
+  --chart-zero: var(--gray-600);
+  --chart-tick: var(--gray-500);
+  /* model families, for chips and badges only */
+  --family-micro: var(--primary);      /* pe-microsim, the core */
+  --family-structural: #026AA2;        /* obr-macro, frb-us */
+  --family-empirical: #475569;         /* boe-svar */
+  --family-ge: #285E61;                /* us-hank, psl-og, define-uk */
+
+  /* ---------- 0.4 legacy aliases ----------
+     The page CSS below and ~100 page-local <style> blocks still use these
+     names. They now resolve onto the roles above, so restyling the roles
+     restyles the legacy rules. New CSS uses the role names. */
+  --ink: var(--background);            /* white: text on filled controls, inner fills */
+  --ink-2: var(--surface-sunken);      /* sunken surface (code blocks) */
+  --paper: var(--text-strong);
+  --paper-dim: var(--text-muted);
+  --paper-faint: var(--text-faint);
   --brand: var(--primary);
   --brand-strong: var(--primary);
-  /* deeper teal for hover/pressed states, so hover still reads as a change now
-     that --brand and --brand-strong resolve to the same AA-passing value.
-     #285E61 = teal-700, 7.33:1 on white. */
-  --brand-deep: #285E61;
-  /* Chart series 2. --brand-strong collapsed onto --primary for AA, which
-     left .vc-s1 and .vc-s2 the same colour, distinguished only by a dash
-     pattern -- while .vc-lab/.vc-lab2 styled the legend as two colours.
-     A dark slate keeps the two-series-plus-neutrals restraint and reads
-     apart from teal in greyscale. 10.4:1 on white. */
-  --chart-s2: #334155;
-  /* AA-safe warning text. --text-warning (#c2410c) is only 4.10:1 against the
-     16%-tinted chip .tag-local paints behind it; #9A3412 is 5.63:1 there. */
-  --brand-warning: #9A3412;
-  /* Back-compat aliases: page-level inline <style> blocks still reference
-     --amber/--amber-soft. Keep them pointed at the accent tokens. */
+  --brand-deep: var(--teal-700);
+  --chart-s2: var(--series-official);
+  --brand-warning: var(--warn-ink);
   --amber: var(--brand);
   --amber-soft: var(--brand-strong);
-  --line: var(--border);
-  --line-soft: var(--border-light);
-  /* aliases so the content-page component CSS uses design-system colors
-     instead of hard-coded light-mode fallbacks (theme-safe). */
-  --text: var(--foreground);
-  --surface: color-mix(in srgb, var(--background) 72%, transparent);
-  /* PE ships its font families in the Tailwind @theme layer (not :root), which a
-     no-build static page can't read; the families below mirror ui-kit tokens.css
-     and resolve to --font-sans/--font-mono if a build ever exposes them. */
+  --line: var(--hairline-strong);
+  --line-soft: var(--hairline);
+  --text: var(--text-strong);
+  --surface: var(--surface-card);
+  --brand-wash: color-mix(in srgb, var(--primary) 8%, transparent);
+
+  /* ---------- 0.5 type ----------
+     Inter for everything, as on the Autumn Budget dashboard. --code is the
+     one monospace, for real code only (code, pre, kbd, samp, .codeblock).
+     --mono and --serif are legacy names kept so the ~100 page-local
+     <style> blocks and SVG labels that still name them read Inter too. */
   --display: var(--font-sans, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   --body: var(--font-sans, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
-  --mono: var(--font-mono, "JetBrains Mono", "Fira Code", Consolas, monospace);
-  --max: 1320px;
+  --code: var(--font-mono, "JetBrains Mono", "Fira Code", Consolas, monospace);
+  --mono: var(--body);
+  --serif: var(--body);
+  --max: 1120px;
 
-  /* ---------- type scale (single source of truth for font sizes) ---------- */
-  /* Steps are ~1.3x apart so h1 > h2 > h3 > body reads as four distinct
-     levels. The old scale topped out at 3.9rem/3.2rem: h1 and h2 were close
-     enough to compete, and both were loud enough to fight the body copy. */
-  --fs-hero: clamp(1.9rem, 3.8vw, 2.7rem);     /* homepage h1 */
-  --fs-hero-sub: clamp(1.9rem, 4vw, 2.7rem);   /* interior-page h1 */
-  --fs-h2: clamp(1.5rem, 2.6vw, 1.95rem);      /* band headings */
-  --fs-h3: 1.2rem;                             /* card h3 */
-  --fs-h3-sm: 1.1rem;                          /* compact card h3 */
-  --fs-h4: 16px;                               /* step / minor headings */
-  --fs-lede: clamp(1.05rem, 1.8vw, 1.25rem);   /* hero ledes */
-  --fs-stat: 2.4rem;                           /* big metric numerals */
-  --fs-body: 17px;                             /* prose + card body text */
-  --fs-body-sm: 14px;                          /* secondary text, notes, tables */
-  --fs-small: 13px;                            /* captions, nav, fine print */
-  --fs-mono: 13px;                             /* code blocks */
-  --fs-label: 12px;                            /* uppercase mono micro-labels */
-  --fs-code-inline: 0.9em;                     /* inline code, relative to its text */
-  --ls-label: 0.08em;                          /* letter-spacing for micro-labels */
+  --fs-hero: clamp(1.75rem, 3vw, 2.25rem);     /* homepage h1 */
+  --fs-hero-sub: 1.5rem;                       /* title-bar h1 (AB --fs-xl) */
+  --fs-h2: 1.25rem;                            /* section title (AB --fs-section) */
+  --fs-h3: 1.125rem;                           /* card title (AB --fs-card-title) */
+  --fs-h3-sm: 1.05rem;
+  --fs-h4: 15px;
+  --fs-lede: 1.0625rem;                        /* intro sentence */
+  --fs-stat: 2rem;                             /* KPI value */
+  --fs-body: 15px;                             /* AB --fs-body */
+  --fs-body-sm: 14px;
+  --fs-small: 13px;                            /* labels, chips, tabs on phone */
+  --fs-mono: 13px;
+  --fs-label: 12px;                            /* minimum size: eyebrows, ticks */
+  --fs-code-inline: 0.9em;
+  --ls-label: 0;                               /* no tracked labels */
 
-  /* ---------- spacing scale (single source of truth for rhythm) ----------
-     One geometric-ish ramp. Component margins/padding pick a step from here
-     instead of inventing a number, so seams between sections are consistent
-     and the eye can find them. */
+  /* ---------- 0.6 spacing, radius, elevation ---------- */
   --s-1: 4px;
   --s-2: 8px;
   --s-3: 12px;
@@ -84,21 +149,23 @@
   --s-7: 48px;
   --s-8: 64px;
   --s-9: 96px;
-  /* band gutter + vertical band rhythm */
-  --gutter: clamp(20px, 5vw, 56px);
-  --band-y: clamp(48px, 6vw, 80px);
+  --gutter: clamp(16px, 3vw, 40px);            /* canvas gutter outside cards */
+  --card-pad: clamp(16px, 2.2vw, 24px);        /* padding inside a card (AB 24px) */
+  --band-y: var(--card-pad);
+  --gap-cards: 20px;                           /* gap between cards (AB) */
+  --radius: 10px;                              /* callouts, inner panels, code */
+  --radius-card: 12px;                         /* cards (AB --card-radius) */
+  --radius-sm: 6px;                            /* bars, tracks, small controls */
+  --shadow-card: 0 1px 2px rgba(17, 24, 39, .04);   /* AB: a card's edge, no heavy shadow */
+  --shadow-raised: 0 6px 18px rgba(17, 24, 39, .08); /* AB: a card lifted on hover */
+  --band-gradient: linear-gradient(to right, var(--teal-800), var(--teal-600)); /* AB title bar */
+  --c-tick: var(--gray-500);
+  --c-zero: var(--gray-700);
 
-  /* ---------- one border radius, one border colour ----------
-     Cards, code blocks, charts and panels used 2px/3px/6px/8px in different
-     places for the same job. One value now. */
-  --radius: 8px;
-  /* Referenced by the model navs, .contact-email, .comparison-table row hover
-     and .verification-tag, but never defined --
-     so those backgrounds resolved to nothing and the PUBLISHED ANCHOR chips
-     rendered as bare text while STATUTE/CALIBRATED rendered as pills. */
-  --brand-wash: color-mix(in srgb, var(--primary) 8%, transparent);
-  --radius-card: var(--radius);
-  --radius-sm: 4px;
+  /* ---------- 0.7 shell geometry (sticky offsets read these) ---------- */
+  --nav-h: 58px;          /* header band height (AB/ui-kit 58px) = top of the sub-tab row */
+  --subnav-h: 48px;       /* sub-tab row height */
+  --sticky-top: calc(var(--nav-h) + var(--subnav-h) + 16px); /* StepPanel, rail */
 }
 
 .skip-link {
@@ -155,6 +222,15 @@
   outline-offset: -5px;
   box-shadow: 0 0 0 3px var(--foreground);
 }
+/* On the dark header band, title band and footer the roles swap too: a
+   white outline with the band colour as the inner gap. */
+.nav :focus-visible,
+.crumbs :focus-visible,
+.doc .hero.model-hero :focus-visible,
+.foot :focus-visible {
+  outline-color: var(--band-text);
+  box-shadow: 0 0 0 6px var(--band-bg);
+}
 /* Never let a clipping ancestor eat the ring. */
 :focus-visible { position: relative; z-index: 1; }
 
@@ -170,11 +246,11 @@
    instead of tucked underneath it. */
 :target,
 section[id],
-[id]:not(body) { scroll-margin-top: clamp(88px, 12vh, 112px); }
+[id]:not(body) { scroll-margin-top: calc(var(--nav-h) + var(--subnav-h) + 16px); }
 
 body {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--canvas);
+  color: var(--text-body);
   font-family: var(--body);
   font-size: var(--fs-body);
   line-height: 1.6;
@@ -205,22 +281,10 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
    never animated, no second layer. It is a texture you notice once and then
    stop seeing, which is the whole difference from the dot field. The character
    is spent in the hero fan chart below; everything else stays quiet. */
-.grain {
-  display: block;
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    repeating-linear-gradient(to right,
-      color-mix(in srgb, var(--brand) 4.5%, transparent) 0 1px, transparent 1px 64px),
-    repeating-linear-gradient(to bottom,
-      color-mix(in srgb, var(--brand) 4.5%, transparent) 0 1px, transparent 1px 64px);
-  /* fade the lattice out down the page so long reference pages end on plain
-     paper rather than carrying texture under 4,900 words of prose */
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 26vh, transparent 96vh);
-  mask-image: linear-gradient(to bottom, #000 0, #000 26vh, transparent 96vh);
-}
+/* The fixed 64px plot lattice is retired with the redesign: a grey canvas
+   with white cards is the surface now, and a lattice behind cards reads as
+   noise. The <div class="grain"> markup stays on every page (harmless). */
+.grain { display: none; }
 
 /* ---------- hero fan chart: the signature element ----------
    The old background depicted a field of synthetic households — a
@@ -280,171 +344,263 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
   }
 }
 
-/* ---------- nav ---------- */
-.nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--s-4) var(--gutter);
-  backdrop-filter: blur(10px);
-  background: color-mix(in srgb, var(--ink) 88%, transparent);
-  border-bottom: 1px solid var(--line-soft);
-}
+/* =====================================================================
+   2. SHELL (DESIGN.md §3). Emitted by site_nav.py on every page:
+      header band (brand + primary view tabs, sticky)
+      → pathway (.crumbs, painted as the band's first line)
+      → title band (the page's own .hero, first child of <main>)
+      → section sub-tabs (.model-tabs / .economy-subnav, sticky under the
+        header) → cards on the canvas → footer.
+   ===================================================================== */
 
+/* ---------- 2.1 header band + primary view tabs ---------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: var(--s-4);
+  height: var(--nav-h);
+  padding: 0 var(--gutter);
+  background: var(--band-bg);
+  color: var(--band-text);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .18);
+}
 .brand {
-  font-family: var(--mono);
-  font-size: var(--fs-body);
-  letter-spacing: 0.02em;
-  color: var(--paper);
-  text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-}
-.brand-dot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  background: var(--brand);
+  gap: 10px;
+  flex: 0 0 auto;
+  color: var(--band-text);
+  font-family: var(--serif);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-decoration: none;
+  white-space: nowrap;
 }
 .brand-logo {
   display: block;
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   flex: 0 0 auto;
+  padding: 3px;
+  border-radius: 6px;
+  background: #FFFFFF;   /* the mark is teal-on-transparent: give it a chip */
 }
-
+.brand-name { display: none; }
 .nav-links {
   display: flex;
-  align-items: center;
-  gap: clamp(14px, 2.4vw, 30px);
-  font-family: var(--mono);
-  font-size: var(--fs-small);
-  letter-spacing: 0.01em;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  font-family: var(--body);
+  font-size: var(--fs-body-sm);
 }
+.nav-links::-webkit-scrollbar { display: none; }
 .nav-links a {
-  color: var(--paper-dim);
-  text-decoration: none;
-  transition: color 0.25s;
-}
-.nav-links a:hover { color: var(--brand-strong); }
-.nav-links a[aria-current="page"] {
-  color: var(--brand-strong);
-  font-weight: 600;
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 8px;
-}
-.nav-gh { color: var(--paper) !important; display: inline-flex; align-items: center; }
-.nav-gh svg { width: 18px; height: 18px; display: block; }
-.nav-links a:not(.nav-gh) { display: none; }
-
-/* Keep the two primary journeys available on small screens. The previous
-   mobile header reduced the entire site navigation to a GitHub icon. */
-.nav-links a.nav-mobile { display: inline-flex; }
-.nav-links .nav-start {
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  min-height: 34px;
+  gap: 7px;
+  flex: 0 0 auto;
   padding: 0 10px;
-  border: 1px solid var(--brand);
-  border-radius: 4px;
-  color: var(--brand-strong);
+  color: var(--band-text-dim);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 150ms, color 150ms;
 }
-.nav-links .nav-start:hover { background: var(--ink-2); }
-
-@media (min-width: 940px) {
-  .nav-links .nav-start { min-height: auto; padding: 0; border: 0; }
-  .nav-links .nav-start:hover { background: transparent; }
-  .nav-links a:not(.nav-gh) { display: inline; }
+.nav-links a svg { width: 16px; height: 16px; flex: 0 0 auto; display: none; }
+.nav-links a:hover { color: var(--band-text); background: rgba(255, 255, 255, .06); }
+/* Chosen view: lighter fill + 3px underline on the band's bottom edge.
+   Fill and border only — never a tick (DESIGN.md §1). aria-current="page"
+   is the section's own index page; "true" is any page inside the section. */
+.nav-links a[aria-current] {
+  color: var(--band-text);
+  background: rgba(255, 255, 255, .10);
+  font-weight: 600;
+}
+.nav-links a[aria-current]::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--band-accent);
+}
+.nav-links a.nav-gh { padding: 0 8px; margin-left: 6px; color: var(--band-text); }
+.nav-links a.nav-gh svg { display: block; width: 18px; height: 18px; }
+.nav-links a.nav-gh::after { display: none; }
+@media (max-width: 419px) {
+  /* GitHub stays in the footer row; the four views keep the room. */
+  .nav-links a.nav-gh { display: none; }
+  .nav-links a { padding: 0 8px; }
+}
+@media (min-width: 640px) {
+  .brand-name { display: inline; }
+}
+@media (min-width: 880px) {
+  .nav-links a { padding: 0 14px; }
+  .nav-links a svg { display: block; }
 }
 
-/* Economy subnav: one sticky bar for the whole section. The country scope
-   sits on the left as a segmented capsule; topic anchors read as quiet
-   underline tabs on the right and scroll horizontally when cramped. */
+/* ---------- 2.2 pathway (crumbs) — first line of the title band ---------- */
+.crumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 0;
+  padding: 14px var(--gutter) 0;
+  background: var(--band-bg-2);
+  color: var(--band-text-dim);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+}
+.crumbs > * { max-width: 100%; }
+.crumbs a { color: var(--band-text-dim); text-decoration: underline; text-decoration-color: rgba(178, 245, 234, .45); text-underline-offset: 3px; }
+.crumbs a:hover { color: var(--band-text); text-decoration-color: currentColor; }
+.crumbs a::after { content: "/"; display: inline-block; margin: 0 8px; color: var(--band-text-dim); text-decoration: none; opacity: .7; }
+.crumbs span[aria-current] { color: var(--band-text); }
+@media (min-width: 1360px) {
+  /* line the pathway up with the title and the cards below it */
+  .crumbs { padding-inline: calc((100% - var(--max)) / 2 + var(--card-pad)); }
+}
+
+/* ---------- 2.3 section sub-tabs (second sticky row) ----------
+   Two markups, one look: .model-tabs (model pages, /models, /connect, paper
+   pages) and .economy-subnav (Forecasts + UK/US data + topic pages, emitted
+   by economy/topics.py between forecasts-section-nav markers). White strip,
+   hairline below, chosen tab = tinted fill + 3px teal underline. */
+.model-tabs,
 .economy-subnav {
   position: sticky;
-  top: calc(var(--nav-h, 62px) - 8px);
-  z-index: 8;
-  border-top: 1px solid var(--line-soft);
-  border-bottom: 1px solid var(--line-soft);
-  background: color-mix(in srgb, var(--ink) 94%, transparent);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 10px 24px color-mix(in srgb, var(--paper) 6%, transparent);
+  top: var(--nav-h);
+  z-index: 15;
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--hairline);
+  box-shadow: 0 6px 16px -12px rgba(16, 24, 40, .25);
 }
+.model-tabs-row,
 .economy-subnav-row {
   display: flex;
   align-items: stretch;
-  justify-content: center;
-  gap: var(--s-5);
-  max-width: var(--max);
+  justify-content: flex-start;
+  gap: 0;
+  max-width: calc(var(--max) + 2 * var(--gutter));
+  min-height: var(--subnav-h);
   margin: 0 auto;
-  padding: 7px var(--gutter) 0;
+  padding: 0 calc(var(--gutter) + var(--card-pad) - 12px);
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.model-tabs-row::-webkit-scrollbar,
+.economy-subnav-row::-webkit-scrollbar { display: none; }
+.model-tabs-link,
+.economy-topics a,
+.economy-topics button,
+.model-tabs-set button {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-family: var(--body);
+  font-size: var(--fs-body-sm);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 150ms, color 150ms;
+}
+.model-tabs-link:hover,
+.economy-topics a:hover,
+.economy-topics button:hover,
+.model-tabs-set button:hover { color: var(--link-hover); background: var(--gray-100); }
+.model-tabs-link[aria-current],
+.economy-topics a[aria-current],
+.economy-topics button[aria-selected="true"],
+.model-tabs-set button.is-current,
+.model-tabs-set button[aria-selected="true"] {
+  color: var(--teal-700);
+  background: var(--surface-tint);
+  font-weight: 600;
+}
+.model-tabs-link[aria-current]::after,
+.economy-topics a[aria-current]::after,
+.economy-topics button[aria-selected="true"]::after,
+.model-tabs-set button.is-current::after,
+.model-tabs-set button[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--primary);
+}
+/* the forecasts/economy row: country scope, a divider, then the topics */
 .economy-subnav-scope {
   display: flex;
-  align-items: center;
-  gap: var(--s-5);
+  align-items: stretch;
   flex: 0 0 auto;
 }
 .economy-subnav-scope::after {
   content: "";
   width: 1px;
-  align-self: stretch;
-  margin: 10px 0;
-  background: var(--line-soft);
+  margin: 12px 8px;
+  background: var(--hairline);
 }
 .economy-subnav-label {
-  color: var(--paper-faint);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px 0 12px;
+  color: var(--text-faint);
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: var(--ls-label);
 }
 .economy-topics {
   display: flex;
-  gap: var(--s-5);
+  align-items: stretch;
+  max-width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
 }
 .economy-topics::-webkit-scrollbar { display: none; }
-/* Buttons join the anchors so an in-page tablist (role="tab" needs buttons,
-   not links) renders in the same idiom instead of a second component. */
-.economy-topics a,
-.economy-topics button {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  padding: var(--s-3) 2px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: none;
-  color: var(--paper-dim);
-  font-family: var(--mono);
-  font-size: var(--fs-small);
-  text-decoration: none;
-  white-space: nowrap;
-}
-.economy-topics button { cursor: pointer; }
-.economy-topics a:hover,
-.economy-topics button:hover { color: var(--brand-strong); }
-.economy-topics a[aria-current="location"],
-.economy-topics button[aria-selected="true"] {
-  color: var(--paper);
-  border-bottom-color: var(--brand-strong);
-}
+/* /forecasts builds an in-card chart switch with this class (fc-chart-tabs):
+   it scrolls inside itself; inside the sticky row the row does the scrolling. */
+.economy-subnav .economy-topics { flex: 0 0 auto; max-width: none; overflow: visible; }
+.fc-chart-tabs { min-height: 40px; border-bottom: 1px solid var(--hairline); }
+.economy-subnav-countries a span { display: none; }
 @media (max-width: 720px) {
-  .economy-subnav-row { flex-wrap: wrap; gap: 0 var(--s-5); }
-  .economy-subnav-scope { padding-bottom: 0; }
-  .economy-topics { margin-left: 0; width: 100%; }
-  .economy-subnav-countries a span { display: none; }
-  .economy-subnav-countries a small { font-size: var(--fs-small); color: inherit; }
+  .economy-subnav-label { display: none; }
+  .model-tabs-row, .economy-subnav-row { padding-inline: 4px; }
+  .model-tabs-link, .economy-topics a, .economy-topics button { padding: 0 10px; font-size: var(--fs-small); }
 }
+.economy-page section[id] { scroll-margin-top: var(--sticky-top); }
 
-/* Homepage at-a-glance country toggle: same capsule language as the
-   economy country switch, in button form. The head is a flex row with the
-   heading left and the toggle sitting on its baseline, wrapping on small
-   screens. */
+/* In-card view switches (.model-tabs-set buttons, the homepage glance
+   switch): same underline idiom, inside a card rather than a sticky row. */
+.model-tabs-set {
+  display: inline-flex;
+  align-items: stretch;
+  min-height: 40px;
+  border-bottom: 1px solid var(--hairline);
+}
+.model-tabs-spacer { flex: 1 1 auto; }
+@media (max-width: 720px) { .model-tabs-spacer { display: none; } }
+
 .glance-head {
   display: flex;
   align-items: flex-end;
@@ -455,233 +611,175 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
 }
 .glance-head > div:first-child { max-width: 60ch; }
 .glance-head h2 { margin-bottom: 0; }
-.glance-switch { display: inline-flex; flex-shrink: 0; }
+/* Segmented chip switch: selected = filled, never a tick. */
+.glance-switch { display: inline-flex; flex-shrink: 0; padding: 3px; gap: 2px; border: 1px solid var(--hairline); border-radius: 999px; background: var(--gray-100); }
 .glance-switch button {
-  padding: 7px 18px;
-  border: 1px solid var(--line-soft);
+  min-height: 32px;
+  padding: 0 16px;
+  border: 0;
   border-radius: 999px;
-  color: var(--paper-dim);
-  background: var(--surface);
+  color: var(--text-muted);
+  background: transparent;
   font: inherit;
   font-size: var(--fs-small);
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
 }
-.glance-switch button + button { margin-left: -1px; }
-.glance-switch button:first-of-type {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-.glance-switch button:last-of-type {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-.glance-switch button:hover {
-  color: var(--brand-strong);
-  border-color: var(--brand);
-  background: var(--brand-wash);
-  position: relative;
-  z-index: 1;
-}
+.glance-switch button:hover { color: var(--link-hover); }
 .glance-switch button[aria-selected="true"] {
-  color: var(--ink);
-  border-color: var(--brand-strong);
-  background: var(--brand-strong);
+  color: var(--teal-700);
+  background: var(--surface-card);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .12);
   font-weight: 600;
-  position: relative;
-  z-index: 1;
 }
 
-.economy-page section[id] { scroll-margin-top: 132px; }
-
-/* Per-model page tabs (olg pilot): the .glance-switch capsule inside a
-   sticky bar in the .economy-subnav idiom. Panels are plain sections with
-   role=tabpanel toggled by a tiny inline script. */
-.model-tabs {
-  position: sticky;
-  top: calc(var(--nav-h, 62px) - 8px);
-  z-index: 8;
-  border-top: 1px solid var(--line-soft);
-  border-bottom: 1px solid var(--line-soft);
-  background: color-mix(in srgb, var(--ink) 94%, transparent);
-  backdrop-filter: blur(12px);
-}
-.model-tabs-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-5);
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 7px var(--gutter) 0;
-}
-.model-tabs-link {
-  flex: 0 0 auto;
-  padding: 10px 2px;
-  border-bottom: 2px solid transparent;
-  color: var(--paper-dim);
-  font-family: var(--mono);
-  font-size: var(--fs-small);
-  text-decoration: none;
-  white-space: nowrap;
-}
-.model-tabs-link:hover { color: var(--brand-strong); }
-.model-tabs-link[aria-current="location"],
-.model-tabs-link[aria-current="page"] {
-  color: var(--paper);
-  border-bottom-color: var(--brand-strong);
-}
-.model-tabs-set {
-  display: inline-flex;
-  gap: var(--s-5);
-}
-.model-tabs-set button {
-  flex: 0 0 auto;
-  padding: 9px 2px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: none;
-  color: var(--paper-dim);
-  font-family: var(--mono);
-  font-size: var(--fs-label);
-  white-space: nowrap;
-  cursor: pointer;
-}
-.model-tabs-set button:hover { color: var(--brand-strong); }
-.model-tabs-set button.is-current {
-  color: var(--paper);
-  border-bottom-color: var(--brand-strong);
-}
-.model-tabs-spacer { flex: 1 1 auto; }
-
-/* Methodology scrollytelling: narrative steps left, a sticky formal-
-   structure panel right that swaps content with the step in view. */
+/* ---------- 2.4 StepPanel: numbered steps left, sticky figures panel right
+   (DESIGN.md §4.9). Markup: .scrolly-wrap > .scrolly-steps > .meth-step[data-step]
+   + aside.scrolly-sticky > .meth-panel[data-step]; each step repeats its panel
+   as .meth-inline, shown only below 900px where the aside is hidden — one of
+   the two is visible at any width, so the figures still appear once. ---- */
 .scrolly-wrap {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 460px);
-  gap: var(--s-7);
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 440px);
+  gap: var(--s-6);
   align-items: start;
-  max-width: min(1400px, 100%);
-  margin: var(--s-7) auto 0;
-  padding: 0 var(--gutter);
+  margin: var(--s-5) 0 0;
+  padding: 0;
 }
-.scrolly-steps { min-width: 0; }
+.scrolly-steps { min-width: 0; counter-reset: none; }
+/* No min-height: a 70vh floor left 300-400px blank under short Overview
+   steps. stepper.js activates the last step at the page end, so a short
+   final step still reaches its panel. */
 .meth-step {
-  min-height: 90vh;
-  padding: var(--s-6) 0 var(--s-6) var(--s-5);
-  border-left: 2px solid var(--line-soft);
-  opacity: .28;
-  transition: opacity .5s ease, border-color .5s ease;
+  position: relative;
+  padding: 0 0 var(--s-7) 52px;
+  border-left: 0;
+  opacity: 1;
 }
-.meth-step.active { opacity: 1; border-left-color: var(--brand-strong); }
-.meth-step:first-child { padding-top: 0; }
-.meth-step:last-child { min-height: auto; padding-bottom: 100px; }
+/* the rail: a hairline joining the numbered discs, teal for the active step */
+.meth-step::before {
+  content: "";
+  position: absolute;
+  left: 17px;
+  top: 40px;
+  bottom: 4px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--hairline);
+  transition: background-color 300ms;
+}
+.meth-step.active::before { background: var(--primary); }
+.meth-step:last-child { padding-bottom: var(--s-5); }
+.meth-step:last-child::before { display: none; }
 .meth-step-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--s-3);
-  margin-bottom: var(--s-3);
+  margin: 0 0 var(--s-3) -52px;
 }
 .meth-step-num {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: var(--brand-strong);
-  color: var(--ink);
+  border: 2px solid var(--primary);
+  background: var(--surface-card);
+  color: var(--teal-700);
+  font-family: var(--mono);
   font-size: var(--fs-small);
   font-weight: 700;
+  transition: background-color 300ms, color 300ms;
 }
-.meth-step-head h3 { margin: 0; }
+.meth-step.active .meth-step-num { background: var(--primary); color: #FFFFFF; }
+.meth-step-head h3 { margin: 0; font-size: var(--fs-h3); }
 .scrolly-sticky {
   position: sticky;
-  top: calc(var(--nav-h, 62px) + 56px);
+  top: var(--sticky-top);
   min-width: 0;
 }
 .meth-panel-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--s-3);
-  margin-bottom: var(--s-3);
-  padding-bottom: var(--s-3);
-  border-bottom: 1px solid var(--line-soft);
 }
-.meth-panel-title { font-weight: 600; }
-.meth-panel-badge { color: var(--paper-faint); font-size: var(--fs-label); }
+.meth-panel-title { font-weight: 600; color: var(--text-strong); }
 .meth-inline { display: none; }
 @media (max-width: 899px) {
   .scrolly-wrap { grid-template-columns: 1fr; }
   .scrolly-sticky { display: none; }
   .meth-inline { display: block; }
-  .meth-step { opacity: 1; }
+  .meth-step::before { background: var(--hairline); }
+  .meth-step .meth-step-num { background: var(--surface-card); color: var(--teal-700); }
 }
-@media (max-width: 720px) {
-  .model-tabs-row { gap: var(--s-3); overflow-x: auto; scrollbar-width: none; }
-  .model-tabs-row::-webkit-scrollbar { display: none; }
-  .model-tabs-spacer { display: none; }
+@media (max-width: 480px) {
+  .meth-step { padding-left: 0; }
+  .meth-step::before { display: none; }
+  .meth-step-head { margin-left: 0; }
 }
-[role="tabpanel"][id] { scroll-margin-top: 132px; }
+[role="tabpanel"][id] { scroll-margin-top: var(--sticky-top); }
 
 /* Methodology-tab formal panels: labelled equations inside a callout. */
 .prose h4 {
   margin: var(--s-5) 0 var(--s-3);
   font-size: var(--fs-small);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: var(--ls-label);
-  color: var(--paper-dim);
+  color: var(--text-muted);
 }
 .formal-label {
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: var(--ls-label);
-  color: var(--paper-faint);
+  color: var(--text-faint);
 }
 .formal-eq-label {
   display: inline-block;
   min-width: 12ch;
   margin-right: var(--s-3);
   font-size: var(--fs-label);
-  color: var(--paper-faint);
+  color: var(--text-faint);
 }
 .callout.formal { overflow-x: auto; }
 
+/* In-page model switcher on /validation-style pages: a chip row. */
 .model-local-nav,
 .validation-model-nav {
   display: flex;
-  gap: 8px;
-  padding: 0 var(--gutter) var(--s-5);
-  max-width: calc(980px + (2 * var(--gutter)));
+  gap: 6px;
+  max-width: var(--max);
   margin: 0 auto;
+  padding: 0 var(--gutter) var(--s-4);
   overflow-x: auto;
   scrollbar-width: none;
 }
 .validation-model-nav {
   position: sticky;
-  top: 116px;
+  top: calc(var(--nav-h) + 8px);
   z-index: 5;
   width: max-content;
   max-width: calc(100% - (2 * var(--gutter)));
-  margin-top: 12px;
-  padding: 5px;
-  gap: 3px;
-  background: color-mix(in srgb, var(--ink) 96%, transparent);
-  border: 1px solid var(--line-soft);
+  margin-top: var(--s-3);
+  padding: 4px;
+  gap: 2px;
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
   border-radius: 999px;
-  box-shadow: 0 8px 24px rgba(20, 45, 52, .06);
+  box-shadow: var(--shadow-card);
 }
 .model-local-nav::-webkit-scrollbar,
 .validation-model-nav::-webkit-scrollbar { display: none; }
 .model-local-nav a,
 .validation-model-nav a {
   flex: 0 0 auto;
-  padding: 9px 14px;
+  padding: 7px 14px;
   border: 1px solid transparent;
   border-radius: 999px;
-  color: var(--paper-dim);
+  color: var(--text-muted);
   font-family: var(--mono);
   font-size: var(--fs-label);
   text-decoration: none;
@@ -689,172 +787,214 @@ h1, h2, h3, p, figcaption, a { overflow-wrap: anywhere; }
 .model-local-nav a:hover,
 .validation-model-nav a:hover,
 .validation-model-nav a[aria-current="location"] {
-  color: var(--brand-strong);
-  border-color: color-mix(in srgb, var(--brand) 34%, var(--line-soft));
-  background: var(--brand-wash);
+  color: var(--teal-700);
+  border-color: color-mix(in srgb, var(--primary) 34%, var(--hairline));
+  background: var(--surface-tint);
 }
 .validation-model-nav a[aria-current="location"] { font-weight: 600; }
-/* Pathway line under the global header, generated by site_nav.py. */
-.crumbs {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px 0;
-  padding: 10px clamp(20px, 5vw, 56px);
-  border-bottom: 1px solid var(--line-soft);
-  color: var(--paper-faint);
-  font-size: var(--fs-label);
-}
-.crumbs a { color: var(--paper-dim); }
-.crumbs a:hover { color: var(--brand-strong); }
-.crumbs a::after { content: "/"; margin: 0 8px; color: var(--line); }
-.crumbs span[aria-current] { color: var(--paper); }
 
 
-/* ---------- hero ---------- */
+/* ---------- 2.5 title band (the page's own .hero, first child of <main>) ----
+   One band per page: serif h1, then ONE subtitle line of key facts (the
+   .eyebrow, moved under the title by `order`), then the lede. The band
+   continues the pathway's teal so pathway + title read as one block.
+   The homepage hero (.hero without .model-hero) is an intro card instead —
+   see "Homepage" in section 5. */
 .hero {
-  display: flex;
-  align-items: center;
-  padding: clamp(120px, 16vh, 168px) var(--gutter) var(--s-9);
+  display: block;
+  padding: var(--s-5) var(--gutter) var(--s-6);
 }
-.hero-inner { max-width: 980px; margin: 0 auto; width: 100%; }
+.hero-inner { max-width: var(--max); margin: 0 auto; width: 100%; }
+.doc .hero.model-hero {
+  min-height: 0;
+  padding: var(--s-3) var(--gutter) var(--s-6);
+  background: var(--band-bg-2);
+  color: var(--band-text);
+}
+.doc .hero.model-hero .hero-inner {
+  display: flex;
+  flex-direction: column;
+  padding-inline: var(--card-pad);
+}
+.doc .model-hero .eyebrow {
+  order: 2;
+  margin: var(--s-2) 0 0;
+  color: var(--band-text-dim);
+  font-size: var(--fs-small);
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+.doc .model-hero h1 {
+  order: 1;
+  margin: 0;
+  color: var(--band-text);
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: var(--fs-hero-sub);
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+.doc .model-hero .lede {
+  order: 3;
+  max-width: 80ch;
+  margin: var(--s-3) 0 0;
+  color: rgba(255, 255, 255, .92);   /* 6.4:1 on --teal-700 */
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+.doc .model-hero > .hero-inner > :not(.eyebrow):not(h1):not(.lede) { order: 4; margin-top: var(--s-4); }
+.doc .model-hero a:not(.btn) { color: var(--band-text); text-decoration-color: rgba(255, 255, 255, .5); }
+.doc .model-hero .lede strong { color: var(--band-text); }
+.doc .model-hero code { color: var(--band-text); background: rgba(255, 255, 255, .12); }
+@media (min-width: 1360px) {
+  .doc .hero.model-hero .hero-inner { padding-inline: var(--card-pad); }
+}
 
 .eyebrow {
   font-family: var(--mono);
-  font-size: var(--fs-small);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--brand);
-  margin-bottom: var(--s-4);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: none;
+  color: var(--teal-700);
+  margin-bottom: var(--s-3);
 }
 
 h1 {
-  font-family: var(--display);
-  font-weight: 400;
+  font-family: var(--serif);
+  font-weight: 600;
   font-size: var(--fs-hero);
-  line-height: 1.08;
-  letter-spacing: -0.015em;
-  font-optical-sizing: auto;
-  margin-bottom: var(--s-5);
+  line-height: 1.15;
+  letter-spacing: 0;
+  color: var(--text-strong);
+  margin-bottom: var(--s-4);
 }
-h1 em {
-  font-style: italic;
-  color: var(--brand-strong);
-  font-weight: 500;
-}
+h1 em { font-style: italic; font-weight: 600; }
 
 .lede {
   font-size: var(--fs-lede);
-  line-height: 1.55;
-  color: var(--paper);
+  line-height: 1.6;
+  color: var(--text-body);
   max-width: 78ch;
-  margin-bottom: var(--s-6);
+  margin-bottom: var(--s-5);
 }
-.lede strong { color: var(--brand-strong); font-weight: 600; }
+.lede strong { color: var(--text-strong); font-weight: 600; }
 
 .hero-cta { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-bottom: 0; }
 
+/* Buttons: one primary (filled teal, white text) and one secondary (white,
+   hairline) per view. Radius 999 like the AB "Explore →" button. */
 .btn {
-  font-family: var(--mono);
-  font-size: var(--fs-body-sm);
-  letter-spacing: 0.01em;
-  text-decoration: none;
-  padding: 12px 22px;
-  border-radius: var(--radius-sm);
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
-  display: inline-block;
-  /* some buttons are labelled with a full repo URL; let the label break
-     rather than push the page sideways at 375px */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
   max-width: 100%;
+  padding: 9px 18px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: var(--body);
+  font-size: var(--fs-body-sm);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-decoration: none;
   overflow-wrap: anywhere;
+  transition: background-color 150ms, color 150ms, border-color 150ms;
 }
-.btn-primary {
-  background: var(--brand);
-  color: var(--ink);
-  font-weight: 500;
-}
-.btn-primary:hover { background: var(--brand-deep); }
-.btn-secondary {
-  color: var(--brand-strong);
-  border: 1px solid var(--brand);
-  background: var(--brand-wash);
-}
-.btn-secondary:hover { border-color: var(--brand-strong); background: var(--surface); }
+.btn-primary { background: var(--primary); color: #FFFFFF; }
+.btn-primary:hover { background: var(--teal-700); }
+.btn-secondary,
 .btn-ghost {
-  color: var(--paper);
-  border: 1px solid var(--line);
+  color: var(--teal-700);
+  border-color: var(--hairline-strong);
+  background: var(--surface-card);
 }
-.btn-ghost:hover { border-color: var(--brand); color: var(--brand-strong); }
+.btn-secondary:hover,
+.btn-ghost:hover { border-color: var(--primary); background: var(--surface-tint); }
 .mono { font-family: var(--mono); }
 
-/* ---------- bands ---------- */
+/* ---------- 2.6 sections are cards on the canvas ----------
+   Every .band (624 of them across the site) is a white card with a hairline
+   border and a soft shadow, separated by --gap-cards. This is the one change
+   that turns the long-scroll pages into the dashboard look; nothing in the
+   markup moves. .band-alt, .band-stack and .band-wide are the same card. */
 .band {
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: var(--band-y) var(--gutter);
   position: relative;
+  width: min(var(--max), calc(100% - 2 * var(--gutter)));
+  max-width: none;
+  margin: var(--gap-cards) auto 0;
+  padding: var(--card-pad);
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
 }
-.band + .band { border-top: 1px solid var(--line-soft); }
-.band-wide { max-width: min(1400px, 100%); }
+main > .band:last-child,
+main > :last-child { margin-bottom: var(--s-7); }
+.band + .band { border-top: 1px solid var(--hairline); }
+.band-wide { max-width: none; }
+.band-alt { background: var(--surface-card); }
+.band .band { box-shadow: none; width: 100%; margin-top: var(--s-5); }
 
-/* Alternating band. Used on 43 pages — the economy hub and topics, the
-   forecast record, and every release note — but never defined, so all of
-   them rendered it as a plain .band. The tint is derived from the border
-   colour rather than a fixed value, so it follows the light and dark
-   palettes without a second rule, matching how --brand-wash is built. It is
-   deliberately faint: these bands separate sections, they do not compete
-   with them. */
-.band-alt { background: color-mix(in srgb, var(--border-light) 22%, transparent); }
-
-/* Used on /, /models and /connect. It lived only in connect's page-local
-   <style>, so the other two rendered it as a default paragraph. */
+/* One-sentence section lede under a section title. */
 .section-intro {
-  margin-top: 10px;
-  color: var(--paper-dim);
+  margin-top: var(--s-2);
+  max-width: 80ch;
+  color: var(--text-muted);
   font-size: var(--fs-body);
   line-height: 1.55;
 }
 
-.band-head { margin-bottom: var(--s-6); }
+/* Section head: eyebrow (.kicker), serif title, one-line lede. */
+.band-head { margin-bottom: var(--s-5); }
 .kicker {
-  display: block;
-  font-size: var(--fs-small);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--brand);
-  margin-bottom: var(--s-3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: none;
+  color: var(--teal-700);
+  margin-bottom: var(--s-2);
 }
 h2 {
-  font-family: var(--display);
-  font-weight: 400;
+  font-family: var(--serif);
+  font-weight: 600;
   font-size: var(--fs-h2);
-  line-height: 1.2;
-  letter-spacing: -0.012em;
-  max-width: 26ch;
+  line-height: 1.25;
+  letter-spacing: 0;
+  color: var(--text-strong);
+  max-width: 48ch;
 }
+h3 { color: var(--text-strong); font-weight: 600; }
 
 .prose { max-width: none; }
 /* Long unbreakable tokens — file paths, package names, URLs printed inline in
-   the prose — are wider than a 375px column at this body size and pushed the
-   page 2–3px sideways on /validation/. Break them instead of shrinking the
-   type. <pre>/.codeblock keep their own horizontal scroll and are untouched. */
+   the prose — are wider than a 375px column. Break them instead of shrinking
+   the type. <pre>/.codeblock keep their own horizontal scroll. */
 .prose p, .prose li, .prose td, .prose figcaption { overflow-wrap: break-word; }
-.prose p { margin-bottom: var(--s-5); color: var(--paper); font-size: var(--fs-body); line-height: 1.7; }
+.prose p { margin-bottom: var(--s-4); color: var(--text-body); font-size: var(--fs-body); line-height: 1.7; }
 .prose p:last-child { margin-bottom: 0; }
-.prose em { font-style: italic; color: var(--brand-strong); }
-.prose strong { font-weight: 600; color: var(--paper); }
+.prose em { font-style: italic; }
+.prose strong { font-weight: 600; color: var(--text-strong); }
 
 /* ---------- cards ---------- */
 .card-id { font-size: var(--fs-small); color: var(--brand); letter-spacing: 0.04em; }
 /* ONE chip form. Variants differ only by colour, never by shape or size. */
 .tag {
-  display: inline-block;
-  font-family: var(--mono);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  font-family: var(--body);
   font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  padding: 3px 9px;
-  border-radius: var(--radius-sm);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  padding: 2px 10px;
+  border-radius: 999px;
   border: 1px solid transparent;
   white-space: nowrap;
 }
@@ -876,28 +1016,27 @@ h2 {
 .metrics {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0;
-  margin: var(--s-7) 0 var(--s-6);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
-  overflow: hidden;
+  gap: var(--s-4);
+  margin: var(--s-5) 0;
 }
 @media (min-width: 720px) { .metrics { grid-template-columns: repeat(3, 1fr); } }
 
+/* .metric is the legacy name of the stat tile (DESIGN.md §4.2). */
 .metric {
-  padding: 30px 28px;
-  border-bottom: 1px solid var(--line-soft);
+  padding: 18px 20px;
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
 }
-@media (min-width: 720px) {
-  .metric { border-bottom: none; border-right: 1px solid var(--line-soft); }
-  .metric:last-child { border-right: none; }
-}
-.metric-label { display: block; font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--paper-faint); margin-bottom: 14px; }
+.metric-label { display: block; font-size: var(--fs-small); font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
 .metric-val {
-  font-family: var(--display);
+  font-family: var(--body);
   font-size: var(--fs-stat);
-  font-weight: 500;
-  color: var(--brand-strong);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary);
   line-height: 1;
   display: flex;
   align-items: baseline;
@@ -923,9 +1062,10 @@ h2 {
 .foot {
   width: 100%;
   max-width: none;
-  margin: 0;
-  padding: 48px var(--gutter) 64px;
-  border-top: 1px solid var(--line-soft);
+  margin: var(--s-7) 0 0;
+  padding: 20px var(--gutter);
+  background: var(--band-bg);
+  color: var(--band-text-dim);
 }
 .foot-pe { display: inline-flex; align-items: center; }
 .foot-pe img { height: 20px; width: auto; display: block; opacity: 0.82; transition: opacity 0.2s; }
@@ -1049,7 +1189,7 @@ h2 {
 .doc .prose li { margin: var(--s-2) 0; line-height: 1.7; font-size: var(--fs-body); max-width: none; }
 .doc .prose p code,
 .doc .prose li code,
-.doc .prose td code { font-family: var(--mono); font-size: var(--fs-code-inline); color: var(--brand-strong); }
+.doc .prose td code { font-family: var(--code); font-size: var(--fs-code-inline); color: var(--brand-strong); }
 .doc .prose p code,
 .doc .prose li code,
 .connect-panel p code { overflow-wrap: anywhere; }
@@ -1114,7 +1254,7 @@ h2 {
 }
 .codeblock pre { margin: 0; }
 .codeblock code,
-.code-window code { font-family: var(--mono); font-size: var(--fs-mono); line-height: 1.7; white-space: pre; }
+.code-window code { font-family: var(--code); font-size: var(--fs-mono); line-height: 1.7; white-space: pre; }
 .codeblock .cb-copy {
   position: absolute; top: 10px; right: 12px;
   border: 0; background: none; cursor: pointer;
@@ -1149,21 +1289,43 @@ h2 {
 .prose table, .meth-step table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: var(--fs-body-sm); }
 .prose th, .meth-step th {
   text-align: left; font-family: var(--mono); font-size: var(--fs-label);
-  letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--paper-faint);
+  letter-spacing: var(--ls-label); text-transform: none; color: var(--paper-faint);
 }
 .prose th, .prose td, .meth-step th, .meth-step td {
   padding: 11px 16px 11px 0; border-bottom: 1px solid var(--line-soft); vertical-align: top;
 }
 .opt-note { font-size: var(--fs-body-sm); line-height: 1.55; color: var(--paper-faint); }
+/* Callout (DESIGN.md §4.4): tinted box, 3px left accent. Default = info;
+   .callout-warn for caution/provisional; .callout-neutral for asides. */
 .callout {
-  border-left: 2px solid var(--brand);
-  padding: var(--s-1) 0 var(--s-1) var(--s-5); margin: var(--s-6) 0;
-  font-size: var(--fs-body-sm); line-height: 1.6; color: var(--paper-dim); max-width: none;
+  margin: var(--s-5) 0;
+  padding: 12px 16px;
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--hairline));
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--surface-tint);
+  font-size: var(--fs-body-sm);
+  line-height: 1.6;
+  color: var(--text-body);
+  max-width: none;
+}
+.callout strong:first-child { color: var(--text-strong); }
+.callout-warn {
+  border-color: var(--warn-line);
+  border-left-color: var(--warn-ink);
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+}
+.callout-warn strong:first-child { color: var(--warn-ink); }
+.callout-neutral {
+  border-color: var(--hairline);
+  border-left-color: var(--gray-400);
+  background: var(--gray-100);
 }
 
 /* ---------- section divider after hero + grid footer ---------- */
 .hero + .band { border-top: 1px solid var(--line-soft); }
-.foot-head { display: block; font-family: var(--mono); font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--paper-faint); margin-bottom: 12px; }
+.foot-head { display: block; font-family: var(--mono); font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: none; color: var(--paper-faint); margin-bottom: 12px; }
 .next-invite { margin-top: 30px; text-align: center; font-size: var(--fs-small); color: var(--paper-faint); display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
 .next-invite a { color: var(--text, #111); text-decoration: none; border-bottom: 1px solid var(--line-soft); padding-bottom: 1px; }
 .next-invite a:hover { color: var(--brand-strong); border-bottom-color: var(--brand-strong); }
@@ -1219,81 +1381,57 @@ h2 {
 .pipeline a.pl-node:hover { border-color: var(--brand); }
 
 @media (max-width: 620px) {
-  .nav {
-    min-height: 112px;
-    align-content: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding-block: 10px;
-  }
-  .brand { width: 100%; font-size: 12px; }
-  .nav-links {
-    width: 100%;
-    justify-content: flex-start;
-    gap: 18px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .nav-links a { flex: 0 0 auto; white-space: nowrap; }
-  .nav-links::-webkit-scrollbar { display: none; }
-  .nav-links .nav-gh { display: none; }
-  .nav-links a.nav-mobile:first-child { display: inline-flex; }
-  .nav-links .nav-start { min-height: 44px; padding-inline: 12px; }
-  .nav-gh { min-width: 44px; min-height: 44px; justify-content: center; }
   .question-list a { grid-template-columns: 1fr 18px; gap: 8px 14px; }
   .question-list strong { grid-column: 1; grid-row: 2; }
   .question-list a::after { grid-column: 2; grid-row: 1 / span 2; }
 }
 
-/* slim footer bar */
-.foot-bar { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding-top: 26px; padding-bottom: 30px; }
-/* wraps like .foot-bar above it — without this the nav pushed every page
-   68px sideways at a 375px viewport. */
-.foot-nav { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 12px 22px; }
-.foot-nav a { font-family: var(--mono); font-size: var(--fs-small); color: var(--paper-dim); text-decoration: none; }
-.foot-nav a:hover { color: var(--brand-strong); }
-.foot-nav .foot-pe img { height: 18px; }
-.footer-brand,
-.footer-links,
-.footer-links a { display: inline-flex; align-items: center; }
-.footer-brand {
-  gap: 10px;
-  color: var(--paper);
-  font-family: var(--mono);
-  font-size: var(--fs-body-sm);
-  text-decoration: none;
+/* ---------- 2.7 footer: one row on the band colour (#133 kept it small) ----
+   PolicyEngine mark, the four views' neighbours (Models, Forecasts, Use),
+   GitHub, Contact; the legal line wraps under it on a phone. */
+.foot-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 24px;
+  flex-wrap: wrap;
 }
-.footer-brand img { width: 20px; height: 20px; }
+.foot-bar > * { max-width: var(--max); }
+.foot-head { display: block; font-family: var(--mono); font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: none; color: var(--band-text-dim); margin-bottom: 12px; }
+.foot-nav { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 12px 22px; }
+.foot-nav a { font-size: var(--fs-small); color: var(--band-text-dim); text-decoration: none; }
+.foot-nav a:hover { color: var(--band-text); }
 .footer-legal {
+  order: 2;
   margin: 0;
-  color: var(--paper-faint);
-  font-family: var(--mono);
+  color: var(--band-text-dim);
   font-size: var(--fs-small);
   line-height: 1.5;
 }
-.footer-links { flex-wrap: wrap; gap: 10px; }
-.footer-links a {
-  justify-content: center;
-  width: 30px;
-  height: 34px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  color: var(--paper-dim);
-  font-family: var(--mono);
-  font-size: var(--fs-small);
-  text-decoration: none;
+.footer-links {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 4px;
 }
-.footer-links a:hover { color: var(--brand-strong); background: transparent; transform: translateY(-1px); }
+.footer-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 8px;
+  color: var(--band-text);
+  font-size: var(--fs-body-sm);
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+.footer-links a:hover { background: rgba(255, 255, 255, .08); text-decoration: underline; text-underline-offset: 3px; }
 .footer-links img,
 .footer-links svg { width: 17px; height: 17px; flex: 0 0 auto; }
-.footer-links svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.footer-links .footer-icon-fill { fill: currentColor; stroke: none; }
-.footer-links .footer-text {
-  width: auto;
-  padding-inline: 8px;
-}
-.footer-links .footer-policyengine { gap: 7px; }
+.footer-links .footer-policyengine img { padding: 2px; border-radius: 4px; background: #FFFFFF; width: 20px; height: 20px; }
+.footer-links .footer-policyengine { font-weight: 600; margin-right: 8px; }
+.footer-links .footer-sep { width: 1px; height: 18px; margin: 0 6px; background: rgba(255, 255, 255, .25); }
 
 /* Homepage: one compact path section replaces two overlapping explainers. */
 .home-page .band { padding-block: clamp(48px, 6vw, 72px); }
@@ -1467,7 +1605,7 @@ h2 {
   background: var(--line-soft);
 }
 .forecast-round dl div { padding: 14px; background: var(--ink); }
-.forecast-round dt { color: var(--paper-faint); font: var(--fs-label)/1.4 var(--mono); text-transform: uppercase; }
+.forecast-round dt { color: var(--paper-faint); font: var(--fs-label)/1.4 var(--mono); text-transform: none; }
 .forecast-round dd { margin: 6px 0 0; color: var(--paper); font-weight: 600; }
 .forecast-round { display: flex; flex-direction: column; }
 .forecast-round dl { width: 100%; }
@@ -1583,7 +1721,7 @@ h2 {
 .contact-socials > span {
   color: var(--paper-faint);
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: var(--ls-label);
 }
 .contact-socials a {
@@ -1645,7 +1783,6 @@ h2 {
   line-height: 1.55;
 }
 .comparison-table thead th a { color: var(--paper); text-decoration: none; line-height: 1.45; }
-.comparison-table thead th a span { color: var(--brand-strong); font-size: 10px; letter-spacing: .06em; }
 .comparison-table tbody tr:nth-child(even) { background: color-mix(in srgb, var(--ink-2) 58%, transparent); }
 .comparison-table tbody tr:hover { background: var(--brand-wash); }
 .comparison-table th,
@@ -1757,7 +1894,7 @@ h2 {
   color: var(--paper-faint);
   font-size: var(--fs-small);
   letter-spacing: .08em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .economy-stat-value {
   color: var(--paper);
@@ -1849,7 +1986,7 @@ h2 {
 .economy-model-card > span {
   color: var(--brand-strong);
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: .06em;
 }
 .economy-model-card h3 {
@@ -1873,7 +2010,7 @@ h2 {
   margin-bottom: 4px;
   color: var(--brand-strong);
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: .06em;
 }
 .economy-note-aside a {
@@ -1995,7 +2132,7 @@ h2 {
 .trends-related span {
   color: var(--brand-strong);
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: .06em;
 }
 .trends-related h2 {
@@ -2088,7 +2225,7 @@ h2 {
 .mobile-compare-controls label { display: grid; gap: 7px; color: var(--paper-dim); font-family: var(--mono); font-size: var(--fs-label); }
 .mobile-compare-controls select { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--paper); background: var(--surface); font: inherit; }
 .mobile-compare-row { padding: var(--s-5) 0; border-top: 1px solid var(--line-soft); }
-.mobile-compare-row h4 { margin: 0 0 var(--s-4); color: var(--brand); font-family: var(--mono); font-size: var(--fs-label); text-transform: uppercase; letter-spacing: var(--ls-label); }
+.mobile-compare-row h4 { margin: 0 0 var(--s-4); color: var(--brand); font-family: var(--mono); font-size: var(--fs-label); text-transform: none; letter-spacing: var(--ls-label); }
 .mobile-compare-row > div { padding: var(--s-3); border: 1px solid var(--line-soft); border-radius: var(--radius-sm); background: var(--surface); }
 .mobile-compare-row > div + div { margin-top: 8px; }
 .mobile-compare-row strong { color: var(--paper); font-size: var(--fs-body-sm); }
@@ -2099,7 +2236,7 @@ h2 {
   .mobile-compare { display: block; }
   .mobile-compare-controls { grid-template-columns: 1fr; }
   .validation-model-nav {
-    top: 172px;
+    top: calc(var(--nav-h) + 8px);
     width: calc(100% - 20px);
     max-width: none;
     border-radius: var(--radius);
@@ -2136,8 +2273,8 @@ h2 {
   margin: 6px 0 0; max-width: 30ch; color: var(--paper);
 }
 @media (max-width: 620px) {
-  .economy-topics { top: 112px; }
-  .economy-page section[id] { scroll-margin-top: 188px; }
+
+
   .paper-viewer-head {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -2355,13 +2492,9 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 
 /* Methodology step diagrams: dashboard schematics remapped to site tokens,
    click to expand in a modal. */
+/* The diagrams' own legacy variables (--accent, --text-light, ...) were
+   replaced by role tokens in the markup (phase 3). */
 .step-diagram {
-  --accent: var(--brand-strong);
-  --accent-light: var(--brand-wash);
-  --bg-diagram: var(--surface);
-  --pe-color-gray-500: var(--paper-faint);
-  --text-light: var(--paper-faint);
-  --text-mid: var(--paper-dim);
   position: relative;
   margin: 0 0 var(--s-4);
   padding: var(--s-4);
@@ -2456,7 +2589,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   border-bottom: 1px solid var(--line-soft);
   color: var(--paper);
   font-size: var(--fs-small);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: var(--ls-label);
 }
 .glance-col table { width: 100%; }
@@ -2485,7 +2618,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   border-radius: 999px;
   background: var(--surface);
   font-family: var(--mono); font-size: var(--fs-label);
-  color: var(--paper-faint); text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--paper-faint); text-transform: none; letter-spacing: 0.06em;
   transition: border-color .15s ease, box-shadow .15s ease;
 }
 .olg-toolbar label:hover, .olg-toolbar label:focus-within {
@@ -2501,6 +2634,8 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 }
 .olg-toolbar select:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .olg-chart svg { width: 100%; height: auto; display: block; }
+.olg-chart .vchart .vc-tick { font-size: var(--fs-label); fill: var(--chart-tick); }
+.olg-chart .vchart .vc-title { font-family: var(--body); font-size: var(--fs-small); }
 .olg-legend {
   display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 8px 0 2px;
   font-family: var(--mono); font-size: 0.76rem; color: var(--paper-dim);
@@ -2526,7 +2661,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 
 /* Subtab bar as the first element of <main> (paper pages): clear the fixed
    header instead of sliding under it. */
-.model-tabs-first { margin-top: calc(var(--nav-h, 62px) + 34px); }
+.model-tabs-first { margin-top: 0; }
 .model-tabs-first + .paper-viewer { padding-top: clamp(28px, 5vh, 48px); }
 
 /* Methodology freeze-box, structured like the dashboard: bordered card,
@@ -2534,11 +2669,14 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
    uppercase section titles with a trailing rule, one white sub-card per
    labelled equation, and arrow output-lines. */
 .meth-panel, .meth-inline {
-  border: 2px solid var(--brand-strong);
-  border-radius: 14px;
+  border: 1px solid var(--hairline);
+  border-top: 3px solid var(--primary);
+  border-radius: var(--radius-card);
   overflow: hidden;
-  background: var(--surface);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-raised);
 }
+.meth-inline { box-shadow: var(--shadow-card); }
 .meth-inline { margin-top: var(--s-4); }
 .meth-panel .meth-panel-head, .meth-inline .meth-panel-head {
   margin: 0;
@@ -2553,10 +2691,10 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 }
 .meth-panel > :last-child, .meth-inline > :last-child { margin-bottom: 18px; }
 .meth-panel-badge {
-  padding: 4px 11px;
-  border-radius: 6px;
-  background: var(--brand-strong);
-  color: var(--ink);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #FFFFFF;
   font-size: var(--fs-label);
   font-weight: 600;
 }
@@ -2569,16 +2707,16 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   font-family: var(--mono);
   font-size: var(--fs-label);
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.08em;
 }
 .meth-sec-title::after { content: ""; flex: 1; height: 1px; background: var(--line-soft); }
 .meth-eq {
   margin: 8px 0;
-  padding: 12px 16px;
-  border: 1px solid var(--line-soft);
-  border-radius: 8px;
-  background: var(--ink);
+  padding: 10px 14px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--gray-50);
   overflow-x: auto;
 }
 .meth-eq-label {
@@ -2587,10 +2725,11 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   font-family: var(--mono);
   font-size: var(--fs-label);
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.08em;
 }
-.meth-eq-body { text-align: center; }
+.meth-eq-body { text-align: left; color: var(--text-strong); font-size: var(--fs-body-sm); font-variant-numeric: tabular-nums; }
+.meth-eq-body:has(> mjx-container, > .MathJax, > math) { text-align: center; }
 /* Narrative sub-headings: bold sentence case, not uppercase micro-labels. */
 .meth-step h4 {
   margin: var(--s-5) 0 var(--s-2);
@@ -2604,7 +2743,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 /* The sticky freeze-box never grows past the viewport: overflowing panel
    content scrolls inside the card. */
 .scrolly-sticky .meth-panel {
-  max-height: calc(100vh - var(--nav-h, 62px) - 110px);
+  max-height: calc(100vh - var(--sticky-top) - 16px);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -2612,7 +2751,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   position: sticky;
   top: 0;
   z-index: 1;
-  background: color-mix(in srgb, var(--brand-wash) 60%, var(--ink));
+  background: var(--surface-tint);
 }
 
 /* ============================================================
@@ -2730,12 +2869,11 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
    no 90vh minimum, tight rhythm, run-out only after the last step so
    its panel can still activate. */
 .scrolly-code .meth-step {
-  min-height: auto;
   padding-top: 36px;
   padding-bottom: 36px;
 }
 .scrolly-code .meth-step:first-child { padding-top: 0; }
-.scrolly-code .meth-step:last-child { min-height: auto; padding-bottom: 45vh; }
+.scrolly-code .meth-step:last-child { padding-bottom: var(--s-5); }
 .scrolly-code .meth-step > :last-child { margin-bottom: 0; }
 .scrolly-code .meth-step h4:first-of-type { margin-top: var(--s-3); }
 
@@ -3002,7 +3140,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   display: block;
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--paper-faint);
   margin-bottom: 12px;
 }
@@ -3054,7 +3192,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 .vmet-notes-key {
   min-width: 0;
   color: var(--brand-strong);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: var(--ls-label);
   font-weight: 600;
 }
@@ -3079,7 +3217,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
 .vchart .vc-s3 { fill: none; stroke: color-mix(in srgb, var(--paper) 45%, transparent); stroke-width: 2; stroke-linejoin: round; }
 
 /* /models hub: offset anchor targets below the sticky subtab bar. */
-.models-page section[id] { scroll-margin-top: 132px; }
+.models-page section[id] { scroll-margin-top: var(--sticky-top); }
 
 .olg-legend .ln-s1 { border-top-color: var(--brand); border-top-style: solid; }
 .olg-legend .ln-s2 { border-top-color: var(--chart-s2); border-top-style: dashed; }
@@ -3137,7 +3275,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   font-family: var(--mono);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
 }
 @media (max-width: 719px) {
   .fc-vmet .forecast-summary { grid-template-columns: 1fr; }
@@ -3252,7 +3390,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   padding: 6px 0;
   color: var(--paper-faint);
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: var(--ls-label);
 }
 .glance-row-head .g-name { font-weight: 500; }
@@ -3310,7 +3448,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   text-align: left;
   font: var(--fs-label)/1.4 var(--mono);
   color: var(--paper-dim);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.04em;
   padding: 0 var(--s-4) 10px 0;
   border-bottom: 1px solid var(--line-soft);
@@ -3436,7 +3574,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   color: var(--brand-strong);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
 }
 /* both panels close on their link, on one baseline */
 .home-page .proof-col .qa-link { margin-top: auto; padding-top: var(--s-5); }
@@ -3517,7 +3655,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   color: var(--brand-strong);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
 }
 .home-page .core-panel + .core-panel .core-panel-head { color: var(--paper-dim); }
 .home-page .core-panel-foot {
@@ -3623,7 +3761,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   font-family: var(--mono);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
 }
 .home-page .xt-tag-warn { color: var(--brand-warning); }
 .home-page .xt-what {
@@ -3694,7 +3832,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   color: var(--paper-faint);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
 }
 .home-page .join-lines dd {
   margin: 0;
@@ -3722,7 +3860,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   color: var(--paper-faint);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
 }
 /* Below ~560px four nodes and three arrows cannot share a row without the
    node text going ragged, so the flow turns vertical and the arrows turn
@@ -3760,7 +3898,7 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   color: var(--paper-faint);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  text-transform: none;
 }
 .home-page .rail-lab {
   width: max-content;
@@ -3823,16 +3961,10 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   font-size: var(--fs-small);
   line-height: 1.55;
 }
-.home-page .scored-verdict {
-  margin: var(--s-4) 0 0;
-  padding-left: var(--s-4);
-  max-width: 66ch;
-  border-left: 2px solid var(--brand-warning);
-  color: var(--paper-dim);
-  font-size: var(--fs-body-sm);
-  line-height: 1.6;
-}
-.home-page .scored-verdict strong { color: var(--paper); font-weight: 650; }
+/* .scored-verdict sits inside .record-now, whose primary left rule already
+   marks it (r2:ia); no second rule, and never the warn colour (§2.1). */
+.home-page .scored-verdict { max-width: 66ch; line-height: 1.6; }
+.home-page .scored-verdict strong { color: var(--text-strong); font-weight: 650; }
 
 /* --- start-using-it row --- */
 .start-row {
@@ -3927,15 +4059,1433 @@ td.vc-warn, th.vc-warn { color: var(--brand-warning); font-weight: 600; }
   fill: var(--paper);
 }
 .mm-what { font-size: 12px; fill: var(--paper-faint); }
-.mm-legend { font-size: 11px; fill: var(--paper-faint); }
+.mm-legend { font-size: var(--fs-label); fill: var(--text-faint); }
 .model-map a { cursor: pointer; }
 .model-map a:hover .mm-pill { fill: color-mix(in srgb, var(--brand) 10%, transparent); stroke-width: 2.5; }
 .model-map a:hover .mm-id { fill: var(--brand-strong); }
 .model-map a:focus-visible .mm-pill { stroke-width: 3; }
 .mm-evidence { margin-top: var(--s-5); }
 
-@media (max-width: 720px) {
-  /* The map is a two-dimensional layout; below this width it stops being
-     readable at all, so the evidence lines carry the section on their own. */
+@media (max-width: 999px) {
+  /* The map is a 940-unit SVG; below a 1000px viewport it renders under
+     ~880px and its 12px labels drop under 11px (DESIGN.md §1.8), so the
+     question list (.mm-list, r2:ia) carries the section instead. */
   .mm-figure { display: none; }
 }
+
+/* =====================================================================
+   5. DESIGN SYSTEM v2 (DESIGN.md §4–§6)
+   Appended last on purpose: these rules restyle legacy page sections above
+   through the cascade, with no !important. New components live here too.
+   ===================================================================== */
+
+/* ---------- 5.1 base fixes the shell depends on ---------- */
+a { color: var(--link); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+a:hover { color: var(--link-hover); }
+code, pre, kbd, samp, .codeblock pre, .codeblock code { font-family: var(--code); }
+.num, td, .metric-val, .stat-value { font-variant-numeric: tabular-nums; }
+
+/* The title band is a column, left-aligned at every width: the legacy
+   two-column hero grid (align-items: center at ≥1000px) must not centre it. */
+.doc .hero.model-hero .hero-inner { align-items: flex-start; text-align: left; gap: 0; }
+
+/* ---------- 5.2 homepage: AB-style intro card instead of a title band ---- */
+.home-page .hero {
+  padding: var(--gap-cards) var(--gutter) 0;
+}
+.home-page .hero > .hero-inner {
+  width: min(var(--max), 100%);
+  padding: var(--card-pad);
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+.home-page .hero h1 { font-size: var(--fs-hero); text-wrap: balance; }
+.home-page .hero .lede { margin-bottom: var(--s-5); }
+.home-page .band { padding: var(--card-pad); }
+.home-page .hero-fig figcaption { color: var(--text-muted); }
+
+/* The verdict band: the one tinted card, marked by a left accent rule like
+   the intro card, not by a full-width wash. */
+.band.band-result,
+.band + .band.band-result {
+  background: var(--surface-card);
+  border-top: 1px solid var(--hairline);
+  border-left: 4px solid var(--primary);
+}
+@media (prefers-color-scheme: dark) {
+  .band-result { background: var(--surface-card); }
+}
+
+/* ---------- 5.3 card (DESIGN.md §4.1) ----------
+   .band is already a card; .card is the same surface for blocks inside a
+   band or in a grid. */
+.card {
+  padding: var(--s-5);
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+.card-flat { box-shadow: none; }
+.card-grid { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+
+/* ---------- 5.4 stat tile / KPI (DESIGN.md §4.2) ---------- */
+.stat-row { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); margin: var(--s-5) 0; }
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 16px 18px;
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+.stat-us { border-left-color: var(--series-us); }
+.stat-neutral { border-left-color: var(--gray-400); }
+.stat-label { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: var(--fs-small); font-weight: 600; }
+.stat-label .icon-badge { width: 28px; height: 28px; }
+.stat-value { color: var(--primary); font-size: var(--fs-stat); font-weight: 650; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat-sub { color: var(--text-faint); font-size: var(--fs-label); }
+.stat-foot { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--hairline); }
+
+/* ---------- 5.5 chip (DESIGN.md §4.3) ---------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 2px 11px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  line-height: 1.3;
+  text-decoration: none;
+  white-space: nowrap;
+}
+a.chip { min-height: 30px; }
+a.chip:hover { border-color: var(--primary); color: var(--teal-700); }
+.chip svg { width: 14px; height: 14px; flex: 0 0 auto; }
+.chip-brand { border-color: color-mix(in srgb, var(--primary) 30%, var(--hairline)); background: var(--surface-tint); color: var(--teal-700); }
+.chip-warn { border-color: var(--warn-line); background: var(--warn-bg); color: var(--warn-ink); }
+.chip-us { border-color: color-mix(in srgb, var(--series-us) 35%, var(--hairline)); color: var(--series-us); }
+/* selected = fill + border. Never a tick (DESIGN.md §1.5). */
+.chip[aria-pressed="true"],
+.chip[aria-selected="true"],
+.chip.is-selected { background: var(--surface-tint); border-color: var(--primary); color: var(--teal-700); font-weight: 600; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ---------- 5.6 icon badge (used by entry cards, stat labels, kickers) ---- */
+.icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--surface-tint);
+  color: var(--teal-700);
+}
+.icon-badge svg { width: 55%; height: 55%; }
+
+/* ---------- 5.7 expander (DESIGN.md §4.5) — native <details> ---------- */
+details.expander,
+details.about {
+  margin: var(--s-4) 0 0;
+  border-top: 1px solid var(--hairline);
+}
+details.expander > summary,
+details.about > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--teal-700);
+  font-size: var(--fs-body-sm);
+  font-weight: 600;
+}
+details.expander > summary::-webkit-details-marker,
+details.about > summary::-webkit-details-marker { display: none; }
+details.expander > summary::after,
+details.about > summary::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 150ms;
+}
+details[open].expander > summary::after,
+details[open].about > summary::after { transform: rotate(225deg) translate(-2px, -2px); }
+details.expander > summary .expander-meta { margin-left: auto; color: var(--text-faint); font-weight: 400; font-size: var(--fs-label); }
+details.expander > :not(summary),
+details.about > :not(summary) { padding-bottom: var(--s-4); color: var(--text-body); font-size: var(--fs-body-sm); }
+
+/* ---------- 5.8 "On this page" rail (DESIGN.md §4.6) ----------
+   <div class="with-rail"><nav class="page-rail" aria-label="On this page">
+   <p class="page-rail-title">On this page</p><a href="#id">…</a>…</nav>
+   <div>…cards…</div></div>. Sticky from 1100px; a chip row above that. */
+.with-rail { display: block; }
+.page-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: var(--gap-cards) auto 0;
+  width: min(var(--max), calc(100% - 2 * var(--gutter)));
+}
+.page-rail-title { display: none; }
+.page-rail a {
+  padding: 5px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  text-decoration: none;
+}
+.page-rail a[aria-current] { border-color: var(--primary); background: var(--surface-tint); color: var(--teal-700); font-weight: 600; }
+@media (min-width: 1100px) {
+  .with-rail {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: var(--s-5);
+    width: min(var(--max), calc(100% - 2 * var(--gutter)));
+    margin: 0 auto;
+  }
+  .with-rail > :not(.page-rail) > .band { width: 100%; }
+  .page-rail {
+    position: sticky;
+    top: var(--sticky-top);
+    align-self: start;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 0;
+    width: auto;
+    margin-top: var(--gap-cards);
+    padding-left: 0;
+  }
+  .page-rail-title { display: block; margin-bottom: 6px; color: var(--text-faint); font-family: var(--mono); font-size: var(--fs-label); text-transform: none; letter-spacing: var(--ls-label); }
+  .page-rail a { padding: 6px 12px; border: 0; border-left: 2px solid var(--hairline); border-radius: 0; background: none; }
+  .page-rail a[aria-current] { border-left-color: var(--primary); background: none; }
+}
+
+/* ---------- 5.9 entry cards (AB "Explore →", DESIGN.md §4.7) ---------- */
+.entry-grid { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
+.entry-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: var(--s-5);
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  border-top: 3px solid var(--primary);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  color: var(--text-body);
+  text-decoration: none;
+  transition: box-shadow 150ms, border-color 150ms;
+}
+.entry-card:hover { box-shadow: var(--shadow-raised); color: var(--text-body); }
+.entry-card h3 { margin: 6px 0 0; font-size: var(--fs-h3); color: var(--text-strong); }
+.entry-card p { margin: 0; color: var(--text-muted); font-size: var(--fs-body-sm); }
+.entry-cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #FFFFFF;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+.entry-card:hover .entry-cta { background: var(--teal-700); }
+
+/* ---------- 5.10 numbered steps (DESIGN.md §4.8) ---------- */
+ol.steps { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); margin: var(--s-5) 0; padding: 0; list-style: none; counter-reset: step; }
+ol.steps > li { position: relative; display: grid; grid-template-columns: 36px 1fr; gap: 4px 12px; align-items: start; counter-increment: step; }
+ol.steps > li::before {
+  content: counter(step);
+  grid-row: span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-tint);
+  color: var(--teal-700);
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+ol.steps > li > strong { color: var(--text-strong); font-size: var(--fs-body-sm); }
+ol.steps > li > span { color: var(--text-muted); font-size: var(--fs-small); }
+
+/* ---------- 5.11 intro card (AB, DESIGN.md §4.10) ---------- */
+.intro-card {
+  width: min(var(--max), calc(100% - 2 * var(--gutter)));
+  margin: var(--gap-cards) auto 0;
+  padding: var(--s-5) var(--card-pad);
+  background: color-mix(in srgb, var(--primary) 5%, var(--surface-card));
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--hairline));
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-card);
+}
+.intro-card p { max-width: 80ch; color: var(--text-body); }
+
+/* ---------- 5.12 chart house style (DESIGN.md §6) ----------
+   Generated SVGs keep their class vocabulary (vc-*, hf-*, mm-*); the roles
+   map onto the series tokens here. */
+.vchart .vc-grid, .hero-fan .hf-grid { stroke: var(--chart-grid); stroke-width: 1; }
+.vchart .vc-axis { stroke: var(--chart-axis); stroke-width: 1.25; }
+.vchart .vc-zero, .hero-fan .hf-zero { stroke: var(--chart-zero); stroke-width: 1.25; }
+.vchart .vc-tick, .hero-fan text { fill: var(--chart-tick); font-family: var(--mono); }
+.vchart .vc-lab { fill: var(--text-muted); font-family: var(--body); font-weight: 600; }
+.vchart .vc-s1 { stroke: var(--series-ours); stroke-width: 2.25; }
+.vchart .vc-s1-dot { fill: var(--series-ours); }
+.vchart .vc-s2 { stroke: var(--series-official); }
+.vchart .vc-s2-dot { fill: var(--series-official); }
+.vchart .vc-band90, .hero-fan .hf-b90 { fill: var(--band-90); stroke: none; }
+.vchart .vc-band68, .hero-fan .hf-b68 { fill: var(--band-68); stroke: none; }
+.hero-fan .hf-med { stroke: var(--series-median); }
+.hero-fan .hf-dot { fill: var(--series-median); }
+.ln-s1 { background: var(--series-ours); }
+
+/* Readable labels (DESIGN.md §6.3, chartkit.py). Marks stay in the SVG; every
+   label is an HTML span laid over it at percent coordinates, so it keeps 12 px
+   at any width. The SVG must have no padding or border of its own, or the
+   percentages would no longer land on the viewBox. */
+.vc-fig { container-type: inline-size; margin: 0; padding: var(--s-2) 0 0; }
+/* The viewBox is cropped to the plot area; axis labels hang outside it by a
+   fixed px offset, so the plot keeps room for them above and below. */
+.vc-fig .vc-plot { position: relative; margin: 18px 0 24px; }
+/* The plot stretches to fill its box (preserveAspectRatio="none", set by
+   chartkit) so a phone gets a usable height rather than a 130 px strip; the
+   labels are percent-positioned, so they follow. Strokes and dots keep their
+   screen size: strokes are non-scaling and chartkit draws dots as round-capped
+   zero-length paths, which stay round under a non-uniform stretch. */
+.vc-fig .vchart,
+.vc-fig .hero-fan { display: block; width: 100%; height: auto; min-height: var(--vc-min-h, 210px); padding: 0; border: 0; border-radius: 0; background: none; overflow: visible; }
+.vc-fig svg * { vector-effect: non-scaling-stroke; }
+.vc-fig .vc-dotp { fill: none; stroke-linecap: round; }
+.vchart .vc-s1-dot.vc-dotp { stroke: var(--series-ours); }
+.vchart .vc-s2-dot.vc-dotp { stroke: var(--series-official); }
+.vchart .vc-out-line { fill: none; stroke: var(--series-outturn); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.hero-fan .hf-dot.vc-dotp { stroke: var(--series-median); }
+.vchart .vc-out-dot.vc-dotp { stroke: var(--series-outturn); }
+.vc-fig .vc-ring { stroke: color-mix(in srgb, var(--text-strong) 70%, transparent); }
+.vc-fig .vc-ring-in { stroke: var(--surface-card); }
+.vc-fig .vc-labels { position: absolute; inset: 0; pointer-events: none; }
+.vc-t {
+  position: absolute;
+  transform: translate(0, -0.86em);
+  white-space: nowrap;
+  font: 400 var(--fs-label)/1 var(--mono);
+  color: var(--chart-tick);
+  font-variant-numeric: tabular-nums;
+}
+.vc-t.vc-a-m { transform: translate(-50%, -0.86em); }
+.vc-t.vc-a-e { transform: translate(-100%, -0.86em); }
+/* Axis labels are offset in px from their line, not in viewBox units, so the
+   gap is the same at every width: y labels sit 3 px above their gridline,
+   x labels 6 px below the axis. */
+.vc-t.vc-y { transform: translate(0, calc(-100% - 3px)); }
+.vc-t.vc-y.vc-a-e { transform: translate(-100%, calc(-100% - 3px)); }
+.vc-t.vc-x { transform: translate(-50%, 6px); }
+.vc-t.vc-x.vc-a-s { transform: translate(0, 6px); }
+.vc-t.vc-x.vc-a-e { transform: translate(-100%, 6px); }
+.vc-t.vc-gutter { transform: translate(0, -50%); }
+.vc-fig.vc-hero { padding: 0; }
+.vc-fig.vc-hero .vc-plot { margin: 4px 44px 24px 0; }
+.vc-t.vc-x2 { transform: translate(-50%, 24px); }
+.vc-fig.vc-two-rows .vc-plot { margin-bottom: 44px; }
+.vc-t.vc-lab { font-family: var(--body); font-weight: 600; color: var(--text-muted); }
+.vc-t.vc-lab2 { color: var(--text-muted); }
+.vc-t.vc-rowlab { font-family: var(--body); font-weight: 500; color: var(--text-body); }
+.vc-t.vc-val { font-weight: 600; color: var(--text-strong); }
+.vc-t.vc-warn { color: var(--warn-ink); font-weight: 600; }
+.vc-t.vc-wrap { white-space: normal; line-height: 1.3; text-align: center; }
+.vc-t.vc-wrap.vc-a-s { text-align: left; }
+.vc-fig .vc-narrow { display: none; }
+@container (max-width: 520px) {
+  .vc-t.vc-minor { display: none; }
+  .vc-fig .vc-narrow { display: block; margin-top: var(--s-3); }
+}
+.vc-fig .table-scroll { margin: 0; }
+.vc-fig .table-scroll table.vc-narrow-table { min-width: 0; }
+.vc-fig .table-scroll table.vc-table { min-width: 520px; }
+.vc-table { width: 100%; border-collapse: collapse; font-size: var(--fs-body-sm); }
+.vc-table caption { caption-side: top; text-align: left; padding: 0 0 var(--s-2); color: var(--text-muted); font-size: var(--fs-small); font-weight: 600; }
+.vc-table th, .vc-table td { padding: 7px 12px 7px 0; border-bottom: 1px solid var(--hairline); text-align: left; white-space: nowrap; }
+.vc-table thead th { color: var(--text-muted); font: 500 var(--fs-label)/1.3 var(--mono); }
+.vc-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.vc-table tbody th { white-space: normal; min-width: 9rem; font-weight: 500; }
+@media (max-width: 620px) { .vc-table th, .vc-table td { padding-right: 8px; } }
+.vc-table td.vc-warn { color: var(--warn-ink); font-weight: 600; }
+.vc-narrow-table { width: 100%; border-collapse: collapse; font-size: var(--fs-small); }
+.vc-narrow-table th, .vc-narrow-table td { padding: 4px 8px 4px 0; border-bottom: 1px solid var(--hairline); text-align: left; }
+.vc-narrow-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.doc .vc-narrow-table th, .doc .vc-narrow-table td { width: auto; min-width: 0; white-space: nowrap; font-size: var(--fs-small); }
+.vc-narrow-table thead th { color: var(--text-muted); font: 500 var(--fs-label)/1.3 var(--mono); }
+.vc-t .vc-num { font-family: var(--mono); font-weight: 600; color: var(--text-strong); }
+.vchart .vc-ref { stroke: var(--chart-axis); stroke-width: 1; stroke-dasharray: 2 4; }
+.vchart .vc-spread { stroke-width: 1.2; opacity: .55; stroke-dasharray: none; }
+.vc-t.vc-y.vc-a-m { transform: translate(-50%, calc(-100% - 3px)); }
+.vchart .vc-outline { stroke: var(--text-strong); stroke-width: 1; stroke-dasharray: 3 2; }
+/* Swatch legends inside or outside a .vc-fig (the scoreboard's .sb-legend
+   is the same component). */
+.doc .vc-legend, .doc ul.vc-legend, .doc .sb-legend, .doc ul.sb-legend {
+  display: flex; flex-wrap: wrap; gap: 6px 18px;
+  margin: var(--s-3) 0 0; padding: 0; list-style: none;
+  font-size: var(--fs-small); color: var(--text-muted);
+}
+.doc .vc-legend li, .doc .sb-legend li { display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 0; font-size: var(--fs-small); line-height: 1.4; }
+.doc .vc-legend li::before, .doc .sb-legend li::before { content: none; }
+.vfig figcaption { font-family: var(--body); }
+.vc-sw { display: inline-block; flex: none; width: 22px; height: 0; border-top: 2.25px solid var(--series-ours); }
+.vc-sw.ln-s1 { background: none; border-top-color: var(--series-ours); }
+.vc-sw.ln-s2 { border-top: 2px dashed var(--series-official); }
+.vc-sw.ln-s3 { border-top: 2px solid color-mix(in srgb, var(--text-strong) 45%, transparent); }
+.vc-sw.ln-edge { border-top: 1px dashed var(--chart-axis); }
+.vc-sw.ln-med { border-top: 2.5px solid var(--series-median); }
+.vc-sw[class*="sw-b"], .vc-sw[class*="sw-band"] { width: 14px; height: 10px; border: 0; border-radius: 2px; }
+.vc-sw.sw-b1 { background: var(--series-ours); }
+.vc-sw.sw-b2 { background: color-mix(in srgb, var(--text-strong) 55%, transparent); }
+.vc-sw.sw-b3 { background: color-mix(in srgb, var(--text-strong) 35%, transparent); }
+.vc-sw.sw-b3d { background: color-mix(in srgb, var(--text-strong) 35%, transparent); outline: 1px dashed var(--text-strong); outline-offset: -1px; }
+.vc-sw.sw-band { background: color-mix(in srgb, var(--primary) 16%, transparent); }
+.vc-sw.sw-band68 { background: var(--band-68); }
+.vc-sw.sw-band90 { background: var(--band-90); }
+.vc-sw.sw-dot1, .vc-sw.sw-dot2, .vc-sw.sw-dot-out { width: 8px; height: 8px; border: 0; border-radius: 50%; background: var(--series-ours); }
+.vc-sw.sw-dot2 { background: var(--series-official); }
+.vc-sw.sw-ring { width: 8px; height: 8px; border: 1.5px solid color-mix(in srgb, var(--text-strong) 70%, transparent); border-radius: 50%; background: none; }
+.vc-sw.sw-dot-out { background: var(--series-outturn); }
+.doc .vc-fig .vc-notes { margin: var(--s-2) 0 0; color: var(--text-muted); font-size: var(--fs-small); line-height: 1.5; }
+.vc-notes .vc-warn { color: var(--warn-ink); font-weight: 600; }
+.mo-figcard, .vfig { border-radius: var(--radius); }
+figure figcaption { color: var(--text-muted); font-size: var(--fs-small); line-height: 1.5; }
+
+/* Short pages: the footer sits at the bottom of the viewport, not mid-screen. */
+body.doc { min-height: 100vh; display: flex; flex-direction: column; }
+body.doc > main { flex: 1 0 auto; }
+
+/* /connect's hero is a title band like every other interior page. */
+.doc .hero.connect-hero {
+  min-height: 0;
+  padding: var(--s-3) var(--gutter) var(--s-6);
+  background: var(--band-bg-2);
+  color: var(--band-text);
+}
+.doc .hero.connect-hero .hero-inner { display: flex; flex-direction: column; align-items: flex-start; gap: 0; padding-inline: var(--card-pad); }
+.doc .connect-hero .eyebrow { order: 2; margin: var(--s-2) 0 0; color: var(--band-text-dim); font-size: var(--fs-small); letter-spacing: 0.02em; text-transform: none; }
+.doc .connect-hero h1 { order: 1; margin: 0; color: var(--band-text); font-size: var(--fs-hero-sub); line-height: 1.2; }
+.doc .connect-hero .lede { order: 3; max-width: 80ch; margin: var(--s-3) 0 0; color: rgba(255, 255, 255, .92); font-size: var(--fs-body); }
+.doc .connect-hero a:not(.btn) { color: var(--band-text); }
+.doc .connect-hero :focus-visible { outline-color: var(--band-text); box-shadow: 0 0 0 6px var(--band-bg); }
+
+/* Paper pages: the viewer card no longer clears a fixed header. */
+.doc .band.paper-viewer { padding-top: var(--card-pad); }
+.paper-viewer-head h1,
+.paper-viewer-head .paper-title { font-family: var(--serif); font-weight: 600; }
+
+/* Bare definition lists (release-note provenance, generated by
+   notes/generate_release_notes.py): a two-column key/value grid. */
+.band dl:not([class]) {
+  display: grid;
+  grid-template-columns: minmax(8rem, max-content) minmax(0, 1fr);
+  gap: 0;
+  margin: var(--s-4) 0;
+  border-top: 1px solid var(--hairline);
+  font-size: var(--fs-body-sm);
+}
+.band dl:not([class]) > dt,
+.band dl:not([class]) > dd { padding: 8px 16px 8px 0; border-bottom: 1px solid var(--hairline); }
+.band dl:not([class]) > dt { color: var(--text-muted); font-weight: 600; }
+.band dl:not([class]) > dd { color: var(--text-strong); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+
+/* Stat tile note line (topic pages: how the snapshot stores the value). */
+.stat .stat-note { display: block; margin-top: 4px; color: var(--text-muted); font-size: var(--fs-small); line-height: 1.45; }
+
+/* ---------- 5.14 "where next" row (DESIGN.md §7.3, §8) ----------
+   The last card on every model tab: 2–4 compact entry cards. */
+.band.where-next .band-head { margin-bottom: var(--s-4); }
+.band.where-next .band-head h2 { font-size: var(--fs-h3); font-family: var(--body); }
+.where-next .entry-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.where-next .entry-card { padding: var(--s-4); gap: 4px; }
+.where-next .entry-card .icon-badge { width: 32px; height: 32px; }
+.where-next .entry-card h3 { margin-top: 4px; font-size: var(--fs-body); }
+.where-next .entry-cta { margin-top: var(--s-2); padding: 5px 14px; }
+@media (max-width: 620px) {
+  .where-next .entry-card, #start .entry-card { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; column-gap: 12px; align-items: center; }
+  .where-next .entry-card .icon-badge, #start .entry-card .icon-badge { grid-row: span 2; width: 32px; height: 32px; }
+  #start .entry-card { padding: var(--s-4); }
+  .where-next .entry-card h3, #start .entry-card h3 { margin: 0; }
+  .where-next .entry-card p, #start .entry-card p { grid-column: 2; }
+  .where-next .entry-cta, #start .entry-cta { grid-column: 3; grid-row: 1 / span 2; margin: 0; padding: 0; background: none; color: var(--teal-700); font-size: 0; }
+  .where-next .entry-cta > span, #start .entry-cta > span { font-size: var(--fs-body); }
+  .where-next .entry-card:hover .entry-cta, #start .entry-card:hover .entry-cta { background: none; }
+}
+
+/* ---------- 5.15 StepPanel body polish (phase 2) ----------
+   Step bodies are not always wrapped in .prose: give their paragraphs the
+   same rhythm. Row headers in reference tables read as text, not as the
+   uppercase micro-label the column headers use. Inside a step on a wide
+   screen a table fits its column instead of forcing a 720px scroll. */
+.meth-step > p, .meth-step > .prose > p { margin: 0 0 var(--s-3); }
+.meth-step > .mo-lead { margin-bottom: var(--s-4); color: var(--text-muted); }
+.prose tbody th, .meth-step tbody th {
+  font-family: var(--body);
+  font-size: var(--fs-body-sm);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-strong);
+}
+@media (min-width: 900px) {
+  .scrolly-steps .table-scroll table { min-width: 0; }
+}
+.verdict-callout { margin: 0 0 var(--s-5); }
+.table-scroll.mo-tablecard table { margin: 0; }
+.stat-foot .chip { white-space: normal; }
+@media (max-width: 620px) {
+  .stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3); }
+  .stat { padding: 12px 14px; }
+  .stat-value { font-size: 24px; }
+}
+
+/* ---------- 5.16 /models question rows on a phone (DESIGN.md §7.2) ----------
+   The model chip stacks under the question instead of squeezing it. */
+@media (max-width: 620px) {
+  .qa summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; align-items: start; padding: var(--s-4); }
+  .qa summary span { grid-column: 1; grid-row: 1; }
+  .qa summary::after { grid-column: 2; grid-row: 1; }
+  .qa summary strong { grid-column: 1 / -1; grid-row: 2; justify-self: start; white-space: normal; }
+}
+
+/* ---------- 5.17 homepage h1: one balanced headline at every width ----------
+   The two spans stay in the markup but run inline, so text-wrap: balance
+   sets the break instead of a forced third line at 1440px. */
+.home-page .hero .hero-h1 { white-space: normal; text-wrap: balance; max-width: 22ch; }
+.home-page .hero .hero-h1 span { display: inline; }
+#start .entry-grid { margin-top: var(--s-2); }
+/* the score column no longer carries the rail: subject, note, verdict sit together */
+.home-page .scored-subject + .scored-note { margin-top: calc(-1 * var(--s-4)); }
+
+/* ---------- 5.18 /contact (DESIGN.md §7.9): the email is the one primary button ---------- */
+.contact-primary h2 { font-family: var(--serif); font-weight: 600; }
+.contact-email.btn { gap: 10px; border-radius: 999px; border-color: var(--primary); background: var(--primary); color: #FFFFFF; font-family: var(--body); font-size: var(--fs-body-sm); font-weight: 600; }
+.contact-email.btn:hover { background: var(--teal-700); color: #FFFFFF; }
+
+/* ---------- 5.13 dark theme for the v2 roles ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gray-50: #0B0E14;
+    --gray-100: #141A26;
+    --gray-200: #263042;
+    --gray-300: #334155;
+    --gray-500: #A9B4C4;
+    --gray-600: #CBD5E1;
+    --gray-400: #64748B;
+    --gray-700: #E2E8F0;
+    --gray-800: #EEF2F6;
+    --gray-900: #F5F5F5;
+    --teal-700: #81E6D9;
+    --band-gradient: linear-gradient(to right, #10282B, #1D4044);
+    --canvas: #0B0E14;
+    --band-bg: #10282B;
+    --band-bg-2: #163538;
+    --series-official: #CBD5E1;
+    --series-us: #7DD3FC;
+    --warn-bg: #2A1A0C;
+    --warn-line: #7C4A1E;
+    --warn-ink: #FFB066;
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, .4);
+    --shadow-raised: 0 8px 24px rgba(0, 0, 0, .5);
+  }
+}
+
+/* =====================================================================
+   5.15 Phone reading (phase 4). reveal.js marks scroll rows with
+   .fade-l/.fade-r when content sits past an edge, and marks word-heavy
+   tables .t-stack (cells carry data-label). DESIGN.md §1.7, §4.12.
+   ===================================================================== */
+.fade-r { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); }
+.fade-l { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent); }
+.fade-l.fade-r { -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); }
+@media (max-width: 400px) {
+  .model-tabs-link, .economy-topics a, .economy-topics button { padding: 0 8px; }
+}
+@media (max-width: 640px) {
+  .table-scroll.has-t-stack { overflow-x: visible; -webkit-mask-image: none; mask-image: none; }
+  table.t-stack { min-width: 0 !important; width: 100%; border-collapse: separate; border-spacing: 0; }
+  table.t-stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  table.t-stack tbody, table.t-stack tr, table.t-stack th, table.t-stack td { display: block; width: auto; }
+  table.t-stack tr {
+    padding: var(--s-3) 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  table.t-stack tbody tr:first-child { border-top: 1px solid var(--hairline); }
+  table.t-stack th, table.t-stack td { padding: 2px 0; border: 0; text-align: left; white-space: normal; overflow-wrap: anywhere; min-width: 0; }
+  table.t-stack code, table.t-stack .mono { white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
+  table.t-stack tr > :first-child { font-weight: 600; color: var(--text-strong); padding-bottom: var(--s-1); }
+  table.t-stack tr > :first-child[data-label]::before { display: none; }
+  table.t-stack td[data-label]::before,
+  table.t-stack th[data-label]:not(:first-child)::before {
+    content: attr(data-label);
+    display: block;
+    margin-top: var(--s-1);
+    color: var(--text-faint);
+    font-family: var(--mono);
+    font-size: var(--fs-label);
+    font-weight: 500;
+    letter-spacing: .04em;
+    text-transform: none;
+  }
+  table.t-stack td[data-label=""]::before { display: none; }
+  table.t-stack caption { text-align: left; }
+  /* Hand-drawn method diagrams (580-unit viewBox, 11px text) keep their
+     native width and scroll inside the figure, so no label drops below 11px
+     (§1.8); the fade marks the hidden side. */
+  .step-diagram { justify-content: flex-start; overflow-x: auto; cursor: default; }
+  .step-diagram svg { max-width: none !important; flex: 0 0 auto; } /* width attribute = viewBox width */
+}
+
+/* === r2:ia === */
+/* Homepage story (what it is, start, why trust it, the record, which model,
+   how it connects, use) and the /models router. Role tokens only. */
+
+/* why trust it: one verdict row per model, the class as a chip */
+.home-page .trust-list { list-style: none; margin: var(--s-5) 0 0; padding: 0; display: grid; gap: 0; }
+.home-page .trust-row {
+  display: grid; grid-template-columns: 9rem 10.5rem minmax(0, 1fr); gap: var(--s-2) var(--s-4);
+  align-items: baseline; padding: var(--s-3) 0; border-top: 1px solid var(--hairline);
+}
+.home-page .trust-row:first-child { border-top: 0; }
+.home-page .trust-model { font-weight: 600; font-size: var(--fs-body-sm); color: var(--link); }
+.home-page .trust-class { justify-self: start; white-space: nowrap; }
+.home-page .trust-verdict { color: var(--text-body); font-size: var(--fs-body-sm); line-height: 1.55; }
+.home-page .trust-verdict strong { color: var(--text-strong); }
+@media (max-width: 760px) {
+  .home-page .trust-row { grid-template-columns: auto 1fr; }
+  .home-page .trust-verdict { grid-column: 1 / -1; }
+}
+
+/* the forecast record */
+.home-page .record-steps { margin: var(--s-5) 0; }
+.home-page .record-now {
+  margin: var(--s-5) 0; padding: var(--s-4) var(--s-5);
+  background: var(--surface-tint); border-left: 3px solid var(--primary); border-radius: var(--radius);
+}
+.home-page .record-now .proof-head { margin-bottom: var(--s-2); }
+.home-page .record-now .scored-subject { margin: 0 0 var(--s-2); color: var(--text-strong); }
+.home-page .record-now .scored-verdict { margin: 0; color: var(--text-body); font-size: var(--fs-body-sm); }
+.home-page #record .hero-cta { margin: var(--s-4) 0 0; }
+
+/* which model: the map on wide screens, a question list on phones
+   (one of the two is visible at any width, as the panel/inline pair) */
+.home-page .mm-list { display: none; list-style: none; margin: var(--s-4) 0 0; padding: 0; }
+.home-page .mm-list li {
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-2);
+  padding: var(--s-3) 0; border-top: 1px solid var(--hairline);
+}
+.home-page .mm-list li:first-child { border-top: 0; }
+.home-page .mm-list-q { color: var(--text-strong); font-size: var(--fs-body-sm); font-weight: 600; }
+@media (max-width: 999px) { .home-page .mm-list { display: block; } }
+
+/* how it connects: three pipeline strips, mechanics on /models#compose */
+.home-page .join-list { list-style: none; margin: var(--s-5) 0 0; padding: 0; display: grid; gap: var(--s-5); }
+.home-page .join-list h3 { margin: 0 0 var(--s-3); font-size: var(--fs-body); }
+.home-page .join-list .pipeline { flex-wrap: wrap; }
+@media (max-width: 560px) {
+  .home-page .join-list .pipeline { flex-direction: column; align-items: stretch; }
+  .home-page .join-list .pipeline .pl-node { text-align: center; }
+  .home-page .join-list .pipeline .pl-arrow { display: block; text-align: center; rotate: 90deg; }
+}
+
+/* /models: comparison heads must not break inside a word; ids >= 12px */
+.comparison-table thead th { text-transform: none; letter-spacing: 0; overflow-wrap: normal; word-break: normal; hyphens: none; vertical-align: bottom; }
+.comparison-table thead th a { display: block; font-family: var(--body); font-size: var(--fs-small); font-weight: 600; letter-spacing: 0; text-transform: none; overflow-wrap: normal; word-break: normal; hyphens: manual; }
+.comparison-table thead th a span { display: block; margin-top: 4px; color: var(--link); font-family: var(--mono); font-size: var(--fs-label); font-weight: 400; letter-spacing: .02em; }
+.router-gap { margin-top: var(--s-5); }
+.class-glossary { display: grid; gap: var(--s-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); margin: var(--s-4) 0 var(--s-5); }
+.class-glossary > div { padding: var(--s-3) var(--s-4); border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface-card); }
+.class-glossary dt { color: var(--text-strong); font-size: var(--fs-body-sm); font-weight: 600; }
+.class-glossary dd { margin: 4px 0 0; color: var(--text-muted); font-size: var(--fs-small); line-height: 1.5; }
+/* === r2:model-cards === */
+/* Model card (DESIGN.md §4.13): the registry facts for one model on its
+   Overview, in section#card under the verdict. One markup and one field order
+   on all seven models (integration/tests/test_site_contract.py enforces it);
+   values follow integration/src/policyengine_macro/capabilities.py MODELS.
+   Two key/value columns from 760px; .model-card-wide rows span both. */
+.model-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 var(--s-6);
+  margin: var(--s-4) 0 0;
+  border-top: 1px solid var(--hairline);
+}
+.model-card > div {
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--hairline);
+  min-width: 0;
+}
+@media (min-width: 760px) {
+  .model-card { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .model-card > .model-card-wide { grid-column: 1 / -1; }
+}
+.model-card dt {
+  margin: 0 0 2px;
+  color: var(--text-faint);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: none;
+}
+.model-card dd {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: var(--fs-body-sm);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.model-card dd a { color: var(--link); }
+.verdict-callout + .model-card { margin-top: var(--s-4); }
+/* Trust card (Validation, DESIGN.md §4.13): one row per MODEL_QUALITY
+   dimension; the level is a neutral chip (no colour for good or bad). */
+.trust-card td:nth-child(2) { white-space: nowrap; }
+.trust-card .chip { font-family: var(--mono); font-size: var(--fs-label); }
+/* === r2:charts-use === */
+/* Chart house style, round 2 (DESIGN.md §6). Owned by the charts agent.
+   1. Halo: every overlay label gets a knock-out in the surface colour, so a
+      tick that sits on a line (y labels live inside the plot, §6.3) or a
+      value over a band stays legible; the line breaks behind the label, as
+      in FT and BoE charts. --vc-halo follows the card in dark mode. */
+.vc-fig { --vc-halo: var(--surface-card); }
+.vc-fig .vc-t {
+  text-shadow:
+    0 0 2px var(--vc-halo), 0 0 2px var(--vc-halo),
+    1px 0 0 var(--vc-halo), -1px 0 0 var(--vc-halo),
+    0 1px 0 var(--vc-halo), 0 -1px 0 var(--vc-halo);
+}
+/* 2. The value axis' unit, printed once above the plot (chartkit unit=). */
+.doc .vc-fig .vc-unit, .vc-fig .vc-unit {
+  margin: 0;
+  font: 500 var(--fs-label)/1.3 var(--body);
+  color: var(--text-muted);
+  max-width: none;
+}
+/* 3. Direct labels at a line's last point (chartkit.endlabel). Ink matches
+      the series; the neutral series uses text-muted, not its 45% grey, so the
+      words keep AA contrast. */
+.vc-t.vc-end { font-family: var(--body); font-weight: 600; }
+.vc-t.vc-end.vc-end-up { transform: translate(-100%, calc(-100% - 6px)); }
+.vc-t.vc-end.vc-end-dn { transform: translate(-100%, 6px); }
+.vc-t.vc-end-s1 { color: var(--series-ours); }
+.vc-t.vc-end-s2 { color: var(--series-official); }
+.vc-t.vc-end-s3 { color: var(--text-muted); }
+.vchart .vc-s3-dot { fill: color-mix(in srgb, var(--text-strong) 45%, transparent); }
+.vchart .vc-s3-dot.vc-dotp { fill: none; stroke: color-mix(in srgb, var(--text-strong) 45%, transparent); }
+.vchart .vc-s3 { stroke: color-mix(in srgb, var(--text-strong) 45%, transparent); }
+/* A published series drawn solid where nothing on the chart is "ours"
+   (single-source charts such as the OBR outlook). */
+.vchart .vc-s2.vc-solid { stroke-dasharray: none; }
+.vc-sw.ln-s2s { border-top: 2px solid var(--series-official); }
+/* 4. Reference rules (nominal coverage, parity at 1.0) must read as rules,
+      not as faint gridlines. */
+.vchart .vc-ref { stroke: var(--chart-zero); stroke-width: 1; stroke-dasharray: 4 3; }
+/* 5. An interpolated value is drawn as an outline, not a solid result bar. */
+.vchart .vc-interp { fill: color-mix(in srgb, var(--series-ours) 18%, transparent); stroke: var(--series-ours); stroke-width: 1.25; stroke-dasharray: 4 3; }
+.vc-sw.sw-interp { width: 14px; height: 10px; border: 1.25px dashed var(--series-ours); border-radius: 2px; background: color-mix(in srgb, var(--series-ours) 18%, transparent); }
+/* Outturn rule across a quarter's forecast bars (obr-outturn). */
+.vchart .vc-out-rule { stroke: var(--series-outturn); stroke-width: 1.5; }
+/* 6. Dot-plot marks: a forecast as a short horizontal bar, outturn as a dot. */
+.vchart .vc-mark-s1 { stroke: var(--series-ours); stroke-width: 3; stroke-linecap: butt; }
+.vchart .vc-mark-s2 { stroke: var(--series-official); stroke-width: 3; stroke-linecap: butt; }
+.vchart .vc-stem { stroke: var(--chart-axis); stroke-width: 1; }
+.vc-sw.sw-mark1 { width: 14px; height: 0; border-top: 3px solid var(--series-ours); }
+.vc-sw.sw-mark2 { width: 14px; height: 0; border-top: 3px solid var(--series-official); }
+.vchart .vc-track { stroke: var(--chart-grid); stroke-width: 1; }
+.vc-t sup { font-size: 0.8em; line-height: 0; vertical-align: 0.45em; }
+.vc-sw.ln-ref { border-top: 1px dashed var(--chart-zero); }
+/* === r2:forecasts === */
+/* Scoreboard on /forecasts#scored (forecasts/score.py render_results). The
+   strip in the Band column places the archived 90%/68% bands, the median and
+   the outturn on the row's own scale; it is aria-hidden because every value
+   it places is in the row's cells. */
+.scoreboard { min-width: 0; width: 100%; }
+.scoreboard th[scope="row"] { min-width: 96px; }
+.scoreboard td, .scoreboard th { vertical-align: top; }
+.scoreboard .sb-sub { color: var(--text-muted); font-size: var(--fs-small); font-weight: 400; }
+.scoreboard td:nth-child(7) { min-width: 168px; font-size: var(--fs-small); }
+.sb-strip { position: relative; width: 120px; height: 18px; margin: 2px 0 6px; }
+.sb-strip > span { position: absolute; top: 50%; transform: translateY(-50%); }
+.sb-b90 { height: 14px; background: var(--band-90); border-radius: 2px; }
+.sb-b68 { height: 14px; background: var(--band-68); border-radius: 2px; }
+.sb-med { width: 2px; height: 18px; margin-left: -1px; background: var(--series-ours); }
+.sb-out { width: 9px; height: 9px; margin-left: -4.5px; border-radius: 50%; background: var(--series-outturn); box-shadow: 0 0 0 2px var(--surface-card); }
+.scoreboard a.mono, .scoreboard .num { white-space: nowrap; }
+@media (max-width: 639px) {
+  .scoreboard { min-width: 0; }
+  .scoreboard th[scope="row"] { min-width: 0; }
+  .scoreboard td:nth-child(7) { min-width: 0; }
+}
+/* Release digests (/notes/releases/<date>, notes/generate_release_notes.py). */
+.digest-table td.kind { white-space: nowrap; }
+/* === r2:integration === */
+/* Baseline for a table outside .prose and .meth-step (e.g. a generated
+   .table-scroll in a card): the same rules and type as .prose tables.
+   :where() keeps it at zero specificity, so any classed table wins. */
+:where(.band) :where(table) { width: 100%; border-collapse: collapse; font-size: var(--fs-body-sm); }
+:where(.band) :where(th, td) { padding: 10px 16px 10px 0; border-bottom: 1px solid var(--hairline); text-align: left; vertical-align: top; }
+:where(.band) :where(thead th) { color: var(--text-faint); font: 500 var(--fs-label)/1.3 var(--mono); letter-spacing: .04em; text-transform: none; }
+:where(.band) :where(caption) { caption-side: top; margin: 0 0 var(--s-2); color: var(--text-muted); font-size: var(--fs-small); text-align: left; }
+
+/* =====================================================================
+   6. AUTUMN BUDGET LOOK (DESIGN.md §2–§4, Nov 2026)
+   The whole site in the UK Autumn Budget 2026 dashboard's visual language
+   (PolicyEngine/uk-autumn-budget-dashboard-2026, src/app/globals.css,
+   SubTabs.css, PolicyCards, ObrDifferencePanel.css, MeasureKey.css):
+   Inter everywhere, the teal gradient title bar, white tab rows with icons,
+   section headers on the canvas above white 12px cards, quiet tints in
+   place of heavy rules. Last in the file so it wins without !important.
+   ===================================================================== */
+
+/* ---------- 6.1 type ---------- */
+body { font-family: var(--body); font-size: var(--fs-body); color: var(--text-body); background: var(--canvas); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4, .brand, .paper-viewer-head h1, .paper-viewer-head .paper-title { font-family: var(--body); letter-spacing: 0; }
+h1 { font-weight: 700; letter-spacing: -0.025em; }
+h2 { font-size: var(--fs-h2); font-weight: 600; line-height: 1.6; color: var(--gray-800); max-width: none; }
+h3 { font-size: var(--fs-h3); font-weight: 600; line-height: 1.35; color: var(--text-strong); }
+.mono { font-family: inherit; }
+code, pre, kbd, samp, .codeblock pre, .codeblock code { font-family: var(--code); }
+.prose p { font-size: var(--fs-body); line-height: 1.6; }
+.prose h4, .formal-label, .meth-sec-title, .meth-eq-label, .economy-subnav-label { letter-spacing: 0; }
+.prose h4 { font-size: var(--fs-body); font-weight: 600; color: var(--text-strong); }
+
+/* ---------- 6.2 site header: policyengine.org's gradient band ---------- */
+.nav {
+  background: var(--band-gradient);
+  border-bottom: 0.5px solid var(--teal-700);
+  box-shadow: none;
+}
+.brand { font-size: 1.0625rem; font-weight: 600; }
+.nav-links { font-size: var(--fs-body); }
+.nav-links a { color: var(--band-text); font-weight: 500; }
+.nav-links a:hover, .nav-links a[aria-current] { background: transparent; }
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 8px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--band-text);
+  transform: scaleX(0);
+  transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.nav-links a:hover::after, .nav-links a[aria-current]::after { transform: scaleX(1); }
+.nav-links a[aria-current]::after { left: 10px; right: 10px; bottom: 8px; height: 2px; background: var(--band-text); }
+.nav-links a.nav-gh::after { display: none; }
+
+/* ---------- 6.3 title bar (AB .title-row) + sub-tabs + section lede ----
+   An interior page's .hero holds the pathway's title, a key-facts line and
+   the lede. The hero and its inner box dissolve (display: contents) so the
+   three become items of <main>'s column and take AB's order: the h1 in the
+   gradient title bar (the pathway, painted the same, sits above it), then
+   the white tab row, then the lede and key facts on the canvas as the
+   page's section header, then the cards. Nothing in the markup moves. */
+.doc main:has(> .hero.model-hero),
+.doc main:has(> .hero.connect-hero) { display: flex; flex-direction: column; }
+.doc main:has(> .hero.model-hero) > *,
+.doc main:has(> .hero.connect-hero) > * { order: 5; }
+.doc .hero.model-hero, .doc .hero.model-hero > .hero-inner,
+.doc .hero.connect-hero, .doc .hero.connect-hero > .hero-inner { display: contents; }
+.doc main > .hero > .hero-inner > * { order: 4; }
+.doc main > .hero > .hero-inner > h1 { order: 1; }
+.doc main > .hero > .hero-inner > .lede { order: 3; }
+.doc main:has(> .hero) > .model-tabs, .doc main:has(> .hero) > .economy-subnav { order: 2; }
+/* the column every bar's content lines up with: the cards' left edge */
+:root { --col-x: max(var(--gutter), calc((100% - var(--max)) / 2)); }
+.crumbs {
+  padding: 10px var(--col-x) 0;
+  background: var(--band-gradient);
+  color: var(--band-text-dim);
+  font-size: var(--fs-small);
+}
+.crumbs a { color: rgba(255, 255, 255, .82); text-decoration: none; }
+.crumbs a:hover { color: var(--band-text); text-decoration: underline; }
+.crumbs a::after { color: rgba(255, 255, 255, .55); }
+@media (min-width: 1360px) { .crumbs { padding-inline: var(--col-x); } }
+.doc main > .hero > .hero-inner > h1 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  margin: 0;
+  padding: 4px var(--col-x) 10px;
+  background: var(--band-gradient);
+  border-bottom: 0.5px solid var(--teal-700);
+  color: var(--band-text);
+  font-size: var(--fs-hero-sub);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.doc main > .hero > .hero-inner > h1::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #FFFFFF url("/assets/policyengine-mark.svg") center / 22px no-repeat;
+}
+.doc main > .hero > .hero-inner > .lede,
+.doc main > .hero > .hero-inner > .eyebrow,
+.doc main > .hero > .hero-inner > :not(h1) {
+  width: min(var(--max), calc(100% - 2 * var(--gutter)));
+  margin-inline: auto;
+}
+.doc main > .hero > .hero-inner > .lede {
+  max-width: none;
+  margin-top: 28px;
+  margin-bottom: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-body-lg, 1rem);
+  line-height: 1.6;
+}
+.doc main > .hero > .hero-inner > .lede > * { max-width: 80ch; }
+.doc main > .hero > .hero-inner > .eyebrow {
+  margin-top: 6px;
+  margin-bottom: 0;
+  color: var(--text-faint);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.doc main > .hero > .hero-inner > :not(h1):not(.lede):not(.eyebrow) { margin-top: var(--s-4); }
+.doc main > .hero a:not(.btn) { color: var(--link); text-decoration-color: color-mix(in srgb, var(--link) 40%, transparent); }
+.doc main > .hero .lede strong { color: var(--text-strong); }
+.doc main > .hero code { color: var(--text-strong); background: var(--surface-sunken); }
+.doc main > .hero :focus-visible { box-shadow: none; }
+
+/* The tab rows: AB's ViewTabs/SubTabs. White, one rule, 48px, 16px/600,
+   an icon before each label; chosen = teal ink, teal-50 tint, 3px teal
+   underline on the rule. */
+:root { --tab-teal: var(--teal-700); }
+.model-tabs, .economy-subnav {
+  border-top: 1px solid var(--hairline);
+  box-shadow: 0 1px 2px rgba(17, 24, 39, .04);
+}
+.model-tabs-row, .economy-subnav-row {
+  gap: 8px;
+  max-width: none;
+  padding: 0 calc(var(--col-x) - 12px);
+}
+.model-tabs-link, .economy-topics a, .economy-topics button, .model-tabs-set button {
+  gap: 8px;
+  height: 48px;
+  min-height: 48px;
+  padding: 0 12px;
+  color: var(--gray-600);
+  font-size: 1rem;
+  font-weight: 600;
+}
+.model-tabs-link:hover, .economy-topics a:hover, .economy-topics button:hover, .model-tabs-set button:hover { color: var(--tab-teal); background: var(--surface-tint); }
+.model-tabs-link[aria-current], .economy-topics a[aria-current], .economy-topics button[aria-selected="true"],
+.model-tabs-set button.is-current, .model-tabs-set button[aria-selected="true"] { color: var(--tab-teal); background: var(--surface-tint); font-weight: 600; }
+.model-tabs-link[aria-current]::after, .economy-topics a[aria-current]::after, .economy-topics button[aria-selected="true"]::after,
+.model-tabs-set button.is-current::after, .model-tabs-set button[aria-selected="true"]::after { background: var(--tab-teal); }
+/* icons, keyed to the tab's target (masks take currentColor) */
+.model-tabs-link::before, .economy-topics a::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  opacity: .8;
+  -webkit-mask: var(--tab-icon, var(--i-doc)) center / contain no-repeat;
+  mask: var(--tab-icon, var(--i-doc)) center / contain no-repeat;
+}
+.model-tabs-link[aria-current]::before, .economy-topics a[aria-current]::before { opacity: 1; }
+:root {
+  --i-doc: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h6'/%3E%3C/svg%3E");
+  --i-home: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10.5 12 3l9 7.5'/%3E%3Cpath d='M5 9.5V21h14V9.5'/%3E%3C/svg%3E");
+  --i-book: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/%3E%3C/svg%3E");
+  --i-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z'/%3E%3Cpath d='m9 12 2 2 4-4'/%3E%3C/svg%3E");
+  --i-code: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m16 18 6-6-6-6M8 6l-6 6 6 6'/%3E%3C/svg%3E");
+  --i-chart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v18h18'/%3E%3Cpath d='m7 15 4-4 3 3 6-7'/%3E%3C/svg%3E");
+  --i-layers: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 3 9 5-9 5-9-5z'/%3E%3Cpath d='m3 12.5 9 5 9-5M3 16.5l9 5 9-5'/%3E%3C/svg%3E");
+  --i-plug: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4'/%3E%3C/svg%3E");
+  --i-globe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18'/%3E%3C/svg%3E");
+  --i-list: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'/%3E%3C/svg%3E");
+}
+.model-tabs-row > .model-tabs-link:first-child { --tab-icon: var(--i-home); }
+.model-tabs-link[href$="/methodology"] { --tab-icon: var(--i-book); }
+.model-tabs-link[href$="/validation"] { --tab-icon: var(--i-check); }
+.model-tabs-link[href$="/code"] { --tab-icon: var(--i-code); }
+.model-tabs-link[href^="/papers/"], .model-tabs-link[href^="/reports/"] { --tab-icon: var(--i-doc); }
+.economy-topics a { --tab-icon: var(--i-chart); }
+.economy-topics a[href="/forecasts"], .economy-topics a[href="/forecasts/us"] { --tab-icon: var(--i-check); }
+.economy-topics a[href="/economy"], .economy-topics a[href="/economy/us"] { --tab-icon: var(--i-list); }
+.economy-subnav-scope a { --tab-icon: var(--i-globe); }
+.economy-subnav .model-tabs-link, .economy-subnav .economy-topics a { font-size: var(--fs-body); }
+.economy-subnav-label { font-size: var(--fs-small); font-weight: 500; color: var(--text-faint); }
+
+/* ---------- 6.4 section header on the canvas, card below (AB) ----------
+   A top-level .band that opens with a .band-head is drawn as AB draws a
+   section: round tinted icon badge + 20px title + one grey line, on the
+   canvas, then the white card. The band itself has no surface; the head's
+   ::after paints the card from just under the head to the band's end
+   (clipped by the band's rounded bottom), and the band's ::after draws the
+   card's bottom edge. */
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) {
+  position: relative;
+  z-index: 0;
+  margin-top: 40px;
+  padding-top: 0;
+  background: none;
+  border: 0;
+  border-radius: 0 0 var(--radius-card) var(--radius-card);
+  box-shadow: none;
+  overflow: clip;
+  overflow-clip-margin: 0;
+}
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band)::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--radius-card);
+  border: 1px solid var(--hairline);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-card) var(--radius-card);
+  pointer-events: none;
+}
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: start;
+  max-width: none;
+  margin: 0 calc(-1 * var(--card-pad)) calc(20px + var(--card-pad));
+  padding: 0;
+}
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child::before {
+  content: "";
+  grid-column: 1;
+  grid-row: 2;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--surface-tint);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 18%, var(--card));
+  background-image: var(--sec-icon);
+  background-position: center;
+  background-size: 16px;
+  background-repeat: no-repeat;
+}
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: calc(100% + 20px);
+  left: 0;
+  right: 0;
+  height: 200000px;
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  border-bottom: 0;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  box-shadow: var(--shadow-card);
+  pointer-events: none;
+}
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child > * { grid-column: 2; margin-top: 0; }
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child > .kicker { grid-row: 1; }
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child > h2 { grid-row: 2; align-self: center; margin: 0; padding: 3px 0; line-height: 1.3; }
+.band-head .section-intro, .band-head > p { margin-top: 4px; color: var(--text-faint); font-size: var(--fs-body); line-height: 1.5; }
+/* section icon: chosen per section by data-icon on .band-head (§6.10);
+   a head without one gets no badge (no generic icon). */
+/* The kicker: a small sentence-case teal label, never tracked capitals */
+.kicker {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--tab-teal);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.kicker::first-letter, .eyebrow::first-letter, .meth-panel-badge::first-letter, .page-rail-title::first-letter, .foot-head::first-letter { text-transform: uppercase; }
+.eyebrow { font-size: var(--fs-small); font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--text-faint); }
+
+/* ---------- 6.5 cards and panels (AB: white, 1px gray-200, 12px) ---------- */
+.band { border-color: var(--hairline); border-radius: var(--radius-card); box-shadow: var(--shadow-card); }
+.card, .entry-card, .meth-panel, .meth-inline, .class-glossary > div, .mo-figcard, .vfig { border-color: var(--hairline); box-shadow: var(--shadow-card); }
+.entry-card, .policy-like { border-top: 3px solid var(--primary); }
+.entry-card:hover { box-shadow: var(--shadow-raised); transform: translateY(-2px); }
+.entry-card { transition: box-shadow 200ms ease, transform 200ms ease; }
+/* homepage intro card and the verdict band: no left rule, a 3px top band */
+.home-page .hero > .hero-inner, .band.band-result, .band + .band.band-result, .intro-card {
+  border: 1px solid var(--hairline);
+  border-top: 3px solid var(--primary);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+.home-page .hero h1 { font-weight: 700; letter-spacing: -0.03em; color: var(--text-strong); }
+
+/* Buttons: AB's dark teal solid (.policy-card-effect) and its outline twin */
+.btn { border-radius: 8px; padding: 9px 16px; font-size: var(--fs-body); font-weight: 600; }
+.btn-primary { background: var(--teal-700); }
+.btn-primary:hover { background: var(--teal-800); }
+.entry-cta { border-radius: 8px; padding: 8px 14px; background: var(--teal-700); font-size: var(--fs-body-sm); }
+.entry-card:hover .entry-cta { background: var(--teal-800); }
+@media (prefers-color-scheme: dark) {
+  .btn-primary, .entry-cta { background: #2C7A7B; color: #FFFFFF; }
+  .btn-primary:hover, .entry-card:hover .entry-cta { background: #319795; }
+}
+
+/* Key/value rows (model card, bare dl): AB's policy-card rows */
+.model-card dt, .band dl:not([class]) > dt {
+  margin: 0 0 2px;
+  color: var(--text-faint);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.model-card dd { color: var(--text-strong); font-size: var(--fs-body); line-height: 1.5; }
+.model-card > div { padding: 12px 0; }
+:where(.band) :where(thead th) { color: var(--text-faint); font: 500 var(--fs-small)/1.3 var(--body); letter-spacing: 0; }
+
+/* Stat tiles: AB's tinted teal boxes ("Duty saved on a 50-litre fill") */
+.stat, .metric {
+  gap: 4px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--primary) 6%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--card));
+  border-radius: 8px;
+  box-shadow: none;
+}
+.stat-us { border-color: color-mix(in srgb, var(--series-us) 30%, var(--card)); background: color-mix(in srgb, var(--series-us) 5%, var(--card)); }
+.stat-neutral { border-color: var(--hairline); background: var(--gray-50); }
+.stat-label, .metric-label { color: var(--text-muted); font-size: var(--fs-small); font-weight: 500; }
+.stat-value, .metric-val { color: var(--tab-teal); font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+.stat-us .stat-value { color: var(--series-us); }
+.stat-neutral .stat-value { color: var(--text-strong); }
+.stat-foot { border-top-color: color-mix(in srgb, var(--primary) 18%, var(--card)); }
+
+/* Chips: AB's pills — light border, white, icon slot */
+.chip, .tag { min-height: 28px; padding: 3px 12px; border-radius: 999px; font-size: var(--fs-small); font-weight: 500; }
+.trust-card .chip { font-family: var(--body); font-size: var(--fs-small); }
+
+/* Callouts: a calm tinted panel, 1px all round, no thick left rule */
+.callout {
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--card));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary) 5%, var(--card));
+  font-size: var(--fs-body);
+}
+.callout-warn { border: 1px solid var(--warn-line); background: var(--warn-bg); }
+.callout-neutral { border: 1px solid var(--hairline); background: var(--gray-50); }
+.home-page .record-now { border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--card)); border-radius: 10px; background: color-mix(in srgb, var(--primary) 5%, var(--card)); }
+
+/* Expanders: AB's "About this chart" foot — title, grey subline, chevron */
+details.expander, details.about { border-top: 1px solid var(--hairline); }
+details.expander > summary, details.about > summary { min-height: 52px; color: var(--gray-800); font-size: var(--fs-body); font-weight: 600; }
+details.expander > summary:hover, details.about > summary:hover { color: var(--tab-teal); }
+details.expander > summary .expander-meta { color: var(--text-faint); font-size: var(--fs-small); font-weight: 400; }
+
+/* ---------- 6.6 StepPanel in AB language ----------
+   Left: clean numbered rows. Right: AB's selected-policy panel — 1.5px
+   teal border, 10px radius, no shadow, a quiet head. */
+.meth-step-num { width: 28px; height: 28px; border: 0; border-radius: 8px; background: var(--surface-tint); color: var(--tab-teal); font-size: var(--fs-small); font-weight: 600; }
+.meth-step.active .meth-step-num { background: var(--teal-700); color: #FFFFFF; }
+.meth-step::before { left: 13px; top: 36px; width: 1px; }
+.meth-step { padding-left: 44px; }
+.meth-step-head { margin-left: -44px; }
+.meth-step-head h3 { font-size: var(--fs-h3); }
+.meth-panel, .meth-inline { border: 1.5px solid var(--primary); border-radius: 10px; box-shadow: none; }
+.meth-panel .meth-panel-head, .meth-inline .meth-panel-head { padding: 14px 16px 12px; background: transparent; border-bottom: 1px solid var(--hairline); }
+.scrolly-sticky .meth-panel .meth-panel-head { background: var(--surface-card); }
+.meth-panel-badge { padding: 2px 10px; background: var(--surface-tint); color: var(--tab-teal); border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--card)); font-size: var(--fs-small); font-weight: 600; }
+.meth-sec-title, .meth-eq-label { color: var(--text-faint); font-size: var(--fs-small); font-weight: 500; }
+.meth-sec-title::after { background: var(--hairline); }
+@media (max-width: 480px) { .meth-step { padding-left: 0; } .meth-step-head { margin-left: 0; } }
+
+/* ---------- 6.7 "On this page" rail: a clean Inter list ---------- */
+.page-rail a { font-size: var(--fs-body-sm); font-weight: 500; }
+@media (min-width: 1100px) {
+  .page-rail-title { font-family: var(--body); font-size: var(--fs-small); font-weight: 600; color: var(--text-faint); letter-spacing: 0; }
+  .page-rail a { padding: 7px 12px; border-left: 2px solid var(--hairline); color: var(--text-muted); }
+  .page-rail a:hover { color: var(--tab-teal); background: var(--surface-tint); }
+  .page-rail a[aria-current] { color: var(--tab-teal); border-left-color: var(--tab-teal); background: var(--surface-tint); }
+}
+
+/* ---------- 6.8 charts: AB's Recharts look ----------
+   Dashed gray-200 grid, gray-500 12px Inter ticks, a solid gray-700 zero
+   line, legends as pill chips under the plot. */
+.vchart .vc-grid, .hero-fan .hf-grid { stroke: var(--gray-200); stroke-dasharray: 3 3; }
+.vchart .vc-axis { stroke: var(--gray-300); stroke-width: 1; }
+.vchart .vc-zero, .hero-fan .hf-zero { stroke: var(--c-zero); stroke-width: 1; stroke-dasharray: none; }
+.vchart .vc-tick, .hero-fan text { fill: var(--c-tick); font-family: var(--body); }
+.vc-t { font: 400 12px/1 var(--body); color: var(--c-tick); }
+.vc-t .vc-num { font-family: var(--body); }
+.doc .vc-fig .vc-unit, .vc-fig .vc-unit { font: 500 12px/1.3 var(--body); color: var(--gray-600); }
+.vc-table thead th, .vc-narrow-table thead th { font: 500 var(--fs-small)/1.3 var(--body); color: var(--text-faint); }
+.doc .vc-legend, .doc ul.vc-legend, .doc .sb-legend, .doc ul.sb-legend { gap: 6px; justify-content: flex-start; margin-top: var(--s-4); font-size: 12.5px; }
+.doc .vc-legend li, .doc .sb-legend li {
+  gap: 8px;
+  min-height: 32px;
+  padding: 3px 12px 3px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--surface-card);
+  color: var(--c-text, var(--text-body));
+  font-size: 12.5px;
+}
+:root { --c-text: var(--gray-700); }
+.doc .vc-fig .vc-notes { color: var(--text-faint); font-size: var(--fs-small); }
+
+/* ---------- 6.9 dark mode for the section above ---------- */
+@media (prefers-color-scheme: dark) {
+  /* the badges' icons, in the dark theme's teal ink */
+  /* a light teal badge so the teal-ink icon keeps its contrast */
+  .band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child::before {
+    background-color: #B2F5EA;
+    box-shadow: none;
+  }
+  .crumbs a { color: rgba(255, 255, 255, .8); }
+}
+
+/* Labels that used to be tracked capitals hold lowercase copy: shown in
+   sentence case now (first letter up), never all caps. */
+:is(.economy-subnav-label, .prose h4, .formal-label, .prose th, .meth-step th, .foot-head,
+  .forecast-round dt, .contact-socials > span, .economy-stat-label, .economy-model-card > span,
+  .economy-note-aside > span.mono, .trends-related span, .mobile-compare-row h4, .glance-title,
+  .olg-toolbar label, .meth-sec-title, .meth-eq-label, .vmet-label, .vmet-notes-key,
+  .fc-vmet .forecast-summary span, .glance-row-head, .series-table thead th, .home-page .proof-head,
+  .home-page .core-panel-head, .home-page .xt-tag, .home-page .join-lines dt, .home-page .rail-cap,
+  .model-card dt, :where(.band) thead th)::first-letter { text-transform: uppercase; }
+:is(.vmet-label, .economy-stat-label, .glance-title, .glance-row-head, .home-page .proof-head,
+  .home-page .core-panel-head, .home-page .rail-cap, .forecast-round dt) { letter-spacing: 0; font-family: var(--body); }
+@media (max-width: 600px) {
+  .doc main > .hero > .hero-inner > h1 { font-size: 1.25rem; gap: 10px; }
+  .doc main > .hero > .hero-inner > h1::before { width: 24px; height: 24px; background-size: 18px; }
+  .model-tabs-link, .economy-topics a { font-size: var(--fs-body); }
+}
+
+/* ============================================================
+   6.10 Round 3 component vocabulary (DESIGN.md §4.12)
+   The small set every page builds from. One level of card per
+   section; inside it, dividers and spacing only.
+   ============================================================ */
+
+/* --- section header: icon from data-icon, short title, one grey line.
+   <div class="band-head" data-icon="chart"><h2>…</h2><p class="section-intro">…</p></div>
+   No data-icon = no badge (never a generic icon). Eyebrows (.kicker) are
+   not shown unless marked .keep. */
+.band-head[data-icon="chart"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v18h18'/%3E%3Cpath d='m7 15 4-4 3 3 6-7'/%3E%3C/svg%3E"); }
+.band-head[data-icon="table"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Cpath d='M3 9h18M3 15h18M9 3v18'/%3E%3C/svg%3E"); }
+.band-head[data-icon="scale"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3v18M7 21h10M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2'/%3E%3Cpath d='m2 16 3-8 3 8c-.9.7-1.9 1-3 1s-2.1-.3-3-1Z'/%3E%3Cpath d='m16 16 3-8 3 8c-.9.7-1.9 1-3 1s-2.1-.3-3-1Z'/%3E%3C/svg%3E"); }
+.band-head[data-icon="shield"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z'/%3E%3Cpath d='m9 12 2 2 4-4'/%3E%3C/svg%3E"); }
+.band-head[data-icon="code"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m16 18 6-6-6-6M8 6l-6 6 6 6'/%3E%3C/svg%3E"); }
+.band-head[data-icon="book"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z'/%3E%3Cpath d='M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z'/%3E%3C/svg%3E"); }
+.band-head[data-icon="layers"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 3 9 5-9 5-9-5z'/%3E%3Cpath d='m3 12.5 9 5 9-5M3 16.5l9 5 9-5'/%3E%3C/svg%3E"); }
+.band-head[data-icon="clock"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E"); }
+.band-head[data-icon="database"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cellipse cx='12' cy='5' rx='8' ry='3'/%3E%3Cpath d='M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5'/%3E%3Cpath d='M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3'/%3E%3C/svg%3E"); }
+.band-head[data-icon="link"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7'/%3E%3Cpath d='M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7'/%3E%3C/svg%3E"); }
+.band-head[data-icon="play"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='m10 8 6 4-6 4z'/%3E%3C/svg%3E"); }
+.band-head[data-icon="alert"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E"); }
+.band-head[data-icon="list"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'/%3E%3C/svg%3E"); }
+.band-head[data-icon="globe"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M3 12h18'/%3E%3Cpath d='M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18'/%3E%3C/svg%3E"); }
+.band-head[data-icon="calculator"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='2' width='16' height='20' rx='2'/%3E%3Cpath d='M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15v3M8 18h.01M12 18h.01'/%3E%3C/svg%3E"); }
+.band-head[data-icon="flask"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 3h6M10 3v6.5L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9.5V3M7 15h10'/%3E%3C/svg%3E"); }
+.band-head[data-icon="users"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8'/%3E%3C/svg%3E"); }
+.band-head[data-icon="target"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Ccircle cx='12' cy='12' r='1'/%3E%3C/svg%3E"); }
+.band-head[data-icon="doc"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h6'/%3E%3C/svg%3E"); }
+.band-head[data-icon="plug"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4'/%3E%3C/svg%3E"); }
+.band-head[data-icon="money"] { --sec-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23285E61' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='6' width='20' height='12' rx='2'/%3E%3Ccircle cx='12' cy='12' r='2.5'/%3E%3Cpath d='M6 12h.01M18 12h.01'/%3E%3C/svg%3E"); }
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child:not([data-icon]) { grid-template-columns: minmax(0, 1fr); }
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child:not([data-icon])::before { display: none; }
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child:not([data-icon]) > * { grid-column: 1; }
+.band-head > .kicker:not(.keep), .band-head > .eyebrow:not(.keep) { display: none; }
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child > .section-intro,
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child > p { grid-row: 3; max-width: 90ch; margin-top: 2px; }
+.band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child > h2 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.01em; }
+
+/* --- .kv: label/value rows (AB's policy panel). Markup:
+   <dl class="kv"><div><dt>Label</dt><dd>Value</dd></div>…</dl>
+   (bare dt/dd pairs work too). Default: label left, value right — for
+   numbers. .kv.stack: label above value — for short text. .kv.cols-2:
+   stacked pairs in two columns (one on a phone). */
+.kv { display: grid; grid-template-columns: fit-content(45%) minmax(0, 1fr); margin: var(--s-3) 0; padding: 0; }
+.kv > div { display: contents; }
+.kv dt, .kv dd { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--hairline); }
+.kv > div:last-child > dt, .kv > div:last-child > dd, .kv > dt:nth-last-child(2), .kv > dd:last-child { border-bottom: 0; }
+.kv dt { color: var(--text-muted); font-size: var(--fs-body-sm); font-weight: 500; line-height: 1.45; }
+.kv dd { padding-left: var(--s-4); color: var(--text-strong); font-size: var(--fs-body); font-weight: 600; line-height: 1.45; text-align: right; font-variant-numeric: tabular-nums; }
+.kv.stack, .kv.cols-2 { grid-template-columns: minmax(0, 1fr); }
+.kv.stack > div, .kv.cols-2 > div { display: block; padding: 10px 0; border-bottom: 1px solid var(--hairline); }
+.kv.stack > div:last-child { border-bottom: 0; }
+.kv.stack > div > dt, .kv.stack > div > dd, .kv.cols-2 > div > dt, .kv.cols-2 > div > dd { padding: 0; border: 0; text-align: left; }
+.kv.stack dt, .kv.cols-2 dt { margin-bottom: 2px; font-size: var(--fs-small); color: var(--text-faint); }
+.kv.stack dd, .kv.cols-2 dd { font-weight: 500; }
+@media (min-width: 700px) {
+  .kv.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--s-6); }
+  .kv.cols-2 > div:nth-last-child(-n+2):nth-child(odd), .kv.cols-2 > div:last-child { border-bottom: 0; }
+}
+.kv.cols-2 > div:last-child { border-bottom: 0; }
+
+/* --- .full: a figure, table or chart that spans the whole card width */
+.full { width: 100%; max-width: none !important; margin-inline: 0; grid-column: 1 / -1; }
+.prose > .full, .prose .full { max-width: none !important; }
+
+/* --- one level of card: framed boxes inside a section card lose their
+   frame and keep dividers and spacing. */
+.band :is(.band, .mo-figcard, .mo-chartcard, .mo-facts, .table-scroll.mo-tablecard, .vfig, .card:not(.entry-card), .trust-card) {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.band :is(.mo-figcard, .mo-chartcard, .table-scroll.mo-tablecard, .mo-facts) { max-width: none; padding-left: 0; padding-right: 0; }
+.band .band { padding: 0; margin: var(--s-6) 0 0; }
+.band :is(.mo-figcard, .mo-chartcard) svg { max-height: none; }
+
+/* --- tables: one level, AB rows. Header row in small grey, hairline rows,
+   no tinted header column, numbers right-aligned (td.num). */
+.band table { width: 100%; border-collapse: collapse; }
+.band :is(thead th) { padding: 8px 16px 8px 0; border-bottom: 1px solid var(--hairline); background: none; color: var(--text-faint); font: 500 var(--fs-small)/1.3 var(--body); letter-spacing: 0; text-align: left; vertical-align: bottom; }
+.band :is(tbody th, tbody td) { padding: 10px 16px 10px 0; border-bottom: 1px solid var(--hairline); background: none; font-size: var(--fs-body-sm); line-height: 1.5; vertical-align: top; }
+.band tbody th { color: var(--text-strong); font-weight: 600; font-family: var(--body); letter-spacing: 0; text-transform: none; }
+.band tbody tr:last-child > * { border-bottom: 0; }
+.band :is(td, th).num, .band td.mono { text-align: right; font-variant-numeric: tabular-nums; }
+.band :is(thead th, tbody th, tbody td):last-child { padding-right: 0; }
+
+/* --- step panels (DESIGN.md §4.9). Left: short text, 3:2 of the width.
+   Right: the sticky panel, one .meth-panel[data-step] per step. A wrap
+   that cannot give every step a panel is marked .single (stepper.js does
+   it too, as a safety net): one full-width column, the .meth-inline
+   copies shown in place. */
+@media (min-width: 900px) { .scrolly-wrap:not(.single) { grid-template-columns: minmax(0, 3fr) minmax(320px, 2fr); gap: var(--s-7, 40px); } }
+.scrolly-wrap > .scrolly-sticky { align-self: stretch; }
+.scrolly-wrap > .scrolly-sticky > .meth-panel { position: sticky; top: var(--sticky-top); }
+.scrolly-wrap .scrolly-sticky { position: static; }
+.scrolly-wrap.single { grid-template-columns: minmax(0, 1fr); }
+.scrolly-wrap.single > .scrolly-sticky { display: none; }
+.scrolly-wrap.single .meth-inline { display: block; }
+.scrolly-wrap.single .meth-step::before { background: var(--hairline); }
+.scrolly-wrap.single .meth-step .meth-step-num { background: var(--surface-tint); color: var(--tab-teal); }
+/* panel content: label/value rows and charts, not boxes inside the box */
+:is(.meth-panel, .meth-inline) .meth-eq {
+  margin-block: 0;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  background: none;
+}
+:is(.meth-panel, .meth-inline) .meth-eq:last-child { border-bottom: 0; }
+:is(.meth-panel, .meth-inline) .meth-sec-title { margin-top: var(--s-3); }
+:is(.meth-panel, .meth-inline) .meth-sec-title + .meth-eq { padding-top: 6px; }
+:is(.meth-panel, .meth-inline) :is(.vc-fig, figure, .vfig) { margin: var(--s-3) 0; }
+:is(.meth-panel, .meth-inline) .vc-fig .vchart { min-height: 260px; }
+:is(.meth-panel, .meth-inline) .kv { margin: 0; }
+.scrolly-sticky .meth-panel { max-height: calc(100vh - var(--sticky-top) - 24px); }
+
+/* --- charts: span the card and take a usable height (AB: ~360-420px).
+   The plot is drawn with preserveAspectRatio="none", so a min-height
+   stretches the marks; labels are HTML and stay 12px. */
+@container (min-width: 640px) {
+  .vchart:not(.vc-keep-ratio) { min-height: max(var(--vc-min-h, 0px), 340px); }
+}
+@container (min-width: 900px) {
+  .vchart:not(.vc-keep-ratio) { min-height: max(var(--vc-min-h, 0px), 380px); }
+}
+.vc-fig.vc-hero .vchart { min-height: var(--vc-min-h, 210px); }
+
+/* --- title bar: one PE logo (the nav's), a quiet breadcrumb, the page's
+   name as h1. */
+.doc main > .hero > .hero-inner > h1::before { content: none; display: none; }
+.crumbs { padding-top: 8px; font-size: 12px; color: rgba(255, 255, 255, .7); }
+.crumbs a { color: rgba(255, 255, 255, .72); }
+.crumbs a::after { margin: 0 6px; color: rgba(255, 255, 255, .45); }
+.crumbs span[aria-current] { color: rgba(255, 255, 255, .88); }
+/* the phone card-stack (§5.15) keeps its own cell rhythm over the rows above */
+@media (max-width: 640px) {
+  .band table.t-stack :is(tbody th, tbody td) { padding: 2px 0; border: 0; text-align: left; }
+  .band table.t-stack tr > :first-child { padding-bottom: var(--s-1); }
+}
+
+/* --- requests from the page agents (r3) --- */
+/* a small grey label above a .kv block */
+.kv-title { margin: var(--s-4) 0 0; color: var(--text-faint); font-size: var(--fs-small); font-weight: 500; letter-spacing: 0; text-transform: none; }
+.kv-title::first-letter { text-transform: uppercase; }
+.kv-title + .kv { margin-top: 2px; }
+/* "About this step" at the end of a step: no card, a hairline on top */
+.meth-step details.about { margin-top: var(--s-4); padding: 0; background: none; border: 0; border-top: 1px solid var(--hairline); border-radius: 0; box-shadow: none; }
+.meth-step details.about > summary { padding-inline: 0; }
+/* a model id kept as secondary text after the human name */
+.model-id { margin-left: 6px; color: var(--text-faint); font-size: 0.9em; font-weight: 400; letter-spacing: 0; text-decoration: none; white-space: nowrap; }
+a .model-id, a:hover .model-id { text-decoration: none; display: inline-block; }
+.home-page .trust-row { grid-template-columns: minmax(220px, 15rem) 10.5rem minmax(0, 1fr); }
+.home-page .trust-model .model-id { display: inline-block; width: 100%; margin: 2px 0 0; }
+@media (max-width: 760px) { .home-page .trust-row { grid-template-columns: auto 1fr; } }
+/* home "how it connects": rows inside one card, divided by hairlines */
+.home-page .join-list { gap: 0; }
+.home-page .join { padding: var(--s-4) 0; border-top: 1px solid var(--hairline); border-bottom: 0; }
+.home-page .join:first-child { border-top: 0; padding-top: 0; }
+.home-page .join:last-child { border-bottom: 0; padding-bottom: 0; }
+@media (max-width: 560px) {
+  .home-page .join-list .pipeline { flex-direction: column; align-items: stretch; }
+  .home-page .join-list .pipeline .pl-node { text-align: center; }
+  .home-page .join-list .pipeline .pl-arrow { display: block; text-align: center; rotate: 90deg; }
+}
+/* home #start: the router cards on the canvas, no section card around them */
+.home-page #start.band:not(:has(> .band-head)) { margin-top: var(--s-6); padding: 0; background: none; border: 0; box-shadow: none; }
+/* more frames that sat inside a section card (audit, r3) */
+.band :is(.vchart-figure, .step-diagram, .dial-card, .qa-facts) { border: 0; border-radius: 0; background: none; box-shadow: none; padding-left: 0; padding-right: 0; }
+/* strip charts keep their drawn shape (no tall-plot stretch) */
+.vc-fig[data-chart="obr-computed-share"] .vchart { min-height: var(--vc-min-h, 210px); }
+/* .kv.kv-text: rows whose values are phrases or sentences — label column
+   left (~35%), value left-aligned in body weight; stacked on phones */
+.kv.kv-text { grid-template-columns: minmax(0, 35%) minmax(0, 1fr); column-gap: var(--s-4); }
+.kv.kv-text dt { color: var(--text-strong); font-size: var(--fs-body-sm); font-weight: 600; }
+.kv.kv-text dd { padding-left: 0; color: var(--text-body); font-size: var(--fs-body-sm); font-weight: 400; text-align: left; font-variant-numeric: normal; }
+:is(.meth-panel, .meth-inline, .scrolly-sticky) .kv.kv-text { grid-template-columns: minmax(0, 1fr); }
+:is(.meth-panel, .meth-inline, .scrolly-sticky) .kv.kv-text dt { padding-bottom: 0; border-bottom: 0; font-size: var(--fs-small); color: var(--text-faint); font-weight: 500; }
+:is(.meth-panel, .meth-inline, .scrolly-sticky) .kv.kv-text dd { padding-top: 2px; }
+@media (max-width: 600px) {
+  .kv.kv-text { grid-template-columns: minmax(0, 1fr); }
+  .kv.kv-text dt { padding-bottom: 0; border-bottom: 0; }
+  .kv.kv-text dd { padding-top: 2px; }
+}
+/* one-level tables: the tinted mono label column goes (diagnosis 7) */
+.band :is(.cmp-compare, .fc-vs-cards) table :is(thead th:first-child, tbody th[scope="row"]) { background: none; }
+.band :is(.cmp-compare, .fc-vs-cards) table tbody th[scope="row"] { font-family: var(--body); font-weight: 600; color: var(--text-strong); }
+
+/* Router pills: the id sits at the pill's own size, after the name. */
+.qa summary strong .model-id { font-size: inherit; margin-left: 4px; }

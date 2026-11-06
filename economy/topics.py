@@ -190,7 +190,7 @@ def esc(value) -> str:
 
 def load(name: str) -> dict:
     series = json.loads((ROOT / "data" / "latest" / f"{name}.json").read_text())
-    # ONS observations live behind a JSON `/data` endpoint, which is a poor
+    # ONS observations live behind a JSON `/data` endpoint, which is a bad
     # destination for a reader clicking through to the official series.
     if "ons.gov.uk/" in series["url"] and series["url"].endswith("/data"):
         series["url"] = series["url"][: -len("/data")]
@@ -447,16 +447,14 @@ def satellite_has_no_surface() -> bool:
 # --------------------------------------------------------------- page pieces
 
 def _card(heading: str, value: str, note: str, series: dict, period: str) -> str:
-    return f"""        <article class="economy-stat">
-          <p class="economy-stat-label mono">{heading}</p>
-          <p class="economy-stat-value">{value}</p>
-          <p class="economy-stat-change">{note}</p>
-          <dl>
-            <div><dt>Observation</dt><dd>{esc(period)}</dd></div>
-            <div><dt>Vintage</dt><dd>{esc(series["vintage"])}</dd></div>
-            <div><dt>Source</dt><dd><a href="{esc(series["url"])}">{esc(series["source"])} · {esc(series["cdid"])}</a></dd></div>
-          </dl>
-        </article>"""
+    """A stat tile (DESIGN.md §4.2): this page is the home of the reading."""
+    return f"""      <div class="stat">
+        <span class="stat-label">{heading}</span>
+        <span class="stat-value">{value}</span>
+        <span class="stat-sub">{esc(period)} &middot; vintage {esc(series["vintage"])}</span>
+        <span class="stat-note">{note}</span>
+        <span class="stat-foot"><a class="chip" href="{esc(series["url"])}">{esc(series["source"])} &middot; {esc(series["cdid"])}</a></span>
+      </div>"""
 
 
 def stat_card(series: dict, kind: str | None = None) -> str:
@@ -471,7 +469,7 @@ def stat_card(series: dict, kind: str | None = None) -> str:
     now = latest(series)
     if kind is None:
         return _card(
-            esc(label(series).upper()),
+            esc(label(series)),
             esc(display(series, now["value"])),
             f'stored as {esc(stored(now["value"]))} &middot; {esc(series["units"])}',
             series,
@@ -485,7 +483,7 @@ def stat_card(series: dict, kind: str | None = None) -> str:
         )
     change = 100 * (now["value"] / before["value"] - 1)
     return _card(
-        esc(f"{label(series).upper()} · YEAR ON YEAR"),
+        esc(f"{label(series)}, year on year"),
         f"{change:+.1f}%",
         f'derived here, not stored: {esc(stored(now["value"]))} in '
         f'{esc(now["period"])} against {esc(stored(before["value"]))} in '
@@ -588,7 +586,7 @@ def stands(cards: tuple[tuple[str, str | None], ...], note: str,
     provenance table are keyed on.
     """
     rendered = "\n".join(stat_card(load(name), kind) for name, kind in cards)
-    return f"""    <div class="economy-grid">
+    return f"""    <div class="stat-row">
 {rendered}
     </div>
     <p class="economy-method">{note}</p>
@@ -635,6 +633,23 @@ def data_layer(names: tuple[str, ...], closing: str) -> str:
     </div>"""
 
 
+def verdict_line(evidence: str) -> str:
+    """The verdict part of a registry evidence string, without its figures.
+
+    The figures behind a validation verdict live on the model's Validation
+    tab (DESIGN.md §7.0); a topic page states the verdict in words and links
+    there. Keeps the first clause that carries no digit ("No demonstrated
+    skill against a random walk WITH DRIFT …", "the anchored fit is by
+    construction"), so no failure statement is dropped, only its numbers.
+    """
+    clauses = [c.strip() for c in re.split(r"(?<=[.;])\s+", evidence) if c.strip()]
+    for clause in clauses:
+        if not re.search(r"\d", clause):
+            clause = clause.rstrip(";").rstrip(".") + "."
+            return clause[0].upper() + clause[1:]
+    return "The figures are on the validation page."
+
+
 def limits_list(items: list[str]) -> str:
     entries = "\n".join(f"        <li>{item}</li>" for item in items)
     return f"      <ul>\n{entries}\n      </ul>"
@@ -659,13 +674,25 @@ def registry_terms(items: list[str]) -> str:
     return ", ".join(f'<span class="mono">{esc(item)}</span>' for item in items)
 
 
+BAND_ICONS = {"stands": "chart", "model": "layers", "run": "code", "data": "database"}
+
+
 def band(ident: str, number: str, kicker: str, heading: str, body: str,
          alt: bool = False) -> str:
+    """A section: the short ``kicker`` is the title, ``heading`` the grey line.
+
+    No eyebrows and no ordinals (DESIGN.md §4.1); the icon is chosen by the
+    section's meaning, from BAND_ICONS.
+    """
     classes = "band band-alt" if alt else "band"
+    del number
+    title = kicker[0].upper() + kicker[1:]
+    line = heading.rstrip(".") + "."
+    icon = BAND_ICONS.get(ident, "list")
     return f"""  <section id="{ident}" class="{classes}">
-    <div class="band-head">
-      <span class="kicker mono">{number} — {kicker}</span>
-      <h2>{heading}</h2>
+    <div class="band-head" data-icon="{icon}">
+      <h2>{title}</h2>
+      <p class="section-intro">{line}</p>
     </div>
 {body}
   </section>"""
@@ -715,7 +742,8 @@ def growth_model() -> str:
     quality = model["quality"]["predictive_validation"]
     forecast = facts["forecast"]
     rows = []
-    for period, values in list(forecast["forecast"].items())[:5]:
+    open_rows = [(p, v) for p, v in forecast["forecast"].items() if p >= facts["period"]]
+    for period, values in open_rows[:5]:
         rows.append(
             "          <tr>"
             f'<th scope="row">{esc(period)}</th>'
@@ -729,9 +757,8 @@ def growth_model() -> str:
         One model in the suite forecasts UK output: <a href="/svar">boe-svar</a>,
         the {esc(model["display_name"])}. The round generated
         {esc(forecast["generated"])} conditions on data through
-        {esc(forecast["data_edge"])} and puts year-on-year growth at
-        {facts["values"]["median"]:.1f}% in {esc(facts["period"])},
-        68% {band_text(facts["values"])} — and in the same breath:
+        {esc(forecast["data_edge"])}; its path, from {esc(facts["period"])}, is
+        in the table below — and in the same breath:
       </p>
 {limits_list([
         f"Status: {esc(model['status'])}.",
@@ -750,12 +777,13 @@ def growth_model() -> str:
       </div>
       <p class="callout">
         <strong>Predictive validation: {esc(quality["level"])}.</strong>
-        {esc(quality["evidence"])}
+        {esc(verdict_line(quality["evidence"]))}
         <a href="/svar/validation">Read the validation page →</a>
       </p>
       <p class="chooser-note">
         Every round is archived before the outturn exists, and scored against
-        the vintage it was made on — <a href="/forecasts">see the record →</a>
+        the outturn as published, with the snapshot it was read from recorded
+        — <a href="/forecasts#scored">see the scoreboard →</a>
       </p>
     </div>"""
 
@@ -820,7 +848,10 @@ def inflation_model() -> str:
     model = MODELS["boe-svar"]
     quality = model["quality"]["predictive_validation"]
     rows = []
-    for period, values in list(facts["forecast"]["forecast"].items())[:5]:
+    open_rows = [
+        (p, v) for p, v in facts["forecast"]["forecast"].items() if p >= facts["period"]
+    ]
+    for period, values in open_rows[:5]:
         rows.append(
             "          <tr>"
             f'<th scope="row">{esc(period)}</th>'
@@ -837,10 +868,10 @@ def inflation_model() -> str:
     return f"""    <div class="prose">
       <p>
         <a href="/svar">boe-svar</a> — the {esc(model["display_name"])} — forecasts
-        headline CPI. The round generated {esc(facts["forecast"]["generated"])} puts
-        the first open quarter, {esc(facts["period"])}, at
-        {facts["values"]["median"]:.1f}% with a 68% range of
-        {band_text(facts["values"])}. {reaches} And in the same breath:
+        headline CPI. The table shows the round generated
+        {esc(facts["forecast"]["generated"])} from {esc(facts["period"])}, the
+        first quarter without a published outturn.
+        {reaches} And in the same breath:
       </p>
 {limits_list([
         f"Status: {esc(model['status'])}.",
@@ -859,7 +890,7 @@ def inflation_model() -> str:
       </div>
       <p class="callout">
         <strong>Predictive validation: {esc(quality["level"])}.</strong>
-        {esc(quality["evidence"])}
+        {esc(verdict_line(quality["evidence"]))}
         <a href="/svar/validation">Read the validation page →</a>
       </p>
     </div>"""
@@ -1098,9 +1129,9 @@ def public_finances_model() -> str:
     ])}
       <p class="callout">
         <strong>Predictive validation: {esc(predictive["level"])}.</strong>
-        {esc(predictive["evidence"])}
+        {esc(verdict_line(predictive["evidence"]))}
         <strong>Policy counterfactuals: {esc(counterfactual["level"])}.</strong>
-        {esc(counterfactual["evidence"])}
+        {esc(verdict_line(counterfactual["evidence"]))}
         <a href="/obr/validation">Read the validation page →</a>
       </p>
       <p>
@@ -1425,20 +1456,8 @@ def uk_platform() -> str:
     ]
     return f"""    <div class="prose">
       <p>
-        The engine underneath this section is
-        {model_link("pe-microsim")} — PolicyEngine's own
-        {esc(microsim["model_class"])}, {only_household_member()} and
-        {only_two_country_member()}. It applies a reform to household microdata
-        and reports {registry_terms(microsim["outputs"])} over a
-        {esc(microsim["horizon"])}. {distribution_members()}
-      </p>
-      <p>
-        The macro members are what it cannot do on its own. pe-microsim
-        cannot answer {(cannot('pe-microsim'))} — so every macro number in this
-        section comes from a member that produces one, and the table says which,
-        in the order they run. Four of the six routes below put pe-microsim in
-        the chain; two are a macro model standing alone, which is also a fine
-        thing to publish.
+        Each route names the models it runs, in order; the household engine,
+        {model_link("pe-microsim")}, sits in four of the six.
       </p>
       <div class="table-scroll">
         <table>
@@ -1449,25 +1468,51 @@ def uk_platform() -> str:
           </tbody>
         </table>
       </div>
+      <details class="about">
+        <summary>About the engine and the macro members</summary>
+        <p>
+          The engine underneath this section is
+          {model_link("pe-microsim")} — PolicyEngine's own
+          {esc(microsim["model_class"])}, {only_household_member()} and
+          {only_two_country_member()}. It applies a reform to household microdata
+          and reports {registry_terms(microsim["outputs"])} over a
+          {esc(microsim["horizon"])}. {distribution_members()}
+        </p>
+        <p>
+          The macro members are what it cannot do on its own. pe-microsim
+          cannot answer {(cannot('pe-microsim'))} — so every macro number in this
+          section comes from a member that produces one, and the table says which,
+          in the order they run. Four of the six routes put pe-microsim in
+          the chain; two are a macro model standing alone, which is also a fine
+          thing to publish.
+        </p>
+        <p>
+          pe-microsim&rsquo;s question types are
+          {registry_terms(microsim["question_types"])}:
+          <span class="mono">forecast</span> is not among them, and its
+          predictive validation is recorded as
+          {registry_terms([microsim["quality"]["predictive_validation"]["level"]])}.
+          The uncertainty of {model_link("boe-svar")} is
+          {esc(svar["uncertainty"])}.
+        </p>
+      </details>
       <p class="callout">
         <strong>pe-microsim does not forecast, and this section does not
-        pretend it does.</strong> Its question types are
-        {registry_terms(microsim["question_types"])} —
-        <span class="mono">forecast</span> is not among them, and its
-        predictive validation is recorded as
-        {registry_terms([microsim["quality"]["predictive_validation"]["level"]])}.
-        The forecast rows are {model_link("boe-svar")}, whose uncertainty is
-        {esc(svar["uncertainty"])}; the record below is what those rounds have
-        been worth so far. <a href="/models#score">See how a score is put together →</a>
+        pretend it does.</strong> The forecast rows are
+        {model_link("boe-svar")}; the scoreboard above is what those rounds
+        have been worth so far. <a href="/models#score">See how a score is put together →</a>
       </p>
-      <p>
-        Over MCP the same six routes are {tool("household_reform_impact")},
-        {tool("population_reform_impact")}, {tool("score_reform")},
-        {tool("dynamic_reform_impact")}, {tool("forecast_uk")} and
-        {tool("svar_inflation_incidence")}; {tool("recommend_model")} routes a
-        question to a member, or refuses when none supports it.
-        <a href="/connect">Connect a client →</a>
-      </p>
+      <details class="about">
+        <summary>The same routes over MCP</summary>
+        <p>
+          Over MCP the same six routes are {tool("household_reform_impact")},
+          {tool("population_reform_impact")}, {tool("score_reform")},
+          {tool("dynamic_reform_impact")}, {tool("forecast_uk")} and
+          {tool("svar_inflation_incidence")}; {tool("recommend_model")} routes a
+          question to a member, or refuses when none supports it.
+          <a href="/connect">Connect a client →</a>
+        </p>
+      </details>
     </div>"""
 
 
@@ -1503,11 +1548,8 @@ def us_platform() -> str:
     ]
     return f"""    <div class="prose">
       <p>
-        The engine underneath this section is
-        {model_link("pe-microsim")} — {only_two_country_member()}, so the two
-        household rows below are the same command as the UK ones with
-        <span class="mono">--country us</span>. It reports
-        {registry_terms(microsim["outputs"])} over a {esc(microsim["horizon"])}.
+        Four routes, each built on {model_link("pe-microsim")}; the household
+        rows are the UK commands with <span class="mono">--country us</span>.
       </p>
       <div class="table-scroll">
         <table>
@@ -1518,9 +1560,18 @@ def us_platform() -> str:
           </tbody>
         </table>
       </div>
+      <details class="about">
+        <summary>About the engine</summary>
+        <p>
+          The engine underneath this section is
+          {model_link("pe-microsim")} — {only_two_country_member()}, so the two
+          household rows above are the same command as the UK ones with
+          <span class="mono">--country us</span>. It reports
+          {registry_terms(microsim["outputs"])} over a {esc(microsim["horizon"])}.
+        </p>
+      </details>
       <p>
-        Two rows that exist on the UK side are missing here, and both absences
-        are the registry's, not an oversight:
+        Two UK rows are missing here; both absences are the registry's, not an oversight:
       </p>
 {limits_list([
         "<strong>No reform with a macro second round.</strong> Both US "
@@ -1534,20 +1585,23 @@ def us_platform() -> str:
         "Forecasts that showed a US path anyway would be the one dishonest "
         "thing on this site.",
     ])}
-      <p>
-        The bridge that does exist runs the other way: the incidence rows take
-        a <em>macro shock</em>, not a reform, and push its earnings
-        consequences through the microsimulation. So this section can answer
-        &ldquo;who bears this shock&rdquo; for the US, and cannot answer
-        &ldquo;what would this reform do to output&rdquo;.
-      </p>
-      <p>
-        Over MCP the four routes are {tool("household_reform_impact")},
-        {tool("population_reform_impact")}, {tool("frbus_shock_incidence")} and
-        {tool("hank_shock_incidence")}; {tool("recommend_model")} refuses a US
-        reform needing macro feedback, which is the correct answer.
-        <a href="/connect">Connect a client →</a>
-      </p>
+      <details class="about">
+        <summary>The bridge that does exist, and the MCP routes</summary>
+        <p>
+          The bridge that does exist runs the other way: the incidence rows take
+          a <em>macro shock</em>, not a reform, and push its earnings
+          consequences through the microsimulation. So this section can answer
+          &ldquo;who bears this shock&rdquo; for the US, and cannot answer
+          &ldquo;what would this reform do to output&rdquo;.
+        </p>
+        <p>
+          Over MCP the four routes are {tool("household_reform_impact")},
+          {tool("population_reform_impact")}, {tool("frbus_shock_incidence")} and
+          {tool("hank_shock_incidence")}; {tool("recommend_model")} refuses a US
+          reform needing macro feedback, which is the correct answer.
+          <a href="/connect">Connect a client →</a>
+        </p>
+      </details>
     </div>"""
 
 
@@ -1629,7 +1683,7 @@ def us_hub_forecast_note() -> str:
     """
     frbus = MODELS["frb-us"]["quality"]["predictive_validation"]
     hank = MODELS["us-hank"]["quality"]["predictive_validation"]
-    return f"""      <p class="lede reveal" style="--d:3">
+    return f"""      <p>
         <strong>{no_us_forecaster()}</strong> Both US members are shock models
         and the registry says so in their own words:
         <a href="/frb-us">frb-us</a> records predictive validation
@@ -2523,7 +2577,7 @@ def subnav(country: str, current: str | None) -> str:
     the reader is in.
 
     ``current`` is ``None`` on the section hub (/forecasts), ``"data"`` on the
-    country data hub (/economy), or a topic slug. Overview and Data exist as
+    country data hub (/economy), or a topic slug. Track record and Data exist as
     tabs because the strip is a tab set and a tab set with nothing selected
     tells the reader they are nowhere; they are also the way back.
 
@@ -2554,7 +2608,9 @@ def subnav(country: str, current: str | None) -> str:
     data_attr = ' aria-current="page"' if current == "data" else ""
     links = [
         f'        <a class="model-tabs-link"{overview_attr} '
-        f'href="{entry["hub"]}">Overview</a>',
+        # "Track record", not "Overview": the hub is the scored record,
+        # and a forecaster's reader looks for the record by that name.
+        f'href="{entry["hub"]}">Track record</a>',
         f'        <a class="model-tabs-link"{data_attr} '
         f'href="{entry["data"]}">Data</a>',
     ]
@@ -2585,6 +2641,38 @@ def _self_url(country: str, current: str | None) -> str:
     if current == "data":
         return entry["data"]
     return topic_url(TOPIC_BY_SLUG[(country, current)])
+
+
+def topic_lede(topic: dict) -> str:
+    """One sentence on what the page holds, with no reading in it.
+
+    The readings live once, in the stat row below (DESIGN.md §7.0); the hook
+    that used to be the lede restated them and stays as the meta description.
+    """
+    names = [esc(sentence_case_inline(label(load(name)))) for name in topic["series"]]
+    if not names:
+        return "What the models can score here, and how to run it yourself."
+    return (f"The latest {listed(names)} as stored, what the "
+            "models make of them, and how to run it yourself.")
+
+
+def sentence_case_inline(text: str) -> str:
+    """A label as it reads mid-sentence: lower the first letter of an
+    ordinary word, keep acronyms and proper nouns ("UK", "CPI", "Bank Rate")."""
+    if len(text) > 1 and text[0].isupper() and text[1].islower():
+        return text[0].lower() + text[1:]
+    return text
+
+
+def topic_where_next(topic: dict) -> str:
+    """The where-next row: the record, the data store, the country data hub."""
+    entry = COUNTRIES[topic["country"]]
+    cards = [
+        (entry["hub"], "chart", "Forecasts", "The record, open rounds and how they score"),
+        ("/forecasts#data", "data", "The data store", "Every vintage behind these numbers"),
+        (entry["data"], "list", f'{entry["label"]} data', "Every topic and series in one place"),
+    ]
+    return site_nav.where_next(cards)
 
 
 def page(topic: dict) -> str:
@@ -2623,19 +2711,17 @@ def page(topic: dict) -> str:
 <meta name="theme-color" content="#FFFFFF" />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=7" />
+<link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 """
     body = f"""<main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">{esc(topic["eyebrow"])}</p>
-      <h1 class="reveal page-title" style="--d:1">{esc(topic["heading"])}</h1>
-      <p class="lede reveal" style="--d:2">{esc(lede)}</p>
+      <h1 class="page-title">{esc(topic["country"].upper())} {esc(topic["title"][0].lower() + topic["title"][1:])}</h1>
+      <p class="lede">{esc(topic["heading"])} {topic_lede(topic)}</p>
     </div>
   </section>
 
@@ -2643,19 +2729,19 @@ def page(topic: dict) -> str:
 
 {band("stands", "01", "where it stands", "The numbers, as the snapshot stores them.", stands_body)}
 
-{band("model", "02", "what the models see", "The model view, and the same breath its limits.", topic["model"](), alt=True)}
+{band("model", "02", "what the models see", "The model view, with its limits beside it.", topic["model"](), alt=True)}
 
 {band("run", "03", "run it yourself", "Every number above is a command away.", topic["run"]())}
 
 {band("data", "04", "the data behind it", "Source, coverage, and the immutable file.", data_body, alt=True)}
+
+{topic_where_next(topic)}
 </main>
 
 <footer class="foot foot-bar">
   <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
-    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
-    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
-    <a class="footer-text" href="/contact">Contact</a>
+{site_nav.FOOTER_LINKS}
   </nav>
 </footer>
 <script src="/reveal.js?v=2" defer></script>
@@ -2669,11 +2755,15 @@ def page(topic: dict) -> str:
 # --------------------------------------------------- economy page + sitemap
 
 def directory_block(country: str) -> str:
+    """The hub's topic list: each row is the topic's question and a link.
+
+    The readings are not restated here; they live on the topic page.
+    """
     rows = []
     for topic in topics_for(country):
         rows.append(
             f'        <a href="{topic_url(topic)}">'
-            f'<span>{esc(topic["hook"]())}</span>'
+            f'<span>{esc(topic["heading"])}</span>'
             f'<strong>{esc(topic["title"])}</strong></a>'
         )
     return "\n".join(rows)

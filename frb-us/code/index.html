@@ -19,25 +19,20 @@
 
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=7" />
-<style>
-/* page-specific: hero sizing only — shared component styles live in style.css */
-.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-</style>
+<link rel="stylesheet" href="/style.css?v=19" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
-  <a class="brand" href="/">
-    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  <a class="brand" href="/" aria-label="PolicyEngine Macro home">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="26" height="26" /><span class="brand-name">PolicyEngine Macro</span>
   </a>
   <nav class="nav-links" aria-label="Primary">
-    <a class="nav-mobile" href="/">Home</a>
-    <a class="nav-mobile" href="/models" aria-current="true">Models</a>
-    <a class="nav-mobile" href="/forecasts">Forecasts</a>
-    <a class="nav-mobile nav-start" href="/connect">Use</a>
+    <a class="nav-mobile" href="/"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>Home</a>
+    <a class="nav-mobile" href="/forecasts"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg>Forecasts</a>
+    <a class="nav-mobile" href="/models" aria-current="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 16.5 9 5 9-5"/></svg>Models</a>
+    <a class="nav-mobile nav-start" href="/connect"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg>Use</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
   </nav>
 </header>
@@ -52,13 +47,10 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 04 — Federal Reserve macroeconomic model · frb-us · US · hosted</p>
-      <h1 class="reveal page-title" style="--d:1;">
-        Test US monetary and fiscal shocks.
-      </h1>
+      <p class="eyebrow reveal" style="--d:0">Fed FRB/US, rebuilt · US · hosted · quarterly</p>
+      <h1 class="reveal page-title" style="--d:1;">FRB/US</h1>
       <p class="lede reveal" style="--d:2">
-        Trace how a funds-rate or fiscal shock affects US output, inflation,
-        and unemployment quarter by quarter using the April 2026 baseline.
+        Run it hosted, from the CLI or in Python, and reproduce its numbers.
       </p>
     </div>
   </section>
@@ -74,80 +66,77 @@
   </nav>
 
   <section id="run" class="band band-wide">
-    <div class="band-head">
-      <span class="kicker mono">code</span>
-      <h2>Ask the server, or install it.</h2>
+    <div class="band-head" data-icon="play">
+      <h2>Ask the server, or install it</h2>
     </div>
     <div class="prose">
       <p>
         Five steps from a hosted one-liner to the full 284-variable model in
-        Python; each step's code sits alongside its narrative.
+        Python; the commands sit in the panel beside each step. For every
+        other model and client, see <a href="/connect">Use</a>.
       </p>
     </div>
 
-    <div class="scrolly-wrap scrolly-code">
+    <div class="scrolly-wrap scrolly-code single">
       <div class="scrolly-steps">
       <div class="meth-step" id="code-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Ask the hosted server</h3></div>
-        <h4>Three MCP tools</h4>
         <p>The quickest route is the <a href="/connect">hosted MCP server</a>, with three tools: <code>frbus_list_variables</code> (the shockable levers, with units), <code>frbus_shock</code> (solve and return impulse responses), and <code>frbus_summary</code> (vintage and validation provenance).</p>
-        <h4>Speed</h4>
-        <p>A solve takes about <strong>3 seconds cold and well under a second warm</strong> — the fastest member of the suite.</p>
-        <h4>CLI mirrors</h4>
-        <p>The same three tools are on the CLI, no server round-trip required.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">the three tools on the CLI</div>
+        <p class="kv-title">The three tools on the CLI</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-variables
 pe-macro frbus-shock --var rffintay_aerr --shock 1.0
 pe-macro frbus-summary</code></pre></div>
-        </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>Three MCP tools</h4>
+          <h4>CLI mirrors</h4>
+          <p>The same three tools are on the CLI, no server round-trip required.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="code-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Two traps</h3></div>
-        <h4>Units are per-lever</h4>
         <p><code>rffintay_aerr</code> is in percentage points (1.0 = a 100bp tightening), but spending levers such as <code>egfe_aerr</code> are in <strong>log points of quarterly growth</strong>, not billions of dollars — a dollar-sized number there diverges the solver.</p>
-        <h4>Each rule reads its own add-error</h4>
-        <p><code>rffintay_aerr</code> works only under <code>inertial_taylor</code>; under <code>taylor</code> it is rejected with a pointer to <code>rfftay_aerr</code> rather than silently returning all-zero responses.</p>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>Units are per-lever</h4>
+          <h4>Each rule reads its own add-error</h4>
+          <p><code>rffintay_aerr</code> works only under <code>inertial_taylor</code>; under <code>taylor</code> it is rejected with a pointer to <code>rfftay_aerr</code> rather than silently returning all-zero responses.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="code-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Choose the policy rule</h3></div>
-        <h4>Usually the point of the exercise</h4>
         <p><code>frbus_shock</code> takes a <code>policy_rule</code>: <code>inertial_taylor</code> (the default, the LONGBASE rule and the one the validation numbers use), <code>taylor</code> (the non-inertial variant), or <code>fixed_funds_rate</code>, which holds the funds rate on its baseline path so there is no endogenous monetary offset.</p>
-        <h4>Why it matters</h4>
-        <p>A four-quarter federal-purchases shock of 0.01 log points peaks higher on real GDP with the funds rate fixed — and the price-level response is larger still.</p>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>Usually the point of the exercise</h4>
+          <h4>Why it matters</h4>
+          <p>A four-quarter federal-purchases shock of 0.01 log points peaks higher on real GDP with the funds rate fixed — and the price-level response is larger still.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="code-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Install the package</h3></div>
-        <h4>When to install</h4>
         <p>For the full 284-variable model, the Board's own demo scripts, or anything the three tools do not expose — separate from the rest of the suite, with its own Python API.</p>
-        <h4>No data step</h4>
-        <p>The Board's raw materials are vendored unmodified, so there is no data-download step, but you clone rather than pip-install from an index.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">clone and install</div>
+        <p class="kv-title">Clone and install</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/us-frb-model
 cd us-frb-model
 uv venv &amp;&amp; uv pip install -e ".[dev]"</code></pre></div>
-        </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>When to install</h4>
+          <h4>No data step</h4>
+          <p>The Board's raw materials are vendored unmodified, so there is no data-download step, but you clone rather than pip-install from an index.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="code-5" data-step="4">
         <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Run a 100bp shock in Python</h3></div>
-        <h4>The workflow</h4>
         <p>Load LONGBASE, set the Board's demo fiscal configuration, add-factor with <code>init_trac</code> so the baseline reproduces LONGBASE exactly, add the shock, solve.</p>
-        <p class="opt-note">
-          a runnable copy of exactly this is
-          <code>examples/monetary_policy_shock.py</code>. The API mirrors the
-          essentials of <code>pyfrbus</code>'s <code>Frbus</code> class —
-          <code>Frbus(path)</code>, <code>.init_trac()</code>,
-          <code>.solve()</code>, <code>.exogenize()</code> — so the Board's
-          demo scripts port across with minimal change.
-        </p>
         <h4>Series you will reach for</h4>
         <div class="table-scroll"><table>
-          <caption>Frequently used frb-us series</caption>
+          <caption>Frequently used FRB/US series</caption>
           <thead><tr><th scope="col">code</th><th scope="col">variable</th><th scope="col">role</th></tr></thead>
           <tbody>
             <tr><th scope="row"><code>rffintay_aerr</code></th><td>Taylor-rule policy-rate error term</td><td>shock instrument — +1 for a 100bp tightening</td></tr>
@@ -158,8 +147,7 @@ uv venv &amp;&amp; uv pip install -e ".[dev]"</code></pre></div>
             <tr><th scope="row"><code>rff</code></th><td>Federal funds rate</td><td>endogenous under the rule, pp</td></tr>
           </tbody>
         </table></div>
-        <div class="meth-inline">
-        <div class="meth-sec-title">monetary_policy_shock.py</div>
+        <p class="kv-title">Monetary_policy_shock.py</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
 <span class="kw">from</span> frbus <span class="kw">import</span> Frbus, load_data
 
@@ -180,53 +168,46 @@ with_adds.loc[start, <span class="kw">"rffintay_aerr"</span>] += 1
 sim = model.solve(start, end, with_adds)
 
 <span class="kw">print</span>((sim.loc[start:end, <span class="kw">"xgdp"</span>] / with_adds.loc[start:end, <span class="kw">"xgdp"</span>] - 1) * 100)</code></pre></div>
-        </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>The workflow</h4>
+          <p class="opt-note">
+          a runnable copy of exactly this is
+          <code>examples/monetary_policy_shock.py</code>. The API mirrors the
+          essentials of <code>pyfrbus</code>'s <code>Frbus</code> class —
+          <code>Frbus(path)</code>, <code>.init_trac()</code>,
+          <code>.solve()</code>, <code>.exogenize()</code> — so the Board's
+          demo scripts port across with minimal change.
+        </p>
+        </details>
       </div>
       </div>
-
-      <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">Ask the hosted server</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">the three tools on the CLI</div>
-          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pe-macro frbus-variables
-pe-macro frbus-shock --var rffintay_aerr --shock 1.0
-pe-macro frbus-summary</code></pre></div>
-        </div>
-        <div class="meth-panel" data-step="3" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Install the package</span><span class="meth-panel-badge mono">Step 4</span></div>
-          <div class="meth-sec-title">clone and install</div>
-          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>git clone https://github.com/PolicyEngine/us-frb-model
-cd us-frb-model
-uv venv &amp;&amp; uv pip install -e ".[dev]"</code></pre></div>
-        </div>
-        <div class="meth-panel" data-step="4" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Run a 100bp shock in Python</span><span class="meth-panel-badge mono">Step 5</span></div>
-          <div class="meth-sec-title">monetary_policy_shock.py</div>
-          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
-<span class="kw">from</span> frbus <span class="kw">import</span> Frbus, load_data
-
-data = load_data(<span class="kw">"vendor/data_only_package/LONGBASE.TXT"</span>)
-model = Frbus(<span class="kw">"vendor/pyfrbus_package/models/model.xml"</span>)
-
-start, end = pd.Period(<span class="kw">"2026Q1"</span>), pd.Period(<span class="kw">"2030Q4"</span>)
-
-<span class="cm"># the fiscal-policy configuration the Board's own demos use</span>
-data.loc[start:end, <span class="kw">"dfpdbt"</span>] = 0
-data.loc[start:end, <span class="kw">"dfpsrp"</span>] = 1
-
-<span class="cm"># add-factor the model so the baseline reproduces LONGBASE exactly</span>
-with_adds = model.init_trac(start, end, data)
-
-<span class="cm"># 100bp monetary policy shock in the first quarter</span>
-with_adds.loc[start, <span class="kw">"rffintay_aerr"</span>] += 1
-sim = model.solve(start, end, with_adds)
-
-<span class="kw">print</span>((sim.loc[start:end, <span class="kw">"xgdp"</span>] / with_adds.loc[start:end, <span class="kw">"xgdp"</span>] - 1) * 100)</code></pre></div>
-        </div>
-      </aside>
     </div>
   </section>
 
+  <section class="band where-next" id="where-next">
+    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/papers/frb-us">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>
+        <h3>The paper</h3>
+        <p>Method and results in full</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/models#compare">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg></span>
+        <h3>Compare the models</h3>
+        <p>All seven side by side</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/connect">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg></span>
+        <h3>Every route to run it</h3>
+        <p>MCP, CLI and Python in one place</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </div>
+  </section>
 </main>
 
 <footer class="foot foot-bar">
@@ -239,48 +220,6 @@ sim = model.solve(start, end, with_adds)
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
-<script>
-// Code scrollytelling: highlight the step at the reading line and
-// show its code panel in the sticky aside.
-(function () {
-  "use strict";
-  var steps = Array.from(document.querySelectorAll(".meth-step"));
-  var panels = Array.from(document.querySelectorAll(".meth-panel"));
-  if (!steps.length || !panels.length) return;
-  var current = -1;
-  function update() {
-    var offset = window.innerHeight * 0.33;
-    var active = 0;
-    steps.forEach(function (step, i) {
-      if (step.getBoundingClientRect().top < offset) active = i;
-    });
-    if (active === current) return;
-    current = active;
-    steps.forEach(function (step, i) {
-      step.classList.toggle("active", i === active);
-    });
-    // Panels pair to steps by data-step. A step with no panel of its own
-    // keeps the nearest earlier panel pinned rather than blanking the column.
-    // Start at the FIRST panel, not -1: several pages have no panel for
-    // step 0, and seeding -1 left the sticky column empty for the whole of
-    // the opening step before popping in. Pinning the earliest panel means
-    // the column is populated from the top and only ever moves forward.
-    var want = Math.min.apply(null, panels.map(function (panel) {
-      return Number(panel.getAttribute("data-step"));
-    }));
-    panels.forEach(function (panel) {
-      var ds = Number(panel.getAttribute("data-step"));
-      if (ds <= active && ds > want) want = ds;
-    });
-    panels.forEach(function (panel) {
-      panel.hidden = Number(panel.getAttribute("data-step")) !== want;
-    });
-  }
-  window.addEventListener("scroll", update, { passive: true });
-  window.addEventListener("resize", update, { passive: true });
-  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
-  update();
-})();
-</script>
+<script src="/stepper.js" defer></script>
 </body>
 </html>

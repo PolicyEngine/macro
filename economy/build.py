@@ -7,10 +7,12 @@ import argparse
 import importlib.util
 import json
 import re
-from datetime import datetime
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+import chartkit  # noqa: E402  (stdlib-only, repo root)
 PAGE = ROOT / "economy" / "index.html"
 US_PAGE = ROOT / "economy" / "us" / "index.html"
 
@@ -78,7 +80,7 @@ PUBLIC_LABELS = _TOPICS.PUBLIC_LABELS
 def load(name: str) -> dict:
     series = json.loads((ROOT / "data" / "latest" / f"{name}.json").read_text())
     # ONS stores observations behind a JSON `/data` endpoint, but that is a
-    # poor destination for a reader clicking "View source". Keep the API URL
+    # bad destination for a reader clicking "View source". Keep the API URL
     # in the committed vintage and expose the matching human-readable page.
     if "ons.gov.uk/" in series["url"] and series["url"].endswith("/data"):
         series["url"] = series["url"][: -len("/data")]
@@ -200,18 +202,27 @@ def line_chart(
         f"to {last['value']:.1f}{units} in {last['period']}; "
         f"range {window_low:.1f}{units} to {window_high:.1f}{units}."
     )
+    g_hi, g_lo = y(high - padding), y(low + padding)
+    svg = "\n".join([
+        f'<svg class="vchart" data-chart="trend-{title_id}" viewBox="{left - 4} {g_hi - 8:.1f} '
+        f'{width - left - right + 8} {g_lo - g_hi + 16:.1f}" role="img" '
+        f'aria-labelledby="{title_id}-title {title_id}-desc">',
+        f'<title id="{title_id}-title">{title}</title>',
+        f'<desc id="{title_id}-desc">{desc}</desc>',
+        f'<line class="vc-grid" x1="{left}" y1="{g_hi:.1f}" x2="{width - right}" y2="{g_hi:.1f}" />',
+        chartkit.ytick(left, g_hi, f"{high - padding:.1f}{units}".replace("-", "\u2212")),
+        f'<line class="vc-grid" x1="{left}" y1="{g_lo:.1f}" x2="{width - right}" y2="{g_lo:.1f}" />',
+        chartkit.ytick(left, g_lo, f"{low + padding:.1f}{units}".replace("-", "\u2212")),
+        f'<polyline class="vc-out-line" points="{points}" />',
+        f'<circle class="vc-out-dot" cx="{x(len(values) - 1):.1f}" cy="{y(last['value']):.1f}" r="4" />',
+        chartkit.xtick(left, g_lo + 8, first["period"], 0, 1),
+        chartkit.xtick(width - right, g_lo + 8, last["period"], 1, 1),
+        "</svg>",
+    ])
+    # The latest reading is not restated here: it lives on the topic page
+    # (DESIGN.md §7.0). The two gridlines mark the window's range.
     return f"""      <figure class="economy-figure">
-        <svg viewBox="0 0 {width} {height}" role="img" aria-labelledby="{title_id}-title {title_id}-desc">
-          <title id="{title_id}-title">{title}</title>
-          <desc id="{title_id}-desc">{desc}</desc>
-          <line class="economy-chart-grid" x1="{left}" y1="{y(high - padding):.1f}" x2="{width - right}" y2="{y(high - padding):.1f}" />
-          <line class="economy-chart-grid" x1="{left}" y1="{y(low + padding):.1f}" x2="{width - right}" y2="{y(low + padding):.1f}" />
-          <polyline class="economy-chart-line" points="{points}" />
-          <circle class="economy-chart-dot" cx="{x(len(values) - 1):.1f}" cy="{y(last['value']):.1f}" r="4" />
-          <text class="economy-chart-label" x="{left}" y="{height - 12}">{first['period']}</text>
-          <text class="economy-chart-label" x="{width - right}" y="{height - 12}" text-anchor="end">{last['period']}</text>
-          <text class="economy-chart-value" x="{width - right}" y="{max(y(last['value']) - 10, 16):.1f}" text-anchor="end">{last['value']:.1f}{units}</text>
-        </svg>
+{chartkit.figure(svg)}
         <figcaption><strong>{title}</strong><span>{description}</span><a href="{url}">View source · {source} →</a></figcaption>
       </figure>"""
 
@@ -303,18 +314,23 @@ def us_trends_note() -> str:
     )
     uk_start = min(index[name]["coverage"][0] for name in ONS_SERIES)
     return f"""    <p class="economy-method">
-      The topic pages carry the current reading and, where one exists, the
-      conditioning baseline beside it; these three charts are the one place the
-      whole path is drawn. Each is generated from the same committed
-      point-in-time observations, and the source link opens the corresponding
-      official series. Two of the three are shorter than their UK counterparts:
-      GDPC1 is quarterly, so twenty points span {gdp[0]['period']}–{gdp[-1]['period']}, but CPIAUCSL
-      and UNRATE are monthly, so the same twenty-point window covers only
-      {cpi[0]['period']}–{cpi[-1]['period']} and {unemployment[0]['period']}–{unemployment[-1]['period']}. And no US series in this store
-      starts before {us_start}, where the ONS series behind the UK charts reach
-      back to {uk_start}: the long view here is as long as the store, not as long
-      as the published record.
-    </p>"""
+      The one place the whole path is drawn, from the committed point-in-time
+      observations; each source link opens the official series.
+    </p>
+    <details class="about">
+      <summary>Why the US charts are shorter</summary>
+      <p>
+        The topic pages carry the current reading and, where one exists, the
+        conditioning baseline beside it. Two of the three charts are shorter
+        than their UK counterparts: GDPC1 is quarterly, so twenty points span
+        {gdp[0]['period']}–{gdp[-1]['period']}, but CPIAUCSL and UNRATE are
+        monthly, so the same twenty-point window covers only
+        {cpi[0]['period']}–{cpi[-1]['period']} and {unemployment[0]['period']}–{unemployment[-1]['period']}.
+        And no US series in this store starts before {us_start}, where the ONS
+        series behind the UK charts reach back to {uk_start}: the long view here
+        is as long as the store, not as long as the published record.
+      </p>
+    </details>"""
 
 
 def us_release_dates_absent(names: tuple[str, ...]) -> None:
@@ -338,97 +354,6 @@ def us_release_dates_absent(names: tuple[str, ...]) -> None:
         )
 
 
-def topic_link(name: str) -> str:
-    """The topic page that reads this series, or a hard failure.
-
-    The hub advertises a topic home for every series it indexes. If a topic
-    stops carrying a series, this raises rather than printing a link into a
-    page where the number is no longer shown.
-    """
-    entry = SERIES_TOPIC.get(name)
-    if entry is None:
-        raise RuntimeError(
-            f"{name} is indexed on an economy hub but no topic page in "
-            f"economy/topics.py reads it — give it a topic home or drop it "
-            f"from the hub index"
-        )
-    url, title = entry
-    return f'<a href="{url}">{title}</a>'
-
-
-def series_index_rows(names: tuple[str, ...], released: bool = True) -> str:
-    """The hub index: what is tracked, which topic reads it, where it came from.
-
-    Deliberately carries no readings. The values, their period comparisons and
-    the model view of each one live on the topic pages; repeating them here is
-    what turned /economy and /economy/topics into two dashboards over one set
-    of numbers.
-
-    ``released`` drops the publisher's release date, which the US hub does: the
-    ONS stamps every series with one, FRED stamps none of them through this
-    site's fetcher, and a column of six identical "not supplied" cells says
-    less than one sentence of prose. ``us_release_dates_absent`` is what keeps
-    that sentence true.
-    """
-    rows = []
-    for name in names:
-        series = load(name)
-        now = latest(series)
-        release = (
-            f"<td>{(series.get('release_updated') or 'not supplied').split('T')[0]}</td>"
-            if released
-            else ""
-        )
-        rows.append(
-            "          <tr>"
-            f'<th scope="row">{public_label(series)}</th>'
-            f"<td>{topic_link(name)}</td>"
-            f"<td>{now['period']}</td>"
-            f"{release}"
-            f"<td>{series['vintage']}</td>"
-            f'<td><a href="{series["url"]}">{series["source"]} · {series["cdid"]}</a></td>'
-            "</tr>"
-        )
-    return "\n".join(rows)
-
-
-def calendar_rows() -> str:
-    names = (
-        "uk_monthly_gva",
-        "uk_unemployment_rate",
-        "uk_average_weekly_earnings",
-        "uk_vacancies",
-        "uk_cpi_yoy",
-        "uk_core_cpi_yoy",
-        "uk_public_sector_net_borrowing",
-        "uk_public_sector_net_debt_gdp",
-        "uk_gdp_cvm",
-        "uk_business_investment",
-    )
-    releases: dict[str, list[dict]] = {}
-    for name in names:
-        series = load(name)
-        date = " ".join((series.get("next_release") or "").split())
-        if date:
-            releases.setdefault(date, []).append(series)
-
-    def sort_key(item: tuple[str, list[dict]]) -> datetime:
-        return datetime.strptime(item[0], "%d %B %Y")
-
-    rows = []
-    for date, series_list in sorted(releases.items(), key=sort_key):
-        labels = ", ".join(public_label(series) for series in series_list)
-        sources = ", ".join(series["cdid"] for series in series_list)
-        rows.append(
-            "          <tr>"
-            f'<th scope="row">{date}</th>'
-            f"<td>{labels}</td>"
-            f"<td>ONS · {sources}</td>"
-            "</tr>"
-        )
-    return "\n".join(rows)
-
-
 def replace(html: str, name: str, value: str) -> str:
     start, end = f"<!-- {name}:begin -->", f"<!-- {name}:end -->"
     updated, count = re.subn(
@@ -443,12 +368,14 @@ def replace(html: str, name: str, value: str) -> str:
 
 
 def render_uk() -> str:
-    """The UK hub. ``economy-topics`` belongs to economy/topics.py, not here."""
+    """The UK hub. ``economy-topics`` belongs to economy/topics.py, not here.
+
+    No series index and no release calendar: both repeated the data store on
+    /forecasts#data, which is their one home (DESIGN.md §7.0). The hub is the
+    topic directory and the long view; a provenance card links to the store.
+    """
     html = PAGE.read_text()
     html = replace(html, "economy-trends-figures", uk_figures())
-    html = replace(html, "economy-series-index", series_index_rows(ONS_SERIES))
-    html = replace(html, "economy-market-index", series_index_rows(MARKET_SERIES))
-    html = replace(html, "economy-calendar", calendar_rows())
     return html
 
 
@@ -463,14 +390,6 @@ def render_us() -> str:
     html = US_PAGE.read_text()
     html = replace(html, "us-economy-trends-note", us_trends_note())
     html = replace(html, "us-economy-trends-figures", us_figures())
-    html = replace(
-        html, "us-economy-series-index", series_index_rows(FRED_SERIES, released=False)
-    )
-    html = replace(
-        html,
-        "us-economy-market-index",
-        series_index_rows(US_MARKET_SERIES, released=False),
-    )
     return html
 
 

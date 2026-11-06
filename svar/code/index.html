@@ -19,25 +19,20 @@
 
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=7" />
-<style>
-/* page-specific: hero sizing only — shared component styles live in style.css */
-.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-</style>
+<link rel="stylesheet" href="/style.css?v=19" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
-  <a class="brand" href="/">
-    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  <a class="brand" href="/" aria-label="PolicyEngine Macro home">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="26" height="26" /><span class="brand-name">PolicyEngine Macro</span>
   </a>
   <nav class="nav-links" aria-label="Primary">
-    <a class="nav-mobile" href="/">Home</a>
-    <a class="nav-mobile" href="/models" aria-current="true">Models</a>
-    <a class="nav-mobile" href="/forecasts">Forecasts</a>
-    <a class="nav-mobile nav-start" href="/connect">Use</a>
+    <a class="nav-mobile" href="/"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>Home</a>
+    <a class="nav-mobile" href="/forecasts"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg>Forecasts</a>
+    <a class="nav-mobile" href="/models" aria-current="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 16.5 9 5 9-5"/></svg>Models</a>
+    <a class="nav-mobile nav-start" href="/connect"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg>Use</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
   </nav>
 </header>
@@ -52,13 +47,10 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 03 — Bank of England structural VAR · boe-svar · UK · hosted</p>
-      <h1 class="reveal page-title" style="--d:1;">
-        Explain UK growth and inflation.
-      </h1>
+      <p class="eyebrow reveal" style="--d:0">Bank of England structural VAR · UK · hosted</p>
+      <h1 class="reveal page-title" style="--d:1;">BoE SVAR</h1>
       <p class="lede reveal" style="--d:2">
-        Decompose UK GDP and inflation into six structural shocks, forecast
-        with credible bands, and explain revisions between quarters.
+        Run it hosted, from the CLI or in Python, and reproduce its numbers.
       </p>
     </div>
   </section>
@@ -74,60 +66,66 @@
   </nav>
 
   <section id="run" class="band band-wide">
-    <div class="band-head">
-      <span class="kicker mono">how to run it</span>
-      <h2>Estimate, identify, decompose.</h2>
+    <div class="band-head" data-icon="play">
+      <h2>Estimate, identify, decompose</h2>
     </div>
     <div class="prose">
       <p>
         Four routes into the model, hosted to local: MCP tools, CLI mirrors,
-        a pip install, and the development runner scripts. Each step's code
-        follows its narrative.
+        Python, and the runner scripts that rebuild the paper&rsquo;s outputs.
       </p>
     </div>
 
-    <div class="scrolly-wrap scrolly-code">
+    <div class="scrolly-wrap scrolly-code single single">
       <div class="scrolly-steps">
       <div class="meth-step" id="run-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Hosted MCP tools</h3></div>
-        <h4>No install, no credentials</h4>
-        <p>The quickest route is the <a href="/connect">hosted MCP server</a>. Three tools reach this model: <code>forecast_uk</code> (YoY GDP-growth and CPI-inflation fan charts with 68%/90% bands), <code>latest_shocks</code> (posterior sign probabilities of each identified shock in the latest quarter), and <code>model_summary</code> (headline replication results — instant, no estimation).</p>
-        <h4>Where to read the results</h4>
-        <p>What each tool tells you is on the <a href="/svar">overview</a>; the estimation and identification choices behind them are on the <a href="/svar/methodology">methodology</a> page.</p>
+        <p>The quickest route is the <a href="/connect">hosted MCP server</a>.</p>
+<details class="about"><summary>More detail</summary><p>Four tools reach this model: <code>forecast_uk</code> (YoY GDP-growth and CPI-inflation fan charts with 68%/90% bands), <code>latest_shocks</code> (posterior sign probabilities of each identified shock in the latest quarter), <code>model_summary</code> (headline replication results — instant, no estimation), and the experimental <code>svar_inflation_incidence</code> (the CPI gap priced through benefit uprating in the microsimulation).</p></details>
+        <p class="kv-title">Hosted tools</p>
+        <dl class="kv"><div><dt>Forecast</dt><dd><code>forecast_uk(horizons=12, draws=2000)</code></dd></div><div><dt>Shocks</dt><dd><code>latest_shocks(draws=2000)</code></dd></div><div><dt>Headlines</dt><dd><code>model_summary()</code>, instant</dd></div><div><dt>Incidence</dt><dd><code>svar_inflation_incidence(year=2027)</code>, experimental</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>No install, no credentials</h4>
+          <h4>Draws and runtime</h4>
+          <p>The first call estimates the model, a couple of minutes cold; results are cached in-process. The default 2,000 draws yield about 135 accepted (ESS about 65); about 3,500 reach ESS 100. Every response carries a <code>warnings</code> list when inference is weak.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="run-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>CLI mirrors</h3></div>
         <h4>Same tools from the terminal</h4>
-        <p>The CLI mirrors the three MCP tools one for one: <code>pe-macro forecast</code>, <code>pe-macro shocks</code>, and <code>pe-macro summary</code>. Same outputs, no MCP client required.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">CLI commands</div>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro forecast   <span class="cm"># fan charts</span>
-pe-macro shocks     <span class="cm"># latest-quarter shocks</span>
-pe-macro summary    <span class="cm"># replication headlines</span></code></pre></div>
-        </div>
+        <p>The CLI mirrors the four MCP tools one for one. Same outputs, no MCP client required.</p>
+        <p class="kv-title">CLI commands</p>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro forecast --horizons 12 --draws 2000   <span class="cm"># fan charts</span>
+pe-macro shocks                                <span class="cm"># latest-quarter shocks</span>
+pe-macro summary                               <span class="cm"># replication headlines</span>
+pe-macro svar-inflation-incidence --year 2027  <span class="cm"># experimental</span></code></pre></div>
       </div>
 
       <div class="meth-step" id="run-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Install locally</h3></div>
-        <h4>One pip install</h4>
         <p>The package installs straight from GitHub with the prepared quarterly dataset inside, so <code>boe_var.data.load_data()</code> works immediately.</p>
-        <h4>All inputs are public</h4>
-        <p>Every input series is public: ONS (CPI, CPI energy, real GDP), Bank of England (Bank Rate, sterling ERI), and FRED (oil, exchange rates, world components).</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">install</div>
+        <p class="kv-title">Install</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
-        </div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> policyengine_macro <span class="kw">import</span> svar_forecast, svar_latest_shocks
+
+fc = svar_forecast(horizons=12, draws=2000)   <span class="cm"># median + 68%/90% bands</span>
+shocks = svar_latest_shocks(draws=2000)</code></pre></div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>One pip install</h4>
+          <h4>All inputs are public</h4>
+          <p>Every input series is public: ONS (CPI, CPI energy, real GDP), Bank of England (Bank Rate, sterling ERI), and FRED (oil, exchange rates, world components).</p>
+          <h4>Or through the suite, from Python</h4>
+          <p>The same calls as the hosted tools, returning dicts: install the suite (<code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code>) and import them.</p>
+        </details>
       </div>
 
       <div class="meth-step" id="run-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Development runner scripts</h3></div>
-        <h4>Clone to rebuild everything</h4>
         <p>The runner scripts are for development — clone the repository to rebuild the dataset or regenerate the paper outputs.</p>
-        <h4>What lands where</h4>
-        <p class="opt-note">outputs land in <code>results/</code> — the replication figures (fig2–fig6), the forecast figures (fig1, fig7–fig9), and two summary reports. runtime scales with draw count; the importance weights are the expensive part — one numerical Jacobian per accepted draw.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">runner scripts</div>
+        <p class="kv-title">Runner scripts</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>python scripts/download_data.py     <span class="cm"># reassemble the public data</span>
 
 <span class="cm"># the paper's core outputs: IRFs, FEVDs, shocks, historical decompositions</span>
@@ -136,38 +134,40 @@ python scripts/run_replication.py
 <span class="cm"># the forecasting toolkit: fan charts, latest-quarter shock distributions,</span>
 <span class="cm"># composite IRFs, and the forecast-revision decomposition</span>
 python scripts/run_forecast_revision.py</code></pre></div>
-        </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>Clone to rebuild everything</h4>
+          <h4>What lands where</h4>
+          <p class="opt-note">outputs land in <code>results/</code> — the replication figures (fig2–fig6), the forecast figures (fig1, fig7–fig9), and two summary reports. runtime scales with draw count; the importance weights are the expensive part — one numerical Jacobian per accepted draw.</p>
+        </details>
       </div>
       </div>
-      <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="1" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">CLI mirrors</span><span class="meth-panel-badge mono">Code 2</span></div>
-          <div class="meth-sec-title">CLI commands</div>
-        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pe-macro forecast   <span class="cm"># fan charts</span>
-pe-macro shocks     <span class="cm"># latest-quarter shocks</span>
-pe-macro summary    <span class="cm"># replication headlines</span></code></pre></div>
-        </div>
-        <div class="meth-panel" data-step="2" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Install locally</span><span class="meth-panel-badge mono">Code 3</span></div>
-          <div class="meth-sec-title">install</div>
-        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
-        </div>
-        <div class="meth-panel" data-step="3" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Development runner scripts</span><span class="meth-panel-badge mono">Code 4</span></div>
-          <div class="meth-sec-title">runner scripts</div>
-        <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>python scripts/download_data.py     <span class="cm"># reassemble the public data</span>
-
-<span class="cm"># the paper's core outputs: IRFs, FEVDs, shocks, historical decompositions</span>
-python scripts/run_replication.py
-
-<span class="cm"># the forecasting toolkit: fan charts, latest-quarter shock distributions,</span>
-<span class="cm"># composite IRFs, and the forecast-revision decomposition</span>
-python scripts/run_forecast_revision.py</code></pre></div>
-        </div>
-      </aside>
     </div>
   </section>
 
+  <section class="band where-next" id="where-next">
+    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/papers/boe-svar">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>
+        <h3>The paper</h3>
+        <p>Method and results in full</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/models#compare">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg></span>
+        <h3>Compare the models</h3>
+        <p>All seven side by side</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/connect">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg></span>
+        <h3>Every route to run it</h3>
+        <p>MCP, CLI and Python in one place</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </div>
+  </section>
 </main>
 
 <footer class="foot foot-bar">
@@ -180,48 +180,6 @@ python scripts/run_forecast_revision.py</code></pre></div>
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
-<script>
-// Code scrollytelling: highlight the step at the reading line and
-// show its code panel in the sticky aside.
-(function () {
-  "use strict";
-  var steps = Array.from(document.querySelectorAll(".meth-step"));
-  var panels = Array.from(document.querySelectorAll(".meth-panel"));
-  if (!steps.length || !panels.length) return;
-  var current = -1;
-  function update() {
-    var offset = window.innerHeight * 0.33;
-    var active = 0;
-    steps.forEach(function (step, i) {
-      if (step.getBoundingClientRect().top < offset) active = i;
-    });
-    if (active === current) return;
-    current = active;
-    steps.forEach(function (step, i) {
-      step.classList.toggle("active", i === active);
-    });
-    // Panels pair to steps by data-step. A step with no panel of its own
-    // keeps the nearest earlier panel pinned rather than blanking the column.
-    // Start at the FIRST panel, not -1: several pages have no panel for
-    // step 0, and seeding -1 left the sticky column empty for the whole of
-    // the opening step before popping in. Pinning the earliest panel means
-    // the column is populated from the top and only ever moves forward.
-    var want = Math.min.apply(null, panels.map(function (panel) {
-      return Number(panel.getAttribute("data-step"));
-    }));
-    panels.forEach(function (panel) {
-      var ds = Number(panel.getAttribute("data-step"));
-      if (ds <= active && ds > want) want = ds;
-    });
-    panels.forEach(function (panel) {
-      panel.hidden = Number(panel.getAttribute("data-step")) !== want;
-    });
-  }
-  window.addEventListener("scroll", update, { passive: true });
-  window.addEventListener("resize", update, { passive: true });
-  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
-  update();
-})();
-</script>
+<script src="/stepper.js" defer></script>
 </body>
 </html>

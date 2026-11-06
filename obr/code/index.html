@@ -19,25 +19,20 @@
 
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=7" />
-<style>
-/* page-specific: hero sizing only — shared component styles live in style.css */
-.model-hero { min-height: auto; padding-top: clamp(120px, 18vh, 180px); padding-bottom: 10px; }
-</style>
+<link rel="stylesheet" href="/style.css?v=19" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
-<div class="grain" aria-hidden="true"></div>
 
 <header class="nav">
-  <a class="brand" href="/">
-    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  <a class="brand" href="/" aria-label="PolicyEngine Macro home">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="26" height="26" /><span class="brand-name">PolicyEngine Macro</span>
   </a>
   <nav class="nav-links" aria-label="Primary">
-    <a class="nav-mobile" href="/">Home</a>
-    <a class="nav-mobile" href="/models" aria-current="true">Models</a>
-    <a class="nav-mobile" href="/forecasts">Forecasts</a>
-    <a class="nav-mobile nav-start" href="/connect">Use</a>
+    <a class="nav-mobile" href="/"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>Home</a>
+    <a class="nav-mobile" href="/forecasts"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg>Forecasts</a>
+    <a class="nav-mobile" href="/models" aria-current="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 16.5 9 5 9-5"/></svg>Models</a>
+    <a class="nav-mobile nav-start" href="/connect"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg>Use</a>
     <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
   </nav>
 </header>
@@ -52,14 +47,10 @@
 <main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <p class="eyebrow reveal" style="--d:0">model 02 — OBR macroeconometric model · obr-macro · UK · hosted</p>
-      <h1 class="reveal page-title" style="--d:1;">
-        UK fiscal reform, quarter by quarter.
-      </h1>
+      <p class="eyebrow reveal" style="--d:0">OBR macroeconometric model · UK · hosted</p>
+      <h1 class="reveal page-title" style="--d:1;">OBR emulator</h1>
       <p class="lede reveal" style="--d:2">
-        Run selected UK tax and spending scenarios and trace GDP, consumption,
-        and investment over 3–5 years against the March 2026 EFO baseline.
-        Borrowing is not yet returned by the PolicyEngine Macro adapter.
+        Run it hosted, from the CLI or locally, and pick a lever.
       </p>
     </div>
   </section>
@@ -75,9 +66,8 @@
   </nav>
 
   <section id="run" class="band band-wide">
-    <div class="band-head">
-      <span class="kicker mono">code</span>
-      <h2>Shock a variable, read the deviation.</h2>
+    <div class="band-head" data-icon="play">
+      <h2>Shock a variable, read the deviation</h2>
     </div>
     <div class="prose">
       <p>
@@ -86,13 +76,16 @@
       </p>
     </div>
 
-    <div class="scrolly-wrap scrolly-code">
+    <div class="scrolly-wrap scrolly-code single">
       <div class="scrolly-steps">
       <div class="meth-step" id="code-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Start hosted: the MCP server</h3></div>
         <p>
           The quickest route is the <a href="/connect">hosted MCP server</a> —
-          no install, no credentials. <code>obr_shock</code> shocks one
+          no install, no credentials.</p>
+        <details class="about">
+          <summary>About this step</summary>
+          <p><code>obr_shock</code> shocks one
           variable in model units and reads the per-quarter GDP deviation;
           <code>list_reform_variables</code> lists the shockable levers with
           units; <code>score_reform</code> with <code>model="obr"</code>
@@ -102,6 +95,7 @@
           Corporation-tax reforms are refused by the bridge (not
           household-borne); UK only.
         </p>
+        </details>
       </div>
 
       <div class="meth-step" id="code-2" data-step="1">
@@ -109,16 +103,15 @@
         <p>
           The <code>pe-macro</code> CLI mirrors the hosted tools one for one:
           shock a variable, list the levers, or score a reform from the
-          terminal.
+          terminal. <code>pe-macro compare</code> runs the same reform through
+          the static and the macro route side by side.
         </p>
-        <div class="meth-inline">
-          <div class="meth-sec-title">CLI equivalents</div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro obr-shock --var CGG --shock 1250
+        <p class="kv-title">CLI equivalents</p>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro obr-shock --var CGG --shock 1250
 pe-macro variables
 pe-macro score --country uk \
   --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
   --model obr</code></pre></div>
-        </div>
       </div>
 
       <div class="meth-step" id="code-3" data-step="2">
@@ -126,24 +119,10 @@ pe-macro score --country uk \
         <p>
           Locally, the package installs straight from GitHub — the equation
           listing, the March 2026 EFO forecast tables, and the ONS snapshot
-          ship inside it, so there is no data step. A reform is one call:
-          pick an exogenous variable, apply a shock, read the deviation from
-          baseline. The baseline is the anchored March 2026 path: the
-          anchoring add-factors are held fixed in both the baseline and the
-          shocked run, so they cancel in the deviation.
-        </p>
-        <p class="opt-note">
-          Two solves, so about a minute.
-          <code>python -m obr_macro.reform_analysis</code> runs the five
-          bundled scenarios — a £5bn spending rise, a 5pp corporation-tax cut
-          and rise, £10bn public real investment (~£3bn nominal
-          <code>CGIPS</code> per quarter), and a £10bn austerity cut — with
-          charts landing in <code>outputs/</code>.
-        </p>
-        <div class="meth-inline">
-          <div class="meth-sec-title">install and run</div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/obr-macroeconomic-model</code></pre></div>
-          <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> obr_macro <span class="kw">import</span> run_reform
+          ship inside it, so there is no data step.</p>
+        <p class="kv-title">Install and run</p>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/obr-macroeconomic-model</code></pre></div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> obr_macro <span class="kw">import</span> run_reform
 
 <span class="cm"># £5bn/yr government spending shock (£1.25bn per quarter)</span>
 results = run_reform(
@@ -155,7 +134,26 @@ results = run_reform(
 <span class="kw">print</span>(results[[<span class="kw">"period"</span>, <span class="kw">"delta_gdp_bn"</span>, <span class="kw">"pct_gdp"</span>]])
 <span class="cm"># ΔGDP = £1.25bn in every quarter, exactly flat — under the demand</span>
 <span class="cm"># closure this lever's multiplier is 1.0000 by construction (OBR: 0.6)</span></code></pre></div>
-        </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>A reform is one call:
+          pick an exogenous variable, apply a shock, read the deviation from
+          the anchored March 2026 baseline (<a href="/obr/methodology#meth-5">why the deviation is clean</a>).
+        </p>
+          <p class="opt-note">
+          Two solves, so about a minute.
+          <code>python -m obr_macro.reform_analysis</code> runs the five
+          bundled scenarios — a £5bn spending rise, a 5pp corporation-tax cut
+          and rise, £10bn public real investment (~£3bn nominal
+          <code>CGIPS</code> per quarter), and a £10bn austerity cut — with
+          charts landing in <code>outputs/</code>.
+        </p>
+          <p class="opt-note">
+          To score a statutory reform end to end from Python, install the
+          suite instead (<code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code>)
+          and call <code>policyengine_macro.score_reform(country="uk", reform={...}, model="obr")</code>.
+        </p>
+        </details>
       </div>
 
       <div class="meth-step" id="code-4" data-step="3">
@@ -166,81 +164,58 @@ results = run_reform(
           has its own equation. The most useful levers and readouts are in
           the table alongside.
         </p>
-        <p class="opt-note">
+        <p class="kv-title">Levers and readouts</p>
+        <div class="dial-cards">
+          <div class="dial-card">
+            <div class="dial-name mono">levers — set these (exogenous)</div>
+            <div class="dial-choice"><code>CGG</code><span class="dial-tradeoff"><strong>Government consumption</strong> — spending shocks, £m per quarter</span></div>
+            <div class="dial-choice"><code>CGIPS</code><span class="dial-tradeoff"><strong>Central government investment</strong> — public investment, £m per quarter (nominal). <strong>Dead channel:</strong> business investment does not respond at all and the residual GDP effect is wrong-signed, against the OBR&rsquo;s published 1.0. Do not score capital spending with it</span></div>
+            <div class="dial-choice"><code>TCPRO</code><span class="dial-tradeoff"><strong>Corporation tax rate</strong> — rate, e.g. &minus;0.05 for a 5pp cut. <strong>Converges slowly:</strong> since the log-space anchor fix the response reaches a plateau, but the root is slow &mdash; a 12-quarter run captures only ~40% of the full effect, and the result reports its <code>plateau_fraction</code></span></div>
+            <div class="dial-choice"><code>HHDI_ADDFACTOR</code><span class="dial-tradeoff"><strong>Externally costed household reform</strong> — virtual instrument, quarterly £m; positive revenue lowers HHDI via a held add-factor</span></div>
+            <div class="dial-choice"><code>R / GILT / RX</code><span class="dial-tradeoff"><strong>Bank Rate &middot; gilt yields &middot; exchange rate</strong> — monetary &amp; market assumptions</span></div>
+          </div>
+          <div class="dial-card">
+            <div class="dial-name mono">readouts — read these (endogenous)</div>
+            <div class="dial-choice"><code>GDPM</code><span class="dial-tradeoff"><strong>GDP at market prices</strong> — headline output</span></div>
+            <div class="dial-choice"><code>CONS</code><span class="dial-tradeoff"><strong>Private consumption</strong></span></div>
+            <div class="dial-choice"><code>IBUS / IF</code><span class="dial-tradeoff"><strong>Business / total investment</strong> — <code>IF</code> has no live equation and moves exactly zero</span></div>
+            <div class="dial-choice"><code>LFSUR</code><span class="dial-tradeoff"><strong>Unemployment rate</strong> — rate, pp. <strong>Does not respond</strong> to any lever tested: no Okun channel</span></div>
+          </div>
+          </div>
+        <details class="about">
+          <summary>About this step</summary>
+          <p class="opt-note">
           The full glossary — all 636 codes with descriptions, ONS series and
           equations — is the model package's variable and equation references.
+          Read each lever&rsquo;s caveat before quoting a result: the
+          <a href="/obr/validation#caveats">limits</a> say which carry behaviour.
         </p>
-        <div class="meth-inline">
-          <div class="meth-sec-title">levers and readouts</div>
-          <div class="dial-cards">
-          <div class="dial-card">
-            <div class="dial-name mono">levers — set these (exogenous)</div>
-            <div class="dial-choice"><code>CGG</code><span class="dial-tradeoff"><strong>Government consumption</strong> — spending shocks, £m per quarter</span></div>
-            <div class="dial-choice"><code>CGIPS</code><span class="dial-tradeoff"><strong>Central government investment</strong> — public investment, £m per quarter (nominal). <strong>Dead channel:</strong> business investment does not respond at all and the residual GDP effect is wrong-signed, against the OBR&rsquo;s published 1.0. Do not score capital spending with it</span></div>
-            <div class="dial-choice"><code>TCPRO</code><span class="dial-tradeoff"><strong>Corporation tax rate</strong> — rate, e.g. &minus;0.05 for a 5pp cut. <strong>Converges slowly:</strong> since the log-space anchor fix the response reaches a plateau, but the root is slow &mdash; a 12-quarter run captures only ~40% of the full effect, and the result reports its <code>plateau_fraction</code></span></div>
-            <div class="dial-choice"><code>HHDI_ADDFACTOR</code><span class="dial-tradeoff"><strong>Externally costed household reform</strong> — virtual instrument, quarterly £m; positive revenue lowers HHDI via a held add-factor</span></div>
-            <div class="dial-choice"><code>R / GILT / RX</code><span class="dial-tradeoff"><strong>Bank Rate &middot; gilt yields &middot; exchange rate</strong> — monetary &amp; market assumptions</span></div>
-          </div>
-          <div class="dial-card">
-            <div class="dial-name mono">readouts — read these (endogenous)</div>
-            <div class="dial-choice"><code>GDPM</code><span class="dial-tradeoff"><strong>GDP at market prices</strong> — headline output</span></div>
-            <div class="dial-choice"><code>CONS</code><span class="dial-tradeoff"><strong>Private consumption</strong></span></div>
-            <div class="dial-choice"><code>IBUS / IF</code><span class="dial-tradeoff"><strong>Business / total investment</strong></span></div>
-            <div class="dial-choice"><code>LFSUR</code><span class="dial-tradeoff"><strong>Unemployment rate</strong> — rate, pp</span></div>
-          </div>
-          </div>
-        </div>
+        </details>
       </div>
       </div>
-      <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="1" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 2</span></div>
-          <div class="meth-sec-title">CLI equivalents</div>
-          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pe-macro obr-shock --var CGG --shock 1250
-pe-macro variables
-pe-macro score --country uk \
-  --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
-  --model obr</code></pre></div>
-        </div>
-        <div class="meth-panel" data-step="2" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 3</span></div>
-          <div class="meth-sec-title">install and run</div>
-          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code>pip install git+https://github.com/PolicyEngine/obr-macroeconomic-model</code></pre></div>
-          <div class="codeblock"><button class="cb-copy" data-copy tabindex="-1">copy</button><pre><code><span class="kw">from</span> obr_macro <span class="kw">import</span> run_reform
-
-<span class="cm"># £5bn/yr government spending shock (£1.25bn per quarter)</span>
-results = run_reform(
-    name=<span class="kw">"Fiscal Stimulus"</span>,
-    var=<span class="kw">"CGG"</span>,        <span class="cm"># government consumption (exogenous)</span>
-    shock=1250,        <span class="cm"># £1.25bn per quarter, in £m</span>
-    periods=12,
-)
-<span class="kw">print</span>(results[[<span class="kw">"period"</span>, <span class="kw">"delta_gdp_bn"</span>, <span class="kw">"pct_gdp"</span>]])
-<span class="cm"># ΔGDP = £1.25bn in every quarter, exactly flat — under the demand</span>
-<span class="cm"># closure this lever's multiplier is 1.0000 by construction (OBR: 0.6)</span></code></pre></div>
-        </div>
-        <div class="meth-panel" data-step="3" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Code</span><span class="meth-panel-badge mono">Step 4</span></div>
-          <div class="meth-sec-title">levers and readouts</div>
-          <div class="dial-cards">
-          <div class="dial-card">
-            <div class="dial-name mono">levers — set these (exogenous)</div>
-            <div class="dial-choice"><code>CGG</code><span class="dial-tradeoff"><strong>Government consumption</strong> — spending shocks, £m per quarter</span></div>
-            <div class="dial-choice"><code>CGIPS</code><span class="dial-tradeoff"><strong>Central government investment</strong> — public investment, £m per quarter (nominal). <strong>Dead channel:</strong> business investment does not respond at all and the residual GDP effect is wrong-signed, against the OBR&rsquo;s published 1.0. Do not score capital spending with it</span></div>
-            <div class="dial-choice"><code>TCPRO</code><span class="dial-tradeoff"><strong>Corporation tax rate</strong> — rate, e.g. &minus;0.05 for a 5pp cut. <strong>Converges slowly:</strong> since the log-space anchor fix the response reaches a plateau, but the root is slow &mdash; a 12-quarter run captures only ~40% of the full effect, and the result reports its <code>plateau_fraction</code></span></div>
-            <div class="dial-choice"><code>HHDI_ADDFACTOR</code><span class="dial-tradeoff"><strong>Externally costed household reform</strong> — virtual instrument, quarterly £m; positive revenue lowers HHDI via a held add-factor</span></div>
-            <div class="dial-choice"><code>R / GILT / RX</code><span class="dial-tradeoff"><strong>Bank Rate &middot; gilt yields &middot; exchange rate</strong> — monetary &amp; market assumptions</span></div>
-          </div>
-          <div class="dial-card">
-            <div class="dial-name mono">readouts — read these (endogenous)</div>
-            <div class="dial-choice"><code>GDPM</code><span class="dial-tradeoff"><strong>GDP at market prices</strong> — headline output</span></div>
-            <div class="dial-choice"><code>CONS</code><span class="dial-tradeoff"><strong>Private consumption</strong></span></div>
-            <div class="dial-choice"><code>IBUS / IF</code><span class="dial-tradeoff"><strong>Business / total investment</strong></span></div>
-            <div class="dial-choice"><code>LFSUR</code><span class="dial-tradeoff"><strong>Unemployment rate</strong> — rate, pp</span></div>
-          </div>
-          </div>
-        </div>
-      </aside>
+    </div>
+  </section>
+  <section class="band where-next" id="where-next">
+    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
+    <div class="entry-grid">
+      <a class="entry-card" href="/papers/obr-macro">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>
+        <h3>The working paper</h3>
+        <p>Method and results in full</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/models#compare">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg></span>
+        <h3>Compare the models</h3>
+        <p>All seven side by side</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" href="/connect">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg></span>
+        <h3>Every route to run it</h3>
+        <p>MCP, CLI and Python in one place</p>
+        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
+      </a>
     </div>
   </section>
 </main>
@@ -255,48 +230,6 @@ results = run_reform(
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
-<script>
-// Code scrollytelling: highlight the step at the reading line and
-// show its code panel in the sticky aside.
-(function () {
-  "use strict";
-  var steps = Array.from(document.querySelectorAll(".meth-step"));
-  var panels = Array.from(document.querySelectorAll(".meth-panel"));
-  if (!steps.length || !panels.length) return;
-  var current = -1;
-  function update() {
-    var offset = window.innerHeight * 0.33;
-    var active = 0;
-    steps.forEach(function (step, i) {
-      if (step.getBoundingClientRect().top < offset) active = i;
-    });
-    if (active === current) return;
-    current = active;
-    steps.forEach(function (step, i) {
-      step.classList.toggle("active", i === active);
-    });
-    // Panels pair to steps by data-step. A step with no panel of its own
-    // keeps the nearest earlier panel pinned rather than blanking the column.
-    // Start at the FIRST panel, not -1: several pages have no panel for
-    // step 0, and seeding -1 left the sticky column empty for the whole of
-    // the opening step before popping in. Pinning the earliest panel means
-    // the column is populated from the top and only ever moves forward.
-    var want = Math.min.apply(null, panels.map(function (panel) {
-      return Number(panel.getAttribute("data-step"));
-    }));
-    panels.forEach(function (panel) {
-      var ds = Number(panel.getAttribute("data-step"));
-      if (ds <= active && ds > want) want = ds;
-    });
-    panels.forEach(function (panel) {
-      panel.hidden = Number(panel.getAttribute("data-step")) !== want;
-    });
-  }
-  window.addEventListener("scroll", update, { passive: true });
-  window.addEventListener("resize", update, { passive: true });
-  window.addEventListener("hashchange", function () { setTimeout(update, 0); });
-  update();
-})();
-</script>
+<script src="/stepper.js" defer></script>
 </body>
 </html>
