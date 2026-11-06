@@ -102,9 +102,9 @@ window.MathJax = {
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Parse the Board's model file</h3></div>
         <p>The Federal Reserve Board publishes FRB/US whole: the equation system as <code>model.xml</code>, the <code>LONGBASE</code> historical and projection database, the documentation, and a reference Python solver, <code>pyfrbus</code> — all in the public domain.</p>
         <div class="meth-inline">
-        <div class="meth-sec-title">parse</div>
-        <div class="meth-eq"><div class="meth-eq-label">system</div><div class="meth-eq-body">\(284\) endogenous eqs (behavioural + identities), from <code>model.xml</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">residual form</div><div class="meth-eq-body">\(F_i(x,\,\text{data}) + \text{aerr}_i + \text{trac}_i = 0\)</div></div>
+        <div class="meth-sec-title">Parse</div>
+        <div class="meth-eq"><div class="meth-eq-label">System</div><div class="meth-eq-body">\(284\) endogenous eqs (behavioural + identities), from <code>model.xml</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Residual form</div><div class="meth-eq-body">\(F_i(x,\,\text{data}) + \text{aerr}_i + \text{trac}_i = 0\)</div></div>
         </div>
         <figure class="step-diagram" data-title="Parsing model.xml" tabindex="0" role="button" aria-label="Expand diagram: Parsing model.xml">
           <svg viewBox="0 0 580 190" width="580" style="max-width:100%;height:auto;">
@@ -146,8 +146,8 @@ window.MathJax = {
         <p>The load stage brings <code>LONGBASE.TXT</code> — the April 2026 vintage — into a pandas frame on a quarterly <code>PeriodIndex</code>. This is the Board's own historical and projection database, and it conditions everything that follows: every simulation is read as a deviation from this baseline.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">LONGBASE conditioning</div>
-        <div class="meth-eq"><div class="meth-eq-label">tracking residual</div><div class="meth-eq-body">\(\text{trac}_i = -F_i(\text{baseline})\) per equation, per quarter</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">invariant</div><div class="meth-eq-body">\(\text{solve}(\text{baseline} + \text{trac}) = \text{LONGBASE}\) exactly</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Tracking residual</div><div class="meth-eq-body">\(\text{trac}_i = -F_i(\text{baseline})\) per equation, per quarter</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Invariant</div><div class="meth-eq-body"><span class="eq-w">\(\text{solve}(\text{baseline} + \text{trac}) = \text{LONGBASE}\)</span><span class="eq-n">\(\begin{aligned} & \text{solve}(\text{baseline} + \text{trac}) \\ & \quad = \text{LONGBASE} \end{aligned}\)</span> exactly</div></div>
         </div>
         <figure class="step-diagram" data-title="LONGBASE conditioning" tabindex="0" role="button" aria-label="Expand diagram: LONGBASE conditioning">
           <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
@@ -187,9 +187,9 @@ window.MathJax = {
         <p>Under VAR expectations every expectations term depends only on current and lagged observables, so the model is simultaneous <em>within</em> each quarter but recursive <em>across</em> quarters. The solver therefore works period by period, starting each quarter from the previous quarter's solution.</p>
         <div class="meth-inline">
         <div class="meth-sec-title">Newton iteration</div>
-        <div class="meth-eq"><div class="meth-eq-label">step</div><div class="meth-eq-body">\(J(x^{(k)})\,\Delta x = -F(x^{(k)})\), sparse LU (SuperLU)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">damping</div><div class="meth-eq-body">halve \(\Delta x\) until \(F, J\) evaluate cleanly</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">convergence</div><div class="meth-eq-body">\(\|\Delta x\| \le 10^{-8}\), then \(\|F\| \le 5\times 10^{-4}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Step</div><div class="meth-eq-body">\(J(x^{(k)})\,\Delta x = -F(x^{(k)})\), sparse LU (SuperLU)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Damping</div><div class="meth-eq-body">halve \(\Delta x\) until \(F, J\) evaluate cleanly</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Convergence</div><div class="meth-eq-body">\(\|\Delta x\| \le 10^{-8}\), then \(\|F\| \le 5\times 10^{-4}\)</div></div>
         </div>
         <figure class="step-diagram" data-title="Damped Newton, period by period" tabindex="0" role="button" aria-label="Expand diagram: Damped Newton, period by period">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
@@ -230,9 +230,9 @@ window.MathJax = {
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Policy rules</h3></div>
         <p>Monetary policy is modular: exogenous 0/1 switches in the model file select which rule sets the funds rate.</p>
         <div class="meth-inline">
-        <div class="meth-sec-title">policy rules</div>
-        <div class="meth-eq"><div class="meth-eq-label">inertial Taylor</div><div class="meth-eq-body" tabindex="0" role="group" aria-label="Inertial Taylor rule; scrolls sideways">\(r_t = 0.85\,r_{t-1} + 0.15\bigl[r^{*}_t + \bar\pi_t + 0.5(\bar\pi_t - \pi^{\text{targ}}) + 1.0\,\tilde x_t\bigr] + \varepsilon_t\)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">effective rate</div><div class="meth-eq-body">\(\texttt{rff}_t = \max(\texttt{rffrule}_t,\ \texttt{rffmin}_t)\)</div></div>
+        <div class="meth-sec-title">Policy rules</div>
+        <div class="meth-eq"><div class="meth-eq-label">Inertial Taylor</div><div class="meth-eq-body" tabindex="0" role="group" aria-label="Inertial Taylor rule"><span class="eq-w">\(r_t = 0.85\,r_{t-1} + 0.15\bigl[r^{*}_t + \bar\pi_t + 0.5(\bar\pi_t - \pi^{\text{targ}}) + 1.0\,\tilde x_t\bigr] + \varepsilon_t\)</span><span class="eq-n">\(\begin{aligned} r_t = {}& 0.85\,r_{t-1} \\ & + 0.15\bigl[r^{*}_t + \bar\pi_t \\ & \qquad + 0.5(\bar\pi_t - \pi^{\text{targ}}) \\ & \qquad + 1.0\,\tilde x_t\bigr] + \varepsilon_t \end{aligned}\)</span></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Effective rate</div><div class="meth-eq-body">\(\texttt{rff}_t = \max(\texttt{rffrule}_t,\ \texttt{rffmin}_t)\)</div></div>
         </div>
         <figure class="step-diagram" data-title="Modular policy rules" tabindex="0" role="button" aria-label="Expand diagram: Modular policy rules">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
@@ -274,9 +274,9 @@ window.MathJax = {
         <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Shock and compare</h3></div>
         <p>A shock is an addition to an equation's error term (<code>rffintay_aerr</code> for the policy rule, for instance). Solve shocked and baseline paths over the same window and read the difference. Shock units differ by lever; the <a href="/frb-us/code#code-2">Code tab</a> lists them.</p>
         <div class="meth-inline">
-        <div class="meth-sec-title">impulse responses</div>
-        <div class="meth-eq"><div class="meth-eq-label">shock</div><div class="meth-eq-body">\(\text{aerr} \mathrel{+}= \text{shock}\) on the add-factored baseline</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">response</div><div class="meth-eq-body">\(\text{IRF}_t = \text{sim}_t - \text{baseline}_t\) over the same window</div></div>
+        <div class="meth-sec-title">Impulse responses</div>
+        <div class="meth-eq"><div class="meth-eq-label">Shock</div><div class="meth-eq-body">\(\text{aerr} \mathrel{+}= \text{shock}\) on the add-factored baseline</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Response</div><div class="meth-eq-body">\(\text{IRF}_t = \text{sim}_t - \text{baseline}_t\) over the same window</div></div>
         </div>
         <figure class="step-diagram" data-title="Shock and compare" tabindex="0" role="button" aria-label="Expand diagram: Shock and compare">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
@@ -315,40 +315,40 @@ window.MathJax = {
       <aside class="scrolly-sticky" aria-hidden="true">
         <div class="meth-panel" data-step="0">
           <div class="meth-panel-head"><span class="meth-panel-title">Parse the Board's model file</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">parse</div>
-        <div class="meth-eq"><div class="meth-eq-label">system</div><div class="meth-eq-body">\(284\) endogenous eqs (behavioural + identities), from <code>model.xml</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">residual form</div><div class="meth-eq-body">\(F_i(x,\,\text{data}) + \text{aerr}_i + \text{trac}_i = 0\)</div></div>
+          <div class="meth-sec-title">Parse</div>
+        <div class="meth-eq"><div class="meth-eq-label">System</div><div class="meth-eq-body">\(284\) endogenous eqs (behavioural + identities), from <code>model.xml</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Residual form</div><div class="meth-eq-body">\(F_i(x,\,\text{data}) + \text{aerr}_i + \text{trac}_i = 0\)</div></div>
         </div>
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Load LONGBASE, then add-factor</span><span class="meth-panel-badge mono">Step 2</span></div>
           <div class="meth-sec-title">LONGBASE conditioning</div>
-        <div class="meth-eq"><div class="meth-eq-label">tracking residual</div><div class="meth-eq-body">\(\text{trac}_i = -F_i(\text{baseline})\) per equation, per quarter</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">invariant</div><div class="meth-eq-body">\(\text{solve}(\text{baseline} + \text{trac}) = \text{LONGBASE}\) exactly</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Tracking residual</div><div class="meth-eq-body">\(\text{trac}_i = -F_i(\text{baseline})\) per equation, per quarter</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Invariant</div><div class="meth-eq-body"><span class="eq-w">\(\text{solve}(\text{baseline} + \text{trac}) = \text{LONGBASE}\)</span><span class="eq-n">\(\begin{aligned} & \text{solve}(\text{baseline} + \text{trac}) \\ & \quad = \text{LONGBASE} \end{aligned}\)</span> exactly</div></div>
         </div>
         <div class="meth-panel" data-step="2" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Solve by damped Newton</span><span class="meth-panel-badge mono">Step 3</span></div>
           <div class="meth-sec-title">Newton iteration</div>
-        <div class="meth-eq"><div class="meth-eq-label">step</div><div class="meth-eq-body">\(J(x^{(k)})\,\Delta x = -F(x^{(k)})\), sparse LU (SuperLU)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">damping</div><div class="meth-eq-body">halve \(\Delta x\) until \(F, J\) evaluate cleanly</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">convergence</div><div class="meth-eq-body">\(\|\Delta x\| \le 10^{-8}\), then \(\|F\| \le 5\times 10^{-4}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Step</div><div class="meth-eq-body">\(J(x^{(k)})\,\Delta x = -F(x^{(k)})\), sparse LU (SuperLU)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Damping</div><div class="meth-eq-body">halve \(\Delta x\) until \(F, J\) evaluate cleanly</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Convergence</div><div class="meth-eq-body">\(\|\Delta x\| \le 10^{-8}\), then \(\|F\| \le 5\times 10^{-4}\)</div></div>
         </div>
         <div class="meth-panel" data-step="3" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Policy rules</span><span class="meth-panel-badge mono">Step 4</span></div>
-          <div class="meth-sec-title">policy rules</div>
-        <div class="meth-eq"><div class="meth-eq-label">inertial Taylor</div><div class="meth-eq-body" tabindex="0" role="group" aria-label="Inertial Taylor rule; scrolls sideways">\(r_t = 0.85\,r_{t-1} + 0.15\bigl[r^{*}_t + \bar\pi_t + 0.5(\bar\pi_t - \pi^{\text{targ}}) + 1.0\,\tilde x_t\bigr] + \varepsilon_t\)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">effective rate</div><div class="meth-eq-body">\(\texttt{rff}_t = \max(\texttt{rffrule}_t,\ \texttt{rffmin}_t)\)</div></div>
+          <div class="meth-sec-title">Policy rules</div>
+        <div class="meth-eq"><div class="meth-eq-label">Inertial Taylor</div><div class="meth-eq-body" tabindex="0" role="group" aria-label="Inertial Taylor rule"><span class="eq-w">\(r_t = 0.85\,r_{t-1} + 0.15\bigl[r^{*}_t + \bar\pi_t + 0.5(\bar\pi_t - \pi^{\text{targ}}) + 1.0\,\tilde x_t\bigr] + \varepsilon_t\)</span><span class="eq-n">\(\begin{aligned} r_t = {}& 0.85\,r_{t-1} \\ & + 0.15\bigl[r^{*}_t + \bar\pi_t \\ & \qquad + 0.5(\bar\pi_t - \pi^{\text{targ}}) \\ & \qquad + 1.0\,\tilde x_t\bigr] + \varepsilon_t \end{aligned}\)</span></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Effective rate</div><div class="meth-eq-body">\(\texttt{rff}_t = \max(\texttt{rffrule}_t,\ \texttt{rffmin}_t)\)</div></div>
         </div>
         <div class="meth-panel" data-step="4" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Shock and compare</span><span class="meth-panel-badge mono">Step 5</span></div>
-          <div class="meth-sec-title">impulse responses</div>
-        <div class="meth-eq"><div class="meth-eq-label">shock</div><div class="meth-eq-body">\(\text{aerr} \mathrel{+}= \text{shock}\) on the add-factored baseline</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">response</div><div class="meth-eq-body">\(\text{IRF}_t = \text{sim}_t - \text{baseline}_t\) over the same window</div></div>
+          <div class="meth-sec-title">Impulse responses</div>
+        <div class="meth-eq"><div class="meth-eq-label">Shock</div><div class="meth-eq-body">\(\text{aerr} \mathrel{+}= \text{shock}\) on the add-factored baseline</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Response</div><div class="meth-eq-body">\(\text{IRF}_t = \text{sim}_t - \text{baseline}_t\) over the same window</div></div>
         </div>
       </aside>
     </div>
 
     <div class="meth-notation" id="notation">
-      <h3>Notation</h3>
+      <details class="about meth-notation-x"><summary>Notation <span class="meth-notation-n">11 symbols</span></summary>
       <table class="meth-notation-table">
         <thead><tr><th scope="col">Symbol</th><th scope="col">Meaning</th><th scope="col">Step</th></tr></thead>
         <tbody>
@@ -365,6 +365,7 @@ window.MathJax = {
           <tr><th scope="row">\(\text{IRF}_t\)</th><td>impulse response: simulated minus baseline path</td><td><a href="#meth-5">5</a></td></tr>
         </tbody>
       </table>
+      </details>
     </div>
   </section>
 

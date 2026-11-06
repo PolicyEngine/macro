@@ -100,9 +100,9 @@ window.MathJax = {
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Transpile the published listing</h3></div>
         <p>The OBR publishes its full equation listing, but as EViews source that few can run. The transpiler rewrites every EViews line — <code>dlog()</code>, <code>@elem</code>, lags like <code>X(-1)</code>, error-correction terms — into an equivalent Python expression, compiled once per solve.</p>
         <div class="meth-inline">
-        <div class="meth-sec-title">translation</div>
-        <div class="meth-eq"><div class="meth-eq-label">growth rates</div><div class="meth-eq-body">\(\mathrm{dlog}(X) \;\rightarrow\; \log X_t - \log X_{t-1}\)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">lags &amp; elements</div><div class="meth-eq-body">\(X_{t-1}\), <code>@elem</code> &rarr; indexed array reads</div></div>
+        <div class="meth-sec-title">Translation</div>
+        <div class="meth-eq"><div class="meth-eq-label">Growth rates</div><div class="meth-eq-body">\(\mathrm{dlog}(X) \;\rightarrow\; \log X_t - \log X_{t-1}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Lags &amp; elements</div><div class="meth-eq-body">\(X_{t-1}\), <code>@elem</code> &rarr; indexed array reads</div></div>
         </div>
         <figure class="step-diagram" data-title="EViews listing to Python" tabindex="0" role="button" aria-label="Expand diagram: EViews listing to Python">
           <svg viewBox="0 0 580 190" width="580" style="max-width:100%;height:auto;">
@@ -140,8 +140,8 @@ window.MathJax = {
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Initialise from official data</h3></div>
         <p>History loads from the OBR's detailed forecast tables. Of the 261 endogenous variables the listing referenced but the outlook did not print, <strong>199 had ONS series codes</strong>; a vendored 355-series ONS snapshot supplies them.</p>
         <div class="meth-inline">
-        <div class="meth-sec-title">data sources</div>
-        <div class="meth-eq"><div class="meth-eq-label">forecast tables</div><div class="meth-eq-body">OBR detailed forecast tables, March 2026 EFO</div></div>
+        <div class="meth-sec-title">Data sources</div>
+        <div class="meth-eq"><div class="meth-eq-label">Forecast tables</div><div class="meth-eq-body">OBR detailed forecast tables, March 2026 EFO</div></div>
         <div class="meth-eq"><div class="meth-eq-label">ONS snapshot</div><div class="meth-eq-body">355 vendored series; 199 of 261 unprinted variables matched</div></div>
         </div>
         <figure class="step-diagram" data-title="Initial data sources" tabindex="0" role="button" aria-label="Expand diagram: Initial data sources">
@@ -173,9 +173,9 @@ window.MathJax = {
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Solve by Gauss–Seidel iteration</h3></div>
         <p>The equations depend on each other, so each quarter is solved simultaneously: cycle through the equations, update, repeat to convergence. Quarters then solve sequentially forward.</p>
         <div class="meth-inline">
-        <div class="meth-sec-title">solver</div>
-        <div class="meth-eq"><div class="meth-eq-label">within quarter</div><div class="meth-eq-body">cycle &rarr; update &rarr; repeat to convergence</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">across quarters</div><div class="meth-eq-body">sequential forward solve</div></div>
+        <div class="meth-sec-title">Solver</div>
+        <div class="meth-eq"><div class="meth-eq-label">Within quarter</div><div class="meth-eq-body">cycle &rarr; update &rarr; repeat to convergence</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Across quarters</div><div class="meth-eq-body">sequential forward solve</div></div>
         </div>
         <figure class="step-diagram" data-title="Gauss–Seidel solve" tabindex="0" role="button" aria-label="Expand diagram: Gauss–Seidel solve">
           <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
@@ -213,10 +213,10 @@ window.MathJax = {
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Anchor to the published EFO</h3></div>
         <p>Add-factors — the residuals reconciling each behavioural equation to data — are set so the baseline reproduces the published EFO. This is the OBR's own device, used the OBR's own way.</p>
         <div class="meth-inline">
-        <div class="meth-sec-title">anchoring</div>
-        <div class="meth-eq"><div class="meth-eq-label">add-factor window</div><div class="meth-eq-body">fit 2024Q1–2025Q4, hold constant, project to 2027Q4</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">scenario solves</div><div class="meth-eq-body">12 quarters, 2025Q1–2027Q4</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">anchored horizon</div><div class="meth-eq-body">to 2031Q1 (fit on the validation tab)</div></div>
+        <div class="meth-sec-title">Anchoring</div>
+        <div class="meth-eq"><div class="meth-eq-label">Add-factor window</div><div class="meth-eq-body">fit 2024Q1–2025Q4, hold constant, project to 2027Q4</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Scenario solves</div><div class="meth-eq-body">12 quarters, 2025Q1–2027Q4</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Anchored horizon</div><div class="meth-eq-body">to 2031Q1 (fit on the validation tab)</div></div>
         </div>
         <figure class="step-diagram" data-title="Anchoring with add-factors" tabindex="0" role="button" aria-label="Expand diagram: Anchoring with add-factors">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
@@ -252,9 +252,9 @@ window.MathJax = {
         <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Swap the closure, shock, compare</h3></div>
         <p>In the OBR file GDP (<code>GDPM</code>) is an exogenous input and inventories (<code>DINV</code>) are already the residual that closes the expenditure identity.</p>
         <div class="meth-inline">
-        <div class="meth-sec-title">closure and shock</div>
-        <div class="meth-eq"><div class="meth-eq-label">closure swap</div><div class="meth-eq-body"><code>DINV</code> equation removed and held at EFO; GDP identity added, <code>GDPM</code> endogenous</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">policy effect</div><div class="meth-eq-body">\(X_t^{\text{shocked}} - X_t^{\text{baseline}}\), identical structure</div></div>
+        <div class="meth-sec-title">Closure and shock</div>
+        <div class="meth-eq"><div class="meth-eq-label">Closure swap</div><div class="meth-eq-body"><code>DINV</code> equation removed and held at EFO; GDP identity added, <code>GDPM</code> endogenous</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Policy effect</div><div class="meth-eq-body">\(X_t^{\text{shocked}} - X_t^{\text{baseline}}\), identical structure</div></div>
         </div>
         <figure class="step-diagram" data-title="Closure swap and shock" tabindex="0" role="button" aria-label="Expand diagram: Closure swap and shock">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
@@ -292,10 +292,10 @@ window.MathJax = {
         <div class="meth-step-head"><span class="meth-step-num mono">6</span><h3>Score a costed reform through the microsimulation bridge</h3></div>
         <p>The suite's flagship join.</p>
         <div class="meth-inline">
-        <div class="meth-sec-title">the bridge</div>
-        <div class="meth-eq"><div class="meth-eq-label">injection</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code> = &minus;(annual costing) &times; 1000 &divide; 4, &pound;m/qtr, held</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">transmission</div><div class="meth-eq-body"><code>HHDI</code> &rarr; <code>RHHDI</code> &rarr; <code>CONS</code> &rarr; <code>GDPM</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">command</div><div class="meth-eq-body"><code>pe-macro score --country uk --reform '{&hellip;}' --model obr</code></div></div>
+        <div class="meth-sec-title">The bridge</div>
+        <div class="meth-eq"><div class="meth-eq-label">Injection</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code> = &minus;(annual costing) &times; 1000 &divide; 4, &pound;m/qtr, held</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Transmission</div><div class="meth-eq-body"><code>HHDI</code> &rarr; <code>RHHDI</code> &rarr; <code>CONS</code> &rarr; <code>GDPM</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Command</div><div class="meth-eq-body"><code>pe-macro score --country uk --reform '{&hellip;}' --model obr</code></div></div>
         </div>
         <figure class="step-diagram" data-title="The static-costing bridge" tabindex="0" role="button" aria-label="Expand diagram: The static-costing bridge">
           <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
@@ -334,47 +334,47 @@ window.MathJax = {
       <aside class="scrolly-sticky" aria-hidden="true">
         <div class="meth-panel" data-step="0">
           <div class="meth-panel-head"><span class="meth-panel-title">Transpile the published listing</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">translation</div>
-        <div class="meth-eq"><div class="meth-eq-label">growth rates</div><div class="meth-eq-body">\(\mathrm{dlog}(X) \;\rightarrow\; \log X_t - \log X_{t-1}\)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">lags &amp; elements</div><div class="meth-eq-body">\(X_{t-1}\), <code>@elem</code> &rarr; indexed array reads</div></div>
+          <div class="meth-sec-title">Translation</div>
+        <div class="meth-eq"><div class="meth-eq-label">Growth rates</div><div class="meth-eq-body">\(\mathrm{dlog}(X) \;\rightarrow\; \log X_t - \log X_{t-1}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Lags &amp; elements</div><div class="meth-eq-body">\(X_{t-1}\), <code>@elem</code> &rarr; indexed array reads</div></div>
         </div>
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Initialise from official data</span><span class="meth-panel-badge mono">Step 2</span></div>
-          <div class="meth-sec-title">data sources</div>
-        <div class="meth-eq"><div class="meth-eq-label">forecast tables</div><div class="meth-eq-body">OBR detailed forecast tables, March 2026 EFO</div></div>
+          <div class="meth-sec-title">Data sources</div>
+        <div class="meth-eq"><div class="meth-eq-label">Forecast tables</div><div class="meth-eq-body">OBR detailed forecast tables, March 2026 EFO</div></div>
         <div class="meth-eq"><div class="meth-eq-label">ONS snapshot</div><div class="meth-eq-body">355 vendored series; 199 of 261 unprinted variables matched</div></div>
         </div>
         <div class="meth-panel" data-step="2" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Solve by Gauss–Seidel iteration</span><span class="meth-panel-badge mono">Step 3</span></div>
-          <div class="meth-sec-title">solver</div>
-        <div class="meth-eq"><div class="meth-eq-label">within quarter</div><div class="meth-eq-body">cycle &rarr; update &rarr; repeat to convergence</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">across quarters</div><div class="meth-eq-body">sequential forward solve</div></div>
+          <div class="meth-sec-title">Solver</div>
+        <div class="meth-eq"><div class="meth-eq-label">Within quarter</div><div class="meth-eq-body">cycle &rarr; update &rarr; repeat to convergence</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Across quarters</div><div class="meth-eq-body">sequential forward solve</div></div>
         </div>
         <div class="meth-panel" data-step="3" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Anchor to the published EFO</span><span class="meth-panel-badge mono">Step 4</span></div>
-          <div class="meth-sec-title">anchoring</div>
-        <div class="meth-eq"><div class="meth-eq-label">add-factor window</div><div class="meth-eq-body">fit 2024Q1–2025Q4, hold constant, project to 2027Q4</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">scenario solves</div><div class="meth-eq-body">12 quarters, 2025Q1–2027Q4</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">anchored horizon</div><div class="meth-eq-body">to 2031Q1 (fit on the validation tab)</div></div>
+          <div class="meth-sec-title">Anchoring</div>
+        <div class="meth-eq"><div class="meth-eq-label">Add-factor window</div><div class="meth-eq-body">fit 2024Q1–2025Q4, hold constant, project to 2027Q4</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Scenario solves</div><div class="meth-eq-body">12 quarters, 2025Q1–2027Q4</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Anchored horizon</div><div class="meth-eq-body">to 2031Q1 (fit on the validation tab)</div></div>
         </div>
         <div class="meth-panel" data-step="4" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Swap the closure, shock, compare</span><span class="meth-panel-badge mono">Step 5</span></div>
-          <div class="meth-sec-title">closure and shock</div>
-        <div class="meth-eq"><div class="meth-eq-label">closure swap</div><div class="meth-eq-body"><code>DINV</code> equation removed and held at EFO; GDP identity added, <code>GDPM</code> endogenous</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">policy effect</div><div class="meth-eq-body">\(X_t^{\text{shocked}} - X_t^{\text{baseline}}\), identical structure</div></div>
+          <div class="meth-sec-title">Closure and shock</div>
+        <div class="meth-eq"><div class="meth-eq-label">Closure swap</div><div class="meth-eq-body"><code>DINV</code> equation removed and held at EFO; GDP identity added, <code>GDPM</code> endogenous</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Policy effect</div><div class="meth-eq-body">\(X_t^{\text{shocked}} - X_t^{\text{baseline}}\), identical structure</div></div>
         </div>
         <div class="meth-panel" data-step="5" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Score a costed reform through the bridge</span><span class="meth-panel-badge mono">Step 6</span></div>
-          <div class="meth-sec-title">the bridge</div>
-        <div class="meth-eq"><div class="meth-eq-label">injection</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code> = &minus;(annual costing) &times; 1000 &divide; 4, &pound;m/qtr, held</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">transmission</div><div class="meth-eq-body"><code>HHDI</code> &rarr; <code>RHHDI</code> &rarr; <code>CONS</code> &rarr; <code>GDPM</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">command</div><div class="meth-eq-body"><code>pe-macro score --country uk --reform '{&hellip;}' --model obr</code></div></div>
+          <div class="meth-sec-title">The bridge</div>
+        <div class="meth-eq"><div class="meth-eq-label">Injection</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code> = &minus;(annual costing) &times; 1000 &divide; 4, &pound;m/qtr, held</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Transmission</div><div class="meth-eq-body"><code>HHDI</code> &rarr; <code>RHHDI</code> &rarr; <code>CONS</code> &rarr; <code>GDPM</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Command</div><div class="meth-eq-body"><code>pe-macro score --country uk --reform '{&hellip;}' --model obr</code></div></div>
         </div>
       </aside>
     </div>
 
     <div class="meth-notation" id="notation">
-      <h3>Notation</h3>
+      <details class="about meth-notation-x"><summary>Notation <span class="meth-notation-n">3 symbols</span></summary>
       <table class="meth-notation-table">
         <thead><tr><th scope="col">Symbol</th><th scope="col">Meaning</th><th scope="col">Step</th></tr></thead>
         <tbody>
@@ -383,6 +383,7 @@ window.MathJax = {
           <tr><th scope="row">\(X_t^{\text{shocked}},\ X_t^{\text{baseline}}\)</th><td>the same variable in the shocked and baseline solves</td><td><a href="#meth-5">5</a></td></tr>
         </tbody>
       </table>
+      </details>
     </div>
   </section>
 

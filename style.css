@@ -5602,6 +5602,58 @@ a .model-id, a:hover .model-id { text-decoration: none; display: inline-block; }
 }
 /* long display equations in a step card scroll inside it on a phone */
 .meth-inline .meth-eq-body { overflow-x: auto; overflow-y: hidden; }
+/* Round 3: step cards are padded on every page (rows inset 18px from the
+   card edge, the caption is the card's own header in sentence case, not a
+   lower-case mono tag floating on a rule). */
+.meth-pair .meth-inline { padding: 0 0 4px; }
+.meth-pair .meth-inline > :not(.meth-panel-head) { margin-left: 18px; margin-right: 18px; }
+.meth-pair .meth-inline .meth-eq { margin-left: 18px; margin-right: 18px; }
+.meth-pair .meth-step > .kv { padding: 4px 18px; }
+.meth-pair .meth-display { padding: 12px 18px; }
+.meth-pair .meth-inline .meth-sec-title {
+  display: block; margin: 0 0 2px; padding: 11px 18px 9px;
+  border-bottom: 1px solid var(--hairline); border-radius: 7px 7px 0 0;
+  background: var(--surface-tint);
+  font-family: var(--body); font-size: var(--fs-small); font-weight: 600; letter-spacing: 0;
+  color: var(--text-strong);
+}
+.meth-pair .meth-inline > .meth-sec-title { margin-left: 0; margin-right: 0; }
+.meth-pair .meth-inline .meth-eq ~ .meth-sec-title { margin-top: 10px; border-top: 1px solid var(--hairline); border-radius: 0; }
+.meth-pair .meth-inline .meth-sec-title::after { content: none; }
+.meth-pair .meth-inline .meth-sec-title + .meth-eq { padding-top: 9px; }
+/* Long equations: one line on wide screens, the same math broken over
+   lines on a phone (MathJax 3 has no automatic line breaking). */
+.eq-n { display: none; }
+@media (max-width: 600px) {
+  .eq-w { display: none; }
+  .eq-n { display: inline; }
+  .meth-display .eq-n { display: block; }
+}
+/* Diagrams on a phone: the 580px SVG would scale its labels to ~6px, so
+   stepper.js lays each one out as stacked boxes (labels at 12-14px); the
+   SVG stays for wide screens, print and the full-size view. */
+.diagram-phone { display: none; }
+@media (max-width: 600px) {
+  .meth-pair .step-diagram.has-phone > svg { display: none; }
+  .meth-pair .step-diagram.has-phone .diagram-phone { display: block; }
+}
+.diagram-phone { margin: 0; padding: 0; text-align: center; }
+.dp-title { margin: 0 0 10px; font-size: var(--fs-small); font-weight: 600; color: var(--text-muted); }
+.dp-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; align-items: start; }
+.dp-row.dp-flow { display: block; }
+.dp-row.dp-flow > .dp-box { max-width: 300px; margin: 0 auto; }
+.dp-box { padding: 9px 10px; border: 1.5px solid var(--hairline); border-radius: 9px; background: var(--surface-card); font-size: 12px; line-height: 1.35; color: var(--text-muted); }
+.dp-box b { display: block; margin-bottom: 2px; font-size: 13px; font-weight: 600; color: var(--text-strong); }
+.dp-box.dp-out { border-color: var(--primary); }
+.dp-box.dp-out b { color: var(--tab-teal); }
+.dp-box.dp-pri { border-color: var(--primary); background: var(--primary); color: #fff; }
+.dp-box.dp-pri b { color: #fff; }
+.dp-arrow { display: block; height: 18px; margin: 2px auto; width: 2px; background: var(--primary); position: relative; }
+.dp-arrow::after { content: ""; position: absolute; left: -4px; bottom: -2px; border: 5px solid transparent; border-top: 6px solid var(--primary); border-bottom: 0; }
+.dp-note { margin: 6px 0; font-size: 12px; line-height: 1.4; color: var(--text-muted); }
+/* Notation: one expander at the end of each methodology page. */
+.meth-notation .meth-notation-x { margin: 0; }
+.meth-notation-n { margin-left: 6px; color: var(--text-faint); font-weight: 400; }
 /* one-level tables: the tinted mono label column goes (diagnosis 7) */
 .band :is(.cmp-compare, .fc-vs-cards) table :is(thead th:first-child, tbody th[scope="row"]) { background: none; }
 .band :is(.cmp-compare, .fc-vs-cards) table tbody th[scope="row"] { font-family: var(--body); font-weight: 600; color: var(--text-strong); }

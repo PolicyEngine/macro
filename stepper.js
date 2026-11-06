@@ -51,6 +51,105 @@
     });
   })();
 
+  // Diagrams on a phone. A 580px-wide SVG in a ~330px column draws its 11px
+  // labels at ~6px, so each diagram also gets an HTML layout built from the
+  // SVG itself: every box that holds text becomes a card (first line bold),
+  // boxes on the same row of the drawing sit side by side, rows stack with
+  // an arrow between them, and free-standing text (titles, arrow labels,
+  // footnotes) keeps its place in reading order. CSS shows it only <=600px;
+  // the SVG stays for wide screens, print and the full-size view.
+  (function phoneDiagrams() {
+    var figs = document.querySelectorAll(".meth-pair figure.step-diagram");
+    Array.prototype.forEach.call(figs, function (fig) {
+      var svg = fig.querySelector("svg");
+      if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
+      var num = function (el, a) { return parseFloat(el.getAttribute(a) || "0"); };
+      var rects = Array.prototype.map.call(svg.querySelectorAll("rect"), function (r) {
+        var fill = (r.getAttribute("fill") || "").trim(), stroke = r.getAttribute("stroke") || "";
+        var op = parseFloat(r.getAttribute("opacity") || r.getAttribute("fill-opacity") || "1");
+        var kind = /primary|brand/.test(fill) && op >= 0.6 ? "pri"
+          : (/primary|brand/.test(stroke) || /primary|brand/.test(fill)) ? "out" : "neu";
+        return { x: num(r, "x"), y: num(r, "y"), w: num(r, "width"), h: num(r, "height"), kind: kind, lines: [] };
+      }).filter(function (r) { return r.w >= 40 && r.h >= 18; });
+      var free = [];
+      Array.prototype.forEach.call(svg.querySelectorAll("text"), function (t) {
+        var s = (t.textContent || "").replace(/\s+/g, " ").trim();
+        // lone operators between boxes (+, -, =) only make sense in the drawing
+        if (!s || s.length < 3 && !/\w/.test(s)) return;
+        var x = num(t, "x"), y = num(t, "y"), best = null;
+        rects.forEach(function (r) {
+          if (x >= r.x - 2 && x <= r.x + r.w + 2 && y >= r.y && y <= r.y + r.h + 2 &&
+              (!best || r.w * r.h < best.w * best.h)) best = r;
+        });
+        var item = { s: s, y: y, x: x, bold: /^(6|7|8|9)00$|bold/.test(t.getAttribute("font-weight") || "") };
+        if (best) best.lines.push(item); else free.push(item);
+      });
+      var lines = Array.prototype.map.call(svg.querySelectorAll("line[marker-end]"), function (l) {
+        return { x1: num(l, "x1"), y1: num(l, "y1"), x2: num(l, "x2"), y2: num(l, "y2") };
+      });
+      var boxes = rects.filter(function (r) { return r.lines.length; });
+      // a chart-like drawing (many empty bars) or a single box: keep the SVG
+      if (boxes.length < 2 || rects.length - boxes.length > 6) return;
+      boxes.sort(function (a, b) { return a.y - b.y || a.x - b.x; });
+      var rows = [];
+      boxes.forEach(function (b) {
+        var row = rows.find(function (rw) {
+          return b.y < rw.y + rw.h - 4 && b.y + b.h > rw.y + 4;
+        });
+        if (row) { row.items.push(b); row.y = Math.min(row.y, b.y); }
+        else rows.push({ y: b.y, h: b.h, items: [b] });
+      });
+      var out = document.createElement("div");
+      out.className = "diagram-phone";
+      out.setAttribute("aria-hidden", "true");
+      var title = free.length && free[0].y < (rows[0] ? rows[0].y : 1e9) ? free.shift() : null;
+      if (title) { var tt = document.createElement("p"); tt.className = "dp-title"; tt.textContent = title.s; out.appendChild(tt); }
+      var el = function (tag, cls, txt) { var e = document.createElement(tag); e.className = cls; if (txt) e.textContent = txt; return e; };
+      rows.forEach(function (rw, i) {
+        if (i) out.appendChild(el("span", "dp-arrow"));
+        var notes = free.filter(function (f) { return f.y < rw.y && !f.used; });
+        notes.forEach(function (f) { f.used = true; out.appendChild(el("p", "dp-note", f.s)); });
+        rw.items.sort(function (a, b) { return a.x - b.x; });
+        // boxes joined left to right by arrows read as a sequence: stack them
+        var flow = rw.items.length > 1 && rw.items.slice(1).every(function (b, k) {
+          var a = rw.items[k];
+          return lines.some(function (l) {
+            return Math.min(l.x1, l.x2) >= a.x + a.w - 12 && Math.max(l.x1, l.x2) <= b.x + 12 &&
+              Math.abs(l.y1 - l.y2) < 6 && l.y1 > rw.y && l.y1 < rw.y + rw.h + 10;
+          });
+        });
+        var row = el("div", flow ? "dp-row dp-flow" : "dp-row");
+        rw.items.forEach(function (b, k) {
+          if (flow && k) row.appendChild(el("span", "dp-arrow"));
+          var box = el("div", "dp-box dp-" + b.kind);
+          b.lines.sort(function (p, q) { return p.y - q.y || p.x - q.x; }).forEach(function (ln, k) {
+            if (k === 0) box.appendChild(el("b", "", ln.s));
+            else { box.appendChild(document.createTextNode(ln.s)); if (k < b.lines.length - 1) box.appendChild(document.createElement("br")); }
+          });
+          row.appendChild(box);
+        });
+        out.appendChild(row);
+      });
+      free.filter(function (f) { return !f.used; }).forEach(function (f) { out.appendChild(el("p", "dp-note", f.s)); });
+      svg.insertAdjacentElement("afterend", out);
+      fig.classList.add("has-phone");
+    });
+  })();
+
+  // The "Notation" link opens the notation expander it points at.
+  (function openNotation() {
+    function open() {
+      var d = location.hash === "#notation" && document.querySelector("#notation details");
+      if (d) d.open = true;
+    }
+    window.addEventListener("hashchange", open);
+    document.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest('a[href="#notation"]');
+      if (a) { var d = document.querySelector("#notation details"); if (d) d.open = true; }
+    });
+    open();
+  })();
+
   var updaters = [];
 
   Array.from(document.querySelectorAll(".scrolly-wrap")).forEach(function (wrap) {
