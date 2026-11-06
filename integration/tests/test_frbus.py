@@ -308,3 +308,23 @@ def test_baseline_is_cached_per_policy_rule():
     core.frbus_shock(var="egfe_aerr", shock=0.01, horizon=8,
                      policy_rule="fixed_funds_rate")
     assert len(core._FRBUS_BASELINE_CACHE) == 2
+
+
+def test_extra_rate_series_are_level_deviations_not_percent_of_the_rate():
+    """A 10-year yield requested through ``variables`` used to come back as
+    100*(new/base-1): a +30bp move on a 4% yield read as +7.5."""
+    mode, meaning = core._frbus_series_mode("rg10", "10-year Treasury bond rate")
+    assert mode == "pp" and "level deviation" in meaning
+    assert core._frbus_series_mode("lfpr", "Labor force participation rate")[0] == "pp"
+    # Levels, including the incidence inputs pl/lhp/leh, stay % deviations.
+    for var, definition in [
+        ("pl", "Compensation per hour, business"),
+        ("lhp", "Aggregate labor hours, business sector"),
+        ("leh", "Civilian employment (break adjusted)"),
+        ("fpx", "Nominal exchange rate (G39, import/export trade weights)"),
+        ("egfe", "Federal Government expenditures, CW 2012$"),
+        ("zzz", None),
+    ]:
+        assert core._frbus_series_mode(var, definition)[0] == "pct", var
+    # Headline series keep their declared modes.
+    assert core._frbus_series_mode("rff", "anything") == core.FRBUS_HEADLINE["rff"]

@@ -542,6 +542,51 @@ def _frbus_paths() -> tuple[str, str]:
     )
 
 
+# An extra series asked for through ``variables`` used to be reported as a
+# % deviation whatever it was, so a 10-year yield came back as "% of the
+# rate" (a +30bp move on a 4% yield read as +7.5). The model's own
+# definitions say which series are rates, ratios or growth rates; those are
+# reported in pp like the headline rff/lur/picxfe.
+_FRBUS_PP_DEFINITION = re.compile(
+    r"\b(rate|rates|yield|ratio|percent change|first diff)\b", re.I
+)
+_FRBUS_LEVEL_DEFINITION = re.compile(r"exchange rate", re.I)
+_FRBUS_DEFINITIONS: dict[str, str] | None = None
+
+
+def _frbus_definitions() -> dict[str, str]:
+    """{variable: definition} from the FRB/US model.xml, cached; {} if absent."""
+    global _FRBUS_DEFINITIONS
+    if _FRBUS_DEFINITIONS is None:
+        import xml.etree.ElementTree as ET
+
+        try:
+            root = ET.parse(_frbus_paths()[0]).getroot()
+            _FRBUS_DEFINITIONS = {
+                (v.findtext("name") or "").strip():
+                    " ".join((v.findtext("definition") or "").split())
+                for v in root.iter("variable")
+            }
+        except (OSError, ET.ParseError, ImportError):
+            _FRBUS_DEFINITIONS = {}
+    return _FRBUS_DEFINITIONS
+
+
+def _frbus_series_mode(var: str, definition: str | None) -> tuple[str, str]:
+    """(mode, meaning) for a reported series; mode 'pp' or 'pct'."""
+    if var in FRBUS_HEADLINE:
+        return FRBUS_HEADLINE[var]
+    label = f"{var} ({definition})" if definition else var
+    if definition and _FRBUS_PP_DEFINITION.search(definition) and not \
+            _FRBUS_LEVEL_DEFINITION.search(definition):
+        return "pp", (
+            f"{label}, level deviation from baseline in the series' own "
+            "units (pp for rates quoted in percent, such as interest rates; "
+            "decimal for tax rates and ratios stored as fractions)"
+        )
+    return "pct", f"{label}, % deviation from baseline"
+
+
 def _frbus_period(value, *, argument: str):
     import pandas as pd
 
@@ -676,6 +721,10 @@ def frbus_shock(
             "because the equation would otherwise just overwrite the level."
         )
 
+    for extra in variables or []:
+        if extra not in with_adds.columns:
+            raise ValueError(f"requested variable {extra!r} is not in the model")
+
     shocked = with_adds.copy()
     shock_end = start_p + periods - 1
     shocked.loc[start_p:shock_end, var] += float(shock)
@@ -698,9 +747,11 @@ def frbus_shock(
             wanted.append(extra)
 
     index = pd.period_range(start_p, end_p, freq="Q")
+    definitions = _frbus_definitions() if len(wanted) > len(FRBUS_HEADLINE) else {}
+    modes = {v: _frbus_series_mode(v, definitions.get(v)) for v in wanted}
     series: dict[str, list[float]] = {}
     for v in wanted:
-        mode = FRBUS_HEADLINE.get(v, ("pct", ""))[0]
+        mode = modes[v][0]
         base, new = with_adds.loc[start_p:end_p, v], sim.loc[start_p:end_p, v]
         if mode == "pct":
             delta = 100.0 * (new / base - 1.0)
@@ -736,10 +787,7 @@ def frbus_shock(
         "policy_rule": policy_rule,
         "policy_rule_description": FRBUS_POLICY_RULES[policy_rule]["description"],
         "expectations": "VAR (backward-looking); MCE is not implemented",
-        "series_meaning": {
-            v: FRBUS_HEADLINE.get(v, ("pct", f"{v}, % deviation from baseline"))[1]
-            for v in wanted
-        },
+        "series_meaning": {v: modes[v][1] for v in wanted},
         "results": rows,
         "peaks": peaks,
     }
