@@ -182,6 +182,9 @@ def score_reform(
         start_year: Reform start year (default 2026).
         max_iter: og only — steady-state solver iteration cap (default 250).
         years: obr only — costing window length in years (default 5).
+            PolicyEngine-UK year y is fiscal year y-(y+1), so the OBR
+            run covers yQ2..(y_last+1)Q1; the databank ends 2031Q1, so
+            start_year + years - 1 must be <= 2030.
         dataset: obr/microsim only — microdata dataset name override.
 
     For population-level budget/distributional impacts WITHOUT macro feedback,

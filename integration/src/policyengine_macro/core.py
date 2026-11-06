@@ -2937,7 +2937,7 @@ def obr_costing_to_shock(annual_budget_bn) -> list[float]:
     - Sign: positive means revenue raised. The OBR adapter applies the minus
       sign when it converts the costing into an HHDI held add-factor.
     - Units: £bn/year -> £m/quarter is * 1000 / 4.
-    - Interpolation: flat within each year (deliberately crude and declared;
+    - Interpolation: flat within each (fiscal) year (deliberately crude and declared;
       the microsim only produces annual numbers).
 
     Pure arithmetic — no model imports — so it is unit-testable everywhere.
@@ -2947,6 +2947,30 @@ def obr_costing_to_shock(annual_budget_bn) -> list[float]:
         quarterly_m = float(bn) * 1000.0 / 4.0
         path.extend([round(quarterly_m, 4)] * 4)
     return path
+
+
+def _obr_fiscal_window(first_year: int, last_year: int) -> tuple[str, str]:
+    """OBR quarters covered by PolicyEngine-UK fiscal years first..last.
+
+    Fiscal year y runs April y to March y+1, i.e. yQ2..(y+1)Q1. Refuses a
+    window that falls outside the OBR databank (2025Q1..2031Q1) before any
+    microsim run is spent on it.
+    """
+    import pandas as pd
+
+    start = pd.Period(f"{int(first_year)}Q2", freq="Q")
+    end = pd.Period(f"{int(last_year) + 1}Q1", freq="Q")
+    data_start = pd.Period(_OBR_START, freq="Q")
+    data_end = pd.Period(_OBR_DATA_END, freq="Q")
+    if start < data_start or end > data_end:
+        raise ValueError(
+            f"fiscal years {first_year}-{str(first_year + 1)[-2:]} to "
+            f"{last_year}-{str(last_year + 1)[-2:]} need OBR quarters "
+            f"{start}..{end}, outside the databank {_OBR_START}..{_OBR_DATA_END}. "
+            f"start_year must be >= {data_start.year} and "
+            f"start_year + years - 1 <= {data_end.year - 1}."
+        )
+    return str(start), str(end)
 
 
 def obr_score_reform(
@@ -2996,9 +3020,15 @@ def obr_score_reform(
     years = int(years)
     if years < 1:
         raise ValueError(f"years must be >= 1, got {years}")
+    window = list(range(int(start_year), int(start_year) + years))
+    # PolicyEngine-UK year y is FISCAL year y-(y+1): policyengine_uk's
+    # convert_to_fiscal_year_parameters samples every parameter at 30 April
+    # of y (policyengine_uk/utils/parameters.py, pinned 2.151.0). So year
+    # 2026's costing covers 2026Q2..2027Q1, and the add-factor path must sit
+    # on those quarters, not on calendar 2026 (issue #201).
+    start, end = _obr_fiscal_window(window[0], window[-1])
     run_reform = _import_obr()
 
-    window = list(range(int(start_year), int(start_year) + years))
     costings = [
         pe_population_impact(
             country="uk", reform=reform, year=y, dataset=dataset
@@ -3008,7 +3038,6 @@ def obr_score_reform(
     annual_bn = [c["budgetary_impact_bn"] for c in costings]
     shock_path = obr_costing_to_shock(annual_bn)
 
-    start, end = f"{window[0]}Q1", f"{window[-1]}Q4"
     name = f"PE static costing via {OBR_BRIDGE_VAR}: {reform}"
     df = run_reform(
         name=name,
@@ -3029,7 +3058,9 @@ def obr_score_reform(
         "(positive revenue is converted to a negative held HHDI add-factor)",
         "demand-side incidence only; supply-side channels belong to the "
         "OG member",
-        "annual costings applied flat within each year",
+        "annual costings are PolicyEngine-UK fiscal years (April-March) "
+        "and are applied flat across that fiscal year's four quarters "
+        f"({start}..{end})",
         "corporation-tax reforms are out of scope (direct TCPRO lever via "
         "obr_shock)",
     ]
@@ -3048,7 +3079,8 @@ def obr_score_reform(
         "window": {"start": start, "end": end},
         "bridge_variable": OBR_BRIDGE_VAR,
         "annual_costings_bn": [
-            {"year": y, "budgetary_impact_bn": bn}
+            {"year": y, "fiscal_year": f"{y}-{(y + 1) % 100:02d}",
+             "budgetary_impact_bn": bn}
             for y, bn in zip(window, annual_bn)
         ],
         "quarterly_shock_path_m": shock_path,
@@ -3128,7 +3160,8 @@ def obr_score_reform(
         assumptions=[
             "microsim static costing injected as an HHDI add path "
             "(demand-side incidence)",
-            "flat quarterly interpolation within each year",
+            "flat quarterly interpolation within each fiscal year "
+            "(PolicyEngine-UK year y = April y to March y+1)",
         ],
         caveats=caveats,
         validation=[
