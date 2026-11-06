@@ -13,6 +13,7 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 ### Changed
 
 - **BoE SVAR replication figures** are labelled with their run vintage (boe-var-model `845e2a4`) and their `results/` links are pinned to it. No number changes.
+- **BoE SVAR figures updated to the 2026Q2 data refresh** (boe-var-model #24, `d4ec3e7`): accepted draws 744 → 765, ESS 356.1 → 368.0, global FEVD share of UK GDP 37.4 → 38.7 and of UK CPI 42.3 → 41.5, rolling origins 49 → 50, smallest adjusted q 0.36 → 0.39 (published spec 0.40 → 0.42), fast-config GDP/CPI 42.0/37.6 → 40.1/40.1.
 
 ## [0.2.0] — 2026-08-11
 
