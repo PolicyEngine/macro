@@ -930,6 +930,11 @@ HANK_HEADLINE = {
     "r": "Real interest rate (quarterly rate), pp deviation from steady state",
     "w": "Pre-tax real wage, % deviation from steady state",
     "N": "Labor, % deviation from steady state",
+    # The financing. The DAG holds bond supply fixed, so a G shock is paid
+    # for by this tax path period by period; the package returns it, and a
+    # spending IRF read without it invites a deficit-financed reading.
+    "tax": "Labour tax rate, pp deviation from steady state (the budget-"
+           "balancing financing of the shock)",
 }
 
 # Cache the steady state + GE jacobian per (variant, T). The steady state

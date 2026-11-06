@@ -231,3 +231,22 @@ def test_distributional_block_is_coherent_and_labelled_first_order():
     # The easing is expansionary, and the high-MPC (poor) quartile responds
     # by more than the wealthy one under the first-order allocation.
     assert dc["Q1"] > dc["Q4"]
+
+
+def test_tax_financing_path_is_surfaced_when_the_package_returns_it(monkeypatch):
+    """us_hank.model.shock returns 'tax' (the labour-tax financing of a G
+    shock); the adapter used to drop it because HANK_HEADLINE had no entry."""
+    import types
+
+    import numpy as np
+
+    T = core.HANK_T
+    irf = {v: np.full(T, 0.1) for v in ("Y", "C", "I", "pi", "r", "tax")}
+    irf.update(shock=np.full(T, 0.01), shock_input="G")
+    fake = types.SimpleNamespace(shock=lambda *a, **k: dict(irf))
+    monkeypatch.setattr(core, "_hank_module", lambda variant: fake)
+    monkeypatch.setattr(core, "_hank_solved", lambda variant: ({}, {}))
+    res = core.hank_shock("fiscal_spending", 0.01, horizon=4)
+    assert "tax" in res["series_meaning"]
+    assert "pp" in res["series_meaning"]["tax"]
+    assert res["results"][0]["tax"] == 0.1
