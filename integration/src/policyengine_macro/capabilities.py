@@ -255,6 +255,8 @@ MODEL_QUALITY = {
             "real data to numerical precision.",
             "Keep all exact invariants hard-gated for every specification.",
         ),
+        # Figures in this entry and the next are from boe-var-model 845e2a4
+        # (data through 2026Q1), the run vintage cited on /svar/validation.
         "predictive_validation": _quality(
             "weak",
             "No demonstrated skill against a random walk WITH DRIFT on any "
