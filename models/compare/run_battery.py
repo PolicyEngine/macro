@@ -36,7 +36,7 @@ HERE = Path(__file__).resolve().parent
 RESULTS = HERE / "results.json"
 
 RUN_KINDS = {"hosted", "battery", "committed"}
-VERDICTS = {"plausible", "plausible-in-model", "off", "questionable", "unresolved"}
+VERDICTS = {"plausible", "plausible-in-model", "off", "questionable", "unresolved", "not-tested"}
 MODEL_ORDER = ("obr", "svar", "frb-us", "us-hank", "define")
 REFRESHABLE = {"frb-us"}
 

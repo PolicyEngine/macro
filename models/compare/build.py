@@ -64,6 +64,7 @@ VERDICT_CLASS = {
     "off": "cmp-v-off",
     "questionable": "cmp-v-mixed",
     "unresolved": "cmp-v-open",
+    "not-tested": "cmp-v-open",
 }
 
 
@@ -380,7 +381,7 @@ def body(data: dict) -> str:
   </nav>
   <section class="band cmp-pick" id="pick">
     <div class="band-head" data-icon="list"><h2>Pick a question</h2>
-      <p class="section-intro">Models are in the hub order, not ranked. Verdicts are in words: plausible, off, questionable, unresolved, or no instrument, each with its reason and the open issue. Results file version {esc(data["version"])}; <a href="{REPO_BLOB}/run_battery.py">how it is checked and regenerated</a>.</p></div>
+      <p class="section-intro">Models are in the hub order, not ranked. Each verdict starts with one of six words: plausible, off, questionable, unresolved, not tested or no instrument; some add a qualifier (such as &ldquo;off, sign right&rdquo;), and each carries its reason and the open issue. Results file version {esc(data["version"])}; <a href="{REPO_BLOB}/run_battery.py">how it is checked and regenerated</a>.</p></div>
     <div class="router-row cmp-chips" role="group" aria-label="Question">{chips}</div>
   </section>
 {sections}
