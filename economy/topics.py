@@ -64,6 +64,9 @@ ECONOMY_PAGE = ROOT / "economy" / "index.html"
 US_TOPICS_DIR = ROOT / "economy" / "us" / "topics"
 US_PAGE = ROOT / "economy" / "us" / "index.html"
 FORECASTS_PAGE = ROOT / "forecasts" / "index.html"
+# The UK routes table lives on /models/combine (ui-home gave it a home there
+# in #204); /forecasts keeps the callout and links to it, so it appears once.
+MODELS_COMBINE_PAGE = ROOT / "models" / "combine" / "index.html"
 US_FORECASTS_PAGE = ROOT / "forecasts" / "us" / "index.html"
 SITEMAP = ROOT / "sitemap.xml"
 SITE = "https://policyengine-macro.vercel.app"
@@ -91,6 +94,8 @@ COUNTRIES = {
         "hub_page": FORECASTS_PAGE,
         "hub_nav_marker": "forecasts-section-nav",
         "platform_marker": "forecasts-platform",
+        "routes_page": MODELS_COMBINE_PAGE,
+        "routes_marker": "models-routes",
         "data": "/economy",
         "data_page": ECONOMY_PAGE,
         "topics_base": "/economy",
@@ -1610,7 +1615,20 @@ US_HOUSEHOLD = '{"state_code":"CA","county_fips":"06037"}'
 
 
 def uk_platform() -> str:
-    """Band 01 of /forecasts: the six things this section can produce."""
+    """The /forecasts band: what the record is not, and where the routes live."""
+    return f"""    <div class="prose">
+      <p class="callout">
+        <strong>pe-microsim does not forecast, and this section does not
+        pretend it does.</strong> The forecast rows are
+        {model_link("boe-svar")}; the scoreboard above is what those rounds
+        have been worth so far. <a href="/models/combine#score">See how a score is put together →</a>
+      </p>
+      <p><a href="/models/combine#routes">The six routes and their commands →</a></p>
+    </div>"""
+
+
+def uk_routes() -> str:
+    """/models/combine#routes: the six things the platform can produce for the UK."""
     microsim = MODELS["pe-microsim"]
     svar = MODELS["boe-svar"]
     rows = [
@@ -1642,7 +1660,7 @@ def uk_platform() -> str:
             "A GDP and CPI forecast, standing alone",
             ["boe-svar"],
             "pe-macro forecast --horizons 8",
-            "medians with 68% and 90% bands; archived and scored below",
+            "medians with 68% and 90% bands; archived and scored on /forecasts",
         ),
         route_row(
             "That forecast carried into household incomes",
@@ -1651,13 +1669,7 @@ def uk_platform() -> str:
             "the model-versus-OBR CPI gap, scored as a real uprating reform",
         ),
     ]
-    return f"""    <div class="prose">
-      <p class="callout">
-        <strong>pe-microsim does not forecast, and this section does not
-        pretend it does.</strong> The forecast rows are
-        {model_link("boe-svar")}; the scoreboard above is what those rounds
-        have been worth so far. <a href="/models#score">See how a score is put together →</a>
-      </p>
+    html = f"""    <div class="prose">
       <details class="about route-details">
         <summary>The six routes, the models each runs in order, and the command</summary>
       <p>
@@ -1711,6 +1723,13 @@ def uk_platform() -> str:
         </p>
       </details>
     </div>"""
+    return html.replace(
+        "held add-factor on",
+        'held <a class="gloss-link" href="/glossary#add-factor">add-factor</a> on',
+    ).replace(
+        "Over MCP the same",
+        'Over <a class="gloss-link" href="/glossary#mcp">MCP</a> the same',
+    )
 
 
 def us_platform() -> str:
@@ -3276,6 +3295,14 @@ def rendered() -> list[tuple[Path, str]]:
             section_hub, entry["platform_marker"], platform[country]()
         )
         artifacts.append((entry["hub_page"], section_hub))
+        if "routes_page" in entry:
+            routes_page = entry["routes_page"]
+            artifacts.append(
+                (
+                    routes_page,
+                    replace(routes_page.read_text(), entry["routes_marker"], uk_routes()),
+                )
+            )
     artifacts.append(
         (SITEMAP, replace(SITEMAP.read_text(), "economy-topics", sitemap_block()))
     )

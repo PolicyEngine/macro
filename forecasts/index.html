@@ -477,7 +477,6 @@
   <section id="run" class="band">
     <div class="band-head" data-icon="layers">
       <h2>Beyond the record</h2>
-      <p class="section-intro">Six outputs, and the models behind each one.</p>
     </div>
 <!-- forecasts-platform:begin -->
     <div class="prose">
@@ -485,65 +484,9 @@
         <strong>pe-microsim does not forecast, and this section does not
         pretend it does.</strong> The forecast rows are
         <a href="/svar">boe-svar</a>; the scoreboard above is what those rounds
-        have been worth so far. <a href="/models#score">See how a score is put together →</a>
+        have been worth so far. <a href="/models/combine#score">See how a score is put together →</a>
       </p>
-      <details class="about route-details">
-        <summary>The six routes, the models each runs in order, and the command</summary>
-      <p>
-        Each route names the models it runs, in order; the household engine,
-        <a href="/pe">pe-microsim</a>, sits in four of the six.
-      </p>
-      <div class="table-scroll">
-        <table class="route-table">
-          <caption>What this section can produce for the UK. Every command is checked against <code>cli.py</code> when this page is generated; a route that stopped running would fail the build rather than sit here.</caption>
-          <thead><tr><th scope="col">What you get</th><th scope="col">Models, in the order they run</th><th scope="col">What the chain does</th><th scope="col">Command</th></tr></thead>
-          <tbody>
-          <tr><th scope="row">One household, exactly</th><td><a href="/pe">pe-microsim</a></td><td>arithmetic over the statutory rules; no sampling, no weights</td><td><code class="mono">pe-macro household-impact --country uk --people &#x27;[{&quot;age&quot;:35,&quot;employment_income&quot;:50000}]&#x27; --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27;</code></td></tr>
-          <tr><th scope="row">The whole population, one policy year</th><td><a href="/pe">pe-microsim</a></td><td>revenue and distribution; a static costing</td><td><code class="mono">pe-macro score --country uk --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27; --model microsim</code></td></tr>
-          <tr><th scope="row">The same reform, with a macro second round</th><td><a href="/pe">pe-microsim</a> &rarr; <a href="/obr">obr-macro</a></td><td>the static costing becomes a held add-factor on household income</td><td><code class="mono">pe-macro score --country uk --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27; --model obr</code></td></tr>
-          <tr><th scope="row">The same reform, with long-run general equilibrium</th><td><a href="/olg">psl-og</a> &rarr; <a href="/pe">pe-microsim</a></td><td>steady-state earnings ratio scales the microsim&#x27;s income inputs</td><td><code class="mono">pe-macro dynamic-score --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27;</code></td></tr>
-          <tr><th scope="row">A GDP and CPI forecast, standing alone</th><td><a href="/svar">boe-svar</a></td><td>medians with 68% and 90% bands; archived and scored below</td><td><code class="mono">pe-macro forecast --horizons 8</code></td></tr>
-          <tr><th scope="row">That forecast carried into household incomes</th><td><a href="/svar">boe-svar</a> &rarr; <a href="/pe">pe-microsim</a></td><td>the model-versus-OBR CPI gap, scored as a real uprating reform</td><td><code class="mono">pe-macro svar-inflation-incidence --year 2027 --reference obr</code></td></tr>
-          </tbody>
-        </table>
-      </div>
-      </details>
-      <details class="about">
-        <summary>About the engine and the macro members, and the same routes over MCP</summary>
-        <p>
-          The engine underneath this section is
-          <a href="/pe">pe-microsim</a> — PolicyEngine's own
-          microsimulation, the only member whose question types include <span class="mono">household</span> and
-          the only one that covers both countries. It applies a reform to household microdata
-          and reports <span class="mono">taxes</span>, <span class="mono">benefits</span>, <span class="mono">net_income</span>, <span class="mono">revenue</span>, <span class="mono">distribution</span> over a
-          single policy year. The only two members that report a distribution are <a href="/pe">pe-microsim</a> and <a href="/olg">psl-og+microsim</a>, and the second is an overlay that runs the first.
-        </p>
-        <p>
-          The macro members are what it cannot do on its own. pe-microsim
-          cannot answer GDP, inflation, interest rates and macro feedback — so every macro number in this
-          section comes from a member that produces one, and the table says which,
-          in the order they run. Four of the six routes put pe-microsim in
-          the chain; two are a macro model standing alone, which is also a fine
-          thing to publish.
-        </p>
-        <p>
-          pe-microsim&rsquo;s question types are
-          <span class="mono">household</span>, <span class="mono">population</span>, <span class="mono">policy_reform</span>:
-          <span class="mono">forecast</span> is not among them, and its
-          predictive validation is recorded as
-          <span class="mono">not_applicable</span>.
-          The uncertainty of <a href="/svar">boe-svar</a> is
-          posterior 68% and 90% intervals.
-        </p>
-        <p>
-          Over MCP the same six routes are <span class="mono">household_reform_impact</span>,
-          <span class="mono">population_reform_impact</span>, <span class="mono">score_reform</span>,
-          <span class="mono">dynamic_reform_impact</span>, <span class="mono">forecast_uk</span> and
-          <span class="mono">svar_inflation_incidence</span>; <span class="mono">recommend_model</span> routes a
-          question to a member, or refuses when none supports it.
-          <a href="/connect">Connect a client →</a>
-        </p>
-      </details>
+      <p><a href="/models/combine#routes">The six routes and their commands →</a></p>
     </div>
 <!-- forecasts-platform:end -->
   </section>
