@@ -897,7 +897,7 @@ def growth_model() -> str:
         <summary>Quarter by quarter</summary>
       <div class="table-scroll">
         <table>
-          <caption>BoE SVAR year-on-year real GDP growth: median and predictive ranges, from the archived round.</caption>
+          <caption>BoE SVAR year-on-year real GDP growth: median and predictive ranges, from the archived round. Bands are raw model quantiles; the fans on the <a href="/forecasts#open">track record</a> are re-calibrated to measured coverage.</caption>
           <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68%</th><th scope="col">90%</th></tr></thead>
           <tbody>
 {chr(10).join(rows)}
@@ -1019,7 +1019,7 @@ def inflation_model() -> str:
         <summary>Quarter by quarter</summary>
       <div class="table-scroll">
         <table>
-          <caption>BoE SVAR year-on-year CPI inflation: median and predictive ranges, from the archived round.</caption>
+          <caption>BoE SVAR year-on-year CPI inflation: median and predictive ranges, from the archived round. Bands are raw model quantiles; the fans on the <a href="/forecasts#open">track record</a> are re-calibrated to measured coverage.</caption>
           <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68%</th><th scope="col">90%</th></tr></thead>
           <tbody>
 {chr(10).join(rows)}
