@@ -42,7 +42,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
+import urllib.request
 import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -53,6 +55,15 @@ ROUNDS = HERE / "rounds"
 LATEST = ROOT / "data" / "latest"
 
 MCP_URL = "https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp"
+
+# The hosted forecast_uk reads boe-var-model's bundled data at the commit the
+# Modal image is built from (BOE_REVISION in integration/modal_app.py). Its
+# last row is the data edge every round from the server will carry, so it can
+# be read from GitHub for free instead of from a cold Modal container.
+MODAL_APP = ROOT / "integration" / "modal_app.py"
+BOE_DATA_URL = (
+    "https://raw.githubusercontent.com/PolicyEngine/boe-var-model/{rev}/data/boe_var_data.csv"
+)
 MODEL = "boe-svar"
 SCHEMA_VERSION = 1
 
@@ -136,6 +147,66 @@ def due(within_days: int, today: date) -> list[tuple[date, str]]:
         for when, name in announced_releases()
         if 0 <= (when - today).days <= within_days
     ]
+
+
+# ------------------------------------------------------------ edge gate
+
+def next_quarter(quarter: str) -> str:
+    year, q = int(quarter[:4]), int(quarter[5])
+    return f"{year + q // 4}Q{q % 4 + 1}"
+
+
+def quarter_key(quarter: str) -> tuple[int, int]:
+    return int(quarter[:4]), int(quarter[5])
+
+
+def hosted_revision(text: str | None = None) -> str | None:
+    """boe-var-model commit the deployed MCP image is built from."""
+    if text is None:
+        if not MODAL_APP.exists():
+            return None
+        text = MODAL_APP.read_text()
+    found = re.search(r'^BOE_REVISION\s*=\s*"([0-9a-f]{7,40})"', text, re.M)
+    return found.group(1) if found else None
+
+
+def last_quarter(csv_text: str) -> str | None:
+    """The last ``YYYYQn`` in the first column of boe_var_data.csv."""
+    rows = [line.split(",", 1)[0].strip() for line in csv_text.splitlines()]
+    quarters = [r for r in rows if re.fullmatch(r"\d{4}Q[1-4]", r)]
+    return max(quarters, key=quarter_key) if quarters else None
+
+
+def hosted_data_edge(revision: str) -> str | None:
+    try:
+        with urllib.request.urlopen(BOE_DATA_URL.format(rev=revision), timeout=30) as r:
+            return last_quarter(r.read().decode())
+    except OSError as exc:
+        print(f"warning: could not read the hosted model's data ({exc})")
+        return None
+
+
+def edge_gate(hosted_edge: str | None, archived: set[str]) -> tuple[bool, str]:
+    """(proceed, reason). A round is only worth a Modal call when the hosted
+    model conditions on a quarter after every archived round's data edge;
+    otherwise ``write_round`` refuses it as "already archived" after the
+    container has done the whole solve. An unknown edge proceeds, so a GitHub
+    outage can never silently stop rounds."""
+    if hosted_edge is None:
+        return True, "hosted data edge unknown; calling the model and letting write_round decide"
+    if not archived:
+        return True, f"hosted data edge {hosted_edge}; no round archived yet"
+    latest = max(archived, key=quarter_key)
+    required = next_quarter(latest)
+    if quarter_key(hosted_edge) < quarter_key(required):
+        return False, (
+            f"skip: the hosted model's data ends {hosted_edge}, before {required}, "
+            f"the first quarter a new round needs (latest archived edge {latest}); "
+            "a call would only be refused as already archived, so no Modal call. "
+            "Refresh boe-var-model data and re-pin BOE_REVISION in "
+            "integration/modal_app.py (issue #224)"
+        )
+    return True, f"hosted data edge {hosted_edge} >= {required}; a new round is possible"
 
 
 # ------------------------------------------------------------- generate
@@ -286,6 +357,12 @@ def main() -> int:
         help="exit 0 if a scored series releases within DAYS, 1 if none does, "
              "2 if the release calendar in data/latest is stale (no future date)",
     )
+    ap.add_argument(
+        "--edge-gate", action="store_true",
+        help="exit 0 if the hosted model's data edge (read from GitHub, no Modal "
+             "call) is newer than every archived round's, 1 if a round would "
+             "only be refused as already archived",
+    )
     ap.add_argument("--draws", type=int, default=DEFAULT_DRAWS)
     ap.add_argument("--horizons", type=int, default=HORIZONS)
     ap.add_argument("--round", help="round id (default: today, UTC)")
@@ -322,6 +399,13 @@ def main() -> int:
             print(f"no scored series releases within {args.due} days of {today}")
             return 1
         return 0
+
+    if args.edge_gate:
+        revision = hosted_revision()
+        edge = hosted_data_edge(revision) if revision else None
+        proceed, reason = edge_gate(edge, archived_data_edges())
+        print(f"boe-var-model {revision or 'unknown'}: {reason}")
+        return 0 if proceed else 1
 
     if args.payload:
         response = json.loads(args.payload.read_text())

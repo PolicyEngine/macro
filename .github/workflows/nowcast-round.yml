@@ -78,14 +78,35 @@ jobs:
             *) exit "$code" ;;
           esac
 
-      - name: Install an MCP client
+      # Second cheap gate, still before any Modal call. The hosted forecast_uk
+      # conditions on boe-var-model's bundled data at BOE_REVISION, so its data
+      # edge is read from GitHub. If that edge is not newer than every archived
+      # round's, the round would be refused as "already archived" after a
+      # ~5.5-minute cold solve — as on 12-13 and 17-19 Aug 2026 (#224). Skip
+      # instead; the job stays green and the log says why.
+      - name: Can the hosted model produce a new round?
         if: steps.due.outputs.due == 'true'
+        id: edge
+        run: |
+          set +e
+          python3 forecasts/nowcast.py --edge-gate
+          code=$?
+          set -e
+          case "$code" in
+            0) echo "ok=true" >> "$GITHUB_OUTPUT" ;;
+            1) echo "ok=false" >> "$GITHUB_OUTPUT"
+               echo "::notice::round skipped, no Modal call: hosted model data edge is already archived (see #224)" ;;
+            *) exit "$code" ;;
+          esac
+
+      - name: Install an MCP client
+        if: steps.due.outputs.due == 'true' && steps.edge.outputs.ok == 'true'
         run: pip install --upgrade pip && pip install "mcp[cli]>=1.9,<2" anyio
 
       # A cold Modal container plus 6000 draws runs several minutes; the
       # measured time for this call is ~5.5 minutes.
       - name: Generate and archive the round
-        if: steps.due.outputs.due == 'true'
+        if: steps.due.outputs.due == 'true' && steps.edge.outputs.ok == 'true'
         timeout-minutes: 20
         run: |
           python3 forecasts/nowcast.py --draws "${{ github.event.inputs.draws || 6000 }}"
@@ -93,7 +114,7 @@ jobs:
       # Nothing was written when the data edge is unchanged, so there is no PR
       # to open. Detect that rather than opening an empty one.
       - name: Did a round land?
-        if: steps.due.outputs.due == 'true'
+        if: steps.due.outputs.due == 'true' && steps.edge.outputs.ok == 'true'
         id: wrote
         run: |
           if [ -n "$(git status --porcelain forecasts/rounds/)" ]; then
