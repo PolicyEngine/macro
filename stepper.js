@@ -13,6 +13,44 @@
 (function () {
   "use strict";
 
+  // MathJax (self-hosted, 1.3 MB) loads only once an equation is close to
+  // the screen, or an expander holding one opens, instead of on every visit
+  // to a methodology tab. The CSP allows no CDN loads.
+  (function lazyMath() {
+    var main = document.querySelector("main");
+    if (!main || !document.querySelector(".meth-step")) return;
+    var holders = Array.from(main.querySelectorAll(
+      ".meth-inline, .kv, .meth-display, .meth-notation, .about, .meth-step > p"
+    )).filter(function (el) { return /\\\(|\\\[/.test(el.textContent); });
+    if (!holders.length) return;
+    var loaded = false, io = null;
+    function load() {
+      if (loaded) return;
+      loaded = true;
+      if (io) io.disconnect();
+      window.MathJax = {
+        chtml: { fontURL: "/vendor/mathjax/output/chtml/fonts/woff-v2" },
+        options: { enableMenu: false }
+      };
+      var s = document.createElement("script");
+      s.src = "/vendor/mathjax/tex-chtml-full.js";
+      s.async = true;
+      document.head.appendChild(s);
+    }
+    window.addEventListener("beforeprint", load);
+    document.addEventListener("toggle", function (e) {
+      if (e.target.open && /\\\(|\\\[/.test(e.target.textContent)) load();
+    }, true);
+    if (!("IntersectionObserver" in window)) { load(); return; }
+    io = new IntersectionObserver(function (entries) {
+      if (entries.some(function (en) { return en.isIntersecting; })) load();
+    }, { rootMargin: "300px 0px" });
+    holders.forEach(function (el) {
+      // a closed expander has no box; its toggle loads MathJax instead
+      if (!el.closest("details:not([open])")) io.observe(el);
+    });
+  })();
+
   var updaters = [];
 
   Array.from(document.querySelectorAll(".scrolly-wrap")).forEach(function (wrap) {

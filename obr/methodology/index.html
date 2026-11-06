@@ -20,15 +20,6 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=19" />
-<script>
-/* Self-hosted MathJax (vendor/mathjax), used only on this page for the
-   methodology tab's formal panels. The CSP allows no CDN loads. */
-window.MathJax = {
-  chtml: { fontURL: "/vendor/mathjax/output/chtml/fonts/woff-v2" },
-  options: { enableMenu: false }
-};
-</script>
-<script src="/vendor/mathjax/tex-chtml-full.js" defer></script>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -83,10 +74,28 @@ window.MathJax = {
 <details class="about"><summary>More detail</summary><p>The OBR's published EViews equation listing is rewritten in Python, initialised from official data, solved quarter by quarter until the equations agree, anchored so the baseline reproduces the published EFO, and shocked against an identical baseline so the difference is the policy effect. The microsimulation supplies the static costing the shock comes from.</p></details>
     </div>
 
+    <figure class="meth-map" aria-labelledby="meth-map-cap">
+      <figcaption id="meth-map-cap" class="meth-map-cap">How the model works, in one picture: the 6 steps below, in order. <a href="#notation">Notation</a> is at the end.</figcaption>
+      <ol class="meth-map-list">
+        <li><a href="#meth-1"><span class="meth-map-num mono">1</span><span class="meth-map-t">Transpile the published listing</span></a></li>
+        <li><a href="#meth-2"><span class="meth-map-num mono">2</span><span class="meth-map-t">Initialise from official data</span></a></li>
+        <li><a href="#meth-3"><span class="meth-map-num mono">3</span><span class="meth-map-t">Solve by Gauss–Seidel iteration</span></a></li>
+        <li><a href="#meth-4"><span class="meth-map-num mono">4</span><span class="meth-map-t">Anchor to the published EFO</span></a></li>
+        <li><a href="#meth-5"><span class="meth-map-num mono">5</span><span class="meth-map-t">Swap the closure, shock, compare</span></a></li>
+        <li><a href="#meth-6"><span class="meth-map-num mono">6</span><span class="meth-map-t">Score a costed reform through the microsimulation bridge</span></a></li>
+      </ol>
+    </figure>
+
     <div class="scrolly-wrap single meth-pair">
       <div class="scrolly-steps">
       <div class="meth-step" id="meth-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Transpile the published listing</h3></div>
+        <p>The OBR publishes its full equation listing, but as EViews source that few can run. The transpiler rewrites every EViews line — <code>dlog()</code>, <code>@elem</code>, lags like <code>X(-1)</code>, error-correction terms — into an equivalent Python expression, compiled once per solve.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">translation</div>
+        <div class="meth-eq"><div class="meth-eq-label">growth rates</div><div class="meth-eq-body">\(\mathrm{dlog}(X) \;\rightarrow\; \log X_t - \log X_{t-1}\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">lags &amp; elements</div><div class="meth-eq-body">\(X_{t-1}\), <code>@elem</code> &rarr; indexed array reads</div></div>
+        </div>
         <figure class="step-diagram" data-title="EViews listing to Python" tabindex="0" role="button" aria-label="Expand diagram: EViews listing to Python">
           <svg viewBox="0 0 580 190" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-s1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -112,12 +121,6 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>The OBR publishes its full equation listing, but as EViews source that few can run. The transpiler rewrites every EViews line — <code>dlog()</code>, <code>@elem</code>, lags like <code>X(-1)</code>, error-correction terms — into an equivalent Python expression, compiled once per solve.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">translation</div>
-        <div class="meth-eq"><div class="meth-eq-label">growth rates</div><div class="meth-eq-body">\(\mathrm{dlog}(X) \;\rightarrow\; \log X_t - \log X_{t-1}\)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">lags &amp; elements</div><div class="meth-eq-body">\(X_{t-1}\), <code>@elem</code> &rarr; indexed array reads</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>What comes out</h4>
@@ -127,6 +130,12 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Initialise from official data</h3></div>
+        <p>History loads from the OBR's detailed forecast tables. Of the 261 endogenous variables the listing referenced but the outlook did not print, <strong>199 had ONS series codes</strong>; a vendored 355-series ONS snapshot supplies them.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">data sources</div>
+        <div class="meth-eq"><div class="meth-eq-label">forecast tables</div><div class="meth-eq-body">OBR detailed forecast tables, March 2026 EFO</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">ONS snapshot</div><div class="meth-eq-body">355 vendored series; 199 of 261 unprinted variables matched</div></div>
+        </div>
         <figure class="step-diagram" data-title="Initial data sources" tabindex="0" role="button" aria-label="Expand diagram: Initial data sources">
           <svg viewBox="0 0 580 195" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-s2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -145,12 +154,6 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>History loads from the OBR's detailed forecast tables. Of the 261 endogenous variables the listing referenced but the outlook did not print, <strong>199 had ONS series codes</strong>; a vendored 355-series ONS snapshot supplies them.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">data sources</div>
-        <div class="meth-eq"><div class="meth-eq-label">forecast tables</div><div class="meth-eq-body">OBR detailed forecast tables, March 2026 EFO</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">ONS snapshot</div><div class="meth-eq-body">355 vendored series; 199 of 261 unprinted variables matched</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>Why it matters</h4>
@@ -160,6 +163,12 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Solve by Gauss–Seidel iteration</h3></div>
+        <p>The equations depend on each other, so each quarter is solved simultaneously: cycle through the equations, update, repeat to convergence. Quarters then solve sequentially forward.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">solver</div>
+        <div class="meth-eq"><div class="meth-eq-label">within quarter</div><div class="meth-eq-body">cycle &rarr; update &rarr; repeat to convergence</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">across quarters</div><div class="meth-eq-body">sequential forward solve</div></div>
+        </div>
         <figure class="step-diagram" data-title="Gauss–Seidel solve" tabindex="0" role="button" aria-label="Expand diagram: Gauss–Seidel solve">
           <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-s3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -185,12 +194,6 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>The equations depend on each other, so each quarter is solved simultaneously: cycle through the equations, update, repeat to convergence. Quarters then solve sequentially forward.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">solver</div>
-        <div class="meth-eq"><div class="meth-eq-label">within quarter</div><div class="meth-eq-body">cycle &rarr; update &rarr; repeat to convergence</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">across quarters</div><div class="meth-eq-body">sequential forward solve</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>Runtime</h4>
@@ -200,6 +203,13 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Anchor to the published EFO</h3></div>
+        <p>Add-factors — the residuals reconciling each behavioural equation to data — are set so the baseline reproduces the published EFO. This is the OBR's own device, used the OBR's own way.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">anchoring</div>
+        <div class="meth-eq"><div class="meth-eq-label">add-factor window</div><div class="meth-eq-body">fit 2024Q1–2025Q4, hold constant, project to 2027Q4</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">scenario solves</div><div class="meth-eq-body">12 quarters, 2025Q1–2027Q4</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">anchored horizon</div><div class="meth-eq-body">to 2031Q1 (fit on the validation tab)</div></div>
+        </div>
         <figure class="step-diagram" data-title="Anchoring with add-factors" tabindex="0" role="button" aria-label="Expand diagram: Anchoring with add-factors">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-s4" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -221,13 +231,6 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>Add-factors — the residuals reconciling each behavioural equation to data — are set so the baseline reproduces the published EFO. This is the OBR's own device, used the OBR's own way.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">anchoring</div>
-        <div class="meth-eq"><div class="meth-eq-label">add-factor window</div><div class="meth-eq-body">fit 2024Q1–2025Q4, hold constant, project to 2027Q4</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">scenario solves</div><div class="meth-eq-body">12 quarters, 2025Q1–2027Q4</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">anchored horizon</div><div class="meth-eq-body">to 2031Q1 (fit on the validation tab)</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>Forecasting with held add-factors</h4>
@@ -239,6 +242,12 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-5" data-step="4">
         <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Swap the closure, shock, compare</h3></div>
+        <p>In the OBR file GDP (<code>GDPM</code>) is an exogenous input and inventories (<code>DINV</code>) are already the residual that closes the expenditure identity.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">closure and shock</div>
+        <div class="meth-eq"><div class="meth-eq-label">closure swap</div><div class="meth-eq-body"><code>DINV</code> equation removed and held at EFO; GDP identity added, <code>GDPM</code> endogenous</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">policy effect</div><div class="meth-eq-body">\(X_t^{\text{shocked}} - X_t^{\text{baseline}}\), identical structure</div></div>
+        </div>
         <figure class="step-diagram" data-title="Closure swap and shock" tabindex="0" role="button" aria-label="Expand diagram: Closure swap and shock">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-s5" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -262,12 +271,6 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>In the OBR file GDP (<code>GDPM</code>) is an exogenous input and inventories (<code>DINV</code>) are already the residual that closes the expenditure identity.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">closure and shock</div>
-        <div class="meth-eq"><div class="meth-eq-label">closure swap</div><div class="meth-eq-body"><code>DINV</code> equation removed and held at EFO; GDP identity added, <code>GDPM</code> endogenous</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">policy effect</div><div class="meth-eq-body">\(X_t^{\text{shocked}} - X_t^{\text{baseline}}\), identical structure</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>Closure swap</h4>
@@ -279,6 +282,13 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-6" data-step="5">
         <div class="meth-step-head"><span class="meth-step-num mono">6</span><h3>Score a costed reform through the microsimulation bridge</h3></div>
+        <p>The suite's flagship join.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">the bridge</div>
+        <div class="meth-eq"><div class="meth-eq-label">injection</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code> = &minus;(annual costing) &times; 1000 &divide; 4, &pound;m/qtr, held</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">transmission</div><div class="meth-eq-body"><code>HHDI</code> &rarr; <code>RHHDI</code> &rarr; <code>CONS</code> &rarr; <code>GDPM</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">command</div><div class="meth-eq-body"><code>pe-macro score --country uk --reform '{&hellip;}' --model obr</code></div></div>
+        </div>
         <figure class="step-diagram" data-title="The static-costing bridge" tabindex="0" role="button" aria-label="Expand diagram: The static-costing bridge">
           <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-s6" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -302,13 +312,6 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>The suite's flagship join.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">the bridge</div>
-        <div class="meth-eq"><div class="meth-eq-label">injection</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code> = &minus;(annual costing) &times; 1000 &divide; 4, &pound;m/qtr, held</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">transmission</div><div class="meth-eq-body"><code>HHDI</code> &rarr; <code>RHHDI</code> &rarr; <code>CONS</code> &rarr; <code>GDPM</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">command</div><div class="meth-eq-body"><code>pe-macro score --country uk --reform '{&hellip;}' --model obr</code></div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>Static costing in, second-round effects out</h4>
@@ -360,6 +363,18 @@ window.MathJax = {
         <div class="meth-eq"><div class="meth-eq-label">command</div><div class="meth-eq-body"><code>pe-macro score --country uk --reform '{&hellip;}' --model obr</code></div></div>
         </div>
       </aside>
+    </div>
+
+    <div class="meth-notation" id="notation">
+      <h3>Notation</h3>
+      <table class="meth-notation-table">
+        <thead><tr><th scope="col">Symbol</th><th scope="col">Meaning</th><th scope="col">Step</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">\(X_t\)</th><td>any model variable in quarter t</td><td><a href="#meth-1">1</a></td></tr>
+          <tr><th scope="row">\(\mathrm{dlog}(X)\)</th><td>EViews log difference, rewritten in Python</td><td><a href="#meth-1">1</a></td></tr>
+          <tr><th scope="row">\(X_t^{\text{shocked}},\ X_t^{\text{baseline}}\)</th><td>the same variable in the shocked and baseline solves</td><td><a href="#meth-5">5</a></td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 

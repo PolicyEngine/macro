@@ -20,15 +20,6 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=19" />
-<script>
-/* Self-hosted MathJax (vendor/mathjax), used only on this page for the
-   methodology tab's formal panels. The CSP allows no CDN loads. */
-window.MathJax = {
-  chtml: { fontURL: "/vendor/mathjax/output/chtml/fonts/woff-v2" },
-  options: { enableMenu: false }
-};
-</script>
-<script src="/vendor/mathjax/tex-chtml-full.js" defer></script>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -80,11 +71,31 @@ window.MathJax = {
     </div>
         <p>
         Six steps from the accounting discipline to the running system; the
-        formal elements sit in a card beside each step's text.</p>
+        formal elements sit in a card under each step's text.</p>
+    <figure class="meth-map" aria-labelledby="meth-map-cap">
+      <figcaption id="meth-map-cap" class="meth-map-cap">How the model works, in one picture: the 6 steps below, in order. <a href="#notation">Notation</a> is at the end.</figcaption>
+      <ol class="meth-map-list">
+        <li><a href="#meth-1"><span class="meth-map-num mono">1</span><span class="meth-map-t">What stock-flow consistency means</span></a></li>
+        <li><a href="#meth-2"><span class="meth-map-num mono">2</span><span class="meth-map-t">Sectors and balance sheets</span></a></li>
+        <li><a href="#meth-3"><span class="meth-map-num mono">3</span><span class="meth-map-t">The housing and power blocks</span></a></li>
+        <li><a href="#meth-4"><span class="meth-map-num mono">4</span><span class="meth-map-t">Demand-led closure and multipliers</span></a></li>
+        <li><a href="#meth-5"><span class="meth-map-num mono">5</span><span class="meth-map-t">Scenarios as policy switches</span></a></li>
+        <li><a href="#meth-6"><span class="meth-map-num mono">6</span><span class="meth-map-t">The adapter and the clean-room path</span></a></li>
+      </ol>
+    </figure>
+
         <div class="scrolly-wrap single meth-pair">
       <div class="scrolly-steps">
       <div class="meth-step" id="meth-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>What stock-flow consistency means</h3></div>
+        <p>DEFINE-UK is an ecological stock-flow consistent (E-SFC) model: DEFINE-UK 1.1, April 2026, by George, Dafermos, Nikolaidi and co-authors (<a href="https://define-model.org/define-uk">define-model.org</a>).</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">matrix identities (manual §2.2)</div>
+        <div class="meth-eq"><div class="meth-eq-label">flow rows</div><div class="meth-eq-body">\(\sum_{s} T_{f,s} = 0\) — every flow leaves one sector and enters another</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sector columns</div><div class="meth-eq-body">\(\sum_{f} T_{f,s} = \mathrm{LEND}_s\) — column sums give net lending</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">final demand</div><div class="meth-eq-body">\(Y = C + I + G + X - M\) — the GDP identity holds in the matrix rows</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">emissions</div><div class="meth-eq-body">\(\mathrm{EMIS} = \mathrm{EMIS}_{\mathrm{ELEC}} + \mathrm{EMIS}_{\mathrm{NELEC}}\)</div></div>
+        </div>
         <figure class="step-diagram" data-title="The transactions matrix closes" tabindex="0" role="button" aria-label="Expand diagram: The transactions matrix closes">
           <svg viewBox="0 0 580 220" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-d1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -108,14 +119,6 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>DEFINE-UK is an ecological stock-flow consistent (E-SFC) model: DEFINE-UK 1.1, April 2026, by George, Dafermos, Nikolaidi and co-authors (<a href="https://define-model.org/define-uk">define-model.org</a>).</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">matrix identities (manual §2.2)</div>
-        <div class="meth-eq"><div class="meth-eq-label">flow rows</div><div class="meth-eq-body">\(\sum_{s} T_{f,s} = 0\) — every flow leaves one sector and enters another</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">sector columns</div><div class="meth-eq-body">\(\sum_{f} T_{f,s} = \mathrm{LEND}_s\) — column sums give net lending</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">final demand</div><div class="meth-eq-body">\(Y = C + I + G + X - M\) — the GDP identity holds in the matrix rows</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">emissions</div><div class="meth-eq-body">\(\mathrm{EMIS} = \mathrm{EMIS}_{\mathrm{ELEC}} + \mathrm{EMIS}_{\mathrm{NELEC}}\)</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>Accounting before theory</h4>
@@ -127,6 +130,14 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Sectors and balance sheets</h3></div>
+        <p>Households, firms, monetary financial institutions (MFIs), non-monetary financial institutions, government, the central bank, and the rest of the world — each with a full balance sheet.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">balance-sheet identities (manual §2.2 Table 2)</div>
+        <div class="meth-eq"><div class="meth-eq-label">instrument rows</div><div class="meth-eq-body">\(\sum_{s} B_{i,s} = 0\) — one sector's asset is another's liability</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sector columns</div><div class="meth-eq-body">financial rows sum to \(\mathrm{FNW}_s\); adding real assets gives \(\mathrm{NW}_s\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">economy-wide closure</div><div class="meth-eq-body">\(\sum_{s} \mathrm{FNW}_s = 0\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">calibration</div><div class="meth-eq-body">UK national accounts (ONS Blue Book / UKEA); manual §5 tables</div></div>
+        </div>
         <figure class="step-diagram" data-title="Seven sectors, closed balance sheets" tabindex="0" role="button" aria-label="Expand diagram: Seven sectors, closed balance sheets">
           <svg viewBox="0 0 580 220" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-d2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -153,14 +164,6 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>Households, firms, monetary financial institutions (MFIs), non-monetary financial institutions, government, the central bank, and the rest of the world — each with a full balance sheet.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">balance-sheet identities (manual §2.2 Table 2)</div>
-        <div class="meth-eq"><div class="meth-eq-label">instrument rows</div><div class="meth-eq-body">\(\sum_{s} B_{i,s} = 0\) — one sector's asset is another's liability</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">sector columns</div><div class="meth-eq-body">financial rows sum to \(\mathrm{FNW}_s\); adding real assets gives \(\mathrm{NW}_s\)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">economy-wide closure</div><div class="meth-eq-body">\(\sum_{s} \mathrm{FNW}_s = 0\)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">calibration</div><div class="meth-eq-body">UK national accounts (ONS Blue Book / UKEA); manual §5 tables</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>The sectors</h4>
@@ -172,6 +175,14 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>The housing and power blocks</h3></div>
+        <p>Two structural blocks distinguish DEFINE-UK from a generic E-SFC model. The <strong>housing block</strong> tracks the UK housing stock by energy efficiency, so retrofit policy — subsidies and regulation — changes household energy demand and emissions through the stock, not through a reduced-form elasticity.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">the two UK blocks</div>
+        <div class="meth-eq"><div class="meth-eq-label">housing</div><div class="meth-eq-body">stock tracked by energy efficiency; retrofit policy works through the stock</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">power</div><div class="meth-eq-body">separate fossil and renewable capital stocks; utilisation threshold triggers renewable investment</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">regulation (v1.1)</div><div class="meth-eq-body">can directly depreciate fossil capital — stranded assets on balance sheets</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">new in v1.1</div><div class="meth-eq-body">regulatory policies · announcement-limited expectations · government non-fossil capital · green sovereign bonds</div></div>
+        </div>
         <figure class="step-diagram" data-title="Housing and power blocks" tabindex="0" role="button" aria-label="Expand diagram: Housing and power blocks">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-d3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -194,14 +205,6 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>Two structural blocks distinguish DEFINE-UK from a generic E-SFC model. The <strong>housing block</strong> tracks the UK housing stock by energy efficiency, so retrofit policy — subsidies and regulation — changes household energy demand and emissions through the stock, not through a reduced-form elasticity.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">the two UK blocks</div>
-        <div class="meth-eq"><div class="meth-eq-label">housing</div><div class="meth-eq-body">stock tracked by energy efficiency; retrofit policy works through the stock</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">power</div><div class="meth-eq-body">separate fossil and renewable capital stocks; utilisation threshold triggers renewable investment</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">regulation (v1.1)</div><div class="meth-eq-body">can directly depreciate fossil capital — stranded assets on balance sheets</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">new in v1.1</div><div class="meth-eq-body">regulatory policies · announcement-limited expectations · government non-fossil capital · green sovereign bonds</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>Power</h4>
@@ -213,6 +216,12 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Demand-led closure and multipliers</h3></div>
+        <p>DEFINE-UK is closed demand-led: output adjusts to aggregate demand rather than being pinned to a supply-side potential path.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">closure and multipliers</div>
+        <div class="meth-eq"><div class="meth-eq-label">closure</div><div class="meth-eq-body">demand-led: \(Y\) adjusts to aggregate demand, not a potential path</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">our computation</div><div class="meth-eq-body">cumulative green-public-investment multiplier, to 2040</div></div>
+        </div>
         <figure class="step-diagram" data-title="Demand-led closure and multipliers" tabindex="0" role="button" aria-label="Expand diagram: Demand-led closure and multipliers">
           <svg viewBox="0 0 640 176" width="640" style="max-width:100%;height:auto;">
             <defs><marker id="arr-d4" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -227,12 +236,6 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>DEFINE-UK is closed demand-led: output adjusts to aggregate demand rather than being pinned to a supply-side potential path.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">closure and multipliers</div>
-        <div class="meth-eq"><div class="meth-eq-label">closure</div><div class="meth-eq-body">demand-led: \(Y\) adjusts to aggregate demand, not a potential path</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">our computation</div><div class="meth-eq-body">cumulative green-public-investment multiplier, to 2040</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>The closure</h4>
@@ -269,6 +272,14 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-6" data-step="5">
         <div class="meth-step-head"><span class="meth-step-num mono">6</span><h3>The adapter and the clean-room path</h3></div>
+        <p>The upstream repository (<a href="https://github.com/DEFINE-model/DEFINE_UK_1.1">github.com/DEFINE-model/DEFINE_UK_1.1</a>) is public but carries no licence.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">adapter architecture</div>
+        <div class="meth-eq"><div class="meth-eq-label">pinned commit</div><div class="meth-eq-body">runtime fetch at <code>846081a</code>; executed unmodified, in R; nothing vendored or hosted</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">cached run</div><div class="meth-eq-body">R 4.3.0 · 151 output files across all four scenario blocks</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">surface</div><div class="meth-eq-body">scenario &minus; baseline deltas only, annualised, with mandatory caveats — never levels</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">clean room</div><div class="meth-eq-body">manual = specification; upstream run = numerical oracle only</div></div>
+        </div>
         <figure class="step-diagram" data-title="Pinned adapter and clean-room path" tabindex="0" role="button" aria-label="Expand diagram: Pinned adapter and clean-room path">
           <svg viewBox="0 0 580 220" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-d6" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -294,14 +305,6 @@ window.MathJax = {
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>The upstream repository (<a href="https://github.com/DEFINE-model/DEFINE_UK_1.1">github.com/DEFINE-model/DEFINE_UK_1.1</a>) is public but carries no licence.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">adapter architecture</div>
-        <div class="meth-eq"><div class="meth-eq-label">pinned commit</div><div class="meth-eq-body">runtime fetch at <code>846081a</code>; executed unmodified, in R; nothing vendored or hosted</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">cached run</div><div class="meth-eq-body">R 4.3.0 · 151 output files across all four scenario blocks</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">surface</div><div class="meth-eq-body">scenario &minus; baseline deltas only, annualised, with mandatory caveats — never levels</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">clean room</div><div class="meth-eq-body">manual = specification; upstream run = numerical oracle only</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>The constraint</h4>
@@ -371,6 +374,21 @@ window.MathJax = {
         it: the <a href="/papers/define-uk">working paper</a>.
       </p>
         </details>
+
+    <div class="meth-notation" id="notation">
+      <h3>Notation</h3>
+      <table class="meth-notation-table">
+        <thead><tr><th scope="col">Symbol</th><th scope="col">Meaning</th><th scope="col">Step</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">\(T_{f,s}\)</th><td>transaction flow f for sector s (transactions matrix)</td><td><a href="#meth-1">1</a></td></tr>
+          <tr><th scope="row">\(\mathrm{LEND}_s\)</th><td>net lending of sector s</td><td><a href="#meth-1">1</a></td></tr>
+          <tr><th scope="row">\(Y,\ C,\ I,\ G,\ X,\ M\)</th><td>GDP, consumption, investment, government spending, exports, imports</td><td><a href="#meth-1">1</a></td></tr>
+          <tr><th scope="row">\(\mathrm{EMIS}\)</th><td>emissions, from electricity (ELEC) and non-electricity (NELEC) sources</td><td><a href="#meth-1">1</a></td></tr>
+          <tr><th scope="row">\(B_{i,s}\)</th><td>holding of financial instrument i by sector s (balance-sheet matrix)</td><td><a href="#meth-2">2</a></td></tr>
+          <tr><th scope="row">\(\mathrm{FNW}_s,\ \mathrm{NW}_s\)</th><td>sector s's financial net worth; net worth including real assets</td><td><a href="#meth-2">2</a></td></tr>
+        </tbody>
+      </table>
+    </div>
       </section>
 
   <div class="diagram-modal" hidden>

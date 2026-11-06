@@ -20,15 +20,6 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=19" />
-<script>
-/* Self-hosted MathJax (vendor/mathjax), used only on this page for the
-   methodology tab's formal panels. The CSP allows no CDN loads. */
-window.MathJax = {
-  chtml: { fontURL: "/vendor/mathjax/output/chtml/fonts/woff-v2" },
-  options: { enableMenu: false }
-};
-</script>
-<script src="/vendor/mathjax/tex-chtml-full.js" defer></script>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -87,10 +78,29 @@ window.MathJax = {
       </p>
     </div>
 
+    <figure class="meth-map" aria-labelledby="meth-map-cap">
+      <figcaption id="meth-map-cap" class="meth-map-cap">How the model works, in one picture: the 5 steps below, in order. <a href="#notation">Notation</a> is at the end.</figcaption>
+      <ol class="meth-map-list">
+        <li><a href="#meth-1"><span class="meth-map-num mono">1</span><span class="meth-map-t">The data: eight quarterly variables</span></a></li>
+        <li><a href="#meth-2"><span class="meth-map-num mono">2</span><span class="meth-map-t">Bayesian estimation</span></a></li>
+        <li><a href="#meth-3"><span class="meth-map-num mono">3</span><span class="meth-map-t">Identification: naming the shocks</span></a></li>
+        <li><a href="#meth-4"><span class="meth-map-num mono">4</span><span class="meth-map-t">Sampling: draws and acceptance</span></a></li>
+        <li><a href="#meth-5"><span class="meth-map-num mono">5</span><span class="meth-map-t">The svar-unemployment satellite</span></a></li>
+      </ol>
+    </figure>
+
     <div class="scrolly-wrap single meth-pair">
       <div class="scrolly-steps">
       <div class="meth-step" id="meth-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>The data: eight quarterly variables</h3></div>
+        <p>Eight quarterly variables in two blocks: <strong>global</strong> — world GDP and world CPI (both UK-trade-weighted) plus the real oil price in sterling — and <strong>UK</strong> — Bank Rate, the sterling exchange-rate index, CPI, CPI energy, and real GDP.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">the eight variables</div>
+        <div class="meth-eq"><div class="meth-eq-label">global block</div><div class="meth-eq-body">World GDP · World CPI (both UK-trade-weighted) · real oil price in sterling</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">UK block</div><div class="meth-eq-body">Bank Rate · sterling exchange-rate index · CPI · CPI energy · real GDP</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">sample</div><div class="meth-eq-body">1992Q1–2025Q1, in levels, \(p = 4\) lags</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">pandemic</div><div class="meth-eq-body">exogenous Covid dummies, 2020Q1–2021Q2</div></div>
+        </div>
         <figure class="step-diagram" data-title="Eight variables, two blocks" tabindex="0" role="button" aria-label="Expand diagram: Eight variables, two blocks">
           <svg viewBox="0 0 580 230" width="580" style="max-width:100%;height:auto;">
                 <defs><marker id="arr-s1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -118,14 +128,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>Eight quarterly variables in two blocks: <strong>global</strong> — world GDP and world CPI (both UK-trade-weighted) plus the real oil price in sterling — and <strong>UK</strong> — Bank Rate, the sterling exchange-rate index, CPI, CPI energy, and real GDP.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">the eight variables</div>
-        <div class="meth-eq"><div class="meth-eq-label">global block</div><div class="meth-eq-body">World GDP · World CPI (both UK-trade-weighted) · real oil price in sterling</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">UK block</div><div class="meth-eq-body">Bank Rate · sterling exchange-rate index · CPI · CPI energy · real GDP</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">sample</div><div class="meth-eq-body">1992Q1–2025Q1, in levels, \(p = 4\) lags</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">pandemic</div><div class="meth-eq-body">exogenous Covid dummies, 2020Q1–2021Q2</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>Sample and specification</h4>
@@ -137,6 +139,14 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Bayesian estimation</h3></div>
+        <p>Estimation is Bayesian with a <strong>Minnesota (normal-inverse-Wishart) prior</strong> plus sum-of-coefficients and dummy-initial-observation priors — the framework of <a href="https://doi.org/10.1162/REST_a_00483">Giannone, Lenza &amp; Primiceri (2015)</a>.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">priors</div>
+        <div class="meth-eq"><div class="meth-eq-label">reduced form</div><div class="meth-eq-body">\(y_t = c + \Pi_1 y_{t-1} + \cdots + \Pi_p y_{t-p} + u_t, \quad p = 4\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">main prior</div><div class="meth-eq-body">Minnesota (normal-inverse-Wishart) on \((\Pi, \Sigma)\)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">additional priors</div><div class="meth-eq-body">sum-of-coefficients · dummy-initial-observation</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">framework</div><div class="meth-eq-body">Giannone, Lenza &amp; Primiceri (2015)</div></div>
+        </div>
         <figure class="step-diagram" data-title="Bayesian estimation" tabindex="0" role="button" aria-label="Expand diagram: Bayesian estimation">
           <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
                 <defs><marker id="arr-s2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -163,14 +173,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>Estimation is Bayesian with a <strong>Minnesota (normal-inverse-Wishart) prior</strong> plus sum-of-coefficients and dummy-initial-observation priors — the framework of <a href="https://doi.org/10.1162/REST_a_00483">Giannone, Lenza &amp; Primiceri (2015)</a>.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">priors</div>
-        <div class="meth-eq"><div class="meth-eq-label">reduced form</div><div class="meth-eq-body">\(y_t = c + \Pi_1 y_{t-1} + \cdots + \Pi_p y_{t-p} + u_t, \quad p = 4\)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">main prior</div><div class="meth-eq-body">Minnesota (normal-inverse-Wishart) on \((\Pi, \Sigma)\)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">additional priors</div><div class="meth-eq-body">sum-of-coefficients · dummy-initial-observation</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">framework</div><div class="meth-eq-body">Giannone, Lenza &amp; Primiceri (2015)</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>The posterior</h4>
@@ -180,6 +182,7 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Identification: naming the shocks</h3></div>
+        <p>Identification follows <strong>Arias–Rubio-Ramírez–Waggoner (2018)</strong>; sign restrictions name six structural shocks: <strong>world demand, world energy, world supply, UK demand, UK supply, and UK monetary policy</strong>.</p>
         <figure class="step-diagram" data-title="Zero and sign restrictions" tabindex="0" role="button" aria-label="Expand diagram: Zero and sign restrictions">
           <svg viewBox="0 0 580 230" width="580" style="max-width:100%;height:auto;">
                 <defs><marker id="arr-s3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -208,7 +211,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>Identification follows <strong>Arias–Rubio-Ramírez–Waggoner (2018)</strong>; sign restrictions name six structural shocks: <strong>world demand, world energy, world supply, UK demand, UK supply, and UK monetary policy</strong>.</p>
 <details class="about"><summary>More detail</summary><p>Zero restrictions make the UK a small open economy (UK shocks cannot move world variables on impact), and impact sign restrictions name the six shocks. Two unidentified shocks absorb residual volatility.</p></details>
         <div class="meth-inline">
         <div class="meth-sec-title">zero and sign restrictions</div>
@@ -226,6 +228,14 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Sampling: draws and acceptance</h3></div>
+        <p>This is accept/reject sampling. The production run drew <strong>10,000</strong> posterior \((\Pi, \Sigma)\) draws, of which <strong>751 passed</strong> the sign restrictions (7.5%), for an importance-weighted effective sample size of <strong>355.9</strong> — so medians and bands are correct but noisier than the paper's.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">accept/reject sampling</div>
+        <div class="meth-eq"><div class="meth-eq-label">production run</div><div class="meth-eq-body">10,000 draws &rarr; 751 accepted (7.5%)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">effective sample size</div><div class="meth-eq-body">355.9 (importance-weighted)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">hosted default</div><div class="meth-eq-body">2,000 draws &rarr; 135 accepted, ESS 65.3</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">published chart</div><div class="meth-eq-body">5,600 draws &rarr; 385 accepted, ESS 176.3</div></div>
+        </div>
         <figure class="step-diagram" data-title="Accept/reject sampling" tabindex="0" role="button" aria-label="Expand diagram: Accept/reject sampling">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
                 <defs><marker id="arr-s4" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -243,14 +253,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>This is accept/reject sampling. The production run drew <strong>10,000</strong> posterior \((\Pi, \Sigma)\) draws, of which <strong>751 passed</strong> the sign restrictions (7.5%), for an importance-weighted effective sample size of <strong>355.9</strong> — so medians and bands are correct but noisier than the paper's.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">accept/reject sampling</div>
-        <div class="meth-eq"><div class="meth-eq-label">production run</div><div class="meth-eq-body">10,000 draws &rarr; 751 accepted (7.5%)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">effective sample size</div><div class="meth-eq-body">355.9 (importance-weighted)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">hosted default</div><div class="meth-eq-body">2,000 draws &rarr; 135 accepted, ESS 65.3</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">published chart</div><div class="meth-eq-body">5,600 draws &rarr; 385 accepted, ESS 176.3</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>The hosted run</h4>
@@ -337,6 +339,22 @@ window.MathJax = {
           <div class="meth-eq"><div class="meth-eq-label">the mapping (dynamic)</div><div class="meth-eq-body">\(\Delta u_t = \alpha + \beta\, g_t + \gamma\, \Delta u_{t-1} + \varepsilon_t\)</div></div>
         </div>
 </aside>
+    </div>
+
+    <div class="meth-notation" id="notation">
+      <h3>Notation</h3>
+      <table class="meth-notation-table">
+        <thead><tr><th scope="col">Symbol</th><th scope="col">Meaning</th><th scope="col">Step</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">\(y_t\)</th><td>vector of the eight VAR variables in quarter t</td><td><a href="#meth-2">2</a></td></tr>
+          <tr><th scope="row">\(c,\ \Pi_1,\ldots,\Pi_p\)</th><td>constant and lag-coefficient matrices</td><td><a href="#meth-2">2</a></td></tr>
+          <tr><th scope="row">\(p\)</th><td>number of lags</td><td><a href="#meth-2">2</a></td></tr>
+          <tr><th scope="row">\(u_t,\ \Sigma\)</th><td>reduced-form errors and their covariance</td><td><a href="#meth-2">2</a></td></tr>
+          <tr><th scope="row">\(\Delta u_t\)</th><td>quarterly change in the unemployment rate (satellite)</td><td><a href="#meth-5">5</a></td></tr>
+          <tr><th scope="row">\(g_t\)</th><td>year-on-year UK GDP growth (satellite)</td><td><a href="#meth-5">5</a></td></tr>
+          <tr><th scope="row">\(\alpha,\ \beta,\ \gamma,\ \varepsilon_t\)</th><td>satellite regression coefficients and residual</td><td><a href="#meth-5">5</a></td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 

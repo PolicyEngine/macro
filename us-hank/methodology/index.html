@@ -20,15 +20,6 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=19" />
-<script>
-/* Self-hosted MathJax (vendor/mathjax), used only on this page for the
-   methodology tab's formal panels. The CSP allows no CDN loads. */
-window.MathJax = {
-  chtml: { fontURL: "/vendor/mathjax/output/chtml/fonts/woff-v2" },
-  options: { enableMenu: false }
-};
-</script>
-<script src="/vendor/mathjax/tex-chtml-full.js" defer></script>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -88,10 +79,24 @@ window.MathJax = {
       </p>
     </div>
 
+    <figure class="meth-map" aria-labelledby="meth-map-cap">
+      <figcaption id="meth-map-cap" class="meth-map-cap">How the model works, in one picture: the 5 steps below, in order. <a href="#notation">Notation</a> is at the end.</figcaption>
+      <ol class="meth-map-list">
+        <li><a href="#meth-1"><span class="meth-map-num mono">1</span><span class="meth-map-t">Heterogeneous agents, two assets</span></a></li>
+        <li><a href="#meth-2"><span class="meth-map-num mono">2</span><span class="meth-map-t">Calibrate and solve the steady state</span></a></li>
+        <li><a href="#meth-3"><span class="meth-map-num mono">3</span><span class="meth-map-t">Differentiate: the sequence-space Jacobian</span></a></li>
+        <li><a href="#meth-4"><span class="meth-map-num mono">4</span><span class="meth-map-t">Shock: three instruments, endogenous labor tax</span></a></li>
+        <li><a href="#meth-5"><span class="meth-map-num mono">5</span><span class="meth-map-t">Distribute — within first-order limits</span></a></li>
+      </ol>
+    </figure>
+
     <div class="scrolly-wrap single meth-pair">
       <div class="scrolly-steps">
       <div class="meth-step" id="meth-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Heterogeneous agents, two assets</h3></div>
+        <p>The model is the two-asset heterogeneous-agent New Keynesian (HANK) model of Auclert, Bardóczy, Rognlie and Straub (<em>Econometrica</em> 2021, "Using the Sequence-Space Jacobian to Solve and Estimate Heterogeneous-Agent Models").</p>
+        <p class="kv-title">Household structure</p>
+        <dl class="kv kv-text"><div><dt>Assets</dt><dd>liquid + illiquid, per household</dd></div><div><dt>Grids</dt><dd>50 liquid × 70 illiquid × 50 capital points</dd></div><div><dt>Variants</dt><dd><code>two_asset</code> (default) · <code>one_asset</code> (no capital)</dd></div></dl>
         <figure class="step-diagram" data-title="Two assets, one consumption decision" tabindex="0" role="button" aria-label="Expand diagram: Two assets, one consumption decision">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
                 <defs><marker id="arr-s1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -116,9 +121,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>The model is the two-asset heterogeneous-agent New Keynesian (HANK) model of Auclert, Bardóczy, Rognlie and Straub (<em>Econometrica</em> 2021, "Using the Sequence-Space Jacobian to Solve and Estimate Heterogeneous-Agent Models").</p>
-        <p class="kv-title">Household structure</p>
-        <dl class="kv kv-text"><div><dt>Assets</dt><dd>liquid + illiquid, per household</dd></div><div><dt>Grids</dt><dd>50 liquid × 70 illiquid × 50 capital points</dd></div><div><dt>Variants</dt><dd><code>two_asset</code> (default) · <code>one_asset</code> (no capital)</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <h4>Households differ</h4>
@@ -130,6 +132,9 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Calibrate and solve the steady state</h3></div>
+        <p>The first stage solves the general-equilibrium steady state at the production grids, calibrating <strong>discounting and portfolio-adjustment costs</strong> to hit the paper's asset-market targets. The solve takes about <strong>13 seconds</strong>, is computed once, and is cached.</p>
+        <p class="kv-title">Steady-state solve</p>
+        <dl class="kv"><div><dt>Calibrated</dt><dd>discounting + portfolio-adjustment costs</dd></div><div><dt>Targets</dt><dd>the paper's asset-market targets</dd></div><div><dt>Cost</dt><dd>~13 s, computed once, cached</dd></div></dl>
         <figure class="step-diagram" data-title="Steady-state calibration" tabindex="0" role="button" aria-label="Expand diagram: Steady-state calibration">
           <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
                 <defs><marker id="arr-s2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -154,9 +159,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>The first stage solves the general-equilibrium steady state at the production grids, calibrating <strong>discounting and portfolio-adjustment costs</strong> to hit the paper's asset-market targets. The solve takes about <strong>13 seconds</strong>, is computed once, and is cached.</p>
-        <p class="kv-title">Steady-state solve</p>
-        <dl class="kv"><div><dt>Calibrated</dt><dd>discounting + portfolio-adjustment costs</dd></div><div><dt>Targets</dt><dd>the paper's asset-market targets</dd></div><div><dt>Cost</dt><dd>~13 s, computed once, cached</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <h4>Checked value by value</h4>
@@ -166,6 +168,9 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Differentiate: the sequence-space Jacobian</h3></div>
+        <p>The second stage builds the general-equilibrium <strong>sequence-space Jacobian</strong> — the \(T \times T\) linear map from each exogenous path to each outcome path, with <strong>\(T = 300\) quarters</strong>. It takes about <strong>5 seconds</strong> and is cached alongside the steady state.</p>
+        <p class="kv-title">Jacobian</p>
+        <dl class="kv kv-text"><div><dt>Object</dt><dd>\(T \times T\) map: exogenous path &rarr; outcome path</dd></div><div><dt>Horizon</dt><dd>\(T = 300\) quarters</dd></div><div><dt>Cost</dt><dd>~5 s, cached alongside the steady state</dd></div></dl>
         <figure class="step-diagram" data-title="The sequence-space Jacobian" tabindex="0" role="button" aria-label="Expand diagram: The sequence-space Jacobian">
           <svg viewBox="0 0 580 230" width="580" style="max-width:100%;height:auto;">
                 <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-faint)" font-weight="600">One T&#215;T matrix per shock&#8211;outcome pair (T = 300 quarters)</text>
@@ -205,9 +210,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>The second stage builds the general-equilibrium <strong>sequence-space Jacobian</strong> — the \(T \times T\) linear map from each exogenous path to each outcome path, with <strong>\(T = 300\) quarters</strong>. It takes about <strong>5 seconds</strong> and is cached alongside the steady state.</p>
-        <p class="kv-title">Jacobian</p>
-        <dl class="kv kv-text"><div><dt>Object</dt><dd>\(T \times T\) map: exogenous path &rarr; outcome path</dd></div><div><dt>Horizon</dt><dd>\(T = 300\) quarters</dd></div><div><dt>Cost</dt><dd>~5 s, cached alongside the steady state</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <h4>Instant IRFs</h4>
@@ -217,6 +219,9 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Shock: three instruments, endogenous labor tax</h3></div>
+        <p>A shock is an AR(1) path, \(\varepsilon_t = \text{size} \times \rho^t\), on one of three instruments: the Taylor-rule intercept (<code>monetary</code>), real government spending (<code>fiscal_spending</code>), or TFP (<code>productivity</code>).</p>
+        <p class="kv-title">Shocks</p>
+        <dl class="kv kv-text"><div><dt>Path</dt><dd>\(\varepsilon_t = \text{size} \times \rho^t\) (AR(1))</dd></div><div><dt>Instruments</dt><dd><code>monetary</code> · <code>fiscal_spending</code> · <code>productivity</code></dd></div><div><dt>Fiscal closure</dt><dd>labor tax balances the budget each period</dd></div></dl>
         <figure class="step-diagram" data-title="AR(1) shock path" tabindex="0" role="button" aria-label="Expand diagram: AR(1) shock path">
           <svg viewBox="0 0 580 220" width="580" style="max-width:100%;height:auto;">
                 <defs><marker id="arr-s4" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -245,9 +250,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>A shock is an AR(1) path, \(\varepsilon_t = \text{size} \times \rho^t\), on one of three instruments: the Taylor-rule intercept (<code>monetary</code>), real government spending (<code>fiscal_spending</code>), or TFP (<code>productivity</code>).</p>
-        <p class="kv-title">Shocks</p>
-        <dl class="kv kv-text"><div><dt>Path</dt><dd>\(\varepsilon_t = \text{size} \times \rho^t\) (AR(1))</dd></div><div><dt>Instruments</dt><dd><code>monetary</code> · <code>fiscal_spending</code> · <code>productivity</code></dd></div><div><dt>Fiscal closure</dt><dd>labor tax balances the budget each period</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <h4>The design point that matters</h4>
@@ -257,6 +259,7 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-5" data-step="4">
         <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Distribute — within first-order limits</h3></div>
+        <p>From the steady-state joint distribution and consumption policy, the model reports <strong>MPCs by liquid-wealth quartile</strong>, the <strong>hand-to-mouth share</strong>, and a first-order allocation of the impact consumption response across <strong>total-wealth quartiles</strong> — allocated in proportion to steady-state MPCs.</p>
         <figure class="step-diagram" data-title="Distributional output" tabindex="0" role="button" aria-label="Expand diagram: Distributional output">
           <svg viewBox="0 0 580 220" width="580" style="max-width:100%;height:auto;">
                 <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-faint)" font-weight="600">MPCs by liquid-wealth quartile (schematic, not data)</text>
@@ -282,7 +285,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>From the steady-state joint distribution and consumption policy, the model reports <strong>MPCs by liquid-wealth quartile</strong>, the <strong>hand-to-mouth share</strong>, and a first-order allocation of the impact consumption response across <strong>total-wealth quartiles</strong> — allocated in proportion to steady-state MPCs.</p>
         <details class="about">
           <summary>About this step</summary>
           <h4>What "first-order" means here</h4>
@@ -290,6 +292,17 @@ window.MathJax = {
         </details>
       </div>
       </div>
+    </div>
+
+    <div class="meth-notation" id="notation">
+      <h3>Notation</h3>
+      <table class="meth-notation-table">
+        <thead><tr><th scope="col">Symbol</th><th scope="col">Meaning</th><th scope="col">Step</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">\(T\)</th><td>horizon of the sequence-space Jacobian, in quarters</td><td><a href="#meth-3">3</a></td></tr>
+          <tr><th scope="row">\(\varepsilon_t,\ \text{size},\ \rho\)</th><td>AR(1) shock path, its impact size and persistence</td><td><a href="#meth-4">4</a></td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 

@@ -5493,17 +5493,105 @@ a .model-id, a:hover .model-id { text-decoration: none; display: inline-block; }
 @media (min-width: 900px) {
   .meth-pair .step-diagram svg { width: 100%; max-width: 720px !important; height: auto; }
 }
-@media (min-width: 1000px) {
-  .meth-pair .meth-step:has(> .meth-inline) {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.75fr);
-    column-gap: var(--s-6, 32px);
-    grid-auto-flow: row dense;
-    align-items: start;
-  }
-  .meth-pair .meth-step:has(> .meth-inline) > * { grid-column: 1 / -1; }
-  .meth-pair .meth-step:has(> .meth-inline) > p { grid-column: 1; margin-top: 0; }
-  .meth-pair .meth-step:has(> .meth-inline) > .meth-inline { grid-column: 2; margin-top: 0; margin-bottom: var(--s-4); }
+/* Round 2 (QA: methodology among the worst-looking pages): read like model
+   documentation. Each step is one column — the plain sentence, then the
+   equation card, then the diagram, then "About this step" — and the page
+   opens with a step map and ends with a notation table. Equations and
+   labels align left in one grid in every card (they alternated left and
+   centred before). */
+.meth-pair .meth-step > p:first-of-type { max-width: 72ch; }
+.meth-pair :is(.meth-inline, .meth-step > .kv, .meth-display) {
+  margin: var(--s-3) 0 var(--s-4);
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--primary);
+  border-radius: 8px;
+  background: var(--surface-card);
+  box-shadow: none;
+}
+.meth-pair .meth-inline { padding: 2px 0 6px; }
+.meth-pair .meth-inline > :not(.meth-panel-head) { margin-left: 16px; margin-right: 16px; }
+.meth-pair .meth-inline > :last-child { margin-bottom: 6px; }
+.meth-pair .meth-inline .meth-sec-title { margin-top: 12px; }
+.meth-pair .meth-inline .meth-eq {
+  display: grid;
+  grid-template-columns: minmax(0, 190px) minmax(0, 1fr);
+  column-gap: var(--s-4);
+  align-items: baseline;
+  margin: 0 16px;
+  padding: 9px 0;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  background: none;
+  overflow: visible;
+}
+.meth-pair .meth-inline .meth-eq:last-child, .meth-pair .meth-inline .meth-eq:has(+ .meth-sec-title) { border-bottom: 0; }
+.meth-pair .meth-inline .meth-eq-label { margin: 0; font-family: var(--body); letter-spacing: 0; color: var(--text-muted); font-size: var(--fs-body-sm); }
+.meth-pair .meth-inline .meth-eq-body,
+.meth-pair .meth-inline .meth-eq-body:has(> mjx-container, > .MathJax, > math) { text-align: left; overflow-x: auto; overflow-y: hidden; }
+.meth-pair .meth-step > .kv { padding: 0 16px; grid-template-columns: minmax(0, 190px) minmax(0, 1fr); column-gap: var(--s-4); }
+.meth-pair .meth-step > .kv dt { color: var(--text-muted); font-weight: 500; }
+.meth-pair .meth-step > .kv dd { text-align: left; padding-left: 0; font-weight: 400; color: var(--text-strong); overflow-x: auto; overflow-y: hidden; }
+.meth-pair .meth-step > .kv-title { margin-bottom: 0; }
+.meth-pair .meth-step > .kv-title + .kv, .meth-pair .meth-step > .kv-title + .meth-display { margin-top: 6px; }
+.meth-pair .meth-display { padding: 10px 16px; overflow-x: auto; overflow-y: hidden; }
+.meth-pair .meth-display mjx-container[display="true"] { text-align: left !important; margin: 0 !important; }
+.meth-pair .meth-step > .step-diagram { margin: var(--s-3) 0 var(--s-4); }
+/* step map: one row of linked steps (two rows of four for eight) */
+.meth-map { margin: var(--s-4) 0 var(--s-6); }
+.meth-map-cap { margin: 0 0 var(--s-3); color: var(--text-muted); font-size: var(--fs-body-sm); }
+.meth-map-list { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); column-gap: 26px; row-gap: 12px; }
+.meth-map-list:has(> li:nth-child(7)) { grid-auto-flow: row; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.meth-map-list li { position: relative; min-width: 0; }
+.meth-map-list a {
+  display: flex; flex-direction: column; gap: 8px; height: 100%; box-sizing: border-box;
+  padding: 12px 14px; border: 1px solid var(--hairline-strong); border-radius: 10px;
+  background: var(--surface-card); color: var(--text-strong); text-decoration: none;
+  font-size: var(--fs-body-sm); font-weight: 600; line-height: 1.35;
+}
+.meth-map-list a:hover { border-color: var(--brand); background: var(--surface-tint); }
+.meth-map-num { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; background: var(--surface-tint); color: var(--tab-teal); font-size: var(--fs-small); font-weight: 600; }
+.meth-map-list li:not(:last-child)::after {
+  content: ""; position: absolute; top: 50%; right: -20px; width: 14px; height: 2px; background: var(--primary);
+  clip-path: none;
+}
+.meth-map-list li:not(:last-child)::before {
+  content: ""; position: absolute; top: calc(50% - 4px); right: -21px; border: 5px solid transparent; border-left: 6px solid var(--primary); border-right: 0;
+}
+.meth-map-list:has(> li:nth-child(7)) li:nth-child(4)::after,
+.meth-map-list:has(> li:nth-child(7)) li:nth-child(4)::before { display: none; }
+@media (max-width: 900px) {
+  /* reflow: one column, arrows point down */
+  .meth-map-list, .meth-map-list:has(> li:nth-child(7)) { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); row-gap: 18px; }
+  .meth-map-list a { flex-direction: row; align-items: center; padding: 9px 12px; }
+  .meth-map-list li:not(:last-child)::after { top: auto; bottom: -14px; right: auto; left: 23px; width: 2px; height: 8px; }
+  .meth-map-list li:not(:last-child)::before { top: auto; bottom: -18px; right: auto; left: 19px; border: 5px solid transparent; border-top: 6px solid var(--primary); border-bottom: 0; }
+  .meth-map-list:has(> li:nth-child(7)) li:nth-child(4)::after,
+  .meth-map-list:has(> li:nth-child(7)) li:nth-child(4)::before { display: block; }
+}
+/* notation table: symbol, meaning, step it first appears in */
+.meth-notation { margin: var(--s-5) 0 0; padding-top: var(--s-5); border-top: 1px solid var(--hairline); }
+.meth-notation h3 { margin: 0 0 var(--s-3); }
+.meth-notation-table { width: 100%; border-collapse: collapse; font-size: var(--fs-body-sm); }
+.meth-notation-table th, .meth-notation-table td { padding: 6px 12px 6px 0; border-bottom: 1px solid var(--hairline); text-align: left; vertical-align: baseline; }
+.meth-notation-table thead th { color: var(--text-faint); font-size: var(--fs-small); font-weight: 500; }
+.meth-notation-table tbody th { width: 220px; font-weight: 400; color: var(--text-strong); white-space: nowrap; }
+.meth-notation-table td:last-child { width: 3.5em; text-align: right; padding-right: 0; font-variant-numeric: tabular-nums; }
+.meth-notation-table td:nth-child(2) { color: var(--text-body); }
+@media (max-width: 600px) {
+  .meth-pair .meth-inline .meth-eq, .meth-pair .meth-step > .kv { grid-template-columns: minmax(0, 1fr); }
+  .meth-pair .meth-inline .meth-eq-label { margin-bottom: 2px; font-size: var(--fs-small); }
+  .meth-pair .meth-step > .kv > div > dt { padding-bottom: 0; border-bottom: 0; font-size: var(--fs-small); }
+  .meth-pair .meth-step > .kv > div > dd { padding-top: 2px; }
+  .meth-notation-table tbody th { white-space: normal; width: 38%; }
+  /* step diagrams fit the column instead of scrolling inside the figure;
+     tapping still opens the full-size copy */
+  .meth-pair .step-diagram { overflow: visible; cursor: zoom-in; justify-content: center; }
+  .meth-pair .step-diagram svg { width: 100% !important; max-width: 100% !important; flex: 1 1 auto; }
+  .meth-pair .step-diagram { flex-direction: column; align-items: stretch; }
+  .meth-pair .step-diagram .expand-hint { position: static; opacity: 1; margin-top: 4px; text-align: right; }
+  .diagram-modal-body { overflow-x: auto; }
+  .diagram-modal-body svg { width: 580px; max-width: none; }
 }
 /* svar win-rate: eight count columns on a 0-8 scale. Stretched to the full
    card (~800px) and a 340px floor, the columns read as slabs and the

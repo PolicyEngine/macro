@@ -20,15 +20,6 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=19" />
-<script>
-/* Self-hosted MathJax (vendor/mathjax), used only on this page for the
-   methodology tab's formal panels. The CSP allows no CDN loads. */
-window.MathJax = {
-  chtml: { fontURL: "/vendor/mathjax/output/chtml/fonts/woff-v2" },
-  options: { enableMenu: false }
-};
-</script>
-<script src="/vendor/mathjax/tex-chtml-full.js" defer></script>
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -88,10 +79,27 @@ window.MathJax = {
       </p>
     </div>
 
+    <figure class="meth-map" aria-labelledby="meth-map-cap">
+      <figcaption id="meth-map-cap" class="meth-map-cap">How the model works, in one picture: the 8 steps below, in order. <a href="#notation">Notation</a> is at the end.</figcaption>
+      <ol class="meth-map-list">
+        <li><a href="#meth-1"><span class="meth-map-num mono">1</span><span class="meth-map-t">The overlapping-generations idea</span></a></li>
+        <li><a href="#meth-2"><span class="meth-map-num mono">2</span><span class="meth-map-t">Household decisions</span></a></li>
+        <li><a href="#meth-3"><span class="meth-map-num mono">3</span><span class="meth-map-t">Firms and production</span></a></li>
+        <li><a href="#meth-4"><span class="meth-map-num mono">4</span><span class="meth-map-t">Government</span></a></li>
+        <li><a href="#meth-5"><span class="meth-map-num mono">5</span><span class="meth-map-t">Market clearing and equilibrium</span></a></li>
+        <li><a href="#meth-6"><span class="meth-map-num mono">6</span><span class="meth-map-t">How the model is solved</span></a></li>
+        <li><a href="#meth-7"><span class="meth-map-num mono">7</span><span class="meth-map-t">Calibrating for the United Kingdom</span></a></li>
+        <li><a href="#meth-8"><span class="meth-map-num mono">8</span><span class="meth-map-t">What this enables</span></a></li>
+      </ol>
+    </figure>
+
     <div class="scrolly-wrap single meth-pair">
       <div class="scrolly-steps">
       <div class="meth-step" id="meth-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>The overlapping-generations idea</h3></div>
+        <p>The economy is not a single "representative agent." Many generations coexist — new labour-force entrants, workers at peak earnings, retirees drawing savings and pensions — each with a different remaining lifespan, accumulated wealth, and response to a policy change.</p>
+        <p class="kv-title">Population</p>
+        <dl class="kv kv-text"><div><dt>Age cohorts</dt><dd>\(s = E+1, \ldots, E+S \quad \text{(economically active)}\)</dd></div><div><dt>Ability types</dt><dd>\(j = 1, \ldots, J \quad \text{with probability } \lambda_j\)</dd></div><div><dt>Population</dt><dd>\(\omega_{s,t}\) evolves with fertility, mortality, immigration</dd></div></dl>
         <figure class="step-diagram" data-title="Overlapping generations" tabindex="0" role="button" aria-label="Expand diagram: Overlapping generations">
           <svg viewBox="0 0 580 260" width="580" style="max-width:100%;height:auto;">
                 <defs><marker id="arr-s1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -112,9 +120,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>The economy is not a single "representative agent." Many generations coexist — new labour-force entrants, workers at peak earnings, retirees drawing savings and pensions — each with a different remaining lifespan, accumulated wealth, and response to a policy change.</p>
-        <p class="kv-title">Population</p>
-        <dl class="kv kv-text"><div><dt>Age cohorts</dt><dd>\(s = E+1, \ldots, E+S \quad \text{(economically active)}\)</dd></div><div><dt>Ability types</dt><dd>\(j = 1, \ldots, J \quad \text{with probability } \lambda_j\)</dd></div><div><dt>Population</dt><dd>\(\omega_{s,t}\) evolves with fertility, mortality, immigration</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <h4>Age cohorts</h4>
@@ -126,6 +131,9 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Household decisions</h3></div>
+        <p>Each period, every household chooses how much to <strong>consume</strong>, <strong>work</strong>, and <strong>save</strong> to maximise expected lifetime utility, subject to a budget constraint.</p>
+        <p class="kv-title">Utility and Euler equations</p>
+        <dl class="kv"><div><dt>Consumption</dt><dd>\(u(c) = \frac{c^{\,1-\sigma}}{1-\sigma}\)</dd></div><div><dt>Labour disutility</dt><dd>\(\chi^n_s \cdot g(n) \quad \text{(elliptical)}\)</dd></div><div><dt>Bequest motive</dt><dd>\(\chi^b_j \cdot \rho_s \cdot \frac{b'^{\,1-\sigma}}{1-\sigma}\)</dd></div><div><dt>Labour FOC</dt><dd>\(\chi^n_s g'(n) = w\,e_{j,s}(1-\tau'_{\text{lab}})\,u'(c)\)</dd></div><div><dt>Savings Euler</dt><dd>\(u'(c_t) = \beta_j(1-\rho_s)(1+r_{p,t+1}(1-\tau'_{\text{cap}}))\,u'(c_{t+1})\)</dd></div></dl>
         <figure class="step-diagram" data-title="Lifetime utility components" tabindex="0" role="button" aria-label="Expand diagram: Lifetime utility components">
           <svg viewBox="0 0 580 190" width="580" style="max-width:100%;height:auto;">
                 <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-faint)" font-weight="600">Three components of lifetime utility</text>
@@ -150,9 +158,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>Each period, every household chooses how much to <strong>consume</strong>, <strong>work</strong>, and <strong>save</strong> to maximise expected lifetime utility, subject to a budget constraint.</p>
-        <p class="kv-title">Utility and Euler equations</p>
-        <dl class="kv"><div><dt>Consumption</dt><dd>\(u(c) = \frac{c^{\,1-\sigma}}{1-\sigma}\)</dd></div><div><dt>Labour disutility</dt><dd>\(\chi^n_s \cdot g(n) \quad \text{(elliptical)}\)</dd></div><div><dt>Bequest motive</dt><dd>\(\chi^b_j \cdot \rho_s \cdot \frac{b'^{\,1-\sigma}}{1-\sigma}\)</dd></div><div><dt>Labour FOC</dt><dd>\(\chi^n_s g'(n) = w\,e_{j,s}(1-\tau'_{\text{lab}})\,u'(c)\)</dd></div><div><dt>Savings Euler</dt><dd>\(u'(c_t) = \beta_j(1-\rho_s)(1+r_{p,t+1}(1-\tau'_{\text{cap}}))\,u'(c_{t+1})\)</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <h4>Consumption utility</h4>
@@ -169,6 +174,9 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Firms and production</h3></div>
+        <p>Production comprises M industries of perfectly competitive firms combining <strong>private capital</strong>, <strong>public capital</strong> (government infrastructure), and <strong>labour</strong> through a constant elasticity of substitution (CES) technology.</p>
+        <p class="kv-title">Technology</p>
+        <dl class="kv kv-text"><div><dt>CES production</dt><dd>\(Y_m = Z_m\bigl[\gamma K_m^\rho + \gamma_g K_{g,m}^\rho + (1\!-\!\gamma\!-\!\gamma_g)(e^{g_y t}L_m)^\rho\bigr]^{1/\rho}\)</dd></div><div><dt>Wage</dt><dd>\(w = p_m \cdot \text{MPL}_m\)</dd></div><div><dt>Rental rate</dt><dd>\(r = (1-\tau^{\text{corp}})\,p_m\,\text{MPK}_m - \delta + \tau^{\text{corp}}\delta^\tau + \tau^{\text{inv}}\delta\)</dd></div></dl>
         <figure class="step-diagram" data-title="CES production" tabindex="0" role="button" aria-label="Expand diagram: CES production">
           <svg viewBox="0 0 560 200" width="560" style="max-width:100%;height:auto;">
                 <text x="280" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-faint)" font-weight="600">CES production</text>
@@ -194,9 +202,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>Production comprises M industries of perfectly competitive firms combining <strong>private capital</strong>, <strong>public capital</strong> (government infrastructure), and <strong>labour</strong> through a constant elasticity of substitution (CES) technology.</p>
-        <p class="kv-title">Technology</p>
-        <dl class="kv kv-text"><div><dt>CES production</dt><dd>\(Y_m = Z_m\bigl[\gamma K_m^\rho + \gamma_g K_{g,m}^\rho + (1\!-\!\gamma\!-\!\gamma_g)(e^{g_y t}L_m)^\rho\bigr]^{1/\rho}\)</dd></div><div><dt>Wage</dt><dd>\(w = p_m \cdot \text{MPL}_m\)</dd></div><div><dt>Rental rate</dt><dd>\(r = (1-\tau^{\text{corp}})\,p_m\,\text{MPK}_m - \delta + \tau^{\text{corp}}\delta^\tau + \tau^{\text{inv}}\delta\)</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <h4>Substitution and productivity</h4>
@@ -210,6 +215,9 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Government</h3></div>
+        <p>The government taxes through <strong>five instruments</strong> — individual income, consumption, wealth, corporate income, and bequests — and spends on public goods, infrastructure, pensions, lump-sum transfers, and universal basic income. Debt finances the difference.</p>
+        <p class="kv-title">Government budget</p>
+        <div class="meth-display" tabindex="0">\[ D_{t+1} + \text{Rev}_t = (1+r_{\text{gov}})D_t + G + I_g + \text{Pen} + TR + UBI \]</div>
         <figure class="step-diagram" data-title="Government budget" tabindex="0" role="button" aria-label="Expand diagram: Government budget">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
                 <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-faint)" font-weight="600">Government budget constraint</text>
@@ -230,8 +238,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>The government taxes through <strong>five instruments</strong> — individual income, consumption, wealth, corporate income, and bequests — and spends on public goods, infrastructure, pensions, lump-sum transfers, and universal basic income. Debt finances the difference.</p>
-        <p class="kv-title">Government budget</p>
         <details class="about">
           <summary>About this step</summary>
           <h4>Income tax: Gouveia-Strauss functions</h4>
@@ -240,12 +246,14 @@ window.MathJax = {
           <p>The <strong>wealth tax</strong> is a progressive three-parameter function, spanning zero taxation to smoothly increasing marginal rates. <strong>Consumption taxes</strong> are linear rates by good, covering VAT and excise. <strong>Corporate income taxes</strong> are flat rates by industry.</p>
           <h4>Fiscal closure rule</h4>
           <p>Debt cannot grow without bound, so a <strong>fiscal closure rule</strong> activates after a specified period, bringing debt-to-GDP gradually to a target via government spending, transfers, or both — the modeller's choice.</p>
-          <p>\[ D_{t+1} + \text{Rev}_t = (1+r_{\text{gov}})D_t + G + I_g + \text{Pen} + TR + UBI \]</p>
         </details>
       </div>
 
       <div class="meth-step" id="meth-5" data-step="4">
         <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Market clearing and equilibrium</h3></div>
+        <p><strong>Market clearing conditions</strong> tie households, firms, and government together: in equilibrium, supply equals demand in every market simultaneously.</p>
+        <p class="kv-title">Equilibrium conditions</p>
+        <dl class="kv kv-text"><div><dt>Labour</dt><dd>\(\sum_{s,j} \omega_s \lambda_j e_{j,s} n_{j,s} = \sum_m L_m\)</dd></div><div><dt>Capital</dt><dd>\(K = K^d + K^f \quad (\text{open economy: } \zeta_K)\)</dd></div><div><dt>Goods</dt><dd>\(Y_m = C_m \;\; (m &lt; M)\)</dd></div><div><dt>Debt</dt><dd>\(D = D^d + D^f \quad (\text{foreign share: } \zeta_D)\)</dd></div></dl>
         <figure class="step-diagram" data-title="Market clearing" tabindex="0" role="button" aria-label="Expand diagram: Market clearing">
           <svg viewBox="0 0 560 190" width="560" style="max-width:100%;height:auto;">
                 <text x="280" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-faint)" font-weight="600">Four markets must clear simultaneously</text>
@@ -264,9 +272,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p><strong>Market clearing conditions</strong> tie households, firms, and government together: in equilibrium, supply equals demand in every market simultaneously.</p>
-        <p class="kv-title">Equilibrium conditions</p>
-        <dl class="kv kv-text"><div><dt>Labour</dt><dd>\(\sum_{s,j} \omega_s \lambda_j e_{j,s} n_{j,s} = \sum_m L_m\)</dd></div><div><dt>Capital</dt><dd>\(K = K^d + K^f \quad (\text{open economy: } \zeta_K)\)</dd></div><div><dt>Goods</dt><dd>\(Y_m = C_m \;\; (m &lt; M)\)</dd></div><div><dt>Debt</dt><dd>\(D = D^d + D^f \quad (\text{foreign share: } \zeta_D)\)</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <h4>Labour and capital markets</h4>
@@ -280,6 +285,9 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-6" data-step="5">
         <div class="meth-step-head"><span class="meth-step-num mono">6</span><h3>How the model is solved</h3></div>
+        <p>The model solves in two stages: first the long-run steady state, then the transition path from today's economy to it.</p>
+        <p class="kv-title">Two-stage algorithm</p>
+        <dl class="kv kv-text"><div><dt>Outer loop</dt><dd>\(\mathbf{x} = \{\bar{r}_p, \bar{r}, \bar{w}, \{\bar{p}_m\}, \overline{BQ}, \overline{TR}, \text{factor}\}\)</dd></div><div><dt>Inner loop</dt><dd>\(\text{Solve } 2JS \text{ Euler equations } \forall (j,s)\)</dd></div><div><dt>Convergence</dt><dd>\(\|\mathbf{x}^{(i')} - \mathbf{x}^{(i)}\| \leq \text{toler}_{\text{ss}}\)</dd></div><div><dt>TPI</dt><dd>\(\text{Guess } \{\mathbf{x}_t\}_{t=1}^T \to \text{solve all cohorts} \to \text{iterate}\)</dd></div></dl>
         <figure class="step-diagram" data-title="Two-stage solution" tabindex="0" role="button" aria-label="Expand diagram: Two-stage solution">
           <svg viewBox="0 0 580 190" width="580" style="max-width:100%;height:auto;">
                 <text x="290" y="18" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-faint)" font-weight="600">Two-stage solution</text>
@@ -305,14 +313,10 @@ window.MathJax = {
                 <text x="410" y="174" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-faint)" font-weight="500">TPI iteration</text>
                 <line x1="520" y1="95" x2="545" y2="95" stroke="var(--primary)" stroke-width="2" marker-end="url(#arr)"/>
                 <rect x="550" y="60" width="28" height="70" rx="6" fill="var(--primary)"/>
-                <text x="564" y="92" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="#fff" font-weight="600">OUT</text>
-                <text x="564" y="105" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="#fff" font-weight="600">PUT</text>
+                <text x="564" y="95" transform="rotate(-90 564 95)" text-anchor="middle" dominant-baseline="middle" font-family="Roboto, sans-serif" font-size="11" fill="#fff" font-weight="600">output</text>
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>The model solves in two stages: first the long-run steady state, then the transition path from today's economy to it.</p>
-        <p class="kv-title">Two-stage algorithm</p>
-        <dl class="kv kv-text"><div><dt>Outer loop</dt><dd>\(\mathbf{x} = \{\bar{r}_p, \bar{r}, \bar{w}, \{\bar{p}_m\}, \overline{BQ}, \overline{TR}, \text{factor}\}\)</dd></div><div><dt>Inner loop</dt><dd>\(\text{Solve } 2JS \text{ Euler equations } \forall (j,s)\)</dd></div><div><dt>Convergence</dt><dd>\(\|\mathbf{x}^{(i')} - \mathbf{x}^{(i)}\| \leq \text{toler}_{\text{ss}}\)</dd></div><div><dt>TPI</dt><dd>\(\text{Guess } \{\mathbf{x}_t\}_{t=1}^T \to \text{solve all cohorts} \to \text{iterate}\)</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <h4>Stage 1: Steady state</h4>
@@ -324,6 +328,7 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-7" data-step="6">
         <div class="meth-step-head"><span class="meth-step-num mono">7</span><h3>Calibrating for the United Kingdom</h3></div>
+        <p>OG-Core supplies the theory; the OG-UK calibration layer anchors every parameter to official UK data.</p>
         <figure class="step-diagram" data-title="UK data sources" tabindex="0" role="button" aria-label="Expand diagram: UK data sources">
           <svg viewBox="0 0 580 195" width="580" style="max-width:100%;height:auto;">
                 <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-faint)" font-weight="600">Data sources for OG-UK</text>
@@ -349,7 +354,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>OG-Core supplies the theory; the OG-UK calibration layer anchors every parameter to official UK data.</p>
 <details class="about"><summary>More detail</summary><p>Depreciation comes from ONS capital-stocks data (<strong>6.5%/yr</strong>), potential-output growth from the OBR EFO (<strong>1.1%/yr</strong>), the discount factor is matched to the ONS household saving ratio, the world interest rate to Bank of England gilt yields, and the Frisch labour-supply elasticity is <strong>0.35–0.4</strong> (Blundell, MaCurdy &amp; Meghir). Demographics — population by age, mortality, immigration — come from the UN World Population Prospects (country&nbsp;826). Tax rates and the state pension age come from HMRC and GOV.UK and match current UK rules, and the debt-to-GDP target the fiscal closure rule steers towards comes from the OBR's fiscal forecasts.</p></details>
         <p class="kv-title">Gouveia-Strauss tax function</p>
         <dl class="kv kv-text"><div><dt>Effective rate</dt><dd>\(\text{ETR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-1/\phi_1}\Bigr]\)</dd></div><div><dt>Marginal (analytical)</dt><dd>\(\text{MTR}(y) = \phi_0\Bigl[1 - \bigl(1 + \phi_2\, y^{\phi_1}\bigr)^{-(1+\phi_1)/\phi_1}\Bigr]\)</dd></div></dl>
@@ -364,6 +368,7 @@ window.MathJax = {
 
       <div class="meth-step" id="meth-8" data-step="7">
         <div class="meth-step-head"><span class="meth-step-num mono">8</span><h3>What this enables</h3></div>
+        <p>Paired with a static microsimulation engine, OG-UK gives two views of a UK tax or benefit reform. Static analysis shows which households gain or lose, and by how much. OG-UK shows GDP, investment, government revenue, interest rates, and wages as the economy adjusts over time.</p>
         <figure class="step-diagram" data-title="Static vs dynamic analysis" tabindex="0" role="button" aria-label="Expand diagram: Static vs dynamic analysis">
           <svg viewBox="0 0 580 190" width="580" style="max-width:100%;height:auto;">
                 <text x="290" y="20" text-anchor="middle" font-family="Roboto, sans-serif" font-size="13" fill="var(--text-faint)" font-weight="600">Static vs dynamic analysis</text>
@@ -386,7 +391,6 @@ window.MathJax = {
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>Paired with a static microsimulation engine, OG-UK gives two views of a UK tax or benefit reform. Static analysis shows which households gain or lose, and by how much. OG-UK shows GDP, investment, government revenue, interest rates, and wages as the economy adjusts over time.</p>
         <details class="about">
           <summary>About this step</summary>
           <h4>Why both views matter</h4>
@@ -409,6 +413,44 @@ window.MathJax = {
         </details>
       </div>
       </div>
+    </div>
+
+    <div class="meth-notation" id="notation">
+      <h3>Notation</h3>
+      <table class="meth-notation-table">
+        <thead><tr><th scope="col">Symbol</th><th scope="col">Meaning</th><th scope="col">Step</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">\(s,\ S\)</th><td>age cohort; S economically active cohorts</td><td><a href="#meth-1">1</a></td></tr>
+          <tr><th scope="row">\(j,\ J\)</th><td>ability type; J types</td><td><a href="#meth-1">1</a></td></tr>
+          <tr><th scope="row">\(\lambda_j\)</th><td>share of each cohort in ability type j</td><td><a href="#meth-1">1</a></td></tr>
+          <tr><th scope="row">\(\omega_{s,t}\)</th><td>population by age, evolving with fertility, mortality and immigration</td><td><a href="#meth-1">1</a></td></tr>
+          <tr><th scope="row">\(\beta_j\)</th><td>discount factor of type j</td><td><a href="#meth-1">1</a></td></tr>
+          <tr><th scope="row">\(e_{j,s}\)</th><td>labour productivity of type j at age s</td><td><a href="#meth-1">1</a></td></tr>
+          <tr><th scope="row">\(\sigma\)</th><td>risk aversion (CRRA consumption utility)</td><td><a href="#meth-2">2</a></td></tr>
+          <tr><th scope="row">\(n,\ g(n)\)</th><td>labour supply and its elliptical disutility</td><td><a href="#meth-2">2</a></td></tr>
+          <tr><th scope="row">\(\chi^n_s,\ \chi^b_j\)</th><td>weights on labour disutility (by age) and on the bequest motive (by type)</td><td><a href="#meth-2">2</a></td></tr>
+          <tr><th scope="row">\(\rho_s\)</th><td>age-specific mortality</td><td><a href="#meth-2">2</a></td></tr>
+          <tr><th scope="row">\(\tau'_{\text{lab}},\ \tau'_{\text{cap}}\)</th><td>marginal tax rates on labour and capital income</td><td><a href="#meth-2">2</a></td></tr>
+          <tr><th scope="row">\(r_p\)</th><td>return on household savings</td><td><a href="#meth-2">2</a></td></tr>
+          <tr><th scope="row">\(m,\ M\)</th><td>industry; M industries</td><td><a href="#meth-3">3</a></td></tr>
+          <tr><th scope="row">\(Y_m,\ Z_m\)</th><td>output and total factor productivity of industry m</td><td><a href="#meth-3">3</a></td></tr>
+          <tr><th scope="row">\(K_m,\ K_{g,m},\ L_m\)</th><td>private capital, public capital and labour used by industry m</td><td><a href="#meth-3">3</a></td></tr>
+          <tr><th scope="row">\(\gamma,\ \gamma_g,\ \rho\)</th><td>CES weights on private and public capital; substitution parameter</td><td><a href="#meth-3">3</a></td></tr>
+          <tr><th scope="row">\(g_y\)</th><td>growth rate of labour-augmenting productivity</td><td><a href="#meth-3">3</a></td></tr>
+          <tr><th scope="row">\(w,\ r,\ p_m\)</th><td>wage, rental rate of capital, price of industry m's output</td><td><a href="#meth-3">3</a></td></tr>
+          <tr><th scope="row">\(\delta,\ \delta^\tau\)</th><td>depreciation rate; depreciation rate for tax deductions</td><td><a href="#meth-3">3</a></td></tr>
+          <tr><th scope="row">\(\tau^{\text{corp}},\ \tau^{\text{inv}}\)</th><td>corporate income tax rate; investment tax credit</td><td><a href="#meth-3">3</a></td></tr>
+          <tr><th scope="row">\(D_t,\ \text{Rev}_t,\ r_{\text{gov}}\)</th><td>government debt, revenue, interest rate on government debt</td><td><a href="#meth-4">4</a></td></tr>
+          <tr><th scope="row">\(G,\ I_g,\ \text{Pen},\ TR,\ UBI\)</th><td>public goods, infrastructure investment, pensions, lump-sum transfers, universal basic income</td><td><a href="#meth-4">4</a></td></tr>
+          <tr><th scope="row">\(K^d,\ K^f,\ D^d,\ D^f\)</th><td>domestic and foreign holdings of capital and government debt</td><td><a href="#meth-5">5</a></td></tr>
+          <tr><th scope="row">\(\zeta_K,\ \zeta_D\)</th><td>open-economy parameters: foreign capital and foreign debt holdings</td><td><a href="#meth-5">5</a></td></tr>
+          <tr><th scope="row">\(C_m\)</th><td>consumption demand for industry m's output</td><td><a href="#meth-5">5</a></td></tr>
+          <tr><th scope="row">\(\mathbf{x}\)</th><td>steady-state guess: returns, wage, prices, bequests, transfers, scale factor</td><td><a href="#meth-6">6</a></td></tr>
+          <tr><th scope="row">\(\text{toler}_{\text{ss}},\ T\)</th><td>steady-state convergence tolerance; periods on the transition path</td><td><a href="#meth-6">6</a></td></tr>
+          <tr><th scope="row">\(\text{ETR}(y),\ \text{MTR}(y)\)</th><td>effective and marginal income-tax rates at income y</td><td><a href="#meth-7">7</a></td></tr>
+          <tr><th scope="row">\(\phi_0,\ \phi_1,\ \phi_2\)</th><td>the three fitted Gouveia–Strauss parameters</td><td><a href="#meth-7">7</a></td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
