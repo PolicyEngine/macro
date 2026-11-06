@@ -1954,6 +1954,186 @@ def longbase_layer(column: str, last_observed: str) -> str:
       </div>"""
 
 
+LONGBASE_LABEL = "FRB/US LONGBASE baseline (Fed staff, April 2026 vintage)"
+LONGBASE_SOURCE = (
+    'FRB/US LONGBASE, <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/'
+    'papers/frb-us/figures/longbase_baseline_yoy.csv">longbase_baseline_yoy.csv</a>, '
+    "extracted 2026-07-29 from LONGBASE.TXT; no bands, because none are published"
+)
+
+
+def month_index(period: str) -> float:
+    """A period on one time axis, in months: quarters sit at their middle month.
+
+    Monthly, quarterly and daily series share the US charts, so the x axis is
+    time rather than position: a quarter (an FRB/US LONGBASE row or a GDP
+    outturn) is drawn at the middle month it averages over, a month at itself
+    and a day at its fraction of the month. Nothing is averaged or resampled.
+    """
+    if "Q" in period:
+        return int(period[:4]) * 12 + (int(period[5]) - 1) * 3 + 1
+    year, month = int(period[:4]), int(period[5:7])
+    day = int(period[8:10]) if len(period) >= 10 else 1
+    return year * 12 + month - 1 + (day - 1) / 31
+
+
+def us_path_chart(chart_id: str, name: str, unit: str,
+                  lines: list[tuple[str, str, list[dict]]],
+                  baseline: list[dict] | None = None,
+                  zero: bool = True, source: str = "",
+                  notes: list[str] | None = None) -> str:
+    """Outturn lines from the FRED snapshot, and the LONGBASE path if one exists.
+
+    ``lines`` is (css class, legend label, observations) for each outturn
+    series: ``vc-out-line`` for the first, the neutral ``vc-s3`` for a second.
+    ``baseline`` is [(quarter, value)] dicts from the committed LONGBASE CSV,
+    drawn dashed (``vc-s2``: published by someone else) over its own quarters
+    only. It is never joined to the last outturn, unlike the UK fans: the UK
+    median is conditioned on that outturn, while LONGBASE is a fixed April 2026
+    vintage, so where an outturn now exists for a baseline quarter the gap
+    between the two is the information. A gap in a stored monthly series (the
+    missing 2025-10, say) breaks the line rather than being bridged.
+    """
+    import chartkit  # repo root, on sys.path above
+
+    points = [month_index(o["period"]) for _, _, obs in lines for o in obs]
+    values = [o["value"] for _, _, obs in lines for o in obs]
+    if baseline:
+        points += [month_index(b["period"]) for b in baseline]
+        values += [b["value"] for b in baseline]
+    t0, t1 = min(points), max(points)
+    width, height = 760, 300
+    left, right, top, bottom = 56, 16, 34, 40
+    plot_w, plot_h = width - left - right, height - top - bottom
+    lo, hi = min(values + ([0.0] if zero else [])), max(values)
+    pad = (hi - lo) * 0.08 or 1.0
+    lo, hi = lo - pad, hi + pad
+
+    def x(t: float) -> float:
+        return left + plot_w * (t - t0) / (t1 - t0)
+
+    def y(v: float) -> float:
+        return top + plot_h * (1 - (v - lo) / (hi - lo))
+
+    grid = []
+    step = next((s for s in (0.1, 0.2, 0.25, 0.5, 1.0, 2.0) if (hi - lo) / s <= 8), 5.0)
+    decimals = 0 if step >= 1 else 2 if step == 0.25 else 1
+    g = math.floor(lo / step) * step
+    while g <= hi:
+        if g >= lo:
+            cls = "vc-zero" if abs(g) < 1e-9 else "vc-grid"
+            grid.append(f'<line class="{cls}" x1="{left}" y1="{y(g):.1f}" '
+                        f'x2="{width - right}" y2="{y(g):.1f}"/>')
+            text = f"{g:.{decimals}f}" if decimals else f"{round(g):g}"
+            grid.append(chartkit.ytick(left, y(g), text.replace("-", "−")))
+        g = round(g + step, 6)
+
+    # x labels: every quarter in the window, at its middle month.
+    quarters = []
+    q = int(t0 // 12), int((t0 % 12) // 3)
+    while True:
+        label = f"{q[0]}Q{q[1] + 1}"
+        t = month_index(label)
+        if t > t1 + 1e-9:
+            break
+        if t >= t0 - 1e-9:
+            quarters.append((t, label))
+        q = (q[0] + (q[1] + 1) // 4, (q[1] + 1) % 4)
+    last = len(quarters) - 1
+    ticks = [chartkit.xtick(x(quarters[i][0]), top + plot_h, quarters[i][1], i, last, minor=minor)
+             for i, minor in chartkit.tick_plan(len(quarters))]
+
+    marks, desc = [], []
+    for cls, label, obs in lines:
+        runs, run = [], []
+        for o in obs:
+            if run and "Q" not in o["period"] and len(o["period"]) == 7 and \
+                    month_index(o["period"]) - month_index(run[-1]["period"]) > 1:
+                runs.append(run)
+                run = []
+            run.append(o)
+        runs.append(run)
+        for r in runs:
+            marks.append(f'<polyline class="{cls}" points="'
+                         + " ".join(f"{x(month_index(o['period'])):.1f},{y(o['value']):.1f}" for o in r)
+                         + '"/>')
+        end = obs[-1]
+        dot = "vc-out-dot" if cls == "vc-out-line" else "vc-s3-dot"
+        marks.append(f'<circle class="{dot}" cx="{x(month_index(end["period"])):.1f}" '
+                     f'cy="{y(end["value"]):.1f}" r="3"/>')
+        desc.append(f"{label} runs {obs[0]['period']} to {end['period']} "
+                    f"({obs[0]['value']:.2f} to {end['value']:.2f})")
+    if baseline:
+        marks.append('<polyline class="vc-s2" points="'
+                     + " ".join(f"{x(month_index(b['period'])):.1f},{y(b['value']):.1f}" for b in baseline)
+                     + '"/>')
+        marks += [f'<circle class="vc-s2-dot" cx="{x(month_index(b["period"])):.1f}" '
+                  f'cy="{y(b["value"]):.1f}" r="3"/>' for b in baseline]
+        desc.append(f"the {LONGBASE_LABEL} runs {baseline[0]['period']} to "
+                    f"{baseline[-1]['period']} ({baseline[0]['value']:.2f} to "
+                    f"{baseline[-1]['value']:.2f}), with no bands")
+    what = f"outturns and the {LONGBASE_LABEL}" if baseline else "outturns only, no model path"
+    svg = "\n".join([
+        f'<svg class="vchart" data-chart="{chart_id}" viewBox="{left - 4} {top - 4} '
+        f'{plot_w + 8} {plot_h + 8}" role="img" aria-labelledby="{chart_id}-t {chart_id}-d">',
+        f'<title id="{chart_id}-t">{esc(name)}: {what}</title>',
+        f'<desc id="{chart_id}-d">{esc(unit)}. {esc("; ".join(desc))}. The quarter-by-quarter '
+        "values are in the table under the chart.</desc>" if baseline else
+        f'<desc id="{chart_id}-d">{esc(unit)}. {esc("; ".join(desc))}.</desc>',
+        *grid,
+        *marks,
+        *ticks,
+        "</svg>",
+    ])
+    legend = [("ln-out" if cls == "vc-out-line" else "ln-s3", label) for cls, label, _ in lines]
+    if baseline:
+        legend.append(("ln-s2", LONGBASE_LABEL))
+    return chartkit.figure(svg, legend=legend, unit=f"{name}, {unit}", source=source,
+                           notes=notes, y_gutter=True)
+
+
+def missing_months(obs: list[dict]) -> list[str]:
+    """Months absent from a stored monthly window, so a chart can say so."""
+    out = []
+    if not obs or len(obs[0]["period"]) != 7:
+        return out  # quarterly or daily: no month to miss
+    for a, b in zip(obs, obs[1:]):
+        t = month_index(a["period"]) + 1
+        while t < month_index(b["period"]):
+            out.append(f"{int(t // 12)}-{int(t % 12) + 1:02d}")
+            t += 1
+    return out
+
+
+def gap_note(obs: list[dict]) -> list[str]:
+    gaps = missing_months(obs)
+    if not gaps:
+        return []
+    return [f"{listed(gaps)} {'is' if len(gaps) == 1 else 'are'} missing from the "
+            "stored series, so the line breaks there."]
+
+
+def us_baseline_chart(chart_id: str, name: str, unit: str, column: str,
+                      series: dict, outturns: list[dict], derived: str = "") -> str:
+    """One US topic chart: a FRED outturn line plus the LONGBASE path."""
+    baseline = [{"period": r["quarter"], "value": r[column]} for r in longbase()]
+    source = (f'FRED <a class="mono" href="{esc(series["url"])}">{esc(series["cdid"])}</a>, '
+              f"snapshot {esc(series['vintage'])}{derived}; " + LONGBASE_SOURCE)
+    return us_path_chart(
+        chart_id, name, unit,
+        [("vc-out-line", f"Outturn, FRED snapshot {esc(series['vintage'])}", outturns)],
+        baseline=baseline, zero=column != "unemployment_pct", source=source,
+        notes=gap_note(outturns) + ["Baseline quarters are drawn at their middle month."]
+        if "Q" not in outturns[0]["period"] else gap_note(outturns))
+
+
+def longbase_expander(column: str, last_observed: str) -> str:
+    return f"""      <details class="about">
+        <summary>Quarter by quarter</summary>
+{longbase_layer(column, last_observed)}
+      </details>"""
+
+
 def us_run_note() -> str:
     return f"""      <p>
         Over MCP the same two models are {tool("frbus_shock")} and
@@ -2031,7 +2211,10 @@ def us_growth_model() -> str:
         <span class="mono">LONGBASE.TXT</span>, and it carries no bands because
         none exist:
       </p>
-{longbase_layer("gdp_yoy_pct", facts["now"]["period"])}
+      <figure class="vchart-figure">
+{us_baseline_chart("us-topic-gdp-path", "US real GDP", "% change on a year earlier", "gdp_yoy_pct", facts["gdp"], yoy(facts["gdp"], 4)[-8:], ", growth derived from the stored level")}
+      </figure>
+{longbase_expander("gdp_yoy_pct", facts["now"]["period"])}
       <p class="callout">
         <strong>Predictive validation: {registry_terms([frbus["quality"]["predictive_validation"]["level"]])}.</strong>
         {esc(frbus["quality"]["predictive_validation"]["evidence"])}
@@ -2131,9 +2314,12 @@ def us_inflation_model() -> str:
       <p>
         The conditioning baseline the frb-us experiments deviate from does
         carry a CPI path, and it is shown for the same reason as on the growth
-        page — with the same caveat, in the same table:
+        page, with the same caveat:
       </p>
-{longbase_layer("cpi_yoy_pct", facts["now"]["period"])}
+      <figure class="vchart-figure">
+{us_baseline_chart("us-topic-cpi-path", "US CPI inflation", "% change on a year earlier", "cpi_yoy_pct", facts["cpi"], yoy(facts["cpi"], 12)[-24:], ", inflation derived from the stored index")}
+      </figure>
+{longbase_expander("cpi_yoy_pct", facts["now"]["period"])}
       <p class="callout">
         <strong>No core CPI.</strong> The UK inflation topic carries core CPI
         beside the headline because the ONS series DKO8 is in the store. There
@@ -2211,7 +2397,10 @@ def us_jobs_model() -> str:
         The unemployment path in the conditioning baseline is the one model
         artifact covering this topic, and it is a baseline rather than a view:
       </p>
-{longbase_layer("unemployment_pct", latest(unemployment)["period"])}
+      <figure class="vchart-figure">
+{us_baseline_chart("us-topic-unemployment-path", "US unemployment rate", "%", "unemployment_pct", unemployment, unemployment["observations"][-24:])}
+      </figure>
+{longbase_expander("unemployment_pct", latest(unemployment)["period"])}
       <p class="chooser-note">
         The UK jobs topic has a satellite that maps the boe-svar GDP forecast
         onto the unemployment rate through a fitted Okun relation, and archives
@@ -2264,6 +2453,22 @@ def us_rates_hook() -> str:
     )
 
 
+def us_rates_chart() -> str:
+    """Two years of both rates, outturn only: no committed model path exists."""
+    funds = load("us_federal_funds_rate")
+    ten = load("us_treasury_10y")
+    monthly = funds["observations"][-24:]
+    daily = [o for o in ten["observations"] if o["period"] >= monthly[0]["period"]]
+    source = (f'FRED <a class="mono" href="{esc(funds["url"])}">{esc(funds["cdid"])}</a>, '
+              f'snapshot {esc(funds["vintage"])}; FRED <a class="mono" href="{esc(ten["url"])}">'
+              f'{esc(ten["cdid"])}</a>, snapshot {esc(ten["vintage"])}')
+    return us_path_chart(
+        "us-topic-rates", "US policy rate and 10-year Treasury yield", "%",
+        [("vc-out-line", f"Effective federal funds rate, monthly, snapshot {esc(funds['vintage'])}", monthly),
+         ("vc-s3", f"10-year Treasury yield, daily, snapshot {esc(ten['vintage'])}", daily)],
+        zero=False, source=source, notes=gap_note(monthly))
+
+
 def us_rates_model() -> str:
     frbus = MODELS["frb-us"]
     hank = MODELS["us-hank"]
@@ -2292,12 +2497,16 @@ def us_rates_model() -> str:
         "because there is no US model that would read one.",
     ])}
       <p>
-        So the two readings above stand alone: observed Federal Reserve data,
-        dated and archived, with no model path beside them. They still do work
-        here — they are the market backdrop the other US topics are read
-        against, and the conditioning environment any future rate model would
-        have to beat.
+        So the chart shows outturns only: observed Federal Reserve data,
+        dated and archived, with no model path beside them, because the
+        committed LONGBASE extract carries no interest-rate column. They still
+        do work here — they are the market backdrop the other US topics are
+        read against, and the conditioning environment any future rate model
+        would have to beat.
       </p>
+      <figure class="vchart-figure">
+{us_rates_chart()}
+      </figure>
       <p class="callout">
         This is the one US topic where the useful output is a refusal, and it
         is the same refusal the <a href="/economy/topics/rates">UK rates and
