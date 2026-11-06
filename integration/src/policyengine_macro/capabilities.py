@@ -22,7 +22,10 @@ MODELS = {
         "access": ["hosted", "CLI", "Python"],
         "runtime": "sub-second household; minutes population",
         "uncertainty": "none for household arithmetic; survey/calibration uncertainty for population estimates",
-        "status": "household arithmetic exact for the rules as implemented; population estimates add survey error",
+        "status": (
+            "exact for implemented rules (household arithmetic); population "
+            "estimates add survey error"
+        ),
         "data_vintage": "country package and dataset dependent; recorded per run",
     },
     "og+microsim": {
@@ -61,7 +64,10 @@ MODELS = {
         "access": ["hosted", "CLI", "Python"],
         "runtime": "seconds for raw shocks; minutes for translated reform scenarios",
         "uncertainty": "not comprehensive",
-        "status": "anchored to the March 2026 EFO; predictive and policy checks weak",
+        "status": (
+            "anchored to the March 2026 EFO, not validated as a forecaster; "
+            "predictive and policy checks weak"
+        ),
         "data_vintage": "March 2026 EFO baseline",
     },
     "boe-svar": {
@@ -77,7 +83,8 @@ MODELS = {
         "runtime": "minutes per estimation and identification run",
         "uncertainty": "posterior 68% and 90% intervals",
         "status": (
-            "replicates the published GDP decomposition; CPI global-shock share "
+            "partial replication of Brignone and Piffer (2025): GDP "
+            "decomposition consistent with the paper; CPI global-shock share "
             "about 8pp short; no forecast skill against a drifting random walk"
         ),
         "estimation_sample": "1992Q1-2025Q1",
