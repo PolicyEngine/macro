@@ -31,7 +31,7 @@ MODEL_PAGE_ROOTS = {
     "psl-og": ("olg", "papers/psl-og"),
     "define-uk": ("define", "papers/define-uk"),
 }
-# /docs is a permanent redirect to /models#compare in vercel.json; the model
+# /docs is a permanent redirect to /models/side-by-side in vercel.json; the model
 # inventory lives on the pages below.
 MODEL_INVENTORY_PAGES = (
     "index.html",
@@ -52,11 +52,11 @@ def check_public_model_inventory() -> None:
             failures.append(f"{path}: missing {', '.join(missing)}")
 
 
-    # /validation was absorbed into /models#validation; the gradient claims
-    # now live on the models hub page.
-    validation = _read("models/index.html")
+    # /validation was absorbed into the models hub; since r5 the gradient
+    # claims live on its Validation tab.
+    validation = _read("models/validation/index.html")
     if "The seven models support" not in validation:
-        failures.append("models/index.html: model count is not seven")
+        failures.append("models/validation/index.html: model count is not seven")
 
     if failures:
         raise SystemExit("\n".join(failures))
