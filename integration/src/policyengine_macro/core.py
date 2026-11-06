@@ -1475,6 +1475,21 @@ def svar_forecast(horizons: int = 12,
             yoy_paths.append(forecast.yoy(np.vstack([tail, path])))
             pw.append(est["weights"][i])
     bands = analysis.aggregate(yoy_paths, weights=np.asarray(pw))
+    # forecast.yoy is the four-quarter LOG difference; ONS, the BoE MPR and
+    # the OBR EFO publish the simple rate 100*(P_t/P_{t-4}-1), which is
+    # higher by ~x^2/200 (issue #208). The map is monotone, so converting
+    # the aggregated median and band edges equals the bands of converted
+    # paths. Prefer boe_var's helper (boe-var-model#18); fall back to the
+    # same formula on older builds.
+    to_simple = getattr(
+        forecast, "log_to_simple_pct",
+        lambda x: 100.0 * np.expm1(np.asarray(x, dtype=float) / 100.0),
+    )
+    bands = {
+        k: (to_simple(v) if k in ("median", "lo68", "hi68", "lo90", "hi90")
+            else v)
+        for k, v in bands.items()
+    }
 
     last_q = est["df_full"].index[-1]
     quarters = [str(last_q + h) for h in range(1, horizons + 1)]
@@ -1507,7 +1522,9 @@ def svar_forecast(horizons: int = 12,
         "accepted_draws": est["n_accepted"],
         "ess": round(est["ess"], 1),
         "warnings": list(est["warnings"]),
-        "units": "YoY percent (4-quarter log difference of 100*log levels)",
+        "units": "YoY percent, simple four-quarter rate "
+                 "100*(P_t/P_{t-4}-1), the basis ONS, the BoE and the OBR "
+                 "publish (converted from the model's log difference)",
         "gdp_growth_yoy": _series(list(est["df_full"].columns).index(_COL_GDP)),
         "cpi_inflation_yoy": _series(list(est["df_full"].columns).index(_COL_CPI)),
     }
