@@ -8,6 +8,12 @@ The version below tracks the `policyengine-macro` package in `integration/`.
 `CITATION.cff` and `integration/pyproject.toml` must agree with the topmost
 heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
+## [Unreleased]
+
+### Added
+
+- **Question router on `/models` and a new `/glossary`.** Model cards filter by question and country; `/connect` gives copy-paste setup and `/contact` lists self-serve routes. No numbers changed.
+
 ## [0.2.0] — 2026-08-11
 
 Access and verification release. Nothing about any model's behaviour or any
