@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "2026-11-06.1",
+  "version": "2026-11-06.2",
   "date": "2026-11-06",
   "title": "Same question, every model: cross-model scenario battery",
   "issue": "https://github.com/PolicyEngine/macro/issues/213",
@@ -21,13 +21,13 @@
       "source": "Bank of England, The transmission mechanism of monetary policy, Quarterly Bulletin 1999 Q2",
       "url": "https://www.bankofengland.co.uk/quarterly-bulletin/1999/q2/the-transmission-mechanism-of-monetary-policy"
     },
-    "fed-2014": {
-      "label": "Fed FRB/US, 100bp funds-rate shock (VAR expectations)",
+    "fed-2018": {
+      "label": "Fed FRB/US, 100bp funds-rate shock (VAR expectations), current model",
       "country": "US",
-      "text": "Output gap trough −0.4pp (FEDS Note 2014); about −0.53pp at quarter 6 (price–wage note 2013, Fig. 3, read off the chart); inflation about −0.08pp.",
-      "gdp_low": -0.53, "gdp_high": -0.4, "gdp_units": "pp output gap, trough",
-      "source": "Brayton, Laubach and Reifschneider, FEDS Note, 3 Apr 2014; FRB/US price–wage sector note, Aug 2013, p.16 (quoted in us-frb-model VALIDATION.md, Test 3)",
-      "url": "https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md"
+      "text": "The Board's own simulation of the current (post-2018) model: output gap trough −0.486pp, core PCE inflation trough −0.0345pp and unemployment peak +0.219pp, all at quarter 8. The previous model gives −0.459pp, −0.062pp and +0.215pp. The −0.4pp and −0.08pp in the 2014 FEDS Note describe the pre-2018 model.",
+      "gdp_low": -0.486, "gdp_high": -0.459, "gdp_units": "pp output gap, trough, current and previous model",
+      "source": "Laforte, Overview of the changes to the FRB/US model (2018), FEDS Notes, 7 Dec 2018, doi:10.17016/2380-7172.2306, Fig. 2 (accessible data table)",
+      "url": "https://www.federalreserve.gov/econres/notes/feds-notes/overview-of-the-changes-to-the-frb-us-model-2018-20181207.htm"
     },
     "purchases": {
       "label": "Purchases multiplier, year 1",
@@ -58,7 +58,7 @@
       "chip": "Rate +100bp",
       "title": "What does a 100bp rise in the policy rate do?",
       "experiment": "A 1pp rise in the policy rate. The models do not share a rate path, so each row states its own and the size of the path in pp-quarters (annualised rate × quarters).",
-      "benchmarks": ["boe-1999", "fed-2014"],
+      "benchmarks": ["boe-1999", "fed-2018"],
       "notes": [
         "GDP per pp-quarter divides the peak GDP effect by the rate path's size to the peak. HANK's figure uses the realised real-rate path; the other rows use the nominal policy rate, which is close to the real rate in FRB/US because its inflation barely moves. On HANK's rstar path (10 pp-quarters at ρ = 0.9) the figure would be about 0.04%, so HANK's 0.16 and FRB/US's 0.15 are not like-for-like.",
         "HANK reports inflation as a quarterly rate; this page multiplies it by 4 to give an annual rate."
@@ -97,10 +97,10 @@
           "inflation": {"value": -0.034, "units": "pp, annual rate", "measure": "core PCE", "when": "q8"},
           "timing": "Hump: GDP and inflation peak at q8",
           "gdp_per_ppq": 0.15,
-          "verdict": "plausible", "verdict_label": "Plausible on output; inflation about 40% of published",
-          "reason": "Output trough sits between the Fed's published −0.4 and −0.53. Inflation is about 40% of the published −0.08pp.",
+          "verdict": "plausible", "verdict_label": "Plausible; matches the Board's current-model simulation",
+          "reason": "The Board's simulation of the current model gives an output-gap trough of −0.486pp and core PCE −0.0345pp at quarter 8 (Laforte 2018). This run gives core PCE −0.034pp at quarter 8; the same experiment's output-gap trough is −0.50pp (us-frb-model VALIDATION.md, Test 3). The −0.08pp in earlier Fed notes describes the pre-2018 model.",
           "issue": null,
-          "benchmark": "fed-2014",
+          "benchmark": "fed-2018",
           "path": {
             "x": ["2026Q1","2026Q2","2026Q3","2026Q4","2027Q1","2027Q2","2027Q3","2027Q4","2028Q1","2028Q2","2028Q3","2028Q4"],
             "gdp": [0.00062,-0.187241,-0.289735,-0.436345,-0.482623,-0.52782,-0.543998,-0.551202,-0.544043,-0.525862,-0.498603,-0.464479],
