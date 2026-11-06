@@ -22,7 +22,7 @@ STYLESHEET = re.compile(r'href="/style\.css(?:\?v=[0-9]+)?"')
 # changes in a way a cached copy would render wrongly; ``render`` writes it
 # into every page and the generators read it from here (economy/topics.py,
 # notes/generate_release_notes.py), so no page can be left on an old copy.
-STYLE_VERSION = 21
+STYLE_VERSION = 22
 STYLE_HREF = f"/style.css?v={STYLE_VERSION}"
 
 DESTINATIONS = (
@@ -86,6 +86,10 @@ PAGE_NAMES = {
     "/economy/us/topics/rates": "Rates and Treasuries",
     "/economy/us/topics/reform": "Tax and benefit reform",
     "/models": "Models",
+    "/models/side-by-side": "Side by side",
+    "/models/combine": "Combine",
+    "/models/validation": "Validation",
+    "/models/papers": "Papers",
     "/obr": "OBR emulator",
     "/svar": "BoE SVAR",
     "/frb-us": "FRB-US",
@@ -174,9 +178,16 @@ CRUMB_PARENTS = {
 # and the five tabs in order. ``render`` writes the row on every page whose
 # URL is one of the tabs, so the rows are generated rather than hand-kept.
 # The row sits below the title band, outside ``</header>``, so HEADER above
-# never reaches it. /models and /connect keep hand-kept rows of in-page
-# anchors: their labels do not end in " pages" and SUBTAB_ROW skips them.
+# never reaches it. /connect keeps a hand-kept row of in-page anchors: its
+# label does not end in " pages" and SUBTAB_ROW skips it. /models was the
+# same until r5 (one 13k px page on phones); the router is now the page and
+# each former section is its own tab, so its row is generated like the
+# model rows and a new /models/* page joins it by being listed here.
 SUBTABS = {
+    "models": ("Models pages", (
+        ("/models", "Which model"), ("/models/side-by-side", "Side by side"),
+        ("/models/combine", "Combine"), ("/models/validation", "Validation"),
+        ("/models/papers", "Papers"))),
     "obr": ("OBR emulator pages", (
         ("/obr", "Overview"), ("/obr/methodology", "Methodology"),
         ("/obr/validation", "Validation"), ("/obr/code", "Code"),

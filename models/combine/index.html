@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>How the models combine — PolicyEngine Macro</title>
+<meta name="description" content="How the seven models join: every chain starts or ends at the PolicyEngine microsimulation." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/models/combine" />
+<meta property="og:title" content="How the models combine — PolicyEngine Macro" />
+<meta property="og:description" content="How the seven models join: every chain starts or ends at the PolicyEngine microsimulation." />
+<meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css?v=22" />
+</head>
+<body class="doc models-page">
+<a class="skip-link" href="#top">Skip to main content</a>
+<header class="nav">
+  <a class="brand" href="/" aria-label="PolicyEngine Macro home">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="26" height="26" /><span class="brand-name">PolicyEngine Macro</span>
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a class="nav-mobile" href="/"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>Home</a>
+    <a class="nav-mobile" href="/forecasts"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg>Forecasts</a>
+    <a class="nav-mobile" href="/models" aria-current="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 16.5 9 5 9-5"/></svg>Models</a>
+    <a class="nav-mobile nav-start" href="/connect"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg>Use</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<nav class="crumbs mono" aria-label="You are here">
+    <a href="/">Home</a>
+    <a href="/models">Models</a>
+    <span aria-current="page">Combine</span>
+</nav>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <h1 class="reveal page-title" style="--d:1">Models</h1>
+    </div>
+  </section>
+  <nav class="model-tabs" aria-label="Models pages">
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="/models">Which model</a>
+      <a class="model-tabs-link" href="/models/side-by-side">Side by side</a>
+      <a class="model-tabs-link" href="/models/combine" aria-current="page">Combine</a>
+      <a class="model-tabs-link" href="/models/validation">Validation</a>
+      <a class="model-tabs-link" href="/models/papers">Papers</a>
+    </div>
+  </nav>
+  <section id="compose" class="band band-wide">
+    <div class="band-head" data-icon="link"><h2>How the models combine</h2><p class="section-intro">Every join starts or ends at the <a class="gloss-link" href="/glossary#microsimulation">microsimulation</a>.</p></div>
+    <div class="scrolly-wrap">
+      <div class="scrolly-steps">
+
+      <div class="meth-step" id="score" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Score a reform: microsimulation, then the OBR emulator</h3></div>
+        <p class="mo-lead">What would a reform cost, and what would it do to the economy?</p>
+        <p>The microsimulation costs the reform from the tax-benefit rules; the OBR emulator returns the second-round effects.</p>
+        <div class="pipeline" role="group" aria-label="Pipeline: a reform goes to the PolicyEngine microsimulation for the static costing, which feeds the OBR emulator for macro feedback.">
+                    <span class="pl-node"><strong>Reform</strong></span>
+                    <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+                    <a class="pl-node" href="/pe"><strong>Microsimulation</strong></a>
+                    <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+                    <a class="pl-node" href="/obr"><strong>OBR emulator</strong></a>
+                    <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+                    <span class="pl-node"><strong>Scored result</strong></span>
+                  </div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre tabindex="0"><code>pe-macro score --country uk --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --model obr</code></pre></div>
+        <details class="about"><summary>About this join</summary>
+          <p>Worked example: 1p on the basic rate, costed by the microsimulation and fed through the emulator; the figures live on the <a href="/obr#answers">OBR Overview</a>. The <a class="gloss-link" href="/glossary#static-costing">static costing</a> runs below HMRC&rsquo;s ready reckoner in the one matched year, 2026&ndash;27: <a href="/pe/validation#hmrc">a benchmark, not a validation</a>. UK only (<a href="/models#us-reform-gap">why a US reform gets no macro feedback</a>).</p>
+          <p>Read the caveats before the headline: the costing inherits survey-microdata uncertainty, and the emulator&rsquo;s spending multiplier is fixed <a class="gloss-link" href="/glossary#by-construction">by construction</a> (<a href="/obr/validation#caveats">limits</a>), so treat <a class="gloss-link" href="/glossary#macro-feedback">macro feedback</a> as sign and order of magnitude. Setup on the <a href="/connect">Use page</a>.</p>
+        </details>
+        <div class="meth-inline">
+        <div class="meth-sec-title">the join</div>
+        <div class="meth-eq"><div class="meth-eq-label">chain</div><div class="meth-eq-body"><code>pe-microsim</code> &rarr; <code>obr-macro</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">enters</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code>, household disposable income</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">call</div><div class="meth-eq-body"><code>score_reform(model="obr")</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">country</div><div class="meth-eq-body">UK only</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="og-join" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Long-run feedback: OG-UK, then a second microsimulation run</h3></div>
+        <p class="mo-lead">What a reform does once wages and the capital stock adjust.</p>
+        <p>OG-UK solves the long-run <a class="gloss-link" href="/glossary#steady-state">steady state</a>; its wage and interest-rate changes feed a second microsimulation run.</p>
+        <details class="about"><summary>About this join</summary>
+        <div class="qa-facts">
+                  <div class="qa-fact"><span class="icon">&rarr;</span><span>Local-only and experimental; the OG solve needs its own environment, so run the two-step <code>--og-payload</code> pipeline</span></div>
+                  <div class="qa-fact"><span class="icon">&rarr;</span><span>The steady-state factor is applied flat: <strong>no transition path</strong>, and no price-level effects, because the OG model is real</span></div>
+                  <div class="qa-fact"><span class="icon">&rarr;</span><span>Effective-labour <a class="gloss-link" href="/glossary#incidence">incidence</a> is reported, not allocated &mdash; and <strong>no scored result is published</strong></span></div>
+                  </div>
+        </details>
+        <p class="qa-link"><a href="/olg">Open OG-UK &rarr;</a></p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">the join</div>
+        <div class="meth-eq"><div class="meth-eq-label">chain</div><div class="meth-eq-body">OG-UK &rarr; <code>pe-microsim</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">moves</div><div class="meth-eq-body">steady-state wage and interest-rate changes</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">call</div><div class="meth-eq-body"><code>score_reform(model="og+microsim")</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">local only, experimental</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">result</div><div class="meth-eq-body">none published</div></div>
+        </div>
+      </div>
+
+      <div class="meth-step" id="incidence" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>A macro shock across households</h3></div>
+        <p class="mo-lead">Four members run the arrow the other way: a macro path in, incidence out.</p>
+        <p>The BoE SVAR, FRB/US, US HANK and DEFINE-UK cannot score a reform; each returns distributional incidence through a microsimulation run instead.</p>
+        <details class="about"><summary>About these joins</summary>
+          <p>All four are experimental, and none of them is a reform bridge. <code>score_reform</code> accepts <code>microsim</code>, <code>obr</code>, <code>og</code> and <code>og+microsim</code>; these four connect the opposite way. The model-by-model mapping is in the <a href="/models/side-by-side#compare">comparison</a>.</p>
+        </details>
+        <div class="meth-inline">
+        <div class="meth-sec-title">four incidence joins</div>
+        <div class="meth-eq"><div class="meth-eq-label">BoE SVAR</div><div class="meth-eq-body"><code>svar_inflation_incidence</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">FRB/US</div><div class="meth-eq-body"><code>frbus_shock_incidence</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">US HANK</div><div class="meth-eq-body"><code>hank_shock_incidence</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">DEFINE-UK</div><div class="meth-eq-body"><code>define_scenario_incidence</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">all experimental; none a reform bridge</div></div>
+        </div>
+      </div>
+
+      </div>
+
+      <aside class="scrolly-sticky" aria-hidden="true">
+        <div class="meth-panel" data-step="0">
+          <div class="meth-panel-head"><span class="meth-panel-title">Reform &rarr; cost &rarr; feedback</span><span class="meth-panel-badge mono">Step 1</span></div>
+          <div class="meth-sec-title">the join</div>
+          <div class="meth-eq"><div class="meth-eq-label">chain</div><div class="meth-eq-body"><code>pe-microsim</code> &rarr; <code>obr-macro</code></div></div>
+          <div class="meth-eq"><div class="meth-eq-label">enters</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code>, household disposable income</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">call</div><div class="meth-eq-body"><code>score_reform(model="obr")</code></div></div>
+          <div class="meth-eq"><div class="meth-eq-label">country</div><div class="meth-eq-body">UK only</div></div>
+        </div>
+        <div class="meth-panel" data-step="1" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Reform &rarr; steady state &rarr; households</span><span class="meth-panel-badge mono">Step 2</span></div>
+          <div class="meth-sec-title">the join</div>
+          <div class="meth-eq"><div class="meth-eq-label">chain</div><div class="meth-eq-body">OG-UK &rarr; <code>pe-microsim</code></div></div>
+          <div class="meth-eq"><div class="meth-eq-label">moves</div><div class="meth-eq-body">steady-state wage and interest-rate changes</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">call</div><div class="meth-eq-body"><code>score_reform(model="og+microsim")</code></div></div>
+          <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">local only, experimental</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">result</div><div class="meth-eq-body">none published</div></div>
+        </div>
+        <div class="meth-panel" data-step="2" hidden>
+          <div class="meth-panel-head"><span class="meth-panel-title">Macro path &rarr; households</span><span class="meth-panel-badge mono">Step 3</span></div>
+          <div class="meth-sec-title">four incidence joins</div>
+          <div class="meth-eq"><div class="meth-eq-label">BoE SVAR</div><div class="meth-eq-body"><code>svar_inflation_incidence</code></div></div>
+          <div class="meth-eq"><div class="meth-eq-label">FRB/US</div><div class="meth-eq-body"><code>frbus_shock_incidence</code></div></div>
+          <div class="meth-eq"><div class="meth-eq-label">US HANK</div><div class="meth-eq-body"><code>hank_shock_incidence</code></div></div>
+          <div class="meth-eq"><div class="meth-eq-label">DEFINE-UK</div><div class="meth-eq-body"><code>define_scenario_incidence</code></div></div>
+          <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">all experimental; none a reform bridge</div></div>
+        </div>
+      </aside>
+    </div>
+    <p class="chooser-note">The routes that run these chains end to end are <a href="#routes">listed below</a>, each with its command.</p>
+  </section>
+  <section id="routes" class="band">
+    <div class="band-head" data-icon="layers">
+      <h2>The routes that run these chains</h2>
+      <p class="section-intro">Six outputs, and the models behind each one.</p>
+    </div>
+<!-- models-routes:begin -->
+    <div class="prose">
+      <details class="about route-details">
+        <summary>The six routes, the models each runs in order, and the command</summary>
+      <p>
+        Each route names the models it runs, in order; the household engine,
+        <a href="/pe">pe-microsim</a>, sits in four of the six.
+      </p>
+      <div class="table-scroll">
+        <table class="route-table">
+          <caption>What this section can produce for the UK. Every command is checked against <code>cli.py</code> when this page is generated; a route that stopped running would fail the build rather than sit here.</caption>
+          <thead><tr><th scope="col">What you get</th><th scope="col">Models, in the order they run</th><th scope="col">What the chain does</th><th scope="col">Command</th></tr></thead>
+          <tbody>
+          <tr><th scope="row">One household, exactly</th><td><a href="/pe">pe-microsim</a></td><td>arithmetic over the statutory rules; no sampling, no weights</td><td><code class="mono">pe-macro household-impact --country uk --people &#x27;[{&quot;age&quot;:35,&quot;employment_income&quot;:50000}]&#x27; --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27;</code></td></tr>
+          <tr><th scope="row">The whole population, one policy year</th><td><a href="/pe">pe-microsim</a></td><td>revenue and distribution; a static costing</td><td><code class="mono">pe-macro score --country uk --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27; --model microsim</code></td></tr>
+          <tr><th scope="row">The same reform, with a macro second round</th><td><a href="/pe">pe-microsim</a> &rarr; <a href="/obr">obr-macro</a></td><td>the static costing becomes a held <a class="gloss-link" href="/glossary#add-factor">add-factor</a> on household income</td><td><code class="mono">pe-macro score --country uk --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27; --model obr</code></td></tr>
+          <tr><th scope="row">The same reform, with long-run general equilibrium</th><td><a href="/olg">psl-og</a> &rarr; <a href="/pe">pe-microsim</a></td><td>steady-state earnings ratio scales the microsim&#x27;s income inputs</td><td><code class="mono">pe-macro dynamic-score --reform &#x27;{&quot;gov.hmrc.income_tax.rates.uk[0].rate&quot;:0.21}&#x27;</code></td></tr>
+          <tr><th scope="row">A GDP and CPI forecast, standing alone</th><td><a href="/svar">boe-svar</a></td><td>medians with 68% and 90% bands; archived and scored below</td><td><code class="mono">pe-macro forecast --horizons 8</code></td></tr>
+          <tr><th scope="row">That forecast carried into household incomes</th><td><a href="/svar">boe-svar</a> &rarr; <a href="/pe">pe-microsim</a></td><td>the model-versus-OBR CPI gap, scored as a real uprating reform</td><td><code class="mono">pe-macro svar-inflation-incidence --year 2027 --reference obr</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      </details>
+      <details class="about">
+        <summary>About the engine and the macro members, and the same routes over MCP</summary>
+        <p>
+          The engine underneath this section is
+          <a href="/pe">pe-microsim</a> — PolicyEngine's own
+          microsimulation, the only member whose question types include <span class="mono">household</span> and
+          the only one that covers both countries. It applies a reform to household microdata
+          and reports <span class="mono">taxes</span>, <span class="mono">benefits</span>, <span class="mono">net_income</span>, <span class="mono">revenue</span>, <span class="mono">distribution</span> over a
+          single policy year. The only two members that report a distribution are <a href="/pe">pe-microsim</a> and <a href="/olg">psl-og+microsim</a>, and the second is an overlay that runs the first.
+        </p>
+        <p>
+          The macro members are what it cannot do on its own. pe-microsim
+          cannot answer GDP, inflation, interest rates and macro feedback — so every macro number in this
+          section comes from a member that produces one, and the table says which,
+          in the order they run. Four of the six routes put pe-microsim in
+          the chain; two are a macro model standing alone, which is also a fine
+          thing to publish.
+        </p>
+        <p>
+          pe-microsim&rsquo;s question types are
+          <span class="mono">household</span>, <span class="mono">population</span>, <span class="mono">policy_reform</span>:
+          <span class="mono">forecast</span> is not among them, and its
+          predictive validation is recorded as
+          <span class="mono">not_applicable</span>.
+          The uncertainty of <a href="/svar">boe-svar</a> is
+          posterior 68% and 90% intervals.
+        </p>
+        <p>
+          Over <a class="gloss-link" href="/glossary#mcp">MCP</a> the same six routes are <span class="mono">household_reform_impact</span>,
+          <span class="mono">population_reform_impact</span>, <span class="mono">score_reform</span>,
+          <span class="mono">dynamic_reform_impact</span>, <span class="mono">forecast_uk</span> and
+          <span class="mono">svar_inflation_incidence</span>; <span class="mono">recommend_model</span> routes a
+          question to a member, or refuses when none supports it.
+          <a href="/connect">Connect a client →</a>
+        </p>
+      </details>
+    </div>
+<!-- models-routes:end -->
+  </section>
+</main>
+<footer class="foot foot-bar">
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/glossary">Glossary</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro/issues">Report an issue</a>
+    <a class="footer-text" href="/contact">Contact</a>
+  </nav>
+</footer>
+<script src="/reveal.js?v=2" defer></script>
+<script src="/stepper.js" defer></script>
+</body>
+</html>
