@@ -13,8 +13,6 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 ### Changed
 
 - **Site redesign.** Every page uses the Autumn Budget 2026 layout (header band, title band, sub-tabs, cards with expanders), with `DESIGN.md` as the spec. URLs, numbers and data are unchanged.
-- **Model pages.** One-column methodology, one overview order, and model names instead of ids.
-- **FRB/US comparators.** The worked-shock reference moves from the 2014 FEDS Note (gap −0.4pp, core PCE −0.08pp) to Laforte (2018) for the current model (gap −0.486pp, core PCE −0.0345pp, unemployment +0.219pp at q8); multiplier ranges move to CBO's converted ranges (for example Coenen 0.7–1.0 → CBO 0.45–1.82).
 
 ## [0.2.0] — 2026-08-11
 
