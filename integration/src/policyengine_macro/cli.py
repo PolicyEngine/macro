@@ -42,7 +42,20 @@ def _table(rows: list[dict], columns: list[str]) -> str:
 
 @click.group()
 def main() -> None:
-    """PolicyEngine Macro: unified CLI over the OBR emulator and the UK SVAR model."""
+    """PolicyEngine Macro: one CLI over the PolicyEngine microsimulation and
+    the macro models of the suite.
+
+    \b
+    Households and reforms:  household, household-impact, population-impact,
+                             score, compare, dynamic-score, report, parameters
+    UK:  OBR emulator (obr-shock, variables), BoE SVAR (forecast, shocks,
+         summary, svar-inflation-incidence), OG-UK (og-score, og-baseline),
+         DEFINE-UK (define-scenarios, define-scenario, define-incidence)
+    US:  FRB/US (frbus-shock, frbus-variables, frbus-summary,
+         frbus-shock-incidence), HANK (hank-shock, hank-summary,
+         hank-shock-incidence)
+    Models:  model-status shows what each model can and cannot answer.
+    """
 
 
 @main.command("model-status")
