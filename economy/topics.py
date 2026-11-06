@@ -1545,7 +1545,7 @@ def uk_platform() -> str:
         {model_link("pe-microsim")}, sits in four of the six.
       </p>
       <div class="table-scroll">
-        <table>
+        <table class="route-table">
           <caption>What this section can produce for the UK. Every command is checked against <code>cli.py</code> when this page is generated; a route that stopped running would fail the build rather than sit here.</caption>
           <thead><tr><th scope="col">What you get</th><th scope="col">Models, in the order they run</th><th scope="col">What the chain does</th><th scope="col">Command</th></tr></thead>
           <tbody>
@@ -1637,7 +1637,7 @@ def us_platform() -> str:
         rows are the UK commands with <span class="mono">--country us</span>.
       </p>
       <div class="table-scroll">
-        <table>
+        <table class="route-table">
           <caption>What this section can produce for the US. Every command is checked against <code>cli.py</code> when this page is generated.</caption>
           <thead><tr><th scope="col">What you get</th><th scope="col">Models, in the order they run</th><th scope="col">What the chain does</th><th scope="col">Command</th></tr></thead>
           <tbody>
