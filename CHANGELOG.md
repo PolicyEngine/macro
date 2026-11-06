@@ -10,8 +10,13 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### Changed
+
+- **Site redesign.** Every page uses the Autumn Budget 2026 layout (header band, title band, sub-tabs, cards with expanders), with `DESIGN.md` as the spec. URLs, numbers and data are unchanged.
+
 ### Added
 
+- **Question router on `/models` and a new `/glossary`.** Model cards filter by question and country; `/connect` gives copy-paste setup and `/contact` lists self-serve routes. No numbers changed.
 - **`/models/compare`.** One table per question (six questions × five models) with the exact call, a sourced benchmark and a verdict. The FRB/US benchmark is Laforte (2018) (band −0.53…−0.40 → −0.486…−0.459).
 
 ## [0.2.0] — 2026-08-11
