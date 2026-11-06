@@ -5,8 +5,8 @@ Reads results.json (produced by run_experiments.py) and pyfrbus_comparison.csv
 patched vendor venv per us-frb-model/scripts) and writes three colorblind-safe
 PDF figures into this directory:
 
-  fig_cmp_multipliers.pdf  grouped bars: our multipliers vs Coenen et al. (2012)
-                           ranges and the CBO central estimate
+  fig_cmp_multipliers.pdf  grouped bars: our multipliers vs CBO ranges and the
+                           FRB-US lines of Coenen et al. (2012)
   fig_cmp_irf_feds.pdf     our 100bp IRFs with the 2014 FEDS Note peak
                            responses marked
   fig_cmp_pyfrbus.pdf      ours vs vendor pyfrbus overlay, max gap annotated
@@ -62,34 +62,43 @@ def calendar_year_multiplier(key: str, year: int) -> float:
 # benchmark of the SAME horizon and the SAME monetary conditioning; the label
 # carries the horizon so the bar cannot be read against the wrong band.
 fig, ax = plt.subplots(figsize=(6.4, 3.6))
+# Published benchmarks: PolicyEngine/us-frb-model docs/benchmarks.md
+# (PR #12, commit 1c1cc54), where each figure carries its table and page.
+# Purchases bands: Whalen & Reichling (2015) Table 2 quarterly paths, cumulated
+# into this paper's sustained calendar-year ratio (our conversion, section 2 of
+# benchmarks.md). Tax band: CBO (2015) Table 3, which assumes the Fed does not
+# tighten -- a different regime from the Taylor-rule bar, hence the hatching.
+# Diamonds: the 2010 FRB-US lines in Coenen et al. Fig. 25, read off the chart
+# (approx., +/-0.1). CBO publishes no central tax-cut multiplier.
 groups = [
+    # (label, ours, (lo, hi), regime_matched, coenen_frbus_line)
     (
         "Purchases, Taylor rule\n(year 1)",
         calendar_year_multiplier("gov_taylor", 1),
-        (0.7, 1.0),
-        None,
-        "Coenen et al. (2012),\nyr 1, no accommodation",
+        (0.45, 1.82),
+        True,
+        0.95,
     ),
     (
         "Purchases, pegged rate\n(year 2)",
         calendar_year_multiplier("gov_fixed", 2),
-        (1.1, 1.2),
-        None,
-        "Coenen et al. (2012),\nyr 2, 2-yr accommodation",
+        (0.50, 2.50),
+        True,
+        1.25,
     ),
     (
         "Personal tax cut,\nTaylor rule (year 2)",
         calendar_year_multiplier("taxcut", 2),
-        (0.2, 0.4),
-        0.3,
-        "Coenen et al. (2012);\nCBO central 0.3",
+        (0.3, 1.5),
+        False,
+        None,
     ),
 ]
 x = np.arange(len(groups))
 w = 0.32
 ours_vals = [g[1] for g in groups]
 ax.bar(x - w / 2, ours_vals, w, color=OI[0], label="This implementation", zorder=3)
-for i, (_, _, rng, cbo, _) in enumerate(groups):
+for i, (_, _, rng, matched, line) in enumerate(groups):
     lo, hi = rng
     ax.bar(
         i + w / 2,
@@ -97,17 +106,22 @@ for i, (_, _, rng, cbo, _) in enumerate(groups):
         w,
         bottom=lo,
         color=OI[1],
-        alpha=0.55,
-        label="Published range" if i == 0 else None,
+        alpha=0.55 if matched else 0.25,
+        hatch=None if matched else "//",
+        edgecolor=OI[1],
+        label=("CBO range, regime matched" if matched and i == 0 else
+               "CBO range, Fed not tightening" if not matched else None),
         zorder=3,
     )
-    if cbo is not None:
+    if line is not None:
         ax.plot(
-            [i + w / 2 - w / 2, i + w / 2 + w / 2],
-            [cbo, cbo],
+            i + w / 2,
+            line,
+            marker="D",
             color=OI[6],
-            lw=2.0,
-            label="CBO central estimate",
+            ms=6,
+            ls="none",
+            label="FRB-US in Coenen et al. (approx.)" if i == 0 else None,
             zorder=4,
         )
 for i, v in enumerate(ours_vals):
@@ -116,13 +130,13 @@ for i, v in enumerate(ours_vals):
 ax.set_xticks(x)
 ax.set_xticklabels([g[0] for g in groups])
 ax.set_ylabel("GDP multiplier")
-ax.set_ylim(0, 1.35)
+ax.set_ylim(0, 2.75)
 ax.set_title(
     "Fiscal multipliers: this implementation vs published benchmarks\n"
-    "each bar against a band of matching horizon and monetary conditioning",
+    "each bar against a band of matching horizon; hatched band is a different monetary regime",
     fontsize=9,
 )
-ax.legend(frameon=False, fontsize=8, loc="upper right")
+ax.legend(frameon=False, fontsize=8, loc="upper left")
 ax.grid(axis="x", visible=False)
 fig.tight_layout()
 fig.savefig(HERE / "fig_cmp_multipliers.pdf")
