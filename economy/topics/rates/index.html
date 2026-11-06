@@ -122,7 +122,7 @@
         says:
       </p>
       <ul>
-        <li><a href="/svar">boe-svar</a> outputs <span class="mono">GDP forecast</span>, <span class="mono">inflation forecast</span>, <span class="mono">identified shocks</span>, <span class="mono">uncertainty ranges</span> — no interest-rate path is among them.</li>
+        <li><a href="/svar">BoE SVAR</a> outputs <span class="mono">GDP forecast</span>, <span class="mono">inflation forecast</span>, <span class="mono">identified shocks</span>, <span class="mono">uncertainty ranges</span> — no interest-rate path is among them.</li>
         <li><a href="/pe">pe-microsim</a> lists interest rates in its own cannot-answer field.</li>
         <li><a href="/olg">psl-og</a> does report an interest rate, but only as part of a long-run steady state, and it cannot answer a short-run forecast. A long-run comparative static is not a market view.</li>
         <li><a href="/frb-us">frb-us</a> produces a federal funds rate, for the US only.</li>
@@ -153,14 +153,14 @@
         above. The vintage store is static files over HTTPS — no key, no
         account, stdlib only:
       </p>
-      <div class="codeblock"><pre><code>import json, urllib.request
+      <div class="codeblock"><pre tabindex="0" aria-label="Command"><code>import json, urllib.request
 
 BASE = &quot;https://policyengine-macro.vercel.app/data&quot;
 with urllib.request.urlopen(f&quot;{BASE}/vintages/boe/uk_bank_rate/2026-08-26.json&quot;) as response:
     bank_rate = json.load(response)
 print(bank_rate[&quot;vintage&quot;], bank_rate[&quot;observations&quot;][-1])   <span class="cm"># 2026-08-26 {&#x27;period&#x27;: &#x27;2026-08-24&#x27;, &#x27;value&#x27;: 3.75}</span></code></pre></div>
       <p>And the refusal is checkable rather than asserted:</p>
-      <div class="codeblock"><pre><code>pe-macro model-status   <span class="cm"># every model, its country, status and access</span>
+      <div class="codeblock"><pre tabindex="0" aria-label="Command"><code>pe-macro model-status   <span class="cm"># every model, its country, status and access</span>
 pe-macro model-status boe-svar --json   <span class="cm"># outputs and cannot_answer, verbatim</span></code></pre></div>
       <p>
         Over MCP the same registry is <span class="mono">list_model_capabilities</span> and

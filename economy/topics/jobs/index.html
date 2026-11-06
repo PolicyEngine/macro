@@ -111,7 +111,7 @@
     <div class="prose">
       <p>
         The labour market is covered by a satellite, not a model of its own: the
-        svar-unemployment satellite maps the <a href="/svar">boe-svar</a> GDP
+        BoE SVAR unemployment satellite maps the <a href="/svar">BoE SVAR</a> GDP
         forecast onto the ONS unemployment rate through a fitted Okun relation.
         Round 2026-07-28 reads GDP from
         archived round forecasts/rounds/2026-07-21/boe-svar.json (data edge 2026Q1) and unemployment from
@@ -119,16 +119,21 @@
         2026Q3 at 5.0%, 68%
         4.9%–5.0%.
       </p>
-      <p>
-        The round file's own description of the mapping, verbatim:
-        Okun&#x27;s-law satellite: deterministic mapping of the boe-svar UK GDP growth forecast to the ONS unemployment rate (MGSX). Fit du_t = alpha + beta*g_t + gamma*du_{t-1} by OLS on 1992Q1-2025Q1 with 2020Q1-2021Q2 dummied out (furlough decoupled unemployment from GDP): alpha=0.0611, beta=-0.0474, gamma=0.1871, sigma=0.172pp, n=123, R2=0.368.
-      </p>
-      <p>The round states its own limits, and they are strict:</p>
+      <details class="about">
+        <summary>The round states its own limits, and they are strict</summary>
       <ul>
         <li>Horizon capped at 4 quarters: the rolling-origin validation (boe-var-model results/okun_validation.json) shows the end-to-end SVAR-&gt;Okun forecast beats a random walk at horizons 1-4 ex-COVID (RMSE ratios 0.82-0.99) and is clearly worse beyond 4 quarters.</li>
         <li>The improvement over no-change is not statistically significant at 73 overlapping origins (Diebold-Mariano p &gt;= 0.14).</li>
         <li>Bands carry GDP-forecast uncertainty only, mapped through the deterministic Okun equation; Okun residual uncertainty (sigma 0.17pp per quarter) is NOT sampled, so the stated bands understate total uncertainty.</li>
       </ul>
+      </details>
+      <details class="about">
+        <summary>The mapping, as the round file states it</summary>
+      <p>
+        The round file's own description of the mapping, verbatim:
+        Okun&#x27;s-law satellite: deterministic mapping of the boe-svar UK GDP growth forecast to the ONS unemployment rate (MGSX). Fit du_t = alpha + beta*g_t + gamma*du_{t-1} by OLS on 1992Q1-2025Q1 with 2020Q1-2021Q2 dummied out (furlough decoupled unemployment from GDP): alpha=0.0611, beta=-0.0474, gamma=0.1871, sigma=0.172pp, n=123, R2=0.368.
+      </p>
+      </details>
       <p class="callout">The satellite has no entry in the capability registry that backs the other model pages, and no CLI command or MCP tool of its own: its limits are the ones the archived round file states, quoted above.
         <a href="/forecasts">See the archived rounds →</a>
       </p>
@@ -151,7 +156,7 @@
         the runnable half is the forecast itself; the mapping's coefficients are
         in the archived round file, not behind a command.
       </p>
-      <div class="codeblock"><pre><code>pe-macro forecast --horizons 4   <span class="cm"># the GDP path the satellite maps</span>
+      <div class="codeblock"><pre tabindex="0" aria-label="Command"><code>pe-macro forecast --horizons 4   <span class="cm"># the GDP path the satellite maps</span>
 pe-macro model-status boe-svar   <span class="cm"># supported uses, access, and stated limitations</span></code></pre></div>
       <p>
         Over MCP: <span class="mono">forecast_uk</span> for the GDP path and

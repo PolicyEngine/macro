@@ -110,25 +110,19 @@
     </div>
     <div class="prose">
       <p>
-        One model in the suite forecasts UK output: <a href="/svar">boe-svar</a>,
+        One model in the suite forecasts UK output: <a href="/svar">BoE SVAR</a>,
         the Bank of England structural VAR replication. The round generated
         2026-07-29 conditions on data through
         2026Q1; its path, from 2026Q2, is
-        in the chart below, after the last two years of ONS outturns. Its limits:
+        in the chart below, after the last two years of ONS outturns.
       </p>
-      <ul>
-        <li>Status: replicates the published GDP decomposition; CPI global-shock share about 8pp short; no forecast skill against a drifting random walk.</li>
-        <li>It cannot answer statutory policy reform effects.</li>
-        <li>Uncertainty is posterior 68% and 90% intervals, which under-cover in back-testing (<a href="/svar/validation#rolling">coverage study</a>).</li>
-        <li>Estimated on 1992Q1-2025Q1 but conditioned on 2026Q1 data, so the estimation sample stops well short of the quarters being forecast.</li>
-      </ul>
       <figure class="vchart-figure">
 <div class="vc-fig" data-chart="topic-gdp-path">
 <p class="vc-unit">UK real GDP, % change on a year earlier</p>
 <div class="vc-plot">
 <svg class="vchart" viewBox="52 30 696 234" role="img" aria-labelledby="topic-gdp-path-t topic-gdp-path-d" preserveAspectRatio="none">
-<title id="topic-gdp-path-t">UK real GDP: ONS outturns, then the boe-svar forecast, median with 68% and 90% bands</title>
-<desc id="topic-gdp-path-d">ONS outturns from the 2026-07-26 snapshot run 2024Q2 to 2026Q1 (0.9% at the end); fan chart of UK real GDP, % change on a year earlier, from the boe-svar round generated 2026-07-29: median 1.14% in 2026Q2 and 1.49% in 2027Q2; the quarter-by-quarter values are in the table under the chart.</desc>
+<title id="topic-gdp-path-t">UK real GDP: ONS outturns, then the BoE SVAR forecast, median with 68% and 90% bands</title>
+<desc id="topic-gdp-path-d">ONS outturns from the 2026-07-26 snapshot run 2024Q2 to 2026Q1 (0.9% at the end); fan chart of UK real GDP, % change on a year earlier, from the BoE SVAR round generated 2026-07-29: median 1.14% in 2026Q2 and 1.49% in 2027Q2; the quarter-by-quarter values are in the table under the chart.</desc>
 <line class="vc-zero" x1="56" y1="216.4" x2="744" y2="216.4"/>
 <line class="vc-grid" x1="56" y1="167.9" x2="744" y2="167.9"/>
 <line class="vc-grid" x1="56" y1="119.4" x2="744" y2="119.4"/>
@@ -156,18 +150,27 @@
 </div>
 <ul class="vc-legend">
 <li><span class="vc-sw ln-out" aria-hidden="true"></span>ONS outturn, snapshot 2026-07-26</li>
-<li><span class="vc-sw ln-s1" aria-hidden="true"></span>boe-svar median, round 2026-07-29</li>
+<li><span class="vc-sw ln-s1" aria-hidden="true"></span>BoE SVAR median, round 2026-07-29</li>
 <li><span class="vc-sw sw-band68" aria-hidden="true"></span>68% band</li>
 <li><span class="vc-sw sw-band90" aria-hidden="true"></span>90% band</li>
 </ul>
-<p class="vc-source">Source: ONS, ABMI, growth derived from the stored level, snapshot 2026-07-26; boe-svar round generated 2026-07-29, <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/papers/boe-svar/figures/current_forecast.json">current_forecast.json</a></p>
+<p class="vc-source">Source: ONS, ABMI, growth derived from the stored level, snapshot 2026-07-26; BoE SVAR round generated 2026-07-29, <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/papers/boe-svar/figures/current_forecast.json">current_forecast.json</a></p>
 </div><!-- /vc-fig -->
       </figure>
+      <details class="about">
+        <summary>Its limits</summary>
+      <ul>
+        <li>Status: replicates the published GDP decomposition; CPI global-shock share about 8pp short; no forecast skill against a drifting random walk.</li>
+        <li>It cannot answer statutory policy reform effects.</li>
+        <li>Uncertainty is posterior 68% and 90% intervals, which under-cover in back-testing (<a href="/svar/validation#rolling">coverage study</a>).</li>
+        <li>Estimated on 1992Q1-2025Q1 but conditioned on 2026Q1 data, so the estimation sample stops well short of the quarters being forecast.</li>
+      </ul>
+      </details>
       <details class="about">
         <summary>Quarter by quarter</summary>
       <div class="table-scroll">
         <table>
-          <caption>boe-svar year-on-year real GDP growth: median and predictive ranges, from the archived round.</caption>
+          <caption>BoE SVAR year-on-year real GDP growth: median and predictive ranges, from the archived round.</caption>
           <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68%</th><th scope="col">90%</th></tr></thead>
           <tbody>
           <tr><th scope="row">2026Q2</th><td>1.14%</td><td>0.59%–1.68%</td><td>0.19%–1.97%</td></tr>
@@ -202,7 +205,7 @@
         The forecast above is one command. It re-estimates and re-identifies the
         model, so it takes minutes rather than seconds (minutes per estimation and identification run).
       </p>
-      <div class="codeblock"><pre><code>pe-macro forecast --horizons 8   <span class="cm"># GDP and CPI, medians with 68% and 90% bands</span>
+      <div class="codeblock"><pre tabindex="0" aria-label="Command"><code>pe-macro forecast --horizons 8   <span class="cm"># GDP and CPI, medians with 68% and 90% bands</span>
 pe-macro summary   <span class="cm"># headline replication results, instant, from committed files</span></code></pre></div>
       <p>
         Over MCP the same forecast is the <span class="mono">forecast_uk</span> tool, the

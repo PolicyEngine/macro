@@ -103,25 +103,19 @@
     </div>
     <div class="prose">
       <p>
-        <a href="/svar">boe-svar</a> — the Bank of England structural VAR replication — forecasts
+        <a href="/svar">BoE SVAR</a> — the Bank of England structural VAR replication — forecasts
         headline CPI. The chart joins the last two years of ONS outturns to
         the round generated 2026-07-29, from
         2026Q3, the first quarter without a published outturn.
-        Its median does not return to 3% until 2027Q2. Its limits:
+        Its median does not return to 3% until 2027Q2.
       </p>
-      <ul>
-        <li>Status: replicates the published GDP decomposition; CPI global-shock share about 8pp short; no forecast skill against a drifting random walk.</li>
-        <li>It cannot answer statutory policy reform effects.</li>
-        <li>It forecasts headline CPI only. Core CPI is shown above as an outturn; no model in this suite forecasts it.</li>
-        <li>Uncertainty is posterior 68% and 90% intervals; the sample ends 2025Q1 while the conditioning data run to 2026Q1.</li>
-      </ul>
       <figure class="vchart-figure">
 <div class="vc-fig" data-chart="topic-cpi-path">
 <p class="vc-unit">UK CPI, % change on a year earlier</p>
 <div class="vc-plot">
 <svg class="vchart" viewBox="52 30 696 234" role="img" aria-labelledby="topic-cpi-path-t topic-cpi-path-d" preserveAspectRatio="none">
-<title id="topic-cpi-path-t">UK CPI: ONS outturns, then the boe-svar forecast, median with 68% and 90% bands</title>
-<desc id="topic-cpi-path-d">ONS outturns from the 2026-08-26 snapshot run 2024Q3 to 2026Q2 (2.8% at the end); fan chart of UK CPI, % change on a year earlier, from the boe-svar round generated 2026-07-29: median 2.54% in 2026Q3 and 3.10% in 2027Q3; the quarter-by-quarter values are in the table under the chart.</desc>
+<title id="topic-cpi-path-t">UK CPI: ONS outturns, then the BoE SVAR forecast, median with 68% and 90% bands</title>
+<desc id="topic-cpi-path-d">ONS outturns from the 2026-08-26 snapshot run 2024Q3 to 2026Q2 (2.8% at the end); fan chart of UK CPI, % change on a year earlier, from the BoE SVAR round generated 2026-07-29: median 2.54% in 2026Q3 and 3.10% in 2027Q3; the quarter-by-quarter values are in the table under the chart.</desc>
 <line class="vc-zero" x1="56" y1="244.4" x2="744" y2="244.4"/>
 <line class="vc-grid" x1="56" y1="206.9" x2="744" y2="206.9"/>
 <line class="vc-grid" x1="56" y1="169.4" x2="744" y2="169.4"/>
@@ -153,18 +147,27 @@
 </div>
 <ul class="vc-legend">
 <li><span class="vc-sw ln-out" aria-hidden="true"></span>ONS outturn, snapshot 2026-08-26</li>
-<li><span class="vc-sw ln-s1" aria-hidden="true"></span>boe-svar median, round 2026-07-29</li>
+<li><span class="vc-sw ln-s1" aria-hidden="true"></span>BoE SVAR median, round 2026-07-29</li>
 <li><span class="vc-sw sw-band68" aria-hidden="true"></span>68% band</li>
 <li><span class="vc-sw sw-band90" aria-hidden="true"></span>90% band</li>
 </ul>
-<p class="vc-source">Source: ONS, D7G7, snapshot 2026-08-26; boe-svar round generated 2026-07-29, <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/papers/boe-svar/figures/current_forecast.json">current_forecast.json</a></p>
+<p class="vc-source">Source: ONS, D7G7, snapshot 2026-08-26; BoE SVAR round generated 2026-07-29, <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/papers/boe-svar/figures/current_forecast.json">current_forecast.json</a></p>
 </div><!-- /vc-fig -->
       </figure>
+      <details class="about">
+        <summary>Its limits</summary>
+      <ul>
+        <li>Status: replicates the published GDP decomposition; CPI global-shock share about 8pp short; no forecast skill against a drifting random walk.</li>
+        <li>It cannot answer statutory policy reform effects.</li>
+        <li>It forecasts headline CPI only. Core CPI is shown above as an outturn; no model in this suite forecasts it.</li>
+        <li>Uncertainty is posterior 68% and 90% intervals; the sample ends 2025Q1 while the conditioning data run to 2026Q1.</li>
+      </ul>
+      </details>
       <details class="about">
         <summary>Quarter by quarter</summary>
       <div class="table-scroll">
         <table>
-          <caption>boe-svar year-on-year CPI inflation: median and predictive ranges, from the archived round.</caption>
+          <caption>BoE SVAR year-on-year CPI inflation: median and predictive ranges, from the archived round.</caption>
           <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68%</th><th scope="col">90%</th></tr></thead>
           <tbody>
           <tr><th scope="row">2026Q3</th><td>2.54%</td><td>1.83%–3.29%</td><td>1.40%–3.85%</td></tr>
@@ -196,7 +199,7 @@
         statutorily CPI-uprated benefit parameters by the model-versus-reference
         gap and scores that as a real reform.
       </p>
-      <div class="codeblock"><pre><code>pe-macro forecast --horizons 8   <span class="cm"># GDP and CPI, medians with 68% and 90% bands</span>
+      <div class="codeblock"><pre tabindex="0" aria-label="Command"><code>pe-macro forecast --horizons 8   <span class="cm"># GDP and CPI, medians with 68% and 90% bands</span>
 pe-macro svar-inflation-incidence --year 2027 --reference obr   <span class="cm"># who bears the CPI gap, by decile</span></code></pre></div>
       <p>
         Over MCP: <span class="mono">forecast_uk</span> for the path and

@@ -412,8 +412,8 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
     svg = "\n".join([
         f'<svg class="vchart" data-chart="{chart_id}" viewBox="{left - 4} {top - 4} '
         f'{plot_w + 8} {plot_h + 8}" role="img" aria-labelledby="{chart_id}-t {chart_id}-d">',
-        f'<title id="{chart_id}-t">{esc(name)}: ONS outturns, then the boe-svar forecast, median with 68% and 90% bands</title>',
-        f'<desc id="{chart_id}-d">{hist_desc}fan chart of {esc(name)}, {esc(unit)}, from the boe-svar '
+        f'<title id="{chart_id}-t">{esc(name)}: ONS outturns, then the BoE SVAR forecast, median with 68% and 90% bands</title>',
+        f'<desc id="{chart_id}-d">{hist_desc}fan chart of {esc(name)}, {esc(unit)}, from the BoE SVAR '
         f"round generated {esc(generated)}: median {vals[0]['median']:.2f}% in {esc(first[0])} "
         f"and {vals[-1]['median']:.2f}% in {esc(end[0])}; the quarter-by-quarter values are "
         "in the table under the chart.</desc>",
@@ -428,9 +428,9 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
     legend = []
     if hist:
         legend.append(("ln-out", f"ONS outturn, snapshot {esc(vintage)}"))
-    legend += [("ln-s1", f"boe-svar median, round {esc(generated)}"),
+    legend += [("ln-s1", f"BoE SVAR median, round {esc(generated)}"),
                ("sw-band68", "68% band"), ("sw-band90", "90% band")]
-    source = (f"boe-svar round generated {esc(generated)}, "
+    source = (f"BoE SVAR round generated {esc(generated)}, "
               '<a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/'
               'papers/boe-svar/figures/current_forecast.json">current_forecast.json</a>')
     if hist:
@@ -535,7 +535,7 @@ def tool(name: str) -> str:
 
 def codeblock(*lines: str) -> str:
     body = "\n".join(lines)
-    return f'      <div class="codeblock"><pre><code>{body}</code></pre></div>'
+    return f'      <div class="codeblock"><pre tabindex="0" aria-label="Command"><code>{body}</code></pre></div>'
 
 
 def satellite_has_no_surface() -> bool:
@@ -858,26 +858,29 @@ def growth_model() -> str:
         )
     return f"""    <div class="prose">
       <p>
-        One model in the suite forecasts UK output: <a href="/svar">boe-svar</a>,
+        One model in the suite forecasts UK output: <a href="/svar">BoE SVAR</a>,
         the {esc(model["display_name"])}. The round generated
         {esc(forecast["generated"])} conditions on data through
         {esc(forecast["data_edge"])}; its path, from {esc(facts["period"])}, is
-        in the chart below, after the last two years of ONS outturns. Its limits:
+        in the chart below, after the last two years of ONS outturns.
       </p>
+      <figure class="vchart-figure">
+{path_chart("topic-gdp-path", "gdp", "UK real GDP", "% change on a year earlier", open_rows[:5], forecast["generated"], history=yoy(facts["gdp"], 4)[-8:], vintage=facts["gdp"]["vintage"], history_note="ABMI, growth derived from the stored level,")}
+      </figure>
+      <details class="about">
+        <summary>Its limits</summary>
 {limits_list([
         f"Status: {esc(model['status'])}.",
         f"It cannot answer {(cannot('boe-svar'))}.",
         f"Uncertainty is {esc(model['uncertainty'])}, which under-cover in back-testing (<a href=\"/svar/validation#rolling\">coverage study</a>).",
         f"Estimated on {esc(model['estimation_sample'])} but conditioned on {esc(model['data_edge'])} data, so the estimation sample stops well short of the quarters being forecast.",
     ])}
-      <figure class="vchart-figure">
-{path_chart("topic-gdp-path", "gdp", "UK real GDP", "% change on a year earlier", open_rows[:5], forecast["generated"], history=yoy(facts["gdp"], 4)[-8:], vintage=facts["gdp"]["vintage"], history_note="ABMI, growth derived from the stored level,")}
-      </figure>
+      </details>
       <details class="about">
         <summary>Quarter by quarter</summary>
       <div class="table-scroll">
         <table>
-          <caption>boe-svar year-on-year real GDP growth: median and predictive ranges, from the archived round.</caption>
+          <caption>BoE SVAR year-on-year real GDP growth: median and predictive ranges, from the archived round.</caption>
           <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68%</th><th scope="col">90%</th></tr></thead>
           <tbody>
 {chr(10).join(rows)}
@@ -977,26 +980,29 @@ def inflation_model() -> str:
     )
     return f"""    <div class="prose">
       <p>
-        <a href="/svar">boe-svar</a> — the {esc(model["display_name"])} — forecasts
+        <a href="/svar">BoE SVAR</a> — the {esc(model["display_name"])} — forecasts
         headline CPI. The chart joins the last two years of ONS outturns to
         the round generated {esc(facts["forecast"]["generated"])}, from
         {esc(facts["period"])}, the first quarter without a published outturn.
-        {reaches} Its limits:
+        {reaches}
       </p>
+      <figure class="vchart-figure">
+{path_chart("topic-cpi-path", "cpi", "UK CPI", "% change on a year earlier", open_rows[:5], facts["forecast"]["generated"], history=facts["cpi"]["observations"][-8:], vintage=facts["cpi"]["vintage"], history_note="D7G7,")}
+      </figure>
+      <details class="about">
+        <summary>Its limits</summary>
 {limits_list([
         f"Status: {esc(model['status'])}.",
         f"It cannot answer {(cannot('boe-svar'))}.",
         "It forecasts headline CPI only. Core CPI is shown above as an outturn; no model in this suite forecasts it.",
         f"Uncertainty is {esc(model['uncertainty'])}; the sample ends {esc(model['estimation_sample'].split('-')[-1])} while the conditioning data run to {esc(model['data_edge'])}.",
     ])}
-      <figure class="vchart-figure">
-{path_chart("topic-cpi-path", "cpi", "UK CPI", "% change on a year earlier", open_rows[:5], facts["forecast"]["generated"], history=facts["cpi"]["observations"][-8:], vintage=facts["cpi"]["vintage"], history_note="D7G7,")}
-      </figure>
+      </details>
       <details class="about">
         <summary>Quarter by quarter</summary>
       <div class="table-scroll">
         <table>
-          <caption>boe-svar year-on-year CPI inflation: median and predictive ranges, from the archived round.</caption>
+          <caption>BoE SVAR year-on-year CPI inflation: median and predictive ranges, from the archived round.</caption>
           <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68%</th><th scope="col">90%</th></tr></thead>
           <tbody>
 {chr(10).join(rows)}
@@ -1075,7 +1081,7 @@ def jobs_model() -> str:
     return f"""    <div class="prose">
       <p>
         The labour market is covered by a satellite, not a model of its own: the
-        svar-unemployment satellite maps the <a href="/svar">boe-svar</a> GDP
+        BoE SVAR unemployment satellite maps the <a href="/svar">BoE SVAR</a> GDP
         forecast onto the ONS unemployment rate through a fitted Okun relation.
         Round {esc(round_file["round_id"])} reads GDP from
         {esc(information["gdp_input"])} and unemployment from
@@ -1083,12 +1089,17 @@ def jobs_model() -> str:
         {esc(facts["period"])} at {facts["values"]["median"]:.1f}%, 68%
         {band_text(facts["values"])}.
       </p>
+      <details class="about">
+        <summary>The round states its own limits, and they are strict</summary>
+{caveats}
+      </details>
+      <details class="about">
+        <summary>The mapping, as the round file states it</summary>
       <p>
         The round file's own description of the mapping, verbatim:
         {esc(model["description"])}
       </p>
-      <p>The round states its own limits, and they are strict:</p>
-{caveats}
+      </details>
       <p class="callout">{registry}
         <a href="/forecasts">See the archived rounds →</a>
       </p>
@@ -1145,7 +1156,7 @@ def rates_model() -> str:
         says:
       </p>
 {limits_list([
-        f"<a href=\"/svar\">boe-svar</a> outputs {registry_terms(svar['outputs'])} — no interest-rate path is among them.",
+        f"<a href=\"/svar\">BoE SVAR</a> outputs {registry_terms(svar['outputs'])} — no interest-rate path is among them.",
         f"<a href=\"/pe\">pe-microsim</a> lists {esc(microsim['cannot_answer'][2])} in its own cannot-answer field.",
         f"<a href=\"/olg\">{site_name('og-uk')}</a> does report an interest rate, but only as part of a {esc(og['horizon'].split(';')[0])}, and it cannot answer a {esc(og['cannot_answer'][0])}. A long-run comparative static is not a market view.",
         f"<a href=\"/frb-us\">frb-us</a> produces a {esc(frbus['outputs'][-1])}, for the {esc(', '.join(frbus['geography']).upper())} only.",

@@ -108,7 +108,7 @@ def render() -> str:
 
     desc = (
         f"Fan chart of the UK unemployment rate, percent, from the "
-        f"svar-unemployment satellite round of {src.parent.name}: the archived median "
+        f"BoE SVAR unemployment satellite round of {src.parent.name}: the archived median "
         f"with its 68 and 90 percent bands, {rows[0]['period']} to "
         f"{rows[-1]['period']}. The median runs from {rows[0]['median']:.2f}% "
         f"to {rows[-1]['median']:.2f}%."
@@ -118,7 +118,7 @@ def render() -> str:
     return "\n".join(
         [
             '      <p class="chart-intro">Unemployment, from the '
-            f"{src.parent.name} svar-unemployment satellite round — no "
+            f"{src.parent.name} BoE SVAR unemployment satellite round — no "
             "official quarterly path to overlay, so the fan stands "
             "alone. Bands are raw model quantiles: the satellite has no "
             "coverage evaluation of its own, so no re-calibration is "
@@ -128,7 +128,7 @@ def render() -> str:
                 f'<svg class="vchart" data-chart="{CHART_ID}" '
                 f'viewBox="{left - 4} {top - 4} {plot_w + 8} {plot_h + 8}" role="img" '
                 f'aria-labelledby="{CHART_ID}-t {CHART_ID}-d">',
-                f'<title id="{CHART_ID}-t">svar-unemployment satellite UK '
+                f'<title id="{CHART_ID}-t">BoE SVAR unemployment satellite: UK '
                 "unemployment rate forecast, median with 68% and 90% bands</title>",
                 f'<desc id="{CHART_ID}-d">{desc}</desc>',
                 *gridlines,
@@ -140,7 +140,7 @@ def render() -> str:
                 *xticks,
                 "</svg>",
             ]), legend=[
-                ("ln-s1", "svar-unemployment median"),
+                ("ln-s1", "BoE SVAR unemployment satellite median"),
                 ("sw-band68", "68% band"),
                 ("sw-band90", "90% band (raw)"),
                 *([("sw-dot-out", "ONS outturn")] if dots else []),

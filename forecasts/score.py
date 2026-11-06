@@ -57,6 +57,21 @@ MODEL_LABELS = {
     "okun-unemployment": "svar-unemployment satellite",
 }
 
+# What the page shows for each recorded model: a readable name, then the id
+# a reader types into pe-macro (none for the satellite, whose archived
+# filename is not a registry id). Render-time only; scorecard.json is unchanged.
+MODEL_DISPLAY = {
+    "boe-svar": ("BoE SVAR", "boe-svar"),
+    "okun-unemployment": ("BoE SVAR unemployment satellite", None),
+}
+
+
+def model_html(detail: dict) -> str:
+    name, mid = MODEL_DISPLAY.get(
+        detail["model"], (detail.get("label", detail["model"]), None))
+    return esc(name) + (f'<span class="model-id">{esc(mid)}</span>' if mid else "")
+
+
 NAIVE_NOTE = (
     "Naive baseline: the last outturn at the round's data edge, held flat "
     "(read from the current vintage, so revisions can shift it slightly)."
@@ -566,10 +581,10 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
             f'<svg class="vchart" data-chart="{chart_id}" viewBox="{left - 4} {top - 4} '
             f'{plot_w + 8} {plot_h + 8}" '
             f'role="img" aria-labelledby="{chart_id}-t {chart_id}-d">',
-            f'<title id="{chart_id}-t">boe-svar {spec["name"]} forecast vs '
+            f'<title id="{chart_id}-t">BoE SVAR {spec["name"]} forecast vs '
             "OBR March 2026 EFO</title>",
             f'<desc id="{chart_id}-d">Fan chart of {spec["series"]}. '
-            "The boe-svar archived median with its 68 and 90 percent bands, "
+            "The BoE SVAR archived median with its 68 and 90 percent bands, "
             "empirically re-calibrated for measured under-coverage, is shown beside "
             "the OBR March 2026 EFO path over the overlapping quarters."
             + "".join(f" ONS outturn for {rows[i]['period']}: {v:.2f} percent." for i, v in dots)
@@ -586,7 +601,7 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
         ]
     )
     block = chartkit.figure(svg, legend=[
-        ("ln-s1", "boe-svar median"),
+        ("ln-s1", "BoE SVAR median"),
         ("sw-band68", "68% band"),
         ("sw-band90", "90% band (both empirically re-calibrated)"),
         ("ln-s2", "OBR March 2026 EFO"),
@@ -662,7 +677,7 @@ def render_status(card: dict) -> str:
     fetched = store_last_fetched()
     if pending:
         who = ", ".join(f"{VARIABLE_LABELS.get(v, v)}" for v in pending["variables"])
-        next_sub = f"next {esc(pending['period'])}, {esc(who)}; store updated {esc(fetched)}"
+        next_sub = f"next <span class=\"nowrap\">{esc(pending['period'])}</span>, {esc(who)}; store updated <span class=\"nowrap\">{esc(fetched)}</span>"
     else:
         next_sub = "every archived period has an outturn"
     rounds_sub = f"from {rounds} archived round{'' if rounds == 1 else 's'}; {next_sub}"
@@ -731,7 +746,7 @@ def render_rounds(card: dict) -> str:
         rows.append(
             "          <tr>"
             f'<th scope="row"><span class="mono">{esc(detail["round_id"])}</span></th>'
-            f"<td>{esc(detail.get('label', detail['model']))}</td>"
+            f"<td>{model_html(detail)}</td>"
             f'<td class="mono">{esc(detail["data_edge"])}</td>'
             f'<td class="mono">{esc(archived)}</td>'
             f'<td class="num">{detail["periods_forecast"]}</td>'
@@ -824,7 +839,7 @@ def render_results(card: dict) -> str:
             "          <tr>"
             f'<th scope="row">{_target(e)}</th>'
             f'<td><a class="mono" href="/{esc(detail["path"])}">{esc(detail["round_id"])}</a>'
-            f'<br><span class="sb-sub">{esc(detail.get("label", detail["model"]))}</span></td>'
+            f'<br><span class="sb-sub">{model_html(detail)}</span></td>'
             f'<td class="num">{e["forecast"]:.2f}%<br><span class="sb-sub">68%: '
             f'{e["lo68"]:.2f}–{e["hi68"]:.2f}</span></td>'
             f'<td class="num">{outturn}</td>'

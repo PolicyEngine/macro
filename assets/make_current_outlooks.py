@@ -101,7 +101,7 @@ def boe_chart() -> str:
     out = [
         f'<svg class="vchart" data-chart="boe-current-outlook" viewBox="{x0 - 6} {top - 6} '
         f'{x1 - x0 + 12} {bot - top + 12}" role="img" aria-labelledby="boe-current-t boe-current-d">',
-        '<title id="boe-current-t">Current boe-svar UK real GDP growth forecast</title>',
+        '<title id="boe-current-t">Current BoE SVAR UK real GDP growth forecast</title>',
         f'<desc id="boe-current-d">Fan chart from the latest complete quarterly data edge, {data["data_edge"]}, forecasting {q[0]} to {q[-1]}. Median with 68 and 90 percent predictive bands.</desc>',
     ]
     for tick in ticks:
