@@ -115,7 +115,7 @@
           <tr>
             <th scope="row"><strong>Anchored</strong></th>
             <td>Add-factors matched to the March 2026 EFO. Every reform score uses it.</td>
-            <td>Tiles above for 2025Q1&ndash;2027Q4; GDP 0.67% out to 2031Q1. Unemployment (<code>LFSUR</code>) unreliable past 2027Q4, drifting to 0.9% against the EFO&rsquo;s 4.1% by 2031Q1. CI gates tolerance, finiteness, the expenditure identity and signs.</td>
+            <td>Tiles above for 2025Q1&ndash;2027Q4; GDP mean absolute deviation 0.67% over 2025Q1&ndash;2031Q1. Unemployment (<code>LFSUR</code>) unreliable past 2027Q4, drifting to 0.9% against the EFO&rsquo;s 4.1% by 2031Q1. The 2025Q1&ndash;2031Q1 solve behind these two figures stops on the solver&rsquo;s stall break, unconverged, in every quarter (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/70ee8f0c788ce9414c465441f581ebb5f385299e/results/site_figures.json"><code>results/site_figures.json</code></a>). CI gates tolerance, finiteness, the expenditure identity and signs.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Held add-factors</strong></th>
@@ -514,7 +514,7 @@
         <tbody>
           <tr>
             <th scope="row"><strong>Two household-income equations never fire</strong></th>
-            <td>The listing's only bare <code>log()</code> left-hand sides — <code>log(HHTFA)</code> and <code>log(NDIVHH)</code> — never execute: their inputs <code>MAJGDP</code> and <code>CORP</code> are absent from the databank. The profits → dividends → household-income channel is inert: a 5pp corporation-tax rise moves <code>FYCPR</code> by −£1,780m and <code>NDIVHH</code> by exactly zero. Reviving it needs a <code>CORP</code> series. Every published figure has the channel inert.</td>
+            <td>The listing's only bare <code>log()</code> left-hand sides — <code>log(HHTFA)</code> and <code>log(NDIVHH)</code> — never execute: their inputs <code>MAJGDP</code> and <code>CORP</code> are absent from the databank. The profits → dividends → household-income channel is inert: a 5pp corporation-tax rise moves <code>FYCPR</code> by −£404m by quarter 12 (−£186m on average over 12 quarters; <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/70ee8f0c788ce9414c465441f581ebb5f385299e/results/site_figures.json"><code>results/site_figures.json</code></a>) and <code>NDIVHH</code> by exactly zero. Reviving it needs a <code>CORP</code> series. Every published figure has the channel inert.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Income tax: right size, wrong profile</strong></th>
@@ -526,7 +526,7 @@
           </tr>
           <tr>
             <th scope="row"><strong>Government investment does not transmit</strong></th>
-            <td><code>CGIPS</code> does not transmit, in two separate ways. Total fixed investment (<code>IF</code>) moves <strong>exactly zero</strong> at any shock size, because <code>IF</code> has no live equation in the published listing — the chain never reaches the GDP identity. Business investment (<code>IBUSX</code>) does move, but wrong-signed and grossly non-proportional: mean responses of −£6.8bn, −£8.8bn and −£11.6bn for shocks of £1.5bn, £3bn and £6bn per quarter. Quadrupling the shock changes the response by under a factor of two, so that is residue, not a multiplier, and the ratio must never be quoted as one. Against the OBR's published 1.0. Capital spending should not be scored on this model.</td>
+            <td><code>CGIPS</code> does not transmit, in two separate ways. Total fixed investment (<code>IF</code>) moves <strong>exactly zero</strong> at any shock size, because <code>IF</code> has no live equation in the published listing — the chain never reaches the GDP identity. Business investment (<code>IBUSX</code>) does move, but only as an offset: it is the residual of the identity <code>IF = IBUS + GGI + …</code>, and with <code>IF</code> held fixed a rise in <code>CGIPS</code> (through <code>GGI</code>) pushes it down about one-for-one &mdash; mean responses of −£1.47bn for a £1.5bn-per-quarter shock and −£5.94bn for £6bn (98% and 99% of the shock). The £3bn run (−£0.83bn) is solver residue. Every quarter of all three runs stops on the solver&rsquo;s stall break, unconverged (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/70ee8f0c788ce9414c465441f581ebb5f385299e/results/site_figures.json"><code>results/site_figures.json</code></a>). That offset is accounting, not a multiplier, and must never be quoted as one. Against the OBR's published 1.0. Capital spending should not be scored on this model.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Corporation-tax closure converges slowly</strong></th>
@@ -542,7 +542,7 @@
           </tr>
           <tr>
             <th scope="row"><strong>Bank Rate: sign right, scale untested</strong></th>
-            <td>Scored around the anchored baseline, a sustained +100bp lowers GDP by about £121m on impact, £431m by quarter 4, £482m by quarter 8 and £416m by quarter 12; a 100bp cut raises it by a similar amount (about £126m to £579m). The earlier finding that a rise barely moved GDP while a cut raised it roughly ninety times as much came from scoring around the free-running model. The response runs through household spending alone &mdash; there is no monetary rule, and unemployment, prices and trade do not move &mdash; and it has not been compared with any published estimate.</td>
+            <td>Scored around the anchored baseline, a sustained +100bp lowers GDP by about £121m on impact, £431m by quarter 4, £482m by quarter 8 and £416m by quarter 12; a 100bp cut raises it by a similar amount (about £126m to £579m). Each figure is the difference between a baseline and a shocked solve, and in every quarter of both runs at least one of the two stops on the solver&rsquo;s stall break, unconverged (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/70ee8f0c788ce9414c465441f581ebb5f385299e/results/site_figures.json"><code>results/site_figures.json</code></a>). The earlier finding that a rise barely moved GDP while a cut raised it roughly ninety times as much came from scoring around the free-running model. The response runs through household spending alone &mdash; there is no monetary rule, and unemployment, prices and trade do not move &mdash; and it has not been compared with any published estimate.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Approximated add-factors</strong></th>
