@@ -402,7 +402,7 @@ tools. Hosted use needs no install, no account and no API key.
 <li><code class="cmd-text">Score raising the UK basic rate of income tax to 21p.</code><span class="cmd-tool mono">start_job · score_reform</span><button type="button" data-copy>copy</button></li>
 <li><code class="cmd-text">What is the UK GDP and inflation outlook for the next four quarters?</code><span class="cmd-tool mono">forecast_uk</span><button type="button" data-copy>copy</button><span class="cmd-note">boe-svar: <a href="/svar/validation#forecasters">no forecast skill against a drifting random walk</a></span></li>
 <li><code class="cmd-text">What happens to US GDP and unemployment if the Fed raises rates by 100 basis points?</code><span class="cmd-tool mono">frbus_shock</span><button type="button" data-copy>copy</button></li>
-<li><code class="cmd-text">How does a 25 basis point US rate cut change consumption across liquid-wealth quartiles?</code><span class="cmd-tool mono">hank_shock</span><button type="button" data-copy>copy</button></li>
+<li><code class="cmd-text">How does a 25 basis point cut in the quarterly US policy rate (about 100bp annualised) change consumption across wealth quartiles?</code><span class="cmd-tool mono">hank_shock</span><button type="button" data-copy>copy</button></li>
 </ul>
 <p class="prompt-note">A reform score outlasts one HTTP request, so the client runs it as a job (<code>start_job</code>, then <code>get_job_result</code> until it is done); the tool descriptions tell it to. See <a href="#limits">limits</a>.</p>
 </li>
@@ -451,7 +451,9 @@ async def call(tool, args=None):
         async with ClientSession(read, write) as session:
             await session.initialize()
             res = await session.call_tool(tool, args or {})
-            return json.loads(res.content[0].text)
+    if res.isError:  # a failed tool or job returns plain text, not JSON
+        raise RuntimeError(res.content[0].text)
+    return json.loads(res.content[0].text)
 
 async def run_job(tool, args):
     """Slow tools: start a job, then poll until it is done."""
