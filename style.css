@@ -5489,3 +5489,52 @@ a .model-id, a:hover .model-id { text-decoration: none; display: inline-block; }
 
 /* Router pills: the id sits at the pill's own size, after the name. */
 .qa summary strong .model-id { font-size: inherit; margin-left: 4px; }
+
+/* === r5:ui-data === */
+/* /forecasts scoreboard: two flat tables in the card (the record, then the
+   benchmark grid), sized to fit beside the "On this page" rail from 1100 px. */
+.band .sb-h { margin: var(--s-5) 0 var(--s-2); color: var(--text-strong); font: 600 var(--fs-h3)/1.3 var(--body); }
+.band .stat-row + .sb-h, .band .fc-vmet + .sb-h { margin-top: var(--s-4); }
+.scoreboard th[scope="row"] { min-width: 0; white-space: nowrap; }
+.scoreboard thead th.num { text-align: right; }
+.scoreboard td.num { text-align: right; white-space: nowrap; }
+.scoreboard .sb-band { display: block; color: var(--text-body); font-size: var(--fs-small); }
+.scoreboard td:nth-child(7) { min-width: 0; font-size: inherit; }
+.sb-grid td.num strong { color: var(--text-strong); }
+.sb-grid th:not(:first-child), .sb-grid td { width: 15%; }
+@media (min-width: 640px) {
+  .scoreboard th[scope="row"] .mono { display: block; color: var(--text-muted); font-weight: 500; }
+}
+/* the archive: one flat table, no card per round */
+.round-table td.rt-files { white-space: nowrap; font-size: var(--fs-small); }
+.round-table td.mono, .round-table th .mono { white-space: nowrap; }
+.round-table thead th.num { text-align: right; }
+/* chart foot line (chartkit source=) */
+:is(.doc, .prose, .band, body) .vc-fig p.vc-source { margin: var(--s-2) 0 0; color: var(--text-faint); font-size: var(--fs-label); line-height: 1.45; }
+.vc-fig .vc-source code { font-size: 0.95em; }
+/* y labels sit inside the plot: a card-coloured halo keeps them legible over bands and lines */
+.vc-fig .vc-t.vc-y { padding: 0 3px; margin-left: -3px; border-radius: 3px; background: color-mix(in srgb, var(--surface-card) 82%, transparent); }
+.band .table-scroll:has(> :is(.scoreboard, .round-table)) { margin: var(--s-3) 0 var(--s-4); }
+.round-table td.rt-files code { padding: 0; border: 0; background: none; color: inherit; font-size: inherit; }
+/* phone: the scoreboard and archive rows stack as label | value pairs, not one value per screen line */
+@media (max-width: 640px) {
+  .band table.t-stack:is(.scoreboard, .round-table) td[data-label] { position: relative; padding: 3px 0 3px 42%; }
+  .band table.t-stack:is(.scoreboard, .round-table) td[data-label]::before { position: absolute; left: 0; top: 3px; width: 40%; margin: 0; letter-spacing: 0; }
+  .band table.t-stack.scoreboard td[colspan] { padding-left: 0; }
+  .sb-strip { margin-top: 4px; }
+}
+/* /economy long view: three small multiples, title first, no frame inside the section card */
+.band .economy-figure { padding: 0; border: 0; border-radius: 0; background: none; }
+.band .economy-figure-grid { padding: 0; column-gap: var(--s-6); }
+.band .economy-figure figcaption { padding: 0 0 var(--s-2); gap: 2px; }
+.band .economy-figure figcaption strong { color: var(--text-strong); font: 600 var(--fs-body)/1.35 var(--body); }
+.band .economy-figure figcaption span { color: var(--text-muted); font-size: var(--fs-small); }
+/* tables in the generated topic and data pages: tighter rhythm inside a card */
+.economy-page .band .table-scroll { margin: var(--s-3) 0 var(--s-4); }
+.economy-page .band .prose > .table-scroll:first-child { margin-top: 0; }
+/* release digests: value and change carry their period beneath, dates never break */
+.digest-table .dg-sub { color: var(--text-muted); font-size: var(--fs-small); white-space: nowrap; }
+.digest-table td.num { white-space: nowrap; }
+.digest-table thead th.num { text-align: right; }
+.band h3[id$="-series"] { margin: var(--s-5) 0 0; }
+.band h3[id$="-series"] + .table-scroll { margin-top: var(--s-2); }

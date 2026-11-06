@@ -336,6 +336,77 @@ def next_open(forecast: dict, variable: str, last_observed: str) -> tuple[str, d
     return period, forecast[period][variable]
 
 
+def path_chart(chart_id: str, variable: str, name: str, unit: str,
+               open_rows: list[tuple[str, dict]], generated: str) -> str:
+    """Fan chart of the archived boe-svar path the table beneath it lists.
+
+    Marks only in the SVG, words in HTML (chartkit). The quarter-by-quarter
+    table moves into an expander under it, so the numbers are stated once in
+    view and once as the chart's data table, never twice on screen.
+    """
+    import chartkit  # repo root, on sys.path above
+
+    vals = [r[variable] for _, r in open_rows]
+    width, height = 760, 300
+    left, right, top, bottom = 56, 16, 34, 40
+    plot_w, plot_h = width - left - right, height - top - bottom
+    lo = min(0.0, min(v["lo90"] for v in vals))
+    hi = max(v["hi90"] for v in vals)
+    pad = (hi - lo) * 0.08 or 1.0
+    lo, hi = lo - pad, hi + pad
+
+    def x(i: int) -> float:
+        return left + plot_w * i / max(1, len(vals) - 1)
+
+    def y(v: float) -> float:
+        return top + plot_h * (1 - (v - lo) / (hi - lo))
+
+    def band(a: str, b: str) -> str:
+        up = " ".join(f"{x(i):.1f},{y(v[b]):.1f}" for i, v in enumerate(vals))
+        dn = " ".join(f"{x(i):.1f},{y(v[a]):.1f}" for i, v in reversed(list(enumerate(vals))))
+        return up + " " + dn
+
+    grid = []
+    step = 1.0 if hi - lo <= 8 else 2.0
+    g = int(lo / step) * step
+    while g <= hi:
+        if g >= lo:
+            cls = "vc-zero" if abs(g) < 1e-9 else "vc-grid"
+            grid.append(f'<line class="{cls}" x1="{left}" y1="{y(g):.1f}" '
+                        f'x2="{width - right}" y2="{y(g):.1f}"/>')
+            grid.append(chartkit.ytick(left, y(g), f"{g:g}".replace("-", "\u2212")))
+        g += step
+    last = len(vals) - 1
+    ticks = [chartkit.xtick(x(i), top + plot_h, esc(open_rows[i][0]), i, last)
+             for i in range(len(vals))]
+    median = " ".join(f"{x(i):.1f},{y(v['median']):.1f}" for i, v in enumerate(vals))
+    first, end = open_rows[0], open_rows[-1]
+    svg = "\n".join([
+        f'<svg class="vchart" data-chart="{chart_id}" viewBox="{left - 4} {top - 4} '
+        f'{plot_w + 8} {plot_h + 8}" role="img" aria-labelledby="{chart_id}-t {chart_id}-d">',
+        f'<title id="{chart_id}-t">boe-svar {esc(name)} forecast, median with 68% and 90% bands</title>',
+        f'<desc id="{chart_id}-d">Fan chart of {esc(name)}, {esc(unit)}, from the boe-svar '
+        f"round generated {esc(generated)}: median {vals[0]['median']:.2f}% in {esc(first[0])} "
+        f"and {vals[-1]['median']:.2f}% in {esc(end[0])}; the quarter-by-quarter values are "
+        "in the table under the chart.</desc>",
+        *grid,
+        f'<polygon class="vc-band90" points="{band("lo90", "hi90")}"/>',
+        f'<polygon class="vc-band68" points="{band("lo68", "hi68")}"/>',
+        f'<polyline class="vc-s1" points="{median}"/>',
+        *ticks,
+        "</svg>",
+    ])
+    return chartkit.figure(
+        svg,
+        legend=[("ln-s1", "boe-svar median"), ("sw-band68", "68% band"),
+                ("sw-band90", "90% band")],
+        unit=f"{name}, {unit}",
+        source=(f"boe-svar round generated {esc(generated)}, "
+                '<a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/'
+                'papers/boe-svar/figures/current_forecast.json">current_forecast.json</a>'),
+    )
+
+
 def band_text(values: dict) -> str:
     return f"{values['lo68']:.1f}%–{values['hi68']:.1f}%"
 
@@ -560,8 +631,10 @@ def movement(name: str) -> str:
         change = f"{now['value'] - before['value']:+,.{digits}f} thousand"
     else:  # "borrowed"
         gap = (-now["value"] + before["value"]) / 1000
-        sign = "+" if gap >= 0 else "-"
+        sign = "+" if gap >= 0 else "\u2212"
         change = f"{sign}£{abs(gap):,.{digits}f}bn on the amount borrowed"
+    if change.startswith("-"):
+        change = "\u2212" + change[1:]
     return (
         f"{esc(label(series))} {change} against {window} "
         f"({esc(before['period'])})"
@@ -758,7 +831,7 @@ def growth_model() -> str:
         the {esc(model["display_name"])}. The round generated
         {esc(forecast["generated"])} conditions on data through
         {esc(forecast["data_edge"])}; its path, from {esc(facts["period"])}, is
-        in the table below — and in the same breath:
+        in the chart below — and in the same breath:
       </p>
 {limits_list([
         f"Status: {esc(model['status'])}.",
@@ -766,6 +839,11 @@ def growth_model() -> str:
         f"Uncertainty is {esc(model['uncertainty'])} — the bands are the forecast, not decoration.",
         f"Estimated on {esc(model['estimation_sample'])} but conditioned on {esc(model['data_edge'])} data, so the estimation sample stops well short of the quarters being forecast.",
     ])}
+      <figure class="vchart-figure">
+{path_chart("topic-gdp-path", "gdp", "UK real GDP", "% change on a year earlier", open_rows[:5], forecast["generated"])}
+      </figure>
+      <details class="about">
+        <summary>Quarter by quarter</summary>
       <div class="table-scroll">
         <table>
           <caption>boe-svar year-on-year real GDP growth: median and predictive ranges, from the archived round.</caption>
@@ -775,6 +853,7 @@ def growth_model() -> str:
           </tbody>
         </table>
       </div>
+      </details>
       <p class="callout">
         <strong>Predictive validation: {esc(quality["level"])}.</strong>
         {esc(verdict_line(quality["evidence"]))}
@@ -868,7 +947,7 @@ def inflation_model() -> str:
     return f"""    <div class="prose">
       <p>
         <a href="/svar">boe-svar</a> — the {esc(model["display_name"])} — forecasts
-        headline CPI. The table shows the round generated
+        headline CPI. The chart shows the round generated
         {esc(facts["forecast"]["generated"])} from {esc(facts["period"])}, the
         first quarter without a published outturn.
         {reaches} And in the same breath:
@@ -879,6 +958,11 @@ def inflation_model() -> str:
         "It forecasts headline CPI only. Core CPI is shown above as an outturn; no model in this suite forecasts it.",
         f"Uncertainty is {esc(model['uncertainty'])}; the sample ends {esc(model['estimation_sample'].split('-')[-1])} while the conditioning data run to {esc(model['data_edge'])}.",
     ])}
+      <figure class="vchart-figure">
+{path_chart("topic-cpi-path", "cpi", "UK CPI", "% change on a year earlier", open_rows[:5], facts["forecast"]["generated"])}
+      </figure>
+      <details class="about">
+        <summary>Quarter by quarter</summary>
       <div class="table-scroll">
         <table>
           <caption>boe-svar year-on-year CPI inflation: median and predictive ranges, from the archived round.</caption>
@@ -888,6 +972,7 @@ def inflation_model() -> str:
           </tbody>
         </table>
       </div>
+      </details>
       <p class="callout">
         <strong>Predictive validation: {esc(quality["level"])}.</strong>
         {esc(verdict_line(quality["evidence"]))}

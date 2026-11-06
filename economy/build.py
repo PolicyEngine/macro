@@ -213,6 +213,8 @@ def line_chart(
         chartkit.ytick(left, g_hi, f"{high - padding:.1f}{units}".replace("-", "\u2212")),
         f'<line class="vc-grid" x1="{left}" y1="{g_lo:.1f}" x2="{width - right}" y2="{g_lo:.1f}" />',
         chartkit.ytick(left, g_lo, f"{low + padding:.1f}{units}".replace("-", "\u2212")),
+        *([f'<line class="vc-zero" x1="{left}" y1="{y(0):.1f}" x2="{width - right}" y2="{y(0):.1f}" />']
+          if low + padding < 0 < high - padding else []),
         f'<polyline class="vc-out-line" points="{points}" />',
         f'<circle class="vc-out-dot" cx="{x(len(values) - 1):.1f}" cy="{y(last['value']):.1f}" r="4" />',
         chartkit.xtick(left, g_lo + 8, first["period"], 0, 1),
@@ -222,8 +224,8 @@ def line_chart(
     # The latest reading is not restated here: it lives on the topic page
     # (DESIGN.md §7.0). The two gridlines mark the window's range.
     return f"""      <figure class="economy-figure">
-{chartkit.figure(svg)}
-        <figcaption><strong>{title}</strong><span>{description}</span><a href="{url}">View source · {source} →</a></figcaption>
+        <figcaption><strong>{title}</strong><span>{description}</span></figcaption>
+{chartkit.figure(svg, source=f'<a href="{url}">{source} →</a>')}
       </figure>"""
 
 
