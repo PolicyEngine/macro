@@ -26,7 +26,7 @@ verbatim — that registry is authoritative and this table is a copy of it.
 
 | # | model | status | repo |
 |---|-------|--------|------|
-| 01 | **`pe-microsim`** — PolicyEngine tax-benefit microsimulation | production-ready for selected household applications | [PolicyEngine/policyengine.py](https://github.com/PolicyEngine/policyengine.py) |
+| 01 | **`pe-microsim`** — PolicyEngine tax-benefit microsimulation | household arithmetic exact for the rules as implemented; population estimates add survey error | [PolicyEngine/policyengine.py](https://github.com/PolicyEngine/policyengine.py) |
 | 02 | **`obr-macro`** — OBR macroeconometric emulator | anchored to the March 2026 EFO; predictive and policy checks weak | [PolicyEngine/obr-macroeconomic-model](https://github.com/PolicyEngine/obr-macroeconomic-model) |
 | 03 | **`boe-svar`** — Bank of England structural VAR replication | replicates the published GDP decomposition; CPI global-shock share about 8pp short; no forecast skill against a drifting random walk | [PolicyEngine/boe-var-model](https://github.com/PolicyEngine/boe-var-model) |
 | 04 | **`frb-us`** — Federal Reserve FRB-US implementation | matches pyfrbus 1.0.0 and 1.1.1 on a 100bp funds-rate shock, within the gap between those two Fed releases | [PolicyEngine/us-frb-model](https://github.com/PolicyEngine/us-frb-model) |

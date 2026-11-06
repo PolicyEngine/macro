@@ -22,7 +22,7 @@ MODELS = {
         "access": ["hosted", "CLI", "Python"],
         "runtime": "sub-second household; minutes population",
         "uncertainty": "none for household arithmetic; survey/calibration uncertainty for population estimates",
-        "status": "production-ready for selected household applications",
+        "status": "household arithmetic exact for the rules as implemented; population estimates add survey error",
         "data_vintage": "country package and dataset dependent; recorded per run",
     },
     "og+microsim": {

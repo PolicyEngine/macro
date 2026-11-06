@@ -1437,8 +1437,7 @@ def reform_model() -> str:
       <p>
         <a href="/pe">pe-microsim</a> is the scorer: it applies the reform to
         household microdata and reports {registry_terms(microsim["outputs"])}.
-        It is {esc(microsim["status"])}, and its uncertainty is
-        {esc(microsim["uncertainty"])}. The limit is structural, and it is the
+        Its registry status: {esc(microsim["status"])}. The limit is structural, and it is the
         reason this topic needs a bridge at all:
       </p>
 {limits_list([
@@ -2642,9 +2641,8 @@ def us_reform_model() -> str:
       <p>
         <a href="/pe">pe-microsim</a> is the scorer, and for the US it is the
         whole of it: it applies the reform to household microdata and reports
-        {registry_terms(microsim["outputs"])}. It is
-        {esc(microsim["status"])}, and its uncertainty is
-        {esc(microsim["uncertainty"])}.
+        {registry_terms(microsim["outputs"])}. Its registry
+        status: {esc(microsim["status"])}.
       </p>
       <p>
         The limit is the same structural one the UK page describes — a static
