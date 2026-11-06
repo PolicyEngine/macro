@@ -2836,6 +2836,8 @@ UK_TOPICS = [
     {
         "slug": "reform",
         "title": "Tax and benefit reform",
+        # the sub-tab label: the full title cut the strip at 1440 px (#220 item 6)
+        "tab": "Tax and benefits",
         "eyebrow": "UK topic · scoring a policy change",
         "heading": "What would a reform do — and how far can the models follow it?",
         "series": (),
@@ -2948,6 +2950,8 @@ US_TOPICS = [
     {
         "slug": "reform",
         "title": "Tax and benefit reform",
+        # the sub-tab label: the full title cut the strip at 1440 px (#220 item 6)
+        "tab": "Tax and benefits",
         "eyebrow": "US topic · scoring a policy change",
         "heading": "What would a US reform do — and how far can the models follow it?",
         "series": (),
@@ -3047,7 +3051,7 @@ def subnav(country: str, current: str | None) -> str:
         attr = ' aria-current="page"' if topic["slug"] == current else ""
         links.append(
             f'        <a class="model-tabs-link"{attr} '
-            f'href="{topic_url(topic)}">{esc(topic["title"])}</a>'
+            f'href="{topic_url(topic)}">{esc(topic.get("tab", topic["title"]))}</a>'
         )
     return f"""  <nav class="economy-subnav" aria-label="Forecasts">
     <div class="economy-subnav-row">
