@@ -198,14 +198,19 @@ def details_html(data: dict, q: dict, cell: dict) -> str:
 def takeaway(data: dict, q: dict) -> str:
     """One neutral sentence built only from the verdicts, in hub order."""
     answered = [c for c in q["cells"] if c["status"] == "answered"]
-    counts: dict[str, int] = {}
+    by_verdict: dict[str, list[str]] = {}
     for c in answered:
-        counts[c["verdict"]] = counts.get(c["verdict"], 0) + 1
-    parts = [f"{NUMBER_WORD[n]} {VERDICT_WORD[v]}" for v, n in counts.items()]
-    verdicts = parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
+        by_verdict.setdefault(c["verdict"], []).append(data["models"][c["model"]]["name"])
+
+    def join(xs: list[str]) -> str:
+        return xs[0] if len(xs) == 1 else ", ".join(xs[:-1]) + " and " + xs[-1]
+
+    # Name the models behind each verdict, so "which answer holds up" is read
+    # off this line instead of by scanning the table (r5 usability test, #220).
+    verdicts = "; ".join(f"{VERDICT_WORD[v]}: {join(ns)}" for v, ns in by_verdict.items())
     none = [data["models"][c["model"]]["name"] for c in q["cells"] if c["status"] == "no_instrument"]
-    text = (f"{NUMBER_WORD[len(answered)].capitalize()} of {NUMBER_WORD[len(q['cells'])]} models answer: "
-            f"{verdicts}.")
+    text = (f"{NUMBER_WORD[len(answered)].capitalize()} of {NUMBER_WORD[len(q['cells'])]} models answer. "
+            f"{verdicts[0].upper()}{verdicts[1:]}.")
     if none:
         names = none[0] if len(none) == 1 else ", ".join(none[:-1]) + " and " + none[-1]
         text += f" {names} {'has' if len(none) == 1 else 'have'} no instrument for it."

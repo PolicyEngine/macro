@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import html
 import importlib.util
 import json
 import re
@@ -166,3 +167,12 @@ def test_takeaway_uses_no_ranking_language():
         line = re.search(r'<p class="cmp-takeaway">(.*?)</p>', _section(q["id"])).group(1).lower()
         for word in ("best", "better", "worse", "most accurate", "only"):
             assert word not in line
+
+
+def test_takeaway_names_the_model_behind_each_verdict():
+    # r5 usability test (#220): "which answer holds up?" is read off this line.
+    for q in DATA["questions"]:
+        line = html.unescape(re.search(r'<p class="cmp-takeaway">(.*?)</p>', _section(q["id"])).group(1))
+        for cell in q["cells"]:
+            if cell["status"] == "answered":
+                assert DATA["models"][cell["model"]]["name"] in line
