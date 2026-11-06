@@ -61,7 +61,7 @@ MODELS = {
         "access": ["hosted", "CLI", "Python"],
         "runtime": "seconds for raw shocks; minutes for translated reform scenarios",
         "uncertainty": "not comprehensive",
-        "status": "validated for selected scenarios",
+        "status": "anchored to the March 2026 EFO; predictive and policy checks weak",
         "data_vintage": "March 2026 EFO baseline",
     },
     "boe-svar": {
@@ -76,7 +76,10 @@ MODELS = {
         "access": ["hosted forecast and latest shocks", "CLI", "Python package for wider analysis"],
         "runtime": "minutes per estimation and identification run",
         "uncertainty": "posterior 68% and 90% intervals",
-        "status": "validated replication for selected outputs",
+        "status": (
+            "replicates the published GDP decomposition; CPI global-shock share "
+            "about 8pp short; no forecast skill against a drifting random walk"
+        ),
         "estimation_sample": "1992Q1-2025Q1",
         "data_edge": "2026Q1",
         "data_vintage": "2026Q1 conditioning data; estimation ends 2025Q1",
@@ -93,7 +96,10 @@ MODELS = {
         "access": ["hosted raw shocks", "CLI with editable model checkout", "Python"],
         "runtime": "seconds to minutes",
         "uncertainty": "not comprehensive",
-        "status": "validated software replication with scope limits",
+        "status": (
+            "matches pyfrbus 1.0.0 and 1.1.1 on a 100bp funds-rate shock, "
+            "within the gap between those two Fed releases"
+        ),
         "data_vintage": "LONGBASE file from the installed frbus package",
     },
     "us-hank": {
@@ -252,7 +258,7 @@ MODEL_QUALITY = {
         ),
         "predictive_validation": _quality(
             "weak",
-            "No demonstrated skill against a random walk WITH DRIFT on any "
+            "No demonstrated skill against a random walk with drift on any "
             "variable at any horizon. The grid runs 64 variable-by-horizon "
             "tests; adjusted together, the smallest Benjamini-Hochberg q is "
             "0.36. Bank Rate comes closest (0.79 at h=1) and does not "
