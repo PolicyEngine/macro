@@ -729,7 +729,7 @@ def render_status(card: dict) -> str:
         cover_sub = f"bands as archived; {in90} of {scored} inside the 90% band"
         mae_value = f"{mae:.2f}pp"
         mae_sub = (
-            f"no change: {sum(naive) / len(naive):.2f}pp over the same {scored} forecasts"
+            f"no change: {sum(naive) / len(naive):.2f}pp over the same {scored} forecasts; too few to show skill"
             if len(naive) == scored else "no complete no-change baseline"
         )
     else:

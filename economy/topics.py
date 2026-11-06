@@ -1964,7 +1964,7 @@ def longbase_layer(column: str, last_observed: str) -> str:
         )
     return f"""      <div class="table-scroll">
         <table>
-          <caption>FRB/US April 2026 LONGBASE, {esc(description)}. This is the conditioning baseline that frb-us shock experiments deviate from — not a forecast, and not scored on <a href="/forecasts">the forecast record</a>.</caption>
+          <caption>FRB/US April 2026 LONGBASE, {esc(description)}. This is the conditioning baseline that frb-us shock experiments deviate from; it is not scored on <a href="/forecasts">the forecast record</a>.</caption>
           <thead><tr><th scope="col">Quarter</th><th scope="col">Baseline</th><th scope="col">Status against the outturn</th><th scope="col">Uncertainty</th></tr></thead>
           <tbody>
 {chr(10).join(rows)}
@@ -2221,11 +2221,10 @@ def us_growth_model() -> str:
 {us_model_limits([
         f'frb-us outputs {registry_terms(frbus["outputs"])} — as responses to a '
         f'reviewed shock under a declared policy rule, over a {esc(frbus["horizon"])} '
-        'horizon, never as a path anyone is asked to believe in.',
+        'horizon.',
     ])}
       <p>
-        The baseline those deviations are measured from is published, so it is
-        shown rather than hidden. It is the Federal Reserve staff-style
+        The baseline those deviations are measured from is the Federal Reserve staff-style
         conditioning path packaged with the model, extracted from
         <span class="mono">LONGBASE.TXT</span>, and it carries no bands because
         none exist:
@@ -2242,8 +2241,7 @@ def us_growth_model() -> str:
       <p class="chooser-note">
         The UK growth topic carries a model forecast with 68% and 90% ranges
         because boe-svar produces one and it is scored before the outturn
-        exists. This page has no such layer, and inventing one out of a
-        tracking baseline is the specific mistake it refuses to make —
+        exists. This page has no such layer —
         <a href="/economy/topics/growth">see the UK page for the contrast →</a>
       </p>
     </div>"""
