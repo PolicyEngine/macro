@@ -335,7 +335,7 @@ def _reform_costing(chart_id: str, title: str):
             "1 percentage point rise in the UK basic rate of income tax, against HMRC's Direct "
             "effects of illustrative tax changes ready reckoner, June 2025 vintage. "
             + " ".join(parts) +
-            " The 2028–29 emulator figure is interpolated between the scored endpoints "
+            " The 2028–29 microsimulation figure is interpolated between the scored endpoints "
             "£6.46bn in 2026 and £7.38bn in 2030.")
     return grouped_bars(
         chart_id, title, desc, groups, y_max=10, y_step=2, fmt=lambda v: f"{v:.2f}",
