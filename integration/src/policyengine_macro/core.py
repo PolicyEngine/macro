@@ -252,6 +252,7 @@ def obr_shock(
     periods = _bounded_int(
         "periods", periods, _OBR_MIN_PERIODS, _OBR_MAX_PERIODS
     )
+    shock = _finite("shock", shock)
     end = _obr_window_end(periods)
     run_reform = _import_obr()
     if investment_closure is None:
@@ -653,6 +654,7 @@ def frbus_shock(
             f"got {policy_rule!r}"
         )
     periods, horizon = int(periods), int(horizon)
+    shock = _finite("shock", shock)
     if periods < 1:
         raise ValueError(f"periods must be >= 1, got {periods}")
     if horizon < periods:
@@ -1031,6 +1033,7 @@ def hank_shock(
     solves; both are cached, so every later call is effectively instant.
     """
     _hank_check_kind(kind, variant)
+    size = _finite("size", size)
     horizon = int(horizon)
     if not 1 <= horizon <= HANK_T:
         raise ValueError(f"horizon must be between 1 and {HANK_T}, got {horizon}")
@@ -1325,6 +1328,17 @@ def _bounded_int(name: str, value: int, minimum: int, maximum: int) -> int:
             f"{name} must be between {minimum} and {maximum}; got {value}"
         )
     return normalized
+
+
+def _finite(name: str, value) -> float:
+    """A shock size as a finite float; NaN/inf would solve to NaN paths."""
+    try:
+        out = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{name} must be a number, got {value!r}") from exc
+    if not np.isfinite(out):
+        raise ValueError(f"{name} must be finite, got {value!r}")
+    return out
 
 
 def _estimate(draws: int = _SVAR_DEFAULT_DRAWS, seed: int = 0) -> dict:
@@ -3538,6 +3552,17 @@ def frbus_shock_incidence(
             )
         payload = frbus_payload
     else:
+        # The overlay needs all four quarters of `year` inside the solve
+        # window; check that before paying for the solve, not after.
+        first = _frbus_period(start, argument="start")
+        last = first + int(horizon) - 1
+        if not (first <= _frbus_period(f"{int(year)}Q1", argument="year")
+                and _frbus_period(f"{int(year)}Q4", argument="year") <= last):
+            raise ValueError(
+                f"the incidence year {year} needs {year}Q1..{year}Q4 inside "
+                f"the FRB/US window {first}..{last} (start={start!r}, "
+                f"horizon={horizon}); move start or lengthen horizon"
+            )
         payload = frbus_shock(
             var=var, shock=shock, start=start, periods=periods,
             horizon=horizon, policy_rule=policy_rule,
@@ -3651,6 +3676,16 @@ def hank_shock_incidence(
             )
         payload = hank_payload
     else:
+        # Same window rule as from_hank_result, checked before the solve.
+        offset = 4 * (int(year) - int(start_year))
+        if offset < 0 or int(horizon) < offset + 4:
+            raise ValueError(
+                f"the incidence year {year} is quarter offsets "
+                f"{offset}..{offset + 3} from the shock start "
+                f"({start_year}Q1); "
+                + ("year must be >= start_year" if offset < 0 else
+                   f"horizon must be >= {offset + 4}, got {horizon}")
+            )
         payload = hank_shock(
             kind=kind, size=size, persistence=persistence, horizon=horizon,
             variant=variant,
@@ -4100,6 +4135,8 @@ def score_reform(
     # Checked before country/reform validation so the caller gets the real
     # reason ("frbus has no reform bridge") rather than being sent off to fix
     # an unrelated argument first.
+    if isinstance(model, str):
+        model = model.strip().lower()  # 'OBR' is not a different model
     if model in SCORE_MODELS_WITHOUT_REFORM_BRIDGE:
         raise ValueError(SCORE_MODELS_WITHOUT_REFORM_BRIDGE[model])
     country = _validate_country(country)
