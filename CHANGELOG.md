@@ -10,13 +10,12 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
-### Fixed
+<!-- Site redesign stack (#200) entries go above this line; data pipeline (#221, #228) entries go below it. Keeping them apart lets both stacks merge in either order. -->
 
-- **Data pipeline.** A scheduled refresh now runs fetch, ingest, score and the CI gates in one driver (`data/refresh.py`) and updates one checked bot PR; the nowcast exits with an error when its calendar is stale instead of doing nothing.
+### Data pipeline (#221, #228)
 
-### Added
-
-- **Snapshot recovery tool.** `data/recover_orphaned_snapshots.py` recovers the 50 orphaned refresh snapshots with repeat days dropped; the refresh carry step also drops repeated releases. No file under `data/vintages/` is added by this change.
+- **#221: data pipeline.** A scheduled refresh now runs fetch, ingest, score and the CI gates in one driver (`data/refresh.py`) and updates one checked bot PR; the nowcast exits with an error when its calendar is stale instead of doing nothing.
+- **#228: snapshot recovery tool.** `data/recover_orphaned_snapshots.py` recovers the 50 orphaned refresh snapshots with repeat days dropped; the refresh carry step also drops repeated releases. No file under `data/vintages/` is added by this change.
 
 ## [0.2.0] — 2026-08-11
 
