@@ -16,8 +16,9 @@
 # Guarantees:
 #   * never pushes to main/master or to anything outside data/ and forecasts/
 #     bot namespaces;
-#   * force-with-lease against the branch tip this job saw, so a human commit
-#     pushed to the bot branch mid-run is not silently overwritten;
+#   * force-with-lease against the branch tip this job started from (see
+#     below), so a commit pushed to the bot branch mid-run fails the push
+#     rather than being silently overwritten;
 #   * no commit and no PR when nothing changed.
 set -euo pipefail
 
@@ -42,11 +43,17 @@ fi
 git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+# The lease is the tip this job STARTED from: the tracking ref data/refresh.py
+# fetched for --carry-from. A commit pushed to the bot branch after that fetch
+# makes the push fail instead of being overwritten. Jobs that did not fetch the
+# branch (nowcast) fall back to the tip seen now, which only guards the push
+# against a concurrent bot run.
 lease=""
-if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+seen="$(git rev-parse -q --verify "refs/remotes/origin/$branch" 2>/dev/null || true)"
+if [ -z "$seen" ] && git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
   seen="$(git ls-remote --heads origin "$branch" | cut -f1)"
-  lease="--force-with-lease=refs/heads/$branch:$seen"
 fi
+[ -n "$seen" ] && lease="--force-with-lease=refs/heads/$branch:$seen"
 
 git checkout -B "$branch"
 git add -A .
