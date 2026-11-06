@@ -4,13 +4,13 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The US HANK model — PolicyEngine Macro</title>
-<meta name="description" content="A validated replication of the two-asset heterogeneous-agent New Keynesian model of Auclert, Bardóczy, Rognlie and Straub (Econometrica 2021), solved in the sequence space at the paper's production grids — stylized US shocks with first-order distributional output. Not a forecaster; does not score reforms." />
+<meta name="description" content="A replication of the two-asset heterogeneous-agent New Keynesian model of Auclert, Bardóczy, Rognlie and Straub (Econometrica 2021), solved in the sequence space at the paper's production grids, its solved steady-state parameters matching the paper — stylized US shocks with distributional output. Not a forecaster; does not score reforms." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/us-hank" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://policyengine-macro.vercel.app/us-hank" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
 <meta property="og:title" content="us-hank — PolicyEngine Macro" />
-<meta property="og:description" content="A validated replication of the Auclert–Bardóczy–Rognlie–Straub (2021) two-asset HANK — stylized US shocks with first-order distributional output. Not a forecaster." />
+<meta property="og:description" content="A replication of the Auclert–Bardóczy–Rognlie–Straub (2021) two-asset HANK, its steady state checked against the paper — stylized US shocks with distributional output. Not a forecaster." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -58,7 +58,7 @@
       <a class="model-tabs-link" href="/us-hank/methodology">Methodology</a>
       <a class="model-tabs-link" href="/us-hank/validation">Validation</a>
       <a class="model-tabs-link" href="/us-hank/code">Code</a>
-      <a class="model-tabs-link" href="/reports/us-hank-open-source">Open models</a>
+      <a class="model-tabs-link" href="/reports/us-hank-open-source">HANK survey</a>
     </div>
   </nav>
   <section id="card" class="band band-wide">
@@ -74,14 +74,14 @@
     <dl class="model-card">
       <div><dt>Answers</dt><dd>How a stylized US shock transmits through a household wealth distribution, and which households drive the response</dd></div>
       <div><dt>Inputs</dt><dd>A stylized shock: kind (monetary, fiscal spending, productivity), size, persistence</dd></div>
-      <div><dt>Outputs</dt><dd>GDP, consumption, investment, inflation, real rate; MPCs by wealth quartile and the hand-to-mouth share</dd></div>
+      <div><dt>Outputs</dt><dd>GDP, consumption, investment, inflation, real rate; MPCs by liquid-wealth quartile (out of a windfall of 25% of mean quarterly post-tax labour income) and the hand-to-mouth share</dd></div>
       <div><dt>Horizon</dt><dd>Quarterly impulse responses, typically 5 years, around a calibrated steady state</dd></div>
       <div><dt>Data</dt><dd>Auclert, Bard&oacute;czy, Rognlie and Straub (2021); no data vintage</dd></div>
       <div><dt>Uncertainty</dt><dd>None quantified: deterministic, first-order responses</dd></div>
       <div><dt>Access</dt><dd>Hosted stylized shocks, CLI, Python package (<a href="/us-hank/code">Code</a>)</dd></div>
       <div><dt>Runtime</dt><dd>About 18 seconds cold per variant (steady state and Jacobian, then cached); instant warm</dd></div>
       <div class="model-card-wide"><dt>Joins pe-microsim</dt><dd>Wage and labor responses scale US employment income (<a href="#pe-bridge">step 1</a>, experimental)</dd></div>
-      <div class="model-card-wide"><dt>Status</dt><dd>Validated replication for hosted stylized-shock experiments; VAR-free sequence-space HANK; not a forecaster; distributional outputs are first-order approximations</dd></div>
+      <div class="model-card-wide"><dt>Status</dt><dd>Steady state replicates the paper (six of seven solved parameters); shock signs are tested, magnitudes are not validated; not a forecaster; distributional outputs are steady-state statistics and an MPC-proportional split of the aggregate</dd></div>
       <div class="model-card-wide"><dt>Cannot answer</dt><dd>Forecasts; detailed tax reforms (the labor tax is endogenous); PolicyEngine reforms; nonlinear or state-dependent dynamics</dd></div>
     </dl>
   </section>
@@ -89,7 +89,7 @@
   <section id="overview" class="band band-wide">
     <div class="band-head" data-icon="layers">
       <h2>How it joins the core, what it is, what it can answer</h2>
-      <p class="section-intro">Run stylized monetary, fiscal-spending, and productivity shocks through a two-asset heterogeneous-agent New Keynesian model — aggregate impulse responses plus first-order distributional output: MPCs by wealth quartile and the hand-to-mouth share.</p>
+      <p class="section-intro">Run stylized monetary, fiscal-spending, and productivity shocks through a two-asset heterogeneous-agent New Keynesian model — aggregate impulse responses plus distributional output: MPCs by liquid-wealth quartile and the hand-to-mouth share.</p>
     </div>
     <div class="scrolly-wrap single single">
       <div class="scrolly-steps">
@@ -142,19 +142,22 @@
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
         <p class="mo-lead">Stylized US shocks, with the household distribution attached.</p>
         <p class="kv-title">Stylized shocks</p>
-        <dl class="kv"><div><dt>Shocks</dt><dd>monetary, fiscal spending, productivity</dd></div><div><dt>Around</dt><dd>a calibrated steady state</dd></div><div><dt>Concentrates in</dt><dd>high-MPC, low-liquid-wealth households</dd></div><div><dt>Tool</dt><dd><code>hank_shock</code></dd></div></dl>
+        <dl class="kv"><div><dt>Shocks</dt><dd>monetary, fiscal spending, productivity</dd></div><div><dt>Around</dt><dd>a calibrated steady state</dd></div><div><dt>By household</dt><dd>the aggregate split in proportion to MPC</dd></div><div><dt>Tool</dt><dd><code>hank_shock</code></dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <p>
                 Its job is the <em>transmission</em> of a stylized aggregate shock
-                through a realistic household wealth distribution: a monetary easing
+                through a two-asset household wealth distribution: a monetary easing
                 raising output, consumption, investment and inflation; a tax-financed
                 spending expansion raising output while the endogenous labor tax
-                leans on consumption; the response concentrating among
-                <strong>high-MPC, low-liquid-wealth households</strong> — the point
-                of a HANK model, which a representative-agent model cannot say.
+                leans on consumption. The distribution is calibrated, not matched to
+                US data: its hand-to-mouth share is about 54%, against about one
+                third in US estimates. The by-wealth consumption split allocates the
+                aggregate response in proportion to each group's MPC, so its
+                concentration among <strong>high-MPC, low-liquid-wealth
+                households</strong> is built in, not a solved household response.
               </p>
-          <p><strong>Worked example.</strong> One monetary shock, two answers: the HANK block reports consumption responses by wealth position; the microsimulation reports the same earnings change after taxes, SNAP, and the EITC, decile by decile.</p>
+          <p><strong>Worked example.</strong> One monetary shock, two answers: the HANK block splits the aggregate consumption response across wealth positions in proportion to MPC; the microsimulation reports the same earnings change after taxes, SNAP, and the EITC, decile by decile.</p>
           <p>What it cannot do, in full: the <a href="/us-hank/validation#caveats">known limits</a>.</p>
           <p>Run <code>hank_shock</code> from <a href="/connect">any connected client</a>.</p>
         </details>

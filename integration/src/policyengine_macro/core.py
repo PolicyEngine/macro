@@ -1104,10 +1104,12 @@ def hank_shock(
         "horizon": horizon,
         "variant": variant,
         "framing": (
-            "Validated replication of Auclert, Bardóczy, Rognlie & Straub "
-            "(Econometrica 2021); stylized shocks around a calibrated steady "
-            "state; VAR-free sequence-space HANK; NOT a forecaster and does "
-            "not score detailed tax reforms; responses are linear/first-order."
+            "Replication of Auclert, Bardóczy, Rognlie & Straub "
+            "(Econometrica 2021): the solved steady-state parameters match "
+            "the paper; shock signs are tested, magnitudes are not validated; "
+            "stylized shocks around a calibrated steady state; NOT a "
+            "forecaster and does not score detailed tax reforms; responses "
+            "are linear/first-order."
         ),
         "series_meaning": {v: HANK_HEADLINE[v] for v in series_names},
         "results": rows,
@@ -1170,9 +1172,11 @@ def hank_summary() -> dict:
                     "Heterogeneous-Agent Models', Econometrica 2021",
         "package_version": _package_version("us-hank-model"),
         "framing": (
-            "Validated replication; stylized shocks; VAR-free sequence-space "
-            "HANK; not a forecaster; distributional outputs are first-order "
-            "approximations."
+            "Replication: steady state validated, IRF magnitudes are not "
+            "validated; stylized shocks; not a forecaster; distributional "
+            "outputs are "
+            "first-order: steady-state MPCs and an MPC-proportional split of "
+            "the aggregate response."
         ),
         "variants": {
             "two_asset": "the paper model: liquid + illiquid assets, sticky "

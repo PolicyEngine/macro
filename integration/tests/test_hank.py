@@ -91,8 +91,8 @@ def test_distribution_is_refused_for_the_one_asset_variant():
 def test_summary_reports_honest_framing_without_a_solve():
     summary = core.hank_summary()
     framing = summary["framing"].lower()
-    for claim in ("validated replication", "stylized shocks",
-                  "not a forecaster", "first-order"):
+    for claim in ("replication", "magnitudes are not validated",
+                  "stylized shocks", "not a forecaster", "first-order"):
         assert claim in framing, f"framing must state: {claim}"
     assert "Econometrica 2021" in summary["upstream"]
     assert "replication suite" in summary["validation"]["suite"]

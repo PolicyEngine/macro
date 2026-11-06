@@ -114,9 +114,15 @@ MODELS = {
         "runtime": "~18s cold per variant (steady state + jacobian, cached); instant warm",
         "uncertainty": "none quantified; deterministic linear IRFs",
         "status": (
-            "validated replication for hosted stylized-shock experiments; "
-            "VAR-free sequence-space HANK; not a forecaster; distributional "
-            "outputs are first-order approximations"
+            # us-hank-model README "Validation status": only the solved
+            # steady-state parameters are validated (Table B.III, phi differs);
+            # IRF magnitudes are not, and the by-wealth split is an
+            # accounting allocation (distributional.py), not a solved response.
+            "steady state replicates the paper (six of seven solved "
+            "parameters); shock signs are tested, magnitudes are not "
+            "validated; not a forecaster; distributional outputs are "
+            "steady-state statistics and an MPC-proportional split of the "
+            "aggregate"
         ),
         "data_vintage": "Auclert-Bardóczy-Rognlie-Straub (2021) calibration",
     },

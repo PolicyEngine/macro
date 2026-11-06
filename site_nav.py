@@ -123,7 +123,7 @@ PAGE_NAMES = {
     "/papers/psl-og": "Paper",
     "/papers/define-uk": "Paper",
     "/reports/define-uk-replication": "Replication report",
-    "/reports/us-hank-open-source": "Open models",
+    "/reports/us-hank-open-source": "HANK survey",
     "/forecasts": "Forecasts",
     "/forecasts/us": "United States",
     "/notes/releases": "Releases",
@@ -191,8 +191,9 @@ SUBTABS = {
     "us-hank": ("US HANK pages", (
         ("/us-hank", "Overview"), ("/us-hank/methodology", "Methodology"),
         ("/us-hank/validation", "Validation"), ("/us-hank/code", "Code"),
-        # us-hank has no paper; its fifth tab is the open-models survey.
-        ("/reports/us-hank-open-source", "Open models"))),
+        # us-hank has no paper; its fifth tab is a survey of other HANK models,
+        # so it is labelled as such rather than as a page about this model.
+        ("/reports/us-hank-open-source", "HANK survey"))),
     "olg": ("OG-UK pages", (
         ("/olg", "Overview"), ("/olg/methodology", "Methodology"),
         ("/olg/validation", "Validation"), ("/olg/code", "Code"),
