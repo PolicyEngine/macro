@@ -7,7 +7,8 @@ PDF figures into this directory:
 
   fig_cmp_multipliers.pdf  grouped bars: our multipliers vs CBO ranges and the
                            FRB-US lines of Coenen et al. (2012)
-  fig_cmp_irf_feds.pdf     our 100bp IRFs with the 2014 FEDS Note peak
+  fig_cmp_irf_feds.pdf     our 100bp IRFs with the Board's current-model troughs
+                           (Laforte 2018, Fig. 2) and the 2014 FEDS Note peak
                            responses marked
   fig_cmp_pyfrbus.pdf      ours vs vendor pyfrbus overlay, max gap annotated
 """
@@ -143,12 +144,20 @@ fig.savefig(HERE / "fig_cmp_multipliers.pdf")
 plt.close(fig)
 
 # ---------------------------------------------------------------- figure 2
-# Our 100bp IRFs with 2014 FEDS Note peak responses marked.
+# Our 100bp IRFs with the Board's current-model troughs (Laforte 2018, FEDS
+# Notes, doi:10.17016/2380-7172.2306, Fig. 2 accessible data table, quarter 8,
+# i.e. 1.75 years after the shock quarter) and, for reference, the 2014 FEDS
+# Note peaks, which describe the pre-2018 model.
 mp = res["mp100"]
+board_2018 = {
+    # (our series key, Board current-model trough, timing in years, label)
+    "xgap2_pp": (-0.486, 1.75, "Board, current model\n(Laforte 2018)"),
+    "picxfe_pp": (-0.0345, 1.75, "Board, current model\n(Laforte 2018)"),
+}
 feds_peaks = {
-    # (our series key, FEDS Note peak value, approx peak timing in years, label)
-    "xgap2_pp": (-0.4, 2.0, "FEDS Note (2014) peak,\nVAR expectations"),
-    "picxfe_pp": (-0.08, 3.0, "FEDS Note (2014) peak,\nVAR expectations"),
+    # (our series key, 2014 FEDS Note peak value, approx peak timing in years, label)
+    "xgap2_pp": (-0.4, 2.0, "FEDS Note (2014),\npre-2018 model"),
+    "picxfe_pp": (-0.08, 3.0, "FEDS Note (2014),\npre-2018 model"),
 }
 panels = [
     ("xgap2_pp", "Output gap (pp)"),
@@ -159,17 +168,19 @@ for ax, (key, title) in zip(axes, panels):
     s = np.array(mp[key])
     ax.plot(years[: len(s)], s, color=OI[0], label="This implementation")
     ax.axhline(0, color="0.4", lw=0.8)
-    peak, when, lab = feds_peaks[key]
-    ax.plot([when], [peak], marker="D", ms=7, mfc="white", mew=1.8,
+    peak, when, lab = board_2018[key]
+    ax.plot([when], [peak], marker="D", ms=7, mew=1.2,
             color=OI[1], ls="none", label=lab)
+    peak, when, lab = feds_peaks[key]
+    ax.plot([when], [peak], marker="s", ms=6, mfc="white", mew=1.4,
+            color="0.45", ls="none", label=lab)
     tr = s.min()
     ax.annotate(f"trough {tr:.2f}", (years[int(s.argmin())], tr),
                 textcoords="offset points", xytext=(6, -10), fontsize=7.5)
     ax.set_title(title, fontsize=9)
     ax.set_xlabel("Years after shock")
-    ax.legend(frameon=False, fontsize=7.5,
-              loc="lower right" if key == "xgap2_pp" else "center right")
-fig.suptitle("100bp funds-rate shock: our responses vs 2014 FEDS Note peaks", fontsize=9, y=1.0)
+    ax.legend(frameon=False, fontsize=7.5, loc="lower right")
+fig.suptitle("100bp funds-rate shock: our responses vs the Board's published simulations", fontsize=9, y=1.0)
 fig.tight_layout()
 fig.savefig(HERE / "fig_cmp_irf_feds.pdf")
 plt.close(fig)
