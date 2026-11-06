@@ -255,14 +255,15 @@ MODEL_QUALITY = {
             "real data to numerical precision.",
             "Keep all exact invariants hard-gated for every specification.",
         ),
-        # Figures in this entry and the next are from boe-var-model 845e2a4
-        # (data through 2026Q1), the run vintage cited on /svar/validation.
+        # Figures in this entry and the next are from boe-var-model #24
+        # (data through 2026Q2), the run vintage cited on /svar/validation;
+        # the pre-refresh values are at boe-var-model 845e2a4.
         "predictive_validation": _quality(
             "weak",
             "No demonstrated skill against a random walk WITH DRIFT on any "
             "variable at any horizon. The grid runs 64 variable-by-horizon "
             "tests; adjusted together, the smallest Benjamini-Hochberg q is "
-            "0.36. Bank Rate comes closest (0.79 at h=1) and does not "
+            "0.39. Bank Rate comes closest (0.79 at h=1) and does not "
             "survive. The model looks strong against a driftless walk, but "
             "that benchmark forfeits the trend on a trending log level and "
             "is too weak to learn from. Under the published specification "
@@ -277,8 +278,8 @@ MODEL_QUALITY = {
             "moderate",
             "On the paper's own definition -- the posterior mean of the "
             "per-draw group share of TOTAL four-quarter-ahead variance -- UK "
-            "GDP replicates (37.4% against ~40%) and UK CPI falls about 8pp "
-            "short (42.3% against ~50%). The 68% band is roughly +/-14pp, "
+            "GDP replicates (38.7% against ~40%) and UK CPI falls about 8.5pp "
+            "short (41.5% against ~50%). The 68% band is roughly +/-15pp, "
             "wider than the shortfall, so the data do not resolve it. Proxy "
             "world aggregates remain a candidate explanation.",
             "Show conclusions across lag, prior, proxy-data and weighting grids "
