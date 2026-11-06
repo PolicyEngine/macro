@@ -52,6 +52,7 @@ import argparse
 import html
 import importlib.util
 import json
+import math
 import re
 import shlex
 import sys
@@ -224,7 +225,7 @@ def latest(series: dict) -> dict:
 def stored(value: float) -> str:
     """The number as the snapshot holds it: grouped, never rounded.
 
-    Same convention as the store catalogue on /forecasts#data — a stored 5.0 is
+    Same convention as the store catalogue on /economy#data — a stored 5.0 is
     printed 5.0, not 5, because the trailing zero is the publisher's precision.
     """
     return f"{value:,}"
@@ -339,7 +340,8 @@ def next_open(forecast: dict, variable: str, last_observed: str) -> tuple[str, d
 def path_chart(chart_id: str, variable: str, name: str, unit: str,
                open_rows: list[tuple[str, dict]], generated: str,
                history: list[dict] | None = None, vintage: str = "",
-               history_note: str = "") -> str:
+               history_note: str = "", model: str = "BoE SVAR",
+               source: str = "", zero: bool = True) -> str:
     """Fan chart of the archived boe-svar path, joined to the outturns before it.
 
     ``history`` is the last few published quarters from the committed ONS
@@ -350,6 +352,12 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
     in the SVG, words in HTML (chartkit). The quarter-by-quarter table sits in
     an expander under it, so the numbers are stated once in view and once as
     the chart's data table, never twice on screen.
+
+    ``model`` names the forecaster in the title, legend and description;
+    ``source`` replaces the default current_forecast.json foot (HTML, without
+    the ONS part, which is added from ``history_note``); ``zero=False`` lets
+    the axis start near the data, for a level such as the unemployment rate
+    where an axis from 0 would flatten the fan into a line.
     """
     import chartkit  # repo root, on sys.path above
 
@@ -360,7 +368,7 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
     width, height = 760, 300
     left, right, top, bottom = 56, 16, 34, 40
     plot_w, plot_h = width - left - right, height - top - bottom
-    lo = min([0.0] + [v["lo90"] for v in vals] + [h["value"] for h in hist])
+    lo = min(([0.0] if zero else []) + [v["lo90"] for v in vals] + [h["value"] for h in hist])
     hi = max([v["hi90"] for v in vals] + [h["value"] for h in hist])
     pad = (hi - lo) * 0.08 or 1.0
     lo, hi = lo - pad, hi + pad
@@ -378,15 +386,18 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
         return up + " " + dn
 
     grid = []
-    step = 1.0 if hi - lo <= 8 else 2.0
-    g = int(lo / step) * step
+    span = hi - lo
+    step = next((s for s in (0.1, 0.2, 0.25, 0.5, 1.0, 2.0) if span / s <= 8), 5.0)
+    g = math.floor(lo / step) * step
+    decimals = 0 if step >= 1 else 2 if step == 0.25 else 1
     while g <= hi:
         if g >= lo:
             cls = "vc-zero" if abs(g) < 1e-9 else "vc-grid"
             grid.append(f'<line class="{cls}" x1="{left}" y1="{y(g):.1f}" '
                         f'x2="{width - right}" y2="{y(g):.1f}"/>')
-            grid.append(chartkit.ytick(left, y(g), f"{g:g}".replace("-", "\u2212")))
-        g += step
+            text = f"{g:.{decimals}f}" if decimals else f"{round(g):g}"
+            grid.append(chartkit.ytick(left, y(g), text.replace("-", "\u2212")))
+        g = round(g + step, 6)
     last = n - 1
     ticks = [chartkit.xtick(x(i), top + plot_h, esc(labels[i]), i, last, minor=minor)
              for i, minor in chartkit.tick_plan(n)]
@@ -412,8 +423,8 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
     svg = "\n".join([
         f'<svg class="vchart" data-chart="{chart_id}" viewBox="{left - 4} {top - 4} '
         f'{plot_w + 8} {plot_h + 8}" role="img" aria-labelledby="{chart_id}-t {chart_id}-d">',
-        f'<title id="{chart_id}-t">{esc(name)}: ONS outturns, then the BoE SVAR forecast, median with 68% and 90% bands</title>',
-        f'<desc id="{chart_id}-d">{hist_desc}fan chart of {esc(name)}, {esc(unit)}, from the BoE SVAR '
+        f'<title id="{chart_id}-t">{esc(name)}: ONS outturns, then the {esc(model)} forecast, median with 68% and 90% bands</title>',
+        f'<desc id="{chart_id}-d">{hist_desc}fan chart of {esc(name)}, {esc(unit)}, from the {esc(model)} '
         f"round generated {esc(generated)}: median {vals[0]['median']:.2f}% in {esc(first[0])} "
         f"and {vals[-1]['median']:.2f}% in {esc(end[0])}; the quarter-by-quarter values are "
         "in the table under the chart.</desc>",
@@ -428,14 +439,15 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
     legend = []
     if hist:
         legend.append(("ln-out", f"ONS outturn, snapshot {esc(vintage)}"))
-    legend += [("ln-s1", f"BoE SVAR median, round {esc(generated)}"),
+    legend += [("ln-s1", f"{esc(model)} median, round {esc(generated)}"),
                ("sw-band68", "68% band"), ("sw-band90", "90% band")]
-    source = (f"BoE SVAR round generated {esc(generated)}, "
-              '<a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/'
-              'papers/boe-svar/figures/current_forecast.json">current_forecast.json</a>')
+    source = source or (f"BoE SVAR round generated {esc(generated)}, "
+                        '<a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/'
+                        'papers/boe-svar/figures/current_forecast.json">current_forecast.json</a>')
     if hist:
         source = f"ONS, {history_note} snapshot {esc(vintage)}; " + source
-    return chartkit.figure(svg, legend=legend, unit=f"{name}, {unit}", source=source)
+    return chartkit.figure(svg, legend=legend, unit=f"{name}, {unit}", source=source,
+                           y_gutter=True)
 
 
 def band_text(values: dict) -> str:
@@ -733,7 +745,7 @@ def data_layer(names: tuple[str, ...], closing: str) -> str:
         </table>
       </div>
       <p class="chooser-note">{closing}</p>
-      <p class="chooser-note">The snapshot files are append-only and never edited, so a number published here can be reproduced against the data as it stood — <a href="/forecasts#data">browse the store, its release calendar, and the as-of recipe →</a></p>
+      <p class="chooser-note">The snapshot files are append-only and never edited, so a number published here can be reproduced against the data as it stood — <a href="/economy#data">browse the store, its release calendar, and the as-of recipe →</a></p>
     </div>"""
 
 
@@ -1052,6 +1064,60 @@ def jobs_facts() -> dict:
     }
 
 
+def jobs_chart(facts: dict) -> str:
+    """The satellite's archived fan after the last two years of ONS outturns.
+
+    Same builder and conventions as the growth and inflation fans; the axis
+    starts near the data (a rate, not a growth), the forecaster and the foot
+    name the satellite's own round file, and the open quarters are the ones
+    after the latest stored outturn, as on the other topic pages.
+    """
+    round_file = facts["round"]
+    last = facts["now"]["period"]
+    rows = [(p, v["unemployment"]) for p, v in round_file["forecast"].items() if p > last]
+    rows = [(p, {"unemployment": v}) for p, v in rows]
+    rid = esc(round_file["round_id"])
+    source = (f'BoE SVAR unemployment satellite round {rid}, '
+              f'<a class="mono" href="/forecasts/rounds/{rid}/okun-unemployment.json">'
+              "okun-unemployment.json</a>; bands raw, GDP-forecast uncertainty only")
+    return path_chart(
+        "topic-unemployment-path", "unemployment", "UK unemployment rate", "%",
+        rows, round_file["round_id"],
+        history=facts["unemployment"]["observations"][-8:],
+        vintage=facts["unemployment"]["vintage"], history_note="MGSX,",
+        model="BoE SVAR unemployment satellite", source=source, zero=False)
+
+
+def jobs_table(facts: dict) -> str:
+    """The quarters drawn in jobs_chart, as the chart's data table."""
+    last = facts["now"]["period"]
+    rows = []
+    for period, values in facts["round"]["forecast"].items():
+        if period <= last:
+            continue
+        v = values["unemployment"]
+        rows.append(
+            "          <tr>"
+            f'<th scope="row">{esc(period)}</th>'
+            f"<td>{v['median']:.2f}%</td>"
+            f"<td>{v['lo68']:.2f}%–{v['hi68']:.2f}%</td>"
+            f"<td>{v['lo90']:.2f}%–{v['hi90']:.2f}%</td>"
+            "</tr>"
+        )
+    return f"""      <details class="about">
+        <summary>Quarter by quarter</summary>
+      <div class="table-scroll">
+        <table>
+          <caption>BoE SVAR unemployment satellite, UK unemployment rate: median and raw model bands, from the archived round.</caption>
+          <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68%</th><th scope="col">90%</th></tr></thead>
+          <tbody>
+{chr(10).join(rows)}
+          </tbody>
+        </table>
+      </div>
+      </details>"""
+
+
 def jobs_hook() -> str:
     facts = jobs_facts()
     vacancies = load("uk_vacancies")
@@ -1089,6 +1155,9 @@ def jobs_model() -> str:
         {esc(facts["period"])} at {facts["values"]["median"]:.1f}%, 68%
         {band_text(facts["values"])}.
       </p>
+      <figure class="vchart-figure">
+{jobs_chart(facts)}
+      </figure>
       <details class="about">
         <summary>The round states its own limits, and they are strict</summary>
 {caveats}
@@ -1100,6 +1169,7 @@ def jobs_model() -> str:
         {esc(model["description"])}
       </p>
       </details>
+{jobs_table(facts)}
       <p class="callout">{registry}
         <a href="/forecasts">See the archived rounds →</a>
       </p>
@@ -1429,7 +1499,7 @@ def reform_data() -> str:
       </p>
       <p class="chooser-note">
         Dated, immutable JSON snapshots of every series this site reads —
-        <a href="/forecasts#data">browse the store, its release calendar, and the as-of recipe →</a>
+        <a href="/economy#data">browse the store, its release calendar, and the as-of recipe →</a>
       </p>
     </div>"""
 
@@ -1582,12 +1652,18 @@ def uk_platform() -> str:
         ),
     ]
     return f"""    <div class="prose">
+      <p class="callout">
+        <strong>pe-microsim does not forecast, and this section does not
+        pretend it does.</strong> The forecast rows are
+        {model_link("boe-svar")}; the scoreboard above is what those rounds
+        have been worth so far. <a href="/models#score">See how a score is put together →</a>
+      </p>
+      <details class="about route-details">
+        <summary>The six routes, the models each runs in order, and the command</summary>
       <p>
         Each route names the models it runs, in order; the household engine,
         {model_link("pe-microsim")}, sits in four of the six.
       </p>
-      <details class="about route-details">
-        <summary>The routes, with the command for each</summary>
       <div class="table-scroll">
         <table class="route-table">
           <caption>What this section can produce for the UK. Every command is checked against <code>cli.py</code> when this page is generated; a route that stopped running would fail the build rather than sit here.</caption>
@@ -1599,7 +1675,7 @@ def uk_platform() -> str:
       </div>
       </details>
       <details class="about">
-        <summary>About the engine and the macro members</summary>
+        <summary>About the engine and the macro members, and the same routes over MCP</summary>
         <p>
           The engine underneath this section is
           {model_link("pe-microsim")} — PolicyEngine's own
@@ -1625,15 +1701,6 @@ def uk_platform() -> str:
           The uncertainty of {model_link("boe-svar")} is
           {esc(svar["uncertainty"])}.
         </p>
-      </details>
-      <p class="callout">
-        <strong>pe-microsim does not forecast, and this section does not
-        pretend it does.</strong> The forecast rows are
-        {model_link("boe-svar")}; the scoreboard above is what those rounds
-        have been worth so far. <a href="/models#score">See how a score is put together →</a>
-      </p>
-      <details class="about">
-        <summary>The same routes over MCP</summary>
         <p>
           Over MCP the same six routes are {tool("household_reform_impact")},
           {tool("population_reform_impact")}, {tool("score_reform")},
@@ -2436,7 +2503,7 @@ def us_reform_data() -> str:
       </p>
       <p class="chooser-note">
         Dated, immutable JSON snapshots of every series this site reads —
-        <a href="/forecasts#data">browse the store, its release calendar, and the as-of recipe →</a>
+        <a href="/economy#data">browse the store, its release calendar, and the as-of recipe →</a>
       </p>
     </div>"""
 
@@ -2807,7 +2874,7 @@ def topic_where_next(topic: dict) -> str:
     entry = COUNTRIES[topic["country"]]
     cards = [
         (entry["hub"], "chart", "Forecasts", "The record, open rounds and how they score"),
-        ("/forecasts#data", "data", "The data store", "Every vintage behind these numbers"),
+        ("/economy#data", "data", "The data store", "Every vintage behind these numbers"),
         (entry["data"], "list", f'{entry["label"]} data', "Every topic and series in one place"),
     ]
     return site_nav.where_next(cards)

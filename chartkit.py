@@ -162,6 +162,7 @@ def figure(
     unit: str | None = None,
     keep_ratio: bool = False,
     source: str | None = None,
+    y_gutter: bool = False,
 ) -> str:
     """Turn a builder's SVG string into the readable block described above.
 
@@ -180,6 +181,10 @@ def figure(
     ``source``: one line of HTML naming where the numbers come from (the
     committed file or the publisher), printed under the chart after any notes,
     the way the BoE and the OBR foot a chart. "Source: " is added here.
+    ``y_gutter``: draw the y labels in a gutter left of the plot, right-aligned
+    and centred on their gridline, instead of inside the plot above it. For
+    fans and line charts whose data start at the left edge, where an inside
+    label would sit on the first points of the line (style.css .vc-ygutter).
     ``narrow_table``: (header cells, rows) shown *instead of* the labels marked
     ``vc-minor`` when the chart is narrower than 520 px: the values a phone
     cannot fit on the bars. Only one of the two is ever visible (the same rule
@@ -230,6 +235,8 @@ def figure(
     if keep_ratio:
         attrs["class"] = (attrs.get("class", "") + " vc-keep-ratio").strip()
     open_attrs = " ".join(f'{k}="{v}"' for k, v in attrs.items())
+    if y_gutter:
+        wrap_class = (wrap_class + " vc-ygutter").strip()
     parts = [
         f'<div class="vc-fig{(" " + wrap_class) if wrap_class else ""}" data-chart="{chart_id}"'
         + (f' style="--vc-min-h:{min_h}px">' if min_h else ">"),

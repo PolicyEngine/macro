@@ -144,10 +144,10 @@ def render() -> str:
                 ("sw-band68", "68% band"),
                 ("sw-band90", "90% band (raw)"),
                 *([("sw-dot-out", "ONS outturn")] if dots else []),
-            ], unit="UK unemployment rate, %",
+            ], unit="UK unemployment rate, %", y_gutter=True,
                source=(f'archived round <a class="mono" href="/forecasts/rounds/'
                        f'{src.parent.name}/{src.name}">{src.parent.name}/{src.name}</a>'
-                       + ('; outturn, ONS series MGSX from the <a href="#data">data store</a>'
+                       + ('; outturn, ONS series MGSX from the <a href="/economy#data">data store</a>'
                           if dots else ""))),
             "      </figure>",
         ]

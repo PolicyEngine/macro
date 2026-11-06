@@ -230,7 +230,7 @@ def digest_page(vintage: str) -> str:
     </div>""")
     where = site_nav.where_next([
         ("/notes/releases", "list", "All release digests", "Every stored date, newest first"),
-        ("/forecasts#data", "data", "The data store", "Every stored vintage of every series"),
+        ("/economy#data", "data", "The data store", "Every stored vintage of every series"),
         ("/forecasts#scored", "chart", "The forecast record", "Rounds scored against outturns like these"),
     ])
     return f"""<!doctype html>

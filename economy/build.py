@@ -372,9 +372,9 @@ def replace(html: str, name: str, value: str) -> str:
 def render_uk() -> str:
     """The UK hub. ``economy-topics`` belongs to economy/topics.py, not here.
 
-    No series index and no release calendar: both repeated the data store on
-    /forecasts#data, which is their one home (DESIGN.md §7.0). The hub is the
-    topic directory and the long view; a provenance card links to the store.
+    No separate series index or release calendar: the data store (#data,
+    spliced in by data/build_page.py) is their one home (DESIGN.md §7.0).
+    The hub is the topic directory, the long view, and the store.
     """
     html = PAGE.read_text()
     html = replace(html, "economy-trends-figures", uk_figures())

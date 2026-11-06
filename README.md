@@ -218,7 +218,7 @@ that are directory prefixes with no index page. None of them has an
 | `/papers` | `/models#evidence` |
 | `/validation` | `/models#validation` |
 | `/score` | `/models#score` |
-| `/data` | `/forecasts#data` |
+| `/data` | `/economy#data` |
 | `/notes` | `/forecasts#notes` |
 | `/economy/topics` | `/economy#topics` |
 | `/economy/trends` | `/economy#trends` |
@@ -270,7 +270,7 @@ snap = json.load(urllib.request.urlopen(
 print(snap["observations"][-1])   # {'period': '2026Q2', 'value': 2.8}
 ```
 
-Browse it at [`/forecasts#data`](https://policyengine-macro.vercel.app/forecasts#data)
+Browse it at [`/economy#data`](https://policyengine-macro.vercel.app/economy#data)
 — the full catalogue, the schema, the release calendar and the recipe above,
 in the section that explains what a forecast round is scored against. The
 [forecast track record](forecasts/) records which vintage each score was

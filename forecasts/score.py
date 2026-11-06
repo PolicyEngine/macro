@@ -606,11 +606,11 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
         ("sw-band90", "90% band (both empirically re-calibrated)"),
         ("ln-s2", "OBR March 2026 EFO"),
         *([("sw-dot-out", "ONS outturn")] if dots else []),
-    ], unit=spec["unit"], source=(
+    ], unit=spec["unit"], y_gutter=True, source=(
         f'archived round <a class="mono" href="/forecasts/rounds/{SVAR_ROUND.parent.name}/'
         f'{SVAR_ROUND.name}">{SVAR_ROUND.parent.name}/{SVAR_ROUND.name}</a>; '
         + spec["source_note"]
-        + ('; outturns from the <a href="#data">data store</a>' if dots else "")
+        + ('; outturns from the <a href="/economy#data">data store</a>' if dots else "")
     ))
     return "\n".join([
         '      <p class="chart-intro">'
