@@ -213,9 +213,25 @@
             <th scope="row"><strong>Stylized instruments only</strong></th>
             <td>Monetary, fiscal-spending and productivity shocks; the labor tax is endogenous. No transfer or tax-rate instrument, so <code>score_reform</code> refuses <code>model="hank"</code>.</td>
           </tr>
-          <tr>
+          <tr id="first-order">
             <th scope="row"><strong>First-order responses</strong></th>
-            <td>IRFs are linear in shock size: no state dependence, no zero lower bound, no asymmetry. Parameter uncertainty is not quantified — the calibration is a single point.</td>
+            <td>Hosted IRFs are linear in shock size: no state dependence, no zero lower bound, and a rise mirrors a cut. The model itself is not linear: on the nonlinear transition, a spending rise of 1% of GDP (&rho;&nbsp;0.8) gives an impact multiplier of 0.251 and a cut gives &minus;0.125, against the first-order 0.175. At +2% of GDP the nonlinear solve does not converge. Parameter uncertainty is not quantified — the calibration is a single point.</td>
+          </tr>
+          <tr id="mpc-level">
+            <th scope="row"><strong>MPCs below the empirical range</strong></th>
+            <td>The aggregate quarterly MPC is 0.058 out of the default windfall, 25% of mean quarterly post-tax labour income (about $2,400 per head or $6,200 per household). On a refined liquid grid, rebates of $500, $1,000 and $1,500 per household give 0.104, 0.091 and 0.083, far below the 0.15–0.25 that US rebate studies find. The grid explains little of the gap. The main cause is the illiquid account&rsquo;s adjustment cost: it is smooth and convex, with zero marginal cost at zero adjustment and no fixed or linear component, so a constrained household that holds illiquid wealth puts most of a rebate into that account. Auclert et al. (2021) report no MPC, so this is a property of the calibration, not a replication failure (<a href="https://github.com/PolicyEngine/us-hank-model/issues/6">us-hank-model #6</a>, <a href="https://github.com/PolicyEngine/us-hank-model/pull/7">PR #7</a>).</td>
+          </tr>
+          <tr id="spending-sign">
+            <th scope="row"><strong>Spending multiplier turns negative</strong></th>
+            <td>A spending rise of 1% of GDP (&rho;&nbsp;0.8) raises output by 0.175% on impact, but output is below baseline from quarter&nbsp;3 (impact is quarter&nbsp;0) while spending is still raised; the 20-quarter cumulative multiplier is &minus;0.015. The labour tax that finances the spending enters the union wage Phillips curve: a higher tax raises the wage unions set, which raises inflation, and the Taylor rule answers with a higher real rate that crowds out investment and consumption. The household and government budget constraints hold along the path, so this is a property of the model, not a bug (<code>tests/test_spending_mechanism.py</code>; <a href="https://github.com/PolicyEngine/us-hank-model/issues/5">us-hank-model #5</a>). No published impulse response gates these numbers.</td>
+          </tr>
+          <tr id="hosted-persistence">
+            <th scope="row"><strong>Hosted default persistence</strong></th>
+            <td>The hosted <code>hank_shock</code> defaults to &rho;&nbsp;0.9; the model&rsquo;s README quotes &rho;&nbsp;0.8. For the same spending shock the impact multiplier is 0.075 at &rho;&nbsp;0.9 and 0.175 at &rho;&nbsp;0.8, and the 20-quarter cumulative multiplier is &minus;0.032 against &minus;0.015. Quote &rho; with any multiplier.</td>
+          </tr>
+          <tr id="variants">
+            <th scope="row"><strong>Higher-MPC calibrations</strong></th>
+            <td>Opt-in calibrations aimed at a higher MPC are under development and are not the published default: a discount-factor heterogeneity variant (<a href="https://github.com/PolicyEngine/us-hank-model/pull/9">PR #9</a>) and a median-wealth calibration (<a href="https://github.com/PolicyEngine/us-hank-model/pull/10">PR #10</a>); the options are discussed in <a href="https://github.com/PolicyEngine/us-hank-model/issues/8">us-hank-model #8</a>. No result on this site comes from them.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Approximate distributional output</strong></th>
