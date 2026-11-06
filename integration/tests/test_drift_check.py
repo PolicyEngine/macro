@@ -194,20 +194,26 @@ def test_every_canary_has_a_check():
 
 
 @pytest.mark.parametrize("cid", sorted(CANARIES))
-def test_quoted_at_points_at_a_real_line(cid):
-    """The page/line must exist and the line must carry the first quoted number,
-    so moving the page text forces the canary to be revisited."""
+def test_quoted_anchor_is_on_the_page_once(cid):
+    """The page must carry the quoted anchor exactly once, so editing the
+    quoted number forces the canary to be revisited, while edits elsewhere on
+    the page (stacked PRs moving lines) do not."""
     c = CANARIES[cid]
-    path, line = c["quoted_at"].rsplit(":", 1)
-    lines = (REPO / path).read_text().splitlines()
-    assert 1 <= int(line) <= len(lines), c["quoted_at"]
+    path = c["quoted_at"]
+    assert ":" not in path, f"{cid}: quoted_at names the page only, not a line"
     anchor = c.get("quoted_anchor")
-    if anchor:
-        assert anchor in lines[int(line) - 1], (c["quoted_at"], anchor)
+    assert anchor, f"{cid}: needs a quoted_anchor"
+    text = (REPO / path).read_text()
+    assert text.count(anchor) == 1, (path, anchor, text.count(anchor))
+    located = dc.quoted_location(c)
+    line = int(located.rsplit(":", 1)[1])
+    assert anchor in text.splitlines()[line - 1]
 
 
 def test_bank_rate_canary_matches_the_page():
-    text = (REPO / "obr/validation/index.html").read_text().splitlines()[544]
+    c = CANARIES["obr_bank_rate_100bp"]
+    line = int(dc.quoted_location(c).rsplit(":", 1)[1])
+    text = (REPO / c["quoted_at"]).read_text().splitlines()[line - 1]
     for figure in ("£121m", "£431m", "£482m", "£416m"):
         assert figure in text
 

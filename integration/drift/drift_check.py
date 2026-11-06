@@ -1,8 +1,9 @@
 """Drift check: do the hosted models still return the numbers the site quotes?
 
 Each canary in ``canaries.json`` is one cheap call to one hosted model whose
-output a page quotes, with the expected value, a tolerance and the page/line
-that quotes it. The check calls the hosted MCP server (the same streamable-HTTP
+output a page quotes, with the expected value, a tolerance and the page that
+quotes it (the line is found from ``quoted_anchor``, so edits higher up the
+page do not stale the pointer). The check calls the hosted MCP server (the same streamable-HTTP
 client as ``tests/test_remote_mcp.py``) and fails with a diff when
 
 - a quoted value has moved outside its tolerance (``value``),
@@ -196,11 +197,31 @@ def check_provenance(canary: dict, response, registry: dict,
     return out
 
 
+def quoted_location(canary: dict) -> str:
+    """``path:line`` of the quote, found by its anchor on the page today.
+
+    ``quoted_at`` names the page only; a stored line number went stale every
+    time a stacked PR edited the page above the quote. Falls back to the page
+    when there is no anchor or it is not found (the tests require it once).
+    """
+    path = canary["quoted_at"].split(":", 1)[0]
+    anchor = canary.get("quoted_anchor")
+    if anchor:
+        try:
+            lines = (INTEGRATION.parent / path).read_text().splitlines()
+        except OSError:
+            return path
+        for i, text in enumerate(lines, 1):
+            if anchor in text:
+                return f"{path}:{i}"
+    return path
+
+
 def evaluate(canary: dict, response, registry: dict, pins: dict[str, str],
              source: str = "hosted") -> dict:
     """One result row: status pass/fail/error, observed values, failures."""
     row = {"id": canary["id"], "source": source, "tool": canary["tool"],
-           "quoted_at": canary["quoted_at"], "failures": [], "observed": {}}
+           "quoted_at": quoted_location(canary), "failures": [], "observed": {}}
     if isinstance(response, dict) and "__error__" in response:
         row["status"] = "error"
         row["failures"].append(("error", response["__error__"]))
@@ -228,7 +249,7 @@ def evaluate(canary: dict, response, registry: dict, pins: dict[str, str],
 def skipped_row(canary: dict, why: str) -> dict:
     """A local row that could not run here; reported, never counted as drift."""
     return {"id": canary["id"], "source": "local", "tool": canary["tool"],
-            "quoted_at": canary["quoted_at"], "status": "skipped",
+            "quoted_at": quoted_location(canary), "status": "skipped",
             "failures": [], "observed": {"skipped": why}}
 
 
