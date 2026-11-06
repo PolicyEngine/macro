@@ -697,7 +697,7 @@ Which model = the question router: each row is a question, a model chip, and an 
 one-line verdict + "Open model →"; it ends with the one question no model answers and the
 `recommend_model` tool. Combine =
 StepPanel of the joins. Compare = the comparison table (`.table-scroll`, every row shown; no
-clamp). Validation = a four-entry glossary of the verification classes (`dl.class-glossary`) then
+clamp). Validation = a five-entry list of the status classes (`dl.class-glossary`; each dt links to its glossary entry, the one place a class is defined) then
 per-model verdict rows linking to each Validation tab (no figures restated). Papers = paper cards linking to
 `/papers/<id>`. At 375 the question rows stack the chip under the question (phase 2: today the
 chip squeezes the question to one word per line).
