@@ -19,10 +19,6 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 - **Integration-layer scenario sweep fixes.** `score_reform(model="obr")` places PolicyEngine-UK costings on fiscal-year quarters (default window `2026Q1..2030Q4` → `2026Q2..2031Q1`); `svar_forecast` returns simple y/y rates rather than log differences; `frbus_shock` reports rates as level deviations; `hank_shock` returns the `tax` series; invalid inputs (NaN sizes, unknown question types, out-of-window years) are refused before solving.
 
-### Added
-
-- **Weekly drift check.** `integration/drift/canaries.json` compares one cheap hosted call per model with the number the site quotes for it and reports value, provenance and revision mismatches.
-
 ## [0.2.0] — 2026-08-11
 
 Access and verification release. Nothing about any model's behaviour or any
