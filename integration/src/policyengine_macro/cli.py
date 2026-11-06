@@ -578,7 +578,7 @@ def frbus_summary(as_json):
 @click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
 def hank_shock(kind, size, persistence, horizon, variant,
                include_distribution, name, as_json):
-    """Run a stylized US HANK shock (validated replication; not a forecaster)."""
+    """Run a stylized US HANK shock (partial replication; not a forecaster)."""
     try:
         res = core.hank_shock(
             kind=kind, size=size, persistence=persistence, horizon=horizon,

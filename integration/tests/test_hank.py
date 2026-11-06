@@ -6,7 +6,7 @@ the model package; everything that needs a real solve is marked `slow` (run
 with `--runslow`) and additionally skipped when `us_hank` is unavailable.
 
 The slow tests assert signs and qualitative properties, not exact floats: the
-model is a validated replication of Auclert, Bardóczy, Rognlie & Straub
+model is a partial replication of Auclert, Bardóczy, Rognlie & Straub
 (Econometrica 2021) and its own repo gates magnitudes; these tests catch a
 sign flip, a dead cache, or a mislabeled series in OUR adapter.
 """
