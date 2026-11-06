@@ -5674,6 +5674,27 @@ a .model-id, a:hover .model-id { text-decoration: none; display: inline-block; }
 /* r5 fresh-eyes: a file path in a figure caption is a source note, not code to copy: caption type, faint, wraps */
 figcaption code { font-family: inherit; font-size: inherit; background: none; border: 0; padding: 0; color: var(--text-faint); overflow-wrap: anywhere; }
 
+/* r5 phone length (svar, obr validation): verdict and limits lead; each evidence step folds
+   behind a summary that states its result. Open, the step reads as before. */
+.meth-step.meth-fold { padding: 0; }
+.meth-step.meth-fold::before { display: none; }
+details.step-fold { margin: 0; }
+details.step-fold > summary { align-items: flex-start; gap: var(--s-3); padding: var(--s-3) 0; color: var(--text-strong); }
+details.step-fold > summary::after { margin-top: 14px; flex: 0 0 auto; }
+details.step-fold > summary .meth-step-num { margin-top: 2px; }
+.step-fold-text { display: block; min-width: 0; }
+.step-fold-text h3 { margin: 0; font-size: var(--fs-h3); line-height: 1.3; }
+details.step-fold > summary:hover h3 { color: var(--tab-teal); }
+.step-fold-result { display: block; margin-top: 4px; color: var(--text-body); font-size: var(--fs-body-sm); font-weight: 400; line-height: 1.45; }
+details.step-fold > :not(summary) { padding-left: 48px; padding-bottom: 0; color: inherit; font-size: inherit; }
+details.step-fold[open] { padding-bottom: var(--s-5); }
+details.dim-fold > summary { font-weight: 400; line-height: 1.45; padding: var(--s-2) 0; }
+/* a long summary must not squeeze the chevron into a tick shape */
+details.dim-fold > summary::after { flex: 0 0 auto; }
+@media (max-width: 600px) {
+  details.step-fold > :not(summary) { padding-left: 0; }
+}
+
 /* === r5:ui-home === */
 /* sub-tab icons for in-page anchor rows (/models, /connect): each tab gets an
    icon that means its target instead of the generic document fallback */

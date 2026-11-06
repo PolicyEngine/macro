@@ -68,12 +68,12 @@
   <div class="with-rail">
     <nav class="page-rail" aria-label="On this page">
       <p class="page-rail-title">On this page</p>
-      <a href="#trust" aria-current="location">Headline numbers</a>
+      <a href="#trust" aria-current="location">Verdict</a>
+      <a href="#caveats">Limits</a>
       <a href="#paper">Replication</a>
       <a href="#frozen">Frozen origin</a>
       <a href="#rolling">49 origins</a>
       <a href="#forecasters">Forecast skill</a>
-      <a href="#caveats">Limits</a>
       <a href="#where-next">Where next</a>
     </nav>
     <div class="rail-main">
@@ -102,25 +102,84 @@
         <span class="stat-foot"><a class="chip chip-warn" href="#forecasters">No skill</a></span>
       </div>
     </div>
-    <!-- Levels and next gates: integration/src/policyengine_macro/capabilities.py MODEL_QUALITY["boe-svar"]. -->
-    <div class="prose">
-    <div class="table-scroll trust-card"><table data-stack="yes">
-      <caption>Evidence by dimension: the registry&rsquo;s categorical judgement, and what would change it</caption>
-      <thead><tr><th scope="col">dimension</th><th scope="col">level</th><th scope="col">what would change it</th></tr></thead>
-      <tbody>
-        <tr><th scope="row">Implementation fidelity</th><td><span class="chip">strong</span></td><td>Keep all exact invariants hard-gated for every specification</td></tr>
-        <tr><th scope="row">Predictive validation</th><td><span class="chip">weak</span></td><td>Score the predictive densities rather than point forecasts, report rolling interval coverage, and re-run once the estimation sample extends past the Covid dummies</td></tr>
-        <tr><th scope="row">Identification</th><td><span class="chip">moderate</span></td><td>Show conclusions across lag, prior, proxy-data and weighting grids with effective-sample-size diagnostics</td></tr>
-        <tr><th scope="row">Policy counterfactuals</th><td><span class="chip">not applicable</span></td><td>Continue to refuse reform-scoring requests</td></tr>
-        <tr><th scope="row">Uncertainty</th><td><span class="chip">moderate</span></td><td>Report rolling empirical coverage and proper predictive scores</td></tr>
-        <tr><th scope="row">Vintage reproducibility</th><td><span class="chip">moderate</span></td><td>Freeze input manifests and retain both real-time and revised vintages</td></tr>
-      </tbody>
-    </table></div>
-    </div>
     <p class="callout callout-neutral">This is an independent replication built from Bank of England Macro
         Technical Paper No. 3 and public data. It is not produced,
         maintained, or endorsed by the Bank of England, and its results
         should not be presented as Bank of England estimates.</p>
+  </section>
+
+  <section class="band band-wide" id="caveats">
+    <div class="band-head" data-icon="alert">
+      <h2>Where this departs from the Bank&rsquo;s model</h2>
+    </div>
+    <div class="prose">
+      <div class="table-scroll mo-tablecard"><table>
+        <caption>Known limits of the structural VAR replication</caption>
+        <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><strong>Frozen data edge</strong></th>
+            <td>Estimation to 2025Q1, conditioning to 2026Q1 — the extended sample, not the paper's 1992Q1&ndash;2023Q2 window. Results shift with revisions.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Proxied world aggregates</strong></th>
+            <td>The Bank's UK-trade-weighted world GDP and CPI are unpublished, so they are rebuilt as chain-weighted US + euro-area + Japan + China with time-varying UK trade weights.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>One ranking does not replicate</strong></th>
+            <td>The paper's prose ranks UK monetary policy as the largest domestic contributor to CPI variance; here UK supply (13.9%) and UK demand (11.4%) both exceed it (8.7%). The paper publishes no FEVD table, so treat this as unresolved rather than a defect; the proxy aggregates are a candidate cause.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Assumed lag length and simplified pandemic prior</strong></th>
+            <td>p&nbsp;=&nbsp;4 is assumed, not selected; the pandemic is handled by exogenous Covid dummies.</td>
+          </tr>
+          <tr id="explosive">
+            <th scope="row"><strong>The posterior is mildly explosive</strong></th>
+            <td>In 99.2% of the 10,000 posterior draws the largest root of the VAR is above 1; the median is about 1.004, and only 4 of the 744 accepted draws are stable. This comes from the specification (variables in levels and a prior centred on a random walk), not from a code error, and the paper&rsquo;s own Fig.&nbsp;3C shows the same shape: Bank Rate fades, while the GDP and CPI levels stay shifted and do not return to baseline by h20. Beyond h20 the CPI level keeps drifting, an extrapolation the paper never shows. Long-horizon responses on these pages carry this property (<a href="https://github.com/PolicyEngine/boe-var-model/issues/11">boe-var-model #11</a>).</td>
+          </tr>
+          <tr id="coverage-fixes">
+            <th scope="row"><strong>No after-the-fact fix brings the 90% band to 90%</strong></th>
+            <td>Scored held-out, the raw 90% band covers about 77% of outturns. Three recalibrations each fall short: per-horizon rescaling factors 82.2% (<a href="https://github.com/PolicyEngine/boe-var-model/pull/19">#19</a>), conformal factors 82.4% (<a href="https://github.com/PolicyEngine/boe-var-model/pull/20">#20</a>), and Lenza&ndash;Primiceri Covid volatility scaling 80.5%, or 86.5% combined with the rescaling (<a href="https://github.com/PolicyEngine/boe-var-model/pull/21">#21</a>). The misses cluster in 2019&ndash;22. Read the 90% fan as under-covering, not as a 90% probability; the remaining candidate fix is time-varying volatility (<a href="https://github.com/PolicyEngine/boe-var-model/issues/12">boe-var-model #12</a>).</td>
+          </tr>
+          <tr id="rate-size">
+            <th scope="row"><strong>Rate-shock response above the Bank of England&rsquo;s estimate</strong></th>
+            <td>Per 25bp monetary policy shock, GDP is about 0.40% lower at h8 (posterior median). Scaled linearly to 100bp that is about 1.6%, above the Bank of England&rsquo;s published range for a 1pp rise (<a href="/models/validation#shops">the benchmark</a>). The experiments differ: here the rate path is persistent rather than held for one year, and GDP is already near its trough on impact rather than after about a year (<a href="https://github.com/PolicyEngine/boe-var-model/issues/11">boe-var-model #11</a>).</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Sign-restriction critiques apply</strong></th>
+            <td>Pointwise medians mix structural models (Fry&ndash;Pagan); the Haar prior over rotations is informative about impulse responses (Baumeister&ndash;Hamilton). These hit the Bank's own outputs identically.</td>
+          </tr>
+        </tbody>
+      </table></div>
+      <p class="opt-note">
+        every deviation is enumerated in the repository's
+        <code>docs/methodology.md</code>.
+      </p>
+    </div>
+  </section>
+
+  <section class="band band-wide" id="tests">
+    <div class="band-head" data-icon="chart">
+      <h2>Replication, one frozen origin, 49 origins, the benchmark</h2>
+    </div>
+    <details class="expander dim-fold">
+      <summary><span><strong>Evidence by dimension:</strong> implementation fidelity strong; identification, uncertainty and vintage reproducibility moderate; predictive validation weak; policy counterfactuals not applicable</span></summary>
+    <!-- Levels and next gates: integration/src/policyengine_macro/capabilities.py MODEL_QUALITY["boe-svar"]. -->
+      <div class="prose">
+      <div class="table-scroll trust-card"><table data-stack="yes">
+        <caption>Evidence by dimension: the registry&rsquo;s categorical judgement, and what would change it</caption>
+        <thead><tr><th scope="col">dimension</th><th scope="col">level</th><th scope="col">what would change it</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Implementation fidelity</th><td><span class="chip">strong</span></td><td>Keep all exact invariants hard-gated for every specification</td></tr>
+          <tr><th scope="row">Predictive validation</th><td><span class="chip">weak</span></td><td>Score the predictive densities rather than point forecasts, report rolling interval coverage, and re-run once the estimation sample extends past the Covid dummies</td></tr>
+          <tr><th scope="row">Identification</th><td><span class="chip">moderate</span></td><td>Show conclusions across lag, prior, proxy-data and weighting grids with effective-sample-size diagnostics</td></tr>
+          <tr><th scope="row">Policy counterfactuals</th><td><span class="chip">not applicable</span></td><td>Continue to refuse reform-scoring requests</td></tr>
+          <tr><th scope="row">Uncertainty</th><td><span class="chip">moderate</span></td><td>Report rolling empirical coverage and proper predictive scores</td></tr>
+          <tr><th scope="row">Vintage reproducibility</th><td><span class="chip">moderate</span></td><td>Freeze input manifests and retain both real-time and revised vintages</td></tr>
+        </tbody>
+      </table></div>
+      </div>
+    </details>
     <details class="expander">
       <summary>What CI gates, and what is refreshed by hand</summary>
       <p><strong>Gated in CI:</strong> the replication invariants and the
@@ -130,17 +189,12 @@
         the identification scheme, so that gate protects the software and
         cannot be evidence about the economy.</p>
     </details>
-  </section>
-
-  <section class="band band-wide" id="tests">
-    <div class="band-head" data-icon="chart">
-      <h2>Replication, one frozen origin, 49 origins, the benchmark</h2>
-    </div>
     <div class="scrolly-wrap single">
       <div class="scrolly-steps">
 
-      <div class="meth-step" id="paper" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Against the Bank of England paper</h3></div>
+      <div class="meth-step meth-fold" data-step="0">
+        <details class="expander step-fold" id="paper">
+          <summary><span class="meth-step-num mono">1</span><span class="step-fold-text"><h3>Against the Bank of England paper</h3><span class="step-fold-result">UK GDP share 37.4% vs ~40%; UK CPI 42.3% vs ~50%, about 8pp short; figures 2&ndash;6 replicate qualitatively</span></span></summary>
         <p class="mo-lead">Global shocks&rsquo; variance shares, against Brignone &amp; Piffer (2025).</p>
         <div class="table-scroll mo-tablecard"><table>
                 <caption>Check by check against Brignone &amp; Piffer (2025); the forecast evidence is below</caption>
@@ -235,10 +289,12 @@
                 against ~50%.
               </p>
         </details>
+              </details>
       </div>
 
-      <div class="meth-step" id="frozen" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>One frozen origin, scored against outturns</h3></div>
+      <div class="meth-step meth-fold" data-step="1">
+        <details class="expander step-fold" id="frozen">
+          <summary><span class="meth-step-num mono">2</span><span class="step-fold-text"><h3>One frozen origin, scored against outturns</h3><span class="step-fold-result">RMSE 0.32pp; 14 of 14 outturns inside the 68% band is over-dispersion, not a pass; peak miss up to 0.6pp</span></span></summary>
         <p class="mo-lead">Seven quarters from the 2024Q2 edge, against the ONS outturns since.</p>
         <figure class="vfig">
         <div class="vc-fig" data-chart="svar-fan">
@@ -331,10 +387,12 @@
                 49-origin coverage below, which finds the opposite problem.
               </p>
         </details>
+              </details>
       </div>
 
-      <div class="meth-step" id="rolling" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Across 49 origins</h3></div>
+      <div class="meth-step meth-fold" data-step="2">
+        <details class="expander step-fold" id="rolling">
+          <summary><span class="meth-step-num mono">3</span><span class="step-fold-text"><h3>Across 49 origins</h3><span class="step-fold-result">68% band 71% at h=1, 57% at h=8; the 90% band under-covers at every horizon</span></span></summary>
         <p class="mo-lead">The rolling evaluation, and the reading to weight over the single origin.</p>
         <figure class="vfig">
         <div class="vc-fig" data-chart="svar-coverage" style="--vc-min-h:260px">
@@ -424,10 +482,12 @@
                 <a href="https://github.com/PolicyEngine/boe-var-model/blob/main/results/unemployment_satellite_validation.json">unemployment_satellite_validation.json</a>.
               </p>
         </details>
+              </details>
       </div>
 
-      <div class="meth-step" id="forecasters" data-step="3">
-        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Against a drifting random walk</h3></div>
+      <div class="meth-step meth-fold" data-step="3">
+        <details class="expander step-fold" id="forecasters">
+          <summary><span class="meth-step-num mono">4</span><span class="step-fold-text"><h3>Against a drifting random walk</h3><span class="step-fold-result">No forecasting win survives the number of tests run: Bank Rate closest at 0.79, adjusted wins zero at every horizon</span></span></summary>
         <p class="mo-lead">No forecasting win survives the number of tests run.</p>
         <details class="more">
               <summary>Benchmark diagnostics, and what official forecasters report</summary>
@@ -718,59 +778,10 @@
                 horizon.
               </p>
         </details>
+              </details>
       </div>
 
       </div>
-    </div>
-  </section>
-
-  <section class="band band-wide" id="caveats">
-    <div class="band-head" data-icon="alert">
-      <h2>Where this departs from the Bank&rsquo;s model</h2>
-    </div>
-    <div class="prose">
-      <div class="table-scroll mo-tablecard"><table>
-        <caption>Known limits of the structural VAR replication</caption>
-        <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row"><strong>Frozen data edge</strong></th>
-            <td>Estimation to 2025Q1, conditioning to 2026Q1 — the extended sample, not the paper's 1992Q1&ndash;2023Q2 window. Results shift with revisions.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Proxied world aggregates</strong></th>
-            <td>The Bank's UK-trade-weighted world GDP and CPI are unpublished, so they are rebuilt as chain-weighted US + euro-area + Japan + China with time-varying UK trade weights.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>One ranking does not replicate</strong></th>
-            <td>The paper's prose ranks UK monetary policy as the largest domestic contributor to CPI variance; here UK supply (13.9%) and UK demand (11.4%) both exceed it (8.7%). The paper publishes no FEVD table, so treat this as unresolved rather than a defect; the proxy aggregates are a candidate cause.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Assumed lag length and simplified pandemic prior</strong></th>
-            <td>p&nbsp;=&nbsp;4 is assumed, not selected; the pandemic is handled by exogenous Covid dummies.</td>
-          </tr>
-          <tr id="explosive">
-            <th scope="row"><strong>The posterior is mildly explosive</strong></th>
-            <td>In 99.2% of the 10,000 posterior draws the largest root of the VAR is above 1; the median is about 1.004, and only 4 of the 744 accepted draws are stable. This comes from the specification (variables in levels and a prior centred on a random walk), not from a code error, and the paper&rsquo;s own Fig.&nbsp;3C shows the same shape: Bank Rate fades, while the GDP and CPI levels stay shifted and do not return to baseline by h20. Beyond h20 the CPI level keeps drifting, an extrapolation the paper never shows. Long-horizon responses on these pages carry this property (<a href="https://github.com/PolicyEngine/boe-var-model/issues/11">boe-var-model #11</a>).</td>
-          </tr>
-          <tr id="coverage-fixes">
-            <th scope="row"><strong>No after-the-fact fix brings the 90% band to 90%</strong></th>
-            <td>Scored held-out, the raw 90% band covers about 77% of outturns. Three recalibrations each fall short: per-horizon rescaling factors 82.2% (<a href="https://github.com/PolicyEngine/boe-var-model/pull/19">#19</a>), conformal factors 82.4% (<a href="https://github.com/PolicyEngine/boe-var-model/pull/20">#20</a>), and Lenza&ndash;Primiceri Covid volatility scaling 80.5%, or 86.5% combined with the rescaling (<a href="https://github.com/PolicyEngine/boe-var-model/pull/21">#21</a>). The misses cluster in 2019&ndash;22. Read the 90% fan as under-covering, not as a 90% probability; the remaining candidate fix is time-varying volatility (<a href="https://github.com/PolicyEngine/boe-var-model/issues/12">boe-var-model #12</a>).</td>
-          </tr>
-          <tr id="rate-size">
-            <th scope="row"><strong>Rate-shock response above the Bank of England&rsquo;s estimate</strong></th>
-            <td>Per 25bp monetary policy shock, GDP is about 0.40% lower at h8 (posterior median). Scaled linearly to 100bp that is about 1.6%, above the Bank of England&rsquo;s published range for a 1pp rise (<a href="/models/validation#shops">the benchmark</a>). The experiments differ: here the rate path is persistent rather than held for one year, and GDP is already near its trough on impact rather than after about a year (<a href="https://github.com/PolicyEngine/boe-var-model/issues/11">boe-var-model #11</a>).</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Sign-restriction critiques apply</strong></th>
-            <td>Pointwise medians mix structural models (Fry&ndash;Pagan); the Haar prior over rotations is informative about impulse responses (Baumeister&ndash;Hamilton). These hit the Bank's own outputs identically.</td>
-          </tr>
-        </tbody>
-      </table></div>
-      <p class="opt-note">
-        every deviation is enumerated in the repository's
-        <code>docs/methodology.md</code>.
-      </p>
     </div>
   </section>
 
