@@ -630,7 +630,7 @@ def movement(name: str) -> str:
 
     The comparison each series supports is not the same: a published rate moves
     in percentage points, a level in percent, and J5II is a negative balance so
-    the honest comparison is between amounts borrowed, not between balances.
+    the like-for-like comparison is between amounts borrowed, not between balances.
 
     A window of "a year earlier" is resolved by period, not by counting rows
     back, so a series with a hole in it — us_cpi is missing 2025-10 — compares
@@ -862,12 +862,12 @@ def growth_model() -> str:
         the {esc(model["display_name"])}. The round generated
         {esc(forecast["generated"])} conditions on data through
         {esc(forecast["data_edge"])}; its path, from {esc(facts["period"])}, is
-        in the chart below, after the last two years of ONS outturns — and in the same breath:
+        in the chart below, after the last two years of ONS outturns. Its limits:
       </p>
 {limits_list([
         f"Status: {esc(model['status'])}.",
         f"It cannot answer {(cannot('boe-svar'))}.",
-        f"Uncertainty is {esc(model['uncertainty'])} — the bands are the forecast, not decoration.",
+        f"Uncertainty is {esc(model['uncertainty'])}, which under-cover in back-testing (<a href=\"/svar/validation#rolling\">coverage study</a>).",
         f"Estimated on {esc(model['estimation_sample'])} but conditioned on {esc(model['data_edge'])} data, so the estimation sample stops well short of the quarters being forecast.",
     ])}
       <figure class="vchart-figure">
@@ -981,7 +981,7 @@ def inflation_model() -> str:
         headline CPI. The chart joins the last two years of ONS outturns to
         the round generated {esc(facts["forecast"]["generated"])}, from
         {esc(facts["period"])}, the first quarter without a published outturn.
-        {reaches} And in the same breath:
+        {reaches} Its limits:
       </p>
 {limits_list([
         f"Status: {esc(model['status'])}.",
@@ -1141,8 +1141,8 @@ def rates_model() -> str:
     return f"""    <div class="prose">
       <p>
         <strong>No model in this suite forecasts Bank Rate or gilt yields.</strong>
-        That is the honest answer, and this page will not dress it up as
-        coverage. What the registry actually says:
+        This page does not present that gap as coverage. What the registry
+        says:
       </p>
 {limits_list([
         f"<a href=\"/svar\">boe-svar</a> outputs {registry_terms(svar['outputs'])} — no interest-rate path is among them.",
@@ -1704,8 +1704,8 @@ def us_platform() -> str:
         "mapping exists from a US statutory reform to a US macro model, and "
         "none is invented here.",
         f"<strong>No forecast.</strong> {no_us_forecaster()} A section called "
-        "Forecasts that showed a US path anyway would be the one dishonest "
-        "thing on this site.",
+        "Forecasts showing a US path anyway would claim a forecast no model "
+        "here makes.",
     ])}
       <details class="about">
         <summary>The bridge that does exist, and the MCP routes</summary>
@@ -2193,8 +2193,8 @@ def us_rates_model() -> str:
     return f"""    <div class="prose">
       <p>
         <strong>No model in this suite forecasts the federal funds rate or the
-        Treasury curve.</strong> That is the honest answer, and this page will
-        not dress it up as coverage. What the registry actually says:
+        Treasury curve.</strong> This page does not present that gap as
+        coverage. What the registry says:
       </p>
 {limits_list([
         f'<a href="/frb-us">frb-us</a> does list a '
@@ -2494,7 +2494,8 @@ UK_TOPICS = [
         "slug": "rates",
         "title": "Rates and gilts",
         "eyebrow": "UK topic · policy rate and the gilt curve",
-        "heading": "What do rates say — and what can this site honestly say back?",
+        "heading": "What do rates say — and what can these models say about them?",
+        "series_phrase": "official Bank Rate and the 5-, 10- and 20-year nominal par gilt yields",
         "series": ("uk_bank_rate", "uk_gilt_5y", "uk_gilt_10y", "uk_gilt_20y"),
         "hook": rates_hook,
         "stands_note": (
@@ -2559,7 +2560,7 @@ US_TOPICS = [
         "slug": "growth",
         "title": "Growth",
         "eyebrow": "US topic · output",
-        "heading": "Is the US economy growing, and what can these models honestly say?",
+        "heading": "Is the US economy growing, and what can these models say?",
         "series": ("us_real_gdp",),
         "cards": (("us_real_gdp", "yoy"), ("us_real_gdp", None)),
         "hook": us_growth_hook,
@@ -2621,7 +2622,7 @@ US_TOPICS = [
         "slug": "rates",
         "title": "Rates and Treasuries",
         "eyebrow": "US topic · policy rate and the Treasury curve",
-        "heading": "What do US rates say — and what can this site honestly say back?",
+        "heading": "What do US rates say — and what can these models say about them?",
         "series": ("us_federal_funds_rate", "us_treasury_10y"),
         "hook": us_rates_hook,
         "stands_note": (
@@ -2774,8 +2775,12 @@ def topic_lede(topic: dict) -> str:
     names = [esc(sentence_case_inline(label(load(name)))) for name in topic["series"]]
     if not names:
         return "What the models can score here, and how to run it yourself."
-    return (f"The latest {listed(names)} as stored, what the "
-            "models make of them, and how to run it yourself.")
+    # A topic may name its series in one phrase where the stored labels,
+    # listed one by one, read as a garbled template (the gilt-yield labels).
+    phrase = topic.get("series_phrase") or listed(names)
+    them = "them" if len(names) > 1 else "it"
+    return (f"The latest {phrase} as stored, what the "
+            f"models make of {them}, and how to run it yourself.")
 
 
 def sentence_case_inline(text: str) -> str:
