@@ -5758,9 +5758,14 @@ details.dim-fold > summary::after { flex: 0 0 auto; }
 /* code is copied by hand from these pages: draw ">=", "==", "->" as typed */
 code, pre, kbd, samp { font-variant-ligatures: none; font-feature-settings: "calt" 0, "liga" 0; }
 /* /glossary: an index row of term links, then one card per group */
-.glossary-index { display: flex; flex-wrap: wrap; gap: var(--s-2); width: min(var(--max), calc(100% - 2 * var(--gutter))); margin: var(--s-2) auto var(--s-4); }
-.glossary-index a { display: inline-flex; align-items: center; min-height: 32px; padding: 2px 12px; border: 1px solid var(--hairline); border-radius: 999px; background: var(--surface-card); color: var(--text-body); font-size: var(--fs-small); text-decoration: none; }
-.glossary-index a:hover { border-color: var(--primary); color: var(--teal-700); }
+/* r5 fresh-eyes: the term index is a compact A-list in columns inside a card, not 36 pills */
+.glossary-index { display: block; columns: 4 13rem; column-gap: var(--s-5); width: min(var(--max), calc(100% - 2 * var(--gutter))); margin: var(--s-2) auto var(--s-4); padding: var(--s-4) var(--card-pad); border: 1px solid var(--hairline); border-radius: var(--radius-card); background: var(--surface-card); }
+.glossary-index a { display: block; break-inside: avoid; padding: 3px 0; color: var(--link); font-size: var(--fs-body-sm); line-height: 1.45; text-decoration: none; }
+.glossary-index a:hover { color: var(--link-hover); text-decoration: underline; }
+@media (max-width: 640px) { .glossary-index { columns: 2; column-gap: var(--s-4); } .glossary-index a { font-size: var(--fs-small); padding: 5px 0; } }
+/* r5 fresh-eyes: hosted / local tags say where a model runs; neither is a warning, so one neutral outline style */
+.tag-hosted, .tag-local { border: 1px solid var(--hairline-strong); background: var(--surface-card); color: var(--text-strong); }
+.tag-local { background: var(--surface-sunken); }
 .glossary { margin: 0; display: grid; }
 .glossary > div { display: grid; grid-template-columns: minmax(0, 16rem) minmax(0, 1fr); gap: var(--s-2) var(--s-5); padding: var(--s-4) 0; border-bottom: 1px solid var(--hairline); scroll-margin-top: var(--sticky-top, 120px); }
 .glossary > div:last-child { border-bottom: 0; }

@@ -4,17 +4,17 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>How each model is checked — PolicyEngine Macro</title>
-<meta name="description" content="Four classes of check and one verdict per model, plus how the same questions are answered by other institutions." />
+<meta name="description" content="Five status classes and one verdict per model, plus how the same questions are answered by other institutions." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/models/validation" />
 <meta property="og:title" content="How each model is checked — PolicyEngine Macro" />
-<meta property="og:description" content="Four classes of check and one verdict per model, plus how the same questions are answered by other institutions." />
+<meta property="og:description" content="Five status classes and one verdict per model, plus how the same questions are answered by other institutions." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <meta name="theme-color" content="#FFFFFF" />
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=22" />
+<link rel="stylesheet" href="/style.css?v=23" />
 </head>
 <body class="doc models-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -55,7 +55,7 @@
   <section id="validation" class="band">
     <div class="band-head" data-icon="scale">
       <h2>How each model is checked</h2>
-      <p class="section-intro">Four classes of check, one verdict per model.</p>
+      <p class="section-intro">Five status classes, one verdict per model.</p>
     </div>
     <div class="prose">
       <div class="glance-tabs model-tabs-set mono" role="tablist" aria-label="Validation views">
@@ -71,57 +71,58 @@
       </p>
       <p>
         The seven models support different kinds of check, grouped below into
-        four classes with one verdict each.
+        the five classes of the <a class="gloss-link" href="/glossary#verification-class">status vocabulary</a>, which the glossary defines, with one verdict each.
       </p>
       <dl class="class-glossary" id="classes">
-        <div><dt>Checked against implemented legislation</dt><dd>The rules are code, checked rule by rule; a household answer can be verified by hand.</dd></div>
-        <div><dt>Replication with a published anchor</dt><dd>Reproduces a published model or paper. An imposed match is an anchor, not a validation.</dd></div>
-        <div><dt>Calibrated counterfactual</dt><dd>Targets are met <a class="gloss-link" href="/glossary#by-construction">by construction</a>, so there is no ground truth to test against.</dd></div>
-        <div><dt>Partial replication</dt><dd>One block replicates a published table; the rest is checked only against the published design (<a href="/glossary#design-gated">design-gated</a>).</dd></div>
+        <div><dt><a class="gloss-link" href="/glossary#exact-for-rules">Exact for implemented rules</a></dt><dd>PolicyEngine microsimulation</dd></div>
+        <div><dt><a class="gloss-link" href="/glossary#replicates">Replicates [source] on [checks]</a></dt><dd>FRB/US</dd></div>
+        <div><dt><a class="gloss-link" href="/glossary#partial-replication">Partial replication of [source]</a></dt><dd>BoE SVAR, US HANK, DEFINE-UK</dd></div>
+        <div><dt><a class="gloss-link" href="/glossary#anchored-not-validated">Anchored to [source], not validated as a forecaster</a></dt><dd>OBR emulator</dd></div>
+        <div><dt><a class="gloss-link" href="/glossary#calibrated-counterfactual">Calibrated; no outcome benchmark</a></dt><dd>OG-UK</dd></div>
       </dl>
       <div class="table-scroll">
       <table>
-        <thead><tr><th scope="col">Model</th><th scope="col">Verification class</th><th scope="col">What it is checked against</th><th scope="col">Verdict</th></tr></thead>
+        <thead><tr><th scope="col">Model</th><th scope="col">Status class</th><th scope="col">What it is checked against</th><th scope="col">Verdict</th></tr></thead>
         <tbody>
           <tr>
             <th scope="row"><a href="/pe/validation"><strong>PolicyEngine microsimulation</strong> <span class="model-id mono">pe-microsim</span></a></th>
-            <td>Checked against implemented legislation</td>
+            <td>Exact for implemented rules</td>
             <td>Implemented UK and US legislation, rule by rule</td>
             <td>Household maths exact; population adds survey error</td>
           </tr>
           <tr>
             <th scope="row"><a href="/obr/validation"><strong>OBR emulator</strong> <span class="model-id mono">obr-macro</span></a></th>
-            <td>Replication with a <a class="gloss-link" href="/glossary#published-anchor">published anchor</a></td>
+            <td>Anchored to the March 2026 EFO, not validated as a forecaster</td>
             <td>March 2026 <a class="gloss-link" href="/glossary#efo">EFO</a>; HMRC ready reckoner; ONS <a class="gloss-link" href="/glossary#outturn">outturns</a></td>
             <td>Tracks the EFO by construction (0.30% GDP MAPE); weak <a href="/glossary#anchored">free-running</a>; predictive, policy and uncertainty checks rated weak; no quarter of the reform solve converges to tolerance; CPI does not respond to rate or oil shocks</td>
           </tr>
           <tr>
             <th scope="row"><a href="/svar/validation"><strong>BoE SVAR</strong> <span class="model-id mono">boe-svar</span></a></th>
-            <td>Replication with a published anchor</td>
+            <td>Partial replication of Brignone &amp; Piffer (2025)</td>
             <td>Brignone &amp; Piffer (2025); ONS outturns</td>
-            <td>Replicates the GDP decomposition; CPI global-shock share about 8pp short; no <a class="gloss-link" href="/glossary#forecast-skill">forecast skill</a> against a drifting <a class="gloss-link" href="/glossary#random-walk">random walk</a> once the 64 tests are adjusted together; bands under-cover across 49 origins</td>
+            <td>GDP decomposition consistent with the paper; CPI global-shock share about 8pp short; no <a class="gloss-link" href="/glossary#forecast-skill">forecast skill</a> against a drifting <a class="gloss-link" href="/glossary#random-walk">random walk</a> once the 64 tests are adjusted together; bands under-cover across 49 origins</td>
           </tr>
           <tr>
             <th scope="row"><a href="/frb-us/validation"><strong>FRB/US</strong> <span class="model-id mono">frb-us</span></a></th>
-            <td>Replication with a published anchor</td>
+            <td>Replicates the Fed's <code>pyfrbus</code> on one 100bp shock</td>
             <td>The Fed's <code>pyfrbus</code> on an identical shock; published multiplier ranges</td>
             <td>One 100bp funds-rate shock matches pyfrbus within the gap between the Fed&rsquo;s own two releases (<a href="/glossary#release-gap">release-to-release gap</a>); baseline tracking is an identity; no predictive claim</td>
           </tr>
           <tr>
             <th scope="row"><a href="/us-hank/validation"><strong>US HANK</strong> <span class="model-id mono">us-hank</span></a></th>
-            <td>Replication with a published anchor</td>
+            <td>Partial replication of Auclert et al. (2021)</td>
             <td>Auclert et al. (2021), via the authors' toolkit</td>
             <td>Six of seven solved parameters match the paper; <code>vphi</code> misses by &minus;17.3%, unresolved; Y, K and r are inputs, not results; IRF magnitudes unvalidated</td>
           </tr>
           <tr>
             <th scope="row"><a href="/olg/validation"><strong>OG-UK</strong> <span class="model-id mono">psl-og</span></a></th>
-            <td><a class="gloss-link" href="/glossary#calibrated-counterfactual">Calibrated counterfactual</a> — no ground truth</td>
+            <td>Calibrated; no outcome benchmark</td>
             <td>ONS/OBR aggregates as <em>targets</em>, not a validation set</td>
             <td>Targets met by construction; the nearest external benchmark (OBR Working Paper 22, Table 5.1) has not yet been run</td>
           </tr>
           <tr>
             <th scope="row"><a href="/define/validation#calibration"><strong>DEFINE-UK</strong> <span class="model-id mono">define-uk</span></a></th>
-            <td><a class="gloss-link" href="/glossary#partial-replication">Partial replication</a> — macro block and scenario design-gate pass</td>
+            <td>Partial replication of the manual — macro block and scenario design-gate pass</td>
             <td>Manual Table&nbsp;4; ONS outturns, OBR EFO, DESNZ emissions — no scenario figures are published</td>
             <td>Macro block matches manual Table&nbsp;4, but 2025 growth misses by &minus;0.30pp, clearing a gate set after the run by 0.01pp; emissions 23.3% below the manual in 2040; no published scenario results to check; baseline far from outturns &mdash; <a class="gloss-link" href="/glossary#deltas-only">deltas only</a>, never levels</td>
           </tr>
@@ -153,8 +154,8 @@
           </tr>
           <tr>
             <th scope="row">Government-purchases multiplier (frb-us)</th>
-            <td><a href="https://econweb.ucsd.edu/~vramey/research/Ramey_Fiscal_JEP.pdf">Ramey (JEP 2019)</a> and the pegged-rate cross-model range</td>
-            <td>Adjusted — both of ours sit inside Ramey&rsquo;s range, but it pools estimates across horizons and monetary regimes, so neither is matched to it; the pegged-rate figure sits below the cross-model range</td>
+            <td>CBO ranges (converted to a calendar-year ratio), <a href="https://econweb.ucsd.edu/~vramey/research/Ramey_Fiscal_JEP.pdf">Ramey (JEP 2019)</a> and the 2010 FRB-US lines in Coenen et al.</td>
+            <td>Adjusted — ours sit inside CBO&rsquo;s converted ranges, in their lower part, and inside Ramey&rsquo;s range, which pools estimates across horizons and monetary regimes; they sit below the 2010 FRB-US lines</td>
             <td><a href="/frb-us/validation#multipliers">frb-us validation</a></td>
           </tr>
           <tr>
@@ -162,6 +163,12 @@
             <td><a href="https://obr.uk/box/fiscal-multipliers/">OBR&rsquo;s published UK assumption</a> for income tax and NICs</td>
             <td>Loose — different country and model class</td>
             <td><a href="/frb-us/validation#multipliers">frb-us validation</a></td>
+          </tr>
+          <tr id="rate-benchmark">
+            <th scope="row">GDP response to a 1pp rise in Bank Rate (obr-macro, boe-svar)</th>
+            <td><a href="https://www.bankofengland.co.uk/quarterly-bulletin/1999/q2/the-transmission-mechanism-of-monetary-policy">Bank of England, Quarterly Bulletin 1999 Q2</a>: a 1pp rise held for a year lowers output by 0.2% to 0.35% after about a year, and inflation by 0.2 to 0.4pp about a year after that</td>
+            <td>Loose &mdash; a 1999 estimate, and the experiments differ in rate path; obr-macro sits below the range, boe-svar above it</td>
+            <td><a href="/obr/validation#caveats">obr-macro validation</a>; <a href="/svar/validation#caveats">boe-svar validation</a></td>
           </tr>
           <tr>
             <th scope="row">Forecast error, 2024Q3 onward (boe-svar)</th>
