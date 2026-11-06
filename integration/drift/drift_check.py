@@ -317,6 +317,7 @@ async def _hosted_calls(url: str, canaries: list[dict], timeout: float,
                 r = await call("get_job_result",
                                {"job_id": job["job_id"], "wait_seconds": 30})
             except Exception:  # noqa: BLE001 - a failed poll is not a failed job
+                await asyncio.sleep(5)  # no tight reconnect loop against Modal
                 continue
             if "__error__" in r or r.get("status") == "done":
                 return r.get("result", r)
