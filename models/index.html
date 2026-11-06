@@ -4,16 +4,17 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Models — PolicyEngine Macro</title>
-<meta name="description" content="Choose from seven open UK and US economic models by question, country, method, and run surface — with side-by-side assumptions, the validation evidence, and the source literature on one page." />
+<meta name="description" content="Choose from seven open UK and US economic models by question and country. The side-by-side table, how the models combine, the validation and the papers each have their own tab." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/models" />
 <meta property="og:title" content="Models — PolicyEngine Macro" />
-<meta property="og:description" content="Choose from seven open UK and US economic models by question, country, method, and run surface — with side-by-side assumptions, the validation evidence, and the source literature on one page." />
+<meta property="og:description" content="Choose from seven open UK and US economic models by question and country. The side-by-side table, how the models combine, the validation and the papers each have their own tab." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <meta name="theme-color" content="#FFFFFF" />
+<link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=19" />
+<link rel="stylesheet" href="/style.css?v=23" />
 </head>
 <body class="doc models-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -39,437 +40,168 @@
   <section class="hero model-hero">
     <div class="hero-inner">
       <h1 class="reveal page-title" style="--d:1">Models</h1>
-      <p class="lede reveal" style="--d:2">One microsimulation, and six macro models that extend it with shocks, forecasts and long-run change.</p>
+      <p class="lede reveal" style="--d:2">One <a class="gloss-link" href="/glossary#microsimulation">microsimulation</a>, and six macro models that extend it with shocks, forecasts and long-run change.</p>
     </div>
   </section>
-  <nav class="model-tabs" aria-label="Model catalog sections" data-models-subnav>
+  <nav class="model-tabs" aria-label="Models pages">
     <div class="model-tabs-row">
-      <a class="model-tabs-link" href="#choose">Which model</a>
-      <a class="model-tabs-link" href="#compare">Compare</a>
-      <a class="model-tabs-link" href="#compose">Combine</a>
-      <a class="model-tabs-link" href="#validation">Validation</a>
-      <a class="model-tabs-link" href="#evidence">Papers</a>
+      <a class="model-tabs-link" href="/models" aria-current="page">Which model</a>
+      <a class="model-tabs-link" href="/models/side-by-side">Side by side</a>
+      <a class="model-tabs-link" href="/models/combine">Combine</a>
+      <a class="model-tabs-link" href="/models/validation">Validation</a>
+      <a class="model-tabs-link" href="/models/papers">Papers</a>
     </div>
   </nav>
   <section id="choose" class="band band-stack">
-    <div class="band-head" data-icon="list"><h2>Which model answers your question</h2><p class="section-intro">Open a question for the model, how far to trust it and where it joins.</p></div>
-    <div class="qa-list">
-      <details class="qa" style="--qa-i:0" id="core">
-        <summary><span>Taxes and benefits, for a household or a population</span><strong>PolicyEngine microsimulation <span class="model-id mono">pe-microsim</span> &middot; UK + US</strong></summary>
-        <div class="qa-body">
-          <p>PolicyEngine&rsquo;s own engine, and the one behind policyengine.org: the tax-benefit rules as code over enhanced survey microdata, for one household or the whole population. The only member covering both countries.</p>
+    <div class="band-head" data-icon="list"><h2>Which model answers your question</h2><p class="section-intro">Pick a question and a country; the models that answer it stay on screen.</p></div>
+    <div class="router" data-router>
+      <div class="router-filters" role="group" aria-label="Filter models">
+        <div class="router-row" role="group" aria-label="Question"><span class="router-label">Question</span><button type="button" class="chip-btn" data-job="all" aria-pressed="true">Any question</button><button type="button" class="chip-btn" data-job="cost" aria-pressed="false">Cost a reform</button><button type="button" class="chip-btn" data-job="forecast" aria-pressed="false">Forecast the economy</button><button type="button" class="chip-btn" data-job="shock" aria-pressed="false">Trace a shock</button><button type="button" class="chip-btn" data-job="gains" aria-pressed="false">Who gains and loses</button><button type="button" class="chip-btn" data-job="long" aria-pressed="false">Effects over decades</button><button type="button" class="chip-btn" data-job="climate" aria-pressed="false">Climate policy</button></div>
+        <div class="router-row" role="group" aria-label="Country"><span class="router-label">Country</span><button type="button" class="chip-btn" data-ctry="all" aria-pressed="true">UK and US</button><button type="button" class="chip-btn" data-ctry="uk" aria-pressed="false">UK</button><button type="button" class="chip-btn" data-ctry="us" aria-pressed="false">US</button></div>
+      </div>
+      <p class="router-count" aria-live="polite" data-router-count>Seven models</p>
+      <div class="mcard-grid">
+      <article class="mcard" data-country="uk us" data-jobs="cost gains" id="core">
+        <p class="mcard-q">Taxes and benefits, for a household or a population</p>
+        <h3 class="mcard-name"><a href="/pe">PolicyEngine microsimulation</a> <span class="model-id mono">pe-microsim</span></h3>
+        <div class="chips mcard-chips"><span class="chip">UK + US</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#exact-for-rules">exact for rules</a></span></div>
+        <p class="mcard-verdict"><span class="mcard-verdict-k">Verdict:</span> Exact for implemented rules (household maths); population estimates add survey error.</p>
+        <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
+          <p class="mcard-lead">PolicyEngine&rsquo;s own engine, and the one behind policyengine.org: the tax-benefit rules as code over enhanced survey microdata, for one household or the whole population. The only member covering both countries.</p>
           <div class="qa-facts">
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Household answers are <strong>exact rule arithmetic</strong> &mdash; the <a href="/pe/code">worked case</a> checks with a pencil</span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Population answers inherit <strong>survey-data error</strong> and carry no interval</span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Static by design &mdash; no forecast, no GDP, inflation or behavioural response. The six below add those</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Hosted &mdash; MCP tools and a CLI, no account needed</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Hosted &mdash; <a class="gloss-link" href="/glossary#mcp">MCP</a> tools and a CLI, no account needed</span></div>
           </div>
-          <p class="qa-link"><a href="/pe">Open PolicyEngine microsim &rarr;</a></p>
-        </div>
-      </details>
-      <details class="qa" style="--qa-i:1">
-        <summary><span>A selected UK fiscal or macro scenario over 3&ndash;5 years</span><strong>OBR emulator <span class="model-id mono">obr-macro</span> &middot; UK</strong></summary>
-        <div class="qa-body">
-          <p>A transpiled, solvable copy of the OBR&rsquo;s published macroeconometric model, anchored to the latest EFO: shock a lever, re-solve, and read GDP, consumption and investment against the official path.</p>
+        </details>
+        <p class="mcard-links"><a class="btn btn-primary btn-sm" href="/pe">Open<span class="visually-hidden"> PolicyEngine microsimulation</span><span aria-hidden="true"> &rarr;</span></a><a href="/pe/validation">Evidence<span class="visually-hidden"> for PolicyEngine microsimulation</span></a><a href="/pe#answers">Results<span class="visually-hidden"> from PolicyEngine microsimulation</span></a><a href="/papers/pe-microsim">Paper<span class="visually-hidden"> on PolicyEngine microsimulation</span></a></p>
+      </article>
+      <article class="mcard" data-country="uk" data-jobs="cost shock">
+        <p class="mcard-q">A selected UK fiscal or macro scenario over 3&ndash;5 years</p>
+        <h3 class="mcard-name"><a href="/obr">OBR emulator</a> <span class="model-id mono">obr-macro</span></h3>
+        <div class="chips mcard-chips"><span class="chip">UK</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#anchored-not-validated">anchored</a></span></div>
+        <p class="mcard-verdict"><span class="mcard-verdict-k">Verdict:</span> Anchored to the EFO by construction, not validated as a forecaster; weak free-running.</p>
+        <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
+          <p class="mcard-lead">A transpiled, solvable copy of the OBR&rsquo;s published macroeconometric model, <a class="gloss-link" href="/glossary#anchored">anchored</a> to the latest <a class="gloss-link" href="/glossary#efo">EFO</a>: shock a lever, re-solve, and read GDP, consumption and investment against the official path.</p>
           <div class="qa-facts">
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Tracks the published forecast <strong>by construction</strong> with the anchors held; <strong>weak free-running</strong> (<a href="/obr/validation">validation</a>)</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>The household tax route behaves; the spending lever&rsquo;s multiplier is <strong>fixed by construction</strong> (<a href="/obr/validation#caveats">limits</a>)</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core: <code>score_reform</code> feeds the static costing in through <code>HHDI_ADDFACTOR</code></span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Tracks the published forecast <strong><a class="gloss-link" href="/glossary#by-construction">by construction</a></strong> with the anchors held; <strong>weak free-running</strong> (<a href="/obr/validation">validation</a>)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>The household tax route transmits, but no quarter of the solve converges to tolerance; the spending lever&rsquo;s multiplier is <strong>fixed by construction</strong> (<a href="/obr/validation#caveats">limits</a>)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core: <code>score_reform</code> feeds the <a class="gloss-link" href="/glossary#static-costing">static costing</a> in as an <a href="/glossary#add-factor">add-factor</a> on household disposable income (<code>HHDI_ADDFACTOR</code>)</span></div>
           </div>
-          <p class="qa-link"><a href="/obr">Open the OBR emulator &rarr;</a></p>
-        </div>
-      </details>
-      <details class="qa" style="--qa-i:2">
-        <summary><span>What drove UK GDP and inflation at the latest model-data vintage</span><strong>BoE SVAR <span class="model-id mono">boe-svar</span> &middot; UK</strong></summary>
-        <div class="qa-body">
-          <p>An eight-variable Bayesian structural VAR: named shocks identified by sign and zero restrictions, a decomposition of recent GDP and inflation, and a forward projection with credible bands.</p>
+        </details>
+        <p class="mcard-links"><a class="btn btn-primary btn-sm" href="/obr">Open<span class="visually-hidden"> OBR emulator</span><span aria-hidden="true"> &rarr;</span></a><a href="/obr/validation">Evidence<span class="visually-hidden"> for OBR emulator</span></a><a href="/obr#answers">Results<span class="visually-hidden"> from OBR emulator</span></a><a href="/papers/obr-macro">Paper<span class="visually-hidden"> on OBR emulator</span></a></p>
+      </article>
+      <article class="mcard" data-country="uk" data-jobs="forecast gains">
+        <p class="mcard-q">What drove UK GDP and inflation at the latest model-data vintage</p>
+        <h3 class="mcard-name"><a href="/svar">BoE SVAR</a> <span class="model-id mono">boe-svar</span></h3>
+        <div class="chips mcard-chips"><span class="chip">UK</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#partial-replication">partial replication</a></span></div>
+        <p class="mcard-verdict"><span class="mcard-verdict-k">Verdict:</span> Partial replication; GDP decomposition consistent with the paper, short on CPI; no forecast skill.</p>
+        <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
+          <p class="mcard-lead">An eight-variable Bayesian structural VAR: named shocks identified by <a class="gloss-link" href="/glossary#sign-restrictions">sign and zero restrictions</a>, a decomposition of recent GDP and inflation, and a forward projection with <a class="gloss-link" href="/glossary#credible-band">credible bands</a>.</p>
           <div class="qa-facts">
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Frozen-edge bands run wide: <strong>over-dispersion, not a pass</strong></span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Against a drifting random walk <strong>no skill survives</strong> once the tests are adjusted together (<a href="/svar/validation#forecasters">validation</a>)</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core: the CPI path drives benefit-uprating incidence (<code>svar_inflation_incidence</code>, experimental)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Bands <strong>under-cover</strong> across 49 back-test origins; one <a href="/glossary#frozen-edge">frozen origin</a> shows the opposite (<a href="/svar/validation#rolling">coverage</a>)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Against a drifting <a class="gloss-link" href="/glossary#random-walk">random walk</a> <strong>no skill survives</strong> once the tests are adjusted together (<a href="/svar/validation#forecasters">validation</a>)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core: the CPI path drives benefit-uprating <a class="gloss-link" href="/glossary#incidence">incidence</a> (<code>svar_inflation_incidence</code>, experimental)</span></div>
           </div>
-          <p class="qa-link"><a href="/svar">Open BoE SVAR &rarr;</a></p>
-        </div>
-      </details>
-      <details class="qa" style="--qa-i:3">
-        <summary><span>A monetary or fiscal shock in the US over coming quarters</span><strong>FRB/US <span class="model-id mono">frb-us</span> &middot; US</strong></summary>
-        <div class="qa-body">
-          <p>The Federal Reserve&rsquo;s FRB/US model &mdash; 284 equations parsed from the Board&rsquo;s own model file &mdash; solved around the April 2026 LONGBASE baseline. Pick a lever and a policy rule, read the deviation path.</p>
+        </details>
+        <p class="mcard-links"><a class="btn btn-primary btn-sm" href="/svar">Open<span class="visually-hidden"> BoE SVAR</span><span aria-hidden="true"> &rarr;</span></a><a href="/svar/validation">Evidence<span class="visually-hidden"> for BoE SVAR</span></a><a href="/svar#answers">Results<span class="visually-hidden"> from BoE SVAR</span></a><a href="/papers/boe-svar">Paper<span class="visually-hidden"> on BoE SVAR</span></a></p>
+      </article>
+      <article class="mcard" data-country="us" data-jobs="shock gains">
+        <p class="mcard-q">A monetary or fiscal shock in the US over coming quarters</p>
+        <h3 class="mcard-name"><a href="/frb-us">FRB/US</a> <span class="model-id mono">frb-us</span></h3>
+        <div class="chips mcard-chips"><span class="chip">US</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#replicates">replicates</a></span></div>
+        <p class="mcard-verdict"><span class="mcard-verdict-k">Verdict:</span> Replicates the Fed&rsquo;s pyfrbus on one 100bp funds-rate shock; a solver check, no predictive claim.</p>
+        <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
+          <p class="mcard-lead">The Federal Reserve&rsquo;s FRB/US model &mdash; 284 equations parsed from the Board&rsquo;s own model file &mdash; solved around the April 2026 LONGBASE baseline. Pick a lever and a policy rule, read the deviation path.</p>
           <div class="qa-facts">
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Levers: federal funds rate, government spending, transfers, taxes</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Matches the Fed&rsquo;s pyfrbus at <strong>its own noise floor</strong> (<a href="/frb-us/validation">validation</a>). Reproducing LONGBASE is an identity, not evidence</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Matches the Fed&rsquo;s pyfrbus on a 100bp funds-rate shock, <strong>within the gap between the Fed&rsquo;s own two releases</strong> (<a href="/frb-us/validation">validation</a>). Reproducing LONGBASE is an identity, not evidence</span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins one way: wage and hours drive employment-income incidence (<code>frbus_shock_incidence</code>, experimental). <code>score_reform</code> refuses it</span></div>
           </div>
-          <p class="qa-link"><a href="/frb-us">Open FRB/US &rarr;</a></p>
-        </div>
-      </details>
-      <details class="qa" style="--qa-i:4">
-        <summary><span>How US shock responses differ across the household wealth distribution</span><strong>US HANK <span class="model-id mono">us-hank</span> &middot; US</strong></summary>
-        <div class="qa-body">
-          <p>A two-asset heterogeneous-agent New Keynesian model (an ABRS 2021 replication): one monetary, fiscal or productivity shock, solved for the whole distribution of households.</p>
+        </details>
+        <p class="mcard-links"><a class="btn btn-primary btn-sm" href="/frb-us">Open<span class="visually-hidden"> FRB/US</span><span aria-hidden="true"> &rarr;</span></a><a href="/frb-us/validation">Evidence<span class="visually-hidden"> for FRB/US</span></a><a href="/frb-us#answers">Results<span class="visually-hidden"> from FRB/US</span></a><a href="/papers/frb-us">Paper<span class="visually-hidden"> on FRB/US</span></a></p>
+      </article>
+      <article class="mcard" data-country="us" data-jobs="shock gains">
+        <p class="mcard-q">How US shock responses differ across the household wealth distribution</p>
+        <h3 class="mcard-name"><a href="/us-hank">US HANK</a> <span class="model-id mono">us-hank</span></h3>
+        <div class="chips mcard-chips"><span class="chip">US</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#partial-replication">partial replication</a></span></div>
+        <p class="mcard-verdict"><span class="mcard-verdict-k">Verdict:</span> Partial replication; six of seven solved parameters of the paper match; <code>vphi</code> is &minus;17.3%, unresolved; not a forecast-accuracy claim.</p>
+        <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
+          <p class="mcard-lead">A two-asset heterogeneous-agent New Keynesian model (an ABRS 2021 replication): one monetary, fiscal or productivity shock, solved for the whole distribution of households.</p>
           <div class="qa-facts">
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Consumption responses by liquid-wealth quartile and the hand-to-mouth share, warm in seconds from a cached sequence-space Jacobian</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Consumption responses by liquid-wealth quartile and the <a class="gloss-link" href="/glossary#hand-to-mouth">hand-to-mouth</a> share, warm in seconds from a cached <a class="gloss-link" href="/glossary#sequence-space-jacobian">sequence-space Jacobian</a></span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Stylized replication &mdash; not a forecaster, no reform scoring, and responses are first-order</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core one way: wage and labour IRFs drive employment-income incidence (<code>hank_shock_incidence</code>, experimental)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Known model properties: <a class="gloss-link" href="/glossary#mpc">MPCs</a> well below US estimates, and a tax-financed spending rise that lowers output within a year (<a href="/us-hank/validation#caveats">limits</a>)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core one way: wage and labour <a class="gloss-link" href="/glossary#irf">IRFs</a> drive employment-income incidence (<code>hank_shock_incidence</code>, experimental)</span></div>
           </div>
-          <p class="qa-link"><a href="/us-hank">Open US HANK &rarr;</a></p>
-        </div>
-      </details>
-      <details class="qa" style="--qa-i:5">
-        <summary><span>Work, saving, and capital effects over decades</span><strong>OG-UK <span class="model-id mono">psl-og</span> &middot; UK</strong></summary>
-        <div class="qa-body">
-          <p>80 age cohorts choose work and saving over their lifetimes. Solve the steady state or the 60-period transition path and read where a reform takes GDP, investment and revenue in the long run.</p>
+        </details>
+        <p class="mcard-links"><a class="btn btn-primary btn-sm" href="/us-hank">Open<span class="visually-hidden"> US HANK</span><span aria-hidden="true"> &rarr;</span></a><a href="/us-hank/validation">Evidence<span class="visually-hidden"> for US HANK</span></a><a href="/us-hank#answers">Results<span class="visually-hidden"> from US HANK</span></a><a href="/reports/us-hank-open-source" title="HANK survey">Survey<span class="visually-hidden">: the HANK survey</span></a></p>
+      </article>
+      <article class="mcard" data-country="uk" data-jobs="cost long">
+        <p class="mcard-q">Work, saving, and capital effects over decades</p>
+        <h3 class="mcard-name"><a href="/olg">OG-UK</a> <span class="model-id mono">psl-og</span></h3>
+        <div class="chips mcard-chips"><span class="chip">UK</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#calibrated-counterfactual">calibrated</a></span></div>
+        <p class="mcard-verdict"><span class="mcard-verdict-k">Verdict:</span> Calibrated; no outcome benchmark.</p>
+        <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
+          <p class="mcard-lead">80 age cohorts choose work and saving over their lifetimes. Solve the <a class="gloss-link" href="/glossary#steady-state">steady state</a> or the 60-period transition path and read where a reform takes GDP, investment and revenue in the long run.</p>
           <div class="qa-facts">
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Worked example: +1pp on the basic rate, with the year-by-year path on the <a href="/olg#showcase">model page</a></span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Local-only and experimental: calibrated, with <strong>no published ground truth</strong></span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core both ways: statute in through PolicyEngine-estimated tax functions, long-run changes back out into a second microsim run (<code>og+microsim</code>)</span></div>
           </div>
-          <p class="qa-link"><a href="/olg">Open OG-UK &rarr;</a></p>
-        </div>
-      </details>
-      <details class="qa" style="--qa-i:6">
-        <summary><span>A UK climate-policy scenario, as deltas against a baseline</span><strong>DEFINE-UK <span class="model-id mono">define-uk</span> &middot; UK</strong></summary>
-        <div class="qa-body">
-          <p>The authors&rsquo; ecological stock-flow-consistent model of the UK economy and climate, run unmodified at a pinned commit: one published scenario, read as deltas over 2023&ndash;2037.</p>
+        </details>
+        <p class="mcard-links"><a class="btn btn-primary btn-sm" href="/olg">Open<span class="visually-hidden"> OG-UK</span><span aria-hidden="true"> &rarr;</span></a><a href="/olg/validation">Evidence<span class="visually-hidden"> for OG-UK</span></a><a href="/olg#showcase">Results<span class="visually-hidden"> from OG-UK</span></a><a href="/papers/psl-og">Paper<span class="visually-hidden"> on OG-UK</span></a></p>
+      </article>
+      <article class="mcard" data-country="uk" data-jobs="climate gains">
+        <p class="mcard-q">A UK climate-policy scenario, as deltas against a baseline</p>
+        <h3 class="mcard-name"><a href="/define">DEFINE-UK</a> <span class="model-id mono">define-uk</span></h3>
+        <div class="chips mcard-chips"><span class="chip">UK</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#partial-replication">partial replication</a></span></div>
+        <p class="mcard-verdict"><span class="mcard-verdict-k">Verdict:</span> Partial replication; deltas only, never levels.</p>
+        <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
+          <p class="mcard-lead">The authors&rsquo; ecological stock-flow-consistent model of the UK economy and climate, run unmodified at a pinned commit: one published scenario, read as deltas over 2023&ndash;2037.</p>
           <div class="qa-facts">
-          <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Deltas only, never levels</strong> &mdash; the baseline sits far from outturns, so nothing here is a forecast</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Partial replication: the macro block replicates manual Table&nbsp;4, and scenario deltas are design-gated because <strong>no numeric v1.1 scenario results are published</strong></span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span><strong><a class="gloss-link" href="/glossary#deltas-only">Deltas only</a>, never levels</strong> &mdash; the baseline sits far from <a class="gloss-link" href="/glossary#outturn">outturns</a>, so nothing here is a forecast</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Partial replication: the macro block replicates manual Table&nbsp;4, and scenario deltas are checked only against the published scenario design (<a href="/glossary#design-gated">design-gated</a>) because <strong>no numeric v1.1 scenario results are published</strong></span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Every published delta also carries a Baseline/policy parameter mismatch, so 2023&ndash;26 deltas are not policy effects (<a href="/define/validation#caveats">limits</a>)</span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core one way: scenario income deltas drive employment-income incidence (<code>define_scenario_incidence</code>, experimental)</span></div>
           </div>
-          <p class="qa-link"><a href="/define">Open DEFINE-UK &rarr;</a></p>
-        </div>
-      </details>
-    </div>
-    <p class="callout callout-neutral router-gap"><strong>No model answers macro feedback on a US reform.</strong> No US macro bridge exists, so a US reform is scored statically.</p>
-    <p class="chooser-note">From code or an AI client, <code>recommend_model</code> routes a question to a model, or refuses when none supports it (<a href="/connect">connect a client</a>). Already have two candidates? <a href="#compare">Compare them side by side</a>.</p>
-  </section>
-  <section id="compare" class="band">
-    <div class="band-head" data-icon="table">
-      <h2>The seven models side by side</h2>
-      <p class="section-intro">What each answers, whether it scores a reform, and where it runs.</p>
-    </div>
-    <div class="table-scroll">
-      <table class="compare-models">
-        <caption class="visually-hidden">The seven models compared by country, question, reform scoring and run surface</caption>
-        <thead><tr><th scope="col">Model</th><th scope="col">Country</th><th scope="col">Answers</th><th scope="col">Scores reforms</th><th scope="col">Runs</th></tr></thead>
-        <tbody>
-          <tr><th scope="row"><a href="/pe">PolicyEngine microsimulation</a> <span class="model-id mono">pe-microsim</span></th><td>UK &amp; US</td><td>What a specific family pays and receives; distributional effects</td><td>Yes</td><td>Hosted</td></tr>
-          <tr><th scope="row"><a href="/obr">OBR emulator</a> <span class="model-id mono">obr-macro</span></th><td>UK</td><td>Selected near-term UK fiscal and macro scenarios</td><td>Yes</td><td>Hosted</td></tr>
-          <tr><th scope="row"><a href="/svar">BoE SVAR</a> <span class="model-id mono">boe-svar</span></th><td>UK</td><td>What drove the UK economy at the latest vintage; short-run forecasts</td><td>No</td><td>Hosted</td></tr>
-          <tr><th scope="row"><a href="/frb-us">FRB/US</a> <span class="model-id mono">frb-us</span></th><td>US</td><td>US macro dynamics: monetary and fiscal shocks, quarter by quarter</td><td>No</td><td>Hosted, raw shocks only</td></tr>
-          <tr><th scope="row"><a href="/us-hank">US HANK</a> <span class="model-id mono">us-hank</span></th><td>US</td><td>Distributional transmission of stylized US shocks: who responds, by wealth</td><td>No</td><td>Hosted, stylized shocks only</td></tr>
-          <tr><th scope="row"><a href="/olg">OG-UK</a> <span class="model-id mono">psl-og</span></th><td>UK (OG-UK)</td><td>Long-run incentives: labour supply, saving, the capital stock over decades</td><td>Yes</td><td>Local only</td></tr>
-          <tr><th scope="row"><a href="/define">DEFINE-UK</a> <span class="model-id mono">define-uk</span></th><td>UK</td><td>UK climate-policy scenario deltas — nothing quotable today</td><td>No</td><td>Local CLI</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <details class="about"><summary>Method, data, connection, scope and runtime, model by model</summary>
-      <h3>PolicyEngine microsimulation <span class="model-id mono">pe-microsim</span></h3>
-      <dl class="kv kv-text">
-        <div><dt>Method</dt><dd>Static tax-benefit microsimulation — direct rule evaluation, no behavioural response</dd></div>
-        <div><dt>Data vintage</dt><dd>UK &amp; US statute; enhanced FRS 2023–24 microdata for UK population runs</dd></div>
-        <div><dt>Microsim connection</dt><dd>Is the microsimulation — every bridge starts or ends here</dd></div>
-        <div><dt>Reform scoring</dt><dd>Yes — a PolicyEngine parameter + a new value, applied directly to households</dd></div>
-        <div><dt>Out of scope</dt><dd>GDP, inflation, interest rates, or macro feedback</dd></div>
-        <div><dt>Run surface</dt><dd>Hosted</dd></div>
-        <div><dt>Typical runtime</dt><dd>Sub-second per household; minutes for population runs</dd></div>
-      </dl>
-      <h3>OBR emulator <span class="model-id mono">obr-macro</span></h3>
-      <dl class="kv kv-text">
-        <div><dt>Method</dt><dd>Structural macroeconometric emulator — Gauss–Seidel over 372 equations per quarter</dd></div>
-        <div><dt>Data vintage</dt><dd>OBR <em>Economic and Fiscal Outlook</em>, March 2026</dd></div>
-        <div><dt>Microsim connection</dt><dd>Static costing in, macro feedback out — <code>score_reform</code> via <code>HHDI_ADDFACTOR</code></dd></div>
-        <div><dt>Reform scoring</dt><dd>Yes — shocks to exogenous model variables; static-costing bridge from PolicyEngine reforms</dd></div>
-        <div><dt>Out of scope</dt><dd>Arbitrary reform incidence; borrowing; capital spending (<code>CGIPS</code> is dead) and corporation-tax magnitudes (<code>TCPRO</code> converges slowly)</dd></div>
-        <div><dt>Run surface</dt><dd>Hosted (CLI, MCP, Python API)</dd></div>
-        <div><dt>Typical runtime</dt><dd>Seconds to minutes per scenario</dd></div>
-      </dl>
-      <h3>BoE SVAR <span class="model-id mono">boe-svar</span></h3>
-      <dl class="kv kv-text">
-        <div><dt>Method</dt><dd>Bayesian structural VAR — posterior sampling with zero and sign restrictions</dd></div>
-        <div><dt>Data vintage</dt><dd>ONS, BoE and FRED — estimated through 2025Q1, conditioned to the 2026Q1 edge</dd></div>
-        <div><dt>Microsim connection</dt><dd>CPI path &rarr; benefit-uprating incidence (<code>svar_inflation_incidence</code>, experimental)</dd></div>
-        <div><dt>Reform scoring</dt><dd>No — the baseline/conditioning member: it reads the economy reforms are scored against</dd></div>
-        <div><dt>Out of scope</dt><dd>The causal effect of a specific statutory reform</dd></div>
-        <div><dt>Run surface</dt><dd>Hosted (CLI, MCP, Python API)</dd></div>
-        <div><dt>Typical runtime</dt><dd>Minutes per full estimation + identification run</dd></div>
-      </dl>
-      <h3>FRB/US <span class="model-id mono">frb-us</span></h3>
-      <dl class="kv kv-text">
-        <div><dt>Method</dt><dd>Large-scale macroeconometric model — 284 equations solved under VAR expectations</dd></div>
-        <div><dt>Data vintage</dt><dd>The Fed's <code>model.xml</code> and LONGBASE database, April 2026</dd></div>
-        <div><dt>Microsim connection</dt><dd>Wage/hours path &rarr; employment-income incidence (<code>frbus_shock_incidence</code>, experimental)</dd></div>
-        <div><dt>Reform scoring</dt><dd>No — shock experiments only; no reform bridge, so <code>score_reform</code> refuses <code>model="frbus"</code></dd></div>
-        <div><dt>Out of scope</dt><dd>PolicyEngine reform effects, anticipated-policy paths, or MCE scenarios</dd></div>
-        <div><dt>Run surface</dt><dd>Hosted (CLI, MCP, Python API) — raw shocks only</dd></div>
-        <div><dt>Typical runtime</dt><dd>Seconds to minutes per simulation</dd></div>
-      </dl>
-      <h3>US HANK <span class="model-id mono">us-hank</span></h3>
-      <dl class="kv kv-text">
-        <div><dt>Method</dt><dd>Two-asset HANK (Auclert et al. 2021) — first-order sequence-space impulse responses</dd></div>
-        <div><dt>Data vintage</dt><dd>The published Econometrica 2021 calibration; no data vintage</dd></div>
-        <div><dt>Microsim connection</dt><dd>Wage/labor IRFs &rarr; employment-income incidence (<code>hank_shock_incidence</code>, experimental)</dd></div>
-        <div><dt>Reform scoring</dt><dd>No — stylized shocks only; the labor tax is endogenous, so <code>score_reform</code> refuses <code>model="hank"</code></dd></div>
-        <div><dt>Out of scope</dt><dd>Forecasts, detailed tax reforms, or nonlinear/state-dependent dynamics</dd></div>
-        <div><dt>Run surface</dt><dd>Hosted (CLI, MCP, Python API) — stylized shocks only</dd></div>
-        <div><dt>Typical runtime</dt><dd>~18s cold per variant (cached); instant warm</dd></div>
-      </dl>
-      <h3>OG-UK <span class="model-id mono">psl-og</span></h3>
-      <dl class="kv kv-text">
-        <div><dt>Method</dt><dd>Dynamic general equilibrium (OLG) — steady-state root-find and transition-path iteration</dd></div>
-        <div><dt>Data vintage</dt><dd>ONS, OBR and BoE aggregates as calibration targets; OG-UK 0.3.2</dd></div>
-        <div><dt>Microsim connection</dt><dd>Two-way: statute in via PE tax functions; long-run changes back into a second microsim run (<code>og+microsim</code>)</dd></div>
-        <div><dt>Reform scoring</dt><dd>Yes — a PolicyEngine policy translated into estimated tax functions</dd></div>
-        <div><dt>Out of scope</dt><dd>A short-run forecast or independently validated reform effect</dd></div>
-        <div><dt>Run surface</dt><dd>Local only</dd></div>
-        <div><dt>Typical runtime</dt><dd>~17+ min per steady-state solve (two per score); hours for transition paths</dd></div>
-      </dl>
-      <h3>DEFINE-UK <span class="model-id mono">define-uk</span></h3>
-      <dl class="kv kv-text">
-        <div><dt>Method</dt><dd>Ecological stock-flow consistent (E-SFC) — upstream R code run unmodified at a pinned commit</dd></div>
-        <div><dt>Data vintage</dt><dd>DEFINE-UK 1.1, April 2026, at pinned commit <code>846081a</code></dd></div>
-        <div><dt>Microsim connection</dt><dd>Scenario income deltas &rarr; employment-income incidence (<code>define_scenario_incidence</code>, experimental; hosted via <code>define_payload</code>)</dd></div>
-        <div><dt>Reform scoring</dt><dd>No — no reform bridge; <code>score_reform</code> will not accept it</dd></div>
-        <div><dt>Out of scope</dt><dd>Levels, forecasts, reform scoring; microsimulation incidence (planned, post-validation)</dd></div>
-        <div><dt>Run surface</dt><dd>Local CLI (<code>pe-macro define-scenario</code>); hosted MCP tools return run instructions</dd></div>
-        <div><dt>Typical runtime</dt><dd>Instant from the cached pinned run; a fresh upstream run takes tens of minutes in R 4.3</dd></div>
-      </dl>
-    </details>
-  </section>
-  <section id="compose" class="band band-wide">
-    <div class="band-head" data-icon="link"><h2>How the models combine</h2><p class="section-intro">Every join starts or ends at the microsimulation.</p></div>
-    <div class="scrolly-wrap">
-      <div class="scrolly-steps">
-
-      <div class="meth-step" id="score" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Score a reform: microsimulation, then the OBR emulator</h3></div>
-        <p class="mo-lead">What would a reform cost, and what would it do to the economy?</p>
-        <p>The microsimulation costs the reform from the tax-benefit rules; the OBR emulator returns the second-round effects.</p>
-        <div class="pipeline" role="img" aria-label="Pipeline: a reform goes to the PolicyEngine microsimulation for the static costing, which feeds the OBR emulator for macro feedback.">
-                    <span class="pl-node"><strong>Reform</strong></span>
-                    <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-                    <a class="pl-node" href="/pe"><strong>Microsimulation</strong></a>
-                    <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-                    <a class="pl-node" href="/obr"><strong>OBR emulator</strong></a>
-                    <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-                    <span class="pl-node"><strong>Scored result</strong></span>
-                  </div>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro score --country uk --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --model obr</code></pre></div>
-        <details class="about"><summary>About this join</summary>
-          <p>Worked example: 1p on the basic rate, costed by the microsimulation and fed through the emulator; the figures live on the <a href="/obr#answers">OBR Overview</a>. The static costing runs below HMRC&rsquo;s ready reckoner at every matched year: <a href="/pe/validation#hmrc">a benchmark, not a validation</a>. UK only: no US macro bridge exists, so a US reform is scored statically.</p>
-          <p>Read the caveats before the headline: the costing inherits survey-microdata uncertainty, and the emulator&rsquo;s spending multiplier is fixed by construction (<a href="/obr/validation#caveats">limits</a>), so treat macro feedback as sign and order of magnitude. Setup on the <a href="/connect">Use page</a>.</p>
         </details>
-        <div class="meth-inline">
-        <div class="meth-sec-title">the join</div>
-        <div class="meth-eq"><div class="meth-eq-label">chain</div><div class="meth-eq-body"><code>pe-microsim</code> &rarr; <code>obr-macro</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">enters</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code>, household disposable income</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">call</div><div class="meth-eq-body"><code>score_reform(model="obr")</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">country</div><div class="meth-eq-body">UK only; a US reform is scored statically</div></div>
-        </div>
+        <p class="mcard-links"><a class="btn btn-primary btn-sm" href="/define">Open<span class="visually-hidden"> DEFINE-UK</span><span aria-hidden="true"> &rarr;</span></a><a href="/define/validation">Evidence<span class="visually-hidden"> for DEFINE-UK</span></a><a href="/define#status">Results<span class="visually-hidden"> from DEFINE-UK</span></a><a href="/papers/define-uk">Paper<span class="visually-hidden"> on DEFINE-UK</span></a></p>
+      </article>
+        <div class="mgap" id="us-reform-gap"><p class="mcard-q">Not covered</p><p><strong>No model answers <a class="gloss-link" href="/glossary#macro-feedback">macro feedback</a> on a US reform.</strong> No US macro bridge exists, so a US reform is scored statically.</p></div>
       </div>
-
-      <div class="meth-step" id="og-join" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Long-run feedback: OG-UK, then a second microsimulation run</h3></div>
-        <p class="mo-lead">What a reform does once wages and the capital stock adjust.</p>
-        <p>OG-UK solves the long-run steady state; its wage and interest-rate changes feed a second microsimulation run.</p>
-        <details class="about"><summary>About this join</summary>
-        <div class="qa-facts">
-                  <div class="qa-fact"><span class="icon">&rarr;</span><span>Local-only and experimental; the OG solve needs its own environment, so run the two-step <code>--og-payload</code> pipeline</span></div>
-                  <div class="qa-fact"><span class="icon">&rarr;</span><span>The steady-state factor is applied flat: <strong>no transition path</strong>, and no price-level effects, because the OG model is real</span></div>
-                  <div class="qa-fact"><span class="icon">&rarr;</span><span>Effective-labour incidence is reported, not allocated &mdash; and <strong>no scored result is published</strong></span></div>
-                  </div>
-        </details>
-        <p class="qa-link"><a href="/olg">Open OG-UK &rarr;</a></p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">the join</div>
-        <div class="meth-eq"><div class="meth-eq-label">chain</div><div class="meth-eq-body">OG-UK &rarr; <code>pe-microsim</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">moves</div><div class="meth-eq-body">steady-state wage and interest-rate changes</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">call</div><div class="meth-eq-body"><code>score_reform(model="og+microsim")</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">local only, experimental</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">result</div><div class="meth-eq-body">none published</div></div>
-        </div>
-      </div>
-
-      <div class="meth-step" id="incidence" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>A macro shock across households</h3></div>
-        <p class="mo-lead">Four members run the arrow the other way: a macro path in, incidence out.</p>
-        <p>The BoE SVAR, FRB/US, US HANK and DEFINE-UK cannot score a reform; each returns distributional incidence through a microsimulation run instead.</p>
-        <details class="about"><summary>About these joins</summary>
-          <p>All four are experimental, and none of them is a reform bridge. <code>score_reform</code> accepts <code>microsim</code>, <code>obr</code>, <code>og</code> and <code>og+microsim</code>; these four connect the opposite way. The model-by-model mapping is in the <a href="#compare">comparison</a>.</p>
-        </details>
-        <div class="meth-inline">
-        <div class="meth-sec-title">four incidence joins</div>
-        <div class="meth-eq"><div class="meth-eq-label">BoE SVAR</div><div class="meth-eq-body"><code>svar_inflation_incidence</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">FRB/US</div><div class="meth-eq-body"><code>frbus_shock_incidence</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">US HANK</div><div class="meth-eq-body"><code>hank_shock_incidence</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">DEFINE-UK</div><div class="meth-eq-body"><code>define_scenario_incidence</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">all experimental; none a reform bridge</div></div>
-        </div>
-      </div>
-
-      </div>
-
-      <aside class="scrolly-sticky" aria-hidden="true">
-        <div class="meth-panel" data-step="0">
-          <div class="meth-panel-head"><span class="meth-panel-title">Reform &rarr; cost &rarr; feedback</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">the join</div>
-          <div class="meth-eq"><div class="meth-eq-label">chain</div><div class="meth-eq-body"><code>pe-microsim</code> &rarr; <code>obr-macro</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">enters</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code>, household disposable income</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">call</div><div class="meth-eq-body"><code>score_reform(model="obr")</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">country</div><div class="meth-eq-body">UK only; a US reform is scored statically</div></div>
-        </div>
-        <div class="meth-panel" data-step="1" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Reform &rarr; steady state &rarr; households</span><span class="meth-panel-badge mono">Step 2</span></div>
-          <div class="meth-sec-title">the join</div>
-          <div class="meth-eq"><div class="meth-eq-label">chain</div><div class="meth-eq-body">OG-UK &rarr; <code>pe-microsim</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">moves</div><div class="meth-eq-body">steady-state wage and interest-rate changes</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">call</div><div class="meth-eq-body"><code>score_reform(model="og+microsim")</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">local only, experimental</div></div>
-          <div class="meth-eq"><div class="meth-eq-label">result</div><div class="meth-eq-body">none published</div></div>
-        </div>
-        <div class="meth-panel" data-step="2" hidden>
-          <div class="meth-panel-head"><span class="meth-panel-title">Macro path &rarr; households</span><span class="meth-panel-badge mono">Step 3</span></div>
-          <div class="meth-sec-title">four incidence joins</div>
-          <div class="meth-eq"><div class="meth-eq-label">BoE SVAR</div><div class="meth-eq-body"><code>svar_inflation_incidence</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">FRB/US</div><div class="meth-eq-body"><code>frbus_shock_incidence</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">US HANK</div><div class="meth-eq-body"><code>hank_shock_incidence</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">DEFINE-UK</div><div class="meth-eq-body"><code>define_scenario_incidence</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">status</div><div class="meth-eq-body">all experimental; none a reform bridge</div></div>
-        </div>
-      </aside>
+      <p class="router-empty" data-router-empty hidden>No model here answers that question for that country.</p>
     </div>
-    <p class="chooser-note">The routes that run these chains end to end are listed on the <a href="/forecasts">Forecasts</a> page.</p>
+    <p class="chooser-note">From code or an AI client, <code>recommend_model</code> routes a question to a model, or refuses when none supports it (<a href="/connect">connect a client</a>). Already have two candidates? <a href="/models/side-by-side">Compare them side by side</a>.</p>
   </section>
-  <section id="validation" class="band">
-    <div class="band-head" data-icon="scale">
-      <h2>How each model is validated</h2>
-      <p class="section-intro">Four classes of check, one verdict per model.</p>
-    </div>
-    <div class="prose">
-      <div class="glance-tabs model-tabs-set mono" role="tablist" aria-label="Validation views">
-        <button type="button" id="val-tab-1" role="tab" aria-selected="true" aria-controls="val-p1" class="is-current">By model</button>
-        <button type="button" id="val-tab-2" role="tab" aria-selected="false" aria-controls="val-p2">Vs other institutions</button>
-      </div>
-      <div id="val-p1" role="tabpanel" aria-labelledby="val-tab-1">
-      <p>
-        The seven models support different kinds of check, grouped below into
-        four classes with one verdict each.
-      </p>
-      <dl class="class-glossary" id="classes">
-        <div><dt>Checked against implemented legislation</dt><dd>The rules are code, checked rule by rule; a household answer can be verified by hand.</dd></div>
-        <div><dt>Replication with a published anchor</dt><dd>Reproduces a published model or paper. An imposed match is an anchor, not a validation.</dd></div>
-        <div><dt>Calibrated counterfactual</dt><dd>Targets are met by construction, so there is no ground truth to test against.</dd></div>
-        <div><dt>Partial replication</dt><dd>One block replicates a published table; the rest is design-gated.</dd></div>
-      </dl>
-      <div class="table-scroll">
-      <table>
-        <thead><tr><th scope="col">Model</th><th scope="col">Verification class</th><th scope="col">What it is checked against</th><th scope="col">Verdict</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row"><a href="/pe/validation"><strong>PolicyEngine microsimulation</strong> <span class="model-id mono">pe-microsim</span></a></th>
-            <td>Checked against implemented legislation</td>
-            <td>Implemented UK and US legislation, rule by rule</td>
-            <td>Household maths exact; population adds survey error</td>
-          </tr>
-          <tr>
-            <th scope="row"><a href="/obr/validation"><strong>OBR emulator</strong> <span class="model-id mono">obr-macro</span></a></th>
-            <td>Replication with a published anchor</td>
-            <td>March 2026 EFO; HMRC ready reckoner; ONS outturns</td>
-            <td>Tracks the EFO by construction; weak free-running</td>
-          </tr>
-          <tr>
-            <th scope="row"><a href="/svar/validation"><strong>BoE SVAR</strong> <span class="model-id mono">boe-svar</span></a></th>
-            <td>Replication with a published anchor</td>
-            <td>Brignone &amp; Piffer (2025); ONS outturns</td>
-            <td>Replicates the GDP decomposition, short on CPI; no forecast skill</td>
-          </tr>
-          <tr>
-            <th scope="row"><a href="/frb-us/validation"><strong>FRB/US</strong> <span class="model-id mono">frb-us</span></a></th>
-            <td>Replication with a published anchor</td>
-            <td>The Fed's <code>pyfrbus</code> on an identical shock; published multiplier ranges</td>
-            <td>Shocked paths match pyfrbus at the Fed&rsquo;s own release-to-release gap; baseline tracking is an identity</td>
-          </tr>
-          <tr>
-            <th scope="row"><a href="/us-hank/validation"><strong>US HANK</strong> <span class="model-id mono">us-hank</span></a></th>
-            <td>Replication with a published anchor</td>
-            <td>Auclert et al. (2021), via the authors' toolkit</td>
-            <td>Solved parameters match the paper; Y, K and r are inputs, not results; IRF magnitudes unvalidated</td>
-          </tr>
-          <tr>
-            <th scope="row"><a href="/olg/validation"><strong>OG-UK</strong> <span class="model-id mono">psl-og</span></a></th>
-            <td>Calibrated counterfactual — no ground truth</td>
-            <td>ONS/OBR aggregates as <em>targets</em>, not a validation set</td>
-            <td>Targets met by construction; no ground truth</td>
-          </tr>
-          <tr>
-            <th scope="row"><a href="/define/validation#calibration"><strong>DEFINE-UK</strong> <span class="model-id mono">define-uk</span></a></th>
-            <td>Partial replication — macro block and scenario design-gate pass</td>
-            <td>Manual Table&nbsp;4; ONS outturns, OBR EFO, DESNZ emissions — no scenario figures are published</td>
-            <td>Baseline far from outturns &mdash; deltas only, never levels</td>
-          </tr>
-        </tbody>
-      </table>
-      </div>
-      </div>
-      <div id="val-p2" role="tabpanel" aria-labelledby="val-tab-2" hidden><h3 id="shops">The same questions, answered by other institutions</h3>
-      <p>
-        Imposed matches are anchors, not validation. The stronger evidence is
-        out-of-sample forecasts, independent costings, and agreement with
-        another implementation.
-      </p>
-      <div class="table-scroll">
-      <table>
-        <thead><tr><th scope="col">Question</th><th scope="col">Compared with</th><th scope="col">How comparable</th><th scope="col">The figures</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row">Long-run effect of a 1pp basic-rate rise (psl-og)</th>
-            <td><a href="https://obr.uk/docs/dlm_uploads/Working_paper_22_A_new_UK_overlapping_generations_model.pdf">OBR Working Paper 22</a>, Table 5.1</td>
-            <td><strong>Future benchmark</strong> — same scenario; ours is not yet produced (the committed run is a transition path to 2030, not the long-run steady state WP&nbsp;22 reports)</td>
-            <td><a href="/olg/validation#benchmark">psl-og validation</a></td>
-          </tr>
-          <tr>
-            <th scope="row">Yield of a 1p rise in the basic rate, 2026&ndash;27 (obr-macro + pe)</th>
-            <td><a href="https://www.gov.uk/government/statistics/direct-effects-of-illustrative-tax-changes">HMRC ready reckoner</a> (June 2025)</td>
-            <td>Adjusted — below HMRC at every matched year; HMRC is post-behavioural on administrative data, ours static and survey-based. A benchmark, not a validation</td>
-            <td><a href="/pe/validation#hmrc">pe-microsim validation</a></td>
-          </tr>
-          <tr>
-            <th scope="row">Government-purchases multiplier (frb-us)</th>
-            <td><a href="https://econweb.ucsd.edu/~vramey/research/Ramey_Fiscal_JEP.pdf">Ramey (JEP 2019)</a> and the pegged-rate cross-model range</td>
-            <td>Adjusted — both of ours sit inside Ramey&rsquo;s range, but it pools estimates across horizons and monetary regimes, so neither is matched to it; the pegged-rate figure sits below the cross-model range</td>
-            <td><a href="/frb-us/validation#multipliers">frb-us validation</a></td>
-          </tr>
-          <tr>
-            <th scope="row">Income-tax multiplier (frb-us, US)</th>
-            <td><a href="https://obr.uk/box/fiscal-multipliers/">OBR&rsquo;s published UK assumption</a> for income tax and NICs</td>
-            <td>Loose — different country and model class</td>
-            <td><a href="/frb-us/validation#multipliers">frb-us validation</a></td>
-          </tr>
-          <tr>
-            <th scope="row">Forecast error, 2024Q3 onward (boe-svar)</th>
-            <td><a href="https://obr.uk/fer/forecast-evaluation-report-july-2025/">OBR FER (July 2025)</a>; <a href="https://www.bankofengland.co.uk/-/media/boe/files/monetary-policy-report/2024/august/monetary-policy-report-august-2024.pdf">BoE MPR (Aug 2024)</a></td>
-            <td>Adjusted — different statistics, matched vintages; over 49 origins, no skill against a drifting random walk</td>
-            <td><a href="/svar/validation#forecasters">boe-svar validation</a></td>
-          </tr>
-        </tbody>
-      </table>
-      </div>
-    </div>
-    </div>
-  </section>
-  <section id="evidence" class="band">
-    <div class="band-head" data-icon="book">
-      <h2>Papers and replication notes</h2>
-      <p class="section-intro">Six working papers (full PDFs) and one feasibility note, one per model.</p>
-    </div>
-    <div class="strategy-grid evidence-grid">
-      <a class="strategy-card" href="/papers/pe-microsim"><header><span class="card-id">PolicyEngine microsimulation <span class="model-id mono">pe-microsim</span></span><span class="tag-row"><span class="tag">working paper</span></span></header><p>Statute as code for the UK and US: why household arithmetic is exact, population estimates are not, and how the static costing benchmarks against HMRC.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
-      <a class="strategy-card" href="/papers/obr-macro"><header><span class="card-id">OBR emulator <span class="model-id mono">obr-macro</span></span><span class="tag-row"><span class="tag">working paper</span></span></header><p>How the OBR's model was transpiled and anchored to the EFO — and why the anchored fit is not forecast skill.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
-      <a class="strategy-card" href="/papers/boe-svar"><header><span class="card-id">BoE SVAR <span class="model-id mono">boe-svar</span></span><span class="tag-row"><span class="tag">working paper</span></span></header><p>Replicating Brignone &amp; Piffer (2025): the identification, the FEVD shares, and the forecast diagnostics against naive benchmarks.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
-      <a class="strategy-card" href="/papers/frb-us"><header><span class="card-id">FRB/US <span class="model-id mono">frb-us</span></span><span class="tag-row"><span class="tag">working paper</span></span></header><p>Parsing and solving the Fed's FRB/US model, and matching pyfrbus on shocked paths at its own noise floor.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
-      <a class="strategy-card" href="/papers/psl-og"><header><span class="card-id">OG-UK <span class="model-id mono">psl-og</span></span><span class="tag-row"><span class="tag">working paper</span></span></header><p>The OG-UK calibration, tax-function estimation, and the limits of a model with no ground truth.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
-      <a class="strategy-card" href="/reports/us-hank-open-source"><header><span class="card-id">US HANK <span class="model-id mono">us-hank</span></span><span class="tag-row"><span class="tag">feasibility note</span></span></header><p>The open US HANK landscape, and why the Auclert et al. (2021) toolkit was the foundation to build on. Not a replication write-up — that gate is on the us-hank validation page.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
-      <a class="strategy-card" href="/papers/define-uk"><header><span class="card-id">DEFINE-UK <span class="model-id mono">define-uk</span></span><span class="tag-row"><span class="tag">working paper</span></span></header><p>The authors' unmodified code at a pinned commit, the Table&nbsp;4 gate, thirteen pinned manual defects, and why only deltas are served.</p><span class="strategy-paper-link mono">read &rarr;</span></a>
+  <section class="band where-next" id="more">
+    <div class="band-head" data-icon="layers"><h2>More on the models</h2></div>
+    <div class="entry-grid models-more">
+      <a class="entry-card" id="compare" href="/models/side-by-side">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></span>
+        <h3>Side by side</h3>
+        <p>What each answers, whether it scores a reform, where it runs</p>
+        <span class="entry-cta">Open <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" id="compose" href="/models/combine">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></span>
+        <h3 id="score">Combine</h3>
+        <p id="incidence">How the models chain, and the routes that run them</p>
+        <span class="entry-cta">Open <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" id="validation" href="/models/validation">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg></span>
+        <h3>Validation</h3>
+        <p>Five status classes, one verdict per model</p>
+        <span class="entry-cta">Open <span aria-hidden="true">&rarr;</span></span>
+      </a>
+      <a class="entry-card" id="evidence" href="/models/papers">
+        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14Z"/><path d="M6.5 17A2.5 2.5 0 0 0 4 19.5 2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></span>
+        <h3>Papers</h3>
+        <p>One working paper or note per model</p>
+        <span class="entry-cta">Open <span aria-hidden="true">&rarr;</span></span>
+      </a>
     </div>
   </section>
   <section class="band where-next" id="where-next">
@@ -500,60 +232,59 @@
   <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
     <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/glossary">Glossary</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro/issues">Report an issue</a>
     <a class="footer-text" href="/contact">Contact</a>
   </nav>
 </footer>
 <script src="/reveal.js?v=2" defer></script>
 <script>
+/* The compare table, the combine steps, the validation and the papers moved to
+   their own tabs (r5). Links elsewhere still point at /models#<id>: send them
+   on to the tab that now holds the id. Without script, the card with that id
+   in "More on the models" links there. */
 (function () {
-  var bar = document.querySelector('[data-models-subnav]');
-  if (!bar || !('IntersectionObserver' in window)) return;
-  var links = Array.from(bar.querySelectorAll('.model-tabs-link'));
-  var sections = links.map(function (link) {
-    return document.getElementById(link.getAttribute('href').slice(1));
-  }).filter(Boolean);
-  function mark(id) {
-    links.forEach(function (link) {
-      if (link.getAttribute('href') === '#' + id) link.setAttribute('aria-current', 'location');
-      else link.removeAttribute('aria-current');
-    });
+  var moved = {
+    compare: "/models/side-by-side#compare",
+    compose: "/models/combine#compose", score: "/models/combine#score",
+    "og-join": "/models/combine#og-join", incidence: "/models/combine#incidence",
+    validation: "/models/validation#validation", classes: "/models/validation#classes",
+    shops: "/models/validation#shops", evidence: "/models/papers#evidence"
+  };
+  function go() {
+    var id = location.hash.slice(1);
+    if (Object.prototype.hasOwnProperty.call(moved, id)) location.replace(moved[id]);
   }
-  var visible = new Set();
-  var observer = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      if (entry.isIntersecting) visible.add(entry.target.id);
-      else visible.delete(entry.target.id);
-    });
-    var current = sections.find(function (section) { return visible.has(section.id); });
-    // Above the first section (the title band) the first tab is chosen,
-    // so the row always shows where the reader is.
-    if (current) mark(current.id);
-    else if (sections[0] && sections[0].getBoundingClientRect().top > 0) mark(sections[0].id);
-  }, { rootMargin: '-25% 0px -60% 0px' });
-  sections.forEach(function (section) { observer.observe(section); });
-  if (sections[0]) mark(sections[0].id);
+  go();
+  window.addEventListener("hashchange", go);
 }());
 </script>
 <script>
 (function () {
-  var tabs = [["val-tab-1", "val-p1"], ["val-tab-2", "val-p2"]];
-  tabs.forEach(function (pair) {
-    document.getElementById(pair[0]).addEventListener("click", function () {
-      tabs.forEach(function (other) {
-        var active = other[0] === pair[0];
-        var btn = document.getElementById(other[0]);
-        btn.setAttribute("aria-selected", active ? "true" : "false");
-        btn.classList.toggle("is-current", active);
-        document.getElementById(other[1]).hidden = !active;
-      });
+  var root = document.querySelector("[data-router]");
+  if (!root) return;
+  var cards = Array.from(root.querySelectorAll(".mcard"));
+  var words = ["No models", "One model", "Two models", "Three models", "Four models", "Five models", "Six models", "Seven models"];
+  var state = { job: "all", ctry: "all" };
+  function apply() {
+    var shown = 0;
+    cards.forEach(function (c) {
+      var ok = (state.job === "all" || c.dataset.jobs.split(" ").indexOf(state.job) >= 0) &&
+               (state.ctry === "all" || c.dataset.country.split(" ").indexOf(state.ctry) >= 0);
+      c.hidden = !ok; if (ok) shown++;
     });
-  });
-  if (location.hash === "#shops") {
-    document.getElementById("val-tab-2").click();
+    root.querySelector("[data-router-count]").textContent = words[shown] + (shown === 7 ? "" : " of seven");
+    root.querySelector("[data-router-empty]").hidden = shown > 0;
   }
+  root.addEventListener("click", function (e) {
+    var b = e.target.closest(".chip-btn"); if (!b) return;
+    var group = b.dataset.job !== undefined ? "job" : "ctry";
+    state[group] = b.dataset[group];
+    b.parentNode.querySelectorAll(".chip-btn").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    apply();
+  });
 })();
 </script>
-<script src="/stepper.js" defer></script>
 </body>
 </html>

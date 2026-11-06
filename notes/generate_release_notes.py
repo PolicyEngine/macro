@@ -163,6 +163,14 @@ def _label(series: dict) -> str:
     return module.PUBLIC_LABELS.get(series["cdid"], series["title"])
 
 
+def _split_on(text: str) -> str:
+    """'−0.3pp on 2026Q1' → the change, then its comparison period beneath."""
+    head, sep, tail = text.rpartition(" on ")
+    if not sep:
+        return html.escape(text)
+    return f'{html.escape(head)}<br><span class="dg-sub">on <span class="mono">{html.escape(tail)}</span></span>'
+
+
 def digest_rows(items: list[dict], vintage: str) -> list[str]:
     rows = []
     for series in items:
@@ -173,9 +181,9 @@ def digest_rows(items: list[dict], vintage: str) -> list[str]:
             f'          <tr id="{series["series"]}">'
             f'<th scope="row">{html.escape(_label(series))}'
             f'<br><a class="mono" href="{topic_url}#stands">{html.escape(topic_title)}</a></th>'
-            f'<td class="mono">{html.escape(now["period"])}</td>'
-            f'<td class="num">{html.escape(display_value(series, now["value"]))}</td>'
-            f'<td class="num">{html.escape(delta(series))}</td>'
+            f'<td class="num">{html.escape(display_value(series, now["value"]))}'
+            f'<br><span class="dg-sub mono">{html.escape(now["period"])}</span></td>'
+            f'<td class="num">{_split_on(delta(series))}</td>'
             f'<td class="kind">{html.escape(what_is_new(series, vintage))}</td>'
             f"<td>{html.escape(next_release)}</td>"
             f'<td><a href="https://github.com/PolicyEngine/macro/blob/main/{series["_path"]}">Snapshot</a>'
@@ -202,8 +210,8 @@ def digest_page(vintage: str) -> str:
     uk = [s for s in items if s["series"].startswith("uk_")]
     us = [s for s in items if not s["series"].startswith("uk_")]
     head = (
-        '          <thead><tr><th scope="col">Series</th><th scope="col">Latest period</th>'
-        '<th scope="col">Value</th><th scope="col">Change</th><th scope="col">What is new</th>'
+        '          <thead><tr><th scope="col">Series</th>'
+        '<th scope="col" class="num">Latest value</th><th scope="col" class="num">Change</th><th scope="col">What is new</th>'
         '<th scope="col">Next release</th><th scope="col">Files</th></tr></thead>'
     )
     tables = []
@@ -222,7 +230,7 @@ def digest_page(vintage: str) -> str:
     </div>""")
     where = site_nav.where_next([
         ("/notes/releases", "list", "All release digests", "Every stored date, newest first"),
-        ("/forecasts#data", "data", "The data store", "Every stored vintage of every series"),
+        ("/economy#data", "data", "The data store", "Every stored vintage of every series"),
         ("/forecasts#scored", "chart", "The forecast record", "Rounds scored against outturns like these"),
     ])
     return f"""<!doctype html>
@@ -317,8 +325,7 @@ def rebuild_indexes() -> None:
     latest = pages[0].parent.name if pages else ""
     summary_row = (
         f'        <a href="/notes/releases"><span>{len(pages)} automated release '
-        f"digests, latest {latest} →</span><strong>{latest} · automated release "
-        "digests</strong></a>"
+        f"digests, newest first</span><strong>latest {latest}</strong></a>"
     )
     marker_replace(NOTES_INDEX, "generated-release-notes", summary_row)
     marker_replace(RELEASES_INDEX, "generated-release-notes", "\n".join(index_rows))
