@@ -93,7 +93,7 @@ MODELS = {
         "access": ["hosted raw shocks", "CLI with editable model checkout", "Python"],
         "runtime": "seconds to minutes",
         "uncertainty": "not comprehensive",
-        "status": "validated software replication with scope limits",
+        "status": "matches pyfrbus 1.0.0 and 1.1.1 on a 100bp funds-rate shock, within the gap between those two Fed releases",
         "data_vintage": "LONGBASE file from the installed frbus package",
     },
     "us-hank": {
