@@ -3247,6 +3247,80 @@ def sitemap_block() -> str:
     )
 
 
+# First prose use of a glossary term on each generated page links to its
+# /glossary entry (headings, labels, links, code, svg and summaries are
+# skipped). Terms and anchors come from the glossary pass on #204.
+GLOSSARY_LINKS = {
+    ("uk", "growth"): (("posterior", "prior-posterior"),),
+    ("uk", "inflation"): (("posterior", "prior-posterior"),),
+    ("uk", "jobs"): (("RMSE", "rmse"), ("Okun", "okun")),
+    ("us", "growth"): (("IRFs", "irf"), ("inertial Taylor", "taylor-rule")),
+    ("us", "inflation"): (("IRFs", "irf"),),
+    ("us", "jobs"): (("IRFs", "irf"), ("Okun", "okun")),
+    ("us", "rates"): (
+        ("impulse responses", "irf"),
+        ("model-consistent", "expectations"),
+    ),
+    ("us", "reform"): (("impulse responses", "irf"), ("endogenous", "exogenous")),
+    "us-platform": (("impulse responses", "irf"), ("endogenous", "exogenous")),
+    "uk-routes": (("posterior", "prior-posterior"),),
+}
+_GLOSS_SKIP = {
+    "a", "svg", "code", "pre", "script", "style", "h1", "h2", "h3", "h4",
+    "h5", "h6", "title", "desc", "summary", "button", "label", "kbd",
+}
+_GLOSS_VOID = {"br", "img", "input", "meta", "link", "hr", "source", "wbr", "col"}
+_GLOSS_CLASS = re.compile(r'class="[^"]*\b[\w-]*(title|label|eyebrow|kicker)\b')
+_GLOSS_TOKEN = re.compile(r"<!--.*?-->|<[^>]+>|[^<]+", re.S)
+
+
+def glossary_links(text: str, pairs) -> str:
+    """Link the first prose use of each (term, anchor) to /glossary#anchor."""
+    for term, anchor in pairs:
+        start = max(text.find("<main"), 0)
+        if f'href="/glossary#{anchor}"' in text[start:]:
+            continue
+        word = re.compile(
+            r"(?<![\w-])" + re.escape(term) + r"s?(?![\w-])", re.I
+        )
+        depth: dict[str, int] = {}
+        skipped: list[tuple[str, int]] = []
+        for token in _GLOSS_TOKEN.finditer(text, start):
+            raw = token.group(0)
+            if raw.startswith("<!--"):
+                continue
+            if raw.startswith("</"):
+                name = raw[2:-1].strip().lower()
+                if name == "main":
+                    break
+                if skipped and skipped[-1] == (name, depth.get(name, 0)):
+                    skipped.pop()
+                depth[name] = depth.get(name, 0) - 1
+                continue
+            if raw.startswith("<"):
+                tag = re.match(r"<([\w-]+)", raw)
+                if not tag:
+                    continue
+                name = tag.group(1).lower()
+                if name in _GLOSS_VOID or raw.endswith("/>"):
+                    continue
+                depth[name] = depth.get(name, 0) + 1
+                if name in _GLOSS_SKIP or _GLOSS_CLASS.search(raw):
+                    skipped.append((name, depth[name]))
+                continue
+            if skipped:
+                continue
+            hit = word.search(raw)
+            if hit:
+                a, b = token.start() + hit.start(), token.start() + hit.end()
+                text = (
+                    f'{text[:a]}<a class="gloss-link" href="/glossary#{anchor}">'
+                    f"{text[a:b]}</a>{text[b:]}"
+                )
+                break
+    return text
+
+
 def replace(text: str, name: str, value: str) -> str:
     start, end = f"<!-- {name}:begin -->", f"<!-- {name}:end -->"
     updated, count = re.subn(
@@ -3263,7 +3337,10 @@ def replace(text: str, name: str, value: str) -> str:
 def rendered() -> list[tuple[Path, str]]:
     artifacts = [
         (COUNTRIES[topic["country"]]["dir"] / topic["slug"] / "index.html",
-         page(topic))
+         glossary_links(
+             page(topic),
+             GLOSSARY_LINKS.get((topic["country"], topic["slug"]), ()),
+         ))
         for topic in TOPICS
     ]
     # The topic cards and the shared bar on each data hub belong to this
@@ -3292,7 +3369,11 @@ def rendered() -> list[tuple[Path, str]]:
             section_hub, entry["hub_nav_marker"], subnav(country, None)
         )
         section_hub = replace(
-            section_hub, entry["platform_marker"], platform[country]()
+            section_hub,
+            entry["platform_marker"],
+            glossary_links(
+                platform[country](), GLOSSARY_LINKS.get(f"{country}-platform", ())
+            ),
         )
         artifacts.append((entry["hub_page"], section_hub))
         if "routes_page" in entry:
@@ -3300,7 +3381,11 @@ def rendered() -> list[tuple[Path, str]]:
             artifacts.append(
                 (
                     routes_page,
-                    replace(routes_page.read_text(), entry["routes_marker"], uk_routes()),
+                    replace(
+                        routes_page.read_text(),
+                        entry["routes_marker"],
+                        glossary_links(uk_routes(), GLOSSARY_LINKS["uk-routes"]),
+                    ),
                 )
             )
     artifacts.append(
