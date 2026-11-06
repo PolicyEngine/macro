@@ -22,7 +22,7 @@ STYLESHEET = re.compile(r'href="/style\.css(?:\?v=[0-9]+)?"')
 # changes in a way a cached copy would render wrongly; ``render`` writes it
 # into every page and the generators read it from here (economy/topics.py,
 # notes/generate_release_notes.py), so no page can be left on an old copy.
-STYLE_VERSION = 20
+STYLE_VERSION = 21
 STYLE_HREF = f"/style.css?v={STYLE_VERSION}"
 
 DESTINATIONS = (
