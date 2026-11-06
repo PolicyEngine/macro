@@ -13,6 +13,7 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 ### Changed
 
 - **Site redesign.** Every page uses the Autumn Budget 2026 layout (header band, title band, sub-tabs, cards with expanders), with `DESIGN.md` as the spec. URLs, numbers and data are unchanged.
+- **Forecast-evaluation scoreboard.** `/forecasts` leads with the record (band coverage, mean absolute error beside the no-change benchmark, forecasts scored), the archive is flat, and charts carry units and sources. `forecasts/scorecard.json` is unchanged.
 
 ## [0.2.0] — 2026-08-11
 
