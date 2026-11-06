@@ -95,48 +95,8 @@
     <div class="scrolly-wrap single">
       <div class="scrolly-steps">
 
-      <div class="meth-step" id="pe-bridge" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>With the microsimulation</h3></div>
-        <p class="mo-lead">
-          Microsimulation supplies the direct cost; this model returns the
-          feedback.
-        </p>
-        <div class="pipeline">
-          <span class="pl-node"><strong>Reform</strong></span>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">cost &middot; who pays</span></a>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <span class="pl-node"><strong>OBR emulator</strong><span class="mono">macro feedback</span></span>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <span class="pl-node pl-node-out"><strong>Scored result</strong></span>
-        </div>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro score --country uk \
-  --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
-  --model obr</code></pre></div>
-        <p class="callout">
-          <strong>Same-breath caveats.</strong> No quarter of the solve
-          converges: read the direction and the scale (<a href="#answers">step 3</a>),
-          not single quarters. Corporation tax is refused, and a US reform is
-          scored statically &mdash; <a href="/obr/validation#caveats">why</a>.
-        </p>
-        <p class="vlinks mono">
-          <a href="/models#compose">every join in the suite &rarr;</a>
-          <a href="/#joins">this join on the landing page &rarr;</a>
-        </p>
-        <p class="kv-title">The join</p>
-        <dl class="kv kv-text"><div><dt>Entry point</dt><dd><code>HHDI_ADDFACTOR</code> &mdash; household disposable income, &pound;m/qtr</dd></div><div><dt>Spreading</dt><dd>&minus;(annual &pound;bn) &times; 1000 &divide; 4, flat across four quarters</dd></div><div><dt>Solved chain</dt><dd>income &rarr; consumption &rarr; GDP, against the anchored baseline</dd></div><div><dt>Refused</dt><dd>corporation tax; US reforms (scored statically)</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <h4>The combination</h4>
-          <p><code>score_reform(country="uk", reform=..., model="obr")</code> runs <a href="/pe">PolicyEngine</a>'s static costing for each year of the window, then hands this model the bill &mdash; the OBR's own workflow: static costing in, second-round effects out.</p>
-          <h4>The mechanism</h4>
-          <p>Each year&rsquo;s costing enters as a held add-factor on household disposable income (<code>HHDI_ADDFACTOR</code>); the emulator solves income &rarr; consumption &rarr; GDP against the anchored March 2026 baseline. Spreading, transmission and why the anchors cancel: <a href="/obr/methodology#meth-6">methodology</a>.</p>
-          <p>No PolicyEngine reform? Shock the model&rsquo;s own variables directly, in model units: <a href="/obr/code#code-4">levers and their caveats</a>.</p>
-        </details>
-      </div>
-
-      <div class="meth-step" id="what" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it is</h3></div>
+      <div class="meth-step" id="what" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>What it is</h3></div>
         <p class="mo-lead">
           An open Python implementation of the OBR's published equations.
         </p>
@@ -212,8 +172,8 @@
         </details>
       </div>
 
-      <div class="meth-step" id="answers" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
+      <div class="meth-step" id="answers" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it can answer</h3></div>
         <p class="mo-lead">
           Second-round effects on a static costing.
         </p>
@@ -250,6 +210,46 @@
           <a href="/pe/validation#hmrc">microsimulation&rsquo;s validation tab</a>;
           the full walkthrough is under <a href="/models#score">score a reform</a>.
         </p>
+        </details>
+      </div>
+
+      <div class="meth-step" id="pe-bridge" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>With the microsimulation</h3></div>
+        <p class="mo-lead">
+          Microsimulation supplies the direct cost; this model returns the
+          feedback.
+        </p>
+        <div class="pipeline">
+          <span class="pl-node"><strong>Reform</strong></span>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">cost &middot; who pays</span></a>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <span class="pl-node"><strong>OBR emulator</strong><span class="mono">macro feedback</span></span>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <span class="pl-node pl-node-out"><strong>Scored result</strong></span>
+        </div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro score --country uk \
+  --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
+  --model obr</code></pre></div>
+        <p class="callout">
+          <strong>Same-breath caveats.</strong> No quarter of the solve
+          converges: read the direction and the scale (<a href="#answers">step 2</a>),
+          not single quarters. Corporation tax is refused, and a US reform is
+          scored statically &mdash; <a href="/obr/validation#caveats">why</a>.
+        </p>
+        <p class="vlinks mono">
+          <a href="/models#compose">every join in the suite &rarr;</a>
+          <a href="/#joins">this join on the landing page &rarr;</a>
+        </p>
+        <p class="kv-title">The join</p>
+        <dl class="kv kv-text"><div><dt>Entry point</dt><dd><code>HHDI_ADDFACTOR</code> &mdash; household disposable income, &pound;m/qtr</dd></div><div><dt>Spreading</dt><dd>&minus;(annual &pound;bn) &times; 1000 &divide; 4, flat across four quarters</dd></div><div><dt>Solved chain</dt><dd>income &rarr; consumption &rarr; GDP, against the anchored baseline</dd></div><div><dt>Refused</dt><dd>corporation tax; US reforms (scored statically)</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>The combination</h4>
+          <p><code>score_reform(country="uk", reform=..., model="obr")</code> runs <a href="/pe">PolicyEngine</a>'s static costing for each year of the window, then hands this model the bill &mdash; the OBR's own workflow: static costing in, second-round effects out.</p>
+          <h4>The mechanism</h4>
+          <p>Each year&rsquo;s costing enters as a held add-factor on household disposable income (<code>HHDI_ADDFACTOR</code>); the emulator solves income &rarr; consumption &rarr; GDP against the anchored March 2026 baseline. Spreading, transmission and why the anchors cancel: <a href="/obr/methodology#meth-6">methodology</a>.</p>
+          <p>No PolicyEngine reform? Shock the model&rsquo;s own variables directly, in model units: <a href="/obr/code#code-4">levers and their caveats</a>.</p>
         </details>
       </div>
 

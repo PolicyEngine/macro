@@ -81,12 +81,12 @@ window.MathJax = {
     <div class="prose">
       <p>
         Five stages, from the Board's published artefacts to an impulse
-        response; equations sit in the panel beside each step. Full
+        response; each step's equations sit in a card beside its text. Full
         derivations: the <a href="/papers/frb-us">working paper</a>.
       </p>
     </div>
 
-    <div class="scrolly-wrap">
+    <div class="scrolly-wrap single meth-pair">
       <div class="scrolly-steps">
       <div class="meth-step" id="meth-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Parse the Board's model file</h3></div>
@@ -124,7 +124,6 @@ window.MathJax = {
         </div>
         <details class="about">
           <summary>About this step</summary>
-          <h4>The published artefacts</h4>
           <h4>One source of truth</h4>
           <p>The parse stage reads <code>model.xml</code> directly: variables, equations, per-equation coefficients, and the endogenous / exogenous classification for the VAR-expectations ("standard") equation set — the only equation set this pipeline reads. Nothing is re-typed or re-specified — the XML file is the single source of truth for the model's semantics. That yields <strong>284 endogenous variables and their equations</strong>, classified into behavioural and identity blocks exactly as the Board's file declares them.</p>
           <h4>Residual form</h4>
@@ -168,7 +167,6 @@ window.MathJax = {
         </div>
         <details class="about">
           <summary>About this step</summary>
-          <h4>The baseline database</h4>
           <h4>Tracking residuals (<code>init_trac</code>)</h4>
           <p><code>init_trac</code> sets each equation's add-factor to minus that equation's residual at the input data, so solving afterwards reproduces the database <strong>identically, for any input</strong>. It is the Fed's own device, the direct analogue of the OBR emulator's anchoring, which is why a baseline match is <a href="/frb-us/validation#trust-table">not evidence</a>. Shocks are imposed on top of the add-factored baseline, where the solver does real work.</p>
         </details>
@@ -211,7 +209,6 @@ window.MathJax = {
         </div>
         <details class="about">
           <summary>About this step</summary>
-          <h4>Period by period</h4>
           <h4>Analytic sparse Jacobian</h4>
           <p>Each quarter, a damped Newton iteration solves the full simultaneous system with an <strong>analytic sparse Jacobian</strong> — differentiated symbolically with sympy, factorised with <code>scipy.sparse.linalg.splu</code>. Damping backtracks the step only to stay inside the domain of definition (no logs of non-positive arguments, no NaNs). Defaults are \(\mathrm{xtol} = 10^{-8}\), \(\mathrm{rtol} = 5\times 10^{-4}\).</p>
           <h4>One block, not many</h4>
@@ -298,7 +295,6 @@ window.MathJax = {
         </div>
         <details class="about">
           <summary>About this step</summary>
-          <h4>Shocks are error-term additions</h4>
           <h4>What comes out</h4>
           <p>The difference is an impulse response for every one of the 284 variables. The headline 100bp tightening, and how it compares with the Board's documented simulation properties, is the <a href="/frb-us/validation#worked-shock">worked shock on Validation</a>.</p>
           <h4>What stays out of scope</h4>

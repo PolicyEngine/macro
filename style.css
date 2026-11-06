@@ -5489,3 +5489,33 @@ a .model-id, a:hover .model-id { text-decoration: none; display: inline-block; }
 
 /* Router pills: the id sits at the pill's own size, after the name. */
 .qa summary strong .model-id { font-size: inherit; margin-left: 4px; }
+
+/* === r5:ui-models === */
+/* Model methodology pages (all seven): one column, not the two-sided
+   StepPanel. Each step's formal elements are one or two equations, too
+   little to fill a sticky column, so the diagrams were squeezed beside a
+   mostly empty panel. Now the diagram spans the card and the step's
+   .meth-inline card sits beside its paragraph on wide screens (stacked
+   below 1000px). Departure from DESIGN.md §4.9 for Methodology tabs. */
+@media (min-width: 900px) {
+  .meth-pair .step-diagram svg { width: 100%; max-width: 720px !important; height: auto; }
+}
+@media (min-width: 1000px) {
+  .meth-pair .meth-step:has(> .meth-inline) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.75fr);
+    column-gap: var(--s-6, 32px);
+    grid-auto-flow: row dense;
+    align-items: start;
+  }
+  .meth-pair .meth-step:has(> .meth-inline) > * { grid-column: 1 / -1; }
+  .meth-pair .meth-step:has(> .meth-inline) > p { grid-column: 1; margin-top: 0; }
+  .meth-pair .meth-step:has(> .meth-inline) > .meth-inline { grid-column: 2; margin-top: 0; margin-bottom: var(--s-4); }
+}
+/* svar win-rate: eight count columns on a 0-8 scale. Stretched to the full
+   card (~800px) and a 340px floor, the columns read as slabs and the
+   ceiling line floats far above them; keep it at a column-chart shape. */
+@container (min-width: 640px) {
+  .vc-fig[data-chart="svar-winrate"] .vc-plot { max-width: 620px; }
+  .vc-fig[data-chart="svar-winrate"] .vchart { min-height: 300px; }
+}

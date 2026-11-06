@@ -80,7 +80,7 @@
       <div><dt>Uncertainty</dt><dd>None quantified: deterministic, first-order responses</dd></div>
       <div><dt>Access</dt><dd>Hosted stylized shocks, CLI, Python package (<a href="/us-hank/code">Code</a>)</dd></div>
       <div><dt>Runtime</dt><dd>About 18 seconds cold per variant (steady state and Jacobian, then cached); instant warm</dd></div>
-      <div class="model-card-wide"><dt>Joins pe-microsim</dt><dd>Wage and labor responses scale US employment income (<a href="#pe-bridge">step 1</a>, experimental)</dd></div>
+      <div class="model-card-wide"><dt>Joins the microsimulation</dt><dd>Wage and labor responses scale US employment income (<a href="#pe-bridge">step 3</a>, experimental)</dd></div>
       <div class="model-card-wide"><dt>Status</dt><dd>Steady state replicates the paper (six of seven solved parameters); shock signs are tested, magnitudes are not validated; not a forecaster; distributional outputs are steady-state statistics and an MPC-proportional split of the aggregate</dd></div>
       <div class="model-card-wide"><dt>Cannot answer</dt><dd>Forecasts; detailed tax reforms (the labor tax is endogenous); PolicyEngine reforms; nonlinear or state-dependent dynamics</dd></div>
     </dl>
@@ -88,33 +88,14 @@
 
   <section id="overview" class="band band-wide">
     <div class="band-head" data-icon="layers">
-      <h2>How it joins the core, what it is, what it can answer</h2>
+      <h2>A heterogeneous-agent model of the US: who moves, not just how much</h2>
       <p class="section-intro">Run stylized monetary, fiscal-spending, and productivity shocks through a two-asset heterogeneous-agent New Keynesian model — aggregate impulse responses plus distributional output: MPCs by liquid-wealth quartile and the hand-to-mouth share.</p>
     </div>
     <div class="scrolly-wrap single single">
       <div class="scrolly-steps">
 
-      <div class="meth-step" id="pe-bridge" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>With the microsimulation</h3></div>
-        <p class="mo-lead">Two distributional cuts of the same shock: the model&rsquo;s and the microsimulation&rsquo;s.</p>
-        <div class="pipeline">
-          <span class="pl-node"><strong>US HANK</strong><span class="mono">wage &middot; labor IRFs</span></span>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">US employment income</span></a>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <span class="pl-node pl-node-out"><strong>Who bears it</strong></span>
-        </div>
-        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
-        <p class="kv-title">Shock to incidence</p>
-        <dl class="kv"><div><dt>Tool</dt><dd><code>hank_shock_incidence</code></dd></div><div><dt>What moves</dt><dd>pre-tax real wage and labor responses</dd></div><div><dt>Enters</dt><dd>US employment income, scaled</dd></div><div><dt>Status</dt><dd>experimental</dd></div><div><dt>Refused</dt><dd><code>score_reform</code> refuses <code>model="hank"</code></dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p>Shock-to-incidence bridge: <code>hank_shock_incidence</code> scales the US <a href="/pe">microsimulation</a>'s employment income with the model's wage and labor impulse responses — the model's MPC-by-wealth story on one side, statutory tax-and-transfer incidence on the other. Experimental illustration. <code>score_reform</code> refuses <code>model="hank"</code>: three stylized instruments map to no statute.</p>
-        </details>
-      </div>
-
-      <div class="meth-step" id="what" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it is</h3></div>
+      <div class="meth-step" id="what" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>What it is</h3></div>
         <p class="mo-lead">The distributional member for the US: who moves, not just how much.</p>
         <p class="kv-title">The replication</p>
         <dl class="kv"><div><dt>Source</dt><dd>Auclert, Bard&oacute;czy, Rognlie &amp; Straub, 2021</dd></div><div><dt>Toolkit</dt><dd>the authors&rsquo; <code>sequence-jacobian</code></dd></div><div><dt>Grids</dt><dd>the paper&rsquo;s production sizes</dd></div><div><dt>Households</dt><dd>differ in liquid and illiquid wealth</dd></div><div><dt>Responses</dt><dd>first order, from the GE Jacobian</dd></div></dl>
@@ -138,8 +119,8 @@
         </details>
       </div>
 
-      <div class="meth-step" id="answers" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
+      <div class="meth-step" id="answers" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it can answer</h3></div>
         <p class="mo-lead">Stylized US shocks, with the household distribution attached.</p>
         <p class="kv-title">Stylized shocks</p>
         <dl class="kv"><div><dt>Shocks</dt><dd>monetary, fiscal spending, productivity</dd></div><div><dt>Around</dt><dd>a calibrated steady state</dd></div><div><dt>By household</dt><dd>the aggregate split in proportion to MPC</dd></div><div><dt>Tool</dt><dd><code>hank_shock</code></dd></div></dl>
@@ -160,6 +141,25 @@
           <p><strong>Worked example.</strong> One monetary shock, two answers: the HANK block splits the aggregate consumption response across wealth positions in proportion to MPC; the microsimulation reports the same earnings change after taxes, SNAP, and the EITC, decile by decile.</p>
           <p>What it cannot do, in full: the <a href="/us-hank/validation#caveats">known limits</a>.</p>
           <p>Run <code>hank_shock</code> from <a href="/connect">any connected client</a>.</p>
+        </details>
+      </div>
+
+      <div class="meth-step" id="pe-bridge" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>With the microsimulation</h3></div>
+        <p class="mo-lead">Two distributional cuts of the same shock: the model&rsquo;s and the microsimulation&rsquo;s.</p>
+        <div class="pipeline">
+          <span class="pl-node"><strong>US HANK</strong><span class="mono">wage &middot; labor IRFs</span></span>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">US employment income</span></a>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <span class="pl-node pl-node-out"><strong>Who bears it</strong></span>
+        </div>
+        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
+        <p class="kv-title">Shock to incidence</p>
+        <dl class="kv"><div><dt>Tool</dt><dd><code>hank_shock_incidence</code></dd></div><div><dt>What moves</dt><dd>pre-tax real wage and labor responses</dd></div><div><dt>Enters</dt><dd>US employment income, scaled</dd></div><div><dt>Status</dt><dd>experimental</dd></div><div><dt>Refused</dt><dd><code>score_reform</code> refuses <code>model="hank"</code></dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>Shock-to-incidence bridge: <code>hank_shock_incidence</code> scales the US <a href="/pe">microsimulation</a>'s employment income with the model's wage and labor impulse responses — the model's MPC-by-wealth story on one side, statutory tax-and-transfer incidence on the other. Experimental illustration. <code>score_reform</code> refuses <code>model="hank"</code>: three stylized instruments map to no statute.</p>
         </details>
       </div>
 

@@ -180,7 +180,7 @@ MODEL_PAGES = {
 }
 MODEL_CARD_ORDER = [
     "Answers", "Inputs", "Outputs", "Horizon", "Data", "Uncertainty",
-    "Access", "Runtime", "Joins pe-microsim", "Status", "Cannot answer",
+    "Access", "Runtime", "Joins the microsimulation", "Status", "Cannot answer",
 ]
 
 

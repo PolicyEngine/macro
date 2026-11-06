@@ -210,7 +210,7 @@ def chart_obr_anchored():
     )
     y_top, y_bot = ymap(1.2), ymap(-0.3)
     out = svg_open(x1 - x0 + 12, y_bot - y_top + 12, "obr-anchored",
-                   "obr-macro: anchored baseline vs March 2026 EFO, quarterly deviation",
+                   "OBR emulator: anchored baseline vs March 2026 EFO, quarterly deviation",
                    desc, origin=(x0 - 6, y_top - 6))
 
     # y grid: labels inside the plot, above their gridline; zero is vc-zero.
@@ -345,13 +345,13 @@ def _reform_costing(chart_id: str, title: str):
 def chart_obr_reform():
     return _reform_costing(
         "obr-reform",
-        "obr-macro: 1p on the basic rate, ours vs HMRC ready reckoner (£bn/yr)")
+        "OBR emulator: 1p on the basic rate, ours vs HMRC ready reckoner (£bn/yr)")
 
 
 def chart_pe_costing():
     return _reform_costing(
         "pe-costing",
-        "pe-microsim: 1p on the UK basic rate, our static costing vs the HMRC "
+        "PolicyEngine microsimulation: 1p on the UK basic rate, our static costing vs the HMRC "
         "ready reckoner (£bn/yr)")
 
 
@@ -390,7 +390,7 @@ def chart_svar_fevd():
             f"{fan['n_draws']:,} draws at seed {fan['seed']}.")
     return grouped_bars(
         "svar-fevd",
-        "boe-svar: global-shock FEVD shares, ours vs Brignone & Piffer (2025)",
+        "BoE SVAR: global-shock FEVD shares, ours vs Brignone & Piffer (2025)",
         desc, groups, y_max=60, y_step=20, fmt=lambda v: f"{v:.1f}", unit_suffix="%",
         unit="Share of forecast-error variance from global shocks, %")
 
@@ -438,7 +438,7 @@ def chart_frbus_residuals():
     track = 16.0                       # dot centre below the row label
     base = top + pitch * (len(rows) - 1) + track + 14
     out = svg_open(x1 - x0, base - 4, "frbus-residuals",
-                   "frb-us: residuals against the Fed’s pyfrbus, log scale", desc,
+                   "FRB/US: residuals against the Fed’s pyfrbus, log scale", desc,
                    origin=(x0, 4))
 
     def xpos(v):
@@ -511,7 +511,7 @@ def chart_obr_freerun():
         f"of {len(quarters)} maps to x = {x0:g} + i * {step:.3f}."
     )
     out = svg_open(x1 - x0 + 12, base_y - top_y + 12, "obr-freerun",
-                   "obr-macro: real GDP level, anchored vs free-running vs the March 2026 EFO (£bn/qtr)",
+                   "OBR emulator: real GDP level, anchored vs free-running vs the March 2026 EFO (£bn/qtr)",
                    desc, origin=(x0 - 6, top_y - 6))
 
     tick = lo
@@ -569,7 +569,7 @@ def chart_obr_outturn():
     )
     x0, x1 = 24.0, 724.0      # room for the y labels left of the first bar
     out = svg_open(x1 - x0, base_y - top_y + 12, "obr-outturn",
-                   "obr-macro: quarterly real GDP growth — emulator vs EFO Nov 2025 vs ONS outturn (% q/q)",
+                   "OBR emulator: quarterly real GDP growth — emulator vs EFO Nov 2025 vs ONS outturn (% q/q)",
                    desc, origin=(x0, top_y - 6))
 
     t = 0.0
@@ -662,7 +662,7 @@ def chart_svar_fan():
         f"416 + i * {panels['cpi']['step']:.3f} (CPI)."
     )
     out = svg_open(724 - 58 + 12, base_y - top_y + 12, "svar-fan",
-                   "boe-svar: out-of-sample forecast fan from the frozen 2024Q2 edge vs ONS outturns",
+                   "BoE SVAR: out-of-sample forecast fan from the frozen 2024Q2 edge vs ONS outturns",
                    desc, origin=(52, top_y - 6))
 
     gdp_labels = {-1: "\u22121%", 0: "0", 1: "+1%", 2: "+2%", 3: "+3%"}
@@ -875,7 +875,7 @@ def chart_svar_skill_all():
     pitch, top = 50.0, 40.0
     base = top + pitch * (len(SKILL_ROWS) - 1) + 14
     out = svg_open(hi_x - lo_x, base - 4, "svar-skill-all",
-                   "boe-svar forecast skill against a random walk with drift, "
+                   "BoE SVAR forecast skill against a random walk with drift, "
                    "all eight variables", desc, origin=(lo_x, 4))
 
     for tick in (0.8, 0.9, 1.0, 1.1, 1.2, 1.3):
@@ -1083,7 +1083,7 @@ def chart_svar_coverage():
             "dummies, which depresses coverage.")
 
     out = svg_open(x1 - x0 + 16, base_y - top_y + 12, "svar-coverage",
-                   "boe-svar: empirical band coverage across 49 origins", desc,
+                   "BoE SVAR: empirical band coverage across 49 origins", desc,
                    origin=(x0 - 8, top_y - 6))
     for k in range(int(math.ceil(lo_v * 10)), 11):
         v = k / 10
@@ -1184,7 +1184,7 @@ def chart_hank_targets():
     parts = [
         '<div class="vc-fig vc-tablefig" data-chart="hank-targets">',
         '<div class="table-scroll"><table class="vc-table">',
-        "<caption>us-hank: internally solved parameters vs Auclert et al. (2021) Table B.III</caption>",
+        "<caption>US HANK: internally solved parameters vs Auclert et al. (2021) Table B.III</caption>",
         '<thead><tr><th scope="col">parameter</th><th scope="col">solved</th>'
         '<th scope="col" class="num">published</th><th scope="col" class="num">ours</th>'
         '<th scope="col" class="num">|diff|</th></tr></thead>',
@@ -1235,7 +1235,7 @@ def chart_define_emissions():
     )
     x0, x1 = 24.0, 724.0      # room for the y labels left of the first bar
     out = svg_open(x1 - x0, base_y - top_y + 12, "define-emissions",
-                   "define-uk: S1 baseline total emissions — pinned run vs manual Table 4 (MtCO2e/yr)",
+                   "DEFINE-UK: S1 baseline total emissions — pinned run vs manual Table 4 (MtCO2e/yr)",
                    desc, origin=(x0, top_y - 6))
 
     t = 0.0
