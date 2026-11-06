@@ -83,8 +83,8 @@
           <p class="mcard-lead">A transpiled, solvable copy of the OBR&rsquo;s published macroeconometric model, anchored to the latest EFO: shock a lever, re-solve, and read GDP, consumption and investment against the official path.</p>
           <div class="qa-facts">
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Tracks the published forecast <strong>by construction</strong> with the anchors held; <strong>weak free-running</strong> (<a href="/obr/validation">validation</a>)</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>The household tax route behaves; the spending lever&rsquo;s multiplier is <strong>fixed by construction</strong> (<a href="/obr/validation#caveats">limits</a>)</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core: <code>score_reform</code> feeds the static costing in through <code>HHDI_ADDFACTOR</code></span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>The household tax route transmits, but no quarter of the solve converges to tolerance; the spending lever&rsquo;s multiplier is <strong>fixed by construction</strong> (<a href="/obr/validation#caveats">limits</a>)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core: <code>score_reform</code> feeds the static costing in as an <a href="/glossary#add-factor">add-factor</a> on household disposable income (<code>HHDI_ADDFACTOR</code>)</span></div>
           </div>
         </details>
         <p class="mcard-links"><a class="btn btn-primary btn-sm" href="/obr">Open<span class="visually-hidden"> OBR emulator</span><span aria-hidden="true"> &rarr;</span></a><a href="/obr/validation">Evidence<span class="visually-hidden"> for OBR emulator</span></a><a href="/obr#answers">Results<span class="visually-hidden"> from OBR emulator</span></a><a href="/papers/obr-macro">Paper<span class="visually-hidden"> on OBR emulator</span></a></p>
@@ -96,7 +96,7 @@
         <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
           <p class="mcard-lead">An eight-variable Bayesian structural VAR: named shocks identified by sign and zero restrictions, a decomposition of recent GDP and inflation, and a forward projection with credible bands.</p>
           <div class="qa-facts">
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Frozen-edge bands run wide: <strong>over-dispersion, not a pass</strong></span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Bands <strong>under-cover</strong> across 49 back-test origins; one <a href="/glossary#frozen-edge">frozen origin</a> shows the opposite (<a href="/svar/validation#rolling">coverage</a>)</span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Against a drifting random walk <strong>no skill survives</strong> once the tests are adjusted together (<a href="/svar/validation#forecasters">validation</a>)</span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core: the CPI path drives benefit-uprating incidence (<code>svar_inflation_incidence</code>, experimental)</span></div>
           </div>
@@ -111,7 +111,7 @@
           <p class="mcard-lead">The Federal Reserve&rsquo;s FRB/US model &mdash; 284 equations parsed from the Board&rsquo;s own model file &mdash; solved around the April 2026 LONGBASE baseline. Pick a lever and a policy rule, read the deviation path.</p>
           <div class="qa-facts">
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Levers: federal funds rate, government spending, transfers, taxes</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Matches the Fed&rsquo;s pyfrbus at <strong>its own noise floor</strong> (<a href="/frb-us/validation">validation</a>). Reproducing LONGBASE is an identity, not evidence</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Matches the Fed&rsquo;s pyfrbus on a 100bp funds-rate shock, <strong>within the gap between the Fed&rsquo;s own two releases</strong> (<a href="/frb-us/validation">validation</a>). Reproducing LONGBASE is an identity, not evidence</span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins one way: wage and hours drive employment-income incidence (<code>frbus_shock_incidence</code>, experimental). <code>score_reform</code> refuses it</span></div>
           </div>
         </details>
@@ -153,13 +153,13 @@
           <p class="mcard-lead">The authors&rsquo; ecological stock-flow-consistent model of the UK economy and climate, run unmodified at a pinned commit: one published scenario, read as deltas over 2023&ndash;2037.</p>
           <div class="qa-facts">
           <div class="qa-fact"><span class="icon">&rarr;</span><span><strong>Deltas only, never levels</strong> &mdash; the baseline sits far from outturns, so nothing here is a forecast</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Partial replication: the macro block replicates manual Table&nbsp;4, and scenario deltas are design-gated because <strong>no numeric v1.1 scenario results are published</strong></span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Partial replication: the macro block replicates manual Table&nbsp;4, and scenario deltas are checked only against the published scenario design (<a href="/glossary#design-gated">design-gated</a>) because <strong>no numeric v1.1 scenario results are published</strong></span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core one way: scenario income deltas drive employment-income incidence (<code>define_scenario_incidence</code>, experimental)</span></div>
           </div>
         </details>
         <p class="mcard-links"><a class="btn btn-primary btn-sm" href="/define">Open<span class="visually-hidden"> DEFINE-UK</span><span aria-hidden="true"> &rarr;</span></a><a href="/define/validation">Evidence<span class="visually-hidden"> for DEFINE-UK</span></a><a href="/define#status">Results<span class="visually-hidden"> from DEFINE-UK</span></a><a href="/papers/define-uk">Paper<span class="visually-hidden"> on DEFINE-UK</span></a></p>
       </article>
-        <div class="mgap"><p class="mcard-q">Not covered</p><p><strong>No model answers macro feedback on a US reform.</strong> No US macro bridge exists, so a US reform is scored statically.</p></div>
+        <div class="mgap" id="us-reform-gap"><p class="mcard-q">Not covered</p><p><strong>No model answers macro feedback on a US reform.</strong> No US macro bridge exists, so a US reform is scored statically.</p></div>
       </div>
       <p class="router-empty" data-router-empty hidden>No model here answers that question for that country.</p>
     </div>
@@ -180,8 +180,8 @@
           <tr><th scope="row"><a href="/svar">BoE SVAR</a> <span class="model-id mono">boe-svar</span></th><td>UK</td><td>What drove the UK economy at the latest vintage; short-run forecasts</td><td>No</td><td>Hosted</td></tr>
           <tr><th scope="row"><a href="/frb-us">FRB/US</a> <span class="model-id mono">frb-us</span></th><td>US</td><td>US macro dynamics: monetary and fiscal shocks, quarter by quarter</td><td>No</td><td>Hosted, raw shocks only</td></tr>
           <tr><th scope="row"><a href="/us-hank">US HANK</a> <span class="model-id mono">us-hank</span></th><td>US</td><td>Distributional transmission of stylized US shocks: who responds, by wealth</td><td>No</td><td>Hosted, stylized shocks only</td></tr>
-          <tr><th scope="row"><a href="/olg">OG-UK</a> <span class="model-id mono">psl-og</span></th><td>UK (OG-UK)</td><td>Long-run incentives: labour supply, saving, the capital stock over decades</td><td>Yes</td><td>Local only</td></tr>
-          <tr><th scope="row"><a href="/define">DEFINE-UK</a> <span class="model-id mono">define-uk</span></th><td>UK</td><td>UK climate-policy scenario deltas — nothing quotable today</td><td>No</td><td>Local CLI</td></tr>
+          <tr><th scope="row"><a href="/olg">OG-UK</a> <span class="model-id mono">psl-og</span></th><td>UK (OG-UK)</td><td>Long-run incentives: labour supply, saving, the capital stock over decades</td><td>Yes (local only; no scored result published)</td><td>Local only</td></tr>
+          <tr><th scope="row"><a href="/define">DEFINE-UK</a> <span class="model-id mono">define-uk</span></th><td>UK</td><td>UK climate-policy scenario deltas; no published results to check them against</td><td>No</td><td>Local CLI</td></tr>
         </tbody>
       </table>
     </div>
@@ -278,7 +278,7 @@
                   </div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre tabindex="0"><code>pe-macro score --country uk --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --model obr</code></pre></div>
         <details class="about"><summary>About this join</summary>
-          <p>Worked example: 1p on the basic rate, costed by the microsimulation and fed through the emulator; the figures live on the <a href="/obr#answers">OBR Overview</a>. The static costing runs below HMRC&rsquo;s ready reckoner at every matched year: <a href="/pe/validation#hmrc">a benchmark, not a validation</a>. UK only: no US macro bridge exists, so a US reform is scored statically.</p>
+          <p>Worked example: 1p on the basic rate, costed by the microsimulation and fed through the emulator; the figures live on the <a href="/obr#answers">OBR Overview</a>. The static costing runs below HMRC&rsquo;s ready reckoner in the one matched year, 2026&ndash;27: <a href="/pe/validation#hmrc">a benchmark, not a validation</a>. UK only (<a href="#us-reform-gap">why a US reform gets no macro feedback</a>).</p>
           <p>Read the caveats before the headline: the costing inherits survey-microdata uncertainty, and the emulator&rsquo;s spending multiplier is fixed by construction (<a href="/obr/validation#caveats">limits</a>), so treat macro feedback as sign and order of magnitude. Setup on the <a href="/connect">Use page</a>.</p>
         </details>
         <div class="meth-inline">
@@ -286,7 +286,7 @@
         <div class="meth-eq"><div class="meth-eq-label">chain</div><div class="meth-eq-body"><code>pe-microsim</code> &rarr; <code>obr-macro</code></div></div>
         <div class="meth-eq"><div class="meth-eq-label">enters</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code>, household disposable income</div></div>
         <div class="meth-eq"><div class="meth-eq-label">call</div><div class="meth-eq-body"><code>score_reform(model="obr")</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">country</div><div class="meth-eq-body">UK only; a US reform is scored statically</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">country</div><div class="meth-eq-body">UK only</div></div>
         </div>
       </div>
 
@@ -338,7 +338,7 @@
           <div class="meth-eq"><div class="meth-eq-label">chain</div><div class="meth-eq-body"><code>pe-microsim</code> &rarr; <code>obr-macro</code></div></div>
           <div class="meth-eq"><div class="meth-eq-label">enters</div><div class="meth-eq-body"><code>HHDI_ADDFACTOR</code>, household disposable income</div></div>
           <div class="meth-eq"><div class="meth-eq-label">call</div><div class="meth-eq-body"><code>score_reform(model="obr")</code></div></div>
-          <div class="meth-eq"><div class="meth-eq-label">country</div><div class="meth-eq-body">UK only; a US reform is scored statically</div></div>
+          <div class="meth-eq"><div class="meth-eq-label">country</div><div class="meth-eq-body">UK only</div></div>
         </div>
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Reform &rarr; steady state &rarr; households</span><span class="meth-panel-badge mono">Step 2</span></div>
@@ -381,7 +381,7 @@
         <div><dt>Checked against implemented legislation</dt><dd>The rules are code, checked rule by rule; a household answer can be verified by hand.</dd></div>
         <div><dt>Replication with a published anchor</dt><dd>Reproduces a published model or paper. An imposed match is an anchor, not a validation.</dd></div>
         <div><dt>Calibrated counterfactual</dt><dd>Targets are met by construction, so there is no ground truth to test against.</dd></div>
-        <div><dt>Partial replication</dt><dd>One block replicates a published table; the rest is design-gated.</dd></div>
+        <div><dt>Partial replication</dt><dd>One block replicates a published table; the rest is checked only against the published design (<a href="/glossary#design-gated">design-gated</a>).</dd></div>
       </dl>
       <div class="table-scroll">
       <table>
@@ -397,37 +397,37 @@
             <th scope="row"><a href="/obr/validation"><strong>OBR emulator</strong> <span class="model-id mono">obr-macro</span></a></th>
             <td>Replication with a published anchor</td>
             <td>March 2026 EFO; HMRC ready reckoner; ONS outturns</td>
-            <td>Tracks the EFO by construction; weak free-running</td>
+            <td>Tracks the EFO by construction (0.30% GDP MAPE); weak <a href="/glossary#anchored">free-running</a>; predictive, policy and uncertainty checks rated weak; no quarter of the reform solve converges to tolerance</td>
           </tr>
           <tr>
             <th scope="row"><a href="/svar/validation"><strong>BoE SVAR</strong> <span class="model-id mono">boe-svar</span></a></th>
             <td>Replication with a published anchor</td>
             <td>Brignone &amp; Piffer (2025); ONS outturns</td>
-            <td>Replicates the GDP decomposition, short on CPI; no forecast skill</td>
+            <td>Replicates the GDP decomposition; CPI global-shock share about 8pp short; no forecast skill against a drifting random walk once the 64 tests are adjusted together; bands under-cover across 49 origins</td>
           </tr>
           <tr>
             <th scope="row"><a href="/frb-us/validation"><strong>FRB/US</strong> <span class="model-id mono">frb-us</span></a></th>
             <td>Replication with a published anchor</td>
             <td>The Fed's <code>pyfrbus</code> on an identical shock; published multiplier ranges</td>
-            <td>Shocked paths match pyfrbus at the Fed&rsquo;s own release-to-release gap; baseline tracking is an identity</td>
+            <td>One 100bp funds-rate shock matches pyfrbus within the gap between the Fed&rsquo;s own two releases (<a href="/glossary#release-gap">release-to-release gap</a>); baseline tracking is an identity; no predictive claim</td>
           </tr>
           <tr>
             <th scope="row"><a href="/us-hank/validation"><strong>US HANK</strong> <span class="model-id mono">us-hank</span></a></th>
             <td>Replication with a published anchor</td>
             <td>Auclert et al. (2021), via the authors' toolkit</td>
-            <td>Solved parameters match the paper; Y, K and r are inputs, not results; IRF magnitudes unvalidated</td>
+            <td>Six of seven solved parameters match the paper; <code>vphi</code> misses by &minus;17.3%, unresolved; Y, K and r are inputs, not results; IRF magnitudes unvalidated</td>
           </tr>
           <tr>
             <th scope="row"><a href="/olg/validation"><strong>OG-UK</strong> <span class="model-id mono">psl-og</span></a></th>
             <td>Calibrated counterfactual — no ground truth</td>
             <td>ONS/OBR aggregates as <em>targets</em>, not a validation set</td>
-            <td>Targets met by construction; no ground truth</td>
+            <td>Targets met by construction; the one external benchmark (OBR Working Paper 22, Table 5.1) has not yet been run</td>
           </tr>
           <tr>
             <th scope="row"><a href="/define/validation#calibration"><strong>DEFINE-UK</strong> <span class="model-id mono">define-uk</span></a></th>
             <td>Partial replication — macro block and scenario design-gate pass</td>
             <td>Manual Table&nbsp;4; ONS outturns, OBR EFO, DESNZ emissions — no scenario figures are published</td>
-            <td>Baseline far from outturns &mdash; deltas only, never levels</td>
+            <td>Macro block matches manual Table&nbsp;4, but 2025 growth misses by &minus;0.30pp, clearing a gate set after the run by 0.01pp; emissions 23.3% below the manual in 2040; no published scenario results to check; baseline far from outturns &mdash; deltas only, never levels</td>
           </tr>
         </tbody>
       </table>
@@ -452,7 +452,7 @@
           <tr>
             <th scope="row">Yield of a 1p rise in the basic rate, 2026&ndash;27 (obr-macro + pe)</th>
             <td><a href="https://www.gov.uk/government/statistics/direct-effects-of-illustrative-tax-changes">HMRC ready reckoner</a> (June 2025)</td>
-            <td>Adjusted — below HMRC at every matched year; HMRC is post-behavioural on administrative data, ours static and survey-based. A benchmark, not a validation</td>
+            <td>Adjusted — below HMRC in the one matched year (2026&ndash;27); HMRC is post-behavioural on administrative data, ours static and survey-based. A benchmark, not a validation</td>
             <td><a href="/pe/validation#hmrc">pe-microsim validation</a></td>
           </tr>
           <tr>
