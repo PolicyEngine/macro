@@ -5583,3 +5583,19 @@ code, pre, kbd, samp { font-variant-ligatures: none; font-feature-settings: "cal
 /* QA (axe color-contrast): --text-faint (#6B7280) is 4.8:1 on white but 4.4:1
    on the tinted stat tiles and the sunken code blocks; use --text-muted there */
 .stat .stat-sub, .codeblock .cm, .codeblock .cb-copy { color: var(--text-muted); }
+/* r5 ui-shared: "Keep reading" is one level, as AB's landing draws its entry
+   cards: the section head and the tiles sit on the canvas, with no white card
+   around the tiles (the row used to be a card inside a section card). */
+.band.where-next:has(> .band-head:first-child):not(.band .band):not(.glance-band) {
+  padding: 0;
+  overflow: visible;
+}
+.band.where-next:has(> .band-head:first-child):not(.band .band):not(.glance-band)::after,
+.band.where-next:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child::after { content: none; }
+.band.where-next:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child { margin: 0 0 var(--s-4); }
+.band.where-next .band-head h2 { font-size: var(--fs-h3); }
+.where-next .entry-grid { gap: var(--s-4); }
+/* papers cards on /models: "Read →" in the body face, sentence case, pinned to
+   the card bottom so the row lines up across cards of different lengths */
+.strategy-card:has(> .strategy-paper-link) { display: flex; flex-direction: column; }
+.strategy-card .strategy-paper-link { margin-top: auto; padding-top: 16px; font-family: var(--body); font-size: var(--fs-body-sm); font-weight: 600; }
