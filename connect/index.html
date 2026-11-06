@@ -20,7 +20,7 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=22" />
+<link rel="stylesheet" href="/style.css?v=23" />
 <style>
 /* ---------- connect page ---------- */
 .connect-hero .hero-inner { display: block; }
@@ -269,7 +269,7 @@
 .run-step { padding: var(--s-5) 0; border-top: 1px solid var(--hairline); }
 .band-head + .run-step { border-top: 0; padding-top: 0; }
 .run-step-h { display: flex; align-items: center; gap: var(--s-3); margin: 0 0 var(--s-2); font-size: var(--fs-h3); }
-.run-num { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px; background: var(--teal-700); color: #fff; font-size: var(--fs-body-sm); font-weight: 700; }
+.run-num { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px; background: var(--surface-tint); color: var(--teal-700); font-size: var(--fs-body-sm); font-weight: 600; }
 .run-lead { margin: 0 0 var(--s-4); color: var(--text-muted); max-width: 70ch; }
 .run-list { margin: 0; padding: 0; list-style: none; counter-reset: run; display: grid; gap: var(--s-5); }
 .run-list > li { counter-increment: run; position: relative; padding-left: 40px; min-width: 0; }
@@ -402,7 +402,7 @@ tools. Hosted use needs no install, no account and no API key.
 <li><code class="cmd-text">Score raising the UK basic rate of income tax to 21p.</code><span class="cmd-tool mono">start_job · score_reform</span><button type="button" data-copy>copy</button></li>
 <li><code class="cmd-text">What is the UK GDP and inflation outlook for the next four quarters?</code><span class="cmd-tool mono">forecast_uk</span><button type="button" data-copy>copy</button><span class="cmd-note">boe-svar: <a href="/svar/validation#forecasters">no forecast skill against a drifting random walk</a></span></li>
 <li><code class="cmd-text">What happens to US GDP and unemployment if the Fed raises rates by 100 basis points?</code><span class="cmd-tool mono">frbus_shock</span><button type="button" data-copy>copy</button></li>
-<li><code class="cmd-text">How does a 25 basis point US rate cut change consumption across liquid-wealth quartiles?</code><span class="cmd-tool mono">hank_shock</span><button type="button" data-copy>copy</button></li>
+<li><code class="cmd-text">How does a 25 basis point cut in the quarterly US policy rate (about 100bp annualised) change consumption across wealth quartiles?</code><span class="cmd-tool mono">hank_shock</span><button type="button" data-copy>copy</button></li>
 </ul>
 <p class="prompt-note">A reform score outlasts one HTTP request, so the client runs it as a job (<code>start_job</code>, then <code>get_job_result</code> until it is done); the tool descriptions tell it to. See <a href="#limits">limits</a>.</p>
 </li>
@@ -451,7 +451,9 @@ async def call(tool, args=None):
         async with ClientSession(read, write) as session:
             await session.initialize()
             res = await session.call_tool(tool, args or {})
-            return json.loads(res.content[0].text)
+    if res.isError:  # a failed tool or job returns plain text, not JSON
+        raise RuntimeError(res.content[0].text)
+    return json.loads(res.content[0].text)
 
 async def run_job(tool, args):
     """Slow tools: start a job, then poll until it is done."""
