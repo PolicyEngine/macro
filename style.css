@@ -5670,3 +5670,124 @@ a .model-id, a:hover .model-id { text-decoration: none; display: inline-block; }
 
 /* Router pills: the id sits at the pill's own size, after the name. */
 .qa summary strong .model-id { font-size: inherit; margin-left: 4px; }
+
+/* === r5:ui-home === */
+/* sub-tab icons for in-page anchor rows (/models, /connect): each tab gets an
+   icon that means its target instead of the generic document fallback */
+:root {
+  --i-signpost: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3v18M12 4h6l3 3-3 3h-6M12 13H6l-3 3 3 3h6'/%3E%3C/svg%3E");
+  --i-table: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Cpath d='M3 9h18M3 15h18M9 3v18'/%3E%3C/svg%3E");
+  --i-link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7'/%3E%3C/svg%3E");
+  --i-terminal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 17 6-6-6-6M12 19h8'/%3E%3C/svg%3E");
+  --i-alert: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01'/%3E%3C/svg%3E");
+  --i-wrench: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.7 6.3a4 4 0 0 0 5 5L21 13a6 6 0 0 1-8 1l-6.5 6.5a2.1 2.1 0 0 1-3-3L10 11a6 6 0 0 1 1-8l1.7 1.3a4 4 0 0 0 2 2z'/%3E%3C/svg%3E");
+}
+.model-tabs-row > .model-tabs-link[href="/models"] { --tab-icon: var(--i-signpost); }
+.model-tabs-link[href="/models/side-by-side"] { --tab-icon: var(--i-table); }
+.model-tabs-link[href="/models/combine"] { --tab-icon: var(--i-link); }
+.model-tabs-link[href="/models/papers"] { --tab-icon: var(--i-book); }
+.model-tabs-row > .model-tabs-link[href="#connect"] { --tab-icon: var(--i-plug); }
+.model-tabs-link[href="#cli"] { --tab-icon: var(--i-terminal); }
+.model-tabs-link[href="#code"] { --tab-icon: var(--i-code); }
+.model-tabs-link[href="#tools"] { --tab-icon: var(--i-wrench); }
+.model-tabs-link[href="#limits"] { --tab-icon: var(--i-alert); }
+
+/* /models question router: filter chips over seven model cards */
+.router-filters { display: grid; gap: var(--s-3); padding-bottom: var(--s-4); border-bottom: 1px solid var(--hairline); }
+.router-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.router-label { min-width: 5.5rem; color: var(--text-muted); font-size: var(--fs-body-sm); font-weight: 600; }
+.chip-btn {
+  min-height: 36px; padding: 6px 14px; border: 1px solid var(--hairline-strong); border-radius: 999px;
+  background: var(--surface-card); color: var(--text-body); font: 500 var(--fs-body-sm)/1.2 var(--body, inherit);
+  cursor: pointer; transition: background-color .15s, border-color .15s, color .15s;
+}
+.chip-btn:hover { border-color: var(--primary); color: var(--teal-700); }
+.chip-btn[aria-pressed="true"] { background: var(--surface-tint); border-color: var(--primary); color: var(--teal-700); font-weight: 600; box-shadow: inset 0 0 0 1px var(--primary); }
+.chip-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.router-count { margin: var(--s-4) 0 var(--s-3); color: var(--text-muted); font-size: var(--fs-body-sm); }
+.router-empty { margin: 0; padding: var(--s-4); border: 1px dashed var(--hairline-strong); border-radius: var(--radius); color: var(--text-muted); }
+.mcard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: var(--s-4); }
+.mcard {
+  display: flex; flex-direction: column; gap: var(--s-2); min-width: 0;
+  padding: var(--s-5); border: 1px solid var(--hairline); border-radius: var(--radius-card); background: var(--surface-card);
+}
+.mcard[hidden] { display: none; }
+.mcard-q { margin: 0; color: var(--text-strong); font-size: var(--fs-h3); font-weight: 600; line-height: 1.35; }
+.mcard-name { margin: 0; font-size: var(--fs-body); font-weight: 600; }
+.mcard-name .model-id { margin-left: 4px; font-size: var(--fs-small); font-weight: 400; }
+.mcard-chips { margin: 0; }
+/* the model's own verdict line (#220 item 2), read off its page's verdict callout */
+.mcard-verdict { margin: 0; color: var(--text-body); font-size: var(--fs-body-sm); line-height: 1.5; }
+.mcard-verdict-k { margin-right: 4px; color: var(--text-strong); font-weight: 600; }
+.mcard-lead { margin: 0 0 var(--s-3); color: var(--text-body); font-size: var(--fs-body-sm); line-height: 1.55; }
+/* details.about sets margin-top, so the expander needs the higher selector to sit at the card bottom with the action row */
+.mcard > details.mcard-more { margin-top: auto; }
+.mcard-more .qa-facts { display: grid; gap: var(--s-2); padding: 0; }
+.mcard-more .qa-fact { font-size: var(--fs-body-sm); }
+.mcard-links { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3); margin: var(--s-2) 0 0; font-size: var(--fs-body-sm); }
+.mcard-links .btn { margin-right: var(--s-1); }
+.btn-sm { padding: 7px 14px; font-size: var(--fs-body-sm); }
+@media (max-width: 600px) {
+  .router-label { flex-basis: 100%; }
+  .mcard { padding: var(--s-4); }
+}
+/* code is copied by hand from these pages: draw ">=", "==", "->" as typed */
+code, pre, kbd, samp { font-variant-ligatures: none; font-feature-settings: "calt" 0, "liga" 0; }
+/* /glossary: an index row of term links, then one card per group */
+.glossary-index { display: flex; flex-wrap: wrap; gap: var(--s-2); width: min(var(--max), calc(100% - 2 * var(--gutter))); margin: var(--s-2) auto var(--s-4); }
+.glossary-index a { display: inline-flex; align-items: center; min-height: 32px; padding: 2px 12px; border: 1px solid var(--hairline); border-radius: 999px; background: var(--surface-card); color: var(--text-body); font-size: var(--fs-small); text-decoration: none; }
+.glossary-index a:hover { border-color: var(--primary); color: var(--teal-700); }
+.glossary { margin: 0; display: grid; }
+.glossary > div { display: grid; grid-template-columns: minmax(0, 16rem) minmax(0, 1fr); gap: var(--s-2) var(--s-5); padding: var(--s-4) 0; border-bottom: 1px solid var(--hairline); scroll-margin-top: var(--sticky-top, 120px); }
+.glossary > div:last-child { border-bottom: 0; }
+.glossary > div:target { background: var(--surface-tint); }
+.glossary dt { color: var(--text-strong); font-weight: 600; }
+.glossary dd { margin: 0; }
+.glossary dd p { margin: 0 0 var(--s-1); color: var(--text-body); max-width: 70ch; }
+.glossary dd a { font-size: var(--fs-body-sm); }
+@media (max-width: 640px) { .glossary > div { grid-template-columns: minmax(0, 1fr); gap: var(--s-1); } }
+/* /contact: three self-serve routes under the email card */
+.contact-routes { list-style: none; margin: var(--s-6) auto 0; padding: 0; max-width: 880px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--s-5); text-align: left; }
+.contact-routes li { display: flex; flex-direction: column; gap: var(--s-1); padding-top: var(--s-4); border-top: 1px solid var(--hairline); }
+.contact-routes strong { color: var(--text-strong); }
+.contact-routes span { color: var(--text-muted); font-size: var(--fs-body-sm); }
+.contact-routes a { margin-top: var(--s-1); font-size: var(--fs-body-sm); font-weight: 600; }
+/* home hero: who the site is for, one quiet line under the lede */
+.home-page .hero-audience { margin: calc(-1 * var(--s-2)) 0 var(--s-5); color: var(--text-muted); font-size: var(--fs-body-sm); }
+.contact-band { padding-top: var(--card-pad); }
+.contact-band .contact-primary { padding-top: var(--s-5); }
+.mgap { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-5); border: 1px dashed var(--hairline-strong); border-radius: var(--radius-card); color: var(--text-body); font-size: var(--fs-body-sm); }
+.mgap p { margin: 0; }
+/* QA: the tab rows scroll sideways (overflow-x), which clips the 2px-offset
+   focus ring top and bottom; draw it inside the tab instead */
+:is(.model-tabs-row, .economy-subnav-row) a:focus-visible { outline-offset: -3px; box-shadow: none; }
+/* QA: the absolute "copy" button sat on top of the first line of a long command */
+.codeblock:has(> .cb-copy) { padding-right: 64px; }
+/* QA (axe color-contrast): --text-faint (#6B7280) is 4.8:1 on white but 4.4:1
+   on the tinted stat tiles and the sunken code blocks; use --text-muted there */
+.stat .stat-sub, .codeblock .cm, .codeblock .cb-copy { color: var(--text-muted); }
+/* r5 ui-shared: "Keep reading" is one level, as AB's landing draws its entry
+   cards: the section head and the tiles sit on the canvas, with no white card
+   around the tiles (the row used to be a card inside a section card). */
+.band.where-next:has(> .band-head:first-child):not(.band .band):not(.glance-band) {
+  padding: 0;
+  overflow: visible;
+}
+.band.where-next:has(> .band-head:first-child):not(.band .band):not(.glance-band)::after,
+.band.where-next:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child::after { content: none; }
+.band.where-next:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child { margin: 0 0 var(--s-4); }
+.band.where-next .band-head h2 { font-size: var(--fs-h3); }
+.where-next .entry-grid { gap: var(--s-4); }
+/* papers cards on /models: "Read →" in the body face, sentence case, pinned to
+   the card bottom so the row lines up across cards of different lengths */
+.strategy-card:has(> .strategy-paper-link) { display: flex; flex-direction: column; }
+.strategy-card .strategy-paper-link { margin-top: auto; padding-top: 16px; font-family: var(--body); font-size: var(--fs-body-sm); font-weight: 600; }
+/* QA: at phone width the four card links need the tighter gap to stay on one row */
+@media (max-width: 480px) { .mcard-links { column-gap: var(--s-2); } }
+
+/* r5 round 2: glossary term links (first use per page) read as text with a
+   dotted rule, so a dense verdict is not a wall of teal links. */
+.gloss-link { color: inherit; text-decoration: underline dotted; text-decoration-color: var(--teal-700, #285E61); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.gloss-link:hover { color: var(--teal-700, #285E61); text-decoration-style: solid; }
+/* /models "More on the models": the four other tabs as one row on the canvas. */
+.where-next .models-more { grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
