@@ -118,3 +118,51 @@ def test_compare_tab_is_on_both_models_pages():
 def test_refresh_rejects_heavy_models():
     with pytest.raises(SystemExit):
         battery.refresh(json.loads(json.dumps(DATA)), "us-hank")
+
+
+def _section(qid: str) -> str:
+    return re.search(rf'<section class="band cmp-q" id="q-{qid}".*?</section>', PAGE, re.S).group(0)
+
+
+def test_every_fact_moves_to_details_not_out():
+    """The headline rows are short; the run call, reason, units and flags stay on the page."""
+    import html as _html
+    text = _html.unescape(PAGE)
+    for q in DATA["questions"]:
+        section = _html.unescape(_section(q["id"]))
+        for cell in q["cells"]:
+            if cell["status"] != "answered":
+                continue
+            assert build.call_text(cell["run"]) in section
+            for key in ("reason", "verdict_label", "solver", "draws", "experiment", "rate_path",
+                        "timing", "multiplier", "symmetry", "linearity", "result"):
+                if cell.get(key):
+                    assert cell[key] in section, (q["id"], cell["model"], key)
+            for key in ("gdp", "inflation"):
+                if cell.get(key):
+                    assert cell[key]["units"] in section
+    assert "186 accepted draws" in text and "744 accepted draws" in text
+
+
+def test_headline_verdicts_are_short_and_benchmark_row_leads():
+    for q in DATA["questions"]:
+        for cell in q["cells"]:
+            if cell["status"] == "answered":
+                assert len(cell["short"]["why"].split()) <= 10
+                assert len(cell["short"].get("timing", "").split()) <= 4
+        body = _section(q["id"]).split("<tbody>", 1)[1]
+        assert body.lstrip().startswith('<tr class="cmp-bench-row">')
+        assert 'class="cmp-takeaway"' in _section(q["id"])
+
+
+def test_validator_catches_a_long_verdict_reason():
+    bad = copy.deepcopy(DATA)
+    bad["questions"][0]["cells"][0]["short"]["why"] = " ".join(["word"] * 11)
+    assert any("over 10 words" in p for p in battery.problems(bad))
+
+
+def test_takeaway_uses_no_ranking_language():
+    for q in DATA["questions"]:
+        line = re.search(r'<p class="cmp-takeaway">(.*?)</p>', _section(q["id"])).group(1).lower()
+        for word in ("best", "better", "worse", "most accurate", "only"):
+            assert word not in line

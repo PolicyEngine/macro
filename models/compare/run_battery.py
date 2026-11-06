@@ -63,6 +63,9 @@ def problems(data: dict) -> list[str]:
                 out.append(f"{where}: unknown benchmark {bid}")
             elif not bench.get("source") or not bench.get("url"):
                 out.append(f"{where}: benchmark {bid} has no source")
+        for row in q.get("benchmark_rows", []):
+            if row.get("benchmark") not in q.get("benchmarks", []):
+                out.append(f"{where}: benchmark row {row.get('benchmark')} is not one of the question's benchmarks")
         models = [c.get("model") for c in q["cells"]]
         if tuple(sorted(models, key=MODEL_ORDER.index)) != tuple(models):
             out.append(f"{where}: cells are not in the fixed hub order")
@@ -93,6 +96,13 @@ def problems(data: dict) -> list[str]:
                 out.append(f"{tag}: verdict {cell.get('verdict')!r} not in {sorted(VERDICTS)}")
             if not cell.get("verdict_label") or not cell.get("reason"):
                 out.append(f"{tag}: verdict needs a label and a reason")
+            short = cell.get("short") or {}
+            if not short.get("tag") or not short.get("why"):
+                out.append(f"{tag}: short needs a tag and a why (the table's verdict)")
+            elif len(short["why"].split()) > 10:
+                out.append(f"{tag}: short.why is over 10 words")
+            if len(str(short.get("timing", "")).split()) > 4:
+                out.append(f"{tag}: short.timing is over 4 words")
             issue = cell.get("issue")
             if issue is not None and issue not in data["issues"]:
                 out.append(f"{tag}: unknown issue {issue}")

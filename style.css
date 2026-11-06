@@ -5671,3 +5671,48 @@ section[data-q][hidden] { display: none; }
 .cmp-bench + .cmp-note, .cmp-note + .cmp-note { margin-top: var(--s-3); }
 .cmp-note { margin-bottom: 0; }
 .cmp-howto { margin-top: var(--s-3); }
+
+/* r5 compare-2: a scannable comparison table (BoE MPR box style). Headline
+   numbers and a short verdict per row; the run, full units and caveats sit in
+   a collapsed Details row; the sourced benchmark is the first row. */
+.cmp-takeaway { max-width: 72ch; margin: 0 0 var(--s-3); font-size: var(--fs-body); color: var(--text-strong); }
+.cmp-scroll table.cmp-table { min-width: 760px; }
+.cmp-table thead th { font-size: 12px; font-weight: 600; color: var(--text-strong); vertical-align: bottom; border-bottom: 2px solid var(--text-strong); }
+.cmp-hunit { display: block; font-weight: 400; color: var(--text-muted); }
+.cmp-table tbody th { min-width: 9rem; }
+.cmp-table td .cmp-num { font-size: var(--fs-body); }
+.cmp-table td:not(:first-child) { white-space: normal; }
+.cmp-why { display: block; margin-top: 4px; font-size: 12px; line-height: 1.4; color: var(--text-body); max-width: 26ch; }
+.cmp-none .cmp-why { display: inline; margin-left: 8px; max-width: none; }
+.cmp-bench-row th, .cmp-bench-row td { background: var(--surface-tint); border-bottom: 1px solid var(--hairline-strong); }
+.cmp-bench-row th { font-weight: 600; color: var(--teal-700); }
+.cmp-bench-row .cmp-num { font-size: var(--fs-body-sm); font-weight: 600; color: var(--text-strong); }
+.cmp-more-cell { width: 1%; white-space: nowrap; text-align: right; }
+.cmp-more { font: inherit; font-size: 12px; white-space: nowrap; font-weight: 600; color: var(--teal-700); background: none; border: 1px solid var(--hairline-strong); border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+.cmp-more::after { content: " +"; }
+.cmp-more[aria-expanded="true"]::after { content: " −"; }
+.cmp-more:hover { background: var(--brand-wash); }
+.cmp-more:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.cmp-detail[hidden] { display: none; }
+.cmp-detail td { background: var(--surface-sunken); padding: 10px 16px 12px; }
+.cmp-dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0; font-size: 12px; line-height: 1.45; max-width: 110ch; }
+.cmp-dl dt { font-weight: 600; color: var(--text-muted); }
+.cmp-dl dd { font-weight: 400; }
+.cmp-dl dd { margin: 0; color: var(--text-body); }
+.cmp-dl .cmp-call { display: block; margin-top: 2px; font-family: inherit; font-size: 12px; color: var(--text-muted); overflow-wrap: anywhere; }
+@media (max-width: 720px) {
+  .cmp-table tr.cmp-bench-row { background: var(--surface-tint); }
+  .cmp-bench-row th, .cmp-bench-row td { background: none; border-bottom: 0; }
+  .cmp-table td.cmp-more-cell { width: auto; text-align: left; }
+  .cmp-table td.cmp-more-cell::before, .cmp-table tr.cmp-detail td::before { content: none; display: none; }
+  .cmp-table tr.cmp-row, .cmp-table tr.cmp-bench-row { display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; }
+  .cmp-table tr.cmp-row > th, .cmp-table tr.cmp-bench-row > th,
+  .cmp-table tr.cmp-row > td[data-label="Verdict"], .cmp-table tr.cmp-bench-row > td[data-label="Verdict"],
+  .cmp-table tr.cmp-row > td.cmp-more-cell, .cmp-table tr.cmp-bench-row > td.cmp-more-cell,
+  .cmp-table tr.cmp-bench-row > td[colspan] { grid-column: 1 / -1; }
+  .cmp-table tr.cmp-detail { margin-top: calc(-1 * var(--s-3) + 2px); border-top-left-radius: 0; border-top-right-radius: 0; background: var(--surface-sunken); }
+  .cmp-detail td { padding: 4px 0; background: none; }
+  .cmp-dl { grid-template-columns: 1fr; gap: 0; }
+  .cmp-dl dd + dt { margin-top: 6px; }
+  .cmp-why { max-width: none; }
+}

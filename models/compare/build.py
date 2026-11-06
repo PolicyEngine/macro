@@ -5,9 +5,11 @@
     python3 models/compare/build.py --check   fail if the committed page is stale
 
 The page is the one home for the cross-model comparison (macro#213): a
-question selector, then for each question one compact table (model, the run,
-peak GDP, peak inflation, timing, the sourced benchmark, the verdict with its
-reason and issue) and small multiples of the stored impulse responses. Model
+question selector, then for each question a one-sentence count of the
+verdicts and one compact table: the sourced benchmark as the first row, then
+per model only the headline numbers and a short verdict, with the run call,
+full units, scaling, solver flags and issue links behind each row's Details
+button. Small multiples of the stored impulse responses follow. Model
 pages keep their own validation facts; rows link to them rather than repeat
 them. Stdlib only.
 """
@@ -41,22 +43,28 @@ DESCRIPTION = (
     "rise and an energy shock, each answer next to a sourced benchmark and a verdict in words."
 )
 
-# Columns per question. Each is (header, cell key). The monetary +100bp table
-# carries the normalisation (rate path, pp-quarters, GDP per pp-quarter)
-# because the "+100bp" runs do not share a rate path (macro#213 rule 1).
+# Columns per question: (header, unit line under the header, cell key). The
+# table shows only the headline per model; everything else (the run call, the
+# rate path, full units and scaling, solver flags, issue links) sits in the
+# row's Details panel, so no fact is dropped (macro#213).
+GDP = ("Peak GDP", "% of GDP", "gdp")
+INFL = ("Peak inflation", "pp, annual rate", "inflation")
 COLUMNS = {
-    "rate-up-100": (("Rate path", "rate"), ("Peak GDP effect", "gdp"),
-                    ("Peak inflation effect", "inflation"), ("Timing", "timing"),
-                    ("GDP per pp-quarter", "ppq")),
-    "rate-down-100": (("Peak GDP effect", "gdp"), ("Against the rise", "symmetry")),
-    "rate-up-25": (("Against 100bp ÷ 4", "linearity"),),
-    "spending": (("Experiment run", "experiment"), ("Multiplier", "multiplier"),
-                 ("Peak GDP effect", "gdp"), ("Peak inflation effect", "inflation")),
-    "tax": (("Experiment run", "experiment"), ("Multiplier", "multiplier"),
-            ("Peak GDP effect", "gdp"), ("Peak inflation effect", "inflation")),
-    "energy": (("Experiment run", "experiment"), ("Peak GDP effect", "gdp"),
-               ("Peak price effect", "inflation"), ("What else moves", "result")),
+    "rate-up-100": (GDP, INFL, ("Timing", "", "timing"), ("GDP per pp-quarter", "% of GDP", "ppq")),
+    "rate-down-100": (("Against the rise", "peak GDP, % of GDP: cut vs rise", "result"),),
+    "rate-up-25": (("Against 100bp ÷ 4", "peak GDP per bp", "result"),),
+    "spending": (("Multiplier", "GDP per unit spent", "multiplier"), GDP, INFL),
+    "tax": (("Multiplier", "GDP per unit of tax", "multiplier"), GDP, INFL),
+    "energy": (GDP, ("Peak price effect", "% on the CPI level", "inflation"),
+               ("Policy rate", "", "result")),
 }
+
+# Full-text fields that move into the Details panel, in display order.
+DETAIL_FIELDS = (
+    ("experiment", "Experiment"), ("rate_path", "Rate path"), ("timing", "Timing"),
+    ("multiplier", "Multiplier"), ("symmetry", "Against the rise"),
+    ("linearity", "Against 100bp ÷ 4"), ("result", "What else moves"),
+)
 
 VERDICT_CLASS = {
     "plausible": "cmp-v-plausible",
@@ -66,6 +74,13 @@ VERDICT_CLASS = {
     "unresolved": "cmp-v-open",
     "not-tested": "cmp-v-open",
 }
+
+VERDICT_WORD = {
+    "plausible": "plausible", "plausible-in-model": "plausible in-model", "off": "off",
+    "questionable": "questionable", "unresolved": "unresolved", "not-tested": "not tested (linear)",
+}
+
+NUMBER_WORD = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five"}
 
 
 def esc(text) -> str:
@@ -98,58 +113,77 @@ def call_text(run: dict) -> str:
     return f"{run['tool']}({args})" if run["kind"] != "committed" else f"{run['tool']}: {args}"
 
 
-def model_cell(data: dict, cell: dict) -> str:
+def model_head(data: dict, cell: dict) -> str:
     model = data["models"][cell["model"]]
-    head = (
+    return (
         f'<a href="{model["href"]}">{esc(model["name"])}</a> '
         f'<span class="cmp-ctry">{model["country"]}</span>'
-    )
-    run = cell.get("run")
-    if not run:
-        return head
-    source = ""
-    if run.get("source"):
-        source = f' <a href="{esc(run["source"])}">source</a>'
-    return (
-        f'{head}<span class="cmp-run">{esc(run["label"])}{source}</span>'
-        f'<code class="cmp-call">{esc(call_text(run))}</code>'
     )
 
 
 def value_html(cell: dict, key: str) -> str:
+    short = cell.get("short", {})
     if key in ("gdp", "inflation"):
         item = cell.get(key)
         if not item:
             return '<span class="cmp-na">not reported</span>'
-        parts = [f'<strong class="cmp-num">{signed(item["value"])}</strong>',
-                 f'<span class="cmp-unit">{esc(item["units"])}</span>']
-        if item.get("measure"):
-            parts.append(f'<span class="cmp-unit">{esc(item["measure"])}</span>')
-        if item.get("when"):
-            parts.append(f'<span class="cmp-unit">at {esc(item["when"])}</span>')
-        return "".join(parts)
-    if key == "rate":
-        ppq = cell.get("pp_quarters")
-        text = esc(cell.get("rate_path", ""))
-        if ppq is not None:
-            note = f", {esc(cell['pp_quarters_note'])}" if cell.get("pp_quarters_note") else ""
-            text += f'<span class="cmp-unit">{ppq:g} pp-quarters{note}</span>'
-        return text
+        sub = short.get(key) or (f'at {item["when"]}' if item.get("when") else "")
+        return (f'<strong class="cmp-num">{signed(item["value"])}</strong>'
+                + (f'<span class="cmp-unit">{esc(sub)}</span>' if sub else ""))
     if key == "ppq":
         v = cell.get("gdp_per_ppq")
         if v is None:
             return '<span class="cmp-na">not reported</span>'
-        return f'<strong class="cmp-num">{v:g}%</strong><span class="cmp-unit">of GDP per pp-quarter</span>'
-    text = cell.get(key)
+        return f'<strong class="cmp-num">{v:g}%</strong>'
+    if key == "multiplier":
+        text = short.get("multiplier")
+        return f'<strong class="cmp-num">{esc(text)}</strong>' if text else '<span class="cmp-na">not reported</span>'
+    text = short.get(key)
     return esc(text) if text else '<span class="cmp-na">not reported</span>'
 
 
-def verdict_html(data: dict, cell: dict) -> str:
+def verdict_html(cell: dict) -> str:
     cls = VERDICT_CLASS[cell["verdict"]]
-    out = [f'<span class="cmp-verdict {cls}">{esc(cell["verdict_label"])}</span>',
-           f'<span class="cmp-reason">{esc(cell["reason"])}</span>']
+    return (f'<span class="cmp-verdict {cls}">{esc(cell["short"]["tag"])}</span>'
+            f'<span class="cmp-why">{esc(cell["short"]["why"])}</span>')
+
+
+def toggle(row_id: str, name: str) -> str:
+    return (f'<button type="button" class="cmp-more" aria-expanded="true" aria-controls="{row_id}" hidden>'
+            f'Details<span class="visually-hidden"> for {esc(name)}</span></button>')
+
+
+def details_html(data: dict, q: dict, cell: dict) -> str:
+    """Everything the headline row leaves out, with nothing dropped."""
+    run = cell["run"]
+    items = []
+    source = f' <a href="{esc(run["source"])}">source</a>' if run.get("source") else ""
+    items.append(("Run", f'{esc(run["label"])}{source}<code class="cmp-call">{esc(call_text(run))}</code>'))
+    for key, label in DETAIL_FIELDS:
+        if not cell.get(key):
+            continue
+        text = esc(cell[key])
+        if key == "rate_path" and cell.get("pp_quarters") is not None:
+            note = f", {esc(cell['pp_quarters_note'])}" if cell.get("pp_quarters_note") else ""
+            text += f'; {cell["pp_quarters"]:g} pp-quarters{note}'
+        items.append((label, text))
+    for key, label in (("gdp", "Peak GDP"), ("inflation", "Peak price" if q["id"] == "energy" else "Peak inflation")):
+        item = cell.get(key)
+        if not item:
+            continue
+        bits = [f'{signed(item["value"])}', esc(item["units"])]
+        if item.get("measure"):
+            bits.append(esc(item["measure"]))
+        if item.get("when"):
+            bits.append(f'at {esc(item["when"])}')
+        items.append((label, ", ".join(bits)))
+    if cell.get("gdp_per_ppq") is not None:
+        items.append(("GDP per pp-quarter", f'{cell["gdp_per_ppq"]:g}% of GDP per pp-quarter'))
+    items.append(("Verdict", f'{esc(cell["verdict_label"])}. {esc(cell["reason"])}'))
+    if cell.get("draws"):
+        items.append(("Draws", esc(cell["draws"])))
     if cell.get("solver"):
-        out.append(f'<span class="cmp-solver">Solver: {esc(cell["solver"])}</span>')
+        items.append(("Solver", f'<span class="cmp-solver">{esc(cell["solver"])}</span>'))
     links = []
     if cell.get("issue"):
         issue = data["issues"][cell["issue"]]
@@ -157,51 +191,90 @@ def verdict_html(data: dict, cell: dict) -> str:
     if cell.get("link"):
         links.append(f'<a href="{cell["link"]["href"]}">{esc(cell["link"]["label"])}</a>')
     if links:
-        out.append(f'<span class="cmp-links">{" · ".join(links)}</span>')
-    return "".join(out)
+        items.append(("Open issue" if cell.get("issue") and not cell.get("link") else "See also", " · ".join(links)))
+    return '<dl class="cmp-dl">' + "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in items) + "</dl>"
+
+
+def takeaway(data: dict, q: dict) -> str:
+    """One neutral sentence built only from the verdicts, in hub order."""
+    answered = [c for c in q["cells"] if c["status"] == "answered"]
+    counts: dict[str, int] = {}
+    for c in answered:
+        counts[c["verdict"]] = counts.get(c["verdict"], 0) + 1
+    parts = [f"{NUMBER_WORD[n]} {VERDICT_WORD[v]}" for v, n in counts.items()]
+    verdicts = parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
+    none = [data["models"][c["model"]]["name"] for c in q["cells"] if c["status"] == "no_instrument"]
+    text = (f"{NUMBER_WORD[len(answered)].capitalize()} of {NUMBER_WORD[len(q['cells'])]} models answer: "
+            f"{verdicts}.")
+    if none:
+        names = none[0] if len(none) == 1 else ", ".join(none[:-1]) + " and " + none[-1]
+        text += f" {names} {'has' if len(none) == 1 else 'have'} no instrument for it."
+    return f'<p class="cmp-takeaway">{esc(text)}</p>'
+
+
+def bench_rows(data: dict, q: dict, ncols: int) -> list[str]:
+    rows = []
+    if not q["benchmarks"]:
+        return [f'<tr class="cmp-bench-row"><th scope="row" data-label="Benchmark">Benchmark</th>'
+                f'<td colspan="{ncols + 2}" data-label="Benchmark">None sourced for this question.</td></tr>']
+    for i, r in enumerate(q.get("benchmark_rows", [])):
+        b = data["benchmarks"][r["benchmark"]]
+        row_id = f'cmp-{q["id"]}-bench-{i}'
+        tds = "".join(
+            f'<td data-label="{esc(h)}{(", " + esc(u)) if u else ""}">'
+            + (f'<span class="cmp-num">{esc(r[k])}</span>' if r.get(k) else '<span class="cmp-na">—</span>') + "</td>"
+            for h, u, k in COLUMNS[q["id"]]
+        )
+        rows.append(
+            f'<tr class="cmp-bench-row"><th scope="row" data-label="Benchmark">{esc(r["name"])} '
+            f'<span class="cmp-ctry">{esc(b["country"])}</span></th>{tds}'
+            f'<td data-label="Verdict"><span class="cmp-why">Reference, sourced</span></td>'
+            f'<td class="cmp-more-cell" data-label="">{toggle(row_id, r["name"])}</td></tr>'
+        )
+        rows.append(
+            f'<tr class="cmp-detail cmp-bench-detail" id="{row_id}"><td colspan="{ncols + 3}" data-label="">'
+            f'<dl class="cmp-dl"><dt>Benchmark</dt><dd>{esc(b["label"])} ({esc(b["country"])}). {esc(b["text"])}</dd>'
+            f'<dt>Source</dt><dd><a href="{esc(b["url"])}">{esc(b["source"])}</a></dd></dl></td></tr>'
+        )
+    return rows
 
 
 def table(data: dict, q: dict) -> str:
     cols = COLUMNS[q["id"]]
-    heads = ["Model and run"] + [h for h, _ in cols] + ["Verdict"]
-    rows = []
+    head = '<th scope="col">Model</th>' + "".join(
+        f'<th scope="col">{esc(h)}' + (f'<span class="cmp-hunit">{esc(u)}</span>' if u else "") + "</th>"
+        for h, u, _ in cols
+    ) + '<th scope="col">Verdict</th><th scope="col"><span class="visually-hidden">Details</span></th>'
+    rows = bench_rows(data, q, len(cols))
     for cell in q["cells"]:
+        name = data["models"][cell["model"]]["name"]
         if cell["status"] == "no_instrument":
             rows.append(
-                f'<tr class="cmp-none"><th scope="row" data-label="Model">{model_cell(data, cell)}</th>'
-                f'<td colspan="{len(cols) + 1}" data-label="Cannot answer">'
+                f'<tr class="cmp-none"><th scope="row" data-label="Model">{model_head(data, cell)}</th>'
+                f'<td colspan="{len(cols) + 2}" data-label="Cannot answer">'
                 f'<span class="cmp-verdict cmp-v-none">No instrument</span>'
-                f'<span class="cmp-reason">{esc(cell["reason"])}</span></td></tr>'
+                f'<span class="cmp-why">{esc(cell["reason"])}</span></td></tr>'
             )
             continue
+        row_id = f'cmp-{q["id"]}-{cell["model"]}'
         tds = "".join(
-            f'<td data-label="{esc(h)}">{value_html(cell, k)}</td>' for h, k in cols
+            f'<td data-label="{esc(h)}{(", " + esc(u)) if u else ""}">{value_html(cell, k)}</td>' for h, u, k in cols
         )
         rows.append(
-            f'<tr><th scope="row" data-label="Model">{model_cell(data, cell)}</th>{tds}'
-            f'<td data-label="Verdict">{verdict_html(data, cell)}</td></tr>'
+            f'<tr class="cmp-row"><th scope="row" data-label="Model">{model_head(data, cell)}</th>{tds}'
+            f'<td data-label="Verdict">{verdict_html(cell)}</td>'
+            f'<td class="cmp-more-cell" data-label="">{toggle(row_id, name)}</td></tr>'
         )
-    head = "".join(f'<th scope="col">{esc(h)}</th>' for h in heads)
+        rows.append(
+            f'<tr class="cmp-detail" id="{row_id}"><td colspan="{len(cols) + 3}" data-label="">'
+            f'{details_html(data, q, cell)}</td></tr>'
+        )
     return (
+        takeaway(data, q) + "\n"
         '<div class="table-scroll cmp-scroll">\n'
-        f'<table class="cmp-table">\n<caption class="visually-hidden">{esc(q["title"])}: every model\'s answer</caption>\n'
+        f'<table class="cmp-table">\n<caption class="visually-hidden">{esc(q["title"])}: every model\'s answer, with the sourced benchmark first</caption>\n'
         f"<thead><tr>{head}</tr></thead>\n<tbody>\n" + "\n".join(rows) + "\n</tbody>\n</table>\n</div>"
     )
-
-
-def benchmarks(data: dict, q: dict) -> str:
-    if not q["benchmarks"]:
-        return ('<div class="cmp-bench"><p class="cmp-bench-h">Benchmark</p>'
-                '<p>None sourced for this question.</p></div>')
-    items = []
-    for bid in q["benchmarks"]:
-        b = data["benchmarks"][bid]
-        items.append(
-            f'<li><strong>{esc(b["label"])}</strong> ({esc(b["country"])}). {esc(b["text"])} '
-            f'<a href="{esc(b["url"])}">{esc(b["source"])}</a></li>'
-        )
-    return ('<div class="cmp-bench"><p class="cmp-bench-h">Benchmark range</p>'
-            f'<ul>{"".join(items)}</ul></div>')
 
 
 # --- small multiples -------------------------------------------------------
@@ -331,7 +404,7 @@ def question(data: dict, q: dict, first: bool) -> str:
         + ">\n"
         f'<div class="band-head" data-icon="table"><h2>{esc(q["title"])}</h2>'
         f'<p class="section-intro">{esc(q["experiment"])}</p></div>\n'
-        + table(data, q) + "\n" + benchmarks(data, q) + "\n" + notes + "\n" + multiples(data, q)
+        + table(data, q) + "\n" + notes + "\n" + multiples(data, q)
         + "\n</section>"
     )
 
@@ -353,6 +426,18 @@ SCRIPT = """<script>
   function fromHash() { show((location.hash || "").replace("#q-", ""), false); }
   window.addEventListener("hashchange", fromHash);
   fromHash();
+  document.querySelectorAll("button.cmp-more").forEach(function (b) {
+    var row = document.getElementById(b.getAttribute("aria-controls"));
+    if (!row) return;
+    b.hidden = false;
+    b.setAttribute("aria-expanded", "false");
+    row.hidden = true;
+    b.addEventListener("click", function () {
+      var open = b.getAttribute("aria-expanded") !== "true";
+      b.setAttribute("aria-expanded", String(open));
+      row.hidden = !open;
+    });
+  });
 })();
 </script>"""
 
@@ -381,7 +466,7 @@ def body(data: dict) -> str:
   </nav>
   <section class="band cmp-pick" id="pick">
     <div class="band-head" data-icon="list"><h2>Pick a question</h2>
-      <p class="section-intro">Models are in the hub order, not ranked. Each row gives the run, the peak effects, a sourced benchmark and a verdict in words.</p></div>
+      <p class="section-intro">Models are in the hub order, not ranked. The sourced benchmark sits in the first row; each model row gives its peak effects and a verdict, and Details holds the run, full units and caveats.</p></div>
     <div class="router-row cmp-chips" role="group" aria-label="Question">{chips}</div>
     <details class="about cmp-howto"><summary>How to read the verdicts</summary>
       <p>Each verdict starts with one of six words: plausible, off, questionable, unresolved, not tested or no instrument; some add a qualifier (such as &ldquo;off, sign right&rdquo;), and each carries its reason and the open issue. These words grade one experiment; each model&rsquo;s overall standing uses the <a class="gloss-link" href="/glossary#verification-class">status vocabulary</a> on its model card. Results file version {esc(data["version"])}; <a href="{REPO_BLOB}/run_battery.py">how it is checked and regenerated</a>.</p></details>
