@@ -8,6 +8,12 @@ The version below tracks the `policyengine-macro` package in `integration/`.
 `CITATION.cff` and `integration/pyproject.toml` must agree with the topmost
 heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
+## [Unreleased]
+
+### Added
+
+- **`/models/compare`.** One table per question (six questions × five models) with the exact call, a sourced benchmark and a verdict. The FRB/US benchmark is Laforte (2018) (band −0.53…−0.40 → −0.486…−0.459).
+
 ## [0.2.0] — 2026-08-11
 
 Access and verification release. Nothing about any model's behaviour or any
