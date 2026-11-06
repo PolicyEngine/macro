@@ -250,3 +250,15 @@ def test_tax_financing_path_is_surfaced_when_the_package_returns_it(monkeypatch)
     assert "tax" in res["series_meaning"]
     assert "pp" in res["series_meaning"]["tax"]
     assert res["results"][0]["tax"] == 0.1
+
+
+def test_monetary_and_tfp_units_are_stated_per_quarter_and_in_tfp_terms():
+    """Issue #211: -0.0025 is -25bp per QUARTER (~-100bp annualised), and
+    0.01 of Z is ~2.1% TFP, not 1%."""
+    from policyengine_macro import mcp_server
+
+    units = core._HANK_KIND_INDEX["monetary"]["units"]
+    assert "annualised" in units and "-0.000625" in units
+    doc = mcp_server.hank_shock.__doc__
+    assert "2.1% TFP" in doc and "1% TFP)" not in doc
+    assert "annualised" in doc

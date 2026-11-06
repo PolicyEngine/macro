@@ -176,7 +176,7 @@ pe-macro frbus-summary                                # FRB/US metadata + valida
 pe-macro frbus-shock --var rffintay_aerr --shock 1.0  # 100bp US monetary tightening
 pe-macro frbus-shock --var egfe_aerr --shock 0.01 --periods 4 \
     --policy-rule fixed_funds_rate                    # fiscal shock, no monetary offset
-pe-macro hank-shock --kind monetary --size 0.0025     # 25bp US rate shock (HANK)
+pe-macro hank-shock --kind monetary --size 0.0025     # +25bp/quarter (~100bp annualised) US rate shock (HANK)
 pe-macro hank-summary                                 # HANK shock kinds, units, provenance
 pe-macro forecast --horizons 12                       # YoY GDP & CPI, 68/90 bands
 pe-macro shocks                                       # P(sign) of latest-quarter shocks

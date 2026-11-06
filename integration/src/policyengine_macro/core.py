@@ -422,7 +422,8 @@ FRBUS_VARIABLES = [
         "units": "LOG POINTS of quarterly growth in egfe (0.01 ~ a 1% higher "
                  "level of federal purchases; egfe is ~4.6% of GDP, so 0.01 "
                  "is roughly 0.046% of GDP). NOT billions of dollars — a "
-                 "shock of order 1 or more diverges the solver.",
+                 "shock of order 1 or more diverges the solver."
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised level move exceeds one period's shock (periods=4 at 0.01 lifts egfe ~2.9%, trp ~+2.4pp); the realised lever path is returned in the results.",
         "typical_shock": 0.01,
         "requires_policy_rule": None,
     },
@@ -430,7 +431,8 @@ FRBUS_VARIABLES = [
         "var": "egse_aerr",
         "description": "Add-error on state and local government purchases",
         "units": "log points of quarterly growth in egse (0.01 ~ a 1% higher "
-                 "level of S&L purchases)",
+                 "level of S&L purchases after one period)."
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised level move exceeds one period's shock (periods=4 at 0.01 lifts egfe ~2.9%, trp ~+2.4pp); the realised lever path is returned in the results.",
         "typical_shock": 0.01,
         "requires_policy_rule": None,
     },
@@ -438,7 +440,8 @@ FRBUS_VARIABLES = [
         "var": "trp_aerr",
         "description": "Add-error on the personal income tax rate",
         "units": "decimal rate change (0.01 = a 1 percentage point rise in the "
-                 "effective personal tax rate)",
+                 "effective personal tax rate on impact)."
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised level move exceeds one period's shock (periods=4 at 0.01 lifts egfe ~2.9%, trp ~+2.4pp); the realised lever path is returned in the results.",
         "typical_shock": 0.01,
         "requires_policy_rule": None,
     },
@@ -446,7 +449,8 @@ FRBUS_VARIABLES = [
         "var": "trci_aerr",
         "description": "Add-error on the corporate income tax rate",
         "units": "decimal rate change (0.01 = a 1pp rise in the effective "
-                 "corporate tax rate)",
+                 "corporate tax rate on impact)."
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised level move exceeds one period's shock (periods=4 at 0.01 lifts egfe ~2.9%, trp ~+2.4pp); the realised lever path is returned in the results.",
         "typical_shock": 0.01,
         "requires_policy_rule": None,
     },
@@ -455,15 +459,30 @@ FRBUS_VARIABLES = [
         "description": "Add-error on aggregate consumption — a direct demand "
                        "shock",
         "units": "log points of quarterly consumption growth (0.01 ~ 1% higher "
-                 "consumption; large, since consumption is ~68% of GDP)",
+                 "consumption after one period; large, since consumption is "
+                 "~68% of GDP)."
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised level move exceeds one period's shock (periods=4 at 0.01 lifts egfe ~2.9%, trp ~+2.4pp); the realised lever path is returned in the results.",
         "typical_shock": 0.01,
         "requires_policy_rule": None,
     },
     {
         "var": "ebfi_aerr",
         "description": "Add-error on business fixed investment",
-        "units": "log points of quarterly BFI growth (0.01 ~ 1% higher BFI)",
+        "units": "log points of quarterly BFI growth (0.01 ~ 1% higher BFI "
+                 "after one period)."
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised level move exceeds one period's shock (periods=4 at 0.01 lifts egfe ~2.9%, trp ~+2.4pp); the realised lever path is returned in the results.",
         "typical_shock": 0.01,
+        "requires_policy_rule": None,
+    },
+    {
+        "var": "poil_aerr",
+        "description": "Add-error on the price of imported oil (an identity, "
+                       "poil = poilr*pxb + poil_aerr) — an oil-price shock",
+        "units": "US dollars per barrel added to the oil price LEVEL (+10 is "
+                 "about +15% at the 2026 LONGBASE price). An identity, so it "
+                 "does not stack over periods: periods=4 holds the price "
+                 "+$10 for four quarters.",
+        "typical_shock": 10.0,
         "requires_policy_rule": None,
     },
 ]
@@ -740,6 +759,12 @@ def frbus_shock(
         ) from e
 
     wanted = list(FRBUS_HEADLINE)
+    # Return the realised path of the shocked variable itself, so a caller
+    # sees what the add-error did once the equation's lags stacked it
+    # (issue #212): trp_aerr=0.01 over 4 periods ends near +2.4pp, not +1pp.
+    lever = var[:-len("_aerr")] if var.endswith("_aerr") else None
+    if lever and lever in with_adds.columns and lever not in wanted:
+        wanted.append(lever)
     for extra in variables or []:
         if extra not in with_adds.columns:
             raise ValueError(f"requested variable {extra!r} is not in the model")
@@ -747,7 +772,9 @@ def frbus_shock(
             wanted.append(extra)
 
     index = pd.period_range(start_p, end_p, freq="Q")
-    definitions = _frbus_definitions() if len(wanted) > len(FRBUS_HEADLINE) else {}
+    definitions = _frbus_definitions() if (
+        len(wanted) > len(FRBUS_HEADLINE) or var not in _FRBUS_VAR_INDEX
+    ) else {}
     modes = {v: _frbus_series_mode(v, definitions.get(v)) for v in wanted}
     series: dict[str, list[float]] = {}
     for v in wanted:
@@ -780,7 +807,14 @@ def frbus_shock(
         ),
         "var": var,
         "shock": float(shock),
-        "units": _FRBUS_VAR_INDEX.get(var, {}).get("units", "model units"),
+        "units": _FRBUS_VAR_INDEX.get(var, {}).get("units") or (
+            "uncurated lever: the units of "
+            + (f"{lever!r} ({definitions.get(lever)})" if lever and
+               definitions.get(lever) else repr(var))
+            + "'s own equation (levels, rates or log-differences); an "
+            "add-error on an equation with lags stacks over periods>1 — "
+            "read the realised path in the results"
+        ),
         "start": str(start_p),
         "periods": periods,
         "horizon": horizon,
@@ -935,7 +969,10 @@ HANK_SHOCK_KINDS = [
         "input": "rstar",
         "description": "Taylor-rule intercept (monetary policy) shock",
         "units": "level change in the QUARTERLY real policy rate "
-                 "(-0.0025 = a 25bp-per-quarter easing on impact)",
+                 "(-0.0025 = -25bp per quarter on impact, about -100bp "
+                 "annualised; for a 25bp annualised move use -0.000625). "
+                 "The r and pi responses are quarterly rates too: multiply "
+                 "by 4 to compare with FRB/US or BoE annual rates",
         "typical_size": -0.0025,
         "variants": ["two_asset", "one_asset"],
     },

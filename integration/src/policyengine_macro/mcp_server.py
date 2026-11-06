@@ -375,10 +375,12 @@ def hank_shock(
             such instrument exists in the model.
         size: Impact size of the shock, in model units — UNITS DIFFER PER
             KIND: monetary is a level change in the QUARTERLY policy rate
-            (-0.0025 = a 25bp easing); fiscal_spending is a level change in G
-            (steady-state Y = 1, so 0.01 = 1% of GDP); productivity is a
-            level change in Z (0.01 ~ 1% TFP). See hank_summary for the
-            catalogue.
+            (-0.0025 = -25bp per quarter, about -100bp annualised; for a
+            25bp annualised move use -0.000625); fiscal_spending is a level
+            change in G (steady-state Y = 1, so 0.01 = 1% of GDP);
+            productivity is a level change in Z (steady-state Z = 0.468, so
+            0.01 ~ 2.1% TFP, not 1%). The r and pi responses are quarterly
+            rates. See hank_summary for the catalogue.
         persistence: AR(1) decay of the shock path size * persistence**t
             (default 0.9; must be in [0, 1)).
         horizon: Quarters reported (default 20 = 5 years; max 300).
