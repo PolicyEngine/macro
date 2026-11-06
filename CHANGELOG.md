@@ -12,7 +12,7 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ### Changed
 
-- **BoE SVAR replication figures** are labelled with their run vintage (boe-var-model `845e2a4`) and their `results/` links are pinned to it. No number changes.
+- **Site redesign.** Every page uses the Autumn Budget 2026 layout (header band, title band, sub-tabs, cards with expanders), with `DESIGN.md` as the spec. URLs, numbers and data are unchanged.
 
 ## [0.2.0] — 2026-08-11
 
