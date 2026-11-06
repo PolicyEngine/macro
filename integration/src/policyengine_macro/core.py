@@ -992,8 +992,10 @@ HANK_SHOCK_KINDS = [
         "input": "Z",
         "description": "Total factor productivity shock",
         "units": "level change in Z around its steady-state value "
-                 "(a LEVEL change: steady-state Z is 0.468, so 0.01 is a "
-                 "~2.1% TFP improvement, not 1%)",
+                 "(a LEVEL change, so the percent TFP shock depends on the "
+                 "variant: two_asset steady-state Z is 0.468, so 0.01 is a "
+                 "~2.1% TFP improvement, not 1%; one_asset steady-state Z "
+                 "is 1, so 0.01 is 1% of TFP)",
         "typical_size": 0.01,
         "variants": ["two_asset", "one_asset"],
     },

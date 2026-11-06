@@ -262,3 +262,15 @@ def test_monetary_and_tfp_units_are_stated_per_quarter_and_in_tfp_terms():
     doc = mcp_server.hank_shock.__doc__
     assert "2.1% TFP" in doc and "1% TFP)" not in doc
     assert "annualised" in doc
+
+
+def test_tfp_units_are_scoped_to_the_variant():
+    """Z_ss is 0.468 in two_asset but 1 in one_asset (sequence_jacobian's
+    one-asset example calibrates Z = 1), so "0.01 ~ 2.1% TFP" must not be
+    stated for both variants."""
+    from policyengine_macro import mcp_server
+
+    units = core._HANK_KIND_INDEX["productivity"]["units"]
+    assert "two_asset" in units and "one_asset" in units
+    doc = mcp_server.hank_shock.__doc__
+    assert "one_asset steady-state" in doc
