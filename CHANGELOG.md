@@ -14,10 +14,6 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 - **Site redesign.** Every page uses the Autumn Budget 2026 layout (header band, title band, sub-tabs, cards with expanders), with `DESIGN.md` as the spec. URLs, numbers and data are unchanged.
 
-### Added
-
-- **Question router on `/models` and a new `/glossary`.** Model cards filter by question and country; `/connect` gives copy-paste setup and `/contact` lists self-serve routes. No numbers changed.
-
 ## [0.2.0] — 2026-08-11
 
 Access and verification release. Nothing about any model's behaviour or any
