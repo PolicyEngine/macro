@@ -61,6 +61,8 @@
   (function phoneDiagrams() {
     var figs = document.querySelectorAll(".meth-pair figure.step-diagram");
     Array.prototype.forEach.call(figs, function (fig) {
+      // drawn with its own phone-sized SVG (charts, matrices): nothing to build
+      if (fig.classList.contains("has-phone-alt")) return;
       var svg = fig.querySelector("svg");
       if (!svg || !svg.viewBox || !svg.viewBox.baseVal) return;
       var num = function (el, a) { return parseFloat(el.getAttribute(a) || "0"); };
