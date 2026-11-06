@@ -617,8 +617,47 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
         f'{spec["intro"].format(round_id=SVAR_ROUND.parent.name)}</p>',
         '      <figure class="vchart-figure">',
         block,
+        # Inside the figure: the page's chart-tab script moves each figure
+        # into its tab panel, and the numbers must travel with their fan.
+        vs_official_table(variable, rows),
         "      </figure>",
     ])
+
+
+def vs_official_table(variable: str, rows: list[dict]) -> str:
+    """The fan's own numbers, quarter by quarter (#220 item 4).
+
+    Same rows the chart draws: the archived median, the re-calibrated bands
+    and the EFO path, at two decimals like the topic tables. Nothing here is
+    computed that the chart does not already plot.
+    """
+    spec = VS_OFFICIAL_SPECS[variable]
+
+    def pc(v: float) -> str:
+        return f"{v:.2f}%".replace("-", "\u2212")
+
+    body = "\n".join(
+        "          <tr>"
+        f'<th scope="row">{r["period"]}</th>'
+        f'<td class="num">{pc(r["median"])}</td>'
+        f'<td class="num">{pc(r["lo68"])}–{pc(r["hi68"])}</td>'
+        f'<td class="num">{pc(r["lo90"])}–{pc(r["hi90"])}</td>'
+        f'<td class="num">{pc(r["efo"])}</td>'
+        "</tr>"
+        for r in rows
+    )
+    return f"""      <details class="about fc-qq">
+        <summary>Quarter by quarter: the numbers in this fan</summary>
+      <div class="table-scroll">
+        <table>
+          <caption>BoE SVAR {esc(spec["name"])} forecast, round {SVAR_ROUND.parent.name}, beside the {OFFICIAL_LABEL}: % change on a year earlier. Bands are re-calibrated, as drawn.</caption>
+          <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68% band</th><th scope="col">90% band</th><th scope="col">EFO</th></tr></thead>
+          <tbody>
+{body}
+          </tbody>
+        </table>
+      </div>
+      </details>"""
 
 
 # ---------------------------------------------------------------- page
