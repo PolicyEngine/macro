@@ -692,6 +692,15 @@ def vintage_file(series: str, vintage: str) -> str | None:
     return None
 
 
+def long_date(iso: str) -> str:
+    """'2026-08-26' -> '26 August 2026' (no leading zero, locale-free)."""
+    import datetime as _dt
+    d = _dt.date.fromisoformat(iso[:10])
+    months = ("January February March April May June July August September "
+              "October November December").split()
+    return f"{d.day} {months[d.month - 1]} {d.year}"
+
+
 def scored_entries(card: dict) -> list[tuple[dict, dict]]:
     return sorted(
         ((detail, entry) for detail in card["detail"] for entry in detail["entries"]),
@@ -735,7 +744,17 @@ def render_status(card: dict) -> str:
     else:
         cover_value, cover_sub = "—", "nothing scored yet"
         mae_value, mae_sub = "—", "nothing scored yet"
+    # Say plainly how current the record is (r5 usability test, #220): the date
+    # is the newest outturn snapshot any scored forecast was read from.
+    if scored:
+        last = max(e["outturn_vintage"] for e in entries)
+        asof = (f'      <p class="record-asof"><strong>Last scored <time datetime="{esc(last)}">'
+                f'{esc(long_date(last))}</time>.</strong> Outturns published after that date are '
+                'not in the record yet.</p>')
+    else:
+        asof = '      <p class="record-asof"><strong>Nothing scored yet.</strong></p>'
     return "\n".join([
+        asof,
         '      <div class="stat-row" aria-label="The record so far">',
         '        <div class="stat">',
         '          <span class="stat-label">Outturns inside the 68% band</span>',
