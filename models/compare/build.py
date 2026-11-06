@@ -330,7 +330,7 @@ def question(data: dict, q: dict, first: bool) -> str:
         + ">\n"
         f'<div class="band-head" data-icon="table"><h2>{esc(q["title"])}</h2>'
         f'<p class="section-intro">{esc(q["experiment"])}</p></div>\n'
-        + benchmarks(data, q) + "\n" + table(data, q) + "\n" + notes + "\n" + multiples(data, q)
+        + table(data, q) + "\n" + benchmarks(data, q) + "\n" + notes + "\n" + multiples(data, q)
         + "\n</section>"
     )
 
