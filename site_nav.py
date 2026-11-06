@@ -22,8 +22,21 @@ STYLESHEET = re.compile(r'href="/style\.css(?:\?v=[0-9]+)?"')
 # changes in a way a cached copy would render wrongly; ``render`` writes it
 # into every page and the generators read it from here (economy/topics.py,
 # notes/generate_release_notes.py), so no page can be left on an old copy.
-STYLE_VERSION = 22
+STYLE_VERSION = 23
 STYLE_HREF = f"/style.css?v={STYLE_VERSION}"
+
+# Inter (latin) is the body face on every page, but the browser only finds the
+# file after it has fetched and parsed fonts.css and laid out text. With
+# font-display: swap the page first paints in the fallback face and re-wraps
+# when Inter lands, which shifted /notes/2026-07-25-cpi-2026q2 by CLS 0.35 at
+# 1440 px. Preloading it starts the download with the HTML, so the first paint
+# is already in Inter. JetBrains Mono is not preloaded: 14 pages never use it.
+# ``render`` writes the line into every page; economy/topics.py emits it too.
+FONTS_CSS_LINK = '<link rel="stylesheet" href="/vendor/fonts/fonts.css" />'
+FONT_PRELOAD = (
+    '<link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" '
+    'type="font/woff2" crossorigin />'
+)
 
 DESTINATIONS = (
     ("home", "/", "Home", "nav-mobile"),
@@ -491,6 +504,8 @@ def render(path: Path, source: str | None = None) -> str:
         raise ValueError(f"could not locate navigation in {path.relative_to(ROOT)}")
     updated = updated.replace(" has-section-tabs", "")
     updated = STYLESHEET.sub(f'href="{STYLE_HREF}"', updated)
+    if FONT_PRELOAD not in updated:
+        updated = updated.replace(FONTS_CSS_LINK, f"{FONT_PRELOAD}\n{FONTS_CSS_LINK}", 1)
     # The footer stays small: a single link row. Strip any directory block a
     # previous revision may have left behind.
     updated = FOOTER_DIR.sub("", updated)

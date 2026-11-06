@@ -10,6 +10,10 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### Added
+
+- **Question router on `/models` and a new `/glossary`.** Model cards filter by question and country; `/connect` gives copy-paste setup and `/contact` lists self-serve routes. No numbers changed.
+
 ### Changed
 
 - **Site redesign.** Every page uses the Autumn Budget 2026 layout (header band, title band, sub-tabs, cards with expanders), with `DESIGN.md` as the spec. URLs, numbers and data are unchanged.

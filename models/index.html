@@ -11,9 +11,10 @@
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <meta name="theme-color" content="#FFFFFF" />
+<link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=22" />
+<link rel="stylesheet" href="/style.css?v=23" />
 </head>
 <body class="doc models-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -63,7 +64,8 @@
       <article class="mcard" data-country="uk us" data-jobs="cost gains" id="core">
         <p class="mcard-q">Taxes and benefits, for a household or a population</p>
         <h3 class="mcard-name"><a href="/pe">PolicyEngine microsimulation</a> <span class="model-id mono">pe-microsim</span></h3>
-        <div class="chips mcard-chips"><span class="chip">UK + US</span><span class="chip chip-brand">legislation</span></div>
+        <div class="chips mcard-chips"><span class="chip">UK + US</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#exact-for-rules">exact for rules</a></span></div>
+        <p class="mcard-verdict"><span class="mcard-verdict-k">Verdict:</span> Exact for implemented rules (household maths); population estimates add survey error.</p>
         <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
           <p class="mcard-lead">PolicyEngine&rsquo;s own engine, and the one behind policyengine.org: the tax-benefit rules as code over enhanced survey microdata, for one household or the whole population. The only member covering both countries.</p>
           <div class="qa-facts">
@@ -78,7 +80,8 @@
       <article class="mcard" data-country="uk" data-jobs="cost shock">
         <p class="mcard-q">A selected UK fiscal or macro scenario over 3&ndash;5 years</p>
         <h3 class="mcard-name"><a href="/obr">OBR emulator</a> <span class="model-id mono">obr-macro</span></h3>
-        <div class="chips mcard-chips"><span class="chip">UK</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#published-anchor">published anchor</a></span></div>
+        <div class="chips mcard-chips"><span class="chip">UK</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#anchored-not-validated">anchored</a></span></div>
+        <p class="mcard-verdict"><span class="mcard-verdict-k">Verdict:</span> Anchored to the EFO by construction, not validated as a forecaster; weak free-running.</p>
         <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
           <p class="mcard-lead">A transpiled, solvable copy of the OBR&rsquo;s published macroeconometric model, <a class="gloss-link" href="/glossary#anchored">anchored</a> to the latest <a class="gloss-link" href="/glossary#efo">EFO</a>: shock a lever, re-solve, and read GDP, consumption and investment against the official path.</p>
           <div class="qa-facts">
@@ -92,9 +95,10 @@
       <article class="mcard" data-country="uk" data-jobs="forecast gains">
         <p class="mcard-q">What drove UK GDP and inflation at the latest model-data vintage</p>
         <h3 class="mcard-name"><a href="/svar">BoE SVAR</a> <span class="model-id mono">boe-svar</span></h3>
-        <div class="chips mcard-chips"><span class="chip">UK</span><span class="chip chip-brand">published anchor</span></div>
+        <div class="chips mcard-chips"><span class="chip">UK</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#partial-replication">partial replication</a></span></div>
+        <p class="mcard-verdict"><span class="mcard-verdict-k">Verdict:</span> Partial replication; GDP decomposition consistent with the paper, short on CPI; no forecast skill.</p>
         <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
-          <p class="mcard-lead">An eight-variable Bayesian structural VAR: named shocks identified by sign and zero restrictions, a decomposition of recent GDP and inflation, and a forward projection with <a class="gloss-link" href="/glossary#credible-band">credible bands</a>.</p>
+          <p class="mcard-lead">An eight-variable Bayesian structural VAR: named shocks identified by <a class="gloss-link" href="/glossary#sign-restrictions">sign and zero restrictions</a>, a decomposition of recent GDP and inflation, and a forward projection with <a class="gloss-link" href="/glossary#credible-band">credible bands</a>.</p>
           <div class="qa-facts">
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Bands <strong>under-cover</strong> across 49 back-test origins; one <a href="/glossary#frozen-edge">frozen origin</a> shows the opposite (<a href="/svar/validation#rolling">coverage</a>)</span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Against a drifting <a class="gloss-link" href="/glossary#random-walk">random walk</a> <strong>no skill survives</strong> once the tests are adjusted together (<a href="/svar/validation#forecasters">validation</a>)</span></div>
@@ -106,7 +110,8 @@
       <article class="mcard" data-country="us" data-jobs="shock gains">
         <p class="mcard-q">A monetary or fiscal shock in the US over coming quarters</p>
         <h3 class="mcard-name"><a href="/frb-us">FRB/US</a> <span class="model-id mono">frb-us</span></h3>
-        <div class="chips mcard-chips"><span class="chip">US</span><span class="chip chip-brand">published anchor</span></div>
+        <div class="chips mcard-chips"><span class="chip">US</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#replicates">replicates</a></span></div>
+        <p class="mcard-verdict"><span class="mcard-verdict-k">Verdict:</span> Replicates the Fed&rsquo;s pyfrbus on one 100bp funds-rate shock; a solver check, no predictive claim.</p>
         <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
           <p class="mcard-lead">The Federal Reserve&rsquo;s FRB/US model &mdash; 284 equations parsed from the Board&rsquo;s own model file &mdash; solved around the April 2026 LONGBASE baseline. Pick a lever and a policy rule, read the deviation path.</p>
           <div class="qa-facts">
@@ -120,13 +125,15 @@
       <article class="mcard" data-country="us" data-jobs="shock gains">
         <p class="mcard-q">How US shock responses differ across the household wealth distribution</p>
         <h3 class="mcard-name"><a href="/us-hank">US HANK</a> <span class="model-id mono">us-hank</span></h3>
-        <div class="chips mcard-chips"><span class="chip">US</span><span class="chip chip-brand">published anchor</span></div>
+        <div class="chips mcard-chips"><span class="chip">US</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#partial-replication">partial replication</a></span></div>
+        <p class="mcard-verdict"><span class="mcard-verdict-k">Verdict:</span> Partial replication; six of seven solved parameters of the paper match; <code>vphi</code> is &minus;17.3%, unresolved; not a forecast-accuracy claim.</p>
         <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
           <p class="mcard-lead">A two-asset heterogeneous-agent New Keynesian model (an ABRS 2021 replication): one monetary, fiscal or productivity shock, solved for the whole distribution of households.</p>
           <div class="qa-facts">
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Consumption responses by liquid-wealth quartile and the hand-to-mouth share, warm in seconds from a cached sequence-space Jacobian</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Consumption responses by liquid-wealth quartile and the <a class="gloss-link" href="/glossary#hand-to-mouth">hand-to-mouth</a> share, warm in seconds from a cached <a class="gloss-link" href="/glossary#sequence-space-jacobian">sequence-space Jacobian</a></span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Stylized replication &mdash; not a forecaster, no reform scoring, and responses are first-order</span></div>
-          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core one way: wage and labour IRFs drive employment-income incidence (<code>hank_shock_incidence</code>, experimental)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Known model properties: <a class="gloss-link" href="/glossary#mpc">MPCs</a> well below US estimates, and a tax-financed spending rise that lowers output within a year (<a href="/us-hank/validation#caveats">limits</a>)</span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core one way: wage and labour <a class="gloss-link" href="/glossary#irf">IRFs</a> drive employment-income incidence (<code>hank_shock_incidence</code>, experimental)</span></div>
           </div>
         </details>
         <p class="mcard-links"><a class="btn btn-primary btn-sm" href="/us-hank">Open<span class="visually-hidden"> US HANK</span><span aria-hidden="true"> &rarr;</span></a><a href="/us-hank/validation">Evidence<span class="visually-hidden"> for US HANK</span></a><a href="/us-hank#answers">Results<span class="visually-hidden"> from US HANK</span></a><a href="/reports/us-hank-open-source" title="HANK survey">Survey<span class="visually-hidden">: the HANK survey</span></a></p>
@@ -134,7 +141,8 @@
       <article class="mcard" data-country="uk" data-jobs="cost long">
         <p class="mcard-q">Work, saving, and capital effects over decades</p>
         <h3 class="mcard-name"><a href="/olg">OG-UK</a> <span class="model-id mono">psl-og</span></h3>
-        <div class="chips mcard-chips"><span class="chip">UK</span><span class="chip chip-brand">no ground truth</span></div>
+        <div class="chips mcard-chips"><span class="chip">UK</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#calibrated-counterfactual">calibrated</a></span></div>
+        <p class="mcard-verdict"><span class="mcard-verdict-k">Verdict:</span> Calibrated; no outcome benchmark.</p>
         <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
           <p class="mcard-lead">80 age cohorts choose work and saving over their lifetimes. Solve the <a class="gloss-link" href="/glossary#steady-state">steady state</a> or the 60-period transition path and read where a reform takes GDP, investment and revenue in the long run.</p>
           <div class="qa-facts">
@@ -149,11 +157,13 @@
         <p class="mcard-q">A UK climate-policy scenario, as deltas against a baseline</p>
         <h3 class="mcard-name"><a href="/define">DEFINE-UK</a> <span class="model-id mono">define-uk</span></h3>
         <div class="chips mcard-chips"><span class="chip">UK</span><span class="chip chip-brand"><a class="gloss-link" href="/glossary#partial-replication">partial replication</a></span></div>
+        <p class="mcard-verdict"><span class="mcard-verdict-k">Verdict:</span> Partial replication; deltas only, never levels.</p>
         <details class="about mcard-more"><summary>What it is, strengths and limits</summary>
           <p class="mcard-lead">The authors&rsquo; ecological stock-flow-consistent model of the UK economy and climate, run unmodified at a pinned commit: one published scenario, read as deltas over 2023&ndash;2037.</p>
           <div class="qa-facts">
           <div class="qa-fact"><span class="icon">&rarr;</span><span><strong><a class="gloss-link" href="/glossary#deltas-only">Deltas only</a>, never levels</strong> &mdash; the baseline sits far from <a class="gloss-link" href="/glossary#outturn">outturns</a>, so nothing here is a forecast</span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Partial replication: the macro block replicates manual Table&nbsp;4, and scenario deltas are checked only against the published scenario design (<a href="/glossary#design-gated">design-gated</a>) because <strong>no numeric v1.1 scenario results are published</strong></span></div>
+          <div class="qa-fact"><span class="icon">&rarr;</span><span>Every published delta also carries a Baseline/policy parameter mismatch, so 2023&ndash;26 deltas are not policy effects (<a href="/define/validation#caveats">limits</a>)</span></div>
           <div class="qa-fact"><span class="icon">&rarr;</span><span>Joins the core one way: scenario income deltas drive employment-income incidence (<code>define_scenario_incidence</code>, experimental)</span></div>
           </div>
         </details>
@@ -183,7 +193,7 @@
       <a class="entry-card" id="validation" href="/models/validation">
         <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg></span>
         <h3>Validation</h3>
-        <p>Four classes of check, one verdict per model</p>
+        <p>Five status classes, one verdict per model</p>
         <span class="entry-cta">Open <span aria-hidden="true">&rarr;</span></span>
       </a>
       <a class="entry-card" id="evidence" href="/models/papers">
