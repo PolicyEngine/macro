@@ -4307,8 +4307,14 @@ def define_scenario(
         from define_uk import scenarios as _sc
     except ImportError:
         return dict(_DEFINE_INSTRUCTIONS)
+    horizon_years = _bounded_int("horizon_years", horizon_years, 1, 15)
     variables = _sc.DEFAULT_VARIABLES + DEFINE_INCIDENCE_VARIABLES \
         if incidence else _sc.DEFAULT_VARIABLES
+    # define-uk-model#15: a cached solve that breaks stock-flow consistency is
+    # refused with StockFlowInconsistent, a ValueError subclass. The name IS
+    # in the listing, so it must not fall into the "unknown scenario" branch
+    # below (issue #203 item 1). Older adapters lack the class.
+    refused = getattr(_sc, "StockFlowInconsistent", None)
     try:
         result = _sc.run_scenario(
             name, variables=variables, horizon_years=horizon_years,
@@ -4317,19 +4323,50 @@ def define_scenario(
         out = dict(_DEFINE_INSTRUCTIONS)
         out["error"] = str(e)
         return out
-    except (KeyError, ValueError) as e:
-        # Unknown scenario name (or bad horizon): the adapter IS installed,
-        # so install instructions would mislead — point at the listing tool.
-        return {
-            "model": "define-uk",
-            "available": False,
-            "error": f"Unknown DEFINE-UK scenario {name!r}: {e}",
-            "how_to_run": (
-                "Run `pe-macro define-scenarios` (or the "
-                "define_list_scenarios tool) to list the valid scenario "
-                "names, then retry with one of them."
-            ),
-        }
+    except Exception as e:
+        if refused is not None and isinstance(e, refused):
+            return {
+                "model": "define-uk",
+                "available": False,
+                "refused": "stock-flow inconsistent",
+                "scenario": name,
+                "error": str(e),
+                "how_to_run": (
+                    f"{name!r} is a listed scenario, but its cached DEFINE-UK "
+                    "solve breaks stock-flow consistency (sectoral net "
+                    "lending does not sum to zero), so its deltas are not "
+                    "served as results. Re-solve the scenario upstream, or "
+                    "pick another scenario from define_list_scenarios."
+                ),
+            }
+        if isinstance(e, KeyError):
+            # Unknown scenario name: the adapter IS installed, so install
+            # instructions would mislead — point at the listing tool.
+            return {
+                "model": "define-uk",
+                "available": False,
+                "error": f"Unknown DEFINE-UK scenario {name!r}: {e}",
+                "how_to_run": (
+                    "Run `pe-macro define-scenarios` (or the "
+                    "define_list_scenarios tool) to list the valid scenario "
+                    "names, then retry with one of them."
+                ),
+            }
+        if isinstance(e, ValueError):
+            # A known scenario the adapter could not serve for another
+            # reason (e.g. a cached run with no departure from baseline).
+            return {
+                "model": "define-uk",
+                "available": False,
+                "scenario": name,
+                "error": f"DEFINE-UK adapter refused {name!r}: {e}",
+                "how_to_run": (
+                    "The scenario name is valid; the cached run could not be "
+                    "served. Check the cached DEFINE-UK run (define_uk."
+                    "runner.run()) and retry."
+                ),
+            }
+        raise
     result["model"] = "define-uk"
     result["available"] = True
     return result
@@ -4384,6 +4421,15 @@ def define_scenario_incidence(
         payload = define_payload
     else:
         payload = define_scenario(scenario, incidence=True)
+        if not payload.get("available") and (
+            "refused" in payload
+            or str(payload.get("error", "")).startswith(
+                ("Unknown DEFINE-UK", "DEFINE-UK adapter refused")
+            )
+        ):
+            # The adapter is installed and answered: a remote-payload
+            # workaround would not help, so pass its reason through as is.
+            return dict(payload)
         if not payload.get("available"):
             out = dict(payload)
             out["how_to_run"] = (

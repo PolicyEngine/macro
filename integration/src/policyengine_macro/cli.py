@@ -1039,10 +1039,17 @@ def define_scenario(name, horizon_years, incidence, as_json):
     for c in res["caveats"]:
         click.echo(f"  ! {c}")
     years = res["years"]
+    def _fmt(value, suffix=""):
+        return "     n/a" if value is None else f"{value:+.3f}{suffix}"
+
     for var, paths in res["variables"].items():
         click.echo(f"\n{var} (delta level / delta %):")
+        # define-uk-model#15 ships a units string per variable; EMIS deltas
+        # are per QUARTER, so a bare number read as annual is 4x too small.
+        if paths.get("units"):
+            click.echo(f"  units: {paths['units']}")
         for y, lv, pc in zip(years, paths["delta_level"], paths["delta_pct"]):
-            click.echo(f"  {y}  {lv:+.3f}  {pc:+.3f}%")
+            click.echo(f"  {y}  {_fmt(lv)}  {_fmt(pc, '%')}")
 
 
 @main.command("define-incidence")
