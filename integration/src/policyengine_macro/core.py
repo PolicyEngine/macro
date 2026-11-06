@@ -252,6 +252,7 @@ def obr_shock(
     periods = _bounded_int(
         "periods", periods, _OBR_MIN_PERIODS, _OBR_MAX_PERIODS
     )
+    end = _obr_window_end(periods)
     run_reform = _import_obr()
     if investment_closure is None:
         known = {v["var"]: v["investment_closure"] for v in OBR_VARIABLES}
@@ -262,6 +263,8 @@ def obr_shock(
         name=name,
         var=var,
         shock=float(shock),
+        start=_OBR_START,
+        end=end,
         periods=periods,
         investment_closure=bool(investment_closure),
     )
@@ -275,6 +278,13 @@ def obr_shock(
         "investment_closure_plateau_fraction"
     )
     shocked = rows[: int(periods)]
+    if len(shocked) < int(periods):
+        # The cumulative below is labelled "over shock periods"; never let
+        # it silently cover fewer quarters than were shocked.
+        raise RuntimeError(
+            f"OBR solve returned {len(rows)} quarters for a {periods}-quarter "
+            f"shock (window {_OBR_START}..{end})"
+        )
     peak = max(rows, key=lambda r: abs(r["pct_gdp"]))
     # A lever whose channel is dead or non-convergent must say so in the
     # payload, not only in a docstring nobody reads over MCP. Of the four
@@ -296,6 +306,7 @@ def obr_shock(
         "var": var,
         "shock": float(shock),
         "periods": int(periods),
+        "window": {"start": _OBR_START, "end": end},
         "investment_closure": bool(investment_closure),
         "investment_closure_plateau_fraction": (
             round(float(plateau_fraction), 4)
@@ -1270,7 +1281,35 @@ _SVAR_MAX_DRAWS = 10_000
 _SVAR_MIN_HORIZONS = 1
 _SVAR_MAX_HORIZONS = 40
 _OBR_MIN_PERIODS = 1
-_OBR_MAX_PERIODS = 40
+# The OBR databank runs 2025Q1..2031Q1 (obr_macro/baseline.py START, END),
+# so a shock applied from 2025Q1 fits at most 25 quarters. run_reform solves
+# and reports only start..end; before 6 Nov 2026 obr_shock never passed
+# ``end``, so every run stopped at run_reform's 2027Q4 default and a
+# periods=20 request summed 12 quarters into a "20-quarter" cumulative.
+_OBR_START = "2025Q1"
+_OBR_DEFAULT_END = "2027Q4"
+_OBR_DATA_END = "2031Q1"
+_OBR_MAX_PERIODS = 25
+
+
+def _obr_window_end(periods: int) -> str:
+    """Last quarter to solve so every shocked quarter is in the results.
+
+    Never earlier than run_reform's own 2027Q4 default, so short shocks
+    keep their post-shock quarters (the reversion is part of the answer),
+    and never past the databank's last quarter.
+    """
+    import pandas as pd
+
+    last_shocked = pd.Period(_OBR_START, freq="Q") + (int(periods) - 1)
+    end = max(last_shocked, pd.Period(_OBR_DEFAULT_END, freq="Q"))
+    if end > pd.Period(_OBR_DATA_END, freq="Q"):
+        raise ValueError(
+            f"periods={periods} runs past the OBR databank's last quarter "
+            f"{_OBR_DATA_END}; at most {_OBR_MAX_PERIODS} quarters from "
+            f"{_OBR_START}"
+        )
+    return str(end)
 
 
 def _bounded_int(name: str, value: int, minimum: int, maximum: int) -> int:

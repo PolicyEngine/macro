@@ -80,7 +80,8 @@ def test_expensive_mcp_inputs_publish_safe_schema_bounds():
     forecast = tools["forecast_uk"].inputSchema["properties"]
     shocks_draws = tools["latest_shocks"].inputSchema["properties"]["draws"]
 
-    assert (obr_periods["minimum"], obr_periods["maximum"]) == (1, 40)
+    # 25 = 2025Q1..2031Q1, the OBR databank window (core._OBR_MAX_PERIODS).
+    assert (obr_periods["minimum"], obr_periods["maximum"]) == (1, core._OBR_MAX_PERIODS) == (1, 25)
     assert (forecast["horizons"]["minimum"], forecast["horizons"]["maximum"]) == (
         1,
         40,

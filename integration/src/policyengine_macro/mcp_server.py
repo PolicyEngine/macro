@@ -197,7 +197,7 @@ def score_reform(
 def obr_shock(
     var: str,
     shock: float,
-    periods: Annotated[int, Field(ge=1, le=40)] = 12,
+    periods: Annotated[int, Field(ge=1, le=25)] = 12,
     name: str | None = None,
     investment_closure: bool | None = None,
 ) -> dict:
@@ -214,8 +214,9 @@ def obr_shock(
         shock: Shock size, applied each quarter. UNITS DEPEND ON THE VARIABLE:
             CGG and CGIPS are in £ million per quarter (e.g. 1250 = £5bn/year);
             TCPRO is a rate change in decimal (e.g. -0.05 = 5 percentage point cut).
-        periods: Number of quarters the shock is applied (1-40; default 12 =
-            3 years).
+        periods: Number of quarters the shock is applied from 2025Q1 (1-25;
+            default 12 = 3 years). The solve runs to 2027Q4 or to the last
+            shocked quarter if later; the databank ends 2031Q1.
         name: Optional label for the reform.
         investment_closure: Omit to use the safe per-variable default (True
             for TCPRO, False otherwise). It activates the cost-of-capital

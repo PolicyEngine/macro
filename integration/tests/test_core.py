@@ -16,7 +16,7 @@ def test_list_variables():
     json.dumps(vars_)
 
 
-@pytest.mark.parametrize("periods", [0, 41, 1.5, "many"])
+@pytest.mark.parametrize("periods", [0, 26, 41, 1.5, "many"])
 def test_obr_shock_rejects_unsafe_periods_before_import(periods):
     with pytest.raises(ValueError, match="periods"):
         core.obr_shock(var="CGG", shock=1250, periods=periods)
@@ -94,6 +94,69 @@ def test_summary_parses():
     fevd = s["replication"]["fevd_1yr_headline"]
     assert any("UK GDP" in row.get("Variable", "") for row in fevd)
     json.dumps(s)
+
+
+def _fake_run_reform(calls):
+    """Stand-in for obr_macro.run_reform with its real window contract:
+    the shock is applied for ``periods`` quarters from ``start`` but only
+    start..end is solved and returned (reform_analysis.run_reform). Each
+    shocked quarter moves GDP by exactly 1.0 £bn, so the cumulative equals
+    the number of shocked quarters that made it into the results."""
+    import pandas as pd
+
+    def run_reform(name, var, shock, start="2025Q1", end="2027Q4",
+                   periods=12, investment_closure=False):
+        calls.append({"start": start, "end": end, "periods": periods})
+        idx = pd.period_range(start, end, freq="Q")
+        shocked = [i < periods for i in range(len(idx))]
+        return pd.DataFrame({
+            "period": idx,
+            "delta_gdp_bn": [1.0 if s else 0.0 for s in shocked],
+            "pct_gdp": [0.1 if s else 0.0 for s in shocked],
+            "delta_cons_m": 0.0,
+            "delta_if_m": 0.0,
+        })
+
+    return run_reform
+
+
+@pytest.mark.parametrize(
+    ("periods", "end", "n_rows"),
+    [(4, "2027Q4", 12), (12, "2027Q4", 12), (20, "2029Q4", 20), (25, "2031Q1", 25)],
+)
+def test_obr_shock_solves_every_shocked_quarter(monkeypatch, periods, end, n_rows):
+    """Before 6 Nov 2026 obr_shock never passed ``end``, so run_reform
+    stopped at 2027Q4 and periods=20 reported a 12-quarter cumulative as
+    "over shock periods". The window now runs to the last shocked quarter
+    (never earlier than 2027Q4, never past the 2031Q1 databank end)."""
+    calls = []
+    monkeypatch.setattr(core, "_import_obr", lambda: _fake_run_reform(calls))
+    res = core.obr_shock(var="CGG", shock=1250, periods=periods)
+    assert calls == [{"start": "2025Q1", "end": end, "periods": periods}]
+    assert res["window"] == {"start": "2025Q1", "end": end}
+    assert len(res["results"]) == n_rows
+    assert res["cumulative_delta_gdp_bn_over_shock_periods"] == float(periods)
+
+
+def test_obr_shock_refuses_a_cumulative_over_fewer_quarters(monkeypatch):
+    """If the solve ever returns fewer quarters than were shocked, the
+    labelled cumulative would be wrong, so obr_shock raises instead."""
+    import pandas as pd
+
+    def short_run(**kw):
+        idx = pd.period_range("2025Q1", "2027Q4", freq="Q")
+        return pd.DataFrame({"period": idx, "delta_gdp_bn": 1.0, "pct_gdp": 0.1,
+                             "delta_cons_m": 0.0, "delta_if_m": 0.0})
+
+    monkeypatch.setattr(core, "_import_obr", lambda: short_run)
+    with pytest.raises(RuntimeError, match="20-quarter shock"):
+        core.obr_shock(var="CGG", shock=1250, periods=20)
+
+
+def test_obr_periods_cap_is_the_databank_window():
+    """25 quarters is exactly 2025Q1..2031Q1 (obr_macro/baseline.py END)."""
+    assert core._OBR_MAX_PERIODS == 25
+    assert core._obr_window_end(core._OBR_MAX_PERIODS) == core._OBR_DATA_END
 
 
 @pytest.mark.slow
