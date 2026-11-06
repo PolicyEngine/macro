@@ -8,6 +8,12 @@ The version below tracks the `policyengine-macro` package in `integration/`.
 `CITATION.cff` and `integration/pyproject.toml` must agree with the topmost
 heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
+## [Unreleased]
+
+### Changed
+
+- **Site redesign.** Every page uses the Autumn Budget 2026 layout (header band, title band, sub-tabs, cards with expanders), with `DESIGN.md` as the spec. URLs, numbers and data are unchanged.
+
 ## [0.2.0] — 2026-08-11
 
 Access and verification release. Nothing about any model's behaviour or any
