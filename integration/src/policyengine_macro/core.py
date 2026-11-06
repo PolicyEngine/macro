@@ -947,7 +947,7 @@ def frbus_summary() -> dict:
 # US HANK adapters
 # ---------------------------------------------------------------------------
 #
-# us_hank (PolicyEngine/us-hank-model) is a validated replication of the
+# us_hank (PolicyEngine/us-hank-model) is a partial replication of the
 # two-asset HANK of Auclert, Bardóczy, Rognlie & Straub (Econometrica 2021),
 # solved in the sequence space at the paper's production grids. It scores
 # STYLIZED shocks (monetary / fiscal spending / productivity AR(1) paths),
@@ -1218,9 +1218,9 @@ def hank_shock(
         "horizon": horizon,
         "variant": variant,
         "framing": (
-            "Replication of Auclert, Bardóczy, Rognlie & Straub "
-            "(Econometrica 2021): the solved steady-state parameters match "
-            "the paper; shock signs are tested, magnitudes are not validated; "
+            "Partial replication of Auclert, Bardóczy, Rognlie & Straub "
+            "(Econometrica 2021): six of seven solved steady-state parameters "
+            "match the paper; shock signs are tested, magnitudes are not validated; "
             "stylized shocks around a calibrated steady state; NOT a "
             "forecaster and does not score detailed tax reforms; responses "
             "are linear/first-order."
@@ -1286,9 +1286,9 @@ def hank_summary() -> dict:
                     "Heterogeneous-Agent Models', Econometrica 2021",
         "package_version": _package_version("us-hank-model"),
         "framing": (
-            "Replication: steady state validated, IRF magnitudes are not "
-            "validated; stylized shocks; not a forecaster; distributional "
-            "outputs are "
+            "Partial replication: six of seven solved steady-state parameters "
+            "match; IRF magnitudes are not validated; stylized shocks; not a "
+            "forecaster; distributional outputs are "
             "first-order: steady-state MPCs and an MPC-proportional split of "
             "the aggregate response."
         ),

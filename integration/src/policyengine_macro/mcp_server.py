@@ -361,8 +361,9 @@ def hank_shock(
     Rognlie & Straub, Econometrica 2021 — two-asset heterogeneous-agent New
     Keynesian, solved in the sequence space) and return the impulse responses.
 
-    HONEST FRAMING: a replication (steady state validated, IRF magnitudes
-    not) scoring STYLIZED shocks. It is NOT a forecaster and does NOT score
+    HONEST FRAMING: a partial replication (six of seven solved steady-state
+    parameters match; IRF magnitudes are not validated) scoring STYLIZED
+    shocks. It is NOT a forecaster and does NOT score
     detailed tax reforms (score_reform rejects model='hank'); distributional
     outputs are first-order approximations. Responses are linear deviations
     around a calibrated steady state and scale exactly with the shock size.
