@@ -686,14 +686,46 @@ def get_status(model_id: str) -> dict:
     return {"model_id": key, **deepcopy(MODELS[key])}
 
 
+def question_types() -> tuple[str, ...]:
+    """Every question_type some registered model declares, sorted."""
+    return tuple(sorted({q for m in MODELS.values() for q in m["question_types"]}))
+
+
+def _no_model_warning(question_type: str, country: str, needs_distribution: bool) -> str:
+    countries = sorted({g for m in MODELS.values() for g in m["geography"]})
+    if country not in countries:
+        why = f"no registered model covers country {country!r} (covered: {countries})"
+    else:
+        why = f"no registered {country} model answers {question_type!r}"
+        if needs_distribution:
+            why += " with a household distribution"
+    return (
+        f"No registered model supports this request: {why}. Do not infer a "
+        "mapping; refine the question or add an explicitly reviewed capability."
+    )
+
+
 def recommend(
     question_type: str,
     country: str = "uk",
     needs_distribution: bool = False,
     horizon: str | None = None,
 ) -> dict:
-    """Deterministic router; it never invents an unsupported model mapping."""
-    country = country.lower()
+    """Deterministic router; it never invents an unsupported model mapping.
+
+    An unknown ``question_type`` is a caller error, not an unsupported
+    combination, so it raises with the valid types listed; before 6 Nov 2026
+    a typo such as 'shock' came back as "no registered model supports this
+    request", which reads as a capability gap.
+    """
+    valid_types = question_types()
+    question_type = str(question_type).strip().lower()
+    if question_type not in valid_types:
+        raise ValueError(
+            f"unknown question_type {question_type!r}; choose one of "
+            f"{list(valid_types)}"
+        )
+    country = str(country).strip().lower()
     candidates = []
     for model_id, model in MODELS.items():
         if country not in model["geography"]:
@@ -710,9 +742,8 @@ def recommend(
         "horizon": horizon,
         "primary_model": candidates[0] if candidates else None,
         "candidate_models": candidates,
-        "warning": None if candidates else (
-            "No registered model supports this request. Do not infer a mapping; "
-            "refine the question or add an explicitly reviewed capability."
+        "warning": None if candidates else _no_model_warning(
+            question_type, country, needs_distribution
         ),
         "details": [get_status(model_id) for model_id in candidates],
     }

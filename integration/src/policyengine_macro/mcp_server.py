@@ -90,8 +90,10 @@ def recommend_model(
 
     question_type must be one of household, population, policy_reform,
     dynamic_scoring, economic_shock, translated_policy_scenario, forecast,
-    economic_diagnosis, or structural_change. Unsupported combinations return
-    no model rather than an invented mapping.
+    economic_diagnosis, structural_change, or climate_policy_scenario; any
+    other value is an error. Unsupported combinations return no model rather
+    than an invented mapping. ``horizon`` is echoed back but does not yet
+    change the routing.
     """
     return capabilities.recommend(
         question_type=question_type,
