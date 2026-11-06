@@ -112,6 +112,23 @@ def announced_releases() -> list[tuple[date, str]]:
     return sorted(found)
 
 
+def stale_calendar(today: date) -> list[tuple[date, str]] | None:
+    """The announced releases, if every one of them is already in the past.
+
+    ``next_release`` is only as current as data/latest. When the data store
+    stops refreshing, each series' announced date slides into the past and
+    ``due`` finds nothing — which looks exactly like a quiet week. That is how
+    this job reported green every weekday from 17 September to November 2026
+    while GDP, CPI and unemployment were all released unforecast. A calendar
+    with no future date is not "nothing due"; it is a stale store, and it is
+    reported as one. An empty calendar counts too: nothing to schedule against.
+    """
+    releases = announced_releases()
+    if releases and any(when >= today for when, _ in releases):
+        return None
+    return releases
+
+
 def due(within_days: int, today: date) -> list[tuple[date, str]]:
     """Releases landing in the next ``within_days`` days, today included."""
     return [
@@ -266,7 +283,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument(
         "--due", type=int, metavar="DAYS",
-        help="exit 0 if a scored series releases within DAYS, else exit 1",
+        help="exit 0 if a scored series releases within DAYS, 1 if none does, "
+             "2 if the release calendar in data/latest is stale (no future date)",
     )
     ap.add_argument("--draws", type=int, default=DEFAULT_DRAWS)
     ap.add_argument("--horizons", type=int, default=HORIZONS)
@@ -284,6 +302,19 @@ def main() -> int:
     today = datetime.now(timezone.utc).date()
 
     if args.due is not None:
+        stale = stale_calendar(today)
+        if stale is not None:
+            last = max((when for when, _ in stale), default=None)
+            print(
+                "stale release calendar: no scored series has an announced "
+                f"release on or after {today}"
+                + (f" (latest announced {last.isoformat()})" if last else "")
+                + " — data/latest has not been refreshed; merge the data "
+                "vintage PR before a round can be scheduled"
+            )
+            for when, name in stale:
+                print(f"{when.isoformat()}  {name}  (past)")
+            return 2
         upcoming = due(args.due, today)
         for when, name in upcoming:
             print(f"{when.isoformat()}  {name}")

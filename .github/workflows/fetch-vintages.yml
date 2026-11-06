@@ -1,6 +1,8 @@
 name: Fetch data vintages
 
-# Pulls the tracked ONS and Bank of England series and opens a PR when a vintage actually changed.
+# Pulls the tracked ONS, Bank of England and FRED series, records any outturn
+# they complete, rescores the track record, and opens ONE PR when anything
+# changed.
 # Deliberately a PR and not a direct push: a data revision changes what the site
 # claims, so it should be visible as a reviewable diff rather than appearing in
 # main overnight. The append-only store means a revision shows up as a new file
@@ -10,67 +12,80 @@ on:
     # Weekday mornings, after the 07:00 London release window.
     - cron: "30 7 * * 1-5"
   workflow_dispatch:
+    inputs:
+      branch:
+        description: "Bot branch to push (must start data/). Use a throwaway name to test a change without touching the open refresh PR."
+        type: string
+        default: "data/vintage-refresh"
+      carry_from:
+        description: "Open refresh branch whose stored vintages to keep (default: the push branch)"
+        type: string
+        default: ""
+      open_pr:
+        description: "Open or update the PR after pushing (false = push the branch only)"
+        type: boolean
+        default: true
 
 permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: fetch-vintages
+  cancel-in-progress: false
+
+env:
+  BRANCH: ${{ github.event.inputs.branch || 'data/vintage-refresh' }}
+  CARRY_FROM: ${{ github.event.inputs.carry_from || github.event.inputs.branch || 'data/vintage-refresh' }}
+  OPEN_PR: ${{ github.event_name == 'schedule' && 'true' || github.event.inputs.open_pr }}
+
 jobs:
   fetch:
-    name: Fetch official series
+    name: Fetch, ingest, score and open one PR
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+        with:
+          # A PAT or app token here makes the bot's push start the PR-time
+          # workflows (a GITHUB_TOKEN push never does, which is why #195 never
+          # had a CI run). Optional: data/refresh.py runs every one of those
+          # gates itself before anything is pushed.
+          token: ${{ secrets.DATA_PR_TOKEN || github.token }}
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
+      - name: Install pytest (for the site test gate)
+        run: python3 -m pip install --upgrade pip pytest
 
-      - name: Fetch
-        run: python3 data/fetch.py
+      # carry → fetch → notes → ingest → score → fans → pages → gates →
+      # append-only. Fails on the first red gate, before anything is pushed;
+      # see the module docstring for why each step is here.
+      - name: Refresh the store and score the record
+        run: python3 data/refresh.py --carry-from "$CARRY_FROM" --summary "$RUNNER_TEMP/summary.md"
 
-      - name: Validate the store
-        run: python3 data/fetch.py --check
-
-      - name: Generate factual notes for new vintages
-        run: python3 notes/generate_release_notes.py --vintage "$(date -u +%F)"
-
-      - name: Validate generated-note indexes
-        run: python3 notes/generate_release_notes.py --check
-
-      # The economy pages render data/latest, so a refreshed vintage makes
-      # them stale; regenerate on the same branch or the merged PR fails the
-      # Site provenance gate on main (issue #147, first hit by #145).
-      # The /data catalogue reports vintage counts and the release calendar is
-      # built from `next_release`, so both move on every refresh for exactly
-      # the same reason the economy pages do.
-      - name: Regenerate pages that read data/latest
+      - name: Write the PR body
         run: |
-          python3 economy/topics.py
-          python3 economy/build.py
-          python3 data/build_page.py
+          {
+            echo "Automated ONS, Bank of England and FRED refresh from \`data/refresh.py\`"
+            echo "(run ${{ github.run_id }}). Outturns, scorecard, notes and pages are"
+            echo "regenerated on the same branch, so merging leaves main green."
+            echo
+            cat "$RUNNER_TEMP/summary.md"
+            echo
+            echo "New files under \`data/vintages/\` are new vintages — an upstream"
+            echo "revision or a new observation. Nothing is edited in place. **An edit"
+            echo "to an existing vintage file is a bug**; check the fetcher rather than"
+            echo "accepting it."
+            echo
+            echo "Merging adds the outturns above to the public track record. Check"
+            echo "that each one matches the publisher's release before merging."
+          } > "$RUNNER_TEMP/body.md"
+          cat "$RUNNER_TEMP/body.md" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Validate regenerated pages
+      - name: Push the branch and open or update one PR
+        env:
+          GH_TOKEN: ${{ secrets.DATA_PR_TOKEN || github.token }}
         run: |
-          python3 economy/topics.py --check
-          python3 economy/build.py --check
-          python3 data/build_page.py --check
-
-      - name: Open a PR if anything changed
-        uses: peter-evans/create-pull-request@v7
-        with:
-          branch: data/vintage-refresh
-          title: "Refresh official data vintages"
-          commit-message: "Refresh official data vintages"
-          body: |
-            Automated ONS and Bank of England vintage refresh from `data/fetch.py`.
-            New factual release-note pages are generated from changed snapshots
-            on the same branch and remain subject to review before publication.
-
-            New files under `data/vintages/` are new vintages — an upstream
-            revision or a new observation. Nothing is edited in place, so the
-            diff should be additions plus the regenerated `MANIFEST.json` and
-            `latest/`. **An edit to an existing vintage file is a bug**; check
-            the fetcher rather than accepting it.
-          labels: data
-          delete-branch: true
+          bash .github/scripts/open-bot-pr.sh "$BRANCH" \
+            "Refresh official data vintages" "$RUNNER_TEMP/body.md" data
