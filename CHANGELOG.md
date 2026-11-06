@@ -14,6 +14,10 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 - **Site redesign.** Every page uses the Autumn Budget 2026 layout (header band, title band, sub-tabs, cards with expanders), with `DESIGN.md` as the spec. URLs, numbers and data are unchanged.
 
+### Fixed
+
+- **Integration-layer scenario sweep fixes.** `score_reform(model="obr")` places PolicyEngine-UK costings on fiscal-year quarters (default window `2026Q1..2030Q4` → `2026Q2..2031Q1`); `svar_forecast` returns simple y/y rates rather than log differences; `frbus_shock` reports rates as level deviations; `hank_shock` returns the `tax` series; invalid inputs (NaN sizes, unknown question types, out-of-window years) are refused before solving.
+
 ## [0.2.0] — 2026-08-11
 
 Access and verification release. Nothing about any model's behaviour or any
