@@ -1083,7 +1083,7 @@ def chart_svar_coverage():
             "dummies, which depresses coverage.")
 
     out = svg_open(x1 - x0 + 16, base_y - top_y + 12, "svar-coverage",
-                   "BoE SVAR: empirical band coverage across 49 origins", desc,
+                   f"BoE SVAR: empirical band coverage across {data['origins']} origins", desc,
                    origin=(x0 - 8, top_y - 6))
     for k in range(int(math.ceil(lo_v * 10)), 11):
         v = k / 10
