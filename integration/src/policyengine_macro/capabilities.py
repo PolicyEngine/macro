@@ -93,7 +93,11 @@ MODELS = {
         "access": ["hosted raw shocks", "CLI with editable model checkout", "Python"],
         "runtime": "seconds to minutes",
         "uncertainty": "not comprehensive",
-        "status": "validated software replication with scope limits",
+        "status": (
+            "replicates the Fed's pyfrbus on one 100bp funds-rate shock, "
+            "within the gap between pyfrbus 1.0.0 and 1.1.1; a solver check, "
+            "not a test of the economics"
+        ),
         "data_vintage": "LONGBASE file from the installed frbus package",
     },
     "us-hank": {
@@ -111,18 +115,19 @@ MODELS = {
         ],
         "horizon": "quarterly impulse responses, typically 5 years",
         "access": ["hosted stylized shocks", "CLI", "Python"],
-        "runtime": "~18s cold per variant (steady state + jacobian, cached); instant warm",
+        "runtime": "about 10 seconds cold on a laptop (steady state plus Jacobian, then cached); instant warm",
         "uncertainty": "none quantified; deterministic linear IRFs",
         "status": (
             # us-hank-model README "Validation status": only the solved
             # steady-state parameters are validated (Table B.III, phi differs);
             # IRF magnitudes are not, and the by-wealth split is an
             # accounting allocation (distributional.py), not a solved response.
-            "steady state replicates the paper (six of seven solved "
-            "parameters); shock signs are tested, magnitudes are not "
-            "validated; not a forecaster; distributional outputs are "
-            "steady-state statistics and an MPC-proportional split of the "
-            "aggregate"
+            "partial replication of Auclert et al. (2021): six of seven "
+            "solved parameters match (vphi misses by 17.3%, unresolved); "
+            "steady-state targets are inputs; shock signs are tested, "
+            "magnitudes are not; not a forecaster; distributional outputs "
+            "are steady-state statistics and an MPC-proportional split of "
+            "the aggregate"
         ),
         "data_vintage": "Auclert-Bardóczy-Rognlie-Straub (2021) calibration",
     },
@@ -143,9 +148,9 @@ MODELS = {
         "cannot_answer": ["short-run forecast", "fast hosted custom scenario"],
         "horizon": "long-run steady state; package also supports transition paths",
         "access": ["local CLI steady state", "Python package"],
-        "runtime": "17+ minutes per steady-state solve; transition paths can take hours",
+        "runtime": "a steady-state solve takes many minutes and transition paths far longer (not timed)",
         "uncertainty": "sensitivity analysis not yet comprehensive",
-        "status": "research prototype; calibrated counterfactual",
+        "status": "calibrated; no outcome benchmark; research prototype",
         "data_vintage": "OG-UK packaged calibration inputs",
     },
     "define-uk": {
@@ -169,12 +174,12 @@ MODELS = {
         "runtime": "instant from the cached upstream run; a fresh run needs local R (full notebook)",
         "uncertainty": "none quantified; deterministic scenario deltas from one calibration",
         "status": (
-            "experimental; partial replication — baseline macro block "
-            "replicates manual Table 4; scenario deltas gated on the pinned "
+            "partial replication of the DEFINE-UK manual: baseline macro "
+            "block replicates Table 4; scenario deltas gated on the pinned "
             "oracle run, the published scenario definitions, and two paper "
             "anchors (no numeric v1.1 scenario results are published); "
-            "unlicensed upstream is never hosted, so hosted calls return "
-            "run instructions"
+            "experimental; unlicensed upstream is never hosted, so hosted "
+            "calls return run instructions"
         ),
         "data_vintage": "DEFINE-UK 1.1 upstream at pinned commit 846081a (April 2026 manual)",
     },

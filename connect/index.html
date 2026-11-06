@@ -17,9 +17,10 @@
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <meta name="theme-color" content="#FFFFFF" />
 
+<link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=19" />
+<link rel="stylesheet" href="/style.css?v=23" />
 <style>
 /* ---------- connect page ---------- */
 .connect-hero .hero-inner { display: block; }
@@ -258,12 +259,62 @@
 .prompt-note { margin: 12px 0 0; font-size: var(--fs-small); color: var(--text-muted); line-height: 1.55; }
 .tool-table { width: 100%; border-collapse: collapse; font-size: var(--fs-body-sm); }
 .tool-table th, .tool-table td { padding: 10px 14px 10px 0; border-bottom: 1px solid var(--hairline); text-align: left; vertical-align: top; }
-.tool-table thead th { color: var(--text-muted); font: 500 var(--fs-label)/1.3 var(--mono); text-transform: uppercase; letter-spacing: .04em; }
+.tool-table thead th { color: var(--text-muted); font: 600 var(--fs-small)/1.3 var(--body, inherit); }
 .tool-table tbody th { white-space: nowrap; font-weight: 600; }
 .tool-table td:nth-child(2) { min-width: 18rem; }
 .tool-table td:nth-child(2) code { display: inline-block; margin: 0 6px 4px 0; font-size: var(--fs-small); }
 .tool-table td:nth-child(3) { min-width: 14rem; color: var(--text-body); }
 #tools .chooser-note, #limits .connect-notes { margin-top: var(--s-4); }
+/* r5: one column of three numbered steps; copy rows instead of nested cards */
+.run-step { padding: var(--s-5) 0; border-top: 1px solid var(--hairline); }
+.band-head + .run-step { border-top: 0; padding-top: 0; }
+.run-step-h { display: flex; align-items: center; gap: var(--s-3); margin: 0 0 var(--s-2); font-size: var(--fs-h3); }
+.run-num { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px; background: var(--surface-tint); color: var(--teal-700); font-size: var(--fs-body-sm); font-weight: 600; }
+.run-lead { margin: 0 0 var(--s-4); color: var(--text-muted); max-width: 70ch; }
+.run-list { margin: 0; padding: 0; list-style: none; counter-reset: run; display: grid; gap: var(--s-5); }
+.run-list > li { counter-increment: run; position: relative; padding-left: 40px; min-width: 0; }
+.run-list > li::before { content: counter(run); position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--surface-tint); color: var(--teal-700); font-size: var(--fs-small); font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.run-li-h { margin: 2px 0 var(--s-3); color: var(--text-strong); font-weight: 600; }
+.run-sub { margin: var(--s-3) 0 var(--s-2); color: var(--text-muted); font-size: var(--fs-body-sm); }
+.run-sub-h { margin: var(--s-5) 0 0; font-size: var(--fs-body); }
+.client-panel p { margin: var(--s-3) 0 0; max-width: 70ch; }
+.client-panel .copyblock, .run-step .copyblock { margin: 0; }
+#seg-client { margin-inline: 0; }
+.copyblock { background: var(--surface-sunken); border-radius: var(--radius); }
+.copyblock code { font-family: var(--code); font-size: var(--fs-small); }
+.copyblock button, .cmd-list button { min-height: 32px; padding: 4px 10px; border: 1px solid var(--hairline-strong); border-radius: 6px; background: var(--surface-card); color: var(--teal-700); font: 600 var(--fs-small)/1 var(--body, inherit); cursor: pointer; }
+.copyblock button:hover, .cmd-list button:hover { border-color: var(--primary); background: var(--surface-tint); }
+.copy-url code { font-size: var(--fs-body-sm); }
+.cmd-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--hairline); }
+.cmd-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: var(--s-2) var(--s-4); padding: var(--s-3) 0; border-bottom: 1px solid var(--hairline); }
+.cmd-text { font-family: var(--body, inherit); font-size: var(--fs-body-sm); color: var(--text-body); background: none; padding: 0; white-space: normal; }
+.cmd-note { grid-column: 1 / -1; font-size: var(--fs-small); color: var(--text-muted); }
+.cmd-tool { color: var(--text-faint); font-size: var(--fs-small); white-space: nowrap; }
+.cmd-list-cli { margin-top: var(--s-4); }
+.cmd-list-cli li { grid-template-columns: 12rem minmax(0, 1fr) auto; }
+.cmd-label { color: var(--text-strong); font-size: var(--fs-body-sm); font-weight: 600; }
+.cmd-list-cli .cmd-text { font-family: var(--code); font-size: var(--fs-small); overflow-wrap: anywhere; }
+.run-facts { margin: var(--s-5) 0 var(--s-3); }
+.band .kv.kv-text.limits-kv, .band .kv.kv-text.run-facts { grid-template-columns: 10rem minmax(0, 1fr); }
+@media (max-width: 600px) { .band .kv.kv-text.limits-kv, .band .kv.kv-text.run-facts { grid-template-columns: minmax(0, 1fr); } }
+.code-window code, .code-window pre code { font-family: var(--code); }
+.setup-list { margin: var(--s-3) 0 0; padding: 0; list-style: none; border-top: 1px solid var(--hairline); }
+.setup-list li { display: grid; grid-template-columns: 15rem 6rem minmax(0, 1fr); gap: var(--s-2) var(--s-4); align-items: baseline; padding: var(--s-3) 0; border-bottom: 1px solid var(--hairline); font-size: var(--fs-body-sm); }
+.setup-list a { font-weight: 600; }
+.setup-list .tag { justify-self: start; }
+.setup-what { color: var(--text-body); line-height: 1.55; }
+@media (max-width: 760px) {
+  .cmd-list li, .cmd-list-cli li { grid-template-columns: minmax(0, 1fr) auto; }
+  .cmd-list li .cmd-text { grid-column: 1 / -1; grid-row: 1; }
+  .cmd-list-cli .cmd-label { grid-column: 1; grid-row: 1; }
+  .cmd-list-cli button { grid-column: 2; grid-row: 1; }
+  .cmd-list-cli li .cmd-text { grid-column: 1 / -1; grid-row: 2; }
+  .setup-list li { grid-template-columns: minmax(0, 1fr) auto; }
+  .setup-what { grid-column: 1 / -1; }
+  .run-list > li { padding-left: 0; }
+  .run-list > li::before { width: 24px; height: 24px; }
+  .run-li-h { padding-left: 34px; min-height: 24px; }
+}
 </style>
 </head>
 <body class="doc">
@@ -307,109 +358,86 @@ tools. Hosted use needs no install, no account and no API key.
 <a class="model-tabs-link" href="#limits">Limits</a>
 </div>
 </nav>
-<section id="routes" class="band band-wide">
+<section id="routes" class="band">
 <div class="band-head" data-icon="play">
 <h2>Three ways to run them</h2>
 <p class="section-intro">MCP first, then the CLI, then Python; the CLI and Python also run the local-only members.</p>
 </div>
-<div class="scrolly-wrap">
-<div class="scrolly-steps">
 
-<div class="meth-step" id="connect" data-step="0">
-<div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Hosted: connect over MCP</h3></div>
-<p class="mo-lead">Add one URL to an MCP client, then ask in plain language.</p>
+<div class="run-step" id="connect">
+<h3 class="run-step-h"><span class="run-num" aria-hidden="true">1</span>Hosted: connect an AI client over MCP</h3>
+<p class="run-lead">Add one URL to an MCP client, then ask in plain language.</p>
+<ol class="run-list">
+<li>
+<p class="run-li-h">Copy the server URL</p>
+<div class="copyblock copy-url"><code>https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" data-copy>copy</button></div>
+</li>
+<li>
+<p class="run-li-h">Add it to your client</p>
 <div class="seg" role="tablist" aria-label="Client" id="seg-client">
-<button id="client-tab-claude" role="tab" data-client="claude" aria-selected="true" aria-controls="client-panel-claude terminal-panel-claude" tabindex="0"><img src="/assets/claude-mark.svg" alt="" width="22" height="22" /><span>Claude</span></button>
-<button id="client-tab-chatgpt" role="tab" data-client="chatgpt" aria-selected="false" aria-controls="client-panel-chatgpt terminal-panel-chatgpt" tabindex="-1"><img src="/assets/chatgpt-mark.svg" alt="" width="22" height="22" /><span>ChatGPT</span></button>
-<button id="client-tab-other" role="tab" data-client="other" aria-selected="false" aria-controls="client-panel-other terminal-panel-other" tabindex="-1"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 7v-3M15 7v-3M7 7h10v5a5 5 0 0 1-10 0V7ZM12 17v4"/></svg><span>More clients</span></button>
+<button id="client-tab-claude" role="tab" data-client="claude" aria-selected="true" aria-controls="client-panel-claude" tabindex="0"><img src="/assets/claude-mark.svg" alt="" width="22" height="22" /><span>Claude</span></button>
+<button id="client-tab-chatgpt" role="tab" data-client="chatgpt" aria-selected="false" aria-controls="client-panel-chatgpt" tabindex="-1"><img src="/assets/chatgpt-mark.svg" alt="" width="22" height="22" /><span>ChatGPT</span></button>
+<button id="client-tab-other" role="tab" data-client="other" aria-selected="false" aria-controls="client-panel-other" tabindex="-1"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg><span>Other clients</span></button>
 </div>
-<div class="steps connect-steps">
-<div class="step">
-<span class="step-num mono" aria-hidden="true">1</span>
-<p class="step-h">Copy the server URL</p>
-<div class="copyblock"><code>https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
-</div>
-<div class="step" id="client-panel-claude" role="tabpanel" aria-labelledby="client-tab-claude" data-for="claude">
-<span class="step-num mono" aria-hidden="true">2</span>
-<p class="step-h">Add a Claude connector</p>
+<div class="client-panel" id="client-panel-claude" role="tabpanel" aria-labelledby="client-tab-claude" data-for="claude">
 <p>On claude.ai or in the Claude Desktop app, open Settings → Connectors, choose “Add custom connector”, and paste the URL.</p>
+<p class="run-sub">In a terminal, with Claude Code:</p>
+<div class="copyblock"><code>claude mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" data-copy>copy</button></div>
 </div>
-<div class="step" id="client-panel-chatgpt" role="tabpanel" aria-labelledby="client-tab-chatgpt" data-for="chatgpt" hidden>
-<span class="step-num mono" aria-hidden="true">2</span>
-<p class="step-h">Add a ChatGPT connector</p>
+<div class="client-panel" id="client-panel-chatgpt" role="tabpanel" aria-labelledby="client-tab-chatgpt" data-for="chatgpt" hidden>
 <p>On an eligible ChatGPT web plan, enable Developer mode in Settings → Apps → Advanced Settings, create a custom app, and paste the URL. Workspace admins may need to grant access.</p>
+<p class="run-sub">For Codex CLI, register the same MCP endpoint:</p>
+<div class="copyblock"><code>codex mcp add policyengine-macro --url https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" data-copy>copy</button></div>
 </div>
-<div class="step" id="client-panel-other" role="tabpanel" aria-labelledby="client-tab-other" data-for="other" hidden>
-<span class="step-num mono" aria-hidden="true">2</span>
-<p class="step-h">Add a remote MCP server</p>
+<div class="client-panel" id="client-panel-other" role="tabpanel" aria-labelledby="client-tab-other" data-for="other" hidden>
 <p>Add the URL as a remote (HTTP) MCP server — Gemini CLI, Cursor, VS Code, Windsurf, Mistral Le Chat, and any other MCP-capable client. Look for “MCP servers” or “connectors” in its settings.</p>
+<p class="run-sub">For the Gemini CLI, register the same MCP endpoint:</p>
+<div class="copyblock"><code>gemini mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" data-copy>copy</button></div>
 </div>
-<div class="step">
-<span class="step-num mono" aria-hidden="true">3</span>
-<p class="step-h">Ask a policy question</p>
-<p>A US rate shock, a UK forecast, a household reform — copy an example prompt below.</p>
-</div>
-</div>
-<div class="prompt-block">
-<div class="meth-sec-title">example prompts</div>
-<ul class="prompt-list">
-<li class="prompt-card"><span class="prompt-tool">calculate_household</span><code>How much tax would a single 35-year-old earning $50,000 pay in Los Angeles County, California?</code><button data-copy>copy</button></li>
-<li class="prompt-card"><span class="prompt-tool">start_job · score_reform</span><code>Score raising the UK basic rate of income tax to 21p.</code><button data-copy>copy</button></li>
-<li class="prompt-card"><span class="prompt-tool">forecast_uk</span><code>What is the UK GDP and inflation outlook for the next four quarters?</code><button data-copy>copy</button></li>
-<li class="prompt-card"><span class="prompt-tool">frbus_shock</span><code>What happens to US GDP and unemployment if the Fed raises rates by 100 basis points?</code><button data-copy>copy</button></li>
-<li class="prompt-card"><span class="prompt-tool">hank_shock</span><code>How does a 25 basis point US rate cut hit households across the wealth distribution?</code><button data-copy>copy</button></li>
+</li>
+<li>
+<p class="run-li-h">Ask a policy question</p>
+<ul class="cmd-list">
+<li><code class="cmd-text">How much tax would a single 35-year-old earning $50,000 pay in Los Angeles County, California?</code><span class="cmd-tool mono">calculate_household</span><button type="button" data-copy>copy</button></li>
+<li><code class="cmd-text">Score raising the UK basic rate of income tax to 21p.</code><span class="cmd-tool mono">start_job · score_reform</span><button type="button" data-copy>copy</button></li>
+<li><code class="cmd-text">What is the UK GDP and inflation outlook for the next four quarters?</code><span class="cmd-tool mono">forecast_uk</span><button type="button" data-copy>copy</button><span class="cmd-note">boe-svar: <a href="/svar/validation#forecasters">no forecast skill against a drifting random walk</a></span></li>
+<li><code class="cmd-text">What happens to US GDP and unemployment if the Fed raises rates by 100 basis points?</code><span class="cmd-tool mono">frbus_shock</span><button type="button" data-copy>copy</button></li>
+<li><code class="cmd-text">How does a 25 basis point cut in the quarterly US policy rate (about 100bp annualised) change consumption across wealth quartiles?</code><span class="cmd-tool mono">hank_shock</span><button type="button" data-copy>copy</button></li>
 </ul>
 <p class="prompt-note">A reform score outlasts one HTTP request, so the client runs it as a job (<code>start_job</code>, then <code>get_job_result</code> until it is done); the tool descriptions tell it to. See <a href="#limits">limits</a>.</p>
-</div>
-<details class="more compact-more">
-<summary>Terminal setup</summary>
-<div class="copyblock" id="terminal-panel-claude" role="tabpanel" aria-labelledby="client-tab-claude" data-for="claude"><code>claude mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
-<div id="terminal-panel-chatgpt" role="tabpanel" aria-labelledby="client-tab-chatgpt" data-for="chatgpt" hidden>
-<p>For Codex CLI, register the same MCP endpoint:</p>
-<div class="copyblock"><code>codex mcp add policyengine-macro --url https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
-</div>
-<div id="terminal-panel-other" role="tabpanel" aria-labelledby="client-tab-other" data-for="other" hidden>
-<p>For the Gemini CLI, register the same MCP endpoint:</p>
-<div class="copyblock"><code>gemini mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button data-copy>copy</button></div>
-</div>
+</li>
+</ol>
+<dl class="kv kv-text run-facts">
+<div><dt>Transport</dt><dd>Remote HTTP MCP (streamable HTTP)</dd></div>
+<div><dt>Auth</dt><dd>None: no account, no API key</dd></div>
+<div><dt>Slow tools</dt><dd><code>start_job</code> → <code>get_job_result</code></dd></div>
+<div><dt>Limits</dt><dd><a href="#limits">Ceiling, concurrency, cold starts</a></dd></div>
+</dl>
+<details class="about">
+<summary>Run the same server on your own machine</summary>
 <p>To run the same server on your own machine over stdio (no request ceiling; local-only tools run where their packages are installed), install the package as in step 2, then:</p>
-<div class="copyblock"><code>claude mcp add policyengine-macro -- python -m policyengine_macro.mcp_server</code><button data-copy>copy</button></div>
+<div class="copyblock"><code>claude mcp add policyengine-macro -- python -m policyengine_macro.mcp_server</code><button type="button" data-copy>copy</button></div>
 </details>
-<div class="meth-inline">
-<div class="meth-sec-title">one endpoint</div>
-<div class="meth-eq"><div class="meth-eq-label">server</div><div class="meth-eq-body"><code>policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code></div></div>
-<div class="meth-eq"><div class="meth-eq-label">transport</div><div class="meth-eq-body">remote HTTP MCP (streamable HTTP)</div></div>
-<div class="meth-eq"><div class="meth-eq-label">auth</div><div class="meth-eq-body">none: no account, no API key</div></div>
-<div class="meth-eq"><div class="meth-eq-label">slow tools</div><div class="meth-eq-body"><code>start_job</code> → <code>get_job_result</code></div></div>
-<div class="meth-eq"><div class="meth-eq-label">limits</div><div class="meth-eq-body"><a href="#limits">ceiling, concurrency, cold starts</a></div></div>
-</div>
 </div>
 
-<div class="meth-step" id="cli" data-step="1">
-<div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Terminal: the shared CLI</h3></div>
-<p class="mo-lead">Install once, check what is importable, then run a model command. Add <code>--json</code> to any command for machine-readable output.</p>
-<div class="copyblock"><code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code><button data-copy>copy</button></div>
-<div class="command-grid">
-<div><span class="dial-name">Which models run here</span><div class="copyblock"><code>pe-macro model-status</code><button data-copy>copy</button></div></div>
-<div><span class="dial-name">Household calculation</span><div class="copyblock"><code>pe-macro household --country us --people '[{"age":35,"employment_income":50000}]' --household '{"state_code":"CA","county_fips":"06037"}'</code><button data-copy>copy</button></div></div>
-<div><span class="dial-name">Score a UK reform</span><div class="copyblock"><code>pe-macro score --country uk --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --model obr</code><button data-copy>copy</button></div></div>
-<div><span class="dial-name">UK forecast</span><div class="copyblock"><code>pe-macro forecast</code><button data-copy>copy</button></div></div>
-<div><span class="dial-name">US rate shock</span><div class="copyblock"><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code><button data-copy>copy</button></div></div>
-<div><span class="dial-name">US HANK shock</span><div class="copyblock"><code>pe-macro hank-shock --kind monetary --size -0.0025</code><button data-copy>copy</button></div></div>
-</div>
-<p class="chooser-note">Shock units differ by lever and model: run <code>pe-macro variables</code>, <code>pe-macro frbus-variables</code> or <code>pe-macro hank-summary</code> first. <a href="https://github.com/PolicyEngine/macro/tree/main/integration#cli">Every CLI command →</a> · How the micro-to-macro scoring pipeline works: <a href="/models#score">score a reform</a>.</p>
-<div class="meth-inline">
-<div class="meth-sec-title">install, then run</div>
-<div class="meth-eq"><div class="meth-eq-label">package</div><div class="meth-eq-body"><code>policyengine-macro[models]</code></div></div>
-<div class="meth-eq"><div class="meth-eq-label">check</div><div class="meth-eq-body"><code>pe-macro model-status</code></div></div>
-<div class="meth-eq"><div class="meth-eq-label">score</div><div class="meth-eq-body"><code>pe-macro score &hellip; --model obr</code></div></div>
-<div class="meth-eq"><div class="meth-eq-label">output</div><div class="meth-eq-body"><code>--json</code> on any command</div></div>
-</div>
+<div class="run-step" id="cli">
+<h3 class="run-step-h"><span class="run-num" aria-hidden="true">2</span>Terminal: the shared CLI</h3>
+<p class="run-lead">Install once, check what is importable, then run a model command. Add <code>--json</code> to any command for machine-readable output.</p>
+<div class="copyblock copy-url"><code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code><button type="button" data-copy>copy</button></div>
+<ul class="cmd-list cmd-list-cli">
+<li><span class="cmd-label">Which models run here</span><code class="cmd-text">pe-macro model-status</code><button type="button" data-copy>copy</button></li>
+<li><span class="cmd-label">Household calculation</span><code class="cmd-text">pe-macro household --country us --people '[{"age":35,"employment_income":50000}]' --household '{"state_code":"CA","county_fips":"06037"}'</code><button type="button" data-copy>copy</button></li>
+<li><span class="cmd-label">Score a UK reform</span><code class="cmd-text">pe-macro score --country uk --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --model obr</code><button type="button" data-copy>copy</button></li>
+<li><span class="cmd-label">UK forecast</span><code class="cmd-text">pe-macro forecast</code><button type="button" data-copy>copy</button></li>
+<li><span class="cmd-label">US rate shock</span><code class="cmd-text">pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code><button type="button" data-copy>copy</button></li>
+<li><span class="cmd-label">US HANK shock</span><code class="cmd-text">pe-macro hank-shock --kind monetary --size -0.0025</code><button type="button" data-copy>copy</button></li>
+</ul>
+<p class="chooser-note">Shock units differ by lever and model: run <code>pe-macro variables</code>, <code>pe-macro frbus-variables</code> or <code>pe-macro hank-summary</code> first. <a href="https://github.com/PolicyEngine/macro/tree/main/integration#cli">Every CLI command →</a> · How the micro-to-macro scoring pipeline works: <a href="/models/combine#score">score a reform</a>.</p>
 </div>
 
-<div class="meth-step" id="code" data-step="2">
-<div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Python: hosted or local</h3></div>
-<p class="mo-lead">Call the hosted server from a script with the MCP client, or import the adapters and run locally.</p>
+<div class="run-step" id="code">
+<h3 class="run-step-h"><span class="run-num" aria-hidden="true">3</span>Python: hosted or local</h3>
+<p class="run-lead">Call the hosted server from a script with the MCP client, or import the adapters and run locally.</p>
 <div class="code-window">
 <div class="cw-bar"><span class="cw-name">hosted.py · <code>pip install "mcp&gt;=1,&lt;2"</code></span><button class="cw-copy" data-copy>copy</button></div>
 <pre><code>import asyncio, json
@@ -423,7 +451,9 @@ async def call(tool, args=None):
         async with ClientSession(read, write) as session:
             await session.initialize()
             res = await session.call_tool(tool, args or {})
-            return json.loads(res.content[0].text)
+    if res.isError:  # a failed tool or job returns plain text, not JSON
+        raise RuntimeError(res.content[0].text)
+    return json.loads(res.content[0].text)
 
 async def run_job(tool, args):
     """Slow tools: start a job, then poll until it is done."""
@@ -452,96 +482,18 @@ household = core.pe_household(
     household={"state_code": "CA", "county_fips": "06037"},
 )</code></pre>
 </div>
-<p class="chooser-note">Each model&rsquo;s own package, pins and reproduction steps are on its Code tab:</p>
-<div class="model-picker">
-<div class="seg model-seg" role="tablist" aria-label="Model" id="model-seg">
-<button id="model-tab-pe" role="tab" data-model="pe" aria-selected="true" aria-controls="model-panel-pe" tabindex="0"><strong>PolicyEngine microsimulation</strong><span>Households</span></button>
-<button id="model-tab-obr" role="tab" data-model="obr" aria-selected="false" aria-controls="model-panel-obr" tabindex="-1"><strong>OBR emulator</strong><span>Near-term fiscal</span></button>
-<button id="model-tab-svar" role="tab" data-model="svar" aria-selected="false" aria-controls="model-panel-svar" tabindex="-1"><strong>BoE SVAR</strong><span>UK forecasts</span></button>
-<button id="model-tab-frbus" role="tab" data-model="frbus" aria-selected="false" aria-controls="model-panel-frbus" tabindex="-1"><strong>FRB/US</strong><span>US shocks</span></button>
-<button id="model-tab-hank" role="tab" data-model="hank" aria-selected="false" aria-controls="model-panel-hank" tabindex="-1"><strong>US HANK</strong><span>US distributional</span></button>
-<button id="model-tab-oguk" role="tab" data-model="oguk" aria-selected="false" aria-controls="model-panel-oguk" tabindex="-1"><strong>OG-UK</strong><span>Long-run reform</span></button>
-<button id="model-tab-ogmicro" role="tab" data-model="ogmicro" aria-selected="false" aria-controls="model-panel-ogmicro" tabindex="-1"><strong>OG-UK + microsimulation</strong><span>Dynamic scoring</span></button>
-<button id="model-tab-define" role="tab" data-model="define" aria-selected="false" aria-controls="model-panel-define" tabindex="-1"><strong>DEFINE-UK</strong><span>UK climate scenarios</span></button>
-</div>
-<div class="model-pane compact-pane" id="model-panel-pe" role="tabpanel" aria-labelledby="model-tab-pe" data-model="pe">
-<span class="tag tag-hosted">hosted</span><h4>UK and US household impacts</h4>
-<p>Taxes, benefits, net income and reform effects, household by household — PolicyEngine&rsquo;s own engine, and the usual starting point. It cannot answer GDP, inflation, interest rates or macro feedback; the macro models below add those.</p>
-<a class="btn btn-primary" href="/pe/code#run">Open PolicyEngine setup</a>
-</div>
-<div class="model-pane compact-pane" id="model-panel-obr" role="tabpanel" aria-labelledby="model-tab-obr" data-model="obr" hidden>
-<span class="tag tag-hosted">hosted</span><h4>Near-term UK fiscal effects</h4>
-<p>Trace tax and spending changes against the OBR baseline.</p>
-<a class="btn btn-primary" href="/obr/code#run">Open OBR setup</a>
-</div>
-<div class="model-pane compact-pane" id="model-panel-svar" role="tabpanel" aria-labelledby="model-tab-svar" data-model="svar" hidden>
-<span class="tag tag-hosted">hosted</span><h4>UK forecasts and shock decomposition</h4>
-<p>Forecast GDP and inflation or explain what moved them.</p>
-<a class="btn btn-primary" href="/svar/code#run">Open SVAR setup</a>
-</div>
-<div class="model-pane compact-pane" id="model-panel-frbus" role="tabpanel" aria-labelledby="model-tab-frbus" data-model="frbus" hidden>
-<span class="tag tag-hosted">hosted</span><h4>US monetary and fiscal shocks</h4>
-<p>Run FRB/US impulse responses under a chosen policy rule.</p>
-<a class="btn btn-primary" href="/frb-us/code#run">Open FRB/US setup</a>
-</div>
-<div class="model-pane compact-pane" id="model-panel-hank" role="tabpanel" aria-labelledby="model-tab-hank" data-model="hank" hidden>
-<span class="tag tag-hosted">hosted</span><h4>US shocks across the wealth distribution</h4>
-<p>Run stylized HANK shocks with MPC and hand-to-mouth detail.</p>
-<a class="btn btn-primary" href="/us-hank/code#run">Open US HANK setup</a>
-</div>
-<div class="model-pane compact-pane" id="model-panel-oguk" role="tabpanel" aria-labelledby="model-tab-oguk" data-model="oguk" hidden>
-<span class="tag tag-local">local</span><h4>Long-run reform effects</h4>
-<p>Model work, saving, capital, and public finances over decades.</p>
-<a class="btn btn-primary" href="/olg/code#run">Open OG-UK setup</a>
-</div>
-<div class="model-pane compact-pane" id="model-panel-ogmicro" role="tabpanel" aria-labelledby="model-tab-ogmicro" data-model="ogmicro" hidden>
-<span class="tag tag-local">local only</span><h4>Dynamic reform scoring</h4>
-<p>Experimental, UK only: an OG-UK steady-state solve feeds long-run wage changes back into a second microsimulation run.</p>
-<p>Local only, and until <a href="https://github.com/PSLmodels/OG-UK/issues/68">OG-UK#68</a> the solve needs its own environment — run <code>pe-macro og-score --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --json &gt; og.json</code> there, then <code>pe-macro dynamic-score --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --og-payload og.json</code> &mdash; both steps need the same <code>--reform</code>.</p>
-<a class="btn btn-primary" href="/olg/code#run">Open dynamic scoring setup</a>
-</div>
-<div class="model-pane compact-pane" id="model-panel-define" role="tabpanel" aria-labelledby="model-tab-define" data-model="define" hidden>
-<span class="tag tag-local">local only</span><h4>UK climate-policy scenarios</h4>
-<p>Experimental: <code>pip install git+https://github.com/PolicyEngine/define-uk-model</code> fetches the pinned upstream at runtime. That upstream is unlicensed and is never hosted, so scenario deltas come from a cached local run — a fresh one needs local R.</p>
-<a class="btn btn-primary" href="/define/code#run">Open DEFINE-UK setup</a>
-</div>
-</div>
-<div class="meth-inline">
-<div class="meth-sec-title">two ways in</div>
-<div class="meth-eq"><div class="meth-eq-label">hosted</div><div class="meth-eq-body"><code>mcp</code> client → same tools as step 1</div></div>
-<div class="meth-eq"><div class="meth-eq-label">local</div><div class="meth-eq-body"><code>policyengine_macro.core</code></div></div>
-<div class="meth-eq"><div class="meth-eq-label">per model</div><div class="meth-eq-body">setup on each model&rsquo;s Code tab</div></div>
-</div>
-</div>
-
-</div>
-
-<aside class="scrolly-sticky" aria-hidden="true">
-<div class="meth-panel" data-step="0">
-<div class="meth-panel-head"><span class="meth-panel-title">The hosted route</span><span class="meth-panel-badge mono">Step 1</span></div>
-<div class="meth-sec-title">one endpoint</div>
-<div class="meth-eq"><div class="meth-eq-label">server</div><div class="meth-eq-body"><code>policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code></div></div>
-<div class="meth-eq"><div class="meth-eq-label">transport</div><div class="meth-eq-body">remote HTTP MCP (streamable HTTP)</div></div>
-<div class="meth-eq"><div class="meth-eq-label">auth</div><div class="meth-eq-body">none: no account, no API key</div></div>
-<div class="meth-eq"><div class="meth-eq-label">slow tools</div><div class="meth-eq-body"><code>start_job</code> → <code>get_job_result</code></div></div>
-<div class="meth-eq"><div class="meth-eq-label">limits</div><div class="meth-eq-body">ceiling, concurrency, cold starts: see Limits</div></div>
-</div>
-<div class="meth-panel" data-step="1" hidden>
-<div class="meth-panel-head"><span class="meth-panel-title">The CLI</span><span class="meth-panel-badge mono">Step 2</span></div>
-<div class="meth-sec-title">install, then run</div>
-<div class="meth-eq"><div class="meth-eq-label">package</div><div class="meth-eq-body"><code>policyengine-macro[models]</code></div></div>
-<div class="meth-eq"><div class="meth-eq-label">check</div><div class="meth-eq-body"><code>pe-macro model-status</code></div></div>
-<div class="meth-eq"><div class="meth-eq-label">score</div><div class="meth-eq-body"><code>pe-macro score &hellip; --model obr</code></div></div>
-<div class="meth-eq"><div class="meth-eq-label">output</div><div class="meth-eq-body"><code>--json</code> on any command</div></div>
-</div>
-<div class="meth-panel" data-step="2" hidden>
-<div class="meth-panel-head"><span class="meth-panel-title">Python</span><span class="meth-panel-badge mono">Step 3</span></div>
-<div class="meth-sec-title">two ways in</div>
-<div class="meth-eq"><div class="meth-eq-label">hosted</div><div class="meth-eq-body"><code>mcp</code> client → same tools as step 1</div></div>
-<div class="meth-eq"><div class="meth-eq-label">local</div><div class="meth-eq-body"><code>policyengine_macro.core</code></div></div>
-<div class="meth-eq"><div class="meth-eq-label">per model</div><div class="meth-eq-body">setup on each model&rsquo;s Code tab</div></div>
-</div>
-</aside>
+<h4 class="run-sub-h">Set up one model</h4>
+<p class="run-sub">Each model&rsquo;s own package, pins and reproduction steps are on its Code tab.</p>
+<ul class="setup-list">
+<li><a href="/pe/code#run">PolicyEngine microsimulation</a><span class="tag tag-hosted">hosted</span><span class="setup-what">Taxes, benefits, net income and reform effects, household by household — PolicyEngine&rsquo;s own engine, and the usual starting point. It cannot answer GDP, inflation, interest rates or macro feedback; the macro models below add those.</span></li>
+<li><a href="/obr/code#run">OBR emulator</a><span class="tag tag-hosted">hosted</span><span class="setup-what">Trace tax and spending changes against the OBR baseline.</span></li>
+<li><a href="/svar/code#run">BoE SVAR</a><span class="tag tag-hosted">hosted</span><span class="setup-what">Forecast GDP and inflation or explain what moved them.</span></li>
+<li><a href="/frb-us/code#run">FRB/US</a><span class="tag tag-hosted">hosted</span><span class="setup-what">Run FRB/US <a class="gloss-link" href="/glossary#irf">impulse responses</a> under a chosen policy rule.</span></li>
+<li><a href="/us-hank/code#run">US HANK</a><span class="tag tag-hosted">hosted</span><span class="setup-what">Run stylized HANK shocks with <a class="gloss-link" href="/glossary#mpc">MPC</a> and <a class="gloss-link" href="/glossary#hand-to-mouth">hand-to-mouth</a> detail.</span></li>
+<li><a href="/olg/code#run">OG-UK</a><span class="tag tag-local">local</span><span class="setup-what">Model work, saving, capital, and public finances over decades.</span></li>
+<li><a href="/olg/code#run">OG-UK + microsimulation<span class="visually-hidden"> (dynamic scoring setup)</span></a><span class="tag tag-local">local only</span><span class="setup-what">Experimental, UK only: an OG-UK steady-state solve feeds long-run wage changes back into a second microsimulation run. Local only, and until <a href="https://github.com/PSLmodels/OG-UK/issues/68">OG-UK#68</a> the solve needs its own environment — run <code>pe-macro og-score --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --json &gt; og.json</code> there, then <code>pe-macro dynamic-score --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --og-payload og.json</code> &mdash; both steps need the same <code>--reform</code>.</span></li>
+<li><a href="/define/code#run">DEFINE-UK</a><span class="tag tag-local">local only</span><span class="setup-what">Experimental: <code>pip install git+https://github.com/PolicyEngine/define-uk-model</code> fetches the pinned upstream at runtime. That upstream is unlicensed and is never hosted, so scenario deltas come from a cached local run — a fresh one needs local R.</span></li>
+</ul>
 </div>
 </section>
 
@@ -574,25 +526,15 @@ household = core.pe_household(
 <h2>Access, limits and cold starts</h2>
 <p class="section-intro">No account or key; slow calls run as jobs.</p>
 </div>
-<div class="vmet-notes connect-notes">
-<p class="vmet-notes-line"><span class="vmet-notes-key">auth</span>
-<span>None. No account, no API key. Some clients gate custom connectors by plan.</span></p>
-<p class="vmet-notes-line"><span class="vmet-notes-key">ceiling</span>
-<span>The hosting transport abandons any HTTP request after 150 seconds. <code>start_job</code> hands a slow call to a worker with a 30-minute budget and returns a job id; poll <code>get_job_result</code>.</span></p>
-<p class="vmet-notes-line"><span class="vmet-notes-key">concurrency</span>
-<span>At most three containers at once, as a spend cap; the server scales to zero when idle.</span></p>
-<p class="vmet-notes-line"><span class="vmet-notes-key">cold start</span>
-<span>A container stays warm for five minutes after the last request. In a fresh one the first PolicyEngine call pays a ~20&nbsp;s model import, and the first UK forecast a couple of minutes of estimation. Warm calls are fast.</span></p>
-<p class="vmet-notes-line"><span class="vmet-notes-key">uk microdata</span>
-<span>Only a <em>local</em> UK population or reform score needs
-<code>HUGGING_FACE_TOKEN</code> (private
-<code>policyengine-uk-data-private</code>). Hosted calls need
-nothing.</span></p>
-<p class="vmet-notes-line"><span class="vmet-notes-key">local only</span>
-<span><code>model='og'</code>, <code>dynamic_reform_impact</code> (tens of minutes) and the DEFINE-UK scenarios (unlicensed upstream). Called hosted they return run instructions or an import error, not results: use the CLI or local Python.</span></p>
-<p class="vmet-notes-line"><span class="vmet-notes-key">results</span>
-<span>Every <code>score_reform</code> result carries a common <code>score</code> block: model class, horizon, provenance, units and time basis, assumptions, caveats and a comparability label. Results from different model classes are complementary, not to be averaged or ranked.</span></p>
-</div>
+<dl class="kv kv-text limits-kv">
+<div><dt>Auth</dt><dd>None. No account, no API key. Some clients gate custom connectors by plan.</dd></div>
+<div><dt>Ceiling</dt><dd>The hosting transport abandons any HTTP request after 150 seconds. <code>start_job</code> hands a slow call to a worker with a 30-minute budget and returns a job id; poll <code>get_job_result</code>.</dd></div>
+<div><dt>Concurrency</dt><dd>At most three containers at once, as a spend cap; the server scales to zero when idle.</dd></div>
+<div><dt>Cold start</dt><dd>A container stays warm for five minutes after the last request. In a fresh one the first PolicyEngine call pays a ~20&nbsp;s model import, and the first UK forecast a couple of minutes of estimation. Warm calls are fast.</dd></div>
+<div><dt>UK microdata</dt><dd>Only a <em>local</em> UK population or reform score needs <code>HUGGING_FACE_TOKEN</code> (private <code>policyengine-uk-data-private</code>). Hosted calls need nothing.</dd></div>
+<div><dt>Local only</dt><dd><code>model='og'</code>, <code>dynamic_reform_impact</code> (tens of minutes) and the DEFINE-UK scenarios (unlicensed upstream). Called hosted they return run instructions or an import error, not results: use the CLI or local Python.</dd></div>
+<div><dt>Results</dt><dd>Every <code>score_reform</code> result carries a common <code>score</code> block: model class, horizon, provenance, units and time basis, assumptions, caveats and a comparability label. Results from different model classes are complementary, not to be averaged or ranked.</dd></div>
+</dl>
 <details class="about">
 <summary>About jobs and polling</summary>
 <p><code>get_job_result</code> blocks at most 60 seconds per call; keep polls short. A poll that errors is not a failed job: call again with the same id. Job names are the adapter names: <code>score_reform</code>, <code>obr_shock</code>, <code>frbus_shock</code>, <code>hank_shock</code>, <code>pe_population_impact</code>, <code>dynamic_population_reform_impact</code>.</p>
@@ -608,7 +550,7 @@ nothing.</span></p>
 <p>Seven models, and how far to trust each</p>
 <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
 </a>
-<a class="entry-card" href="/models#score">
+<a class="entry-card" href="/models/combine#score">
 <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="12" r="3"/><path d="M9 12h6"/></svg></span>
 <h3>Score a reform end to end</h3>
 <p>Microsimulation, then macro feedback</p>
@@ -629,7 +571,9 @@ nothing.</span></p>
   <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
     <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/glossary">Glossary</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro/issues">Report an issue</a>
     <a class="footer-text" href="/contact">Contact</a>
   </nav>
 </footer>
@@ -686,18 +630,6 @@ nothing.</span></p>
     applyClient();
   });
 
-  // model selector in the code section: one tab per entry in the
-  // capabilities registry (integration/src/policyengine_macro/capabilities.py),
-  // including the local-only ones — define-uk and the og+microsim overlay
-  // have a CLI/Python surface even though neither runs hosted.
-  var modelSeg = document.getElementById("model-seg");
-  if (modelSeg) {
-    bindTabs(modelSeg, function (btn) {
-      document.querySelectorAll(".model-pane").forEach(function (p) {
-        p.hidden = p.dataset.model !== btn.dataset.model;
-      });
-    });
-  }
 
 })();
 </script>
