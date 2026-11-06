@@ -90,6 +90,7 @@ PAGE_NAMES = {
     "/models/combine": "Combine",
     "/models/validation": "Validation",
     "/models/papers": "Papers",
+    "/models/compare": "Same question",
     "/obr": "OBR emulator",
     "/svar": "BoE SVAR",
     "/frb-us": "FRB-US",
@@ -185,7 +186,8 @@ CRUMB_PARENTS = {
 # model rows and a new /models/* page joins it by being listed here.
 SUBTABS = {
     "models": ("Models pages", (
-        ("/models", "Which model"), ("/models/side-by-side", "Side by side"),
+        ("/models", "Which model"), ("/models/compare", "Same question"),
+        ("/models/side-by-side", "Side by side"),
         ("/models/combine", "Combine"), ("/models/validation", "Validation"),
         ("/models/papers", "Papers"))),
     "obr": ("OBR emulator pages", (
