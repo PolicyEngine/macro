@@ -12,6 +12,8 @@ from copy import deepcopy
 MODELS = {
     "pe-microsim": {
         "display_name": "PolicyEngine tax-benefit microsimulation",
+        "source_url": "https://github.com/PolicyEngine/policyengine",
+        "package": "policyengine",
         "model_class": "microsimulation",
         "geography": ["uk", "us"],
         "question_types": ["household", "population", "policy_reform"],
@@ -28,6 +30,8 @@ MODELS = {
     "og+microsim": {
         "site_id": "psl-og+microsim",
         "display_name": "OG-UK overlay dynamic scoring (og+microsim)",
+        "source_url": "https://github.com/PolicyEngine/macro",
+        "package": "policyengine-macro",
         "model_class": "olg-ge overlay on microsimulation",
         "geography": ["uk"],
         "question_types": ["dynamic_scoring", "policy_reform"],
@@ -51,6 +55,8 @@ MODELS = {
     },
     "obr-macro": {
         "display_name": "OBR macroeconometric emulator",
+        "source_url": "https://github.com/PolicyEngine/obr-macroeconomic-model",
+        "package": "obr-macro-model",
         "model_class": "macroeconometric",
         "geography": ["uk"],
         "question_types": ["economic_shock", "translated_policy_scenario"],
@@ -66,6 +72,8 @@ MODELS = {
     },
     "boe-svar": {
         "display_name": "Bank of England structural VAR replication",
+        "source_url": "https://github.com/PolicyEngine/boe-var-model",
+        "package": "boe_var",
         "model_class": "structural VAR",
         "geography": ["uk"],
         "question_types": ["forecast", "economic_diagnosis"],
@@ -83,6 +91,8 @@ MODELS = {
     },
     "frb-us": {
         "display_name": "Federal Reserve FRB-US implementation",
+        "source_url": "https://github.com/PolicyEngine/us-frb-model",
+        "package": "frbus",
         "model_class": "macroeconometric",
         "geography": ["us"],
         "question_types": ["economic_shock"],
@@ -98,6 +108,8 @@ MODELS = {
     },
     "us-hank": {
         "display_name": "US two-asset HANK (Auclert-Bardóczy-Rognlie-Straub 2021)",
+        "source_url": "https://github.com/PolicyEngine/us-hank-model",
+        "package": "us-hank-model",
         "model_class": "heterogeneous-agent New Keynesian (sequence-space)",
         "geography": ["us"],
         "question_types": ["economic_shock"],
@@ -135,6 +147,8 @@ MODELS = {
         # must use site_id, or the site ends up calling one model four things.
         "site_id": "psl-og",
         "display_name": "OG-UK overlapping generations model",
+        "source_url": "https://github.com/PSLmodels/OG-UK",
+        "package": "oguk",
         "model_class": "overlapping-generations general equilibrium",
         "geography": ["uk"],
         "question_types": ["policy_reform", "structural_change"],
@@ -150,6 +164,8 @@ MODELS = {
     },
     "define-uk": {
         "display_name": "DEFINE-UK ecological stock-flow consistent model",
+        "source_url": "https://github.com/PolicyEngine/define-uk-model",
+        "package": "define-uk-model",
         "model_class": "ecological stock-flow consistent (E-SFC)",
         "geography": ["uk"],
         "question_types": ["climate_policy_scenario"],
@@ -620,7 +636,7 @@ for _model_id, _model in MODELS.items():
 REQUIRED_CAPABILITY_FIELDS = {
     "display_name", "model_class", "geography", "question_types", "inputs",
     "outputs", "cannot_answer", "horizon", "access", "runtime", "uncertainty",
-    "status", "data_vintage", "quality",
+    "status", "data_vintage", "quality", "source_url", "package",
 }
 
 
@@ -686,14 +702,46 @@ def get_status(model_id: str) -> dict:
     return {"model_id": key, **deepcopy(MODELS[key])}
 
 
+def question_types() -> tuple[str, ...]:
+    """Every question_type some registered model declares, sorted."""
+    return tuple(sorted({q for m in MODELS.values() for q in m["question_types"]}))
+
+
+def _no_model_warning(question_type: str, country: str, needs_distribution: bool) -> str:
+    countries = sorted({g for m in MODELS.values() for g in m["geography"]})
+    if country not in countries:
+        why = f"no registered model covers country {country!r} (covered: {countries})"
+    else:
+        why = f"no registered {country} model answers {question_type!r}"
+        if needs_distribution:
+            why += " with a household distribution"
+    return (
+        f"No registered model supports this request: {why}. Do not infer a "
+        "mapping; refine the question or add an explicitly reviewed capability."
+    )
+
+
 def recommend(
     question_type: str,
     country: str = "uk",
     needs_distribution: bool = False,
     horizon: str | None = None,
 ) -> dict:
-    """Deterministic router; it never invents an unsupported model mapping."""
-    country = country.lower()
+    """Deterministic router; it never invents an unsupported model mapping.
+
+    An unknown ``question_type`` is a caller error, not an unsupported
+    combination, so it raises with the valid types listed; before 6 Nov 2026
+    a typo such as 'shock' came back as "no registered model supports this
+    request", which reads as a capability gap.
+    """
+    valid_types = question_types()
+    question_type = str(question_type).strip().lower()
+    if question_type not in valid_types:
+        raise ValueError(
+            f"unknown question_type {question_type!r}; choose one of "
+            f"{list(valid_types)}"
+        )
+    country = str(country).strip().lower()
     candidates = []
     for model_id, model in MODELS.items():
         if country not in model["geography"]:
@@ -710,9 +758,8 @@ def recommend(
         "horizon": horizon,
         "primary_model": candidates[0] if candidates else None,
         "candidate_models": candidates,
-        "warning": None if candidates else (
-            "No registered model supports this request. Do not infer a mapping; "
-            "refine the question or add an explicitly reviewed capability."
+        "warning": None if candidates else _no_model_warning(
+            question_type, country, needs_distribution
         ),
         "details": [get_status(model_id) for model_id in candidates],
     }

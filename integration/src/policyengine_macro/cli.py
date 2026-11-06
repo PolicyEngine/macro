@@ -42,7 +42,20 @@ def _table(rows: list[dict], columns: list[str]) -> str:
 
 @click.group()
 def main() -> None:
-    """PolicyEngine Macro: unified CLI over the OBR emulator and the UK SVAR model."""
+    """PolicyEngine Macro: one CLI over the PolicyEngine microsimulation and
+    the macro models of the suite.
+
+    \b
+    Households and reforms:  household, household-impact, population-impact,
+                             score, compare, dynamic-score, report, parameters
+    UK:  OBR emulator (obr-shock, variables), BoE SVAR (forecast, shocks,
+         summary, svar-inflation-incidence), OG-UK (og-score, og-baseline),
+         DEFINE-UK (define-scenarios, define-scenario, define-incidence)
+    US:  FRB/US (frbus-shock, frbus-variables, frbus-summary,
+         frbus-shock-incidence), HANK (hank-shock, hank-summary,
+         hank-shock-incidence)
+    Models:  model-status shows what each model can and cannot answer.
+    """
 
 
 @main.command("model-status")
@@ -565,7 +578,7 @@ def frbus_summary(as_json):
 @click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
 def hank_shock(kind, size, persistence, horizon, variant,
                include_distribution, name, as_json):
-    """Run a stylized US HANK shock (validated replication; not a forecaster)."""
+    """Run a stylized US HANK shock (partial replication; not a forecaster)."""
     try:
         res = core.hank_shock(
             kind=kind, size=size, persistence=persistence, horizon=horizon,
@@ -1039,10 +1052,17 @@ def define_scenario(name, horizon_years, incidence, as_json):
     for c in res["caveats"]:
         click.echo(f"  ! {c}")
     years = res["years"]
+    def _fmt(value, suffix=""):
+        return "     n/a" if value is None else f"{value:+.3f}{suffix}"
+
     for var, paths in res["variables"].items():
         click.echo(f"\n{var} (delta level / delta %):")
+        # define-uk-model#15 ships a units string per variable; EMIS deltas
+        # are per QUARTER, so a bare number read as annual is 4x too small.
+        if paths.get("units"):
+            click.echo(f"  units: {paths['units']}")
         for y, lv, pc in zip(years, paths["delta_level"], paths["delta_pct"]):
-            click.echo(f"  {y}  {lv:+.3f}  {pc:+.3f}%")
+            click.echo(f"  {y}  {_fmt(lv)}  {_fmt(pc, '%')}")
 
 
 @main.command("define-incidence")
