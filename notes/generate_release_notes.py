@@ -325,8 +325,7 @@ def rebuild_indexes() -> None:
     latest = pages[0].parent.name if pages else ""
     summary_row = (
         f'        <a href="/notes/releases"><span>{len(pages)} automated release '
-        f"digests, latest {latest} →</span><strong>{latest} · automated release "
-        "digests</strong></a>"
+        f"digests, newest first</span><strong>latest {latest}</strong></a>"
     )
     marker_replace(NOTES_INDEX, "generated-release-notes", summary_row)
     marker_replace(RELEASES_INDEX, "generated-release-notes", "\n".join(index_rows))
