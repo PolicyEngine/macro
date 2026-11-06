@@ -2089,7 +2089,7 @@ def us_inflation_run() -> str:
 {codeblock(
         command("pe-macro frbus-shock --var rffintay_aerr --shock 1.0 --horizon 20", "price response to a 1pp policy surprise"),
         command("pe-macro hank-summary", "shock catalogue, units and scope limits"),
-        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6", "a 25bp easing, quarterly IRF"),
+        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6", "a 25bp-per-quarter (about 100bp annualised) easing, quarterly IRF"),
     )}
 {us_run_note()}
     </div>"""
