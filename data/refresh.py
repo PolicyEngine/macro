@@ -173,6 +173,44 @@ def carry_plan(branch_files: set[str], main_files: set[str]) -> tuple[list[str],
     return carry, skipped
 
 
+def drop_repeats(plan: list[str], main_files: set[str], load) -> tuple[list[str], list[str]]:
+    """Drop carried files whose payload repeats the snapshot before them.
+
+    ``load(path)`` returns a vintage's payload (from the branch for carried
+    paths, from HEAD for main's). The predecessor of a carried file is the
+    newest file of its series dated before it, among main's files and the
+    files already kept. Without this, a release main already holds (for
+    example one recovered by data/recover_orphaned_snapshots.py, #222) would
+    be stored a second time under the branch's later date, because the bot
+    branch measured it against an older main. Same test as the fetcher:
+    ``fetch.same_data``. Returns (kept, repeats).
+    """
+    same_data = _fetch_module().same_data
+    chain: dict[str, list[str]] = {}
+    for path in main_files:
+        chain.setdefault(series_dir(path), []).append(path)
+    kept, repeats = [], []
+    for path in sorted(plan, key=lambda p: (series_dir(p), vintage_date(p))):
+        earlier = [p for p in chain.get(series_dir(path), []) if vintage_date(p) < vintage_date(path)]
+        if earlier:
+            pred = max(earlier, key=vintage_date)
+            if same_data(load(pred), load(path)):
+                repeats.append(path)
+                continue
+        kept.append(path)
+        chain.setdefault(series_dir(path), []).append(path)
+    return sorted(kept), sorted(repeats)
+
+
+def _fetch_module():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("data_fetch", ROOT / "data" / "fetch.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def carry(branch: str | None) -> list[str]:
     if not branch:
         print("carry: no --carry-from branch; starting from HEAD")
@@ -188,6 +226,15 @@ def carry(branch: str | None) -> list[str]:
     plan, skipped = carry_plan(tracked_vintages(ref), tracked_vintages("HEAD"))
     for path in skipped:
         print(f"carry: skip {path} (not newer than main's newest for the series)")
+    main_files = tracked_vintages("HEAD")
+
+    def load(path: str) -> dict:
+        source = ref if path in plan else "HEAD"
+        return json.loads(git("show", f"{source}:{path}"))
+
+    plan, repeats = drop_repeats(plan, main_files, load)
+    for path in repeats:
+        print(f"carry: skip {path} (same release as the snapshot before it)")
     if plan:
         # `git show` per file, not `git checkout ref -- paths`: nothing is
         # staged, and only the listed paths are touched.
