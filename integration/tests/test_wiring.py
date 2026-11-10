@@ -80,7 +80,8 @@ def test_expensive_mcp_inputs_publish_safe_schema_bounds():
     forecast = tools["forecast_uk"].inputSchema["properties"]
     shocks_draws = tools["latest_shocks"].inputSchema["properties"]["draws"]
 
-    assert (obr_periods["minimum"], obr_periods["maximum"]) == (1, 40)
+    # 25 = 2025Q1..2031Q1, the OBR databank window (core._OBR_MAX_PERIODS).
+    assert (obr_periods["minimum"], obr_periods["maximum"]) == (1, core._OBR_MAX_PERIODS) == (1, 25)
     assert (forecast["horizons"]["minimum"], forecast["horizons"]["maximum"]) == (
         1,
         40,
@@ -432,3 +433,13 @@ def test_obr_shock_carries_the_lever_caveat_in_the_payload():
     assert levers["CGG"]["caveat"], "the identity lever declares no caveat"
     assert "1.0000" in levers["CGG"]["caveat"], "CGG caveat omits the measured multiplier"
     assert "0.6" in levers["CGG"]["caveat"], "CGG caveat omits the OBR published figure"
+
+
+def test_cli_help_header_names_every_subcommand():
+    # The header said "the OBR emulator and the UK SVAR model" long after
+    # FRB/US, HANK, OG-UK, DEFINE-UK and the microsim joined (issue #225).
+    from policyengine_macro.cli import main
+
+    header = main.help or ""
+    missing = [name for name in main.commands if name not in header]
+    assert not missing, f"pe-macro --help header omits {missing}"

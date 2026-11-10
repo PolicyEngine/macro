@@ -23,7 +23,8 @@ def test_svar_site_uses_runtime_estimation_endpoint():
     drift in the other direction."""
     from policyengine_macro.core import _SVAR_EST_END
 
-    pages = _read("svar/index.html") + _read("models/index.html")
+    # The seven-model table moved to its own /models tab in r5.
+    pages = _read("svar/index.html") + _read("models/side-by-side/index.html")
     assert f"estimated through {_SVAR_EST_END}" in pages
 
     # No other quarter may be presented as the estimation endpoint.
@@ -42,13 +43,15 @@ def test_og_is_not_labelled_as_us_model():
         for path in (
             "index.html",
             "models/index.html",
+            "models/side-by-side/index.html",
+            "models/papers/index.html",
         )
     )
     assert "psl-og · UK + US" not in pages
 
 
 def test_site_does_not_promise_obr_borrowing_output():
-    pages = _read("index.html") + _read("models/index.html")
+    pages = _read("index.html") + _read("models/index.html") + _read("models/combine/index.html")
     assert "growth and borrowing" not in pages
     assert "borrowing after" not in pages
 
@@ -74,7 +77,17 @@ def test_mobile_css_does_not_hide_document_overflow():
     css = _read("style.css")
     body = css.split("body {", 1)[1].split("}", 1)[0]
     assert "overflow-x: hidden" not in body
-    assert "min-height: 112px" in css
+    # The two-row 112px mobile header (#70) was replaced by a single
+    # --nav-h band whose view tabs scroll inside themselves (DESIGN.md §2.4,
+    # §3.1). The intent is unchanged: the header never pushes the page wider
+    # and every sticky offset follows the header's real height.
+    assert re.search(r"--nav-h:\s*\d+px", css)
+    nav = css.split("\n.nav {", 1)[1].split("}", 1)[0]
+    assert "height: var(--nav-h)" in nav
+    links = css.split("\n.nav-links {", 1)[1].split("}", 1)[0]
+    assert "overflow-x: auto" in links
+    assert "top: var(--nav-h)" in css
+    assert not re.search(r"top:\s*(112|129|172)px", css)
     assert "min-height: 44px" in css
 
 
@@ -141,14 +154,20 @@ def test_paper_landings_publish_the_page_count_of_the_pdf_they_link():
     from /reports/define-uk-replication to /papers/define-uk, so every paper
     is linked from the hub again and the exemption that recorded the gap is
     gone.
+
+    6 Nov 2026: the round-5 corrections rebuilt every paper. frb-us 38 -> 39
+    (sourced CBO and Coenen et al. fiscal benchmarks), obr-macro 40 -> 42
+    (profits, CGIPS and convergence corrections; 41 was already committed
+    without the landing being updated) and define-uk 28 -> 29 (the withdrawn
+    multiplier caveat; likewise already 29 on disk).
     """
     expected = {
-        "obr-macro": 40,
+        "obr-macro": 42,
         "boe-svar": 33,
-        "frb-us": 38,
+        "frb-us": 39,
         "psl-og": 34,
         "pe-microsim": 25,
-        "define-uk": 28,
+        "define-uk": 29,
     }
     # The /papers listing was retired; each landing carries its own
     # "slug · … · N pages" line, and /models links every paper landing.
@@ -157,3 +176,73 @@ def test_paper_landings_publish_the_page_count_of_the_pdf_they_link():
         landing = _read(f"papers/{slug}/index.html")
         assert re.search(rf"{re.escape(slug)} · [^<]* · {pages} pages", landing)
         assert f'href="/papers/{slug}"' in hub
+
+
+MODEL_PAGES = {
+    "pe-microsim": "pe",
+    "obr-macro": "obr",
+    "boe-svar": "svar",
+    "frb-us": "frb-us",
+    "us-hank": "us-hank",
+    "og-uk": "olg",
+    "define-uk": "define",
+}
+MODEL_CARD_ORDER = [
+    "Answers", "Inputs", "Outputs", "Horizon", "Data", "Uncertainty",
+    "Access", "Runtime", "Joins the microsimulation", "Status", "Cannot answer",
+]
+
+
+def _model_card(page: str) -> str:
+    html = _read(f"{page}/index.html")
+    section = re.search(r'<section id="card"[^>]*>(.*?)</section>', html, re.S)
+    assert section, f"{page}: no model card section"
+    card = re.search(r'<dl class="model-card">(.*?)</dl>', section.group(1), re.S)
+    assert card, f"{page}: no dl.model-card in #card"
+    return card.group(1)
+
+
+def test_model_cards_quote_the_capability_registry():
+    """Every model Overview carries one model card (DESIGN.md §4.13): the same
+    markup and field order on all seven, a Status row that quotes the
+    registry verbatim, and a Horizon row that quotes it, so the card cannot
+    drift from capabilities.py silently."""
+    from policyengine_macro.capabilities import MODELS
+
+    for model, page in MODEL_PAGES.items():
+        card = _model_card(page)
+        rows = dict(re.findall(r"<dt>([^<]+)</dt><dd>(.*?)</dd>", card))
+        labels = re.findall(r"<dt>([^<]+)</dt>", card)
+        assert labels == [f for f in MODEL_CARD_ORDER if f in labels], (
+            f"{page}: model card fields out of order: {labels}"
+        )
+        for field in ("Answers", "Inputs", "Outputs", "Horizon", "Access", "Status", "Cannot answer"):
+            assert field in rows, f"{page}: model card has no {field} row"
+        status = MODELS[model]["status"].lower()
+        assert rows["Status"].lower() == status, f"{page}: Status does not quote the registry"
+        horizon = MODELS[model]["horizon"].lower()
+        if page not in ("pe", "obr", "svar"):
+            # US-agent cards extend the registry horizon in prose; the
+            # registry's own words must still lead the row.
+            horizon = horizon.split(";")[0]
+        value = rows["Horizon"].lower().replace("&ndash;", "-")
+        assert horizon in value, f"{page}: Horizon does not quote the registry {horizon!r}"
+
+
+def test_trust_cards_quote_the_quality_registry():
+    """Every model Validation tab carries the trust card: one row per
+    MODEL_QUALITY dimension, with the registry's level."""
+    from policyengine_macro.capabilities import MODEL_QUALITY
+
+    dims = [
+        "implementation_fidelity", "predictive_validation",
+        "identification_robustness", "policy_counterfactual_validity",
+        "uncertainty_calibration", "vintage_reproducibility",
+    ]
+    for model, page in MODEL_PAGES.items():
+        html = _read(f"{page}/validation/index.html")
+        card = re.search(r'<div class="table-scroll trust-card">(.*?)</table>', html, re.S)
+        assert card, f"{page}/validation: no trust card"
+        levels = re.findall(r'<td><span class="chip">([^<]+)</span></td>', card.group(1))
+        want = [MODEL_QUALITY[model][d]["level"].replace("_", " ") for d in dims]
+        assert levels == want, f"{page}/validation: trust levels {levels} != registry {want}"

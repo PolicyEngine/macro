@@ -52,6 +52,11 @@ def passthrough(observations: list[dict]) -> dict[str, float]:
 MAPPING = {
     "gdp": {"series": "uk_gdp_cvm", "transform": yoy_from_levels},
     "cpi": {"series": "uk_cpi_yoy", "transform": passthrough},
+    # The svar-unemployment satellite forecasts the MGSX rate level itself,
+    # so the outturn is the stored quarterly rate, untransformed. Until this
+    # row existed the satellite's 2026Q2 outturn sat in data/latest unscored:
+    # an available result left out of the record, which is worse than a bad one.
+    "unemployment": {"series": "uk_unemployment_rate", "transform": passthrough},
 }
 
 

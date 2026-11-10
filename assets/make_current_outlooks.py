@@ -6,9 +6,12 @@ from __future__ import annotations
 import csv
 import json
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+import chartkit  # noqa: E402  (stdlib-only, repo root)
 
 
 def points(values, xs, ymap):
@@ -28,40 +31,45 @@ def obr_chart() -> str:
     def ymap(v):
         return bot - (v - 99) / 11 * (bot - top)
 
+    top_v = ymap(110)
     out = [
-        '<figure class="vfig current-outlook">',
-        '<svg class="vchart" viewBox="0 0 800 326" role="img" aria-labelledby="obr-current-t obr-current-d">',
+        f'<svg class="vchart" data-chart="obr-current-outlook" viewBox="{x0 - 6} {top_v - 6:.1f} '
+        f'{x1 - x0 + 12} {bot - top_v + 12:.1f}" role="img" aria-labelledby="obr-current-t obr-current-d">',
         '<title id="obr-current-t">March 2026 OBR outlook for real GDP and household consumption</title>',
         '<desc id="obr-current-d">Indexed line chart from 2026Q1 to 2031Q1. Real GDP rises from 100 to %.1f and household consumption from 100 to %.1f.</desc>'
         % (g[-1], c[-1]),
-        '<text class="vc-lab" x="62" y="25">March 2026 EFO outlook · 2026Q1 = 100</text>',
     ]
     for tick in (100, 102, 104, 106, 108, 110):
         y = ymap(tick)
         out += [
             f'<line class="vc-grid" x1="{x0}" y1="{y:.1f}" x2="{x1}" y2="{y:.1f}"/>',
-            f'<text class="vc-tick" x="52" y="{y + 4:.1f}" text-anchor="end">{tick}</text>',
+            chartkit.ytick(x0, y, str(tick)),
         ]
+    # Both series are the OBR's published outlook, nothing here is "ours":
+    # GDP in the official ink, drawn solid (no model to contrast it with),
+    # consumption as the neutral. A legend, not end labels: the two paths
+    # cross and end close together, both rising into the edge.
     out += [
-        f'<polyline class="vc-s1" points="{points(g, xs, ymap)}"/>',
-        f'<polyline class="vc-s2" points="{points(c, xs, ymap)}"/>',
-        f'<circle class="vc-s1-dot" cx="{xs[-1]:.1f}" cy="{ymap(g[-1]):.1f}" r="3.5"/>',
-        f'<circle class="vc-s2-dot" cx="{xs[-1]:.1f}" cy="{ymap(c[-1]):.1f}" r="3.5"/>',
-
+        f'<polyline class="vc-s2 vc-solid" points="{points(g, xs, ymap)}"/>',
+        f'<polyline class="vc-s3" points="{points(c, xs, ymap)}"/>',
+        f'<circle class="vc-s2-dot" cx="{xs[-1]:.1f}" cy="{ymap(g[-1]):.1f}" r="3.5"/>',
+        f'<circle class="vc-s3-dot" cx="{xs[-1]:.1f}" cy="{ymap(c[-1]):.1f}" r="3.5"/>',
     ]
-    for i in (0, 4, 8, 12, 16, 20):
-        out.append(
-            f'<text class="vc-tick" x="{xs[i]:.1f}" y="302" text-anchor="middle">{q[i]}</text>'
-        )
-    out += [
-        "</svg>",
-        '<div class="olg-legend">'
-        '<span class="li"><span class="ln ln-s1"></span>Real GDP</span>'
-        '<span class="li"><span class="ln ln-s2"></span>Household consumption</span>'
-        '</div>',
+    ticks_at = (0, 4, 8, 12, 16, 20)
+    for j, i in enumerate(ticks_at):
+        # Narrow: keep 2026Q1, 2028Q1 and the last tick (2030Q1 would touch it).
+        out.append(chartkit.xtick(xs[i], bot, q[i], j, len(ticks_at) - 1,
+                                  minor=j % 2 == 1 or j == len(ticks_at) - 2))
+    out.append("</svg>")
+    return "\n".join([
+        '<figure class="vfig current-outlook">',
+        chartkit.figure("\n".join(out), unit="March 2026 EFO outlook, index, 2026Q1 = 100",
+                        legend=[("ln-s2s", "Real GDP"), ("ln-s3", "Household consumption")],
+                        source='<a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/'
+                               'papers/obr-macro/figures/current_outlook.csv">'
+                               'papers/obr-macro/figures/current_outlook.csv</a>'),
         "</figure>",
-    ]
-    return "\n".join(out)
+    ])
 
 
 def boe_chart() -> str:
@@ -91,36 +99,38 @@ def boe_chart() -> str:
 
     ticks = range(int(vlo), int(vhi) + 1)
     out = [
-        '<figure class="vfig current-outlook">',
-        '<svg class="vchart" viewBox="0 0 800 326" role="img" aria-labelledby="boe-current-t boe-current-d">',
-        '<title id="boe-current-t">Current boe-svar UK real GDP growth forecast</title>',
+        f'<svg class="vchart" data-chart="boe-current-outlook" viewBox="{x0 - 6} {top - 6} '
+        f'{x1 - x0 + 12} {bot - top + 12}" role="img" aria-labelledby="boe-current-t boe-current-d">',
+        '<title id="boe-current-t">Current BoE SVAR UK real GDP growth forecast</title>',
         f'<desc id="boe-current-d">Fan chart from the latest complete quarterly data edge, {data["data_edge"]}, forecasting {q[0]} to {q[-1]}. Median with 68 and 90 percent predictive bands.</desc>',
-        f'<text class="vc-lab" x="62" y="25">Current forecast from {data["data_edge"]} · year-on-year %</text>',
     ]
     for tick in ticks:
         y = ymap(tick)
-        cls = "vc-axis" if tick == 0 else "vc-grid"
+        cls = "vc-zero" if tick == 0 else "vc-grid"
+        label = f"{tick:+d}%".replace("-", "\u2212") if tick else "0%"
         out += [
             f'<line class="{cls}" x1="{x0}" y1="{y:.1f}" x2="{x1}" y2="{y:.1f}"/>',
-            f'<text class="vc-tick" x="52" y="{y + 4:.1f}" text-anchor="end">{tick:+d}%</text>',
+            chartkit.ytick(x0, y, label),
         ]
     out += [
         f'<path class="vc-band90" d="{band(lo90, hi90)}"/>',
         f'<path class="vc-band68" d="{band(lo68, hi68)}"/>',
         f'<polyline class="vc-s1" points="{points(med, xs, ymap)}"/>',
         f'<circle class="vc-s1-dot" cx="{xs[-1]:.1f}" cy="{ymap(med[-1]):.1f}" r="3.5"/>',
-        '<text class="vc-note" x="738" y="25" text-anchor="end">90% / 68% bands · median</text>',
     ]
-    for i in (0, 4, 8, 12):
-        out.append(
-            f'<text class="vc-tick" x="{xs[i]:.1f}" y="302" text-anchor="middle">{q[i]}</text>'
-        )
-    out += [
-        "</svg>",
+    ticks_at = (0, 4, 8, 12)
+    for j, i in enumerate(ticks_at):
+        out.append(chartkit.xtick(xs[i], bot, q[i], j, len(ticks_at) - 1))
+    out.append("</svg>")
+    return "\n".join([
+        '<figure class="vfig current-outlook">',
+        chartkit.figure("\n".join(out), legend=[
+            ("ln-s1", "median"), ("sw-band68", "68% band"), ("sw-band90", "90% band"),
+        ], unit="UK real GDP, % change on a year earlier",
+            notes=[f"Current forecast from {data['data_edge']}."]),
         f"<figcaption>Bands are the model&rsquo;s raw posterior quantiles, not rescaled to measured coverage &mdash; the calibrated version is on the <a href='/forecasts'>forecast record</a>. Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through {data['data_edge']}; forecast begins {data['forecast_start']}. Estimated on {data['estimation_sample'].replace('-', '&ndash;')}; {data['draws']:,} posterior draws, {data['accepted']} accepted; five stochastic paths per accepted draw. Source and provenance: <code>papers/boe-svar/figures/current_forecast.json</code>.</figcaption>",
         "</figure>",
-    ]
-    return "\n".join(out)
+    ])
 
 
 def render(page: Path, name: str, content: str) -> str:

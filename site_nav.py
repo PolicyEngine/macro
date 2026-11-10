@@ -16,18 +16,61 @@ HEADER = re.compile(
     re.DOTALL,
 )
 FOOTER_DIR = re.compile(r'<nav class="footer-dir".*?</nav>\s*', re.DOTALL)
+STYLESHEET = re.compile(r'href="/style\.css(?:\?v=[0-9]+)?"')
+
+# Cache buster for the one shared stylesheet. Bump it whenever style.css
+# changes in a way a cached copy would render wrongly; ``render`` writes it
+# into every page and the generators read it from here (economy/topics.py,
+# notes/generate_release_notes.py), so no page can be left on an old copy.
+STYLE_VERSION = 23
+STYLE_HREF = f"/style.css?v={STYLE_VERSION}"
+
+# Inter (latin) is the body face on every page, but the browser only finds the
+# file after it has fetched and parsed fonts.css and laid out text. With
+# font-display: swap the page first paints in the fallback face and re-wraps
+# when Inter lands, which shifted /notes/2026-07-25-cpi-2026q2 by CLS 0.35 at
+# 1440 px. Preloading it starts the download with the HTML, so the first paint
+# is already in Inter. JetBrains Mono is not preloaded: 14 pages never use it.
+# ``render`` writes the line into every page; economy/topics.py emits it too.
+FONTS_CSS_LINK = '<link rel="stylesheet" href="/vendor/fonts/fonts.css" />'
+FONT_PRELOAD = (
+    '<link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" '
+    'type="font/woff2" crossorigin />'
+)
 
 DESTINATIONS = (
     ("home", "/", "Home", "nav-mobile"),
-    ("models", "/models", "Models", "nav-mobile"),
+    # Forecasts sits second, ahead of Models (r2 IA): the scored, vintage-
+    # controlled record is what a visitor cannot get anywhere else, and the
+    # homepage tells the story in the same order (what it is, why trust it,
+    # the record, which model, how to use it).
     # Economy was folded into Forecasts: one tab for everything the platform
     # produces and the data it is produced from. /economy and /economy/us keep
     # their URLs — ~200 generated release notes, the homepage and the models
     # hub link to them in prose — but they are Forecasts pages now, and
     # ``section`` and ``CRUMB_PARENTS`` below are what make that true.
     ("forecasts", "/forecasts", "Forecasts", "nav-mobile"),
+    ("models", "/models", "Models", "nav-mobile"),
     ("use", "/connect", "Use", "nav-mobile nav-start"),
 )
+
+# One 24px stroke icon per view (DESIGN.md §3.1). Decorative: the label is
+# the link text, so every icon is aria-hidden and the tab still reads
+# "Forecasts" to a screen reader and to site_contract's ">Forecasts</a>".
+VIEW_ICONS = {
+    "home": '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/>',
+    "models": '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 16.5 9 5 9-5"/>',
+    "forecasts": '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/>',
+    "use": '<path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/>',
+}
+
+
+def icon(key: str) -> str:
+    return (
+        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" '
+        'stroke="currentColor" stroke-width="1.75" stroke-linecap="round" '
+        f'stroke-linejoin="round" aria-hidden="true">{VIEW_ICONS[key]}</svg>'
+    )
 
 MODEL_ROOTS = {"models", "obr", "svar", "frb-us", "us-hank", "olg", "pe", "define"}
 EVIDENCE_ROOTS = {"papers", "reports"}
@@ -56,6 +99,11 @@ PAGE_NAMES = {
     "/economy/us/topics/rates": "Rates and Treasuries",
     "/economy/us/topics/reform": "Tax and benefit reform",
     "/models": "Models",
+    "/models/side-by-side": "Side by side",
+    "/models/combine": "Combine",
+    "/models/validation": "Validation",
+    "/models/papers": "Papers",
+    "/models/compare": "Same question",
     "/obr": "OBR emulator",
     "/svar": "BoE SVAR",
     "/frb-us": "FRB-US",
@@ -84,19 +132,22 @@ PAGE_NAMES = {
     "/olg/methodology": "Methodology",
     "/olg/validation": "Validation",
     "/pe": "PolicyEngine microsim",
-    "/papers/pe-microsim": "pe-microsim",
-    "/papers/obr-macro": "obr-macro",
-    "/papers/boe-svar": "boe-svar",
-    "/papers/frb-us": "frb-us",
-    "/papers/psl-og": "psl-og",
-    "/papers/define-uk": "define-uk",
-    "/reports/define-uk-replication": "define-uk",
-    "/reports/us-hank-open-source": "Open models",
+    # Papers are each model's fifth tab, so the leaf reads like the other
+    # tabs ("Paper") and the crumb runs through the model (CRUMB_PARENTS).
+    "/papers/pe-microsim": "Paper",
+    "/papers/obr-macro": "Paper",
+    "/papers/boe-svar": "Paper",
+    "/papers/frb-us": "Paper",
+    "/papers/psl-og": "Paper",
+    "/papers/define-uk": "Paper",
+    "/reports/define-uk-replication": "Replication report",
+    "/reports/us-hank-open-source": "HANK survey",
     "/forecasts": "Forecasts",
     "/forecasts/us": "United States",
     "/notes/releases": "Releases",
     "/connect": "Use",
     "/contact": "Contact",
+    "/glossary": "Glossary",
 }
 
 # Parent chain overrides where the URL hierarchy is not the reading hierarchy:
@@ -109,13 +160,17 @@ CRUMB_PARENTS = {
     "/olg": "/models",
     "/pe": "/models",
     "/define": "/models",
-    "/papers/pe-microsim": "/models",
-    "/papers/obr-macro": "/models",
-    "/papers/boe-svar": "/models",
-    "/papers/frb-us": "/models",
-    "/papers/psl-og": "/models",
-    "/papers/define-uk": "/models",
-    "/reports/define-uk-replication": "/models",
+    # A paper is read as its model's Paper tab (it carries the model's
+    # sub-tab row), so its pathway runs through the model —
+    # Home / Models / OBR emulator / Paper — not straight to /models, which
+    # left the reader with a tab row for a model the crumb never named.
+    "/papers/pe-microsim": "/pe",
+    "/papers/obr-macro": "/obr",
+    "/papers/boe-svar": "/svar",
+    "/papers/frb-us": "/frb-us",
+    "/papers/psl-og": "/olg",
+    "/papers/define-uk": "/define",
+    "/reports/define-uk-replication": "/define",
     # The open-models survey is one of the five us-hank tabs, so its pathway
     # runs through the model rather than straight to /models.
     "/reports/us-hank-open-source": "/us-hank",
@@ -131,6 +186,101 @@ CRUMB_PARENTS = {
     "/economy": "/forecasts",
     "/economy/us": "/forecasts",
 }
+
+
+# Model sub-tab rows (DESIGN.md §3.4), keyed by model root: the aria-label
+# and the five tabs in order. ``render`` writes the row on every page whose
+# URL is one of the tabs, so the rows are generated rather than hand-kept.
+# The row sits below the title band, outside ``</header>``, so HEADER above
+# never reaches it. /connect keeps a hand-kept row of in-page anchors: its
+# label does not end in " pages" and SUBTAB_ROW skips it. /models was the
+# same until r5 (one 13k px page on phones); the router is now the page and
+# each former section is its own tab, so its row is generated like the
+# model rows and a new /models/* page joins it by being listed here.
+SUBTABS = {
+    "models": ("Models pages", (
+        ("/models", "Which model"), ("/models/compare", "Same question"),
+        ("/models/side-by-side", "Side by side"),
+        ("/models/combine", "Combine"), ("/models/validation", "Validation"),
+        ("/models/papers", "Papers"))),
+    "obr": ("OBR emulator pages", (
+        ("/obr", "Overview"), ("/obr/methodology", "Methodology"),
+        ("/obr/validation", "Validation"), ("/obr/code", "Code"),
+        ("/papers/obr-macro", "Paper"))),
+    "svar": ("BoE SVAR pages", (
+        ("/svar", "Overview"), ("/svar/methodology", "Methodology"),
+        ("/svar/validation", "Validation"), ("/svar/code", "Code"),
+        ("/papers/boe-svar", "Paper"))),
+    "frb-us": ("FRB-US pages", (
+        ("/frb-us", "Overview"), ("/frb-us/methodology", "Methodology"),
+        ("/frb-us/validation", "Validation"), ("/frb-us/code", "Code"),
+        ("/papers/frb-us", "Paper"))),
+    "us-hank": ("US HANK pages", (
+        ("/us-hank", "Overview"), ("/us-hank/methodology", "Methodology"),
+        ("/us-hank/validation", "Validation"), ("/us-hank/code", "Code"),
+        # us-hank has no paper; its fifth tab is a survey of other HANK models,
+        # so it is labelled as such rather than as a page about this model.
+        ("/reports/us-hank-open-source", "HANK survey"))),
+    "olg": ("OG-UK pages", (
+        ("/olg", "Overview"), ("/olg/methodology", "Methodology"),
+        ("/olg/validation", "Validation"), ("/olg/code", "Code"),
+        ("/papers/psl-og", "Paper"))),
+    "pe": ("PolicyEngine microsim pages", (
+        ("/pe", "Overview"), ("/pe/methodology", "Methodology"),
+        ("/pe/validation", "Validation"), ("/pe/code", "Code"),
+        ("/papers/pe-microsim", "Paper"))),
+    "define": ("DEFINE-UK pages", (
+        ("/define", "Overview"), ("/define/methodology", "Methodology"),
+        ("/define/validation", "Validation"), ("/define/code", "Code"),
+        ("/papers/define-uk", "Paper"))),
+}
+# Pages that belong to a model's row without being one of its five URLs:
+# the replication report is read as DEFINE-UK's Paper tab, so on that page
+# the Paper tab points at the report itself and is the chosen one.
+SUBTAB_EXTRA = {"/reports/define-uk-replication": ("define", "Paper")}
+SUBTAB_ROW = re.compile(r'<nav class="model-tabs" aria-label="[^"]* pages">.*?</nav>', re.DOTALL)
+
+
+def subtab_owner(url: str) -> tuple[str, str] | None:
+    """(model root, chosen tab label) for a page that carries a model row."""
+    if url in SUBTAB_EXTRA:
+        return SUBTAB_EXTRA[url]
+    for key, (_, tabs) in SUBTABS.items():
+        for href, label in tabs:
+            if href == url:
+                return key, label
+    return None
+
+
+def subtabs(url: str) -> str | None:
+    owner = subtab_owner(url)
+    if owner is None:
+        return None
+    key, chosen = owner
+    aria, tabs = SUBTABS[key]
+    rows = []
+    for href, label in tabs:
+        if label == chosen:
+            href = url
+            rows.append(f'      <a class="model-tabs-link" href="{href}" aria-current="page">{label}</a>')
+        else:
+            rows.append(f'      <a class="model-tabs-link" href="{href}">{label}</a>')
+    return (
+        f'<nav class="model-tabs" aria-label="{aria}">\n'
+        '    <div class="model-tabs-row">\n'
+        + "\n".join(rows)
+        + "\n    </div>\n  </nav>"
+    )
+
+
+# Every page with a StepPanel or an "On this page" rail loads the one shared
+# script; the inline copies it replaced must not come back.
+STEPPER_TAG = '<script src="/stepper.js" defer></script>'
+INLINE_STEPPER = re.compile(r"<script>(?:(?!</script>).)*?(?:\.meth-step|\.page-rail)", re.DOTALL)
+
+
+def needs_stepper(source: str) -> bool:
+    return 'class="scrolly-wrap' in source or 'class="page-rail' in source
 
 
 def page_url(path: Path) -> str:
@@ -204,8 +354,15 @@ def crumbs(path: Path) -> str:
     )
 
 GITHUB = """    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>"""
+# The footer stays one small row (#133 dropped the four-column directory and
+# kept PolicyEngine, GitHub and Contact): the views live in the header tabs,
+# not here. r5 added two utility links a reader looks for in a footer: the
+# glossary of the site's trust terms and where to report a wrong number. Contact lives here, never in the header tabs
+# (site_contract.check_economy_navigation).
 FOOTER_LINKS = """    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/glossary">Glossary</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro/issues">Report an issue</a>
     <a class="footer-text" href="/contact">Contact</a>"""
 
 
@@ -222,6 +379,10 @@ def section(path: Path) -> str | None:
     # the Forecasts tab, so a reader on a topic page is never told they are in
     # a section the header no longer offers.
     if root in ("economy", "forecasts"):
+        return "forecasts"
+    # Release notes hang off Forecasts in the pathway (CRUMB_PARENTS), so the
+    # view tab agrees with the crumb instead of leaving no tab chosen.
+    if root == "notes":
         return "forecasts"
     if root == "connect":
         return "use"
@@ -245,11 +406,13 @@ def header(path: Path) -> str:
             current_attr = ' aria-current="true"'
         else:
             current_attr = ""
-        links.append(f"    <a{class_attr} href=\"{href}\"{current_attr}>{label}</a>")
+        links.append(
+            f"    <a{class_attr} href=\"{href}\"{current_attr}>{icon(key)}{label}</a>"
+        )
     links.append(GITHUB)
     return """<header class="nav">
-  <a class="brand" href="/">
-    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro
+  <a class="brand" href="/" aria-label="PolicyEngine Macro home">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="26" height="26" /><span class="brand-name">PolicyEngine Macro</span>
   </a>
   <nav class="nav-links" aria-label="Primary">
 %s
@@ -257,6 +420,41 @@ def header(path: Path) -> str:
 </header>
 
 %s""" % ("\n".join(links), crumbs(path))
+
+
+# "Where next" row (DESIGN.md §4.7, §8): the last card on generated pages.
+# Icons are 24 px Lucide-style strokes, decorative.
+CARD_ICONS = {
+    "chart": '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/>',
+    "data": '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+    "topic": '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    "list": '<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>',
+    "model": '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 16.5 9 5 9-5"/>',
+    "plug": VIEW_ICONS["use"],
+    "target": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+}
+
+
+def where_next(cards: list[tuple[str, str, str, str]], indent: str = "  ") -> str:
+    """A "where next" card: (href, icon key, title, one line) per entry card."""
+    rows = []
+    for href, key, title, line in cards:
+        rows.append(
+            f'{indent}    <a class="entry-card" href="{href}">\n'
+            f'{indent}      <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" '
+            'fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" '
+            f'stroke-linejoin="round">{CARD_ICONS[key]}</svg></span>\n'
+            f"{indent}      <h3>{title}</h3>\n"
+            f"{indent}      <p>{line}</p>\n"
+            f'{indent}      <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>\n'
+            f"{indent}    </a>"
+        )
+    return (
+        f'{indent}<section class="band where-next" id="where-next">\n'
+        f'{indent}  <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>\n'
+        f'{indent}  <div class="entry-grid">\n' + "\n".join(rows) + "\n"
+        f"{indent}  </div>\n{indent}</section>"
+    )
 
 
 # Standalone documents allowed to ship without the global nav header.
@@ -275,7 +473,10 @@ def all_html() -> list[Path]:
     return sorted(
         path
         for path in ROOT.rglob("*.html")
-        if not any(part.startswith(".") for part in path.relative_to(ROOT).parts)
+        if not any(
+            part.startswith(".") or part == "node_modules"
+            for part in path.relative_to(ROOT).parts
+        )
         and path.relative_to(ROOT).parts[0] not in SKIP_ROOTS
     )
 
@@ -295,12 +496,21 @@ def navless_violations() -> list[Path]:
     ]
 
 
-def render(path: Path) -> str:
-    source = path.read_text()
+def render(path: Path, source: str | None = None) -> str:
+    """The page at ``path`` with the shell stamped in.
+
+    ``source`` renders a page body that is not on disk yet (a generator's
+    template) as if it lived at ``path``; nothing is written either way.
+    """
+    if source is None:
+        source = path.read_text()
     updated, replacements = HEADER.subn(header(path), source, count=1)
     if replacements != 1:
         raise ValueError(f"could not locate navigation in {path.relative_to(ROOT)}")
     updated = updated.replace(" has-section-tabs", "")
+    updated = STYLESHEET.sub(f'href="{STYLE_HREF}"', updated)
+    if FONT_PRELOAD not in updated:
+        updated = updated.replace(FONTS_CSS_LINK, f"{FONT_PRELOAD}\n{FONTS_CSS_LINK}", 1)
     # The footer stays small: a single link row. Strip any directory block a
     # previous revision may have left behind.
     updated = FOOTER_DIR.sub("", updated)
@@ -315,6 +525,19 @@ def render(path: Path) -> str:
     )
     if footer_replacements != 1:
         raise ValueError(f"could not locate footer navigation in {path.relative_to(ROOT)}")
+    url = page_url(path)
+    row = subtabs(url)
+    found = SUBTAB_ROW.findall(updated)
+    if row is None and found:
+        raise ValueError(f"model sub-tab row on a page SUBTABS does not list: {url}")
+    if row is not None:
+        if len(found) != 1:
+            raise ValueError(f"expected one model sub-tab row in {path.relative_to(ROOT)}, found {len(found)}")
+        updated = SUBTAB_ROW.sub(lambda _m: row, updated, count=1)
+    if INLINE_STEPPER.search(updated):
+        raise ValueError(f"inline StepPanel/rail script in {path.relative_to(ROOT)}: use {STEPPER_TAG}")
+    if needs_stepper(updated) and STEPPER_TAG not in updated:
+        updated = updated.replace("</body>", f"{STEPPER_TAG}\n</body>", 1)
     return updated
 
 

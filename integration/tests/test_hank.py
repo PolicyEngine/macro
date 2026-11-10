@@ -6,7 +6,7 @@ the model package; everything that needs a real solve is marked `slow` (run
 with `--runslow`) and additionally skipped when `us_hank` is unavailable.
 
 The slow tests assert signs and qualitative properties, not exact floats: the
-model is a validated replication of Auclert, Bardóczy, Rognlie & Straub
+model is a partial replication of Auclert, Bardóczy, Rognlie & Straub
 (Econometrica 2021) and its own repo gates magnitudes; these tests catch a
 sign flip, a dead cache, or a mislabeled series in OUR adapter.
 """
@@ -91,8 +91,8 @@ def test_distribution_is_refused_for_the_one_asset_variant():
 def test_summary_reports_honest_framing_without_a_solve():
     summary = core.hank_summary()
     framing = summary["framing"].lower()
-    for claim in ("validated replication", "stylized shocks",
-                  "not a forecaster", "first-order"):
+    for claim in ("replication", "magnitudes are not validated",
+                  "stylized shocks", "not a forecaster", "first-order"):
         assert claim in framing, f"framing must state: {claim}"
     assert "Econometrica 2021" in summary["upstream"]
     assert "replication suite" in summary["validation"]["suite"]
@@ -231,3 +231,46 @@ def test_distributional_block_is_coherent_and_labelled_first_order():
     # The easing is expansionary, and the high-MPC (poor) quartile responds
     # by more than the wealthy one under the first-order allocation.
     assert dc["Q1"] > dc["Q4"]
+
+
+def test_tax_financing_path_is_surfaced_when_the_package_returns_it(monkeypatch):
+    """us_hank.model.shock returns 'tax' (the labour-tax financing of a G
+    shock); the adapter used to drop it because HANK_HEADLINE had no entry."""
+    import types
+
+    import numpy as np
+
+    T = core.HANK_T
+    irf = {v: np.full(T, 0.1) for v in ("Y", "C", "I", "pi", "r", "tax")}
+    irf.update(shock=np.full(T, 0.01), shock_input="G")
+    fake = types.SimpleNamespace(shock=lambda *a, **k: dict(irf))
+    monkeypatch.setattr(core, "_hank_module", lambda variant: fake)
+    monkeypatch.setattr(core, "_hank_solved", lambda variant: ({}, {}))
+    res = core.hank_shock("fiscal_spending", 0.01, horizon=4)
+    assert "tax" in res["series_meaning"]
+    assert "pp" in res["series_meaning"]["tax"]
+    assert res["results"][0]["tax"] == 0.1
+
+
+def test_monetary_and_tfp_units_are_stated_per_quarter_and_in_tfp_terms():
+    """Issue #211: -0.0025 is -25bp per QUARTER (~-100bp annualised), and
+    0.01 of Z is ~2.1% TFP, not 1%."""
+    from policyengine_macro import mcp_server
+
+    units = core._HANK_KIND_INDEX["monetary"]["units"]
+    assert "annualised" in units and "-0.000625" in units
+    doc = mcp_server.hank_shock.__doc__
+    assert "2.1% TFP" in doc and "1% TFP)" not in doc
+    assert "annualised" in doc
+
+
+def test_tfp_units_are_scoped_to_the_variant():
+    """Z_ss is 0.468 in two_asset but 1 in one_asset (sequence_jacobian's
+    one-asset example calibrates Z = 1), so "0.01 ~ 2.1% TFP" must not be
+    stated for both variants."""
+    from policyengine_macro import mcp_server
+
+    units = core._HANK_KIND_INDEX["productivity"]["units"]
+    assert "two_asset" in units and "one_asset" in units
+    doc = mcp_server.hank_shock.__doc__
+    assert "one_asset steady-state" in doc
