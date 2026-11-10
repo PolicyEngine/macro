@@ -2,6 +2,7 @@
 
 import json
 
+import numpy as np
 import pytest
 
 from policyengine_macro import core
@@ -16,7 +17,7 @@ def test_list_variables():
     json.dumps(vars_)
 
 
-@pytest.mark.parametrize("periods", [0, 41, 1.5, "many"])
+@pytest.mark.parametrize("periods", [0, 26, 41, 1.5, "many"])
 def test_obr_shock_rejects_unsafe_periods_before_import(periods):
     with pytest.raises(ValueError, match="periods"):
         core.obr_shock(var="CGG", shock=1250, periods=periods)
@@ -94,6 +95,69 @@ def test_summary_parses():
     fevd = s["replication"]["fevd_1yr_headline"]
     assert any("UK GDP" in row.get("Variable", "") for row in fevd)
     json.dumps(s)
+
+
+def _fake_run_reform(calls):
+    """Stand-in for obr_macro.run_reform with its real window contract:
+    the shock is applied for ``periods`` quarters from ``start`` but only
+    start..end is solved and returned (reform_analysis.run_reform). Each
+    shocked quarter moves GDP by exactly 1.0 £bn, so the cumulative equals
+    the number of shocked quarters that made it into the results."""
+    import pandas as pd
+
+    def run_reform(name, var, shock, start="2025Q1", end="2027Q4",
+                   periods=12, investment_closure=False):
+        calls.append({"start": start, "end": end, "periods": periods})
+        idx = pd.period_range(start, end, freq="Q")
+        shocked = [i < periods for i in range(len(idx))]
+        return pd.DataFrame({
+            "period": idx,
+            "delta_gdp_bn": [1.0 if s else 0.0 for s in shocked],
+            "pct_gdp": [0.1 if s else 0.0 for s in shocked],
+            "delta_cons_m": 0.0,
+            "delta_if_m": 0.0,
+        })
+
+    return run_reform
+
+
+@pytest.mark.parametrize(
+    ("periods", "end", "n_rows"),
+    [(4, "2027Q4", 12), (12, "2027Q4", 12), (20, "2029Q4", 20), (25, "2031Q1", 25)],
+)
+def test_obr_shock_solves_every_shocked_quarter(monkeypatch, periods, end, n_rows):
+    """Before 6 Nov 2026 obr_shock never passed ``end``, so run_reform
+    stopped at 2027Q4 and periods=20 reported a 12-quarter cumulative as
+    "over shock periods". The window now runs to the last shocked quarter
+    (never earlier than 2027Q4, never past the 2031Q1 databank end)."""
+    calls = []
+    monkeypatch.setattr(core, "_import_obr", lambda: _fake_run_reform(calls))
+    res = core.obr_shock(var="CGG", shock=1250, periods=periods)
+    assert calls == [{"start": "2025Q1", "end": end, "periods": periods}]
+    assert res["window"] == {"start": "2025Q1", "end": end}
+    assert len(res["results"]) == n_rows
+    assert res["cumulative_delta_gdp_bn_over_shock_periods"] == float(periods)
+
+
+def test_obr_shock_refuses_a_cumulative_over_fewer_quarters(monkeypatch):
+    """If the solve ever returns fewer quarters than were shocked, the
+    labelled cumulative would be wrong, so obr_shock raises instead."""
+    import pandas as pd
+
+    def short_run(**kw):
+        idx = pd.period_range("2025Q1", "2027Q4", freq="Q")
+        return pd.DataFrame({"period": idx, "delta_gdp_bn": 1.0, "pct_gdp": 0.1,
+                             "delta_cons_m": 0.0, "delta_if_m": 0.0})
+
+    monkeypatch.setattr(core, "_import_obr", lambda: short_run)
+    with pytest.raises(RuntimeError, match="20-quarter shock"):
+        core.obr_shock(var="CGG", shock=1250, periods=20)
+
+
+def test_obr_periods_cap_is_the_databank_window():
+    """25 quarters is exactly 2025Q1..2031Q1 (obr_macro/baseline.py END)."""
+    assert core._OBR_MAX_PERIODS == 25
+    assert core._obr_window_end(core._OBR_MAX_PERIODS) == core._OBR_DATA_END
 
 
 @pytest.mark.slow
@@ -390,3 +454,46 @@ def test_svar_summary_serves_the_paper_comparable_fevd(monkeypatch):
         row["Variable"] == "UK GDP" and row["Group"] == "global" for row in groups
     )
     assert "renormalises" in rep["fevd_note"]
+
+
+def test_svar_forecast_reports_simple_yoy_rates_not_log_differences(monkeypatch):
+    """Issue #208. For a known level path, the adapter's YoY must be the
+    published simple rate 100*(P_t/P_{t-4}-1), not 100*log(P_t/P_{t-4})."""
+    import types
+
+    import pandas as pd
+
+    growth = 0.025  # 2.5% a quarter: ~10.4% a year, where the gap is ~0.5pp
+    hist = 100.0 * np.log(np.exp(np.arange(8) * growth))[:, None] * np.ones(2)
+
+    def sample_forecast(draw, y_full, horizons, rng):
+        last = y_full[-1]
+        return last + 100.0 * growth * np.arange(1, horizons + 1)[:, None]
+
+    def aggregate(paths, weights):
+        med = np.median(np.asarray(paths), axis=0)
+        return {k: med for k in ("median", "lo68", "hi68", "lo90", "hi90")}
+
+    forecast = types.SimpleNamespace(
+        sample_forecast=sample_forecast,
+        yoy=lambda x: np.asarray(x)[4:] - np.asarray(x)[:-4],
+    )  # an older boe_var without log_to_simple_pct: the fallback runs
+    analysis = types.SimpleNamespace(aggregate=aggregate)
+    est = {
+        "modules": (analysis, forecast), "y_full": hist,
+        "pairs": [(object(), None)], "weights": np.array([1.0]),
+        "df_full": pd.DataFrame(
+            hist, columns=[core._COL_GDP, core._COL_CPI],
+            index=pd.period_range("2024Q2", periods=8, freq="Q"),
+        ),
+        "n_accepted": 1, "ess": 1.0, "warnings": [],
+        "estimation_sample": "fake",
+    }
+    monkeypatch.setattr(core, "_estimate", lambda draws: est)
+    monkeypatch.setattr(core, "_FORECAST_CACHE", {})
+    res = core.svar_forecast(horizons=4, draws=100)
+    simple = 100.0 * (np.exp(4 * growth) - 1.0)  # 10.517
+    for row in res["cpi_inflation_yoy"] + res["gdp_growth_yoy"]:
+        assert row["median"] == pytest.approx(simple, abs=1e-3)
+        assert row["lo90"] == pytest.approx(simple, abs=1e-3)
+    assert "simple" in res["units"]

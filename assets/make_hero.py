@@ -23,6 +23,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+import chartkit  # noqa: E402  (stdlib-only, repo root)
 PAGE = ROOT / "index.html"
 SRC = ROOT / "papers" / "boe-svar" / "figures" / "current_forecast.json"
 
@@ -61,7 +63,9 @@ def build() -> str:
     quarters, med, lo68, hi68, lo90, hi90 = load_fan()
 
     W, H = 640, 400
-    x0, x1 = 30.0, 604.0
+    # The value ticks sit in a gutter right of the plot, clear of the bands and
+    # the median (at 1440 the "+1%" label used to sit on the median path).
+    x0, x1 = 30.0, 580.0
     top, bot = 40.0, 344.0  # plot area for the value range below
     v_lo, v_hi = -1.7, 3.4
     step = (x1 - x0) / (len(quarters) - 1)
@@ -98,8 +102,8 @@ def build() -> str:
     )
 
     out = [
-        f"{MARK_OPEN}",
-        f'<svg class="hero-fan" viewBox="0 0 {W} {H}" preserveAspectRatio="xMidYMid meet" '
+        f'<svg class="hero-fan" data-chart="hero-fan" viewBox="{x0 - 6:g} {top - 6:g} '
+        f'{x1 - x0 + 12:g} {bot - top + 12:g}" '
         f'role="img" aria-labelledby="hero-fan-t hero-fan-d">',
         '<title id="hero-fan-t">boe-svar: UK real GDP growth forecast, median with 68% and 90% credible bands</title>',
         f'<desc id="hero-fan-d">{esc(desc)}</desc>',
@@ -111,8 +115,9 @@ def build() -> str:
         out.append(
             f'<line class="{cls}" x1="{n(x0)}" y1="{n(y)}" x2="{n(x1)}" y2="{n(y)}"/>'
         )
+        label = f"{tick:+d}%".replace("-", "\u2212") if tick else "0%"
         out.append(
-            f'<text class="hf-tick" x="{n(x0)}" y="{n(y - 7)}">{tick:+d}%</text>'
+            f'<text class="vc-tick hf-tick vc-gutter" x="{n(x1 + 8)}" y="{n(y)}">{label}</text>'
         )
 
     out.append(f'<path class="hf-b90" d="{band(lo90, hi90)}"/>')
@@ -128,16 +133,16 @@ def build() -> str:
     for i, q in enumerate(quarters):
         year, qtr = q.split("Q")
         if i == 0 or qtr == "1":
+            anchor = "start" if i == 0 else "middle"
             out.append(
-                f'<text class="hf-tick hf-q" x="{n(xs[i])}" y="366">{esc(year)}</text>'
+                f'<text class="vc-tick hf-q vc-x" x="{n(xs[i])}" y="{n(bot)}" '
+                f'text-anchor="{anchor}">{esc(year)}</text>'
             )
-    # No in-SVG caption: the <figcaption> next to this figure says the same thing
-    # at real body size. Below 1000px the viewBox scales to roughly half, which
-    # would render these 11px labels at ~6px, so style.css hides .hf-tick there
-    # and the figure reads as a shape with the prose caption carrying the detail.
+    # The labels are lifted into HTML by chartkit, so they stay 12 px at every
+    # width; the <figcaption> next to this figure carries the rest.
     out.append("</svg>")
-    out.append(MARK_CLOSE)
-    return "\n".join(out)
+    return "\n".join([MARK_OPEN, chartkit.figure("\n".join(out), wrap_class="vc-hero",
+                                                  unit="UK real GDP, % change on a year earlier"), MARK_CLOSE])
 
 
 BLOCK_RE = re.compile(re.escape(MARK_OPEN) + r".*?" + re.escape(MARK_CLOSE), re.DOTALL)
@@ -146,7 +151,7 @@ BLOCK_RE = re.compile(re.escape(MARK_OPEN) + r".*?" + re.escape(MARK_CLOSE), re.
 def render_page(html: str) -> str:
     if not BLOCK_RE.search(html):
         sys.exit(f"no {MARK_OPEN} … {MARK_CLOSE} block in {PAGE}")
-    return BLOCK_RE.sub(lambda _m: build().replace("\\", "\\\\"), html)
+    return BLOCK_RE.sub(lambda _m: build(), html)
 
 
 def main():

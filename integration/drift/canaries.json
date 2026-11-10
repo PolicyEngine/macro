@@ -1,0 +1,327 @@
+{
+  "about": "One cheap call per hosted model whose output the site quotes. drift_check.py calls each on the hosted MCP server and fails when a value leaves its tolerance, when provenance disagrees with the capability registry, or when the hosted source revision is not modal_app.py's pin. Expected values are the site's quoted figures; where a page shows the command but no number, the expected value is a regression pin from the committed pin and says so in 'basis'. Edit an expected value only with the page edit (or the evidence) in the same PR.",
+  "canaries": [
+    {
+      "id": "obr_bank_rate_100bp",
+      "model_id": "obr-macro",
+      "source_url": "https://github.com/PolicyEngine/obr-macroeconomic-model",
+      "tool": "obr_shock",
+      "args": {
+        "var": "R",
+        "shock": 1.0,
+        "periods": 12
+      },
+      "cost": "cheap",
+      "local_cheap": true,
+      "quoted_at": "obr/validation/index.html",
+      "quote": "a sustained +100bp lowers GDP by about £121m on impact, £431m by quarter 4, £482m by quarter 8 and £416m by quarter 12",
+      "basis": "site quote; reproduces at OBR pin e4d7faa (old pin 1ed742c gave -119/-446/-525/-490)",
+      "checks": [
+        {
+          "name": "dgdp_q1_m",
+          "path": [
+            "results",
+            0,
+            "delta_gdp_bn"
+          ],
+          "scale": 1000,
+          "expected": -121,
+          "tolerance": 10
+        },
+        {
+          "name": "dgdp_q4_m",
+          "path": [
+            "results",
+            3,
+            "delta_gdp_bn"
+          ],
+          "scale": 1000,
+          "expected": -431,
+          "tolerance": 10
+        },
+        {
+          "name": "dgdp_q8_m",
+          "path": [
+            "results",
+            7,
+            "delta_gdp_bn"
+          ],
+          "scale": 1000,
+          "expected": -482,
+          "tolerance": 10
+        },
+        {
+          "name": "dgdp_q12_m",
+          "path": [
+            "results",
+            11,
+            "delta_gdp_bn"
+          ],
+          "scale": 1000,
+          "expected": -416,
+          "tolerance": 10
+        }
+      ],
+      "quoted_anchor": "£416m by quarter 12",
+      "via_job": true
+    },
+    {
+      "id": "obr_household_ratio_q12",
+      "model_id": "obr-macro",
+      "source_url": "https://github.com/PolicyEngine/obr-macroeconomic-model",
+      "tool": "obr_shock",
+      "args": {
+        "var": "HHDI_ADDFACTOR",
+        "shock": 1615.75,
+        "periods": 12
+      },
+      "cost": "cheap",
+      "local_cheap": true,
+      "quoted_at": "obr/index.html",
+      "quote": "0.34× by the twelfth quarter — close to the OBR's published 0.3",
+      "basis": "site quote; the 1p basic-rate costing (£6.46bn/yr = £1,615.75m/q) held on household income for an explicit 12-quarter window, so the ratio does not depend on score_reform's default window. Ratio = −ΔGDP(£m) / 1,615.75 (the add-factor carries the revenue raised, so GDP falls). Old pin gave 0.357, new pin 0.342",
+      "checks": [
+        {
+          "name": "gdp_per_revenue_q12",
+          "path": [
+            "results",
+            11,
+            "delta_gdp_bn"
+          ],
+          "scale": -0.6189076280365,
+          "expected": 0.34,
+          "tolerance": 0.01
+        }
+      ],
+      "quoted_anchor": "<strong>0.34&times;</strong>",
+      "via_job": true
+    },
+    {
+      "id": "frbus_100bp_tightening",
+      "model_id": "frb-us",
+      "source_url": "https://github.com/PolicyEngine/us-frb-model",
+      "tool": "frbus_shock",
+      "args": {
+        "var": "rffintay_aerr",
+        "shock": 1.0
+      },
+      "cost": "cheap",
+      "local_cheap": true,
+      "quoted_at": "frb-us/validation/index.html",
+      "quote": "Real GDP, trough (2027Q4) −0.55%; unemployment peak +0.26pp (line 272)",
+      "basis": "site quote",
+      "checks": [
+        {
+          "name": "gdp_trough_pct",
+          "path": [
+            "results",
+            "*",
+            "xgdp"
+          ],
+          "reduce": "min",
+          "expected": -0.55,
+          "tolerance": 0.01
+        },
+        {
+          "name": "gdp_at_2027Q4_pct",
+          "path": [
+            "results",
+            {
+              "key": "period",
+              "equals": "2027Q4"
+            },
+            "xgdp"
+          ],
+          "expected": -0.55,
+          "tolerance": 0.01
+        },
+        {
+          "name": "unemployment_peak_pp",
+          "path": [
+            "results",
+            "*",
+            "lur"
+          ],
+          "reduce": "max",
+          "expected": 0.26,
+          "tolerance": 0.01
+        }
+      ],
+      "quoted_anchor": "&minus;0.55%"
+    },
+    {
+      "id": "hank_25bp_easing",
+      "model_id": "us-hank",
+      "source_url": "https://github.com/PolicyEngine/us-hank-model",
+      "tool": "hank_shock",
+      "args": {
+        "kind": "monetary",
+        "size": -0.0025
+      },
+      "cost": "cheap",
+      "local_cheap": true,
+      "quoted_at": "connect/index.html",
+      "quote": "pe-macro hank-shock --kind monetary --size -0.0025 (command quoted; no number on the page)",
+      "basis": "regression pin, not a site figure: the page quotes the command only. Hosted us-hank-model 19a8e5e on 6 Nov 2026 gave Y +0.361% on impact (the +0.0025 run in r5/cross-model.md gave −0.36%, so the model is linear in the sign as expected) and +0.175% at quarter 3",
+      "checks": [
+        {
+          "name": "output_impact_pct",
+          "path": [
+            "results",
+            0,
+            "Y"
+          ],
+          "expected": 0.361,
+          "tolerance": 0.005
+        },
+        {
+          "name": "output_q3_pct",
+          "path": [
+            "results",
+            3,
+            "Y"
+          ],
+          "expected": 0.175,
+          "tolerance": 0.005
+        }
+      ],
+      "quoted_anchor": "--size -0.0025"
+    },
+    {
+      "id": "svar_forecast_median",
+      "model_id": "boe-svar",
+      "source_url": "https://github.com/PolicyEngine/boe-var-model",
+      "tool": "forecast_uk",
+      "args": {
+        "horizons": 4,
+        "draws": 2000
+      },
+      "cost": "moderate",
+      "local_cheap": false,
+      "quoted_at": "svar/index.html",
+      "quote": "Live-facing fan chart; median from papers/boe-svar/figures/current_forecast.json (5,600 draws): GDP 2026Q2 1.135, CPI 2026Q2 2.644",
+      "basis": "site figure. The page is 5,600 draws, the hosted call 2,000 (135 accepted), so 0.1pp covers sampling noise; it also covers the log-vs-simple YoY gap (#208, ~0.035pp on CPI). A new data edge moves the first quarter and fails the label lookup, which is the point: the page would then be stale",
+      "checks": [
+        {
+          "name": "gdp_2026Q2_median",
+          "path": [
+            "gdp_growth_yoy",
+            {
+              "key": "quarter",
+              "equals": "2026Q2"
+            },
+            "median"
+          ],
+          "expected": 1.135,
+          "tolerance": 0.1
+        },
+        {
+          "name": "cpi_2026Q2_median",
+          "path": [
+            "cpi_inflation_yoy",
+            {
+              "key": "quarter",
+              "equals": "2026Q2"
+            },
+            "median"
+          ],
+          "expected": 2.644,
+          "tolerance": 0.1
+        }
+      ],
+      "quoted_anchor": "current_forecast.json"
+    },
+    {
+      "id": "define_green_public_investment",
+      "model_id": "define-uk",
+      "source_url": "https://github.com/PolicyEngine/define-uk-model",
+      "tool": "define_scenario",
+      "args": {
+        "name": "green_public_investment"
+      },
+      "cost": "cheap",
+      "local_cheap": true,
+      "check_provenance": false,
+      "quoted_at": "define/validation/index.html",
+      "quote": "PASS — peak +0.92% vs ≈+1%",
+      "basis": "DEFINE-UK is never hosted (unlicensed upstream): the hosted check is that it still refuses; the number is checked against the cached pinned run with --local",
+      "checks": [
+        {
+          "name": "hosted_refuses",
+          "path": [
+            "available"
+          ],
+          "equals": true,
+          "expected": false
+        }
+      ],
+      "quoted_anchor": "peak +0.92% vs",
+      "local_checks": [
+        {
+          "name": "gdp_peak_pct",
+          "path": [
+            "variables",
+            "GDP_R",
+            "delta_pct"
+          ],
+          "reduce": "max",
+          "expected": 0.92,
+          "tolerance": 0.01
+        }
+      ]
+    },
+    {
+      "id": "household_uk_50k",
+      "model_id": "pe-microsim",
+      "source_url": "https://github.com/PolicyEngine/policyengine",
+      "tool": "calculate_household",
+      "args": {
+        "country": "uk",
+        "people": [
+          {
+            "age": 35,
+            "employment_income": 50000
+          }
+        ],
+        "year": 2026
+      },
+      "cost": "cheap",
+      "local_cheap": true,
+      "quoted_at": "pe/code/index.html",
+      "quote": "income_tax £7,486; national_insurance £2,994 (line 142); hbai_household_net_income £39,520 (line 143)",
+      "basis": "site quote (/pe/code household example; /connect's own calculate_household example is the US one and quotes no number)",
+      "checks": [
+        {
+          "name": "income_tax",
+          "path": [
+            "summary",
+            "income_tax_by_person",
+            0
+          ],
+          "expected": 7486,
+          "tolerance": 1
+        },
+        {
+          "name": "national_insurance",
+          "path": [
+            "summary",
+            "national_insurance_by_person",
+            0
+          ],
+          "expected": 2994,
+          "tolerance": 1
+        },
+        {
+          "name": "hbai_net_income",
+          "path": [
+            "household",
+            "hbai_household_net_income"
+          ],
+          "expected": 39520,
+          "tolerance": 1
+        }
+      ],
+      "quoted_anchor": "£7,486"
+    }
+  ]
+}

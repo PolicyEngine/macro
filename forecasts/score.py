@@ -30,6 +30,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+import chartkit  # noqa: E402  (stdlib-only, repo root)
 HERE = Path(__file__).resolve().parent
 ROUNDS = HERE / "rounds"
 OUTTURNS = HERE / "outturns.json"
@@ -54,6 +56,21 @@ NAIVE_SERIES = {
 MODEL_LABELS = {
     "okun-unemployment": "svar-unemployment satellite",
 }
+
+# What the page shows for each recorded model: a readable name, then the id
+# a reader types into pe-macro (none for the satellite, whose archived
+# filename is not a registry id). Render-time only; scorecard.json is unchanged.
+MODEL_DISPLAY = {
+    "boe-svar": ("BoE SVAR", "boe-svar"),
+    "okun-unemployment": ("BoE SVAR unemployment satellite", None),
+}
+
+
+def model_html(detail: dict) -> str:
+    name, mid = MODEL_DISPLAY.get(
+        detail["model"], (detail.get("label", detail["model"]), None))
+    return esc(name) + (f'<span class="model-id">{esc(mid)}</span>' if mid else "")
+
 
 NAIVE_NOTE = (
     "Naive baseline: the last outturn at the round's data edge, held flat "
@@ -134,6 +151,21 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
             error = point - actual
             naive = naive_random_walk(variable, rnd["information_set"]["data_edge"])
             official = official_paths().get(variable, {}).get(period)
+            # Every published path stored for this period and variable, each
+            # with the date its information set closed. They are context for
+            # the error, not a league table: each was fixed months before the
+            # round, on less data (see BENCHMARKS).
+            benchmarks = [
+                {
+                    "label": label,
+                    "fixed": fixed,
+                    "value": value,
+                    "abs_error": abs(value - actual),
+                }
+                for label, fixed, paths in BENCHMARKS()
+                for value in [paths.get(variable, {}).get(period)]
+                if value is not None
+            ]
 
             entries.append(
                 {
@@ -142,6 +174,7 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
                     "forecast": point,
                     "outturn": actual,
                     "outturn_vintage": obs.get("vintage"),
+                    "outturn_series": obs.get("series"),
                     "error": error,
                     "abs_error": abs(error),
                     # Naive random-walk baseline (see NAIVE_NOTE). None when no
@@ -165,6 +198,14 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
                     # Band coverage is the honest test of a fan chart: a model
                     # whose 68% band contains the outturn 68% of the time is
                     # calibrated, however large its point errors are.
+                    "benchmarks": benchmarks,
+                    # The archived band, as it was stated: coverage is scored
+                    # on the raw quantiles, never on the re-calibrated display
+                    # bands of the open-round fans.
+                    "lo68": stats["lo68"],
+                    "hi68": stats["hi68"],
+                    "lo90": stats["lo90"],
+                    "hi90": stats["hi90"],
                     "in_68": stats["lo68"] <= actual <= stats["hi68"],
                     "in_90": stats["lo90"] <= actual <= stats["hi90"],
                 }
@@ -247,7 +288,10 @@ def build() -> dict:
         "status": (
             "accumulating — no forecast period has an outturn yet"
             if total_scored == 0
-            else f"{total_scored} forecast period(s) scored"
+            else (
+                f"{sum(len(d['entries']) for d in scored)} forecast(s) scored, "
+                f"{len({e['period'] for d in scored for e in d['entries']})} period(s)"
+            )
         ),
         "detail": scored,
     }
@@ -310,6 +354,7 @@ BOE_MPR_CSV = HERE / "official" / "boe_mpr_feb_2026_central.csv"
 SEF_CSV = HERE / "official" / "boe_sef_april_2026.csv"
 
 BOE_LABEL = "BoE Feb 2026 MPR"
+SEF_LABEL = "BoE SEF Apr 2026"
 
 
 def _official_csv(path: Path) -> dict[str, dict[str, float]]:
@@ -357,6 +402,20 @@ def sef_paths() -> dict[str, dict[str, float]]:
     if _SEF_CACHE is None:
         _SEF_CACHE = _official_csv(SEF_CSV)
     return _SEF_CACHE
+
+
+def BENCHMARKS() -> list[tuple[str, str, dict[str, dict[str, float]]]]:
+    """(label, date the information set closed, paths) for every stored path.
+
+    The dates are the publications' own: the BoE February 2026 MPR central
+    projection, the OBR March 2026 EFO, and the Survey of External
+    Forecasters as of 16 April 2026 (forecasts/official/*.csv headers).
+    """
+    return [
+        (BOE_LABEL, "2026-02", boe_paths()),
+        (OFFICIAL_LABEL, "2026-03", official_paths()),
+        (SEF_LABEL, "2026-04-16", sef_paths()),
+    ]
 
 
 BAND_CALIBRATION = HERE / "band_calibration.json"
@@ -414,6 +473,7 @@ VS_OFFICIAL_SPECS = {
         "chart_id": "svar-vs-efo",
         "name": "UK real GDP growth",
         "series": "UK real GDP, year-on-year growth, percent",
+        "unit": "UK real GDP, % change on a year earlier",
         "source_note": (
             "EFO path derived from the March 2026 EFO real-GDP level path stored "
             "in <code>papers/obr-macro/figures/fig_anchored_data.csv</code>"
@@ -427,6 +487,7 @@ VS_OFFICIAL_SPECS = {
         "chart_id": "svar-vs-efo-cpi",
         "name": "UK CPI inflation",
         "series": "UK CPI, year-on-year inflation, percent",
+        "unit": "UK CPI, % change on a year earlier",
         "source_note": (
             "EFO path from Table 1.7 of the March 2026 EFO detailed economy "
             "tables, stored in "
@@ -441,6 +502,16 @@ VS_OFFICIAL_SPECS = {
 }
 
 
+def outturn_values(variable: str) -> dict[str, float]:
+    """Newest stored outturn per period, for the outturn dots on the fans."""
+    doc = json.loads(OUTTURNS.read_text())
+    return {
+        period: obs["value"]
+        for (period, var), obs in latest_outturns(doc.get("observations", [])).items()
+        if var == variable
+    }
+
+
 def render_vs_official_variable(variable: str, include_note: bool = False) -> str:
     """Fan chart: archived boe-svar path with 68/90% bands vs March 2026 EFO."""
     rows = build_vs_official(variable)
@@ -453,7 +524,10 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
     width, height = 760, 300
     left, right, top, bottom = 56, 16, 34, 40
     plot_w, plot_h = width - left - right, height - top - bottom
+    seen = outturn_values(variable)
+    dots = [(i, seen[r["period"]]) for i, r in enumerate(rows) if r["period"] in seen]
     values = [v for r in rows for v in (r["lo90"], r["hi90"], r["efo"])]
+    values += [v for _, v in dots]
     lo = min(0.0, min(values))
     hi = max(values)
     span = (hi - lo) or 1.0
@@ -479,225 +553,431 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
     median = " ".join(f"{x(i):.1f},{y(r['median']):.1f}" for i, r in enumerate(rows))
     efo = " ".join(f"{x(i):.1f},{y(r['efo']):.1f}" for i, r in enumerate(rows))
 
-    gridlines, ticks = [], []
-    step = 0.5
+    gridlines = []
+    # One labelled gridline per point: at 0.5 the labels stacked on a phone.
+    step = 1.0
     v = (int(lo / step)) * step
     while v <= hi:
         if v >= lo:
+            cls = "vc-zero" if abs(v) < 1e-9 else "vc-grid"
             gridlines.append(
-                f'          <line class="vc-grid" x1="{left}" y1="{y(v):.1f}" '
+                f'<line class="{cls}" x1="{left}" y1="{y(v):.1f}" '
                 f'x2="{width - right}" y2="{y(v):.1f}"/>'
             )
-            ticks.append(
-                f'          <text class="vc-tick" x="{left - 8}" y="{y(v) + 4:.1f}" '
-                f'text-anchor="end">{v:g}</text>'
-            )
+            # More than six labels: odd ones are minor, hidden on a phone,
+            # where the plot is ~170 px tall and they crowded the median.
+            odd = (hi - lo) > 6 and round(v) % 2 != 0
+            gridlines.append(chartkit.ytick(left, y(v), f"{v:g}".replace("-", "\u2212"),
+                                            "vc-minor" if odd else ""))
         v += step
-    xticks = [
-        f'          <text class="vc-tick" x="{x(i):.1f}" y="{height - 14}" '
-        f'text-anchor="middle">{r["period"]}</text>'
-        for i, r in enumerate(rows)
-    ]
+    last = len(rows) - 1
+    # About seven quarter labels when wide, three when the chart is narrower
+    # than 520 px (chartkit.tick_plan).
+    xticks = [chartkit.xtick(x(i), top + plot_h, rows[i]["period"], i, last, minor=minor)
+              for i, minor in chartkit.tick_plan(len(rows))]
 
     svg = "\n".join(
         [
-            '      <p class="chart-intro">'
-            f'{spec["intro"].format(round_id=SVAR_ROUND.parent.name)}</p>',
-            '      <figure class="vchart-figure">',
-            f'        <svg class="vchart" data-chart="{chart_id}" viewBox="0 0 {width} {height}" '
+            f'<svg class="vchart" data-chart="{chart_id}" viewBox="{left - 4} {top - 4} '
+            f'{plot_w + 8} {plot_h + 8}" '
             f'role="img" aria-labelledby="{chart_id}-t {chart_id}-d">',
-            f'          <title id="{chart_id}-t">boe-svar {spec["name"]} forecast vs '
+            f'<title id="{chart_id}-t">BoE SVAR {spec["name"]} forecast vs '
             "OBR March 2026 EFO</title>",
-            f'          <desc id="{chart_id}-d">Fan chart of {spec["series"]}. '
-            "The boe-svar archived median with its 68 and 90 percent bands, "
+            f'<desc id="{chart_id}-d">Fan chart of {spec["series"]}. '
+            "The BoE SVAR archived median with its 68 and 90 percent bands, "
             "empirically re-calibrated for measured under-coverage, is shown beside "
-            "the OBR March 2026 EFO path over the overlapping quarters.</desc>",
+            "the OBR March 2026 EFO path over the overlapping quarters."
+            + "".join(f" ONS outturn for {rows[i]['period']}: {v:.2f} percent." for i, v in dots)
+            + "</desc>",
             *gridlines,
-            *ticks,
-            f'          <polygon class="vc-band90" points="{band90}"/>',
-            f'          <polygon class="vc-band68" points="{band}"/>',
-            f'          <polyline class="vc-s1" points="{median}"/>',
-            f'          <polyline class="vc-s2" points="{efo}"/>',
+            f'<polygon class="vc-band90" points="{band90}"/>',
+            f'<polygon class="vc-band68" points="{band}"/>',
+            f'<polyline class="vc-s1" points="{median}"/>',
+            f'<polyline class="vc-s2" points="{efo}"/>',
+            *(f'<circle class="vc-out-dot" cx="{x(i):.1f}" cy="{y(v):.1f}" r="4"/>'
+              for i, v in dots),
             *xticks,
-            "        </svg>",
-            '        <div class="olg-legend">'
-            '<span class="li"><span class="ln ln-s1"></span>boe-svar median (68% and 90% bands, '
-            "empirically re-calibrated)</span>"
-            '<span class="li"><span class="ln ln-s2"></span>OBR March 2026 EFO</span>'
-            "</div>",
-            "      </figure>",
+            "</svg>",
         ]
     )
-    return svg
+    block = chartkit.figure(svg, legend=[
+        ("ln-s1", "BoE SVAR median"),
+        ("sw-band68", "68% band (re-calibrated)"),
+        ("sw-band90", "90% band (re-calibrated)"),
+        ("ln-s2", "OBR March 2026 EFO"),
+        *([("sw-dot-out", "ONS outturn")] if dots else []),
+    ], unit=spec["unit"], y_gutter=True, source=(
+        f'archived round <a class="mono" href="/forecasts/rounds/{SVAR_ROUND.parent.name}/'
+        f'{SVAR_ROUND.name}">{SVAR_ROUND.parent.name}/{SVAR_ROUND.name}</a>; '
+        + spec["source_note"]
+        + ('; outturns from the <a href="/economy#data">data store</a>' if dots else "")
+    ))
+    return "\n".join([
+        '      <p class="chart-intro">'
+        f'{spec["intro"].format(round_id=SVAR_ROUND.parent.name)}</p>',
+        '      <figure class="vchart-figure">',
+        block,
+        # Inside the figure: the page's chart-tab script moves each figure
+        # into its tab panel, and the numbers must travel with their fan.
+        vs_official_table(variable, rows),
+        "      </figure>",
+    ])
+
+
+def vs_official_table(variable: str, rows: list[dict]) -> str:
+    """The fan's own numbers, quarter by quarter (#220 item 4).
+
+    Same rows the chart draws: the archived median, the re-calibrated bands
+    and the EFO path, at two decimals like the topic tables. Nothing here is
+    computed that the chart does not already plot.
+    """
+    spec = VS_OFFICIAL_SPECS[variable]
+
+    def pc(v: float) -> str:
+        return f"{v:.2f}%".replace("-", "\u2212")
+
+    body = "\n".join(
+        "          <tr>"
+        f'<th scope="row">{r["period"]}</th>'
+        f'<td class="num">{pc(r["median"])}</td>'
+        f'<td class="num">{pc(r["lo68"])}–{pc(r["hi68"])}</td>'
+        f'<td class="num">{pc(r["lo90"])}–{pc(r["hi90"])}</td>'
+        f'<td class="num">{pc(r["efo"])}</td>'
+        "</tr>"
+        for r in rows
+    )
+    return f"""      <details class="about fc-qq">
+        <summary>Quarter by quarter: the numbers in this fan</summary>
+      <div class="table-scroll">
+        <table>
+          <caption>BoE SVAR {esc(spec["name"])} forecast, round {SVAR_ROUND.parent.name}, beside the {OFFICIAL_LABEL}: % change on a year earlier. Bands are re-calibrated, as drawn.</caption>
+          <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68% band</th><th scope="col">90% band</th><th scope="col">EFO</th></tr></thead>
+          <tbody>
+{body}
+          </tbody>
+        </table>
+      </div>
+      </details>"""
 
 
 # ---------------------------------------------------------------- page
 
-VARIABLE_LABELS = {"gdp": "UK real GDP, y/y", "cpi": "UK CPI, y/y"}
+VARIABLE_LABELS = {
+    "gdp": "UK real GDP, y/y",
+    "cpi": "UK CPI, y/y",
+    "unemployment": "UK unemployment rate",
+}
+MANIFEST = ROOT / "data" / "MANIFEST.json"
+
 
 def esc(s: str) -> str:
     return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
+def signed(v: float, unit: str = "pp") -> str:
+    """Signed value with a true minus sign (DESIGN.md §2.3)."""
+    return f"{v:+.2f}{unit}".replace("-", "\u2212")
+
+
+def store_last_fetched() -> str:
+    """Newest snapshot date anywhere in the vintage store."""
+    doc = json.loads(MANIFEST.read_text())
+    return max(entry["latest_vintage"] for entry in doc["series"].values())
+
+
+def vintage_file(series: str, vintage: str) -> str | None:
+    """Site path of the immutable snapshot an outturn was read from."""
+    for path in sorted((ROOT / "data" / "vintages").glob(f"*/{series}/{vintage}.json")):
+        return "/" + path.relative_to(ROOT).as_posix()
+    return None
+
+
+def long_date(iso: str) -> str:
+    """'2026-08-26' -> '26 August 2026' (no leading zero, locale-free)."""
+    import datetime as _dt
+    d = _dt.date.fromisoformat(iso[:10])
+    months = ("January February March April May June July August September "
+              "October November December").split()
+    return f"{d.day} {months[d.month - 1]} {d.year}"
+
+
+def scored_entries(card: dict) -> list[tuple[dict, dict]]:
+    return sorted(
+        ((detail, entry) for detail in card["detail"] for entry in detail["entries"]),
+        key=lambda r: (r[1]["period"], r[1]["variable"], r[0]["round_id"]),
+    )
+
+
 def render_status(card: dict) -> str:
-    """Visual record totals without turning a one-period sample into a claim."""
+    """The record in three tiles: band coverage, mean error against no change,
+    and how much there is to go on.
+
+    Every figure is an aggregate of the per-forecast values in scorecard.json
+    (``in_68``/``in_90``, ``abs_error``, ``naive_abs_error``), computed here at
+    render time; scorecard.json itself is untouched. The third tile carries the
+    sample size and links to the limits, so the first two are never read as a
+    skill claim on their own (DESIGN.md §7.5).
+    """
     rounds = card["rounds"]
-    scored = card["periods_scored"]
-    entries = [
-        entry
-        for detail in card["detail"]
-        for entry in detail["entries"]
-    ]
-    latest_entry = sorted(entries, key=lambda entry: entry["period"])[-1] if entries else None
-    pending_card = card.get("pending_detail") or {}
-    scored_target = esc(pending_card.get("period") or "—")
-    lines = [
-        '      <div class="forecast-summary" aria-label="Current forecast record">',
-        f"        <article><strong>{rounds}</strong><span>Archived "
-        f"round{'' if rounds == 1 else 's'}</span>"
-        "<small>committed to Git before the outturn existed</small></article>",
-        f"        <article><strong>{scored}</strong><span>Scored "
-        f"period{'' if scored == 1 else 's'}</span>"
-        "<small>quarters whose outturn is now published and scored</small></article>",
-        # NOT the latest error. This module's whole argument is that a
-        # headline accuracy figure derived from one observation is worse than
-        # none, and putting it in the record band — level with the round and
-        # scored counts — was the page doing exactly that, with the "one
-        # scored period is not an accuracy headline" disclaimer underneath it.
-        # The error still appears on the scored card in §02, where it sits
-        # beside its benchmarks and its caveats.
-        f"        <article><strong>{scored_target}</strong><span>Next scored "
-        "period</span>"
-        "<small>when the record next grows, not how it is doing</small></article>",
-        "      </div>",
-        '      <p class="forecast-next">',
-    ]
+    entries = [e for _, e in scored_entries(card)]
+    scored = len(entries)
     pending = card.get("pending_detail")
+    fetched = store_last_fetched()
     if pending:
         who = ", ".join(f"{VARIABLE_LABELS.get(v, v)}" for v in pending["variables"])
-        lines.append(
-            f"        <strong>Next due:</strong> {esc(pending['period'])} "
-            f"({esc(who)}), which lands when the ONS publishes it."
+        next_sub = f"next <span class=\"nowrap\">{esc(pending['period'])}</span>, {esc(who)}; store updated <span class=\"nowrap\">{esc(fetched)}</span>"
+    else:
+        next_sub = "every archived period has an outturn"
+    rounds_sub = f"from {rounds} archived round{'' if rounds == 1 else 's'}; {next_sub}"
+    if scored:
+        in68 = sum(1 for e in entries if e["in_68"])
+        in90 = sum(1 for e in entries if e["in_90"])
+        mae = sum(e["abs_error"] for e in entries) / scored
+        naive = [e["naive_abs_error"] for e in entries if e.get("naive_abs_error") is not None]
+        cover_value = f"{in68} of {scored}"
+        cover_sub = f"bands as archived; {in90} of {scored} inside the 90% band"
+        mae_value = f"{mae:.2f}pp"
+        mae_sub = (
+            f"no change: {sum(naive) / len(naive):.2f}pp over the same {scored} forecasts; too few to show skill"
+            if len(naive) == scored else "no complete no-change baseline"
         )
     else:
-        lines.append("        Every archived period now has an outturn.")
-    lines.append("      </p>")
-    return "\n".join(lines)
+        cover_value, cover_sub = "—", "nothing scored yet"
+        mae_value, mae_sub = "—", "nothing scored yet"
+    # Say plainly how current the record is (r5 usability test, #220): the date
+    # is the newest outturn snapshot any scored forecast was read from.
+    if scored:
+        last = max(e["outturn_vintage"] for e in entries)
+        asof = (f'      <p class="record-asof"><strong>Last scored <time datetime="{esc(last)}">'
+                f'{esc(long_date(last))}</time>.</strong> Outturns published after that date are '
+                'not in the record yet.</p>')
+    else:
+        asof = '      <p class="record-asof"><strong>Nothing scored yet.</strong></p>'
+    return "\n".join([
+        asof,
+        '      <div class="stat-row" aria-label="The record so far">',
+        '        <div class="stat">',
+        '          <span class="stat-label">Outturns inside the 68% band</span>',
+        f'          <span class="stat-value">{cover_value}</span>',
+        f'          <span class="stat-sub">{cover_sub}</span>',
+        '          <span class="stat-foot"><a class="chip" href="#record">The record</a></span>',
+        "        </div>",
+        '        <div class="stat">',
+        '          <span class="stat-label">Mean absolute error</span>',
+        f'          <span class="stat-value">{mae_value}</span>',
+        f'          <span class="stat-sub">{mae_sub}</span>',
+        '          <span class="stat-foot"><a class="chip" href="#benchmarks">Against the benchmarks</a></span>',
+        "        </div>",
+        '        <div class="stat stat-neutral">',
+        f"          <span class=\"stat-label\">Forecast{'' if scored == 1 else 's'} scored</span>",
+        f'          <span class="stat-value">{scored}</span>',
+        f'          <span class="stat-sub">{rounds_sub}</span>',
+        '          <span class="stat-foot"><a class="chip" href="#limits">Too few to show skill</a></span>',
+        "        </div>",
+        "      </div>",
+    ])
 
 
 def render_rounds(card: dict) -> str:
-    rows = ['      <div class="forecast-round-list">']
+    """The archive: one row per round, flat (no card inside the section card).
+
+    Below 640 px reveal.js stacks each row into a labelled block.
+    """
+    rows = [
+        '      <div class="table-scroll">',
+        '        <table class="round-table" data-stack="yes">',
+        "          <caption>Every archived round, oldest first.</caption>",
+        "          <thead><tr>"
+        '<th scope="col">Round</th>'
+        '<th scope="col">Model</th>'
+        '<th scope="col">Data edge</th>'
+        '<th scope="col">Archived</th>'
+        '<th scope="col" class="num">Periods</th>'
+        '<th scope="col" class="num">Scored</th>'
+        '<th scope="col">Files</th>'
+        "</tr></thead>",
+        "          <tbody>",
+    ]
     for detail in card["detail"]:
-        href = f"{REPO_BLOB}/{detail['path']}"
+        href = f"https://github.com/PolicyEngine/macro/commits/main/{detail['path']}"
+        archived = (detail.get("archived_utc") or "")[:10] or "—"
         rows.append(
-            "        <article class=\"forecast-round\">\n"
-            f"          <div><span class=\"mono\">{esc(detail['round_id'])}</span>"
-            f"<strong>{esc(detail.get('label', detail['model']))}</strong></div>\n"
-            "          <dl>\n"
-            f"            <div><dt>Data edge</dt><dd>{esc(detail['data_edge'])}</dd></div>\n"
-            f"            <div><dt>Periods</dt><dd>{detail['periods_forecast']}</dd></div>\n"
-            f"            <div><dt>Scored</dt><dd>{detail['periods_scored']}</dd></div>\n"
-            "          </dl>\n"
-            f"          <a class=\"mono\" href=\"/{esc(detail['path'])}\" download>"
-            f"Download <code>{esc(Path(detail['path']).name)}</code> →</a>\n"
-            f"          <a class=\"mono\" href=\"{href}\">"
-            "GitHub commit history →</a>\n"
-            "        </article>"
+            "          <tr>"
+            f'<th scope="row"><span class="mono">{esc(detail["round_id"])}</span></th>'
+            f"<td>{model_html(detail)}</td>"
+            f'<td class="mono">{esc(detail["data_edge"])}</td>'
+            f'<td class="mono">{esc(archived)}</td>'
+            f'<td class="num">{detail["periods_forecast"]}</td>'
+            f'<td class="num">{len(detail["entries"])}</td>'
+            f'<td class="rt-files"><a href="/{esc(detail["path"])}" download>'
+            f'<code>{esc(Path(detail["path"]).name)}</code></a>'
+            f' · <a href="{href}">history</a></td>'
+            "</tr>"
         )
-    rows.append("      </div>")
+    rows += ["          </tbody>", "        </table>", "      </div>"]
     return "\n".join(rows)
 
 
+def _strip(e: dict) -> str:
+    """Where the outturn fell against the archived bands, on the row's own scale.
+
+    Decoration for the eye only (aria-hidden): every value it places is in the
+    row's cells, so the strip states no number of its own.
+    """
+    values = [e["lo90"], e["hi90"], e["outturn"], e["forecast"]]
+    lo, hi = min(values), max(values)
+    pad = max(hi - lo, 0.1) * 0.08
+    lo, hi = lo - pad, hi + pad
+
+    def pos(v: float) -> str:
+        return f"{(v - lo) / (hi - lo) * 100:.1f}%"
+
+    def span(cls: str, a: float, b: float) -> str:
+        return (f'<span class="sb-{cls}" style="left:{pos(a)};'
+                f'width:calc({pos(b)} - {pos(a)})"></span>')
+
+    return (
+        '<div class="sb-strip" aria-hidden="true">'
+        + span("b90", e["lo90"], e["hi90"])
+        + span("b68", e["lo68"], e["hi68"])
+        + f'<span class="sb-med" style="left:{pos(e["forecast"])}"></span>'
+        + f'<span class="sb-out" style="left:{pos(e["outturn"])}"></span>'
+        + "</div>"
+    )
+
+
+def _band_label(e: dict) -> str:
+    return ("inside 68%" if e["in_68"]
+            else "inside 90%, outside 68%" if e["in_90"]
+            else "outside 90%")
+
+
+def _target(e: dict) -> str:
+    return (f'<span class="mono">{esc(e["period"])}</span> '
+            f'{esc(VARIABLE_LABELS.get(e["variable"], e["variable"]))}')
+
+
 def render_results(card: dict) -> str:
-    """The scored entries. Absent entirely until something has been scored."""
-    rows = [
-        (detail, entry)
-        for detail in card["detail"]
-        for entry in detail["entries"]
-    ]
+    """The scoreboard: the home of every scored number (DESIGN.md §7.0).
+
+    Two tables in the forecast-evaluation layout: the record (one row per
+    scored forecast: median, band, outturn, signed error, where the outturn
+    fell) and the benchmark grid (the same outturn against the no-change
+    forecast and each published path, absolute errors side by side). Every
+    figure is read from scorecard.json; nothing is ranked or highlighted.
+    Absent entirely until something is scored.
+    """
+    rows = scored_entries(card)
     if not rows:
         return "      <!-- nothing scored yet -->"
 
-    body = ['      <div class="forecast-result-list">']
-    for detail, e in sorted(rows, key=lambda r: (r[1]["period"], r[1]["variable"])):
-        band = "68%" if e["in_68"] else ("90%" if e["in_90"] else "outside 90%")
-        naive = e.get("naive_rw")
-        official = e.get("official")
-        # Dot plot on a shared scale: every value at its true position, so a
-        # 0.12pp miss is visibly small and a 0.66pp miss visibly larger —
-        # bars from zero flattened exactly that comparison.
-        marks = [("Forecast", e["forecast"], "forecast", "up"),
-                 ("Outturn", e["outturn"], "outturn", "down")]
-        naive_footer = ""
-        if naive is not None:
-            marks.append(("Naive", naive, "naive", "up"))
-            verdict = "beats" if e["beats_naive"] else "does not beat"
-            # Name the benchmark. This is the DRIFTLESS walk, and §06 of the
-            # page says plainly that against a random walk WITH drift the
-            # advantage largely evaporates. Reporting a win against the weaker
-            # benchmark without saying which one it is was the page's single
-            # favourable data point resting on the comparison its own
-            # validation calls too weak for a trending series.
-            naive_footer = (
-                f"<span>{verdict} driftless-naive error "
-                f"<strong>{e['naive_abs_error']:.2f}pp</strong></span>"
-            )
-        official_footer = ""
-        if official is not None:
-            marks.append(("Official", official, "official", "down"))
-            official_footer = (
-                f"<span>{esc(e['official_label'])} error "
-                f"<strong>{e['official_abs_error']:.2f}pp</strong></span>"
-            )
-        values = [v for _, v, _, _ in marks]
-        lo, hi = min(values), max(values)
-        pad = max(hi - lo, 0.2) * 0.12
-        lo, hi = lo - pad, hi + pad
-        mark_html = "".join(
-            f"            <div class=\"fc-mark fc-mark-{kind} fc-{side}\" "
-            f"style=\"left:{(v - lo) / (hi - lo) * 100:.1f}%\">"
-            f"<i></i><span>{label}<strong>{v:.2f}%</strong></span></div>\n"
-            for label, v, kind, side in marks
-        )
-        aria = "; ".join(f"{label} {v:.2f} percent" for label, v, _, _ in marks)
-        body.append(
-            "        <article class=\"forecast-result\">\n"
-            "          <header>\n"
-            f"            <div><span class=\"mono\">{esc(e['period'])}</span>"
-            f"<h3>{esc(VARIABLE_LABELS.get(e['variable'], e['variable']))}</h3></div>\n"
-            f"            <span class=\"forecast-band\">Inside {esc(band)} band</span>\n"
-            "          </header>\n"
-            f"          <div class=\"forecast-dotplot\" aria-label=\"{aria}\">\n"
-            "            <div class=\"fc-axis\"></div>\n"
-            + mark_html
-            + "          </div>\n"
-            f"          <footer><span>Error <strong>{e['error']:+.2f}pp</strong></span>"
-            f"{naive_footer}"
-            f"{official_footer}"
-            f"<span>Round {esc(detail['round_id'])}</span></footer>\n"
-            "        </article>"
-        )
-    body.append("      </div>")
-    # How to read the card. Every caveat the arrow-bullet stack carried is
-    # kept verbatim; only the presentation changed, from a stack of keyed
-    # rows to one short paragraph directly under the card it explains.
-    notes = [
-        "Errors are signed forecast − outturn, so a positive number means "
-        "the forecast ran high."
+    body = [
+        '      <h3 class="sb-h" id="record">The record</h3>',
+        '      <div class="table-scroll">',
+        '        <table class="scoreboard" data-stack="yes">',
+        "          <caption>Every scored forecast. Forecast is the archived median; "
+        "errors are forecast minus outturn, in percentage points.</caption>",
+        "          <thead><tr>"
+        '<th scope="col">Target</th>'
+        '<th scope="col">Round</th>'
+        '<th scope="col" class="num">Forecast</th>'
+        '<th scope="col" class="num">Outturn</th>'
+        '<th scope="col" class="num">Error</th>'
+        '<th scope="col">Where the outturn fell</th>'
+        "</tr></thead>",
+        "          <tbody>",
     ]
-    if any(e.get("naive_rw") is not None for _, e in rows):
-        notes.append(esc(NAIVE_NOTE))
-    if any(e.get("official") is not None for _, e in rows):
+    for detail, e in rows:
+        vfile = vintage_file(e.get("outturn_series") or "", e["outturn_vintage"] or "")
+        outturn = f"{e['outturn']:.2f}%"
+        if vfile:
+            outturn += (f'<br><a class="mono sb-sub" href="{vfile}">vintage '
+                        f'{esc(e["outturn_vintage"])}</a>')
+        body.append(
+            "          <tr>"
+            f'<th scope="row">{_target(e)}</th>'
+            f'<td><a class="mono" href="/{esc(detail["path"])}">{esc(detail["round_id"])}</a>'
+            f'<br><span class="sb-sub">{model_html(detail)}</span></td>'
+            f'<td class="num">{e["forecast"]:.2f}%<br><span class="sb-sub">68%: '
+            f'{e["lo68"]:.2f}–{e["hi68"]:.2f}</span></td>'
+            f'<td class="num">{outturn}</td>'
+            f'<td class="num"><strong>{signed(e["error"])}</strong></td>'
+            f'<td>{_strip(e)}<span class="sb-band">{esc(_band_label(e))}</span></td>'
+            "</tr>"
+        )
+    body += ["          </tbody>", "        </table>", "      </div>"]
+    body.append(
+        '      <ul class="vc-legend sb-legend" aria-hidden="true">'
+        '<li><span class="vc-sw sw-band90"></span>90% band, as archived</li>'
+        '<li><span class="vc-sw sw-band68"></span>68% band</li>'
+        '<li><span class="vc-sw ln-s1"></span>forecast median</li>'
+        '<li><span class="vc-sw sw-dot-out"></span>outturn</li></ul>'
+    )
+
+    # Benchmark grid: one column per published path that scores anything,
+    # in the order the scorecard lists them (earliest fixed first).
+    labels: list[str] = []
+    for _, e in rows:
+        for b in e.get("benchmarks", []):
+            if b["label"] not in labels:
+                labels.append(b["label"])
+    has_naive = any(e.get("naive_rw") is not None for _, e in rows)
+    head = ['<th scope="col">Target</th>', '<th scope="col" class="num">This round</th>']
+    if has_naive:
+        head.append('<th scope="col" class="num">No change</th>')
+    head += [f'<th scope="col" class="num">{esc(lbl)}</th>' for lbl in labels]
+    body += [
+        '      <h3 class="sb-h" id="benchmarks">Against the benchmarks</h3>',
+        '      <div class="table-scroll">',
+        '        <table class="scoreboard sb-grid" data-stack="yes">',
+        "          <caption>Absolute error against the same outturn, in percentage "
+        "points; the benchmark's own value beneath it.</caption>",
+        "          <thead><tr>" + "".join(head) + "</tr></thead>",
+        "          <tbody>",
+    ]
+    for _, e in rows:
+        cells = [f'<th scope="row">{_target(e)}</th>',
+                 f'<td class="num"><strong>{e["abs_error"]:.2f}</strong></td>']
+        if has_naive:
+            cells.append(
+                f'<td class="num">{e["naive_abs_error"]:.2f}<br>'
+                f'<span class="sb-sub">{e["naive_rw"]:.2f}%</span></td>'
+                if e.get("naive_rw") is not None else '<td class="num">—</td>'
+            )
+        by_label = {b["label"]: b for b in e.get("benchmarks", [])}
+        if labels and not by_label:
+            cells.append(f'<td colspan="{len(labels)}"><span class="sb-sub">'
+                         "no published quarterly path</span></td>")
+        else:
+            for lbl in labels:
+                b = by_label.get(lbl)
+                cells.append(
+                    f'<td class="num">{b["abs_error"]:.2f}<br>'
+                    f'<span class="sb-sub">{b["value"]:.2f}%</span></td>'
+                    if b else '<td class="num">—</td>'
+                )
+        body.append("          <tr>" + "".join(cells) + "</tr>")
+    body += ["          </tbody>", "        </table>", "      </div>"]
+
+    notes = []
+    if has_naive:
         notes.append(
-            "The official number is the OBR March 2026 EFO — fixed months "
-            "earlier on less data, so part of its larger error is the "
-            "information gap."
+            "No change is the naive baseline: "
+            + esc(NAIVE_NOTE.split(": ", 1)[1]) + " This is the driftless walk; against a walk with "
+            "drift the CPI advantage largely evaporates (see the limits below)."
+        )
+    if labels:
+        notes.append(
+            "Published paths were fixed earlier, on less data: the BoE MPR in "
+            "February, the OBR EFO in March and the Bank's survey of external "
+            "forecasters (SEF) in April 2026, against July rounds. They show where views "
+            "differed, not who forecasts better."
         )
     if notes:
         body.append(
-            '      <p class="forecast-note">\n        '
-            + " ".join(notes)
-            + "\n      </p>"
+            '      <details class="about">\n        <summary>About the benchmarks</summary>\n'
+            + "".join(f"        <p>{n}</p>\n" for n in notes)
+            + "      </details>"
         )
     return "\n".join(body)
 

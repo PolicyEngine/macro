@@ -60,3 +60,17 @@ class MergeTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MappingTests(unittest.TestCase):
+    def test_every_forecast_variable_has_an_outturn_series(self):
+        """A forecast variable with no mapped series is never scored.
+
+        The svar-unemployment satellite's 2026Q2 outturn sat in data/latest
+        for weeks unscored because MAPPING had no unemployment row; an
+        available result left out of the record is worse than a bad one.
+        """
+        from forecasts.ingest_outturns import MAPPING, forecast_periods
+
+        missing = sorted(set(forecast_periods()) - set(MAPPING))
+        self.assertEqual(missing, [])
