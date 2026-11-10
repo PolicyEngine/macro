@@ -17,9 +17,10 @@
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <meta name="theme-color" content="#FFFFFF" />
 
+<link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=19" />
+<link rel="stylesheet" href="/style.css?v=23" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -77,10 +78,26 @@
       </p>
     </div>
 
-    <div class="scrolly-wrap">
+    <figure class="meth-map" aria-labelledby="meth-map-cap">
+      <figcaption id="meth-map-cap" class="meth-map-cap">How the model works, in one picture: the 3 steps below, in order.</figcaption>
+      <ol class="meth-map-list">
+        <li><a href="#meth-1"><span class="meth-map-num mono">1</span><span class="meth-map-t">Statute as a dependency graph</span></a></li>
+        <li><a href="#meth-2"><span class="meth-map-num mono">2</span><span class="meth-map-t">Reforms and reproducibility</span></a></li>
+        <li><a href="#meth-3"><span class="meth-map-num mono">3</span><span class="meth-map-t">Survey microdata, enhanced</span></a></li>
+      </ol>
+    </figure>
+
+    <div class="scrolly-wrap single meth-pair">
       <div class="scrolly-steps">
       <div class="meth-step" id="meth-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Statute as a dependency graph</h3></div>
+        <p>Every quantity — an allowance, a taper, a means test — is a variable with a formula and dated parameters. Asking for one variable resolves the graph beneath it, so a net-income figure comes from the statutory chain, not an approximating schedule.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">Rules, entities, dependency graph</div>
+        <div class="meth-eq"><div class="meth-eq-label">Variable</div><div class="meth-eq-body">formula + dated parameters</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Resolution</div><div class="meth-eq-body">request a variable &rarr; resolve the graph beneath it</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Entities</div><div class="meth-eq-body">UK: 3 &middot; US: 6</div></div>
+        </div>
         <figure class="step-diagram" data-title="Statute as a dependency graph" tabindex="0" role="button" aria-label="Expand diagram: Statute as a dependency graph">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
                 <defs><marker id="arr-s1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -105,16 +122,8 @@
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>Every quantity — an allowance, a taper, a means test — is a variable with a formula and dated parameters. Asking for one variable resolves the graph beneath it, so a net-income figure comes from the statutory chain, not an approximating schedule.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">rules, entities, dependency graph</div>
-        <div class="meth-eq"><div class="meth-eq-label">variable</div><div class="meth-eq-body">formula + dated parameters</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">resolution</div><div class="meth-eq-body">request a variable &rarr; resolve the graph beneath it</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">entities</div><div class="meth-eq-body">UK: 3 &middot; US: 6</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
-          <h4>Variables and parameters</h4>
           <h4>Entities</h4>
           <p>Variables attach to <strong>entities</strong>, which differ by country — UK: three (person, benefit unit, household); US: six (person, tax unit, SPM unit, family, marital unit, household) — because US programmes are assessed on differently drawn units.</p>
         </details>
@@ -122,6 +131,12 @@
 
       <div class="meth-step" id="meth-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Reforms and reproducibility</h3></div>
+        <p>A reform re-dates a parameter and re-resolves the same graph, so the household and population APIs take reforms in the identical format — a flat dict of parameter path &rarr; new value.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">Reform mechanics</div>
+        <div class="meth-eq"><div class="meth-eq-label">Reform</div><div class="meth-eq-body">{parameter path &rarr; new value}</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Evaluation</div><div class="meth-eq-body">re-date parameter &rarr; re-resolve same graph</div></div>
+        </div>
         <figure class="step-diagram" data-title="One reform format" tabindex="0" role="button" aria-label="Expand diagram: One reform format">
           <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
                 <defs><marker id="arr-s2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -144,15 +159,8 @@
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>A reform re-dates a parameter and re-resolves the same graph, so the household and population APIs take reforms in the identical format — a flat dict of parameter path &rarr; new value.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">reform mechanics</div>
-        <div class="meth-eq"><div class="meth-eq-label">reform</div><div class="meth-eq-body">{parameter path &rarr; new value}</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">evaluation</div><div class="meth-eq-body">re-date parameter &rarr; re-resolve same graph</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
-          <h4>One reform format</h4>
           <h4>Version-pinned releases</h4>
           <p>Each release pins the country-model and dataset versions it certifies, so a published estimate traces to the exact bundle that produced it.</p>
         </details>
@@ -160,6 +168,13 @@
 
       <div class="meth-step" id="meth-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Survey microdata, enhanced</h3></div>
+        <p>Household calculations need no data and no credentials — the inputs are the ones you type.</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">Data enhancement</div>
+        <div class="meth-eq"><div class="meth-eq-label">UK dataset</div><div class="meth-eq-body">enhanced FRS &middot; <code>enhanced_frs_2023_24</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">US dataset</div><div class="meth-eq-body">Current Population Survey (CPS)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Enhancement</div><div class="meth-eq-body">impute under-reported incomes + reweight to administrative totals</div></div>
+        </div>
         <figure class="step-diagram" data-title="Enhanced survey microdata" tabindex="0" role="button" aria-label="Expand diagram: Enhanced survey microdata">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
                 <defs><marker id="arr-s3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -184,13 +199,6 @@
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
-        <p>Household calculations need no data and no credentials — the inputs are the ones you type.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">data enhancement</div>
-        <div class="meth-eq"><div class="meth-eq-label">UK dataset</div><div class="meth-eq-body">enhanced FRS &middot; <code>enhanced_frs_2023_24</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">US dataset</div><div class="meth-eq-body">Current Population Survey (CPS)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">enhancement</div><div class="meth-eq-body">impute under-reported incomes + reweight to administrative totals</div></div>
-        </div>
         <details class="about">
           <summary>About this step</summary>
           <h4>Two modes, two data needs</h4>
@@ -206,23 +214,23 @@
       <aside class="scrolly-sticky" aria-hidden="true">
         <div class="meth-panel" data-step="0">
           <div class="meth-panel-head"><span class="meth-panel-title">Statute as a dependency graph</span><span class="meth-panel-badge mono">Step 1</span></div>
-          <div class="meth-sec-title">rules, entities, dependency graph</div>
-        <div class="meth-eq"><div class="meth-eq-label">variable</div><div class="meth-eq-body">formula + dated parameters</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">resolution</div><div class="meth-eq-body">request a variable &rarr; resolve the graph beneath it</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">entities</div><div class="meth-eq-body">UK: 3 &middot; US: 6</div></div>
+          <div class="meth-sec-title">Rules, entities, dependency graph</div>
+        <div class="meth-eq"><div class="meth-eq-label">Variable</div><div class="meth-eq-body">formula + dated parameters</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Resolution</div><div class="meth-eq-body">request a variable &rarr; resolve the graph beneath it</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Entities</div><div class="meth-eq-body">UK: 3 &middot; US: 6</div></div>
         </div>
         <div class="meth-panel" data-step="1" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Reforms and reproducibility</span><span class="meth-panel-badge mono">Step 2</span></div>
-          <div class="meth-sec-title">reform mechanics</div>
-        <div class="meth-eq"><div class="meth-eq-label">reform</div><div class="meth-eq-body">{parameter path &rarr; new value}</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">evaluation</div><div class="meth-eq-body">re-date parameter &rarr; re-resolve same graph</div></div>
+          <div class="meth-sec-title">Reform mechanics</div>
+        <div class="meth-eq"><div class="meth-eq-label">Reform</div><div class="meth-eq-body">{parameter path &rarr; new value}</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Evaluation</div><div class="meth-eq-body">re-date parameter &rarr; re-resolve same graph</div></div>
         </div>
         <div class="meth-panel" data-step="2" hidden>
           <div class="meth-panel-head"><span class="meth-panel-title">Survey microdata, enhanced</span><span class="meth-panel-badge mono">Step 3</span></div>
-          <div class="meth-sec-title">data enhancement</div>
+          <div class="meth-sec-title">Data enhancement</div>
         <div class="meth-eq"><div class="meth-eq-label">UK dataset</div><div class="meth-eq-body">enhanced FRS &middot; <code>enhanced_frs_2023_24</code></div></div>
         <div class="meth-eq"><div class="meth-eq-label">US dataset</div><div class="meth-eq-body">Current Population Survey (CPS)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">enhancement</div><div class="meth-eq-body">impute under-reported incomes + reweight to administrative totals</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Enhancement</div><div class="meth-eq-body">impute under-reported incomes + reweight to administrative totals</div></div>
         </div>
       </aside>
     </div>
@@ -268,7 +276,9 @@
   <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
     <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/glossary">Glossary</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro/issues">Report an issue</a>
     <a class="footer-text" href="/contact">Contact</a>
   </nav>
 </footer>

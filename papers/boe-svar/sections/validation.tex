@@ -11,11 +11,11 @@ Validation is against ground truth --- the restrictions and published figures of
 
 Getting that comparison like-for-like took three corrections, all made in August 2026 and all of which had been inflating the replication's agreement with the paper. First, the \emph{horizon}: the decomposition of equation~\eqref{eq:fevd} accumulates squared moving-average coefficients, so its column $h$ holds the variance of the $(h{+}1)$-step-ahead forecast error. ``One year'' is therefore column 3, not column 4; reading column 4 was reading five quarters. Second, the \emph{statistic}: the shares were formed by summing the six identified shocks' pointwise posterior \emph{medians} and renormalising the result to 100 per cent. The per-shock medians sum to about 0.62 (GDP) and 0.71 (CPI) here, so that renormalisation inflated every identified share by roughly a third. Third, the \emph{target}: the paper's Figure~4 decomposes ``the mean of the sum of the decomposition'', and its note attributes the residual to 100 per cent to the unidentified shocks --- its text states that the six identified shocks explain around 80 per cent of the domestic variables, of which the global shocks are around 40 per cent of real GDP and 50 per cent of CPI variation one year after the shocks. Its shares are therefore posterior \emph{means} of shares of \emph{total} forecast-error variance, renormalised over nothing.
 
-Computed the paper's way --- the group share formed on each accepted draw, averaged, four quarters ahead --- the 10{,}000-draw production run gives \textbf{37.4} per cent for UK GDP against the paper's $\sim$40, a match, and \textbf{42.3} per cent for UK CPI against $\sim$50, about eight points short. The previously published pair, 42.1 and 49.5 per cent, appeared to match on both; the CPI agreement was the renormalisation, not the model. What the shortfall does \emph{not} support is a strong claim in either direction: the 68 per cent posterior band on these shares is $[23.4, 52.2]$ for GDP and $[25.5, 60.3]$ for CPI, roughly $\pm14$ points, wider than the eight-point gap being discussed. The identified shocks in total explain about 76 per cent of UK GDP and 79 per cent of UK CPI one-year variance here, against the paper's ``around 80 per cent'' --- so the disagreement is about the \emph{split} between global and domestic, not about how much the six shocks explain.
+Computed the paper's way --- the group share formed on each accepted draw, averaged, four quarters ahead --- the 10{,}000-draw production run gives \textbf{38.7} per cent for UK GDP against the paper's $\sim$40, a match, and \textbf{41.5} per cent for UK CPI against $\sim$50, about eight and a half points short. The previously published pair, 42.1 and 49.5 per cent, appeared to match on both; the CPI agreement was the renormalisation, not the model. What the shortfall does \emph{not} support is a strong claim in either direction: the 68 per cent posterior band on these shares is $[24.0, 53.1]$ for GDP and $[25.6, 56.3]$ for CPI, roughly $\pm15$ points, wider than the 8.5-point gap being discussed. The identified shocks in total explain about 77 per cent of UK GDP and 78 per cent of UK CPI one-year variance here, against the paper's ``around 80 per cent'' --- so the disagreement is about the \emph{split} between global and domestic, not about how much the six shocks explain.
 
 The $[30, 60]$ per cent acceptance band used by the per-commit test suite should be read for what it is: a regression tripwire, not a calibration result. A band 30 points wide around targets of 40 and 50 admits values from three-quarters below to half again above the published number, so ``in band'' is close to a claim that cannot fail; it is set to catch a gross code regression without going flaky on Monte-Carlo variation and the proxy world aggregates, and passing it is not evidence of agreement. The informative comparison is the point estimate against $\sim$40 / $\sim$50 with its posterior band, above.
 
-Nor do the importance weights explain the remaining distance. The cheap unweighted CI configuration (600 draws, 51 accepted) gives 42.0 and 37.6 per cent, but it is a noisy estimator --- across sampling seeds its global GDP share has a standard deviation of about 6.5 points at that draw count --- and the unweighted 3{,}000-draw run behind Figures~\ref{fig:irf}--\ref{fig:hd} gives 38.1 and 42.3 per cent, essentially the weighted production values. The gap between the CI configuration and the production run is therefore Monte-Carlo noise in the accepted sample, not the weights correcting the \citet{arias2018} sampler towards the uniform-over-rotations posterior; an earlier version of this paper attributed it to the weights.
+Nor do the importance weights explain the remaining distance. The cheap unweighted CI configuration (600 draws, 51 accepted) gives 40.1 and 40.1 per cent, but it is a noisy estimator --- across sampling seeds its global GDP share has a standard deviation of about 6.5 points at that draw count --- and the unweighted 3{,}000-draw run behind Figures~\ref{fig:irf}--\ref{fig:hd} gives 38.1 and 42.3 per cent, essentially the weighted production values. The gap between the CI configuration and the production run is therefore Monte-Carlo noise in the accepted sample, not the weights correcting the \citet{arias2018} sampler towards the uniform-over-rotations posterior; an earlier version of this paper attributed it to the weights.
 
 \begin{table}[t]
 \centering
@@ -37,22 +37,22 @@ Forecast-revision adding-up identity & $<5.3\times10^{-12}$ & identity & algebra
 \multicolumn{4}{@{}l}{\emph{Can fail --- comparisons against the publication}} \\
 Sign restrictions on the median IRF & every restricted response & imposed per draw & pass \\
 Oil price after world supply shock (impact) & $+5.83$ (unrestricted) & positive (Fig.~2) & pass \\
-Global share, UK GDP FEVD, 1 yr & 37.4\% [23.4, 52.2] & $\sim$40\% & match \\
-Global share, UK CPI FEVD, 1 yr & 42.3\% [25.5, 60.3] & $\sim$50\% & $\sim$8 pp short \\
+Global share, UK GDP FEVD, 1 yr & 38.7\% [24.0, 53.1] & $\sim$40\% & match \\
+Global share, UK CPI FEVD, 1 yr & 41.5\% [25.6, 56.3] & $\sim$50\% & $\sim$8.5 pp short \\
 Identified shocks in total, UK GDP / CPI, 1 yr & 76\% / 79\% & ``around 80\%'' & match \\
 Shock narrative (2008, 2022--23 episodes) & reproduced & Fig.~5 & pass \\
 Largest domestic CPI contributor & UK supply (13.9\% vs 8.7\%) & monetary policy (prose) & unresolved \\
 \bottomrule
 \end{tabularx}
 \par\smallskip
-\parbox{0.95\textwidth}{\footnotesize \emph{Notes:} The first block is separated because those six checks have no failing branch: zeros and $BB'=\Sigma$ are properties of the \citet{arias2018} construction, sign restrictions are the accept/reject rule itself, and the last three are algebraic identities of equations~\eqref{eq:fevd}, \eqref{eq:hd} and \eqref{eq:revision}. The residuals are solver tolerances, not accuracy. FEVD rows: posterior mean of the group share formed on each accepted draw at the 4-quarter-ahead forecast-error variance, as a share of total variance --- the statistic the paper's Figure~4 plots --- with 68 per cent posterior bands in brackets; production run of 10{,}000 posterior draws, 744 accepted, importance-weighted ESS 356.1. The final row is marked unresolved rather than a known defect: the paper states the monetary-policy ranking in prose but publishes no FEVD table, and its Figure~4 does not obviously show it for CPI; percentages are this replication's median 1-year CPI shares for UK supply and UK monetary policy. Proxy world aggregates remain a candidate explanation.}
+\parbox{0.95\textwidth}{\footnotesize \emph{Notes:} The first block is separated because those six checks have no failing branch: zeros and $BB'=\Sigma$ are properties of the \citet{arias2018} construction, sign restrictions are the accept/reject rule itself, and the last three are algebraic identities of equations~\eqref{eq:fevd}, \eqref{eq:hd} and \eqref{eq:revision}. The residuals are solver tolerances, not accuracy. FEVD rows: posterior mean of the group share formed on each accepted draw at the 4-quarter-ahead forecast-error variance, as a share of total variance --- the statistic the paper's Figure~4 plots --- with 68 per cent posterior bands in brackets; production run of 10{,}000 posterior draws, 765 accepted, importance-weighted ESS 368.0. The final row is marked unresolved rather than a known defect: the paper states the monetary-policy ranking in prose but publishes no FEVD table, and its Figure~4 does not obviously show it for CPI; percentages are this replication's median 1-year CPI shares for UK supply and UK monetary policy. Proxy world aggregates remain a candidate explanation.}
 \end{table}
 
 \paragraph{Internal consistency.} Identities are verified to numerical precision rather than assumed: FEVD shares sum to one at every horizon on every draw within $10^{-10}$ (equation~\ref{eq:fevd}); the historical decomposition~\eqref{eq:hd} --- structural shocks plus Covid component plus deterministic component --- reconstructs the observed data within $10^{-8}$, and the stochastic component equals the sum over shocks within $10^{-10}$; and in the forecast-revision exercise the identity ``forecast at $T$ $=$ pseudo-forecast at $T{-}1$ $+$ composite impulse response'' holds per draw with a maximum absolute error of $5.3\times10^{-12}$ across all draws, horizons and variables.
 
 \paragraph{Rolling-origin forecast evidence: no demonstrated skill.} A separate
 expanding-window pseudo-out-of-sample evaluation estimates the reduced-form
-BVAR at 49 historical origins, at horizons one to eight, and compares its
+BVAR at 50 historical origins, at horizons one to eight, and compares its
 posterior-mean path with three benchmarks: no change (a driftless random walk),
 a random walk \emph{with drift}, and an AR(1). No structural restriction or
 FEVD target enters this exercise. Read carelessly it is the most flattering
@@ -84,7 +84,7 @@ production-specification block is the like-for-like one.
 Diebold--Mariano tests per benchmark, so the smallest of them is not a
 discovery. Under a Benjamini--Hochberg false-discovery-rate adjustment across
 the whole grid, the minimum $q$-value against the drifting random walk is
-\textbf{0.36} in the headline block and \textbf{0.40} under the published
+\textbf{0.39} in the headline block and \textbf{0.42} under the published
 specification: \emph{nothing clears a 10 per cent false-discovery rate on any
 variable at any horizon}. Bank Rate comes closest --- relative RMSE 0.78--0.87
 against drift and an unadjusted $p = 0.018$ at one quarter, the smallest of the
@@ -92,7 +92,7 @@ against drift and an unadjusted $p = 0.018$ at one quarter, the smallest of the
 any $q$-values fall below 0.10 (two in the headline block, three under the
 published specification), and none below 0.05.
 
-The honest summary is therefore narrower than the earlier one: this model has
+The summary is therefore narrower than the earlier one: this model has
 \emph{not} demonstrated forecast skill against a drifting random walk on any
 variable at any horizon, and the seven-quarter frozen-edge result of
 Section~\ref{sec:results} is a single origin, not a contradiction of that. The

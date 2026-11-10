@@ -141,7 +141,8 @@ def build() -> str:
     # The labels are lifted into HTML by chartkit, so they stay 12 px at every
     # width; the <figcaption> next to this figure carries the rest.
     out.append("</svg>")
-    return "\n".join([MARK_OPEN, chartkit.figure("\n".join(out), wrap_class="vc-hero"), MARK_CLOSE])
+    return "\n".join([MARK_OPEN, chartkit.figure("\n".join(out), wrap_class="vc-hero",
+                                                  unit="UK real GDP, % change on a year earlier"), MARK_CLOSE])
 
 
 BLOCK_RE = re.compile(re.escape(MARK_OPEN) + r".*?" + re.escape(MARK_CLOSE), re.DOTALL)

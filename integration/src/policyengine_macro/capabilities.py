@@ -24,7 +24,10 @@ MODELS = {
         "access": ["hosted", "CLI", "Python"],
         "runtime": "sub-second household; minutes population",
         "uncertainty": "none for household arithmetic; survey/calibration uncertainty for population estimates",
-        "status": "production-ready for selected household applications",
+        "status": (
+            "exact for implemented rules (household arithmetic); population "
+            "estimates add survey error"
+        ),
         "data_vintage": "country package and dataset dependent; recorded per run",
     },
     "og+microsim": {
@@ -67,7 +70,10 @@ MODELS = {
         "access": ["hosted", "CLI", "Python"],
         "runtime": "seconds for raw shocks; minutes for translated reform scenarios",
         "uncertainty": "not comprehensive",
-        "status": "validated for selected scenarios",
+        "status": (
+            "anchored to the March 2026 EFO, not validated as a forecaster; "
+            "predictive and policy checks weak"
+        ),
         "data_vintage": "March 2026 EFO baseline",
     },
     "boe-svar": {
@@ -84,7 +90,11 @@ MODELS = {
         "access": ["hosted forecast and latest shocks", "CLI", "Python package for wider analysis"],
         "runtime": "minutes per estimation and identification run",
         "uncertainty": "posterior 68% and 90% intervals",
-        "status": "validated replication for selected outputs",
+        "status": (
+            "partial replication of Brignone and Piffer (2025): GDP "
+            "decomposition consistent with the paper; CPI global-shock share "
+            "about 8pp short; no forecast skill against a drifting random walk"
+        ),
         "estimation_sample": "1992Q1-2025Q1",
         "data_edge": "2026Q1",
         "data_vintage": "2026Q1 conditioning data; estimation ends 2025Q1",
@@ -103,7 +113,11 @@ MODELS = {
         "access": ["hosted raw shocks", "CLI with editable model checkout", "Python"],
         "runtime": "seconds to minutes",
         "uncertainty": "not comprehensive",
-        "status": "validated software replication with scope limits",
+        "status": (
+            "replicates the Fed's pyfrbus on one 100bp funds-rate shock, "
+            "within the gap between pyfrbus 1.0.0 and 1.1.1; a solver check, "
+            "not a test of the economics"
+        ),
         "data_vintage": "LONGBASE file from the installed frbus package",
     },
     "us-hank": {
@@ -123,18 +137,19 @@ MODELS = {
         ],
         "horizon": "quarterly impulse responses, typically 5 years",
         "access": ["hosted stylized shocks", "CLI", "Python"],
-        "runtime": "~18s cold per variant (steady state + jacobian, cached); instant warm",
+        "runtime": "about 10 seconds cold on a laptop (steady state plus Jacobian, then cached); instant warm",
         "uncertainty": "none quantified; deterministic linear IRFs",
         "status": (
             # us-hank-model README "Validation status": only the solved
             # steady-state parameters are validated (Table B.III, phi differs);
             # IRF magnitudes are not, and the by-wealth split is an
             # accounting allocation (distributional.py), not a solved response.
-            "steady state replicates the paper (six of seven solved "
-            "parameters); shock signs are tested, magnitudes are not "
-            "validated; not a forecaster; distributional outputs are "
-            "steady-state statistics and an MPC-proportional split of the "
-            "aggregate"
+            "partial replication of Auclert et al. (2021): six of seven "
+            "solved parameters match (vphi misses by 17.3%, unresolved); "
+            "steady-state targets are inputs; shock signs are tested, "
+            "magnitudes are not; not a forecaster; distributional outputs "
+            "are steady-state statistics and an MPC-proportional split of "
+            "the aggregate"
         ),
         "data_vintage": "Auclert-Bardóczy-Rognlie-Straub (2021) calibration",
     },
@@ -157,9 +172,9 @@ MODELS = {
         "cannot_answer": ["short-run forecast", "fast hosted custom scenario"],
         "horizon": "long-run steady state; package also supports transition paths",
         "access": ["local CLI steady state", "Python package"],
-        "runtime": "17+ minutes per steady-state solve; transition paths can take hours",
+        "runtime": "a steady-state solve takes many minutes and transition paths far longer (not timed)",
         "uncertainty": "sensitivity analysis not yet comprehensive",
-        "status": "research prototype; calibrated counterfactual",
+        "status": "calibrated; no outcome benchmark; research prototype",
         "data_vintage": "OG-UK packaged calibration inputs",
     },
     "define-uk": {
@@ -185,12 +200,12 @@ MODELS = {
         "runtime": "instant from the cached upstream run; a fresh run needs local R (full notebook)",
         "uncertainty": "none quantified; deterministic scenario deltas from one calibration",
         "status": (
-            "experimental; partial replication — baseline macro block "
-            "replicates manual Table 4; scenario deltas gated on the pinned "
+            "partial replication of the DEFINE-UK manual: baseline macro "
+            "block replicates Table 4; scenario deltas gated on the pinned "
             "oracle run, the published scenario definitions, and two paper "
             "anchors (no numeric v1.1 scenario results are published); "
-            "unlicensed upstream is never hosted, so hosted calls return "
-            "run instructions"
+            "experimental; unlicensed upstream is never hosted, so hosted "
+            "calls return run instructions"
         ),
         "data_vintage": "DEFINE-UK 1.1 upstream at pinned commit 846081a (April 2026 manual)",
     },
@@ -266,12 +281,15 @@ MODEL_QUALITY = {
             "real data to numerical precision.",
             "Keep all exact invariants hard-gated for every specification.",
         ),
+        # Figures in this entry and the next are from boe-var-model #24
+        # (data through 2026Q2), the run vintage cited on /svar/validation;
+        # the pre-refresh values are at boe-var-model 845e2a4.
         "predictive_validation": _quality(
             "weak",
-            "No demonstrated skill against a random walk WITH DRIFT on any "
+            "No demonstrated skill against a random walk with drift on any "
             "variable at any horizon. The grid runs 64 variable-by-horizon "
             "tests; adjusted together, the smallest Benjamini-Hochberg q is "
-            "0.36. Bank Rate comes closest (0.79 at h=1) and does not "
+            "0.39. Bank Rate comes closest (0.79 at h=1) and does not "
             "survive. The model looks strong against a driftless walk, but "
             "that benchmark forfeits the trend on a trending log level and "
             "is too weak to learn from. Under the published specification "
@@ -286,8 +304,8 @@ MODEL_QUALITY = {
             "moderate",
             "On the paper's own definition -- the posterior mean of the "
             "per-draw group share of TOTAL four-quarter-ahead variance -- UK "
-            "GDP replicates (37.4% against ~40%) and UK CPI falls about 8pp "
-            "short (42.3% against ~50%). The 68% band is roughly +/-14pp, "
+            "GDP replicates (38.7% against ~40%) and UK CPI falls about 8.5pp "
+            "short (41.5% against ~50%). The 68% band is roughly +/-15pp, "
             "wider than the shortfall, so the data do not resolve it. Proxy "
             "world aggregates remain a candidate explanation.",
             "Show conclusions across lag, prior, proxy-data and weighting grids "

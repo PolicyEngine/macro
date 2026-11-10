@@ -17,9 +17,10 @@
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <meta name="theme-color" content="#FFFFFF" />
 
+<link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=19" />
+<link rel="stylesheet" href="/style.css?v=23" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -66,7 +67,7 @@
       <h2>BoE SVAR at a glance</h2>
     </div>
     <p class="callout verdict-callout">
-      <strong>Verdict: replicates the paper&rsquo;s GDP decomposition, short on CPI; no forecast skill.</strong>
+      <strong>Verdict: partial replication; GDP decomposition consistent with the paper, short on CPI; no forecast skill.</strong>
       Against a drifting random walk no variable shows skill at any horizon once the tests are adjusted together.
       <a href="/svar/validation#forecasters">How far to trust it &rarr;</a>
     </p>
@@ -77,10 +78,10 @@
       <div><dt>Outputs</dt><dd>GDP and CPI forecasts with bands, identified shocks, decompositions, forecast revisions</dd></div>
       <div><dt>Horizon</dt><dd>Quarterly short-run forecast</dd></div>
       <div><dt>Data</dt><dd>Sample 1992Q1&ndash;2025Q1 &middot; conditioning data through 2026Q1</dd></div>
-      <div><dt>Uncertainty</dt><dd>Posterior 68% and 90% intervals, raw rather than calibrated to <a href="/svar/validation#rolling">measured coverage</a></dd></div>
+      <div><dt>Uncertainty</dt><dd><a class="gloss-link" href="/glossary#prior-posterior">Posterior</a> 68% and 90% intervals, raw rather than calibrated to <a href="/svar/validation#rolling">measured coverage</a></dd></div>
       <div><dt>Access</dt><dd>Hosted forecast and latest shocks, CLI, Python</dd></div>
       <div><dt>Runtime</dt><dd>Minutes per estimation run</dd></div>
-      <div class="model-card-wide"><dt>Status</dt><dd>Validated replication for selected outputs</dd></div>
+      <div class="model-card-wide"><dt>Status</dt><dd>Partial replication of Brignone and Piffer (2025): GDP decomposition consistent with the paper; CPI global-shock share about 8pp short; no forecast skill against a drifting random walk</dd></div>
       <div class="model-card-wide"><dt>Cannot answer</dt><dd>The effect of a statutory policy reform: <code>score_reform</code> does not accept it (<a href="/svar/validation#caveats">limits</a>)</dd></div>
     </dl>
   </section>
@@ -94,36 +95,8 @@
     <div class="scrolly-wrap single">
       <div class="scrolly-steps">
 
-      <div class="meth-step" id="pe-bridge" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>With the microsimulation</h3></div>
-        <p class="mo-lead">Its CPI forecast prices CPI-linked benefit uprating; it does not score reforms.</p>
-        <div class="pipeline">
-          <span class="pl-node"><strong>BoE SVAR</strong><span class="mono">CPI path</span></span>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">benefit uprating</span></a>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <span class="pl-node pl-node-out"><strong>Who gains and loses</strong></span>
-        </div>
-        <p class="callout callout-neutral"><strong>It does not score reforms.</strong> Mapping a policy reform
-                into identified structural innovations is conceptually dubious, not
-                merely unbuilt.</p>
-    <details class="about"><summary>More detail</summary><p>For reform scoring use the
-                <a href="/obr">OBR emulator</a> (short-run, fiscal) or the
-                <a href="/olg">OLG model</a> (long-run, structural) — both fed by the
-                <a href="/pe">PolicyEngine microsimulation</a>'s static costing, as
-                the <a href="/models#score">score a reform</a> workflow shows; this model
-                tells you what you are scoring <em>against</em>.</p></details>
-        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
-        <p class="kv-title">Forecast to incidence</p>
-        <dl class="kv kv-text"><div><dt>Tool</dt><dd><code>svar_inflation_incidence</code></dd></div><div><dt>What moves</dt><dd>this model&rsquo;s CPI path minus the official one</dd></div><div><dt>Enters</dt><dd>April 2028 uprating of CPI-linked benefits</dd></div><div><dt>Status</dt><dd>experimental</dd></div><div><dt>Refused</dt><dd><code>score_reform</code> does not accept it</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p>Forecast-to-incidence bridge: <code>svar_inflation_incidence</code> passes the gap between this model's CPI path and the official one through the April 2028 uprating of CPI-linked benefits in <a href="/pe">PolicyEngine</a>. Experimental, and labelled as such. No reform scoring — <code>score_reform</code> does not accept this model.</p>
-        </details>
-      </div>
-
-      <div class="meth-step" id="what" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it is</h3></div>
+      <div class="meth-step" id="what" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>What it is</h3></div>
         <p class="mo-lead">The Bank&rsquo;s own empirical lens, replicated in the open.</p>
         <div class="mo-figcard full">
 <!-- boe-current-outlook:begin -->
@@ -132,7 +105,7 @@
 <p class="vc-unit">UK real GDP, % change on a year earlier</p>
 <div class="vc-plot">
 <svg class="vchart" viewBox="56 36 688 248" role="img" aria-labelledby="boe-current-t boe-current-d" preserveAspectRatio="none">
-<title id="boe-current-t">Current boe-svar UK real GDP growth forecast</title>
+<title id="boe-current-t">Current BoE SVAR UK real GDP growth forecast</title>
 <desc id="boe-current-d">Fan chart from the latest complete quarterly data edge, 2026Q1, forecasting 2026Q2 to 2029Q2. Median with 68 and 90 percent predictive bands.</desc>
 <line class="vc-zero" x1="62" y1="233.8" x2="738" y2="233.8"/>
 <line class="vc-grid" x1="62" y1="186.1" x2="738" y2="186.1"/>
@@ -169,15 +142,15 @@
         </div>
         <p class="vlinks mono"><a href="/svar/methodology#sources">the source paper, method papers and code &rarr;</a></p>
         <p class="kv-title">The replication</p>
-        <dl class="kv kv-text"><div><dt>Source</dt><dd>BoE Macro Technical Paper No.&nbsp;3, July 2025</dd></div><div><dt>Family</dt><dd>Bayesian structural VAR</dd></div><div><dt>Shocks</dt><dd>six named structural shocks</dd></div><div><dt>Identification</dt><dd>zero and sign restrictions</dd></div><div><dt>Role</dt><dd>baseline and conditioning member</dd></div></dl>
+        <dl class="kv kv-text"><div><dt>Source</dt><dd>BoE Macro Technical Paper No.&nbsp;3, July 2025</dd></div><div><dt>Family</dt><dd>Bayesian structural VAR</dd></div><div><dt>Shocks</dt><dd>six named structural shocks</dd></div><div><dt>Identification</dt><dd><a class="gloss-link" href="/glossary#sign-restrictions">zero and sign restrictions</a></dd></div><div><dt>Role</dt><dd>baseline and conditioning member</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <p>In July 2025 the Bank of England published Macro Technical Paper
                 No.&nbsp;3 — <em>A structural VAR model for the UK economy</em> — with
                 no replication package. This project re-implements the full pipeline
                 in Python — public-source data assembly, Bayesian estimation,
-                identification, and every output figure — validated against the
-                paper's published results.</p>
+                identification, and every output figure — compared with the
+                paper's published results, gaps included (<a href="/svar/validation">validation</a>).</p>
           <p>Within the suite it is the <strong>empirical, time-series
                 member</strong> — a structural VAR: a statistical model of a small
                 set of series, with just enough economic structure to name the shocks
@@ -187,19 +160,19 @@
         </details>
       </div>
 
-      <div class="meth-step" id="answers" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
+      <div class="meth-step" id="answers" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it can answer</h3></div>
         <p class="mo-lead">What is hitting the economy now, and why, as posterior distributions.</p>
         <div class="table-scroll mo-tablecard"><table>
                 <caption>The SVAR toolkit and what each output tells you</caption>
                 <thead><tr><th scope="col">tool</th><th scope="col">what it tells you</th></tr></thead>
                 <tbody>
                   <tr>
-                    <th scope="row"><strong>IRFs &amp; FEVDs</strong></th>
+                    <th scope="row"><strong><a class="gloss-link" href="/glossary#irf">IRFs</a> &amp; <a class="gloss-link" href="/glossary#fevd">FEVDs</a></strong></th>
                     <td>How each named shock propagates through the UK economy (the impulse response function, IRF), and how much of GDP and inflation variance each explains at every horizon (the FEVD).</td>
                   </tr>
                   <tr>
-                    <th scope="row"><strong>Historical decompositions</strong></th>
+                    <th scope="row"><strong><a class="gloss-link" href="/glossary#historical-decomposition">Historical decompositions</a></strong></th>
                     <td>Which shocks drove each episode — how much of the 2022 inflation surge was world energy versus UK demand.</td>
                   </tr>
                   <tr>
@@ -230,6 +203,34 @@
                 scored reform.
               </p>
           <p>Results: the live UK fan chart on the <a href="/">home page</a> and every archived round under <a href="/forecasts#open">forecasts</a>.</p>
+        </details>
+      </div>
+
+      <div class="meth-step" id="pe-bridge" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>With the microsimulation</h3></div>
+        <p class="mo-lead">Its CPI forecast prices CPI-linked benefit uprating; it does not score reforms.</p>
+        <div class="pipeline">
+          <span class="pl-node"><strong>BoE SVAR</strong><span class="mono">CPI path</span></span>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">benefit uprating</span></a>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <span class="pl-node pl-node-out"><strong>Who gains and loses</strong></span>
+        </div>
+        <p class="callout callout-neutral"><strong>It does not score reforms.</strong> Mapping a policy reform
+                into identified structural innovations is conceptually dubious, not
+                merely unbuilt.</p>
+    <details class="about"><summary>More detail</summary><p>For reform scoring use the
+                <a href="/obr">OBR emulator</a> (short-run, fiscal) or the
+                <a href="/olg">OLG model</a> (long-run, structural) — both fed by the
+                <a href="/pe">PolicyEngine microsimulation</a>'s static costing, as
+                the <a href="/models#score">score a reform</a> workflow shows; this model
+                tells you what you are scoring <em>against</em>.</p></details>
+        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
+        <p class="kv-title">Forecast to incidence</p>
+        <dl class="kv kv-text"><div><dt>Tool</dt><dd><code>svar_inflation_incidence</code></dd></div><div><dt>What moves</dt><dd>this model&rsquo;s CPI path minus the official one</dd></div><div><dt>Enters</dt><dd>April 2028 uprating of CPI-linked benefits</dd></div><div><dt>Status</dt><dd>experimental</dd></div><div><dt>Refused</dt><dd><code>score_reform</code> does not accept it</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p>Forecast-to-incidence bridge: <code>svar_inflation_incidence</code> passes the gap between this model's CPI path and the official one through the April 2028 uprating of CPI-linked benefits in <a href="/pe">PolicyEngine</a>. Experimental, and labelled as such. No reform scoring — <code>score_reform</code> does not accept this model.</p>
         </details>
       </div>
 
@@ -267,7 +268,9 @@
   <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
     <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/glossary">Glossary</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro/issues">Report an issue</a>
     <a class="footer-text" href="/contact">Contact</a>
   </nav>
 </footer>

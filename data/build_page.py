@@ -3,13 +3,15 @@
 
 Writes two artifacts, both committed:
 
-    forecasts/index.html   the data-store section, spliced between markers
+    economy/index.html     the data-store section, spliced between markers
     data/calendar.ics      an iCalendar feed of announced next releases
 
-There is no /data page: the store exists to make the forecast record
-reproducible, so it lives in the section explaining what a round is scored
-against. /data and /data/ redirect to /forecasts#data; the JSON endpoints
-under /data/ are unaffected.
+There is no /data page: the store lives on the UK data hub (/economy#data,
+the "Data" tab), beside the long view it feeds. It moved there from
+/forecasts, where it was the longest section of the track record; /forecasts
+keeps a one-line pointer under the #data anchor so old links still land.
+/data and /data/ redirect to /economy#data; the JSON endpoints under /data/
+are unaffected.
 
 Nothing here reads the clock or the network: the same store always renders the
 same bytes, so ``--check`` is a real drift test rather than a coin flip.
@@ -26,7 +28,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 STORE = ROOT / "data"
-FORECASTS = ROOT / "forecasts" / "index.html"
+FORECASTS = ROOT / "economy" / "index.html"  # the page that hosts the store
 BEGIN = "<!-- data-store:begin -->"
 END = "<!-- data-store:end -->"
 CALENDAR = STORE / "calendar.ics"
@@ -412,7 +414,7 @@ def render_calendar() -> str:
 
 
 def render_fragment() -> str:
-    """The data-store block inside /forecasts, between the markers.
+    """The data-store block inside /economy, between the markers.
 
     The one home of data provenance (DESIGN.md §7.0): the /economy hubs used
     to repeat its series list and calendar, and now link here instead.
@@ -447,7 +449,7 @@ def render_fragment() -> str:
         </table>
       </div>
       <p class="table-controls">
-        <button type="button" id="show-all" class="series-show-all" hidden
+        <button type="button" id="show-all" class="btn btn-secondary series-show-all" hidden
                 aria-controls="series-table" aria-expanded="false"></button>
       </p>
 
@@ -517,7 +519,7 @@ def render_fragment() -> str:
 
 
 def splice(page: str, fragment: str) -> str:
-    """Replace the marked block in /forecasts, leaving the rest untouched."""
+    """Replace the marked block in /economy, leaving the rest untouched."""
     start = page.index(BEGIN)
     end = page.index(END) + len(END)
     return page[:start] + fragment + page[end:]
@@ -548,11 +550,11 @@ def main() -> int:
         if stale:
             print(f"{', '.join(stale)} stale; run python3 data/build_page.py")
             return 1
-        print("Forecasts data block and release calendar match committed data")
+        print("Data-store block and release calendar match committed data")
         return 0
     for path, content in rendered:
         path.write_bytes(content)
-    print("updated the forecasts data block and release calendar")
+    print("updated the economy data-store block and release calendar")
     return 0
 
 

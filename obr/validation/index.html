@@ -17,9 +17,10 @@
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <meta name="theme-color" content="#FFFFFF" />
 
+<link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=19" />
+<link rel="stylesheet" href="/style.css?v=23" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -68,18 +69,18 @@
   <div class="with-rail">
     <nav class="page-rail" aria-label="On this page">
       <p class="page-rail-title">On this page</p>
-      <a href="#trust" aria-current="location">Headline numbers</a>
+      <a href="#trust" aria-current="location">Verdict</a>
+      <a href="#caveats">Known limits</a>
       <a href="#anchored">Anchored fit</a>
       <a href="#outturn">Against outturns</a>
       <a href="#val-freerun">Free-running</a>
-      <a href="#caveats">Known limits</a>
       <a href="#where-next">Where next</a>
     </nav>
     <div class="rail-main">
   <section class="band band-wide" id="trust">
     <div class="band-head" data-icon="shield">
       <h2>How far to trust it, and where it stops</h2>
-      <p class="section-intro">Excellent anchored. Weak free-running. Both published, as MAPE against the EFO path.</p>
+      <p class="section-intro">Anchored by construction. Weak free-running. Both published, as MAPE against the EFO path.</p>
     </div>
     <div class="stat-row">
       <div class="stat">
@@ -107,48 +108,6 @@
         <span class="stat-foot"><a class="chip chip-warn" href="#val-freerun">Weak, regression-gated</a></span>
       </div>
     </div>
-    <div class="prose">
-      <div class="table-scroll mo-tablecard"><table>
-        <caption>The three emulator configurations and how each one scores</caption>
-        <thead><tr><th scope="col">configuration</th><th scope="col">what it is</th><th scope="col">how it scores</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row"><strong>Anchored</strong></th>
-            <td>Add-factors matched to the March 2026 EFO. Every reform score uses it.</td>
-            <td>Tiles above for 2025Q1&ndash;2027Q4; GDP 0.67% out to 2031Q1. Unemployment (<code>LFSUR</code>) unreliable past 2027Q4, drifting to 0.9% against the EFO&rsquo;s 4.1% by 2031Q1. CI gates tolerance, finiteness, the expenditure identity and signs.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Held add-factors</strong></th>
-            <td>Fitted 2024Q1&ndash;2025Q4, held flat, scored 2026Q1&ndash;2027Q4. Initialised at the EFO values it is scored against, and its fitting window contains OBR-forecast quarters &mdash; so it partly encodes &ldquo;agree with the OBR&rdquo;.</td>
-            <td>Consumption 0.19%; GDP in the tiles above.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Free-running</strong></th>
-            <td>De-seeded, add-factors off, and GDP made endogenous &mdash; the emulator&rsquo;s raw structural dynamics. In the OBR&rsquo;s published model GDP is an input, so this is not a measure of OBR forecast error.</td>
-            <td><strong>Weak, and reported as such.</strong> Consumption 7.22%, household income 6.18%, business investment 15.28%, company profits 82.77%, current account 3.02% of GDP &mdash; the model contracts while the EFO grows.</td>
-          </tr>
-        </tbody>
-      </table></div>
-    </div>
-    <div class="vmet-notes mono">
-      <p class="vmet-notes-line"><span class="vmet-notes-key">in band</span> <span>rates within 1.0pp · net balances within 1.5% of GDP · levels within 10% MAPE.</span></p>
-      <p class="vmet-notes-line"><span class="vmet-notes-key">gated</span> <span>CI enforces the anchored tolerance and the multiplier band; the HMRC comparison and the outturn backtest are computed for the <a href="/papers/obr-macro">working paper</a> and refreshed by hand.</span></p>
-    </div>
-    <!-- Levels and next gates: integration/src/policyengine_macro/capabilities.py MODEL_QUALITY["obr-macro"]. -->
-    <div class="prose">
-    <div class="table-scroll trust-card"><table data-stack="yes">
-      <caption>Evidence by dimension: the registry&rsquo;s categorical judgement, and what would change it</caption>
-      <thead><tr><th scope="col">dimension</th><th scope="col">level</th><th scope="col">what would change it</th></tr></thead>
-      <tbody>
-        <tr><th scope="row">Implementation fidelity</th><td><span class="chip">moderate</span></td><td>Exercise every published behavioural equation and eliminate or explicitly scope every inactive channel</td></tr>
-        <tr><th scope="row">Predictive validation</th><td><span class="chip">weak</span></td><td>Pass rolling-origin historical-vintage tests against simple benchmarks and first-release outturns</td></tr>
-        <tr><th scope="row">Identification</th><td><span class="chip">not applicable</span></td><td>Keep this dimension explicitly not applicable</td></tr>
-        <tr><th scope="row">Policy counterfactuals</th><td><span class="chip">weak</span></td><td>Validate a frozen suite of fiscal shocks against independent official costings and published multiplier ranges</td></tr>
-        <tr><th scope="row">Uncertainty</th><td><span class="chip">weak</span></td><td>Publish sensitivity envelopes for judgement, closure and bridge assumptions</td></tr>
-        <tr><th scope="row">Vintage reproducibility</th><td><span class="chip">moderate</span></td><td>Archive source hashes and reproduce at least three historical EFO vintages end to end</td></tr>
-      </tbody>
-    </table></div>
-    </div>
     <p class="callout callout-neutral">
       An independent implementation built from the OBR's published model
       code and forecast data. Not produced, maintained or endorsed by the
@@ -156,22 +115,145 @@
     </p>
   </section>
 
+  <section class="band band-wide" id="caveats">
+    <div class="band-head" data-icon="alert">
+      <h2>What it cannot be used for</h2>
+    </div>
+    <p class="callout callout-warn" id="multiplier">
+        <strong>The spending multiplier is 1.0 by construction, against the
+        OBR's own <a href="https://obr.uk/box/fiscal-multipliers/">published
+        0.6</a></strong> for day-to-day public services and welfare spending.</p>
+    <details class="about"><summary>More detail</summary><p>Under the demand <a class="gloss-link" href="/glossary#closure">closure</a> a spending shock lands straight in the GDP
+        identity with the behavioural second round inactive, so &pound;5bn in
+        returns &pound;5bn of GDP — a <strong>two-thirds overstatement</strong>
+        of every spending-side figure on this page.</p></details>
+    <div class="prose">
+      <div class="table-scroll mo-tablecard"><table>
+        <caption>Known limits of the OBR emulator</caption>
+        <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><strong>Two household-income equations never fire</strong></th>
+            <td>The listing's only bare <code>log()</code> left-hand sides — <code>log(HHTFA)</code> and <code>log(NDIVHH)</code> — never execute: their inputs <code>MAJGDP</code> and <code>CORP</code> are absent from the databank. The profits → dividends → household-income channel is inert: a 5pp corporation-tax rise moves <code>FYCPR</code> by −£404m by quarter 12 (−£186m on average over 12 quarters; <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/70ee8f0c788ce9414c465441f581ebb5f385299e/results/site_figures.json"><code>results/site_figures.json</code></a>) and <code>NDIVHH</code> by exactly zero. Reviving it needs a <code>CORP</code> series. Every published figure has the channel inert.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Income tax: right size, wrong profile</strong></th>
+            <td>The household route is the one lever with behaviour in it. Its GDP effect as a ratio to revenue lands near the OBR&rsquo;s published figure (<a href="/obr#answers">worked example</a>), but it rises over the horizon where the OBR&rsquo;s decays &mdash; the working paper calls the profile inverted.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Impact multiplier 1.0 by construction</strong></th>
+            <td>1.0 vs the OBR's published 0.6 — <a href="#multiplier">the warning above</a> explains why and what it biases.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Government investment does not transmit</strong></th>
+            <td><code>CGIPS</code> does not transmit, in two separate ways. Total fixed investment (<code>IF</code>) moves <strong>exactly zero</strong> at any shock size, because <code>IF</code> has no live equation in the published listing — the chain never reaches the GDP identity. Business investment (<code>IBUSX</code>) does move, but only as an offset: it is the residual of the identity <code>IF = IBUS + GGI + …</code>, and with <code>IF</code> held fixed a rise in <code>CGIPS</code> (through <code>GGI</code>) pushes it down about one-for-one &mdash; mean responses of −£1.47bn for a £1.5bn-per-quarter shock and −£5.94bn for £6bn (98% and 99% of the shock). The £3bn run (−£0.83bn) is solver residue. Every quarter of all three runs stops on the solver&rsquo;s stall break, unconverged (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/70ee8f0c788ce9414c465441f581ebb5f385299e/results/site_figures.json"><code>results/site_figures.json</code></a>). That offset is accounting, not a multiplier, and must never be quoted as one. Against the OBR's published 1.0. Capital spending should not be scored on this model.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Corporation-tax closure converges slowly</strong></th>
+            <td>The published <code>TCPRO</code> → cost-of-capital → investment chain, with the business-investment equation reconstructed from the OBR's truncated line and <code>MSGVA</code>, <code>PIF</code>, <code>PIRHH</code> frozen against uncalibrated feedback. Since the anchor add-factors moved to log space (August 2026) the <em>deviation</em> reaches a steady state — for a sustained +5pp rise: £0.24bn at q8, £0.38bn at q12, toward a ~£0.95bn/q plateau — but the root is slow (~0.958/quarter), so a 12-quarter run captures only ~40% of the full effect and every result reports its <code>plateau_fraction</code>. The response size now rests on allowance present values <strong>estimated from statute and the OBR's own gilt assumption</strong> rather than invented constants; full expensing makes it ~0.42× its former magnitude. A controlled scenario closure, not a calibrated supply block.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Passthrough channels</strong></th>
+            <td>Exports, imports and CPI are <a class="gloss-link" href="/glossary#exogenous">exogenous</a> here, held at the OBR value. They score 0.00% error without being behavioural wins — 10 of 21 scorecard lines are passthroughs, labelled as such.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Whole blocks do not respond to policy</strong></th>
+            <td>Distinct from the baseline passthroughs above: this is about <em>shock response</em>. Across every lever tested — government consumption, the household tax bridge, corporation tax, Bank Rate and the exchange rate — the unemployment rate, employment, retail prices, exports and imports move by <strong>exactly zero</strong>, not approximately zero. There is no <a class="gloss-link" href="/glossary#okun">Okun</a> channel, no Phillips channel and no trade channel: a 6% sterling appreciation moves exports and imports not at all. The second round is consumption — or, under the investment closure, business investment — and nothing else. Pinned per block in <code>tests/test_sign_conventions.py</code>.</td>
+          </tr>
+          <tr id="nominal-gdp">
+            <th scope="row"><strong>Nominal GDP is not pinned down</strong></th>
+            <td>The investment deflator (<code>PIF</code>) and nominal GDP (<code>GDPMPS</code>) are set by one identity written twice in the listing (lines 337 and 688), so the solve does not pin either down. <code>PIF</code> drifts from quarter to quarter, nominal GDP follows it, and company profits (<code>FYCPR</code>), a residual, follow nominal GDP: that drift is most of the 82.77% profits error (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/issues/42">obr-macroeconomic-model #42</a>). It is also why no quarter converges. An opt-in closure in draft <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/pull/52">obr-macroeconomic-model #52</a> restores the OBR&rsquo;s own nominal-GDP line (line 690). Under it the profits error is 18.04%, 7 of the 11 computed lines are in band rather than 6, and 25 of 25 quarters converge to tolerance rather than none. The pin is not the default. Every figure on this page uses the published closure.</td>
+          </tr>
+          <tr id="bank-rate">
+            <th scope="row"><strong>Bank Rate: sign right, response below the Bank of England&rsquo;s estimate</strong></th>
+            <td>Scored around the anchored baseline, a sustained +100bp lowers GDP by about £121m on impact, £431m by quarter 4, £482m by quarter 8 and £416m by quarter 12; a 100bp cut raises it by a similar amount (about £126m to £579m). Each figure is the difference between a baseline and a shocked solve, and in every quarter of both runs at least one of the two stops on the solver&rsquo;s stall break, unconverged (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/70ee8f0c788ce9414c465441f581ebb5f385299e/results/site_figures.json"><code>results/site_figures.json</code></a>). The earlier finding that a rise barely moved GDP while a cut raised it roughly ninety times as much came from scoring around the free-running model. The response runs through household spending alone &mdash; there is no monetary rule, and unemployment, prices and trade do not move. With a 1pp rise held for four quarters, GDP falls by about 0.06% at its peak, both in the published closure and under the nominal-GDP pin (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/issues/50">obr-macroeconomic-model #50</a>). That is well below the Bank of England&rsquo;s published estimate for the same experiment (<a href="/models/validation#shops">the benchmark</a>).</td>
+          </tr>
+          <tr id="hosted">
+            <th scope="row"><strong>Hosted results depend on the model pin and window</strong></th>
+            <td>The hosted service pins this model at commit <code>1ed742c</code>, which predates scoring around the anchored baseline (<a href="https://github.com/PolicyEngine/macro/issues/218">macro #218</a>). Until the pin bump in <a href="https://github.com/PolicyEngine/macro/pull/226">macro #226</a> is deployed, hosted <code>obr_shock</code> and <code>score_reform(model="obr")</code> results are scored around the free-running baseline. On that pin, <code>score_reform</code> for 1p on the basic rate, with the static costing held at &pound;6.46bn a year, returns cumulative GDP of +&pound;5.6bn over its default window: the wrong sign for a tax rise. The figures on these pages come from the anchored model. The default window also differs from the <a href="/obr#answers">worked example</a>: <code>score_reform</code> scores five years from 2026Q2 to 2031Q1, while the example is a 12-quarter run from 2025Q1. On the bumped pin, the same call gives a quarter-12 ratio of 0.73&times; revenue, more than twice the example&rsquo;s. Every quarter of both calls stops on the solver&rsquo;s stall break, unconverged. These are runs from 6 Nov 2026 (<a href="https://github.com/PolicyEngine/macro/pull/226">macro #226</a>).</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Approximated add-factors</strong></th>
+            <td>Recent corrections are averaged and held flat. The OBR's judgemental, quarter-by-quarter add-factors are not reproduced.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Vintage</strong></th>
+            <td>October 2025 equation listing, March 2026 EFO, current-vintage ONS series. Where the ONS has revised history the identities don't close exactly; that slack lands in the add-factors.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>No behavioural micro</strong></th>
+            <td>Aggregate equations only. Distributional questions belong to <a href="/pe">PolicyEngine</a>.</td>
+          </tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
   <section class="band band-wide" id="tests">
     <div class="band-head" data-icon="chart">
       <h2>Anchored fit, outturns, free-running</h2>
     </div>
+    <details class="expander dim-fold">
+      <summary><span><strong>The three configurations:</strong> anchored, used by every reform score (unemployment unreliable past 2027Q4, and that solve unconverged in every quarter); held add-factors, which partly encodes &ldquo;agree with the OBR&rdquo;; free-running, weak, and reported as such: the model contracts while the EFO grows</span></summary>
+    <div class="prose">
+        <div class="table-scroll mo-tablecard"><table>
+          <caption>The three emulator configurations and how each one scores</caption>
+          <thead><tr><th scope="col">configuration</th><th scope="col">what it is</th><th scope="col">how it scores</th></tr></thead>
+          <tbody>
+            <tr>
+              <th scope="row"><strong>Anchored</strong></th>
+              <td>Add-factors matched to the March 2026 EFO. Every reform score uses it.</td>
+              <td>Tiles above for 2025Q1&ndash;2027Q4; GDP mean absolute deviation 0.67% over 2025Q1&ndash;2031Q1. Unemployment (<code>LFSUR</code>) unreliable past 2027Q4, drifting to 0.9% against the EFO&rsquo;s 4.1% by 2031Q1. The 2025Q1&ndash;2031Q1 solve behind these two figures stops on the solver&rsquo;s stall break, unconverged, in every quarter (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/70ee8f0c788ce9414c465441f581ebb5f385299e/results/site_figures.json"><code>results/site_figures.json</code></a>). CI gates tolerance, finiteness, the expenditure identity and signs.</td>
+            </tr>
+            <tr>
+              <th scope="row"><strong>Held add-factors</strong></th>
+              <td>Fitted 2024Q1&ndash;2025Q4, held flat, scored 2026Q1&ndash;2027Q4. Initialised at the EFO values it is scored against, and its fitting window contains OBR-forecast quarters &mdash; so it partly encodes &ldquo;agree with the OBR&rdquo;.</td>
+              <td>Consumption 0.19%; GDP in the tiles above.</td>
+            </tr>
+            <tr>
+              <th scope="row"><strong>Free-running</strong></th>
+              <td>De-seeded, add-factors off, and GDP made endogenous &mdash; the emulator&rsquo;s raw structural dynamics. In the OBR&rsquo;s published model GDP is an input, so this is not a measure of OBR forecast error.</td>
+              <td><strong>Weak, and reported as such.</strong> Consumption 7.22%, nominal household income 6.18%, business investment 15.28%, company profits 82.77%, current account 3.02% of GDP &mdash; the model contracts while the EFO grows.</td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+    </details>
+    <div class="vmet-notes mono">
+      <p class="vmet-notes-line"><span class="vmet-notes-key">in band</span> <span>rates within 1.0pp · net balances within 1.5% of GDP · levels within 10% MAPE.</span></p>
+      <p class="vmet-notes-line"><span class="vmet-notes-key">gated</span> <span>CI enforces the anchored tolerance and the multiplier band; the HMRC comparison and the outturn backtest are computed for the <a href="/papers/obr-macro">working paper</a> and refreshed by hand.</span></p>
+    </div>
+    <details class="expander dim-fold">
+      <summary><span><strong>Evidence by dimension:</strong> implementation fidelity and vintage reproducibility moderate; predictive validation, policy counterfactuals and uncertainty weak; identification not applicable</span></summary>
+    <!-- Levels and next gates: integration/src/policyengine_macro/capabilities.py MODEL_QUALITY["obr-macro"]. -->
+      <div class="prose">
+      <div class="table-scroll trust-card"><table data-stack="yes">
+        <caption>Evidence by dimension: the registry&rsquo;s categorical judgement, and what would change it</caption>
+        <thead><tr><th scope="col">dimension</th><th scope="col">level</th><th scope="col">what would change it</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Implementation fidelity</th><td><span class="chip">moderate</span></td><td>Exercise every published behavioural equation and eliminate or explicitly scope every inactive channel</td></tr>
+          <tr><th scope="row">Predictive validation</th><td><span class="chip">weak</span></td><td>Pass rolling-origin historical-vintage tests against simple benchmarks and first-release outturns</td></tr>
+          <tr><th scope="row">Identification</th><td><span class="chip">not applicable</span></td><td>Keep this dimension explicitly not applicable</td></tr>
+          <tr><th scope="row">Policy counterfactuals</th><td><span class="chip">weak</span></td><td>Validate a frozen suite of fiscal shocks against independent official costings and published multiplier ranges</td></tr>
+          <tr><th scope="row">Uncertainty</th><td><span class="chip">weak</span></td><td>Publish sensitivity envelopes for judgement, closure and bridge assumptions</td></tr>
+          <tr><th scope="row">Vintage reproducibility</th><td><span class="chip">moderate</span></td><td>Archive source hashes and reproduce at least three historical EFO vintages end to end</td></tr>
+        </tbody>
+      </table></div>
+      </div>
+    </details>
     <div class="scrolly-wrap single">
       <div class="scrolly-steps">
 
-      <div class="meth-step" id="anchored" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Anchored against the EFO</h3></div>
+      <div class="meth-step meth-fold" data-step="0">
+        <details class="expander step-fold" id="anchored">
+          <summary><span class="meth-step-num mono">1</span><span class="step-fold-text"><h3>Anchored against the EFO</h3><span class="step-fold-result">Real GDP &minus;0.07% to +0.70% and consumption &minus;0.11% to +1.16% from the EFO: one test, not two, and by construction</span></span></summary>
         <p class="mo-lead">One test, not two.</p>
         <figure class="vfig">
         <div class="vc-fig" data-chart="obr-anchored">
 <p class="vc-unit">% deviation from the March 2026 EFO</p>
 <div class="vc-plot">
 <svg class="vchart" viewBox="52 54 678.0 242.0" role="img" aria-labelledby="obr-anchored-t obr-anchored-d" preserveAspectRatio="none">
-<title id="obr-anchored-t">obr-macro: anchored baseline vs March 2026 EFO, quarterly deviation</title>
+<title id="obr-anchored-t">OBR emulator: anchored baseline vs March 2026 EFO, quarterly deviation</title>
 <desc id="obr-anchored-d">Line chart. Quarterly percentage deviation of the anchored emulator from the published March 2026 EFO, 2025Q1 to 2027Q4. Real GDP ranges from -0.07% to +0.70% (mean absolute deviation 0.30%); consumption from -0.11% to +1.16% (mean absolute deviation 0.49%). Continuous integration hard-fails the build if either mean absolute deviation reaches 1%; it does not test single quarters, and consumption is more than 1% from the EFO in 2027Q3 and 2027Q4.</desc>
 <line class="vc-grid" x1="58" y1="290.0" x2="724" y2="290.0"/>
 <line class="vc-zero" x1="58" y1="244.0" x2="724" y2="244.0"/>
@@ -246,16 +328,18 @@
         other term in the demand identity is exogenous or pinned.
       </p>
         </details>
+              </details>
       </div>
-      <div class="meth-step" id="outturn" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Against ONS outturns</h3></div>
+      <div class="meth-step meth-fold" data-step="1">
+        <details class="expander step-fold" id="outturn">
+          <summary><span class="meth-step-num mono">2</span><span class="step-fold-text"><h3>Against ONS outturns</h3><span class="step-fold-result">2025 outturns tracked to within 0.06pp; 2026Q1 missed by roughly a quarter point, like the EFO</span></span></summary>
         <p class="mo-lead">The only test against reality, and mostly a test of the inherited EFO vintage.</p>
         <figure class="vfig">
         <div class="vc-fig" data-chart="obr-outturn">
 <p class="vc-unit">Real GDP growth, % q/q</p>
 <div class="vc-plot">
 <svg class="vchart" viewBox="24 20 700.0 244.0" role="img" aria-labelledby="obr-outturn-t obr-outturn-d" preserveAspectRatio="none">
-<title id="obr-outturn-t">obr-macro: quarterly real GDP growth — emulator vs EFO Nov 2025 vs ONS outturn (% q/q)</title>
+<title id="obr-outturn-t">OBR emulator: quarterly real GDP growth — emulator vs EFO Nov 2025 vs ONS outturn (% q/q)</title>
 <desc id="obr-outturn-d">Bar chart with outturn markers, percentage quarter-on-quarter real GDP growth for the four quarters with ONS outturns since anchoring. 2025Q2: emulator 0.15, EFO 0.28, ONS 0.10; 2025Q3: emulator 0.14, EFO 0.20, ONS 0.20; 2025Q4: emulator 0.25, EFO 0.27, ONS 0.20; 2026Q1: emulator 0.37, EFO 0.39, ONS 0.60. The emulator tracks the three 2025 outturns to within 0.06 points; both the emulator and the November EFO it inherits miss the strong 0.6 per cent 2026Q1 outturn by roughly a quarter of a point. Data from papers/obr-macro/figures/fig_outturn_data.csv. Coordinates: value v maps to y = 258 - v * 331.4 on a 0 to 0.7 axis.</desc>
 <line class="vc-zero" x1="24" y1="258.0" x2="724" y2="258.0"/>
 <line class="vc-grid" x1="24" y1="191.7" x2="724" y2="191.7"/>
@@ -331,9 +415,11 @@
         revised.
       </p>
         </details>
+              </details>
       </div>
-      <div class="meth-step" id="val-freerun" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Free-running</h3></div>
+      <div class="meth-step meth-fold" data-step="2">
+        <details class="expander step-fold" id="val-freerun">
+          <summary><span class="meth-step-num mono">3</span><span class="step-fold-text"><h3>Free-running</h3><span class="step-fold-result">6 of the 11 computed lines in band, one of them a trivial identity; worst, company profits 82.77%</span></span></summary>
         <p class="mo-lead">What the emulator does with GDP made endogenous and no add-factors.</p>
       <div class="prose">
       <figure class="vfig">
@@ -367,9 +453,9 @@
         <figcaption>Raw calibration against the March 2026 EFO. The two &ldquo;off&rdquo; variables depend on unpublished OBR constants and are regression-gated, not tuned. Source: <code>docs/calibration_scorecard.md</code> in the obr-macroeconomic-model repository.</figcaption>
       </figure>
       <details class="more">
-        <summary>The honest scorecard and the March 2026 re-anchoring</summary>
+        <summary>The free-running scorecard and the March 2026 re-anchoring</summary>
       <p>
-        <strong>The honest scorecard.</strong> The free-running miss is
+        <strong>The free-running scorecard.</strong> The free-running miss is
         not a measure of OBR forecast error. In the OBR's published model GDP
         (<code>GDPM</code>) is an exogenous input, so that model cannot miss
         GDP; the gap measures this emulator's closure swap, which makes GDP
@@ -379,9 +465,9 @@
         households' operating-surplus constant <code>OSHH</code>: its ONS
         anchor applies in the raw solve too. Built from its own identity on
         the loaded inputs, which mix EFO and ONS vintages, profits already
-        miss by 23.9% with no behavioural error; the rest comes from solved
-        inputs and is not yet diagnosed
-        (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/issues/42">obr-macroeconomic-model #42</a>).
+        miss by 23.9% with no behavioural error; the rest comes from the
+        investment deflator drifting in the solve
+        (<a href="#nominal-gdp">limits: nominal GDP is not pinned down</a>).
         The line is regression-gated rather than re-tuned, since tuning it
         would be fitting to the answer. Two lines
         not in the chart above — real household income 5.94%, RPI 1.71pp —
@@ -394,7 +480,7 @@
 <p class="vc-unit">Real GDP, £bn per quarter</p>
 <div class="vc-plot">
 <svg class="vchart" viewBox="52 50 678.0 248.0" role="img" aria-labelledby="obr-freerun-t obr-freerun-d" preserveAspectRatio="none">
-<title id="obr-freerun-t">obr-macro: real GDP level, anchored vs free-running vs the March 2026 EFO (£bn/qtr)</title>
+<title id="obr-freerun-t">OBR emulator: real GDP level, anchored vs free-running vs the March 2026 EFO (£bn/qtr)</title>
 <desc id="obr-freerun-d">Line chart of quarterly real GDP levels in billions of pounds, 2025Q1 to 2027Q4. The published March 2026 EFO path rises from 703.4 to 728.6. The anchored emulator tracks it closely, running from 703.8 to 733.7 (mean absolute deviation 0.30 per cent, recomputed here from the plotted series). The free-running emulator, de-seeded and with no add-factors, contracts from 694.4 to 679.0 — a gap that widens to 50 billion pounds, 4.32 per cent mean absolute deviation over the horizon. Free-running and EFO paths from papers/obr-macro/figures/fig_free_running_data.csv; anchored path from papers/obr-macro/figures/fig_anchored_data.csv. Coordinates: value v in billions maps to y = 292 - (v - 660) * 2.95 on a 660 to 740 axis; quarter i of 12 maps to x = 58 + i * 60.545.</desc>
 <line class="vc-grid" x1="58" y1="292.0" x2="724" y2="292.0"/>
 <line class="vc-grid" x1="58" y1="233.0" x2="724" y2="233.0"/>
@@ -444,8 +530,9 @@
       </p>
       </details>
     </div>
-        <p class="kv-title">The honest scorecard</p>
+        <p class="kv-title">The free-running scorecard</p>
         <dl class="kv kv-text"><div><dt>Computed</dt><dd>11 of 21 headline variables; the other 10 are passthrough</dd></div><div><dt>In band</dt><dd>6 of the 11, and one of those is a trivial identity</dd></div><div><dt>Worst</dt><dd>company profits 82.77%</dd></div><div><dt>Current account</dt><dd>3.02% of GDP</dd></div></dl>
+              </details>
       </div>
       </div>
     </div>
@@ -457,7 +544,7 @@
 <p class="vc-unit">Static revenue, £bn a year</p>
 <div class="vc-plot">
 <svg class="vchart" viewBox="64 20 660.0 244.0" role="img" aria-labelledby="obr-reform-t obr-reform-d" preserveAspectRatio="none">
-<title id="obr-reform-t">obr-macro: 1p on the basic rate, ours vs HMRC ready reckoner (£bn/yr)</title>
+<title id="obr-reform-t">OBR emulator: 1p on the basic rate, ours vs HMRC ready reckoner (£bn/yr)</title>
 <desc id="obr-reform-d">Grouped bar chart in billions of pounds per year. PolicyEngine's static costing of a 1 percentage point rise in the UK basic rate of income tax, against HMRC's Direct effects of illustrative tax changes ready reckoner, June 2025 vintage. For the basic rate +1pp, 2026–27 group, ours is 6.46 against HMRC’s 6.90, a deviation of -6.4%. For the basic rate +1pp, 2028–29 group, ours is 6.92 against HMRC’s 8.20, a deviation of -15.6%. The 2028–29 microsimulation figure is interpolated between the scored endpoints £6.46bn in 2026 and £7.38bn in 2030.</desc>
 <line class="vc-zero" x1="64" y1="258.0" x2="724" y2="258.0"/>
 <line class="vc-grid" x1="64" y1="211.6" x2="724" y2="211.6"/>
@@ -495,72 +582,6 @@
     </details>
   </section>
 
-  <section class="band band-wide" id="caveats">
-    <div class="band-head" data-icon="alert">
-      <h2>What it cannot be used for</h2>
-    </div>
-    <p class="callout callout-warn" id="multiplier">
-        <strong>The spending multiplier is 1.0 by construction, against the
-        OBR's own <a href="https://obr.uk/box/fiscal-multipliers/">published
-        0.6</a></strong> for day-to-day public services and welfare spending.</p>
-    <details class="about"><summary>More detail</summary><p>Under the demand closure a spending shock lands straight in the GDP
-        identity with the behavioural second round inactive, so &pound;5bn in
-        returns &pound;5bn of GDP — a <strong>two-thirds overstatement</strong>
-        of every spending-side figure on this page.</p></details>
-    <div class="prose">
-      <div class="table-scroll mo-tablecard"><table>
-        <caption>Known limits of the OBR emulator</caption>
-        <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row"><strong>Two household-income equations never fire</strong></th>
-            <td>The listing's only bare <code>log()</code> left-hand sides — <code>log(HHTFA)</code> and <code>log(NDIVHH)</code> — never execute: their inputs <code>MAJGDP</code> and <code>CORP</code> are absent from the databank. The profits → dividends → household-income channel is inert: a 5pp corporation-tax rise moves <code>FYCPR</code> by −£1,780m and <code>NDIVHH</code> by exactly zero. Reviving it needs a <code>CORP</code> series. Every published figure has the channel inert.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Income tax: right size, wrong profile</strong></th>
-            <td>The household route is the one lever with behaviour in it. Its GDP effect as a ratio to revenue lands near the OBR&rsquo;s published figure (<a href="/obr#answers">worked example</a>), but it rises over the horizon where the OBR&rsquo;s decays &mdash; the working paper calls the profile inverted.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Impact multiplier 1.0 by construction</strong></th>
-            <td>1.0 vs the OBR's published 0.6 — <a href="#multiplier">the warning above</a> explains why and what it biases.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Government investment does not transmit</strong></th>
-            <td><code>CGIPS</code> does not transmit, in two separate ways. Total fixed investment (<code>IF</code>) moves <strong>exactly zero</strong> at any shock size, because <code>IF</code> has no live equation in the published listing — the chain never reaches the GDP identity. Business investment (<code>IBUSX</code>) does move, but wrong-signed and grossly non-proportional: mean responses of −£6.8bn, −£8.8bn and −£11.6bn for shocks of £1.5bn, £3bn and £6bn per quarter. Quadrupling the shock changes the response by under a factor of two, so that is residue, not a multiplier, and the ratio must never be quoted as one. Against the OBR's published 1.0. Capital spending should not be scored on this model.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Corporation-tax closure converges slowly</strong></th>
-            <td>The published <code>TCPRO</code> → cost-of-capital → investment chain, with the business-investment equation reconstructed from the OBR's truncated line and <code>MSGVA</code>, <code>PIF</code>, <code>PIRHH</code> frozen against uncalibrated feedback. Since the anchor add-factors moved to log space (August 2026) the <em>deviation</em> reaches a steady state — for a sustained +5pp rise: £0.24bn at q8, £0.38bn at q12, toward a ~£0.95bn/q plateau — but the root is slow (~0.958/quarter), so a 12-quarter run captures only ~40% of the full effect and every result reports its <code>plateau_fraction</code>. The response size now rests on allowance present values <strong>estimated from statute and the OBR's own gilt assumption</strong> rather than invented constants; full expensing makes it ~0.42× its former magnitude. A controlled scenario closure, not a calibrated supply block.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Passthrough channels</strong></th>
-            <td>Exports, imports and CPI are exogenous here, held at the OBR value. They score 0.00% error without being behavioural wins — 10 of 21 scorecard lines are passthroughs, labelled as such.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Whole blocks do not respond to policy</strong></th>
-            <td>Distinct from the baseline passthroughs above: this is about <em>shock response</em>. Across every lever tested — government consumption, the household tax bridge, corporation tax, Bank Rate and the exchange rate — the unemployment rate, employment, retail prices, exports and imports move by <strong>exactly zero</strong>, not approximately zero. There is no Okun channel, no Phillips channel and no trade channel: a 6% sterling appreciation moves exports and imports not at all. The second round is consumption — or, under the investment closure, business investment — and nothing else. Pinned per block in <code>tests/test_sign_conventions.py</code>.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Bank Rate: sign right, scale untested</strong></th>
-            <td>Scored around the anchored baseline, a sustained +100bp lowers GDP by about £121m on impact, £431m by quarter 4, £482m by quarter 8 and £416m by quarter 12; a 100bp cut raises it by a similar amount (about £126m to £579m). The earlier finding that a rise barely moved GDP while a cut raised it roughly ninety times as much came from scoring around the free-running model. The response runs through household spending alone &mdash; there is no monetary rule, and unemployment, prices and trade do not move &mdash; and it has not been compared with any published estimate.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Approximated add-factors</strong></th>
-            <td>Recent corrections are averaged and held flat. The OBR's judgemental, quarter-by-quarter add-factors are not reproduced.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Vintage</strong></th>
-            <td>October 2025 equation listing, March 2026 EFO, current-vintage ONS series. Where the ONS has revised history the identities don't close exactly; that slack lands in the add-factors.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>No behavioural micro</strong></th>
-            <td>Aggregate equations only. Distributional questions belong to <a href="/pe">PolicyEngine</a>.</td>
-          </tr>
-        </tbody>
-      </table></div>
-    </div>
-  </section>
-
   <section class="band where-next" id="where-next">
     <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
     <div class="entry-grid">
@@ -593,7 +614,9 @@
   <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
     <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/glossary">Glossary</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro/issues">Report an issue</a>
     <a class="footer-text" href="/contact">Contact</a>
   </nav>
 </footer>

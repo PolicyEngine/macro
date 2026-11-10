@@ -17,9 +17,10 @@
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <meta name="theme-color" content="#FFFFFF" />
 
+<link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=19" />
+<link rel="stylesheet" href="/style.css?v=23" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -67,18 +68,18 @@
   <div class="with-rail">
     <nav class="page-rail" aria-label="On this page">
       <p class="page-rail-title">On this page</p>
-      <a href="#trust" aria-current="location">Headline numbers</a>
+      <a href="#trust" aria-current="location">Verdict</a>
+      <a href="#caveats">Limits</a>
       <a href="#paper">Replication</a>
       <a href="#frozen">Frozen origin</a>
-      <a href="#rolling">49 origins</a>
+      <a href="#rolling">50 origins</a>
       <a href="#forecasters">Forecast skill</a>
-      <a href="#caveats">Limits</a>
       <a href="#where-next">Where next</a>
     </nav>
     <div class="rail-main">
   <section class="band band-wide" id="trust">
     <div class="band-head" data-icon="shield">
-      <h2>Replicates the paper; forecast evidence remains limited</h2>
+      <h2>Partial replication: GDP decomposition consistent; no forecast skill against a drifting random walk</h2>
       <p class="section-intro">Two checks: replication against the published paper, and forecasts scored against outturns.</p>
     </div>
     <div class="stat-row">
@@ -96,50 +97,105 @@
       </div>
       <div class="stat stat-neutral">
         <span class="stat-label">Vs a drifting random walk</span>
-        <span class="stat-value">0.36</span>
+        <span class="stat-value">0.39</span>
         <span class="stat-sub">smallest adjusted q, 64 tests</span>
         <span class="stat-foot"><a class="chip chip-warn" href="#forecasters">No skill</a></span>
       </div>
-    </div>
-    <!-- Levels and next gates: integration/src/policyengine_macro/capabilities.py MODEL_QUALITY["boe-svar"]. -->
-    <div class="prose">
-    <div class="table-scroll trust-card"><table data-stack="yes">
-      <caption>Evidence by dimension: the registry&rsquo;s categorical judgement, and what would change it</caption>
-      <thead><tr><th scope="col">dimension</th><th scope="col">level</th><th scope="col">what would change it</th></tr></thead>
-      <tbody>
-        <tr><th scope="row">Implementation fidelity</th><td><span class="chip">strong</span></td><td>Keep all exact invariants hard-gated for every specification</td></tr>
-        <tr><th scope="row">Predictive validation</th><td><span class="chip">weak</span></td><td>Score the predictive densities rather than point forecasts, report rolling interval coverage, and re-run once the estimation sample extends past the Covid dummies</td></tr>
-        <tr><th scope="row">Identification</th><td><span class="chip">moderate</span></td><td>Show conclusions across lag, prior, proxy-data and weighting grids with effective-sample-size diagnostics</td></tr>
-        <tr><th scope="row">Policy counterfactuals</th><td><span class="chip">not applicable</span></td><td>Continue to refuse reform-scoring requests</td></tr>
-        <tr><th scope="row">Uncertainty</th><td><span class="chip">moderate</span></td><td>Report rolling empirical coverage and proper predictive scores</td></tr>
-        <tr><th scope="row">Vintage reproducibility</th><td><span class="chip">moderate</span></td><td>Freeze input manifests and retain both real-time and revised vintages</td></tr>
-      </tbody>
-    </table></div>
     </div>
     <p class="callout callout-neutral">This is an independent replication built from Bank of England Macro
         Technical Paper No. 3 and public data. It is not produced,
         maintained, or endorsed by the Bank of England, and its results
         should not be presented as Bank of England estimates.</p>
-    <details class="expander">
-      <summary>What CI gates, and what is refreshed by hand</summary>
-      <p><strong>Gated in CI:</strong> the replication invariants and the
-        forecast archive's append-only rule. <strong>Computed once and
-        refreshed by hand:</strong> the 49-origin rolling evaluation and the
-        coverage study. The sign and zero restrictions are <em>imposed</em> by
-        the identification scheme, so that gate protects the software and
-        cannot be evidence about the economy.</p>
-    </details>
+  </section>
+
+  <section class="band band-wide" id="caveats">
+    <div class="band-head" data-icon="alert">
+      <h2>Where this departs from the Bank&rsquo;s model</h2>
+    </div>
+    <div class="prose">
+      <div class="table-scroll mo-tablecard"><table>
+        <caption>Known limits of the structural VAR replication</caption>
+        <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><strong>Frozen data edge</strong></th>
+            <td>Estimation to 2025Q1, conditioning to 2026Q1 — the extended sample, not the paper's 1992Q1&ndash;2023Q2 window. Results shift with revisions.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Proxied world aggregates</strong></th>
+            <td>The Bank's UK-trade-weighted world GDP and CPI are unpublished, so they are rebuilt as chain-weighted US + euro-area + Japan + China with time-varying UK trade weights.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>One ranking does not replicate</strong></th>
+            <td>The paper's prose ranks UK monetary policy as the largest domestic contributor to CPI variance; here UK supply (14.6%) and UK demand (10.5%) both exceed it (8.9%). The paper publishes no <a class="gloss-link" href="/glossary#fevd">FEVD</a> table, so treat this as unresolved rather than a defect; the proxy aggregates are a candidate cause.</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Assumed lag length and simplified pandemic prior</strong></th>
+            <td>p&nbsp;=&nbsp;4 is assumed, not selected; the pandemic is handled by <a class="gloss-link" href="/glossary#exogenous">exogenous</a> Covid dummies.</td>
+          </tr>
+          <tr id="explosive">
+            <th scope="row"><strong>The <a class="gloss-link" href="/glossary#prior-posterior">posterior</a> is mildly explosive</strong></th>
+            <td>In 99.2% of the 10,000 posterior draws the largest root of the VAR is above 1; the median is about 1.004, and only 4 of the 744 accepted draws are stable (counted on the run before the 2026Q2 data refresh; not yet recounted on the 765-draw run). This comes from the specification (variables in levels and a prior centred on a random walk), not from a code error, and the paper&rsquo;s own Fig.&nbsp;3C shows the same shape: Bank Rate fades, while the GDP and CPI levels stay shifted and do not return to baseline by h20. Beyond h20 the CPI level keeps drifting, an extrapolation the paper never shows. Long-horizon responses on these pages carry this property (<a href="https://github.com/PolicyEngine/boe-var-model/issues/11">boe-var-model #11</a>).</td>
+          </tr>
+          <tr id="coverage-fixes">
+            <th scope="row"><strong>No after-the-fact fix brings the 90% band to 90%</strong></th>
+            <td>Scored held-out, the raw 90% band covers about 77% of outturns. Three recalibrations each fall short: per-horizon rescaling factors 82.2% (<a href="https://github.com/PolicyEngine/boe-var-model/pull/19">#19</a>), conformal factors 82.4% (<a href="https://github.com/PolicyEngine/boe-var-model/pull/20">#20</a>), and Lenza&ndash;Primiceri Covid volatility scaling 80.5%, or 86.5% combined with the rescaling (<a href="https://github.com/PolicyEngine/boe-var-model/pull/21">#21</a>). The misses cluster in 2019&ndash;22. Read the 90% fan as under-covering, not as a 90% probability; the remaining candidate fix is time-varying volatility (<a href="https://github.com/PolicyEngine/boe-var-model/issues/12">boe-var-model #12</a>).</td>
+          </tr>
+          <tr id="rate-size">
+            <th scope="row"><strong>Rate-shock response above the Bank of England&rsquo;s estimate</strong></th>
+            <td>Per 25bp monetary policy shock, GDP is about 0.40% lower at h8 (posterior median). Scaled linearly to 100bp that is about 1.6%, above the Bank of England&rsquo;s published range for a 1pp rise (<a href="/models/validation#shops">the benchmark</a>). The experiments differ: here the rate path is persistent rather than held for one year, and GDP is already near its trough on impact rather than after about a year (<a href="https://github.com/PolicyEngine/boe-var-model/issues/11">boe-var-model #11</a>).</td>
+          </tr>
+          <tr>
+            <th scope="row"><strong>Sign-restriction critiques apply</strong></th>
+            <td>Pointwise medians mix structural models (Fry&ndash;Pagan); the Haar prior over rotations is informative about <a class="gloss-link" href="/glossary#irf">impulse responses</a> (Baumeister&ndash;Hamilton). These hit the Bank's own outputs identically.</td>
+          </tr>
+        </tbody>
+      </table></div>
+      <p class="opt-note">
+        every deviation is enumerated in the repository's
+        <code>docs/methodology.md</code>.
+      </p>
+    </div>
   </section>
 
   <section class="band band-wide" id="tests">
     <div class="band-head" data-icon="chart">
-      <h2>Replication, one frozen origin, 49 origins, the benchmark</h2>
+      <h2>Replication, one frozen origin, 50 origins, the benchmark</h2>
     </div>
+    <p class="section-intro">Run vintage: every replication and evaluation figure on this tab comes from the model repository as refreshed to 2026Q2 data in <a href="https://github.com/PolicyEngine/boe-var-model/pull/24">boe-var-model #24</a>, with data through 2026Q2 and the estimation sample 1992Q1&ndash;2025Q1. The figures before that refresh are at commit <a href="https://github.com/PolicyEngine/boe-var-model/tree/845e2a4">845e2a4</a>.</p>
+    <details class="expander dim-fold">
+      <summary><span><strong>Evidence by dimension:</strong> implementation fidelity strong; identification, uncertainty and vintage reproducibility moderate; predictive validation weak; policy counterfactuals not applicable</span></summary>
+    <!-- Levels and next gates: integration/src/policyengine_macro/capabilities.py MODEL_QUALITY["boe-svar"]. -->
+      <div class="prose">
+      <div class="table-scroll trust-card"><table data-stack="yes">
+        <caption>Evidence by dimension: the registry&rsquo;s categorical judgement, and what would change it</caption>
+        <thead><tr><th scope="col">dimension</th><th scope="col">level</th><th scope="col">what would change it</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Implementation fidelity</th><td><span class="chip">strong</span></td><td>Keep all exact invariants hard-gated for every specification</td></tr>
+          <tr><th scope="row">Predictive validation</th><td><span class="chip">weak</span></td><td>Score the predictive densities rather than point forecasts, report rolling interval coverage, and re-run once the estimation sample extends past the Covid dummies</td></tr>
+          <tr><th scope="row">Identification</th><td><span class="chip">moderate</span></td><td>Show conclusions across lag, prior, proxy-data and weighting grids with effective-sample-size diagnostics</td></tr>
+          <tr><th scope="row">Policy counterfactuals</th><td><span class="chip">not applicable</span></td><td>Continue to refuse reform-scoring requests</td></tr>
+          <tr><th scope="row">Uncertainty</th><td><span class="chip">moderate</span></td><td>Report rolling empirical coverage and proper predictive scores</td></tr>
+          <tr><th scope="row">Vintage reproducibility</th><td><span class="chip">moderate</span></td><td>Freeze input manifests and retain both real-time and revised vintages</td></tr>
+        </tbody>
+      </table></div>
+      </div>
+    </details>
+    <details class="expander">
+      <summary>What CI gates, and what is refreshed by hand</summary>
+      <p><strong>Gated in CI:</strong> the replication invariants and the
+        forecast archive's append-only rule. <strong>Computed once and
+        refreshed by hand:</strong> the 50-origin rolling evaluation and the
+        coverage study. The <a class="gloss-link" href="/glossary#sign-restrictions">sign and zero restrictions</a> are <em>imposed</em> by
+        the identification scheme, so that gate protects the software and
+        cannot be evidence about the economy.</p>
+    </details>
     <div class="scrolly-wrap single">
       <div class="scrolly-steps">
 
-      <div class="meth-step" id="paper" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Against the Bank of England paper</h3></div>
+      <div class="meth-step meth-fold" data-step="0">
+        <details class="expander step-fold" id="paper">
+          <summary><span class="meth-step-num mono">1</span><span class="step-fold-text"><h3>Against the Bank of England paper</h3><span class="step-fold-result">UK GDP share 38.7% vs ~40%; UK CPI 41.5% vs ~50%, about 8.5pp short; figures 2&ndash;6 replicate qualitatively</span></span></summary>
         <p class="mo-lead">Global shocks&rsquo; variance shares, against Brignone &amp; Piffer (2025).</p>
         <div class="table-scroll mo-tablecard"><table>
                 <caption>Check by check against Brignone &amp; Piffer (2025); the forecast evidence is below</caption>
@@ -147,27 +203,27 @@
                 <tbody>
                   <tr>
                     <th scope="row">Global shocks' share of UK GDP variance (4 quarters)</th>
-                    <td><strong>37.4%</strong> <span class="mono">[23.4, 52.2]</span> 68%</td>
+                    <td><strong>38.7%</strong> <span class="mono">[24.0, 53.1]</span> 68%</td>
                     <td>~40%</td>
                   </tr>
                   <tr>
                     <th scope="row">Global shocks' share of UK CPI variance (4 quarters)</th>
-                    <td><strong>42.3%</strong> <span class="mono">[25.5, 60.3]</span> 68% &mdash; about 8pp short</td>
+                    <td><strong>41.5%</strong> <span class="mono">[25.6, 56.3]</span> 68% &mdash; about 8.5pp short</td>
                     <td>~50%</td>
                   </tr>
                   <tr>
                     <th scope="row">Identified shocks' total share, UK GDP / UK CPI</th>
-                    <td>76.3% / 78.9%</td>
+                    <td>77.3% / 78.3%</td>
                     <td>&ldquo;around 80%&rdquo;</td>
                   </tr>
                   <tr>
-                    <th scope="row">IRFs, FEVDs, shocks, historical decompositions</th>
+                    <th scope="row">IRFs, FEVDs, shocks, <a class="gloss-link" href="/glossary#historical-decomposition">historical decompositions</a></th>
                     <td>Figures 2–6 replicate</td>
                     <td>qualitative match</td>
                   </tr>
                   <tr>
                     <th scope="row">Forecast-revision adding-up identity</th>
-                    <td>exact per draw (max abs error 5.23e-12)</td>
+                    <td>exact per draw (max abs error 3.64e-12)</td>
                     <td>holds by construction &mdash; a regression check, not an agreement</td>
                   </tr>
                 </tbody>
@@ -177,25 +233,25 @@
 <p class="vc-unit">Share of forecast-error variance from global shocks, %</p>
 <div class="vc-plot">
 <svg class="vchart" viewBox="64 20 660.0 244.0" role="img" aria-labelledby="svar-fevd-t svar-fevd-d" preserveAspectRatio="none">
-<title id="svar-fevd-t">boe-svar: global-shock FEVD shares, ours vs Brignone &amp; Piffer (2025)</title>
-<desc id="svar-fevd-d">Grouped bar chart. Share of UK forecast-error variance attributed to identified global shocks (world demand, energy and supply) four quarters ahead, as a share of total variance — the statistic the paper's Figure 4 plots. For GDP, our production artifact gives 37.4% against the paper's 40.0%, 2.6 points short; for CPI, 42.3% against 50.0%, 7.7 points short. Neither gap is resolvable: on the 600-draw check configuration the 68 per cent posterior band on the same share runs 25 to 56 per cent for GDP and 22 to 47 per cent for CPI, both far wider than the shortfall, and the paper's values are read off its figure and approximate. This comparison and the fan chart elsewhere on this page are different runs: the fan chart is the frozen 2024Q2-edge run of 3,000 draws at seed 20250717.</desc>
+<title id="svar-fevd-t">BoE SVAR: global-shock FEVD shares, ours vs Brignone &amp; Piffer (2025)</title>
+<desc id="svar-fevd-d">Grouped bar chart. Share of UK forecast-error variance attributed to identified global shocks (world demand, energy and supply) four quarters ahead, as a share of total variance — the statistic the paper's Figure 4 plots. For GDP, our production artifact gives 38.7% against the paper's 40.0%, 1.3 points short; for CPI, 41.5% against 50.0%, 8.5 points short. Neither gap is resolvable: on the 600-draw check configuration the 68 per cent posterior band on the same share runs 24 to 57 per cent for GDP and 24 to 54 per cent for CPI, both far wider than the shortfall, and the paper's values are read off its figure and approximate. This comparison and the fan chart elsewhere on this page are different runs: the fan chart is the frozen 2024Q2-edge run of 3,000 draws at seed 20250717.</desc>
 <line class="vc-zero" x1="64" y1="258.0" x2="724" y2="258.0"/>
 <line class="vc-grid" x1="64" y1="180.7" x2="724" y2="180.7"/>
 <line class="vc-grid" x1="64" y1="103.3" x2="724" y2="103.3"/>
 <line class="vc-grid" x1="64" y1="26.0" x2="724" y2="26.0"/>
-<rect class="vc-b1" x="141.9" y="113.4" width="79.2" height="144.6"/>
+<rect class="vc-b1" x="141.9" y="108.4" width="79.2" height="149.6"/>
 <rect class="vc-b2" x="233.0" y="103.3" width="79.2" height="154.7"/>
-<rect class="vc-b1" x="471.9" y="94.4" width="79.2" height="163.6"/>
+<rect class="vc-b1" x="471.9" y="97.5" width="79.2" height="160.5"/>
 <rect class="vc-b2" x="563.0" y="64.7" width="79.2" height="193.3"/>
 </svg>
 <div class="vc-labels" aria-hidden="true">
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0%;top:65.86%">20%</span>
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0%;top:34.14%">40%</span>
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:0%;top:2.46%">60%</span>
-<span class="vc-t vc-val vc-a-m" style="left:17.8%;top:35.82%">37.4</span>
+<span class="vc-t vc-val vc-a-m" style="left:17.8%;top:33.77%">38.7</span>
 <span class="vc-t vc-val vc-a-m" style="left:31.61%;top:31.68%">40.0</span>
 <span class="vc-t vc-lab vc-x vc-a-m vc-wrap" style="left:25%;top:100%;width:48.48%">UK GDP, 1-yr horizon</span>
-<span class="vc-t vc-val vc-a-m" style="left:67.8%;top:28.03%">42.3</span>
+<span class="vc-t vc-val vc-a-m" style="left:67.8%;top:29.3%">41.5</span>
 <span class="vc-t vc-val vc-a-m" style="left:81.61%;top:15.86%">50.0</span>
 <span class="vc-t vc-lab vc-x vc-a-m vc-wrap" style="left:75%;top:100%;width:48.48%">UK CPI, 1-yr horizon</span>
 </div>
@@ -210,7 +266,7 @@
         <details class="more">
                 <summary>How noisy that comparison is</summary>
               <p>
-                The 68% posterior band is about &plusmn;14pp wide, so the 8pp CPI
+                The 68% posterior band is about &plusmn;15pp wide, so the 8.5pp CPI
                 shortfall sits inside a single interval: a real gap on the paper's
                 definition, reported as one, but not resolvable at this sample size.
               </p>
@@ -222,29 +278,31 @@
               </p>
               </details>
         <p class="kv-title">Four-quarter FEVD, ours vs paper</p>
-        <dl class="kv"><div><dt>Global, UK GDP</dt><dd>37.4% vs ~40%</dd></div><div><dt>Global, UK CPI</dt><dd>42.3% vs ~50%, about 8pp short</dd></div><div><dt>Identified total</dt><dd>76.3% / 78.9% vs &ldquo;around 80%&rdquo;</dd></div><div><dt>Figures 2&ndash;6</dt><dd>replicate qualitatively</dd></div><div><dt>Adding-up identity</dt><dd>exact per draw, by construction</dd></div></dl>
+        <dl class="kv"><div><dt>Global, UK GDP</dt><dd>38.7% vs ~40%</dd></div><div><dt>Global, UK CPI</dt><dd>41.5% vs ~50%, about 8.5pp short</dd></div><div><dt>Identified total</dt><dd>77.3% / 78.3% vs &ldquo;around 80%&rdquo;</dd></div><div><dt>Figures 2&ndash;6</dt><dd>replicate qualitatively</dd></div><div><dt>Adding-up identity</dt><dd>exact per draw, by construction</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <p>
                 On the paper's own definition — the posterior mean of the per-draw
                 group share of <em>total</em> four-quarter-ahead variance, which leaves
                 about a fifth unexplained — identified global shocks explain
-                <strong>37.4%</strong> of UK GDP forecast-error variance against
-                Brignone &amp; Piffer's ~40%, and <strong>42.3%</strong> of UK CPI
+                <strong>38.7%</strong> of UK GDP forecast-error variance against
+                Brignone &amp; Piffer's ~40%, and <strong>41.5%</strong> of UK CPI
                 against ~50%.
               </p>
         </details>
+              </details>
       </div>
 
-      <div class="meth-step" id="frozen" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>One frozen origin, scored against outturns</h3></div>
+      <div class="meth-step meth-fold" data-step="1">
+        <details class="expander step-fold" id="frozen">
+          <summary><span class="meth-step-num mono">2</span><span class="step-fold-text"><h3>One frozen origin, scored against outturns</h3><span class="step-fold-result">RMSE 0.32pp; 14 of 14 outturns inside the 68% band is over-dispersion, not a pass; peak miss up to 0.6pp</span></span></summary>
         <p class="mo-lead">Seven quarters from the 2024Q2 edge, against the ONS outturns since.</p>
         <figure class="vfig">
         <div class="vc-fig" data-chart="svar-fan">
 <p class="vc-unit">% change on a year earlier</p>
 <div class="vc-plot">
 <svg class="vchart" viewBox="52 50 678 248.0" role="img" aria-labelledby="svar-fan-t svar-fan-d" preserveAspectRatio="none">
-<title id="svar-fan-t">boe-svar: out-of-sample forecast fan from the frozen 2024Q2 edge vs ONS outturns</title>
+<title id="svar-fan-t">BoE SVAR: out-of-sample forecast fan from the frozen 2024Q2 edge vs ONS outturns</title>
 <desc id="svar-fan-d">Two-panel fan chart. Left panel: year-on-year UK GDP growth; right panel: year-on-year UK CPI inflation. Each shows the posterior median forecast from the frozen 2024Q2 data edge as a line, the 68 per cent credible band as a shaded region over thirteen quarters 2024Q3 to 2027Q3, and ONS outturns for the seven evaluated quarters 2024Q3 to 2026Q1 as dots. All fourteen outturn dots fall inside the 68 per cent band; RMSE 0.32 percentage points on GDP and 0.32 on CPI. GDP medians run 1.3, 1.8, 1.3, 0.9, 0.8, 0.9, 0.9 per cent over the evaluated quarters against outturns of 1.0, 1.5, 1.3, 1.4, 1.3, 1.0, 0.9; CPI medians 2.3, 2.7, 2.8, 3.2, 3.2, 3.2, 3.2 against outturns of 2.0, 2.5, 2.8, 3.5, 3.8, 3.4, 3.1. A dashed rule in each panel marks 2026Q1, the last quarter with an outturn: the six quarters to its right are forecast with nothing yet to check them against, so the fit shown covers seven of the thirteen quarters plotted. This run is 3,000 posterior draws at seed 20250717, 217 of which were accepted by the sign restrictions; it is a different run from the FEVD comparison elsewhere on this page, which comes from the production artifact. Medians and 68 per cent bands from papers/boe-svar/figures/figure_numbers.json (forecast_table, entries [median, lo68, hi68]); ONS outturns from papers/boe-svar/figures/make_figures.py. Coordinates: GDP panel maps value v to y = 292 - (v + 1) * 59 for the -1 to 3 per cent axis; CPI panel y = 292 - (v - 1) * 59 for the 1 to 5 per cent axis; quarter i of 13 maps to x = 58 + i * 25.667 (GDP) or 416 + i * 25.667 (CPI).</desc>
 <line class="vc-grid" x1="58" y1="292.0" x2="366" y2="292.0"/>
 <line class="vc-zero" x1="58" y1="233.0" x2="366" y2="233.0"/>
@@ -321,27 +379,29 @@
           <summary>About this step</summary>
           <p>
                 <strong>Out-of-sample.</strong> Seven quarters ahead from the frozen
-                2024Q2 edge, the RMSE in the tiles above holds for both GDP growth and CPI inflation.
+                2024Q2 edge, the <a class="gloss-link" href="/glossary#rmse">RMSE</a> in the tiles above holds for both GDP growth and CPI inflation.
               </p>
           <p>
                 <strong>Every outturn inside the 68% band is over-dispersion, not a pass</strong> — a correct interval should
                 contain about 9.5 of 14. One frozen origin yields two or three
                 effectively independent observations, so the reading to weight is the
-                49-origin coverage below, which finds the opposite problem.
+                50-origin coverage below, which finds the opposite problem.
               </p>
         </details>
+              </details>
       </div>
 
-      <div class="meth-step" id="rolling" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Across 49 origins</h3></div>
+      <div class="meth-step meth-fold" data-step="2">
+        <details class="expander step-fold" id="rolling">
+          <summary><span class="meth-step-num mono">3</span><span class="step-fold-text"><h3>Across 50 origins</h3><span class="step-fold-result">68% band 71% at h=1, 58% at h=8; the 90% band under-covers at every horizon</span></span></summary>
         <p class="mo-lead">The rolling evaluation, and the reading to weight over the single origin.</p>
         <figure class="vfig">
         <div class="vc-fig" data-chart="svar-coverage" style="--vc-min-h:260px">
 <p class="vc-unit">Share of outturns inside the band, %</p>
 <div class="vc-plot">
 <svg class="vchart" viewBox="50 50 682.0 238.0" role="img" aria-labelledby="svar-coverage-t svar-coverage-d" preserveAspectRatio="none">
-<title id="svar-coverage-t">boe-svar: empirical band coverage across 49 origins</title>
-<desc id="svar-coverage-d">Line chart of empirical interval coverage by forecast horizon, averaged across the eight model variables, against the nominal 68 and 90 percent levels; a vertical bar at each horizon spans the best and worst variable. 68% band, mean coverage at horizons one to eight: 71%, 68%, 64%, 61%, 60%, 60%, 58%, 57%; 90% band, mean coverage at horizons one to eight: 87%, 81%, 81%, 76%, 76%, 73%, 72%, 72%. The 68 per cent band covers 71% at one quarter, just above nominal, and falls below nominal from horizon two onward to 57% at eight; the 90 per cent band under-covers at every horizon, from 87% down to 72%. The mean hides how bad the worst variable is: the lowest cell in the grid is CPI energy at the 68 per cent band, horizon 4, covering 29%. The window includes the Covid quarters and the evaluation model carries no Covid dummies, which depresses coverage.</desc>
+<title id="svar-coverage-t">BoE SVAR: empirical band coverage across 50 origins</title>
+<desc id="svar-coverage-d">Line chart of empirical interval coverage by forecast horizon, averaged across the eight model variables, against the nominal 68 and 90 percent levels; a vertical bar at each horizon spans the best and worst variable. 68% band, mean coverage at horizons one to eight: 71%, 69%, 63%, 62%, 60%, 61%, 59%, 58%; 90% band, mean coverage at horizons one to eight: 86%, 82%, 81%, 78%, 76%, 74%, 73%, 71%. The 68 per cent band covers 71% at one quarter, just above nominal, and falls below nominal from horizon two onward to 58% at eight; the 90 per cent band under-covers at every horizon, from 86% down to 71%. The mean hides how bad the worst variable is: the lowest cell in the grid is CPI energy at the 68 per cent band, horizon 5, covering 30%. The window includes the Covid quarters and the evaluation model carries no Covid dummies, which depresses coverage.</desc>
 <line class="vc-grid" x1="58.0" y1="266.9" x2="724.0" y2="266.9"/>
 <line class="vc-grid" x1="58.0" y1="236.8" x2="724.0" y2="236.8"/>
 <line class="vc-grid" x1="58.0" y1="206.7" x2="724.0" y2="206.7"/>
@@ -351,25 +411,25 @@
 <line class="vc-grid" x1="58.0" y1="86.1" x2="724.0" y2="86.1"/>
 <line class="vc-grid" x1="58.0" y1="56.0" x2="724.0" y2="56.0"/>
 <line class="vc-ref" x1="58.0" y1="86.1" x2="724.0" y2="86.1"/>
-<line class="vc-s3 vc-spread" x1="62.0" y1="68.3" x2="62.0" y2="123.6"/>
-<line class="vc-s3 vc-spread" x1="157.1" y1="74.4" x2="157.1" y2="172.9"/>
-<line class="vc-s3 vc-spread" x1="252.3" y1="80.6" x2="252.3" y2="166.7"/>
-<line class="vc-s3 vc-spread" x1="347.4" y1="92.9" x2="347.4" y2="191.3"/>
-<line class="vc-s3 vc-spread" x1="442.6" y1="92.9" x2="442.6" y2="191.3"/>
-<line class="vc-s3 vc-spread" x1="537.7" y1="99.1" x2="537.7" y2="197.4"/>
-<line class="vc-s3 vc-spread" x1="632.9" y1="105.2" x2="632.9" y2="203.6"/>
-<line class="vc-s3 vc-spread" x1="728.0" y1="99.1" x2="728.0" y2="197.4"/>
-<polyline class="vc-s3" points="58.0,96.0 153.1,112.1 248.3,114.4 343.4,129.0 438.6,129.0 533.7,137.5 628.9,139.8 724.0,140.6"/>
+<line class="vc-s3 vc-spread" x1="62.0" y1="68.1" x2="62.0" y2="128.3"/>
+<line class="vc-s3 vc-spread" x1="157.1" y1="74.1" x2="157.1" y2="170.5"/>
+<line class="vc-s3 vc-spread" x1="252.3" y1="80.1" x2="252.3" y2="164.5"/>
+<line class="vc-s3 vc-spread" x1="347.4" y1="86.1" x2="347.4" y2="182.6"/>
+<line class="vc-s3 vc-spread" x1="442.6" y1="92.2" x2="442.6" y2="182.6"/>
+<line class="vc-s3 vc-spread" x1="537.7" y1="98.2" x2="537.7" y2="200.6"/>
+<line class="vc-s3 vc-spread" x1="632.9" y1="104.2" x2="632.9" y2="194.6"/>
+<line class="vc-s3 vc-spread" x1="728.0" y1="98.2" x2="728.0" y2="200.6"/>
+<polyline class="vc-s3" points="58.0,96.7 153.1,109.5 248.3,114.0 343.4,123.0 438.6,126.8 533.7,135.9 628.9,137.4 724.0,142.6"/>
 <line class="vc-ref" x1="58.0" y1="152.4" x2="724.0" y2="152.4"/>
-<line class="vc-s1 vc-spread" x1="54.0" y1="92.9" x2="54.0" y2="215.9"/>
-<line class="vc-s1 vc-spread" x1="149.1" y1="105.2" x2="149.1" y2="228.2"/>
-<line class="vc-s1 vc-spread" x1="244.3" y1="99.1" x2="244.3" y2="258.9"/>
-<line class="vc-s1 vc-spread" x1="339.4" y1="99.1" x2="339.4" y2="271.2"/>
-<line class="vc-s1 vc-spread" x1="434.6" y1="105.2" x2="434.6" y2="271.2"/>
-<line class="vc-s1 vc-spread" x1="529.7" y1="111.4" x2="529.7" y2="252.8"/>
-<line class="vc-s1 vc-spread" x1="624.9" y1="111.4" x2="624.9" y2="258.9"/>
-<line class="vc-s1 vc-spread" x1="720.0" y1="117.5" x2="720.0" y2="252.8"/>
-<polyline class="vc-s1" points="58.0,142.9 153.1,153.6 248.3,165.9 343.4,174.4 438.6,177.5 533.7,177.5 628.9,182.1 724.0,186.7"/>
+<line class="vc-s1 vc-spread" x1="54.0" y1="98.2" x2="54.0" y2="218.7"/>
+<line class="vc-s1 vc-spread" x1="149.1" y1="92.2" x2="149.1" y2="218.7"/>
+<line class="vc-s1 vc-spread" x1="244.3" y1="104.2" x2="244.3" y2="248.9"/>
+<line class="vc-s1 vc-spread" x1="339.4" y1="98.2" x2="339.4" y2="260.9"/>
+<line class="vc-s1 vc-spread" x1="434.6" y1="104.2" x2="434.6" y2="266.9"/>
+<line class="vc-s1 vc-spread" x1="529.7" y1="110.2" x2="529.7" y2="242.8"/>
+<line class="vc-s1 vc-spread" x1="624.9" y1="110.2" x2="624.9" y2="254.9"/>
+<line class="vc-s1 vc-spread" x1="720.0" y1="116.3" x2="720.0" y2="242.8"/>
+<polyline class="vc-s1" points="58.0,142.6 153.1,149.4 248.3,166.7 343.4,171.3 438.6,175.8 533.7,173.5 628.9,179.5 724.0,182.6"/>
 </svg>
 <div class="vc-labels" aria-hidden="true">
 <span class="vc-t vc-tick vc-y vc-a-s" style="left:1.17%;top:91.13%">30%</span>
@@ -397,20 +457,22 @@
 <li><span class="vc-sw ln-s3" aria-hidden="true"></span>90% band</li>
 <li><span class="vc-sw ln-ref" aria-hidden="true"></span>nominal coverage</li>
 </ul>
-<p class="vc-notes">Vertical bars span the best and worst of the eight variables; lowest cell 29% (CPI energy, 68% band, h4).</p>
+<p class="vc-notes">Vertical bars span the best and worst of the eight variables; lowest cell 30% (CPI energy, 68% band, h5).</p>
 </div><!-- /vc-fig -->
-                <figcaption>Empirical interval coverage across 49 expanding-window origins, mean across the eight variables, by horizon. The 68% band <em>over</em>-covers at one quarter (71%) and falls below nominal from two onward; the 90% band <strong>under-covers</strong> at every horizon. Both worsen with horizon — the opposite of the frozen-origin reading above, and the one to weight. These figures are the evaluation run without Covid dummies. The same evaluation with the six Covid dummies (2020Q1&ndash;2021Q2) that the published fans use covers about the same: 69% at one quarter and 56% at eight (<a href="https://github.com/PolicyEngine/boe-var-model/blob/main/results/coverage_evaluation.json">boe-var-model <code>production_spec</code></a>). Source: <code>papers/boe-svar/figures/coverage_evaluation.json</code>.</figcaption>
+                <figcaption>Empirical interval coverage across 50 expanding-window origins, mean across the eight variables, by horizon. The 68% band <em>over</em>-covers at one quarter (71%) and falls below nominal from two onward; the 90% band <strong>under-covers</strong> at every horizon. Both worsen with horizon — the opposite of the frozen-origin reading above, and the one to weight. These figures are the evaluation run without Covid dummies. The same evaluation with the six Covid dummies (2020Q1&ndash;2021Q2) that the published fans use covers about the same: 69% at one quarter and 56% at eight (<a href="https://github.com/PolicyEngine/boe-var-model/blob/main/results/coverage_evaluation.json">boe-var-model <code>production_spec</code></a>). Source: <code>papers/boe-svar/figures/coverage_evaluation.json</code>.</figcaption>
               </figure>
-        <p class="kv-title">49 expanding-window origins</p>
-        <dl class="kv kv-text"><div><dt>Run</dt><dd>evaluation model without Covid dummies</dd></div><div><dt>68% band, h=1</dt><dd>71%, just above nominal</dd></div><div><dt>68% band, h=8</dt><dd>57%</dd></div><div><dt>90% band</dt><dd>under-covers at every horizon</dd></div><div><dt>Unemployment satellite</dt><dd>beats no-change at h=1&ndash;4 only, not significant</dd></div></dl>
+        <p class="kv-title">50 expanding-window origins</p>
+        <dl class="kv kv-text"><div><dt>Run</dt><dd>evaluation model without Covid dummies</dd></div><div><dt>68% band, h=1</dt><dd>71%, just above nominal</dd></div><div><dt>68% band, h=8</dt><dd>58%</dd></div><div><dt>90% band</dt><dd>under-covers at every horizon</dd></div><div><dt>Unemployment satellite</dt><dd>beats no-change at h=1&ndash;4 only, not significant</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <p>
-                <strong>Rolling-origin audit.</strong> Across 49 expanding-window
+                <strong>Rolling-origin audit.</strong> Across 50 expanding-window
                 origins, no variable beats a drifting random walk at any horizon once
                 the 64 tests are adjusted together — the
                 <a href="#forecasters">benchmark section below</a>. One frozen origin
-                is not evidence of broad forecast superiority.
+                is not evidence of broad forecast superiority. Three attempts to
+                recalibrate the bands after the fact are in the
+                <a href="#coverage-fixes">limits</a>.
               </p>
           <p>
                 <strong>The svar-unemployment satellite.</strong> It beats
@@ -421,17 +483,19 @@
                 <a href="https://github.com/PolicyEngine/boe-var-model/blob/main/results/unemployment_satellite_validation.json">unemployment_satellite_validation.json</a>.
               </p>
         </details>
+              </details>
       </div>
 
-      <div class="meth-step" id="forecasters" data-step="3">
-        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Against a drifting random walk</h3></div>
+      <div class="meth-step meth-fold" data-step="3">
+        <details class="expander step-fold" id="forecasters">
+          <summary><span class="meth-step-num mono">4</span><span class="step-fold-text"><h3>Against a drifting random walk</h3><span class="step-fold-result">No forecasting win survives the number of tests run: Bank Rate closest at 0.79, adjusted wins zero at every horizon</span></span></summary>
         <p class="mo-lead">No forecasting win survives the number of tests run.</p>
         <details class="more">
               <summary>Benchmark diagnostics, and what official forecasters report</summary>
               <h4>BoE SVAR against a random walk, computed from our own runs</h4>
               <p>
-                Expanding-window design: 49 quarterly origins
-                (2012Q1&ndash;2024Q1), estimation from 1992Q1, data through 2026Q1,
+                Expanding-window design: 50 quarterly origins
+                (2012Q1&ndash;2024Q2), estimation from 1992Q1, data through 2026Q2,
                 horizons 1&ndash;8. A ratio below 1.0 beats the benchmark.
               </p>
               <p>
@@ -499,86 +563,86 @@
 <p class="vc-unit">RMSE &divide; drifting-random-walk RMSE, horizons 1&ndash;8 quarters</p>
 <div class="vc-plot">
 <svg class="vchart" viewBox="158.88 4 529.8000000000001 400.0" role="img" aria-labelledby="svar-skill-all-t svar-skill-all-d" preserveAspectRatio="none">
-<title id="svar-skill-all-t">boe-svar forecast skill against a random walk with drift, all eight variables</title>
-<desc id="svar-skill-all-d">Dot matrix of forecast error relative to a random walk with drift, eight variables by eight quarterly horizons, from 49 expanding-window origins. Position alone carries better or worse: a dot left of the 1.0 rule means the model beats the benchmark, right of it means the benchmark wins. Filled dots mark differences significant at 5 per cent by a Diebold-Mariano test, hollow dots differences that are not statistically distinguishable; those p-values are pairwise and the grid runs 64 tests, none of which clears a 10 per cent false-discovery rate once adjusted together — the smallest adjusted q-value is 0.36. Bank Rate runs 0.79 at one quarter to 0.85 at 8; UK CPI runs 0.83 at one quarter to 1.03 at 8; World CPI runs 0.94 at one quarter to 1.07 at 8; Oil price runs 1.01 at one quarter to 0.98 at 8; CPI energy runs 0.98 at one quarter to 1.11 at 8; UK real GDP runs 1.06 at one quarter to 1.12 at 8; World GDP runs 1.07 at one quarter to 1.10 at 8; Exchange rate runs 1.03 at one quarter to 1.33 at 8. Bank Rate is the best at the longest horizon and Exchange rate the worst. Against this harder benchmark only four of eight variables beat naive at one quarter and two at 8. The number at the end of each row is that row's ratio at horizon 8.</desc>
+<title id="svar-skill-all-t">BoE SVAR forecast skill against a random walk with drift, all eight variables</title>
+<desc id="svar-skill-all-d">Dot matrix of forecast error relative to a random walk with drift, eight variables by eight quarterly horizons, from 50 expanding-window origins. Position alone carries better or worse: a dot left of the 1.0 rule means the model beats the benchmark, right of it means the benchmark wins. Filled dots mark differences significant at 5 per cent by a Diebold-Mariano test, hollow dots differences that are not statistically distinguishable; those p-values are pairwise and the grid runs 64 tests, none of which clears a 10 per cent false-discovery rate once adjusted together — the smallest adjusted q-value is 0.39. Bank Rate runs 0.79 at one quarter to 0.85 at 8; UK CPI runs 0.83 at one quarter to 1.03 at 8; World CPI runs 0.94 at one quarter to 1.07 at 8; Oil price runs 1.01 at one quarter to 0.98 at 8; CPI energy runs 0.97 at one quarter to 1.11 at 8; UK real GDP runs 1.06 at one quarter to 1.12 at 8; World GDP runs 1.07 at one quarter to 1.11 at 8; Exchange rate runs 1.03 at one quarter to 1.33 at 8. Bank Rate is the best at the longest horizon and Exchange rate the worst. Against this harder benchmark only four of eight variables beat naive at one quarter and two at 8. The number at the end of each row is that row's ratio at horizon 8.</desc>
 <line class="vc-grid" x1="194.2" y1="10.0" x2="194.2" y2="404.0"/>
 <line class="vc-grid" x1="282.5" y1="10.0" x2="282.5" y2="404.0"/>
 <line class="vc-zero" x1="370.8" y1="10.0" x2="370.8" y2="404.0"/>
 <line class="vc-grid" x1="459.1" y1="10.0" x2="459.1" y2="404.0"/>
 <line class="vc-grid" x1="547.4" y1="10.0" x2="547.4" y2="404.0"/>
 <line class="vc-grid" x1="635.7" y1="10.0" x2="635.7" y2="404.0"/>
-<line class="vc-grid" x1="188.3" y1="40.0" x2="273.1" y2="40.0"/>
-<path class="vc-s1-dot vc-dotp" d="M188.3 40h0" stroke-width="6"/>
-<path class="vc-s1-dot vc-dotp" d="M241.5 40h0" stroke-width="6"/>
-<path class="vc-s1-dot vc-dotp" d="M262.2 40h0" stroke-width="6"/>
-<path class="vc-s1-dot vc-dotp" d="M273.1 40h0" stroke-width="6"/>
-<path class="vc-s1-dot vc-dotp" d="M272.8 40h0" stroke-width="6"/>
-<path class="vc-dotp vc-ring" d="M264.2 40h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M264.2 40h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M253.4 40h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M253.4 40h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M241.5 40h0" stroke-width="9.2"/><path class="vc-dotp vc-ring-in" d="M241.5 40h0" stroke-width="6.8"/>
-<line class="vc-grid" x1="221.2" y1="90.0" x2="399.0" y2="90.0"/>
-<path class="vc-s1-dot vc-dotp" d="M221.2 90h0" stroke-width="6"/>
+<line class="vc-grid" x1="189.8" y1="40.0" x2="274.2" y2="40.0"/>
+<path class="vc-s1-dot vc-dotp" d="M189.8 40h0" stroke-width="6"/>
+<path class="vc-s1-dot vc-dotp" d="M243 40h0" stroke-width="6"/>
+<path class="vc-s1-dot vc-dotp" d="M263.4 40h0" stroke-width="6"/>
+<path class="vc-s1-dot vc-dotp" d="M274.2 40h0" stroke-width="6"/>
+<path class="vc-s1-dot vc-dotp" d="M273.9 40h0" stroke-width="6"/>
+<path class="vc-dotp vc-ring" d="M265.2 40h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M265.2 40h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M254.6 40h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M254.6 40h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M242.6 40h0" stroke-width="9.2"/><path class="vc-dotp vc-ring-in" d="M242.6 40h0" stroke-width="6.8"/>
+<line class="vc-grid" x1="221.8" y1="90.0" x2="398.3" y2="90.0"/>
+<path class="vc-s1-dot vc-dotp" d="M221.8 90h0" stroke-width="6"/>
 <path class="vc-dotp vc-ring" d="M238.4 90h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M238.4 90h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M283.2 90h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M283.2 90h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M316.2 90h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M316.2 90h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M344.4 90h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M344.4 90h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M366.6 90h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M366.6 90h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M383.4 90h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M383.4 90h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M399 90h0" stroke-width="9.2"/><path class="vc-dotp vc-ring-in" d="M399 90h0" stroke-width="6.8"/>
-<line class="vc-grid" x1="320.7" y1="140.0" x2="431.8" y2="140.0"/>
-<path class="vc-dotp vc-ring" d="M320.7 140h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M320.7 140h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M327.9 140h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M327.9 140h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M355 140h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M355 140h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M375.2 140h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M375.2 140h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M393.4 140h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M393.4 140h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M406.9 140h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M406.9 140h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M419.7 140h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M419.7 140h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M431.8 140h0" stroke-width="9.2"/><path class="vc-dotp vc-ring-in" d="M431.8 140h0" stroke-width="6.8"/>
-<line class="vc-grid" x1="352.9" y1="190.0" x2="387.2" y2="190.0"/>
-<path class="vc-dotp vc-ring" d="M382.8 190h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M382.8 190h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M385.1 190h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M385.1 190h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M387.2 190h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M387.2 190h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M380 190h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M380 190h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M369.8 190h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M369.8 190h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M359.5 190h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M359.5 190h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M352.9 190h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M352.9 190h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M354 190h0" stroke-width="9.2"/><path class="vc-dotp vc-ring-in" d="M354 190h0" stroke-width="6.8"/>
-<line class="vc-grid" x1="348.2" y1="240.0" x2="466.1" y2="240.0"/>
-<path class="vc-dotp vc-ring" d="M350.5 240h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M350.5 240h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M348.2 240h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M348.2 240h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M375.1 240h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M375.1 240h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M396.3 240h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M396.3 240h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M414.5 240h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M414.5 240h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M430.6 240h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M430.6 240h0" stroke-width="4.8"/>
-<path class="vc-s1-dot vc-dotp" d="M445.2 240h0" stroke-width="6"/>
-<path class="vc-s1-dot vc-dotp" d="M466.1 240h0" stroke-width="8"/>
-<line class="vc-grid" x1="426.9" y1="290.0" x2="480.7" y2="290.0"/>
-<path class="vc-dotp vc-ring" d="M426.9 290h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M426.9 290h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M449.3 290h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M449.3 290h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M453.1 290h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M453.1 290h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M461.8 290h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M461.8 290h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M470.1 290h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M470.1 290h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M470.8 290h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M470.8 290h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M472.9 290h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M472.9 290h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M480.7 290h0" stroke-width="9.2"/><path class="vc-dotp vc-ring-in" d="M480.7 290h0" stroke-width="6.8"/>
-<line class="vc-grid" x1="433.5" y1="340.0" x2="467.7" y2="340.0"/>
-<path class="vc-dotp vc-ring" d="M433.5 340h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M433.5 340h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M458.6 340h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M458.6 340h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M460.6 340h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M460.6 340h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M282.9 90h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M282.9 90h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M315.6 90h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M315.6 90h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M343.7 90h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M343.7 90h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M366 90h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M366 90h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M382.8 90h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M382.8 90h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M398.3 90h0" stroke-width="9.2"/><path class="vc-dotp vc-ring-in" d="M398.3 90h0" stroke-width="6.8"/>
+<line class="vc-grid" x1="321.3" y1="140.0" x2="431.3" y2="140.0"/>
+<path class="vc-dotp vc-ring" d="M321.3 140h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M321.3 140h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M328.9 140h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M328.9 140h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M355.7 140h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M355.7 140h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M375.4 140h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M375.4 140h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M393.6 140h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M393.6 140h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M407.1 140h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M407.1 140h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M420 140h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M420 140h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M431.3 140h0" stroke-width="9.2"/><path class="vc-dotp vc-ring-in" d="M431.3 140h0" stroke-width="6.8"/>
+<line class="vc-grid" x1="349.5" y1="190.0" x2="383.7" y2="190.0"/>
+<path class="vc-dotp vc-ring" d="M379.8 190h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M379.8 190h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M380.7 190h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M380.7 190h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M383.7 190h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M383.7 190h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M372.5 190h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M372.5 190h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M363 190h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M363 190h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M352.1 190h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M352.1 190h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M349.5 190h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M349.5 190h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M354.8 190h0" stroke-width="9.2"/><path class="vc-dotp vc-ring-in" d="M354.8 190h0" stroke-width="6.8"/>
+<line class="vc-grid" x1="345.7" y1="240.0" x2="466.5" y2="240.0"/>
+<path class="vc-dotp vc-ring" d="M347 240h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M347 240h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M345.7 240h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M345.7 240h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M373.5 240h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M373.5 240h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M394.8 240h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M394.8 240h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M411.9 240h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M411.9 240h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M428.6 240h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M428.6 240h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M443.5 240h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M443.5 240h0" stroke-width="4.8"/>
+<path class="vc-s1-dot vc-dotp" d="M466.5 240h0" stroke-width="8"/>
+<line class="vc-grid" x1="426.8" y1="290.0" x2="479.8" y2="290.0"/>
+<path class="vc-dotp vc-ring" d="M426.8 290h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M426.8 290h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M449.1 290h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M449.1 290h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M453.6 290h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M453.6 290h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M462.3 290h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M462.3 290h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M470.3 290h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M470.3 290h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M470.7 290h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M470.7 290h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M472.7 290h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M472.7 290h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M479.8 290h0" stroke-width="9.2"/><path class="vc-dotp vc-ring-in" d="M479.8 290h0" stroke-width="6.8"/>
+<line class="vc-grid" x1="434.0" y1="340.0" x2="470.7" y2="340.0"/>
+<path class="vc-dotp vc-ring" d="M434 340h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M434 340h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M460 340h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M460 340h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M462.4 340h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M462.4 340h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M466.2 340h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M466.2 340h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M470.7 340h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M470.7 340h0" stroke-width="4.8"/>
 <path class="vc-dotp vc-ring" d="M464.2 340h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M464.2 340h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M467.7 340h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M467.7 340h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M461 340h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M461 340h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M456.3 340h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M456.3 340h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M460.5 340h0" stroke-width="9.2"/><path class="vc-dotp vc-ring-in" d="M460.5 340h0" stroke-width="6.8"/>
-<line class="vc-grid" x1="397.2" y1="390.0" x2="661.1" y2="390.0"/>
-<path class="vc-dotp vc-ring" d="M397.2 390h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M397.2 390h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M452.1 390h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M452.1 390h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M497.2 390h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M497.2 390h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M539.9 390h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M539.9 390h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M573.2 390h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M573.2 390h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M606.3 390h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M606.3 390h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M637.9 390h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M637.9 390h0" stroke-width="4.8"/>
-<path class="vc-dotp vc-ring" d="M661.1 390h0" stroke-width="9.2"/><path class="vc-dotp vc-ring-in" d="M661.1 390h0" stroke-width="6.8"/>
+<path class="vc-dotp vc-ring" d="M459.9 340h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M459.9 340h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M465.7 340h0" stroke-width="9.2"/><path class="vc-dotp vc-ring-in" d="M465.7 340h0" stroke-width="6.8"/>
+<line class="vc-grid" x1="396.1" y1="390.0" x2="661.8" y2="390.0"/>
+<path class="vc-dotp vc-ring" d="M396.1 390h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M396.1 390h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M451.8 390h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M451.8 390h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M497.3 390h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M497.3 390h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M540.1 390h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M540.1 390h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M573.7 390h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M573.7 390h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M607 390h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M607 390h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M638.6 390h0" stroke-width="7.2"/><path class="vc-dotp vc-ring-in" d="M638.6 390h0" stroke-width="4.8"/>
+<path class="vc-dotp vc-ring" d="M661.8 390h0" stroke-width="9.2"/><path class="vc-dotp vc-ring-in" d="M661.8 390h0" stroke-width="6.8"/>
 </svg>
 <div class="vc-labels" aria-hidden="true">
 <span class="vc-t vc-tick vc-x vc-a-m" style="left:6.67%;top:100%">0.8</span>
@@ -593,7 +657,7 @@
 <span class="vc-t vc-rowlab vc-y vc-a-s" style="left:0%;top:45%">Oil price <b class="vc-num">0.98</b></span>
 <span class="vc-t vc-rowlab vc-y vc-a-s" style="left:0%;top:57.5%">CPI energy <b class="vc-num">1.11</b></span>
 <span class="vc-t vc-rowlab vc-y vc-a-s" style="left:0%;top:70%">UK real GDP <b class="vc-num">1.12</b></span>
-<span class="vc-t vc-rowlab vc-y vc-a-s" style="left:0%;top:82.5%">World GDP <b class="vc-num">1.10</b></span>
+<span class="vc-t vc-rowlab vc-y vc-a-s" style="left:0%;top:82.5%">World GDP <b class="vc-num">1.11</b></span>
 <span class="vc-t vc-rowlab vc-y vc-a-s" style="left:0%;top:95%">Exchange rate <b class="vc-num">1.33</b></span>
 </div>
 </div>
@@ -601,9 +665,9 @@
 <li><span class="vc-sw sw-dot1" aria-hidden="true"></span>significant at 5%, pairwise</li>
 <li><span class="vc-sw sw-ring" aria-hidden="true"></span>not distinguishable</li>
 </ul>
-<p class="vc-notes">Left of the 1.0 rule the model is better; right of it the benchmark is.<br />The large dot, and the number after each name, is h=8. Smallest adjusted q over the 64 cells: 0.36.</p>
+<p class="vc-notes">Left of the 1.0 rule the model is better; right of it the benchmark is.<br />The large dot, and the number after each name, is h=8. Smallest adjusted q over the 64 cells: 0.39.</p>
 </div><!-- /vc-fig -->
-                <figcaption>Error ratios against a random walk <strong>with drift</strong>, on the level of each series — the fair benchmark for a trending series. Estimated without the Covid dummies the published specification carries; no-change ratios are in the table below. Estimation uses final revised data, so this is pseudo- rather than real-time out-of-sample. The ratios rest on fewer effective observations than 49 origins suggests: in 16 of the 64 cells one origin contributes over 35% of the squared error, peaking at <strong>63% for UK GDP at h=1</strong>. Source: <code>papers/boe-svar/figures/rolling_evaluation.json</code> (<code>worst_origin_mse_share.drift</code>).</figcaption>
+                <figcaption>Error ratios against a random walk <strong>with drift</strong>, on the level of each series — the fair benchmark for a trending series. Estimated without the Covid dummies the published specification carries; no-change ratios are in the table below. Estimation uses final revised data, so this is pseudo- rather than real-time out-of-sample. The ratios rest on fewer effective observations than 50 origins suggests: in 16 of the 64 cells one origin contributes over 35% of the squared error, peaking at <strong>64% for UK GDP at h=1</strong>. Source: <code>papers/boe-svar/figures/rolling_evaluation.json</code> (<code>worst_origin_mse_share.drift</code>).</figcaption>
               </figure>
         <figure class="vfig">
         <div class="vc-fig vc-two-rows" data-chart="svar-winrate">
@@ -611,7 +675,7 @@
 <div class="vc-plot">
 <svg class="vchart" viewBox="64 52 660 202.0" role="img" aria-labelledby="svar-winrate-t svar-winrate-d" preserveAspectRatio="none">
 <title id="svar-winrate-t">How many of eight variables beat a drifting random walk, by horizon</title>
-<desc id="svar-winrate-d">Column chart, one column per forecast horizon from one to eight quarters. Column height is the number of the model's eight forecast variables whose root mean squared error is below that of a random walk with drift; a dashed reference line across the top marks all eight. The counts are 4, 4, 3, 2, 3, 3, 2, 2, so between 2 and 4 of the 8 beat the benchmark at any horizon and the remaining 4, 4, 5, 6, 5, 5, 6, 6 do not. The shaded lower part of each column is the subset whose difference is significant at 5 per cent on an unadjusted pairwise Diebold-Mariano test: 2, 1, 1, 1, 1, 0, 0, 0. Those p-values are pairwise and the grid runs 64 tests; under a Benjamini-Hochberg adjustment none of them reaches a 10 per cent false-discovery rate and the smallest adjusted q-value is 0.36, so on the adjusted reading the significant-win count is zero at every horizon. At horizons 7 and 8 one variable is significantly worse than the benchmark.</desc>
+<desc id="svar-winrate-d">Column chart, one column per forecast horizon from one to eight quarters. Column height is the number of the model's eight forecast variables whose root mean squared error is below that of a random walk with drift; a dashed reference line across the top marks all eight. The counts are 4, 4, 3, 2, 3, 3, 2, 2, so between 2 and 4 of the 8 beat the benchmark at any horizon and the remaining 4, 4, 5, 6, 5, 5, 6, 6 do not. The shaded lower part of each column is the subset whose difference is significant at 5 per cent on an unadjusted pairwise Diebold-Mariano test: 2, 1, 1, 1, 1, 0, 0, 0. Those p-values are pairwise and the grid runs 64 tests; under a Benjamini-Hochberg adjustment none of them reaches a 10 per cent false-discovery rate and the smallest adjusted q-value is 0.39, so on the adjusted reading the significant-win count is zero at every horizon. At horizon 8 one variable is significantly worse than the benchmark.</desc>
 <line class="vc-grid" x1="64" y1="205.0" x2="724" y2="205.0"/>
 <line class="vc-grid" x1="64" y1="162.0" x2="724" y2="162.0"/>
 <line class="vc-grid" x1="64" y1="119.0" x2="724" y2="119.0"/>
@@ -666,7 +730,7 @@
 <li><span class="vc-sw sw-b1" aria-hidden="true"></span>beats it, p&lt;0.05 unadjusted (count under each column)</li>
 <li><span class="vc-sw sw-b2" aria-hidden="true"></span>beats it, not distinguishable</li>
 </ul>
-<p class="vc-notes">Column height = variables with lower RMSE than a random walk with drift, out of 8; the rest do not beat it.<br /><span class="vc-warn">Adjusted together, none of the 64 tests clears a 10% false-discovery rate (smallest q = 0.36).</span></p>
+<p class="vc-notes">Column height = variables with lower RMSE than a random walk with drift, out of 8; the rest do not beat it.<br /><span class="vc-warn">Adjusted together, none of the 64 tests clears a 10% false-discovery rate (smallest q = 0.39).</span></p>
 </div><!-- /vc-fig -->
                 <figcaption>A win is a ratio strictly below 1.0 — a hard cut that counts 0.99 and rejects 1.01 though neither is distinguishable from the benchmark, so the significance split matters more than the count. That significance is pairwise: under a Benjamini&ndash;Hochberg adjustment the significant-win count is <strong>zero at every horizon</strong>. Same origins and benchmark as above. Source: <code>papers/boe-svar/figures/rolling_evaluation.json</code>.</figcaption>
               </figure>
@@ -715,47 +779,10 @@
                 horizon.
               </p>
         </details>
+              </details>
       </div>
 
       </div>
-    </div>
-  </section>
-
-  <section class="band band-wide" id="caveats">
-    <div class="band-head" data-icon="alert">
-      <h2>Where this departs from the Bank&rsquo;s model</h2>
-    </div>
-    <div class="prose">
-      <div class="table-scroll mo-tablecard"><table>
-        <caption>Known limits of the structural VAR replication</caption>
-        <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row"><strong>Frozen data edge</strong></th>
-            <td>Estimation to 2025Q1, conditioning to 2026Q1 — the extended sample, not the paper's 1992Q1&ndash;2023Q2 window. Results shift with revisions.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Proxied world aggregates</strong></th>
-            <td>The Bank's UK-trade-weighted world GDP and CPI are unpublished, so they are rebuilt as chain-weighted US + euro-area + Japan + China with time-varying UK trade weights.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>One ranking does not replicate</strong></th>
-            <td>The paper's prose ranks UK monetary policy as the largest domestic contributor to CPI variance; here UK supply (13.9%) and UK demand (11.4%) both exceed it (8.7%). The paper publishes no FEVD table, so treat this as unresolved rather than a defect; the proxy aggregates are a candidate cause.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Assumed lag length and simplified pandemic prior</strong></th>
-            <td>p&nbsp;=&nbsp;4 is assumed, not selected; the pandemic is handled by exogenous Covid dummies.</td>
-          </tr>
-          <tr>
-            <th scope="row"><strong>Sign-restriction critiques apply</strong></th>
-            <td>Pointwise medians mix structural models (Fry&ndash;Pagan); the Haar prior over rotations is informative about impulse responses (Baumeister&ndash;Hamilton). These hit the Bank's own outputs identically.</td>
-          </tr>
-        </tbody>
-      </table></div>
-      <p class="opt-note">
-        every deviation is enumerated in the repository's
-        <code>docs/methodology.md</code>.
-      </p>
     </div>
   </section>
 
@@ -791,7 +818,9 @@
   <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
     <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/glossary">Glossary</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro/issues">Report an issue</a>
     <a class="footer-text" href="/contact">Contact</a>
   </nav>
 </footer>

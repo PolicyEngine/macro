@@ -41,6 +41,11 @@ jobs:
         run: python3 forecasts/make_open_fans.py --check
       - name: Generated release notes are indexed
         run: python3 notes/generate_release_notes.py --check
+      - name: Pre-rendered methodology equations match their TeX
+        # MathJax 3.2.2 at authoring time (tools/package.json); ubuntu-latest has node.
+        run: |
+          npm ci --prefix tools --no-audit --no-fund
+          python3 tools/prerender_math.py --check
       - name: Global navigation is consistent
         run: python3 site_nav.py
       - name: Public model inventory and evidence are complete

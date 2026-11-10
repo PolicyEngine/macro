@@ -17,9 +17,10 @@
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <meta name="theme-color" content="#FFFFFF" />
 
+<link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=19" />
+<link rel="stylesheet" href="/style.css?v=23" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -70,7 +71,7 @@
         <a class="model-tabs-link" href="/economy/us/topics/inflation">Inflation</a>
         <a class="model-tabs-link" href="/economy/us/topics/jobs">Jobs</a>
         <a class="model-tabs-link" href="/economy/us/topics/rates">Rates and Treasuries</a>
-        <a class="model-tabs-link" href="/economy/us/topics/reform">Tax and benefit reform</a>
+        <a class="model-tabs-link" href="/economy/us/topics/reform">Tax and benefits</a>
       </div>
     </div>
   </nav>
@@ -96,18 +97,19 @@
       <p class="forecast-note">
         Archiving &ldquo;forecasts&rdquo; from models that do not claim to
         forecast would manufacture a record. The UK page exists because
-        <a href="/svar">the BoE SVAR</a> genuinely forecasts and accepts being
+        <a href="/svar">the BoE SVAR</a> produces forecasts and accepts being
         scored; neither US model does.
       </p>
       <details class="about">
         <summary>What each US model does claim</summary>
         <p>
-          <strong><a href="/frb-us">FRB/US</a></strong> is a validated software
+          <strong><a href="/frb-us">FRB/US</a></strong> is a software
           replication of the Fed&rsquo;s model — it answers &ldquo;what does a
           shock do&rdquo;, and its <a href="/frb-us/validation">validation</a>
           makes no predictive claim.
           <strong><a href="/us-hank">US HANK</a></strong> is a calibrated
-          validated replication of Auclert et al. (2021); its responses are first-order and stylized, not
+          replication of Auclert et al. (2021) whose response magnitudes are
+          <a href="/us-hank/validation">not validated</a>; its responses are first-order and stylized, not
           forecasts.
         </p>
       </details>
@@ -180,18 +182,21 @@
         Four routes, each built on <a href="/pe">pe-microsim</a>; the household
         rows are the UK commands with <span class="mono">--country us</span>.
       </p>
+      <details class="about route-details">
+        <summary>The routes, with the command for each</summary>
       <div class="table-scroll">
-        <table>
+        <table class="route-table">
           <caption>What this section can produce for the US. Every command is checked against <code>cli.py</code> when this page is generated.</caption>
           <thead><tr><th scope="col">What you get</th><th scope="col">Models, in the order they run</th><th scope="col">What the chain does</th><th scope="col">Command</th></tr></thead>
           <tbody>
           <tr><th scope="row">One household, exactly</th><td><a href="/pe">pe-microsim</a></td><td>arithmetic over the statutory rules; no sampling, no weights</td><td><code class="mono">pe-macro household-impact --country us --people &#x27;[{&quot;age&quot;:35,&quot;employment_income&quot;:50000}]&#x27; --household &#x27;{&quot;state_code&quot;:&quot;CA&quot;,&quot;county_fips&quot;:&quot;06037&quot;}&#x27; --reform &#x27;{&quot;gov.irs.credits.ctc.amount.adult_dependent&quot;:1000}&#x27;</code></td></tr>
           <tr><th scope="row">The whole population, one policy year</th><td><a href="/pe">pe-microsim</a></td><td>revenue and distribution; a static costing</td><td><code class="mono">pe-macro score --country us --reform &#x27;{&quot;gov.irs.credits.ctc.amount.adult_dependent&quot;:1000}&#x27; --model microsim</code></td></tr>
           <tr><th scope="row">A macro shock carried into household earnings</th><td><a href="/frb-us">frb-us</a> &rarr; <a href="/pe">pe-microsim</a></td><td>the wage-bill change applied through the automatic stabilisers</td><td><code class="mono">pe-macro frbus-shock-incidence --var rffintay_aerr --shock 1.0 --year 2027</code></td></tr>
-          <tr><th scope="row">The same question in the HANK member</th><td><a href="/us-hank">us-hank</a> &rarr; <a href="/pe">pe-microsim</a></td><td>impulse responses around a calibrated steady state</td><td><code class="mono">pe-macro hank-shock-incidence --kind monetary --size -0.0025 --year 2026</code></td></tr>
+          <tr><th scope="row">The same question in the HANK member</th><td><a href="/us-hank">us-hank</a> &rarr; <a href="/pe">pe-microsim</a></td><td><a class="gloss-link" href="/glossary#irf">impulse responses</a> around a calibrated steady state</td><td><code class="mono">pe-macro hank-shock-incidence --kind monetary --size -0.0025 --year 2026</code></td></tr>
           </tbody>
         </table>
       </div>
+      </details>
       <details class="about">
         <summary>About the engine</summary>
         <p>
@@ -206,8 +211,8 @@
         Two UK rows are missing here; both absences are the registry's, not an oversight:
       </p>
       <ul>
-        <li><strong>No reform with a macro second round.</strong> Both US members — <a href="/frb-us">frb-us</a> and <a href="/us-hank">us-hank</a> — record <span class="mono">PolicyEngine reforms</span> in their own cannot-answer field, and us-hank adds <span class="mono">detailed tax reforms (only monetary/fiscal-spending/productivity instruments; the labor tax is endogenous)</span>. No mapping exists from a US statutory reform to a US macro model, and none is invented here.</li>
-        <li><strong>No forecast.</strong> No model in this suite forecasts the US economy. The only member whose question types include <span class="mono">forecast</span> is <a href="/svar">boe-svar</a>, and its geography is UK-only. A section called Forecasts that showed a US path anyway would be the one dishonest thing on this site.</li>
+        <li><strong>No reform with a macro second round.</strong> Both US members — <a href="/frb-us">frb-us</a> and <a href="/us-hank">us-hank</a> — record <span class="mono">PolicyEngine reforms</span> in their own cannot-answer field, and us-hank adds <span class="mono">detailed tax reforms (only monetary/fiscal-spending/productivity instruments; the labor tax is <a class="gloss-link" href="/glossary#exogenous">endogenous</a>)</span>. No mapping exists from a US statutory reform to a US macro model, and none is invented here.</li>
+        <li><strong>No forecast.</strong> No model in this suite forecasts the US economy. The only member whose question types include <span class="mono">forecast</span> is <a href="/svar">boe-svar</a>, and its geography is UK-only. A section called Forecasts showing a US path anyway would claim a forecast no model here makes.</li>
       </ul>
       <details class="about">
         <summary>The bridge that does exist, and the MCP routes</summary>
@@ -261,7 +266,9 @@
   <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
     <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/glossary">Glossary</a>
     <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro/issues">Report an issue</a>
     <a class="footer-text" href="/contact">Contact</a>
   </nav>
 </footer>
