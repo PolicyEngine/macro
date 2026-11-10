@@ -28,6 +28,11 @@ Bullets by PR, in merge order. #226 and #229 wait on the decision in #218; #231 
 
 <!-- Site redesign stack (#200) entries go above this line; data pipeline (#221, #228) entries go below it. Keeping them apart lets both stacks merge in either order. -->
 
+### Data pipeline (#221, #228)
+
+- **#221: data pipeline.** A scheduled refresh now runs fetch, ingest, score and the CI gates in one driver (`data/refresh.py`) and updates one checked bot PR; the nowcast exits with an error when its calendar is stale instead of doing nothing.
+- **#228: snapshot recovery tool.** `data/recover_orphaned_snapshots.py` recovers the 50 orphaned refresh snapshots with repeat days dropped; the refresh carry step also drops repeated releases. No file under `data/vintages/` is added by this change.
+
 ## [0.2.0] — 2026-08-11
 
 Access and verification release. Nothing about any model's behaviour or any
