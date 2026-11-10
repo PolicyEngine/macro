@@ -66,7 +66,7 @@
         <a class="model-tabs-link" href="/economy/us/topics/inflation">Inflation</a>
         <a class="model-tabs-link" href="/economy/us/topics/jobs">Jobs</a>
         <a class="model-tabs-link" href="/economy/us/topics/rates">Rates and Treasuries</a>
-        <a class="model-tabs-link" aria-current="page" href="/economy/us/topics/reform">Tax and benefit reform</a>
+        <a class="model-tabs-link" aria-current="page" href="/economy/us/topics/reform">Tax and benefits</a>
       </div>
     </div>
   </nav>
@@ -127,9 +127,8 @@
       <p>
         <a href="/pe">pe-microsim</a> is the scorer, and for the US it is the
         whole of it: it applies the reform to household microdata and reports
-        <span class="mono">taxes</span>, <span class="mono">benefits</span>, <span class="mono">net_income</span>, <span class="mono">revenue</span>, <span class="mono">distribution</span>. It is
-        production-ready for selected household applications, and its uncertainty is
-        none for household arithmetic; survey/calibration uncertainty for population estimates.
+        <span class="mono">taxes</span>, <span class="mono">benefits</span>, <span class="mono">net_income</span>, <span class="mono">revenue</span>, <span class="mono">distribution</span>. Its registry
+        status: exact for implemented rules (household arithmetic); population estimates add survey error.
       </p>
       <p>
         The limit is the same structural one the UK page describes — a static
@@ -139,7 +138,7 @@
       <ul>
         <li>pe-microsim cannot answer GDP, inflation, interest rates and macro feedback. A US costing from it is a static costing.</li>
         <li>On the UK side that gap is bridged: <a href="/obr">obr-macro</a> supplies macro feedback through a reviewed reform translation, and <a href="/olg">psl-og+microsim</a> adds olg-ge overlay on microsimulation. Both are <span class="mono">uk</span>-only.</li>
-        <li><strong>There is no US equivalent of either.</strong> Both US models record PolicyEngine reforms in their own cannot-answer field, and us-hank adds detailed tax reforms (only monetary/fiscal-spending/productivity instruments; the labor tax is endogenous). No mapping exists from a US statutory reform to a US macro model, and none is invented here.</li>
+        <li><strong>There is no US equivalent of either.</strong> Both US models record PolicyEngine reforms in their own cannot-answer field, and us-hank adds detailed tax reforms (only monetary/fiscal-spending/productivity instruments; the labor tax is <a class="gloss-link" href="/glossary#exogenous">endogenous</a>). No mapping exists from a US statutory reform to a US macro model, and none is invented here.</li>
       </ul>
       <p>
         One bridge does exist, and it runs the other way. The incidence
@@ -167,7 +166,7 @@
         adult-dependent credit, scored statically on the population, then the
         macro-to-household bridge that does exist:
       </p>
-      <div class="codeblock"><pre><code>pe-macro parameters   <span class="cm"># curated reform parameter paths, live-resolved, both countries</span>
+      <div class="codeblock"><pre tabindex="0" aria-label="Command"><code>pe-macro parameters   <span class="cm"># curated reform parameter paths, live-resolved, both countries</span>
 pe-macro score --country us --reform &#x27;{&quot;gov.irs.credits.ctc.amount.adult_dependent&quot;:1000}&#x27; --model microsim   <span class="cm"># static population costing</span>
 pe-macro population-impact --country us --reform &#x27;{&quot;gov.irs.credits.ctc.amount.adult_dependent&quot;:1000}&#x27; --year 2027   <span class="cm"># revenue and distribution for one policy year</span>
 pe-macro frbus-shock-incidence --var rffintay_aerr --shock 1.0 --year 2027   <span class="cm"># a macro shock&#x27;s earnings incidence — not a reform</span></code></pre></div>
@@ -208,7 +207,7 @@ pe-macro frbus-shock-incidence --var rffintay_aerr --shock 1.0 --year 2027   <sp
       </p>
       <p class="chooser-note">
         Dated, immutable JSON snapshots of every series this site reads —
-        <a href="/forecasts#data">browse the store, its release calendar, and the as-of recipe →</a>
+        <a href="/economy#data">browse the store, its release calendar, and the as-of recipe →</a>
       </p>
     </div>
   </section>
@@ -222,7 +221,7 @@ pe-macro frbus-shock-incidence --var rffintay_aerr --shock 1.0 --year 2027   <sp
         <p>The record, open rounds and how they score</p>
         <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
       </a>
-      <a class="entry-card" href="/forecasts#data">
+      <a class="entry-card" href="/economy#data">
         <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></span>
         <h3>The data store</h3>
         <p>Every vintage behind these numbers</p>

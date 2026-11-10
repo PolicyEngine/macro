@@ -213,6 +213,8 @@ def line_chart(
         chartkit.ytick(left, g_hi, f"{high - padding:.1f}{units}".replace("-", "\u2212")),
         f'<line class="vc-grid" x1="{left}" y1="{g_lo:.1f}" x2="{width - right}" y2="{g_lo:.1f}" />',
         chartkit.ytick(left, g_lo, f"{low + padding:.1f}{units}".replace("-", "\u2212")),
+        *([f'<line class="vc-zero" x1="{left}" y1="{y(0):.1f}" x2="{width - right}" y2="{y(0):.1f}" />']
+          if low + padding < 0 < high - padding else []),
         f'<polyline class="vc-out-line" points="{points}" />',
         f'<circle class="vc-out-dot" cx="{x(len(values) - 1):.1f}" cy="{y(last['value']):.1f}" r="4" />',
         chartkit.xtick(left, g_lo + 8, first["period"], 0, 1),
@@ -222,8 +224,8 @@ def line_chart(
     # The latest reading is not restated here: it lives on the topic page
     # (DESIGN.md §7.0). The two gridlines mark the window's range.
     return f"""      <figure class="economy-figure">
-{chartkit.figure(svg)}
-        <figcaption><strong>{title}</strong><span>{description}</span><a href="{url}">View source · {source} →</a></figcaption>
+        <figcaption><strong>{title}</strong><span>{description}</span></figcaption>
+{chartkit.figure(svg, source=f'<a href="{url}">{source} →</a>')}
       </figure>"""
 
 
@@ -370,9 +372,9 @@ def replace(html: str, name: str, value: str) -> str:
 def render_uk() -> str:
     """The UK hub. ``economy-topics`` belongs to economy/topics.py, not here.
 
-    No series index and no release calendar: both repeated the data store on
-    /forecasts#data, which is their one home (DESIGN.md §7.0). The hub is the
-    topic directory and the long view; a provenance card links to the store.
+    No separate series index or release calendar: the data store (#data,
+    spliced in by data/build_page.py) is their one home (DESIGN.md §7.0).
+    The hub is the topic directory, the long view, and the store.
     """
     html = PAGE.read_text()
     html = replace(html, "economy-trends-figures", uk_figures())
