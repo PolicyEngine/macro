@@ -51,6 +51,10 @@ modifies, renames or deletes an already-archived round.
   is worse than an empty record, because the empty record is honest.
 - **Every forecast is reported beside a naive baseline.** Beating a random walk
   is the minimum bar for a model to have earned its complexity.
+  Where a stored quarterly path exists (`official/*.csv` and the OBR EFO files
+  under `papers/obr-macro/figures/`), the BoE MPR, OBR EFO and BoE survey of
+  external forecasters are shown beside it too, each with the date its
+  information set closed.
 
 ## Adding a model
 

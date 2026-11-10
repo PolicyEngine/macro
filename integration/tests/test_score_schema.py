@@ -150,13 +150,14 @@ def test_obr_bridge_costs_each_year_and_injects_hhdi_path(fake_bridge):
     assert rr["var"] == "HHDI_ADDFACTOR"
     # Unit-converted: +£10bn/yr -> +£2,500m/q of revenue costing.
     assert rr["shock"] == [2500.0] * 8
-    assert rr["start"] == "2026Q1" and rr["end"] == "2027Q4"
+    # PE-UK years 2026, 2027 are fiscal 2026-27, 2027-28 (issue #201).
+    assert rr["start"] == "2026Q2" and rr["end"] == "2028Q1"
     assert rr["investment_closure"] is False
 
     assert res["bridge_variable"] == "HHDI_ADDFACTOR"
     assert res["annual_costings_bn"] == [
-        {"year": 2026, "budgetary_impact_bn": 10.0},
-        {"year": 2027, "budgetary_impact_bn": 10.0},
+        {"year": 2026, "fiscal_year": "2026-27", "budgetary_impact_bn": 10.0},
+        {"year": 2027, "fiscal_year": "2027-28", "budgetary_impact_bn": 10.0},
     ]
     assert len(res["results"]) == 8
     assert res["cumulative_delta_gdp_bn_over_shock_periods"] == pytest.approx(-4.0)
@@ -169,7 +170,7 @@ def test_obr_bridge_score_block(fake_bridge):
     score = res["score"]
     assert score["model"] == "obr-macro"
     assert score["model_class"] == "semi-structural"
-    assert score["horizon"] == "quarterly window 2026Q1..2026Q4"
+    assert score["horizon"] == "quarterly window 2026Q2..2027Q1"
     q = score["quantities"]
     assert q["gdp"]["delta_bn"] == pytest.approx(-2.0)
     assert q["consumption"]["delta_bn"] == pytest.approx(-1.6)
@@ -197,6 +198,38 @@ def test_score_reform_routes_microsim(monkeypatch):
                             start_year=2027)
     assert seen == {"country": "uk", "reform": {"gov.x": 1}, "year": 2027}
     assert res["model"].startswith("PolicyEngine")
+
+
+def test_obr_bridge_maps_pe_uk_fiscal_years_to_quarters(fake_bridge):
+    """Issue #201. policyengine_uk samples every parameter at 30 April of
+    year y (convert_to_fiscal_year_parameters), so a year=y costing is
+    fiscal y-(y+1): the add-factor path must start in yQ2 and end in
+    (y_last+1)Q1. The default 2026 x 5 window then ends on the databank's
+    last quarter, 2031Q1."""
+    core.obr_score_reform({"gov.x": 1})  # defaults: 2026, 5 years
+    (rr,) = fake_bridge["run_reform"]
+    assert (rr["start"], rr["end"]) == ("2026Q2", "2031Q1")
+    assert len(rr["shock"]) == 20
+
+
+def test_pe_uk_year_convention_is_fiscal():
+    """Pin the PolicyEngine-UK convention the mapping above relies on.
+    Skipped where policyengine_uk is not installed; reads source only."""
+    import inspect
+
+    params = pytest.importorskip("policyengine_uk.utils.parameters")
+    src = inspect.getsource(params.convert_to_fiscal_year_parameters)
+    assert "-04-30" in src
+
+
+@pytest.mark.parametrize("start_year, years", [(2027, 5), (2030, 2), (2024, 1)])
+def test_obr_bridge_refuses_windows_outside_the_databank(
+    fake_bridge, start_year, years
+):
+    with pytest.raises(ValueError, match="outside the databank"):
+        core.obr_score_reform({"gov.x": 1}, start_year=start_year, years=years)
+    assert fake_bridge["costed_years"] == []  # no microsim run spent
+    assert fake_bridge["run_reform"] == []
 
 
 def test_obr_bridge_validates_before_importing_anything(fake_bridge):

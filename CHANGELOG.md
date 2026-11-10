@@ -10,6 +10,22 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### Site redesign stack (#200)
+
+Bullets by PR, in merge order. #226 and #229 wait on the decision in #218; #231 and #232 sit on #206. Drop a PR's bullet here if it has not merged into #200 when #200 merges.
+
+- **#200: site redesign.** Every page uses the Autumn Budget 2026 layout (header band, title band, sub-tabs, cards with expanders), with `DESIGN.md` as the spec. URLs, numbers and data are unchanged.
+- **#204: question router on `/models` and a new `/glossary`.** Model cards filter by question and country; `/connect` gives copy-paste setup and `/contact` lists self-serve routes. No numbers changed.
+- **#206: model pages.** One-column methodology, one overview order, and model names instead of ids.
+- **#206: FRB/US comparators.** The worked-shock reference moves from the 2014 FEDS Note (gap −0.4pp, core PCE −0.08pp) to Laforte (2018) for the current model (gap −0.486pp, core PCE −0.0345pp, unemployment +0.219pp at q8); multiplier ranges move to CBO's converted ranges (for example Coenen 0.7–1.0 → CBO 0.45–1.82).
+- **#205: forecast-evaluation scoreboard.** `/forecasts` leads with the record (band coverage, mean absolute error beside the no-change benchmark, forecasts scored), the archive is flat, and charts carry units and sources. `forecasts/scorecard.json` is unchanged.
+- **#219: `/models/compare`.** One table per question (six questions × five models) with the exact call, a sourced benchmark and a verdict. The FRB/US benchmark is Laforte (2018) (band −0.53…−0.40 → −0.486…−0.459).
+- **#216: integration-layer scenario sweep fixes.** `score_reform(model="obr")` places PolicyEngine-UK costings on fiscal-year quarters (default window `2026Q1..2030Q4` → `2026Q2..2031Q1`); `svar_forecast` returns simple y/y rates rather than log differences; `frbus_shock` reports rates as level deviations; `hank_shock` returns the `tax` series; invalid inputs (NaN sizes, unknown question types, out-of-window years) are refused before solving.
+- **#226: hosted OBR pin** `1ed742c` → `e4d7faa` (obr-macroeconomic-model main). After a redeploy, hosted Bank Rate +100bp ΔGDP q4/q8/q12 moves −446/−525/−490 → −431/−482/−416 £m, matching the site, and the default `score_reform` cumulative ΔGDP for a basic-rate rise moves +£5.6bn → −£18.3bn.
+- **#229: weekly drift check.** `integration/drift/canaries.json` compares one cheap hosted call per model with the number the site quotes for it and reports value, provenance and revision mismatches.
+- **#231: BoE SVAR replication figures** are labelled with their run vintage (boe-var-model `845e2a4`) and their `results/` links are pinned to it. No number changes.
+- **#232: BoE SVAR figures updated to the 2026Q2 data refresh** (boe-var-model #24, `d4ec3e7`): accepted draws 744 → 765, ESS 356.1 → 368.0, global FEVD share of UK GDP 37.4 → 38.7 and of UK CPI 42.3 → 41.5, rolling origins 49 → 50, smallest adjusted q 0.36 → 0.39 (published spec 0.40 → 0.42), fast-config GDP/CPI 42.0/37.6 → 40.1/40.1.
+
 <!-- Site redesign stack (#200) entries go above this line; data pipeline (#221, #228) entries go below it. Keeping them apart lets both stacks merge in either order. -->
 
 ### Data pipeline (#221, #228)

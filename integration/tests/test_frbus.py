@@ -308,3 +308,72 @@ def test_baseline_is_cached_per_policy_rule():
     core.frbus_shock(var="egfe_aerr", shock=0.01, horizon=8,
                      policy_rule="fixed_funds_rate")
     assert len(core._FRBUS_BASELINE_CACHE) == 2
+
+
+def test_extra_rate_series_are_level_deviations_not_percent_of_the_rate():
+    """A 10-year yield requested through ``variables`` used to come back as
+    100*(new/base-1): a +30bp move on a 4% yield read as +7.5."""
+    mode, meaning = core._frbus_series_mode("rg10", "10-year Treasury bond rate")
+    assert mode == "pp" and "level deviation" in meaning
+    assert core._frbus_series_mode("lfpr", "Labor force participation rate")[0] == "pp"
+    # Levels, including the incidence inputs pl/lhp/leh, stay % deviations.
+    for var, definition in [
+        ("pl", "Compensation per hour, business"),
+        ("lhp", "Aggregate labor hours, business sector"),
+        ("leh", "Civilian employment (break adjusted)"),
+        ("fpx", "Nominal exchange rate (G39, import/export trade weights)"),
+        ("egfe", "Federal Government expenditures, CW 2012$"),
+        ("zzz", None),
+    ]:
+        assert core._frbus_series_mode(var, definition)[0] == "pct", var
+    # Headline series keep their declared modes.
+    assert core._frbus_series_mode("rff", "anything") == core.FRBUS_HEADLINE["rff"]
+
+
+def test_every_stacking_lever_says_so_and_poil_has_real_units():
+    """Issue #212: us-frb-model VALIDATION.md asks every wrapper exposing
+    `periods` to document stacking on every lever."""
+    for entry in core.FRBUS_VARIABLES:
+        if entry["var"] == "poil_aerr":
+            assert "dollars per barrel" in entry["units"]
+            assert "does not stack" in entry["units"]
+        else:
+            assert "PER SHOCKED PERIOD" in entry["units"], entry["var"]
+
+
+def _fake_frbus(monkeypatch):
+    import pandas as pd
+
+    idx = pd.period_range("2026Q1", periods=8, freq="Q")
+    cols = list(core.FRBUS_HEADLINE) + ["trp", "trp_aerr", "zz", "zz_aerr"]
+    base = pd.DataFrame(1.0, index=idx, columns=cols)
+    base[["trp_aerr", "zz_aerr"]] = 0.0
+
+    class _Model:
+        def solve(self, start, end, data):
+            out = data.copy()
+            # a lagged equation: the lever accumulates its add-error
+            out["trp"] = base["trp"] + data["trp_aerr"].cumsum()
+            out["xgdp"] = base["xgdp"] - data["trp_aerr"].cumsum()
+            return out
+
+    monkeypatch.setattr(core, "_frbus_baseline",
+                        lambda rule, s, e: (_Model(), base.copy()))
+    monkeypatch.setattr(core, "_frbus_definitions",
+                        lambda: {"trp": "Average government tax rate",
+                                 "zz": "Something, cw 2012$"})
+
+
+def test_realised_lever_path_is_returned(monkeypatch):
+    _fake_frbus(monkeypatch)
+    res = core.frbus_shock("trp_aerr", 0.01, periods=4, horizon=8)
+    assert "trp" in res["series_meaning"]
+    path = [r["trp"] for r in res["results"]]
+    assert path[3] == pytest.approx(0.04)  # stacked: 4 x 0.01, not 0.01
+
+
+def test_uncurated_lever_is_not_labelled_bare_model_units(monkeypatch):
+    _fake_frbus(monkeypatch)
+    res = core.frbus_shock("zz_aerr", 0.01, horizon=8)
+    assert res["units"] != "model units"
+    assert "uncurated" in res["units"] and "stacks" in res["units"]

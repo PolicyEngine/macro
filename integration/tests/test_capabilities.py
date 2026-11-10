@@ -142,3 +142,30 @@ def test_public_site_names_resolve_through_the_api():
         assert "og-uk" in message and "psl-og" in message, message
     else:
         raise AssertionError("an unknown model_id must raise")
+
+
+def test_router_rejects_unknown_question_type_with_the_valid_list():
+    import pytest
+
+    with pytest.raises(ValueError, match="economic_shock"):
+        capabilities.recommend("shock", country="uk")
+
+
+def test_router_normalises_case_and_whitespace():
+    assert capabilities.recommend(" Economic_Shock ", "US")["candidate_models"] == [
+        "frb-us", "us-hank",
+    ]
+
+
+def test_router_warning_names_the_missing_country():
+    rec = capabilities.recommend("forecast", country="fr")
+    assert rec["primary_model"] is None
+    assert "'fr'" in rec["warning"]
+
+
+def test_mcp_docstring_lists_every_question_type():
+    from policyengine_macro import mcp_server
+
+    doc = mcp_server.recommend_model.__doc__
+    for q in capabilities.question_types():
+        assert q in doc, q

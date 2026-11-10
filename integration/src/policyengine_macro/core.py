@@ -15,6 +15,8 @@ from pathlib import Path
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
+from policyengine_macro.capabilities import MODELS
+
 # Fallback checkout of boe-var-model for svar_summary when the boe_var
 # package is not installed; unset means no fallback.
 BOE_VAR_REPO_ENV = "POLICYENGINE_MACRO_BOE_VAR_REPO"
@@ -23,6 +25,18 @@ BOE_VAR_REPO_ENV = "POLICYENGINE_MACRO_BOE_VAR_REPO"
 # name against the loaded dataset's own columns, so an upstream reorder can
 # never silently mislabel a series.
 _COL_CPI, _COL_GDP = "cpisa", "uk_gdp"
+
+
+MACRO_SOURCE_URL = "https://github.com/PolicyEngine/macro"
+
+# Model ids recorded by the shock-incidence overlays. They are not registry
+# members: each composes a registry member with the microsim, in this repo.
+INCIDENCE_OVERLAY_MODEL_IDS = {
+    "frbus+microsim": "frb-us",
+    "hank+microsim": "us-hank",
+    "svar+microsim": "boe-svar",
+    "define+microsim": "define-uk",
+}
 
 
 def _package_version(distribution: str) -> str:
@@ -43,15 +57,9 @@ def _provenance(
 ) -> dict:
     """Common model/run provenance returned by every public adapter."""
     package_version = _package_version(distribution)
-    source_urls = {
-        "og-uk": "https://github.com/PolicyEngine/og-uk",
-        "pe-microsim": "https://github.com/PolicyEngine/policyengine",
-        "obr-macro": "https://github.com/PolicyEngine/obr-macroeconomic-model",
-        "boe-svar": "https://github.com/PolicyEngine/boe-var-model",
-        "frb-us": "https://github.com/PolicyEngine/us-frb-model",
-        "og+microsim": "https://github.com/PolicyEngine/macro",
-        "us-hank": "https://github.com/PolicyEngine/us-hank-model",
-    }
+    # The registry is the one home for each member's repo URL; the composite
+    # incidence overlays (frbus+microsim, ...) are code in this repo.
+    source_url = MODELS.get(model_id, {}).get("source_url", MACRO_SOURCE_URL)
     revision_env = {
         "obr-macro": "POLICYENGINE_MACRO_SOURCE_REVISION_OBR",
         "boe-svar": "POLICYENGINE_MACRO_SOURCE_REVISION_BOE",
@@ -76,7 +84,7 @@ def _provenance(
         "package_version": package_version,
         "model_version": package_version,
         "adapter_version": _package_version("policyengine-macro"),
-        "source_url": source_urls.get(model_id, "https://github.com/PolicyEngine/macro"),
+        "source_url": source_url,
         "source_revision": source_revision,
         "data_vintage": data_vintage,
         "baseline_vintage": baseline,
@@ -252,6 +260,8 @@ def obr_shock(
     periods = _bounded_int(
         "periods", periods, _OBR_MIN_PERIODS, _OBR_MAX_PERIODS
     )
+    shock = _finite("shock", shock)
+    end = _obr_window_end(periods)
     run_reform = _import_obr()
     if investment_closure is None:
         known = {v["var"]: v["investment_closure"] for v in OBR_VARIABLES}
@@ -262,6 +272,8 @@ def obr_shock(
         name=name,
         var=var,
         shock=float(shock),
+        start=_OBR_START,
+        end=end,
         periods=periods,
         investment_closure=bool(investment_closure),
     )
@@ -275,6 +287,13 @@ def obr_shock(
         "investment_closure_plateau_fraction"
     )
     shocked = rows[: int(periods)]
+    if len(shocked) < int(periods):
+        # The cumulative below is labelled "over shock periods"; never let
+        # it silently cover fewer quarters than were shocked.
+        raise RuntimeError(
+            f"OBR solve returned {len(rows)} quarters for a {periods}-quarter "
+            f"shock (window {_OBR_START}..{end})"
+        )
     peak = max(rows, key=lambda r: abs(r["pct_gdp"]))
     # A lever whose channel is dead or non-convergent must say so in the
     # payload, not only in a docstring nobody reads over MCP. Of the four
@@ -288,7 +307,7 @@ def obr_shock(
     result = {
         "name": name,
         "provenance": _provenance(
-            model_id="obr-emulator",
+            model_id="obr-macro",
             distribution="obr-macro-model",
             data_vintage="March 2026 EFO",
             baseline="March 2026 EFO anchored baseline",
@@ -296,6 +315,7 @@ def obr_shock(
         "var": var,
         "shock": float(shock),
         "periods": int(periods),
+        "window": {"start": _OBR_START, "end": end},
         "investment_closure": bool(investment_closure),
         "investment_closure_plateau_fraction": (
             round(float(plateau_fraction), 4)
@@ -410,7 +430,8 @@ FRBUS_VARIABLES = [
         "units": "LOG POINTS of quarterly growth in egfe (0.01 ~ a 1% higher "
                  "level of federal purchases; egfe is ~4.6% of GDP, so 0.01 "
                  "is roughly 0.046% of GDP). NOT billions of dollars — a "
-                 "shock of order 1 or more diverges the solver.",
+                 "shock of order 1 or more diverges the solver."
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised level move exceeds one period's shock (periods=4 at 0.01 lifts egfe ~2.9%, trp ~+2.4pp); the realised lever path is returned in the results.",
         "typical_shock": 0.01,
         "requires_policy_rule": None,
     },
@@ -418,7 +439,8 @@ FRBUS_VARIABLES = [
         "var": "egse_aerr",
         "description": "Add-error on state and local government purchases",
         "units": "log points of quarterly growth in egse (0.01 ~ a 1% higher "
-                 "level of S&L purchases)",
+                 "level of S&L purchases after one period)."
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised level move exceeds one period's shock (periods=4 at 0.01 lifts egfe ~2.9%, trp ~+2.4pp); the realised lever path is returned in the results.",
         "typical_shock": 0.01,
         "requires_policy_rule": None,
     },
@@ -426,7 +448,8 @@ FRBUS_VARIABLES = [
         "var": "trp_aerr",
         "description": "Add-error on the personal income tax rate",
         "units": "decimal rate change (0.01 = a 1 percentage point rise in the "
-                 "effective personal tax rate)",
+                 "effective personal tax rate on impact)."
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised level move exceeds one period's shock (periods=4 at 0.01 lifts egfe ~2.9%, trp ~+2.4pp); the realised lever path is returned in the results.",
         "typical_shock": 0.01,
         "requires_policy_rule": None,
     },
@@ -434,7 +457,8 @@ FRBUS_VARIABLES = [
         "var": "trci_aerr",
         "description": "Add-error on the corporate income tax rate",
         "units": "decimal rate change (0.01 = a 1pp rise in the effective "
-                 "corporate tax rate)",
+                 "corporate tax rate on impact)."
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised level move exceeds one period's shock (periods=4 at 0.01 lifts egfe ~2.9%, trp ~+2.4pp); the realised lever path is returned in the results.",
         "typical_shock": 0.01,
         "requires_policy_rule": None,
     },
@@ -443,15 +467,30 @@ FRBUS_VARIABLES = [
         "description": "Add-error on aggregate consumption — a direct demand "
                        "shock",
         "units": "log points of quarterly consumption growth (0.01 ~ 1% higher "
-                 "consumption; large, since consumption is ~68% of GDP)",
+                 "consumption after one period; large, since consumption is "
+                 "~68% of GDP)."
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised level move exceeds one period's shock (periods=4 at 0.01 lifts egfe ~2.9%, trp ~+2.4pp); the realised lever path is returned in the results.",
         "typical_shock": 0.01,
         "requires_policy_rule": None,
     },
     {
         "var": "ebfi_aerr",
         "description": "Add-error on business fixed investment",
-        "units": "log points of quarterly BFI growth (0.01 ~ 1% higher BFI)",
+        "units": "log points of quarterly BFI growth (0.01 ~ 1% higher BFI "
+                 "after one period)."
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised level move exceeds one period's shock (periods=4 at 0.01 lifts egfe ~2.9%, trp ~+2.4pp); the realised lever path is returned in the results.",
         "typical_shock": 0.01,
+        "requires_policy_rule": None,
+    },
+    {
+        "var": "poil_aerr",
+        "description": "Add-error on the price of imported oil (an identity, "
+                       "poil = poilr*pxb + poil_aerr) — an oil-price shock",
+        "units": "US dollars per barrel added to the oil price LEVEL (+10 is "
+                 "about +15% at the 2026 LONGBASE price). An identity, so it "
+                 "does not stack over periods: periods=4 holds the price "
+                 "+$10 for four quarters.",
+        "typical_shock": 10.0,
         "requires_policy_rule": None,
     },
 ]
@@ -528,6 +567,51 @@ def _frbus_paths() -> tuple[str, str]:
         str(repo / "vendor" / "pyfrbus_package" / "models" / "model.xml"),
         str(repo / "vendor" / "data_only_package" / "LONGBASE.TXT"),
     )
+
+
+# An extra series asked for through ``variables`` used to be reported as a
+# % deviation whatever it was, so a 10-year yield came back as "% of the
+# rate" (a +30bp move on a 4% yield read as +7.5). The model's own
+# definitions say which series are rates, ratios or growth rates; those are
+# reported in pp like the headline rff/lur/picxfe.
+_FRBUS_PP_DEFINITION = re.compile(
+    r"\b(rate|rates|yield|ratio|percent change|first diff)\b", re.I
+)
+_FRBUS_LEVEL_DEFINITION = re.compile(r"exchange rate", re.I)
+_FRBUS_DEFINITIONS: dict[str, str] | None = None
+
+
+def _frbus_definitions() -> dict[str, str]:
+    """{variable: definition} from the FRB/US model.xml, cached; {} if absent."""
+    global _FRBUS_DEFINITIONS
+    if _FRBUS_DEFINITIONS is None:
+        import xml.etree.ElementTree as ET
+
+        try:
+            root = ET.parse(_frbus_paths()[0]).getroot()
+            _FRBUS_DEFINITIONS = {
+                (v.findtext("name") or "").strip():
+                    " ".join((v.findtext("definition") or "").split())
+                for v in root.iter("variable")
+            }
+        except (OSError, ET.ParseError, ImportError):
+            _FRBUS_DEFINITIONS = {}
+    return _FRBUS_DEFINITIONS
+
+
+def _frbus_series_mode(var: str, definition: str | None) -> tuple[str, str]:
+    """(mode, meaning) for a reported series; mode 'pp' or 'pct'."""
+    if var in FRBUS_HEADLINE:
+        return FRBUS_HEADLINE[var]
+    label = f"{var} ({definition})" if definition else var
+    if definition and _FRBUS_PP_DEFINITION.search(definition) and not \
+            _FRBUS_LEVEL_DEFINITION.search(definition):
+        return "pp", (
+            f"{label}, level deviation from baseline in the series' own "
+            "units (pp for rates quoted in percent, such as interest rates; "
+            "decimal for tax rates and ratios stored as fractions)"
+        )
+    return "pct", f"{label}, % deviation from baseline"
 
 
 def _frbus_period(value, *, argument: str):
@@ -642,6 +726,7 @@ def frbus_shock(
             f"got {policy_rule!r}"
         )
     periods, horizon = int(periods), int(horizon)
+    shock = _finite("shock", shock)
     if periods < 1:
         raise ValueError(f"periods must be >= 1, got {periods}")
     if horizon < periods:
@@ -663,6 +748,10 @@ def frbus_shock(
             "because the equation would otherwise just overwrite the level."
         )
 
+    for extra in variables or []:
+        if extra not in with_adds.columns:
+            raise ValueError(f"requested variable {extra!r} is not in the model")
+
     shocked = with_adds.copy()
     shock_end = start_p + periods - 1
     shocked.loc[start_p:shock_end, var] += float(shock)
@@ -678,6 +767,12 @@ def frbus_shock(
         ) from e
 
     wanted = list(FRBUS_HEADLINE)
+    # Return the realised path of the shocked variable itself, so a caller
+    # sees what the add-error did once the equation's lags stacked it
+    # (issue #212): trp_aerr=0.01 over 4 periods ends near +2.4pp, not +1pp.
+    lever = var[:-len("_aerr")] if var.endswith("_aerr") else None
+    if lever and lever in with_adds.columns and lever not in wanted:
+        wanted.append(lever)
     for extra in variables or []:
         if extra not in with_adds.columns:
             raise ValueError(f"requested variable {extra!r} is not in the model")
@@ -685,9 +780,13 @@ def frbus_shock(
             wanted.append(extra)
 
     index = pd.period_range(start_p, end_p, freq="Q")
+    definitions = _frbus_definitions() if (
+        len(wanted) > len(FRBUS_HEADLINE) or var not in _FRBUS_VAR_INDEX
+    ) else {}
+    modes = {v: _frbus_series_mode(v, definitions.get(v)) for v in wanted}
     series: dict[str, list[float]] = {}
     for v in wanted:
-        mode = FRBUS_HEADLINE.get(v, ("pct", ""))[0]
+        mode = modes[v][0]
         base, new = with_adds.loc[start_p:end_p, v], sim.loc[start_p:end_p, v]
         if mode == "pct":
             delta = 100.0 * (new / base - 1.0)
@@ -716,17 +815,21 @@ def frbus_shock(
         ),
         "var": var,
         "shock": float(shock),
-        "units": _FRBUS_VAR_INDEX.get(var, {}).get("units", "model units"),
+        "units": _FRBUS_VAR_INDEX.get(var, {}).get("units") or (
+            "uncurated lever: the units of "
+            + (f"{lever!r} ({definitions.get(lever)})" if lever and
+               definitions.get(lever) else repr(var))
+            + "'s own equation (levels, rates or log-differences); an "
+            "add-error on an equation with lags stacks over periods>1 — "
+            "read the realised path in the results"
+        ),
         "start": str(start_p),
         "periods": periods,
         "horizon": horizon,
         "policy_rule": policy_rule,
         "policy_rule_description": FRBUS_POLICY_RULES[policy_rule]["description"],
         "expectations": "VAR (backward-looking); MCE is not implemented",
-        "series_meaning": {
-            v: FRBUS_HEADLINE.get(v, ("pct", f"{v}, % deviation from baseline"))[1]
-            for v in wanted
-        },
+        "series_meaning": {v: modes[v][1] for v in wanted},
         "results": rows,
         "peaks": peaks,
     }
@@ -844,7 +947,7 @@ def frbus_summary() -> dict:
 # US HANK adapters
 # ---------------------------------------------------------------------------
 #
-# us_hank (PolicyEngine/us-hank-model) is a validated replication of the
+# us_hank (PolicyEngine/us-hank-model) is a partial replication of the
 # two-asset HANK of Auclert, Bardóczy, Rognlie & Straub (Econometrica 2021),
 # solved in the sequence space at the paper's production grids. It scores
 # STYLIZED shocks (monetary / fiscal spending / productivity AR(1) paths),
@@ -874,7 +977,10 @@ HANK_SHOCK_KINDS = [
         "input": "rstar",
         "description": "Taylor-rule intercept (monetary policy) shock",
         "units": "level change in the QUARTERLY real policy rate "
-                 "(-0.0025 = a 25bp-per-quarter easing on impact)",
+                 "(-0.0025 = -25bp per quarter on impact, about -100bp "
+                 "annualised; for a 25bp annualised move use -0.000625). "
+                 "The r and pi responses are quarterly rates too: multiply "
+                 "by 4 to compare with FRB/US or BoE annual rates",
         "typical_size": -0.0025,
         "variants": ["two_asset", "one_asset"],
     },
@@ -894,8 +1000,10 @@ HANK_SHOCK_KINDS = [
         "input": "Z",
         "description": "Total factor productivity shock",
         "units": "level change in Z around its steady-state value "
-                 "(a LEVEL change: steady-state Z is 0.468, so 0.01 is a "
-                 "~2.1% TFP improvement, not 1%)",
+                 "(a LEVEL change, so the percent TFP shock depends on the "
+                 "variant: two_asset steady-state Z is 0.468, so 0.01 is a "
+                 "~2.1% TFP improvement, not 1%; one_asset steady-state Z "
+                 "is 1, so 0.01 is 1% of TFP)",
         "typical_size": 0.01,
         "variants": ["two_asset", "one_asset"],
     },
@@ -917,6 +1025,11 @@ HANK_HEADLINE = {
     "r": "Real interest rate (quarterly rate), pp deviation from steady state",
     "w": "Pre-tax real wage, % deviation from steady state",
     "N": "Labor, % deviation from steady state",
+    # The financing. The DAG holds bond supply fixed, so a G shock is paid
+    # for by this tax path period by period; the package returns it, and a
+    # spending IRF read without it invites a deficit-financed reading.
+    "tax": "Labour tax rate, pp deviation from steady state (the budget-"
+           "balancing financing of the shock)",
 }
 
 # Cache the steady state + GE jacobian per (variant, T). The steady state
@@ -1020,6 +1133,7 @@ def hank_shock(
     solves; both are cached, so every later call is effectively instant.
     """
     _hank_check_kind(kind, variant)
+    size = _finite("size", size)
     horizon = int(horizon)
     if not 1 <= horizon <= HANK_T:
         raise ValueError(f"horizon must be between 1 and {HANK_T}, got {horizon}")
@@ -1104,10 +1218,12 @@ def hank_shock(
         "horizon": horizon,
         "variant": variant,
         "framing": (
-            "Validated replication of Auclert, Bardóczy, Rognlie & Straub "
-            "(Econometrica 2021); stylized shocks around a calibrated steady "
-            "state; VAR-free sequence-space HANK; NOT a forecaster and does "
-            "not score detailed tax reforms; responses are linear/first-order."
+            "Partial replication of Auclert, Bardóczy, Rognlie & Straub "
+            "(Econometrica 2021): six of seven solved steady-state parameters "
+            "match the paper; shock signs are tested, magnitudes are not validated; "
+            "stylized shocks around a calibrated steady state; NOT a "
+            "forecaster and does not score detailed tax reforms; responses "
+            "are linear/first-order."
         ),
         "series_meaning": {v: HANK_HEADLINE[v] for v in series_names},
         "results": rows,
@@ -1170,9 +1286,11 @@ def hank_summary() -> dict:
                     "Heterogeneous-Agent Models', Econometrica 2021",
         "package_version": _package_version("us-hank-model"),
         "framing": (
-            "Validated replication; stylized shocks; VAR-free sequence-space "
-            "HANK; not a forecaster; distributional outputs are first-order "
-            "approximations."
+            "Partial replication: six of seven solved steady-state parameters "
+            "match; IRF magnitudes are not validated; stylized shocks; not a "
+            "forecaster; distributional outputs are "
+            "first-order: steady-state MPCs and an MPC-proportional split of "
+            "the aggregate response."
         ),
         "variants": {
             "two_asset": "the paper model: liquid + illiquid assets, sticky "
@@ -1266,7 +1384,35 @@ _SVAR_MAX_DRAWS = 10_000
 _SVAR_MIN_HORIZONS = 1
 _SVAR_MAX_HORIZONS = 40
 _OBR_MIN_PERIODS = 1
-_OBR_MAX_PERIODS = 40
+# The OBR databank runs 2025Q1..2031Q1 (obr_macro/baseline.py START, END),
+# so a shock applied from 2025Q1 fits at most 25 quarters. run_reform solves
+# and reports only start..end; before 6 Nov 2026 obr_shock never passed
+# ``end``, so every run stopped at run_reform's 2027Q4 default and a
+# periods=20 request summed 12 quarters into a "20-quarter" cumulative.
+_OBR_START = "2025Q1"
+_OBR_DEFAULT_END = "2027Q4"
+_OBR_DATA_END = "2031Q1"
+_OBR_MAX_PERIODS = 25
+
+
+def _obr_window_end(periods: int) -> str:
+    """Last quarter to solve so every shocked quarter is in the results.
+
+    Never earlier than run_reform's own 2027Q4 default, so short shocks
+    keep their post-shock quarters (the reversion is part of the answer),
+    and never past the databank's last quarter.
+    """
+    import pandas as pd
+
+    last_shocked = pd.Period(_OBR_START, freq="Q") + (int(periods) - 1)
+    end = max(last_shocked, pd.Period(_OBR_DEFAULT_END, freq="Q"))
+    if end > pd.Period(_OBR_DATA_END, freq="Q"):
+        raise ValueError(
+            f"periods={periods} runs past the OBR databank's last quarter "
+            f"{_OBR_DATA_END}; at most {_OBR_MAX_PERIODS} quarters from "
+            f"{_OBR_START}"
+        )
+    return str(end)
 
 
 def _bounded_int(name: str, value: int, minimum: int, maximum: int) -> int:
@@ -1282,6 +1428,17 @@ def _bounded_int(name: str, value: int, minimum: int, maximum: int) -> int:
             f"{name} must be between {minimum} and {maximum}; got {value}"
         )
     return normalized
+
+
+def _finite(name: str, value) -> float:
+    """A shock size as a finite float; NaN/inf would solve to NaN paths."""
+    try:
+        out = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{name} must be a number, got {value!r}") from exc
+    if not np.isfinite(out):
+        raise ValueError(f"{name} must be finite, got {value!r}")
+    return out
 
 
 def _estimate(draws: int = _SVAR_DEFAULT_DRAWS, seed: int = 0) -> dict:
@@ -1365,6 +1522,21 @@ def svar_forecast(horizons: int = 12,
             yoy_paths.append(forecast.yoy(np.vstack([tail, path])))
             pw.append(est["weights"][i])
     bands = analysis.aggregate(yoy_paths, weights=np.asarray(pw))
+    # forecast.yoy is the four-quarter LOG difference; ONS, the BoE MPR and
+    # the OBR EFO publish the simple rate 100*(P_t/P_{t-4}-1), which is
+    # higher by ~x^2/200 (issue #208). The map is monotone, so converting
+    # the aggregated median and band edges equals the bands of converted
+    # paths. Prefer boe_var's helper (boe-var-model#18); fall back to the
+    # same formula on older builds.
+    to_simple = getattr(
+        forecast, "log_to_simple_pct",
+        lambda x: 100.0 * np.expm1(np.asarray(x, dtype=float) / 100.0),
+    )
+    bands = {
+        k: (to_simple(v) if k in ("median", "lo68", "hi68", "lo90", "hi90")
+            else v)
+        for k, v in bands.items()
+    }
 
     last_q = est["df_full"].index[-1]
     quarters = [str(last_q + h) for h in range(1, horizons + 1)]
@@ -1397,7 +1569,9 @@ def svar_forecast(horizons: int = 12,
         "accepted_draws": est["n_accepted"],
         "ess": round(est["ess"], 1),
         "warnings": list(est["warnings"]),
-        "units": "YoY percent (4-quarter log difference of 100*log levels)",
+        "units": "YoY percent, simple four-quarter rate "
+                 "100*(P_t/P_{t-4}-1), the basis ONS, the BoE and the OBR "
+                 "publish (converted from the model's log difference)",
         "gdp_growth_yoy": _series(list(est["df_full"].columns).index(_COL_GDP)),
         "cpi_inflation_yoy": _series(list(est["df_full"].columns).index(_COL_CPI)),
     }
@@ -2894,7 +3068,7 @@ def obr_costing_to_shock(annual_budget_bn) -> list[float]:
     - Sign: positive means revenue raised. The OBR adapter applies the minus
       sign when it converts the costing into an HHDI held add-factor.
     - Units: £bn/year -> £m/quarter is * 1000 / 4.
-    - Interpolation: flat within each year (deliberately crude and declared;
+    - Interpolation: flat within each (fiscal) year (deliberately crude and declared;
       the microsim only produces annual numbers).
 
     Pure arithmetic — no model imports — so it is unit-testable everywhere.
@@ -2904,6 +3078,30 @@ def obr_costing_to_shock(annual_budget_bn) -> list[float]:
         quarterly_m = float(bn) * 1000.0 / 4.0
         path.extend([round(quarterly_m, 4)] * 4)
     return path
+
+
+def _obr_fiscal_window(first_year: int, last_year: int) -> tuple[str, str]:
+    """OBR quarters covered by PolicyEngine-UK fiscal years first..last.
+
+    Fiscal year y runs April y to March y+1, i.e. yQ2..(y+1)Q1. Refuses a
+    window that falls outside the OBR databank (2025Q1..2031Q1) before any
+    microsim run is spent on it.
+    """
+    import pandas as pd
+
+    start = pd.Period(f"{int(first_year)}Q2", freq="Q")
+    end = pd.Period(f"{int(last_year) + 1}Q1", freq="Q")
+    data_start = pd.Period(_OBR_START, freq="Q")
+    data_end = pd.Period(_OBR_DATA_END, freq="Q")
+    if start < data_start or end > data_end:
+        raise ValueError(
+            f"fiscal years {first_year}-{str(first_year + 1)[-2:]} to "
+            f"{last_year}-{str(last_year + 1)[-2:]} need OBR quarters "
+            f"{start}..{end}, outside the databank {_OBR_START}..{_OBR_DATA_END}. "
+            f"start_year must be >= {data_start.year} and "
+            f"start_year + years - 1 <= {data_end.year - 1}."
+        )
+    return str(start), str(end)
 
 
 def obr_score_reform(
@@ -2953,9 +3151,15 @@ def obr_score_reform(
     years = int(years)
     if years < 1:
         raise ValueError(f"years must be >= 1, got {years}")
+    window = list(range(int(start_year), int(start_year) + years))
+    # PolicyEngine-UK year y is FISCAL year y-(y+1): policyengine_uk's
+    # convert_to_fiscal_year_parameters samples every parameter at 30 April
+    # of y (policyengine_uk/utils/parameters.py, pinned 2.151.0). So year
+    # 2026's costing covers 2026Q2..2027Q1, and the add-factor path must sit
+    # on those quarters, not on calendar 2026 (issue #201).
+    start, end = _obr_fiscal_window(window[0], window[-1])
     run_reform = _import_obr()
 
-    window = list(range(int(start_year), int(start_year) + years))
     costings = [
         pe_population_impact(
             country="uk", reform=reform, year=y, dataset=dataset
@@ -2965,7 +3169,6 @@ def obr_score_reform(
     annual_bn = [c["budgetary_impact_bn"] for c in costings]
     shock_path = obr_costing_to_shock(annual_bn)
 
-    start, end = f"{window[0]}Q1", f"{window[-1]}Q4"
     name = f"PE static costing via {OBR_BRIDGE_VAR}: {reform}"
     df = run_reform(
         name=name,
@@ -2986,7 +3189,9 @@ def obr_score_reform(
         "(positive revenue is converted to a negative held HHDI add-factor)",
         "demand-side incidence only; supply-side channels belong to the "
         "OG member",
-        "annual costings applied flat within each year",
+        "annual costings are PolicyEngine-UK fiscal years (April-March) "
+        "and are applied flat across that fiscal year's four quarters "
+        f"({start}..{end})",
         "corporation-tax reforms are out of scope (direct TCPRO lever via "
         "obr_shock)",
     ]
@@ -3005,7 +3210,8 @@ def obr_score_reform(
         "window": {"start": start, "end": end},
         "bridge_variable": OBR_BRIDGE_VAR,
         "annual_costings_bn": [
-            {"year": y, "budgetary_impact_bn": bn}
+            {"year": y, "fiscal_year": f"{y}-{(y + 1) % 100:02d}",
+             "budgetary_impact_bn": bn}
             for y, bn in zip(window, annual_bn)
         ],
         "quarterly_shock_path_m": shock_path,
@@ -3085,7 +3291,8 @@ def obr_score_reform(
         assumptions=[
             "microsim static costing injected as an HHDI add path "
             "(demand-side incidence)",
-            "flat quarterly interpolation within each year",
+            "flat quarterly interpolation within each fiscal year "
+            "(PolicyEngine-UK year y = April y to March y+1)",
         ],
         caveats=caveats,
         validation=[
@@ -3462,6 +3669,17 @@ def frbus_shock_incidence(
             )
         payload = frbus_payload
     else:
+        # The overlay needs all four quarters of `year` inside the solve
+        # window; check that before paying for the solve, not after.
+        first = _frbus_period(start, argument="start")
+        last = first + int(horizon) - 1
+        if not (first <= _frbus_period(f"{int(year)}Q1", argument="year")
+                and _frbus_period(f"{int(year)}Q4", argument="year") <= last):
+            raise ValueError(
+                f"the incidence year {year} needs {year}Q1..{year}Q4 inside "
+                f"the FRB/US window {first}..{last} (start={start!r}, "
+                f"horizon={horizon}); move start or lengthen horizon"
+            )
         payload = frbus_shock(
             var=var, shock=shock, start=start, periods=periods,
             horizon=horizon, policy_rule=policy_rule,
@@ -3575,6 +3793,16 @@ def hank_shock_incidence(
             )
         payload = hank_payload
     else:
+        # Same window rule as from_hank_result, checked before the solve.
+        offset = 4 * (int(year) - int(start_year))
+        if offset < 0 or int(horizon) < offset + 4:
+            raise ValueError(
+                f"the incidence year {year} is quarter offsets "
+                f"{offset}..{offset + 3} from the shock start "
+                f"({start_year}Q1); "
+                + ("year must be >= start_year" if offset < 0 else
+                   f"horizon must be >= {offset + 4}, got {horizon}")
+            )
         payload = hank_shock(
             kind=kind, size=size, persistence=persistence, horizon=horizon,
             variant=variant,
@@ -4024,6 +4252,8 @@ def score_reform(
     # Checked before country/reform validation so the caller gets the real
     # reason ("frbus has no reform bridge") rather than being sent off to fix
     # an unrelated argument first.
+    if isinstance(model, str):
+        model = model.strip().lower()  # 'OBR' is not a different model
     if model in SCORE_MODELS_WITHOUT_REFORM_BRIDGE:
         raise ValueError(SCORE_MODELS_WITHOUT_REFORM_BRIDGE[model])
     country = _validate_country(country)
@@ -4128,7 +4358,7 @@ def svar_summary() -> dict:
         "source": str(rdir),
         "provenance": _provenance(
             model_id="boe-svar",
-            distribution="boe-var-model",
+            distribution="boe_var",
             data_vintage="estimation through 2025Q1; conditioning data through 2026Q1",
             baseline="committed replication and forecast artefacts",
         ),
@@ -4231,8 +4461,14 @@ def define_scenario(
         from define_uk import scenarios as _sc
     except ImportError:
         return dict(_DEFINE_INSTRUCTIONS)
+    horizon_years = _bounded_int("horizon_years", horizon_years, 1, 15)
     variables = _sc.DEFAULT_VARIABLES + DEFINE_INCIDENCE_VARIABLES \
         if incidence else _sc.DEFAULT_VARIABLES
+    # define-uk-model#15: a cached solve that breaks stock-flow consistency is
+    # refused with StockFlowInconsistent, a ValueError subclass. The name IS
+    # in the listing, so it must not fall into the "unknown scenario" branch
+    # below (issue #203 item 1). Older adapters lack the class.
+    refused = getattr(_sc, "StockFlowInconsistent", None)
     try:
         result = _sc.run_scenario(
             name, variables=variables, horizon_years=horizon_years,
@@ -4241,21 +4477,60 @@ def define_scenario(
         out = dict(_DEFINE_INSTRUCTIONS)
         out["error"] = str(e)
         return out
-    except (KeyError, ValueError) as e:
-        # Unknown scenario name (or bad horizon): the adapter IS installed,
-        # so install instructions would mislead — point at the listing tool.
-        return {
-            "model": "define-uk",
-            "available": False,
-            "error": f"Unknown DEFINE-UK scenario {name!r}: {e}",
-            "how_to_run": (
-                "Run `pe-macro define-scenarios` (or the "
-                "define_list_scenarios tool) to list the valid scenario "
-                "names, then retry with one of them."
-            ),
-        }
+    except Exception as e:
+        if refused is not None and isinstance(e, refused):
+            return {
+                "model": "define-uk",
+                "available": False,
+                "refused": "stock-flow inconsistent",
+                "scenario": name,
+                "error": str(e),
+                "how_to_run": (
+                    f"{name!r} is a listed scenario, but its cached DEFINE-UK "
+                    "solve breaks stock-flow consistency (sectoral net "
+                    "lending does not sum to zero), so its deltas are not "
+                    "served as results. Re-solve the scenario upstream, or "
+                    "pick another scenario from define_list_scenarios."
+                ),
+            }
+        if isinstance(e, KeyError):
+            # Unknown scenario name: the adapter IS installed, so install
+            # instructions would mislead — point at the listing tool.
+            return {
+                "model": "define-uk",
+                "available": False,
+                "error": f"Unknown DEFINE-UK scenario {name!r}: {e}",
+                "how_to_run": (
+                    "Run `pe-macro define-scenarios` (or the "
+                    "define_list_scenarios tool) to list the valid scenario "
+                    "names, then retry with one of them."
+                ),
+            }
+        if isinstance(e, ValueError):
+            # A known scenario the adapter could not serve for another
+            # reason (e.g. a cached run with no departure from baseline).
+            return {
+                "model": "define-uk",
+                "available": False,
+                "scenario": name,
+                "error": f"DEFINE-UK adapter refused {name!r}: {e}",
+                "how_to_run": (
+                    "The scenario name is valid; the cached run could not be "
+                    "served. Check the cached DEFINE-UK run (define_uk."
+                    "runner.run()) and retry."
+                ),
+            }
+        raise
     result["model"] = "define-uk"
     result["available"] = True
+    # Every other member records provenance; DEFINE-UK returned none, so a
+    # served scenario carried no package version or source URL at all.
+    result.setdefault("provenance", _provenance(
+        model_id="define-uk",
+        distribution="define-uk-model",
+        data_vintage="cached upstream DEFINE-UK scenario solves",
+        baseline="DEFINE-UK model baseline",
+    ))
     return result
 
 
@@ -4308,6 +4583,15 @@ def define_scenario_incidence(
         payload = define_payload
     else:
         payload = define_scenario(scenario, incidence=True)
+        if not payload.get("available") and (
+            "refused" in payload
+            or str(payload.get("error", "")).startswith(
+                ("Unknown DEFINE-UK", "DEFINE-UK adapter refused")
+            )
+        ):
+            # The adapter is installed and answered: a remote-payload
+            # workaround would not help, so pass its reason through as is.
+            return dict(payload)
         if not payload.get("available"):
             out = dict(payload)
             out["how_to_run"] = (

@@ -162,3 +162,84 @@ def test_define_is_not_in_the_supported_score_models():
     assert "define-uk" not in core.SCORE_MODELS
     assert "define" in core.SCORE_MODELS_WITHOUT_REFORM_BRIDGE
     assert "define-uk" in core.SCORE_MODELS_WITHOUT_REFORM_BRIDGE
+
+
+# --- adapter refusals (issue #203 items 1-2) --------------------------------
+
+def _fake_define(monkeypatch, run_scenario):
+    """Install a stand-in define_uk.scenarios with define-uk-model#15's API."""
+    import sys
+    import types
+
+    class StockFlowInconsistent(ValueError):
+        pass
+
+    sc = types.ModuleType("define_uk.scenarios")
+    sc.DEFAULT_VARIABLES = ("GDP_R", "EMIS")
+    sc.StockFlowInconsistent = StockFlowInconsistent
+    sc.list_scenarios = lambda: [{"name": "fossil_fuel_ban__no_forward_guidance"}]
+    sc.run_scenario = lambda name, **kw: run_scenario(sc, name, **kw)
+    pkg = types.ModuleType("define_uk")
+    pkg.scenarios = sc
+    monkeypatch.setitem(sys.modules, "define_uk", pkg)
+    monkeypatch.setitem(sys.modules, "define_uk.scenarios", sc)
+    return sc
+
+
+def test_refused_inconsistent_scenario_is_not_reported_unknown(monkeypatch):
+    def run(sc, name, **kw):
+        raise sc.StockFlowInconsistent(
+            f"scenario {name!r}: the cached solve is not stock-flow consistent"
+        )
+
+    _fake_define(monkeypatch, run)
+    res = core.define_scenario("fossil_fuel_ban__no_forward_guidance")
+    assert res["available"] is False
+    assert res["refused"] == "stock-flow inconsistent"
+    assert "Unknown" not in res["error"]
+    assert "stock-flow" in res["how_to_run"]
+    # The incidence tool passes the reason through instead of telling the
+    # caller to ship a payload from another machine.
+    inc = core.define_scenario_incidence("fossil_fuel_ban__no_forward_guidance")
+    assert inc["refused"] == "stock-flow inconsistent"
+    assert "define_payload" not in inc["how_to_run"]
+
+
+def test_unknown_scenario_still_points_at_listing(monkeypatch):
+    def run(sc, name, **kw):
+        raise KeyError(f"unknown scenario {name!r}")
+
+    _fake_define(monkeypatch, run)
+    res = core.define_scenario("no_such_scenario")
+    assert res["error"].startswith("Unknown DEFINE-UK scenario")
+    assert "define_list_scenarios" in res["how_to_run"]
+
+
+@pytest.mark.parametrize("bad", [0, -1, 16])
+def test_define_horizon_is_bounded(monkeypatch, bad):
+    _fake_define(monkeypatch, lambda sc, name, **kw: {})
+    with pytest.raises(ValueError, match="horizon_years"):
+        core.define_scenario("fossil_fuel_ban", horizon_years=bad)
+
+
+def test_cli_define_table_prints_units_and_tolerates_gaps(monkeypatch):
+    from click.testing import CliRunner
+
+    from policyengine_macro import cli
+
+    def run(sc, name, **kw):
+        return {
+            "result_type": "scenario deltas", "scenario": name,
+            "block": "fossil", "description": "d", "caveats": [],
+            "years": [2030, 2031],
+            "variables": {"EMIS": {
+                "delta_level": [-1.5, None], "delta_pct": [-2.0, None],
+                "units": "MtCO2e per QUARTER",
+            }},
+        }
+
+    _fake_define(monkeypatch, run)
+    out = CliRunner().invoke(cli.main, ["define-scenario", "fossil_fuel_ban"])
+    assert out.exit_code == 0, out.output
+    assert "units: MtCO2e per QUARTER" in out.output
+    assert "n/a" in out.output
