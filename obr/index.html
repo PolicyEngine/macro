@@ -67,9 +67,11 @@
       <h2>OBR emulator at a glance</h2>
     </div>
     <p class="callout verdict-callout">
-      <strong>Verdict: tracks the EFO by construction, weak free-running.</strong>
-      The household tax route behaves; the spending lever&rsquo;s multiplier is
-      fixed by construction and capital spending does not transmit.
+      <strong>Verdict: anchored to the EFO by construction, not validated as a forecaster; weak free-running.</strong>
+      The household tax route transmits, but no quarter of the solve converges
+      to tolerance; the spending lever&rsquo;s multiplier is
+      fixed by construction and capital spending does not transmit. CPI does
+      not respond to rate or oil shocks.
       <a href="/obr/validation">How far to trust it &rarr;</a>
     </p>
     <!-- Fields follow integration/src/policyengine_macro/capabilities.py MODELS["obr-macro"]; one field order on all seven Overviews (DESIGN.md §4.13). -->
@@ -96,48 +98,8 @@
     <div class="scrolly-wrap single">
       <div class="scrolly-steps">
 
-      <div class="meth-step" id="pe-bridge" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>With the microsimulation</h3></div>
-        <p class="mo-lead">
-          Microsimulation supplies the direct cost; this model returns the
-          feedback.
-        </p>
-        <div class="pipeline">
-          <span class="pl-node"><strong>Reform</strong></span>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">cost &middot; who pays</span></a>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <span class="pl-node"><strong>OBR emulator</strong><span class="mono">macro feedback</span></span>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <span class="pl-node pl-node-out"><strong>Scored result</strong></span>
-        </div>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro score --country uk \
-  --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
-  --model obr</code></pre></div>
-        <p class="callout">
-          <strong>Same-breath caveats.</strong> No quarter of the solve
-          converges: read the direction and the scale (<a href="#answers">step 3</a>),
-          not single quarters. Corporation tax is refused, and a US reform is
-          scored statically &mdash; <a href="/obr/validation#caveats">why</a>.
-        </p>
-        <p class="vlinks mono">
-          <a href="/models#compose">every join in the suite &rarr;</a>
-          <a href="/#joins">this join on the landing page &rarr;</a>
-        </p>
-        <p class="kv-title">The join</p>
-        <dl class="kv kv-text"><div><dt>Entry point</dt><dd><code>HHDI_ADDFACTOR</code> &mdash; household disposable income, &pound;m/qtr</dd></div><div><dt>Spreading</dt><dd>&minus;(annual &pound;bn) &times; 1000 &divide; 4, flat across four quarters</dd></div><div><dt>Solved chain</dt><dd>income &rarr; consumption &rarr; GDP, against the anchored baseline</dd></div><div><dt>Refused</dt><dd>corporation tax; US reforms (scored statically)</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <h4>The combination</h4>
-          <p><code>score_reform(country="uk", reform=..., model="obr")</code> runs <a href="/pe">PolicyEngine</a>'s static costing for each year of the window, then hands this model the bill &mdash; the OBR's own workflow: static costing in, second-round effects out.</p>
-          <h4>The mechanism</h4>
-          <p>Each year&rsquo;s costing enters as a held add-factor on household disposable income (<code>HHDI_ADDFACTOR</code>); the emulator solves income &rarr; consumption &rarr; GDP against the anchored March 2026 baseline. Spreading, transmission and why the anchors cancel: <a href="/obr/methodology#meth-6">methodology</a>.</p>
-          <p>No PolicyEngine reform? Shock the model&rsquo;s own variables directly, in model units: <a href="/obr/code#code-4">levers and their caveats</a>.</p>
-        </details>
-      </div>
-
-      <div class="meth-step" id="what" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it is</h3></div>
+      <div class="meth-step" id="what" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>What it is</h3></div>
         <p class="mo-lead">
           An open Python implementation of the OBR's published equations.
         </p>
@@ -184,9 +146,10 @@
 </div><!-- /vc-fig -->
 </figure>
 <!-- obr-current-outlook:end -->
+        <p class="chart-note">The March 2026 EFO path the emulator is anchored to; every scenario is read as a deviation from it (<a href="/obr/validation">how far to trust it</a>).</p>
         </div>
         <p class="kv-title">The listing</p>
-        <dl class="kv kv-text"><div><dt>Equations</dt><dd>372 published, in 17 thematic groups</dd></div><div><dt>Variables</dt><dd>636 &mdash; 383 solved, 253 exogenous</dd></div><div><dt>Of the 383</dt><dd>~29 estimated, 216 identities, 138 calibrated or technical</dd></div><div><dt>Tradition</dt><dd>HM Treasury / Cowles-Commission structural</dd></div></dl>
+        <dl class="kv kv-text"><div><dt>Equations</dt><dd>372 published, in 17 thematic groups</dd></div><div><dt>Variables</dt><dd>636 &mdash; 383 solved, 253 <a class="gloss-link" href="/glossary#exogenous">exogenous</a></dd></div><div><dt>Of the 383</dt><dd>~29 estimated, 216 identities, 138 calibrated or technical</dd></div><div><dt>Tradition</dt><dd>HM Treasury / Cowles-Commission structural</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <h4>The published listing, made runnable</h4>
@@ -214,8 +177,8 @@
         </details>
       </div>
 
-      <div class="meth-step" id="answers" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
+      <div class="meth-step" id="answers" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it can answer</h3></div>
         <p class="mo-lead">
           Second-round effects on a static costing.
         </p>
@@ -228,7 +191,7 @@
           autoregression).
         </div>
         <p class="kv-title">1p on the basic rate, April 2026</p>
-        <dl class="kv kv-text"><div><dt>Direct yield</dt><dd>from PolicyEngine microsimulation</dd></div><div><dt>Second round</dt><dd>GDP falls, building to ~0.34&times; the revenue raised by quarter 12</dd></div><div><dt>Vs OBR</dt><dd>published 0.3 for income tax &amp; NICs</dd></div><div><dt>Per-quarter</dt><dd>not reliable &mdash; no quarter converges to tolerance</dd></div></dl>
+        <dl class="kv kv-text"><div><dt>Direct yield</dt><dd>from PolicyEngine microsimulation; the second round changes GDP, not this costing</dd></div><div><dt>Second round</dt><dd>GDP falls, building to ~0.34&times; the revenue raised by quarter 12 of a run from 2025Q1</dd></div><div><dt>Vs OBR</dt><dd>published 0.3 for income tax &amp; NICs</dd></div><div><dt>Per-quarter</dt><dd>not reliable &mdash; no quarter converges to tolerance</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <h4>The half of the workflow it does</h4>
@@ -245,13 +208,58 @@
           direct yield costed by the <a href="/pe#answers">microsimulation</a>.
           The second round is a GDP fall that builds from about
           0.15&times; the revenue raised in the first year to roughly
-          <strong>0.34&times;</strong> by the twelfth quarter &mdash; close to the OBR's published <strong>0.3</strong>
-          for income tax and NICs. Read the direction and the scale, not the
+          <strong>0.34&times;</strong> by the twelfth quarter &mdash; against the OBR's published <strong>0.3</strong>
+          for income tax and NICs. Both ratios come from a 12-quarter run,
+          2025Q1&ndash;2027Q4, with the yield entered as a household-income
+          shock of &pound;1,615.75m a quarter (<code>obr_shock</code>). The hosted
+          <code>score_reform(model="obr")</code> default scores a different
+          window, 2026Q2&ndash;2031Q1, and returns different ratios
+          (<a href="/obr/validation#hosted">hosted results</a>). Read the direction and the scale, not the
           individual quarters: <a href="/obr/validation#caveats">no quarter of
           the solve converges to tolerance</a>. The static costing itself is benchmarked against HMRC on the
           <a href="/pe/validation#hmrc">microsimulation&rsquo;s validation tab</a>;
           the full walkthrough is under <a href="/models#score">score a reform</a>.
         </p>
+        </details>
+      </div>
+
+      <div class="meth-step" id="pe-bridge" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>With the microsimulation</h3></div>
+        <p class="mo-lead">
+          Microsimulation supplies the direct cost; this model returns the
+          feedback.
+        </p>
+        <div class="pipeline">
+          <span class="pl-node"><strong>Reform</strong></span>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">cost &middot; who pays</span></a>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <span class="pl-node"><strong>OBR emulator</strong><span class="mono">macro feedback</span></span>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <span class="pl-node pl-node-out"><strong>Scored result</strong></span>
+        </div>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro score --country uk \
+  --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
+  --model obr</code></pre></div>
+        <p class="callout">
+          <strong>Same-breath caveats.</strong> No quarter of the solve
+          converges: read the direction and the scale (<a href="#answers">step 2</a>),
+          not single quarters. Corporation tax is refused (<a href="/obr/validation#caveats">why</a>);
+          for a US reform, see <a href="/models#choose">the gap in the model router</a>.
+        </p>
+        <p class="vlinks mono">
+          <a href="/models#compose">every join in the suite &rarr;</a>
+          <a href="/#joins">this join on the landing page &rarr;</a>
+        </p>
+        <p class="kv-title">The join</p>
+        <dl class="kv kv-text"><div><dt>Entry point</dt><dd><code>HHDI_ADDFACTOR</code> &mdash; household disposable income, &pound;m/qtr</dd></div><div><dt>Spreading</dt><dd>&minus;(annual &pound;bn) &times; 1000 &divide; 4, flat across four quarters</dd></div><div><dt>Solved chain</dt><dd>income &rarr; consumption &rarr; GDP, against the anchored baseline</dd></div><div><dt>Refused</dt><dd>corporation tax; US reforms (scored statically)</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <h4>The combination</h4>
+          <p><code>score_reform(country="uk", reform=..., model="obr")</code> runs <a href="/pe">PolicyEngine</a>'s static costing for each year of the window, then hands this model the bill &mdash; the OBR's own workflow: static costing in, second-round effects out.</p>
+          <h4>The mechanism</h4>
+          <p>Each year&rsquo;s costing enters as a held add-factor on household disposable income (<code>HHDI_ADDFACTOR</code>); the emulator solves income &rarr; consumption &rarr; GDP against the anchored March 2026 baseline. Spreading, transmission and why the anchors cancel: <a href="/obr/methodology#meth-6">methodology</a>.</p>
+          <p>No PolicyEngine reform? Shock the model&rsquo;s own variables directly, in model units: <a href="/obr/code#code-4">levers and their caveats</a>.</p>
         </details>
       </div>
 

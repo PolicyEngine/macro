@@ -78,52 +78,25 @@
       <div><dt>Outputs</dt><dd>Scenario minus baseline: real GDP, emissions, unemployment, real consumption</dd></div>
       <div><dt>Horizon</dt><dd>Annual scenario deltas, 2023&ndash;2037 by default (<code>horizon_years=15</code>); the validation checks read the run to 2040</dd></div>
       <div><dt>Data</dt><dd>DEFINE-UK 1.1 upstream at pinned commit <code>846081a</code> (April 2026 manual)</dd></div>
-      <div><dt>Uncertainty</dt><dd>None quantified: deterministic deltas from one calibration</dd></div>
+      <div><dt>Uncertainty</dt><dd>None quantified: deterministic deltas from one calibration; every delta also carries a Baseline/policy parameter mismatch (<a href="/define/validation#alpha-pp">limits</a>)</dd></div>
       <div><dt>Access</dt><dd>Local CLI and Python package; hosted tools return run instructions, never results (<a href="/define/code">Code</a>)</dd></div>
       <div><dt>Runtime</dt><dd>Instant from the cached upstream run; a fresh run needs local R</dd></div>
-      <div class="model-card-wide"><dt>Joins pe-microsim</dt><dd>Household income deltas become a UK earnings overlay (<a href="#pe-bridge">step 1</a>, experimental)</dd></div>
-      <div class="model-card-wide"><dt>Status</dt><dd>Experimental; partial replication — baseline macro block replicates manual Table 4; scenario deltas gated on the pinned oracle run, the published scenario definitions, and two paper anchors (no numeric v1.1 scenario results are published); unlicensed upstream is never hosted, so hosted calls return run instructions</dd></div>
+      <div class="model-card-wide"><dt>Joins the microsimulation</dt><dd>Household income deltas become a UK earnings overlay (<a href="#pe-bridge">step 3</a>, experimental)</dd></div>
+      <div class="model-card-wide"><dt>Status</dt><dd>Partial replication of the DEFINE-UK manual: baseline macro block replicates Table 4; scenario deltas gated on the pinned oracle run, the published scenario definitions, and two paper anchors (no numeric v1.1 scenario results are published); experimental; unlicensed upstream is never hosted, so hosted calls return run instructions</dd></div>
       <div class="model-card-wide"><dt>Cannot answer</dt><dd>Reform scoring (no statute mapping); forecasts or baseline levels (deltas only)</dd></div>
     </dl>
   </section>
 
   <section id="overview" class="band band-wide">
     <div class="band-head" data-icon="layers">
-      <h2>How it joins the core, what it is, what it can answer</h2>
+      <h2>An ecological stock-flow consistent model of the UK</h2>
       <p class="section-intro">An adapter for DEFINE-UK, the ecological stock-flow consistent model of the UK macrofinancial system, run experimentally for scenario deltas.</p>
     </div>
     <div class="scrolly-wrap single">
       <div class="scrolly-steps">
 
-      <div class="meth-step" id="pe-bridge" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>With the microsimulation</h3></div>
-        <p class="mo-lead">Connected experimentally: deltas in, incidence out.</p>
-        <div class="pipeline">
-          <span class="pl-node"><strong>DEFINE-UK</strong><span class="mono">scenario deltas</span></span>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">UK earnings overlay</span></a>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <span class="pl-node pl-node-out"><strong>Who gains and loses</strong></span>
-        </div>
-        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
-        <p class="kv-title">Scenario to incidence</p>
-        <dl class="kv"><div><dt>Tool</dt><dd><code>define_scenario_incidence</code></dd></div><div><dt>What moves</dt><dd>household income deltas from a scenario</dd></div><div><dt>Enters</dt><dd>a pre-tax earnings overlay, UK population</dd></div><div><dt>Travels</dt><dd>the numbers only, never upstream code</dd></div><div><dt>Refused</dt><dd><code>score_reform</code> refuses this model</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p><code>define_scenario_incidence</code> turns a scenario's household
-                income deltas into a pre-tax earnings overlay on
-                <a href="/pe">PolicyEngine</a>'s UK population — the same
-                <code>EconomicAssumptions</code> pattern as the SVAR, FRB/US and HANK
-                bridges — so a climate-policy scenario reads household by household,
-                through the automatic stabilizers. The deltas are produced locally and
-                only the numbers travel, never the unlicensed upstream code; the
-                output is a delta, not a forecast; and <code>score_reform</code>
-                still refuses this model.</p>
-        </details>
-      </div>
-
-      <div class="meth-step" id="what" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it is</h3></div>
+      <div class="meth-step" id="what" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>What it is</h3></div>
         <p class="mo-lead">An ecological stock-flow consistent model of the UK.</p>
         <details class="expander" id="sources">
           <summary>Sources: the model, the paper, the adapter</summary>
@@ -173,18 +146,45 @@
         </details>
       </div>
 
-      <div class="meth-step" id="status" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
+      <div class="meth-step" id="status" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it can answer</h3></div>
         <p class="mo-lead">How a climate-policy mix moves the UK economy and emissions against the baseline, as deltas.</p>
         <p class="kv-title">Scenario deltas</p>
         <dl class="kv"><div><dt>Against</dt><dd>the S1 current-policies baseline</dd></div><div><dt>Scenarios</dt><dd>the papers&rsquo; published policy switches</dd></div><div><dt>Never</dt><dd>levels or forecasts</dd></div><div><dt>Hosted</dt><dd>run instructions only, never results</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
-          <p>Two things do not pass: the baseline emissions path runs below the published table, and the baseline sits far from official outturns &mdash; both are on the <a href="/define/validation#calibration">validation tab</a>. Hence deltas only. The green-public-investment multiplier also runs high (<a href="/define/validation#multiplier">why</a>).</p>
+          <p>Two things do not pass: the baseline emissions path runs below the published table, and the baseline sits far from official outturns &mdash; both are on the <a href="/define/validation#calibration">validation tab</a>. Hence deltas only. Deltas also carry a parameter change: the Baseline and policy runs use different values of one coefficient, so 2023&ndash;26 deltas are not policy effects (<a href="/define/validation#alpha-pp">limits</a>). The green-public-investment multiplier also runs high (<a href="/define/validation#multiplier">why</a>).</p>
           <p><strong>Nothing upstream is hosted.</strong> Hosted tools return run
                   instructions, never results; the path to hosting is a
                   <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">clean-room
                   reimplementation</a> of the published manual.</p>
+        </details>
+      </div>
+
+      <div class="meth-step" id="pe-bridge" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>With the microsimulation</h3></div>
+        <p class="mo-lead">Connected experimentally: deltas in, incidence out.</p>
+        <div class="pipeline">
+          <span class="pl-node"><strong>DEFINE-UK</strong><span class="mono">scenario deltas</span></span>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">UK earnings overlay</span></a>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <span class="pl-node pl-node-out"><strong>Who gains and loses</strong></span>
+        </div>
+        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
+        <p class="kv-title">Scenario to incidence</p>
+        <dl class="kv"><div><dt>Tool</dt><dd><code>define_scenario_incidence</code></dd></div><div><dt>What moves</dt><dd>household income deltas from a scenario</dd></div><div><dt>Enters</dt><dd>a pre-tax earnings overlay, UK population</dd></div><div><dt>Travels</dt><dd>the numbers only, never upstream code</dd></div><div><dt>Refused</dt><dd><code>score_reform</code> refuses this model</dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p><code>define_scenario_incidence</code> turns a scenario's household
+                income deltas into a pre-tax earnings overlay on
+                <a href="/pe">PolicyEngine</a>'s UK population — the same
+                <code>EconomicAssumptions</code> pattern as the SVAR, FRB/US and HANK
+                bridges — so a climate-policy scenario reads household by household,
+                through the automatic stabilizers. The deltas are produced locally and
+                only the numbers travel, never the unlicensed upstream code; the
+                output is a delta, not a forecast; and <code>score_reform</code>
+                still refuses this model.</p>
         </details>
       </div>
 

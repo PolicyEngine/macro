@@ -154,14 +154,20 @@ def test_paper_landings_publish_the_page_count_of_the_pdf_they_link():
     from /reports/define-uk-replication to /papers/define-uk, so every paper
     is linked from the hub again and the exemption that recorded the gap is
     gone.
+
+    6 Nov 2026: the round-5 corrections rebuilt every paper. frb-us 38 -> 39
+    (sourced CBO and Coenen et al. fiscal benchmarks), obr-macro 40 -> 42
+    (profits, CGIPS and convergence corrections; 41 was already committed
+    without the landing being updated) and define-uk 28 -> 29 (the withdrawn
+    multiplier caveat; likewise already 29 on disk).
     """
     expected = {
-        "obr-macro": 40,
+        "obr-macro": 42,
         "boe-svar": 33,
-        "frb-us": 38,
+        "frb-us": 39,
         "psl-og": 34,
         "pe-microsim": 25,
-        "define-uk": 28,
+        "define-uk": 29,
     }
     # The /papers listing was retired; each landing carries its own
     # "slug · … · N pages" line, and /models links every paper landing.
@@ -183,7 +189,7 @@ MODEL_PAGES = {
 }
 MODEL_CARD_ORDER = [
     "Answers", "Inputs", "Outputs", "Horizon", "Data", "Uncertainty",
-    "Access", "Runtime", "Joins pe-microsim", "Status", "Cannot answer",
+    "Access", "Runtime", "Joins the microsimulation", "Status", "Cannot answer",
 ]
 
 

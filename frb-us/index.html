@@ -67,7 +67,7 @@
       <h2>FRB/US at a glance</h2>
     </div>
     <p class="callout verdict-callout">
-      <strong>Verdict: matches the Fed&rsquo;s own solver; no predictive claim.</strong>
+      <strong>Verdict: replicates the Fed&rsquo;s pyfrbus on one 100bp funds-rate shock; a solver check, no predictive claim.</strong>
       Baseline agreement is an identity, not evidence, and the baseline itself misses core inflation.
       <a href="/frb-us/validation">How far to trust it &rarr;</a>
     </p>
@@ -81,46 +81,26 @@
       <div><dt>Uncertainty</dt><dd>Not comprehensive: the hosted shock returns one deterministic path</dd></div>
       <div><dt>Access</dt><dd>Hosted raw shocks, CLI, Python package (<a href="/frb-us/code">Code</a>)</dd></div>
       <div><dt>Runtime</dt><dd>About 3 seconds cold, well under a second warm</dd></div>
-      <div class="model-card-wide"><dt>Joins pe-microsim</dt><dd>Wage and hours paths scale US employment income (<a href="#pe-bridge">step 1</a>, experimental)</dd></div>
-      <div class="model-card-wide"><dt>Status</dt><dd>Validated software replication with scope limits</dd></div>
-      <div class="model-card-wide"><dt>Cannot answer</dt><dd>PolicyEngine reforms; model-consistent expectations, so no forward guidance; anything about the UK</dd></div>
+      <div class="model-card-wide"><dt>Joins the microsimulation</dt><dd>Wage and hours paths scale US employment income (<a href="#pe-bridge">step 3</a>, experimental)</dd></div>
+      <div class="model-card-wide"><dt>Status</dt><dd>Replicates the Fed's pyfrbus on one 100bp funds-rate shock, within the gap between pyfrbus 1.0.0 and 1.1.1; a solver check, not a test of the economics</dd></div>
+      <div class="model-card-wide"><dt>Cannot answer</dt><dd>PolicyEngine reforms; <a class="gloss-link" href="/glossary#expectations">model-consistent</a> expectations, so no forward guidance; anything about the UK</dd></div>
     </dl>
   </section>
 
   <section id="overview" class="band band-wide">
     <div class="band-head" data-icon="layers">
-      <h2>How it joins the core, what it is, what it can answer</h2>
+      <h2>The Board&rsquo;s equation system, solved from scratch in Python</h2>
       <p class="section-intro">Trace how a funds-rate or fiscal shock affects US output, inflation, and unemployment quarter by quarter using the April 2026 baseline.</p>
     </div>
 
     <div class="scrolly-wrap single single">
       <div class="scrolly-steps">
 
-      <div class="meth-step" id="pe-bridge" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>With the microsimulation</h3></div>
-        <p class="mo-lead">Its labour-market path tells the microsimulation who bears a shock.</p>
-        <div class="pipeline">
-          <span class="pl-node"><strong>FRB/US</strong><span class="mono">wages &middot; hours</span></span>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">US employment income</span></a>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <span class="pl-node pl-node-out"><strong>Who bears it</strong></span>
-        </div>
-        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
-        <p class="kv-title">Shock to incidence</p>
-        <dl class="kv kv-text"><div><dt>Tool</dt><dd><code>frbus_shock_incidence</code></dd></div><div><dt>What moves</dt><dd>wage and hours deviations from a shock</dd></div><div><dt>Enters</dt><dd>US employment income, scaled uniformly</dd></div><div><dt>Status</dt><dd>experimental</dd></div><div><dt>Refused</dt><dd><code>score_reform</code> refuses <code>model="frbus"</code></dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p><code>frbus_shock_incidence</code> scales the US <a href="/pe">microsimulation</a>&rsquo;s employment income with the wage and hours deviations a shock produces, so the automatic stabilizers answer who bears it: how much of the earnings loss federal and state taxes absorb, and what SNAP and the EITC give back, decile by decile.</p>
-          <p>Uniform scaling is an experimental illustration: real incidence concentrates in job losers. The join runs one way only. <code>score_reform</code> refuses <code>model="frbus"</code> rather than return a plausible-but-wrong number, because no mapping exists from a PolicyEngine reform to FRB/US levers.</p>
-        </details>
-      </div>
-
-      <div class="meth-step" id="what" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it is</h3></div>
+      <div class="meth-step" id="what" data-step="0">
+        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>What it is</h3></div>
         <p class="mo-lead">The Board&rsquo;s own equation system, parsed and solved from scratch in Python.</p>
         <p class="kv-title">The Board&rsquo;s model, rebuilt</p>
-        <dl class="kv kv-text"><div><dt>Source</dt><dd>Federal Reserve Board, in use since 1996</dd></div><div><dt>Equations</dt><dd>284 endogenous variables</dd></div><div><dt>Solve</dt><dd>one simultaneous system per quarter</dd></div><div><dt>Build</dt><dd>numpy, scipy and sympy, Python 3.10+</dd></div><div><dt>Input file</dt><dd>the Board&rsquo;s own <code>model.xml</code></dd></div></dl>
+        <dl class="kv kv-text"><div><dt>Source</dt><dd>Federal Reserve Board, in use since 1996</dd></div><div><dt>Equations</dt><dd>284 <a class="gloss-link" href="/glossary#exogenous">endogenous</a> variables</dd></div><div><dt>Solve</dt><dd>one simultaneous system per quarter</dd></div><div><dt>Build</dt><dd>numpy, scipy and sympy, Python 3.10+</dd></div><div><dt>Input file</dt><dd>the Board&rsquo;s own <code>model.xml</code></dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <p>
@@ -144,8 +124,8 @@
         </details>
       </div>
 
-      <div class="meth-step" id="answers" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>What it can answer</h3></div>
+      <div class="meth-step" id="answers" data-step="1">
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it can answer</h3></div>
         <p class="mo-lead">A worked example: a 100bp funds-rate tightening in 2026Q1.</p>
         <p class="kv-title">100bp tightening, 2026Q1</p>
         <dl class="kv"><div><dt>Lever</dt><dd><code>rffintay_aerr</code>, +1.0pp</dd></div><div><dt>Policy rule</dt><dd><code>inertial_taylor</code> (default)</dd></div><div><dt>Returns</dt><dd>funds rate, GDP, unemployment, core inflation</dd></div><div><dt>2027 wage bill</dt><dd>&minus;0.65%</dd></div></dl>
@@ -156,7 +136,7 @@
                 adds 1pp to the inertial-Taylor-rule error term and returns the
                 quarter-by-quarter paths for the funds rate, real GDP,
                 unemployment and core inflation. What the microsimulation join
-                (step 1) takes in is the labour-market path, summarised above as
+                (<a href="#pe-bridge">step 3</a>) takes in is the labour-market path, summarised above as
                 the 2027 wage bill (compensation per hour plus hours, <code>pl</code> + <code>lhp</code>).
               </p>
           <p>
@@ -164,6 +144,26 @@
                 simulation properties, is the <a href="/frb-us/validation#worked-shock">worked shock on Validation</a>;
                 fiscal multipliers are <a href="/frb-us/validation#multipliers">there too</a>.
               </p>
+        </details>
+      </div>
+
+      <div class="meth-step" id="pe-bridge" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>With the microsimulation</h3></div>
+        <p class="mo-lead">Its labour-market path tells the microsimulation who bears a shock.</p>
+        <div class="pipeline">
+          <span class="pl-node"><strong>FRB/US</strong><span class="mono">wages &middot; hours</span></span>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">US employment income</span></a>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <span class="pl-node pl-node-out"><strong>Who bears it</strong></span>
+        </div>
+        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
+        <p class="kv-title">Shock to incidence</p>
+        <dl class="kv kv-text"><div><dt>Tool</dt><dd><code>frbus_shock_incidence</code></dd></div><div><dt>What moves</dt><dd>wage and hours deviations from a shock</dd></div><div><dt>Enters</dt><dd>US employment income, scaled uniformly</dd></div><div><dt>Status</dt><dd>experimental</dd></div><div><dt>Refused</dt><dd><code>score_reform</code> refuses <code>model="frbus"</code></dd></div></dl>
+        <details class="about">
+          <summary>About this step</summary>
+          <p><code>frbus_shock_incidence</code> scales the US <a href="/pe">microsimulation</a>&rsquo;s employment income with the wage and hours deviations a shock produces, so the automatic stabilizers answer who bears it: how much of the earnings loss federal and state taxes absorb, and what SNAP and the EITC give back, decile by decile.</p>
+          <p>Uniform scaling is an experimental illustration: real incidence concentrates in job losers. The join runs one way only. <code>score_reform</code> refuses <code>model="frbus"</code> rather than return a plausible-but-wrong number, because no mapping exists from a PolicyEngine reform to FRB/US levers.</p>
         </details>
       </div>
 
