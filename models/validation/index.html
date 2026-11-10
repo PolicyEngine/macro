@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>How each model is checked — PolicyEngine Macro</title>
+<meta name="description" content="Five status classes and one verdict per model, plus how the same questions are answered by other institutions." />
+<link rel="canonical" href="https://policyengine-macro.vercel.app/models/validation" />
+<meta property="og:title" content="How each model is checked — PolicyEngine Macro" />
+<meta property="og:description" content="Five status classes and one verdict per model, plus how the same questions are answered by other institutions." />
+<meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
+<link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
+<meta name="theme-color" content="#FFFFFF" />
+<link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="/vendor/fonts/fonts.css" />
+<link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
+<link rel="stylesheet" href="/style.css?v=23" />
+</head>
+<body class="doc models-page">
+<a class="skip-link" href="#top">Skip to main content</a>
+<header class="nav">
+  <a class="brand" href="/" aria-label="PolicyEngine Macro home">
+    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="26" height="26" /><span class="brand-name">PolicyEngine Macro</span>
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a class="nav-mobile" href="/"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>Home</a>
+    <a class="nav-mobile" href="/forecasts"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg>Forecasts</a>
+    <a class="nav-mobile" href="/models" aria-current="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 16.5 9 5 9-5"/></svg>Models</a>
+    <a class="nav-mobile nav-start" href="/connect"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg>Use</a>
+    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+  </nav>
+</header>
+
+<nav class="crumbs mono" aria-label="You are here">
+    <a href="/">Home</a>
+    <a href="/models">Models</a>
+    <span aria-current="page">Validation</span>
+</nav>
+
+<main id="top">
+  <section class="hero model-hero">
+    <div class="hero-inner">
+      <h1 class="reveal page-title" style="--d:1">Models</h1>
+    </div>
+  </section>
+  <nav class="model-tabs" aria-label="Models pages">
+    <div class="model-tabs-row">
+      <a class="model-tabs-link" href="/models">Which model</a>
+      <a class="model-tabs-link" href="/models/compare">Same question</a>
+      <a class="model-tabs-link" href="/models/side-by-side">Side by side</a>
+      <a class="model-tabs-link" href="/models/combine">Combine</a>
+      <a class="model-tabs-link" href="/models/validation" aria-current="page">Validation</a>
+      <a class="model-tabs-link" href="/models/papers">Papers</a>
+    </div>
+  </nav>
+  <section id="validation" class="band">
+    <div class="band-head" data-icon="scale">
+      <h2>How each model is checked</h2>
+      <p class="section-intro">Five status classes, one verdict per model.</p>
+    </div>
+    <div class="prose">
+      <div class="glance-tabs model-tabs-set mono" role="tablist" aria-label="Validation views">
+        <button type="button" id="val-tab-1" role="tab" aria-selected="true" aria-controls="val-p1" class="is-current">By model</button>
+        <button type="button" id="val-tab-2" role="tab" aria-selected="false" aria-controls="val-p2">Vs other institutions</button>
+      </div>
+      <div id="val-p1" role="tabpanel" aria-labelledby="val-tab-1">
+      <p class="callout verdict-callout val-answer">
+        <strong>Is any model validated? Not as a forecaster.</strong> None of
+        the seven verdicts below claims forecast skill; the strongest checks are
+        household arithmetic, exact for the rules as implemented, and replication of a published model or
+        paper.
+      </p>
+      <p>
+        The seven models support different kinds of check, grouped below into
+        the five classes of the <a class="gloss-link" href="/glossary#verification-class">status vocabulary</a>, which the glossary defines, with one verdict each.
+      </p>
+      <dl class="class-glossary" id="classes">
+        <div><dt><a class="gloss-link" href="/glossary#exact-for-rules">Exact for implemented rules</a></dt><dd>PolicyEngine microsimulation</dd></div>
+        <div><dt><a class="gloss-link" href="/glossary#replicates">Replicates [source] on [checks]</a></dt><dd>FRB/US</dd></div>
+        <div><dt><a class="gloss-link" href="/glossary#partial-replication">Partial replication of [source]</a></dt><dd>BoE SVAR, US HANK, DEFINE-UK</dd></div>
+        <div><dt><a class="gloss-link" href="/glossary#anchored-not-validated">Anchored to [source], not validated as a forecaster</a></dt><dd>OBR emulator</dd></div>
+        <div><dt><a class="gloss-link" href="/glossary#calibrated-counterfactual">Calibrated; no outcome benchmark</a></dt><dd>OG-UK</dd></div>
+      </dl>
+      <div class="table-scroll">
+      <table>
+        <thead><tr><th scope="col">Model</th><th scope="col">Status class</th><th scope="col">What it is checked against</th><th scope="col">Verdict</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><a href="/pe/validation"><strong>PolicyEngine microsimulation</strong> <span class="model-id mono">pe-microsim</span></a></th>
+            <td>Exact for implemented rules</td>
+            <td>Implemented UK and US legislation, rule by rule</td>
+            <td>Household maths exact; population adds survey error</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="/obr/validation"><strong>OBR emulator</strong> <span class="model-id mono">obr-macro</span></a></th>
+            <td>Anchored to the March 2026 EFO, not validated as a forecaster</td>
+            <td>March 2026 <a class="gloss-link" href="/glossary#efo">EFO</a>; HMRC ready reckoner; ONS <a class="gloss-link" href="/glossary#outturn">outturns</a></td>
+            <td>Tracks the EFO by construction (0.30% GDP MAPE); weak <a href="/glossary#anchored">free-running</a>; predictive, policy and uncertainty checks rated weak; no quarter of the reform solve converges to tolerance; CPI does not respond to rate or oil shocks</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="/svar/validation"><strong>BoE SVAR</strong> <span class="model-id mono">boe-svar</span></a></th>
+            <td>Partial replication of Brignone &amp; Piffer (2025)</td>
+            <td>Brignone &amp; Piffer (2025); ONS outturns</td>
+            <td>GDP decomposition consistent with the paper; CPI global-shock share about 8pp short; no <a class="gloss-link" href="/glossary#forecast-skill">forecast skill</a> against a drifting <a class="gloss-link" href="/glossary#random-walk">random walk</a> once the 64 tests are adjusted together; bands under-cover across 49 origins</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="/frb-us/validation"><strong>FRB/US</strong> <span class="model-id mono">frb-us</span></a></th>
+            <td>Replicates the Fed's <code>pyfrbus</code> on one 100bp shock</td>
+            <td>The Fed's <code>pyfrbus</code> on an identical shock; published multiplier ranges</td>
+            <td>One 100bp funds-rate shock matches pyfrbus within the gap between the Fed&rsquo;s own two releases (<a href="/glossary#release-gap">release-to-release gap</a>); baseline tracking is an identity; no predictive claim</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="/us-hank/validation"><strong>US HANK</strong> <span class="model-id mono">us-hank</span></a></th>
+            <td>Partial replication of Auclert et al. (2021)</td>
+            <td>Auclert et al. (2021), via the authors' toolkit</td>
+            <td>Six of seven solved parameters match the paper; <code>vphi</code> misses by &minus;17.3%, unresolved; Y, K and r are inputs, not results; <a class="gloss-link" href="/glossary#irf">IRF</a> magnitudes unvalidated</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="/olg/validation"><strong>OG-UK</strong> <span class="model-id mono">psl-og</span></a></th>
+            <td>Calibrated; no outcome benchmark</td>
+            <td>ONS/OBR aggregates as <em>targets</em>, not a validation set</td>
+            <td>Targets met by construction; the nearest external benchmark (OBR Working Paper 22, Table 5.1) has not yet been run</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="/define/validation#calibration"><strong>DEFINE-UK</strong> <span class="model-id mono">define-uk</span></a></th>
+            <td>Partial replication of the manual — macro block and scenario design-gate pass</td>
+            <td>Manual Table&nbsp;4; ONS outturns, OBR EFO, DESNZ emissions — no scenario figures are published</td>
+            <td>Macro block matches manual Table&nbsp;4, but 2025 growth misses by &minus;0.30pp, clearing a gate set after the run by 0.01pp; emissions 23.3% below the manual in 2040; no published scenario results to check; baseline far from outturns &mdash; <a class="gloss-link" href="/glossary#deltas-only">deltas only</a>, never levels</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      </div>
+      <div id="val-p2" role="tabpanel" aria-labelledby="val-tab-2" hidden><h3 id="shops">The same questions, answered by other institutions</h3>
+      <p>
+        Imposed matches are anchors, not validation. The stronger evidence is
+        out-of-sample forecasts, independent costings, and agreement with
+        another implementation.
+      </p>
+      <div class="table-scroll">
+      <table>
+        <thead><tr><th scope="col">Question</th><th scope="col">Compared with</th><th scope="col">How comparable</th><th scope="col">The figures</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row">Long-run effect of a 1pp basic-rate rise (psl-og)</th>
+            <td><a href="https://obr.uk/docs/dlm_uploads/Working_paper_22_A_new_UK_overlapping_generations_model.pdf">OBR Working Paper 22</a>, Table 5.1</td>
+            <td><strong>Future benchmark</strong> — same scenario; ours is not yet produced (the committed run is a transition path to 2030, not the long-run <a class="gloss-link" href="/glossary#steady-state">steady state</a> WP&nbsp;22 reports)</td>
+            <td><a href="/olg/validation#benchmark">psl-og validation</a></td>
+          </tr>
+          <tr>
+            <th scope="row">Yield of a 1p rise in the basic rate, 2026&ndash;27 (obr-macro + pe)</th>
+            <td><a href="https://www.gov.uk/government/statistics/direct-effects-of-illustrative-tax-changes">HMRC ready reckoner</a> (June 2025)</td>
+            <td>Adjusted — below HMRC in the one matched year (2026&ndash;27); HMRC is post-behavioural on administrative data, ours static and survey-based. A benchmark, not a validation</td>
+            <td><a href="/pe/validation#hmrc">pe-microsim validation</a></td>
+          </tr>
+          <tr>
+            <th scope="row">Government-purchases multiplier (frb-us)</th>
+            <td>CBO ranges (converted to a calendar-year ratio), <a href="https://econweb.ucsd.edu/~vramey/research/Ramey_Fiscal_JEP.pdf">Ramey (JEP 2019)</a> and the 2010 FRB-US lines in Coenen et al.</td>
+            <td>Adjusted — ours sit inside CBO&rsquo;s converted ranges, in their lower part, and inside Ramey&rsquo;s range, which pools estimates across horizons and monetary regimes; they sit below the 2010 FRB-US lines</td>
+            <td><a href="/frb-us/validation#multipliers">frb-us validation</a></td>
+          </tr>
+          <tr>
+            <th scope="row">Income-tax multiplier (frb-us, US)</th>
+            <td><a href="https://obr.uk/box/fiscal-multipliers/">OBR&rsquo;s published UK assumption</a> for income tax and NICs</td>
+            <td>Loose — different country and model class</td>
+            <td><a href="/frb-us/validation#multipliers">frb-us validation</a></td>
+          </tr>
+          <tr id="rate-benchmark">
+            <th scope="row">GDP response to a 1pp rise in Bank Rate (obr-macro, boe-svar)</th>
+            <td><a href="https://www.bankofengland.co.uk/quarterly-bulletin/1999/q2/the-transmission-mechanism-of-monetary-policy">Bank of England, Quarterly Bulletin 1999 Q2</a>: a 1pp rise held for a year lowers output by 0.2% to 0.35% after about a year, and inflation by 0.2 to 0.4pp about a year after that</td>
+            <td>Loose &mdash; a 1999 estimate, and the experiments differ in rate path; obr-macro sits below the range, boe-svar above it</td>
+            <td><a href="/obr/validation#caveats">obr-macro validation</a>; <a href="/svar/validation#caveats">boe-svar validation</a></td>
+          </tr>
+          <tr>
+            <th scope="row">Forecast error, 2024Q3 onward (boe-svar)</th>
+            <td><a href="https://obr.uk/fer/forecast-evaluation-report-july-2025/">OBR FER (July 2025)</a>; <a href="https://www.bankofengland.co.uk/-/media/boe/files/monetary-policy-report/2024/august/monetary-policy-report-august-2024.pdf">BoE MPR (Aug 2024)</a></td>
+            <td>Adjusted — different statistics, matched <a class="gloss-link" href="/glossary#vintage">vintages</a>; over 49 origins, no skill against a drifting random walk</td>
+            <td><a href="/svar/validation#forecasters">boe-svar validation</a></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    </div>
+  </section>
+</main>
+<footer class="foot foot-bar">
+  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <nav class="footer-links" aria-label="PolicyEngine links">
+    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
+    <a class="footer-text" href="/glossary">Glossary</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
+    <a class="footer-text" href="https://github.com/PolicyEngine/macro/issues">Report an issue</a>
+    <a class="footer-text" href="/contact">Contact</a>
+  </nav>
+</footer>
+<script src="/reveal.js?v=2" defer></script>
+<script>
+(function () {
+  var tabs = [["val-tab-1", "val-p1"], ["val-tab-2", "val-p2"]];
+  tabs.forEach(function (pair) {
+    document.getElementById(pair[0]).addEventListener("click", function () {
+      tabs.forEach(function (other) {
+        var active = other[0] === pair[0];
+        var btn = document.getElementById(other[0]);
+        btn.setAttribute("aria-selected", active ? "true" : "false");
+        btn.classList.toggle("is-current", active);
+        document.getElementById(other[1]).hidden = !active;
+      });
+    });
+  });
+  if (location.hash === "#shops") {
+    document.getElementById("val-tab-2").click();
+  }
+})();
+</script>
+</body>
+</html>
