@@ -90,8 +90,10 @@ def recommend_model(
 
     question_type must be one of household, population, policy_reform,
     dynamic_scoring, economic_shock, translated_policy_scenario, forecast,
-    economic_diagnosis, or structural_change. Unsupported combinations return
-    no model rather than an invented mapping.
+    economic_diagnosis, structural_change, or climate_policy_scenario; any
+    other value is an error. Unsupported combinations return no model rather
+    than an invented mapping. ``horizon`` is echoed back but does not yet
+    change the routing.
     """
     return capabilities.recommend(
         question_type=question_type,
@@ -182,6 +184,9 @@ def score_reform(
         start_year: Reform start year (default 2026).
         max_iter: og only — steady-state solver iteration cap (default 250).
         years: obr only — costing window length in years (default 5).
+            PolicyEngine-UK year y is fiscal year y-(y+1), so the OBR
+            run covers yQ2..(y_last+1)Q1; the databank ends 2031Q1, so
+            start_year + years - 1 must be <= 2030.
         dataset: obr/microsim only — microdata dataset name override.
 
     For population-level budget/distributional impacts WITHOUT macro feedback,
@@ -197,7 +202,7 @@ def score_reform(
 def obr_shock(
     var: str,
     shock: float,
-    periods: Annotated[int, Field(ge=1, le=40)] = 12,
+    periods: Annotated[int, Field(ge=1, le=25)] = 12,
     name: str | None = None,
     investment_closure: bool | None = None,
 ) -> dict:
@@ -214,8 +219,9 @@ def obr_shock(
         shock: Shock size, applied each quarter. UNITS DEPEND ON THE VARIABLE:
             CGG and CGIPS are in £ million per quarter (e.g. 1250 = £5bn/year);
             TCPRO is a rate change in decimal (e.g. -0.05 = 5 percentage point cut).
-        periods: Number of quarters the shock is applied (1-40; default 12 =
-            3 years).
+        periods: Number of quarters the shock is applied from 2025Q1 (1-25;
+            default 12 = 3 years). The solve runs to 2027Q4 or to the last
+            shocked quarter if later; the databank ends 2031Q1.
         name: Optional label for the reform.
         investment_closure: Omit to use the safe per-variable default (True
             for TCPRO, False otherwise). It activates the cost-of-capital
@@ -355,8 +361,9 @@ def hank_shock(
     Rognlie & Straub, Econometrica 2021 — two-asset heterogeneous-agent New
     Keynesian, solved in the sequence space) and return the impulse responses.
 
-    HONEST FRAMING: a validated replication scoring STYLIZED shocks — a
-    VAR-free sequence-space HANK. It is NOT a forecaster and does NOT score
+    HONEST FRAMING: a partial replication (six of seven solved steady-state
+    parameters match; IRF magnitudes are not validated) scoring STYLIZED
+    shocks. It is NOT a forecaster and does NOT score
     detailed tax reforms (score_reform rejects model='hank'); distributional
     outputs are first-order approximations. Responses are linear deviations
     around a calibrated steady state and scale exactly with the shock size.
@@ -369,10 +376,13 @@ def hank_shock(
             such instrument exists in the model.
         size: Impact size of the shock, in model units — UNITS DIFFER PER
             KIND: monetary is a level change in the QUARTERLY policy rate
-            (-0.0025 = a 25bp easing); fiscal_spending is a level change in G
-            (steady-state Y = 1, so 0.01 = 1% of GDP); productivity is a
-            level change in Z (0.01 ~ 1% TFP). See hank_summary for the
-            catalogue.
+            (-0.0025 = -25bp per quarter, about -100bp annualised; for a
+            25bp annualised move use -0.000625); fiscal_spending is a level
+            change in G (steady-state Y = 1, so 0.01 = 1% of GDP);
+            productivity is a level change in Z (two_asset steady-state
+            Z = 0.468, so 0.01 ~ 2.1% TFP, not 1%; one_asset steady-state
+            Z = 1, so 0.01 = 1% of TFP). The r and pi responses are quarterly
+            rates. See hank_summary for the catalogue.
         persistence: AR(1) decay of the shock path size * persistence**t
             (default 0.9; must be in [0, 1)).
         horizon: Quarters reported (default 20 = 5 years; max 300).
@@ -403,10 +413,10 @@ def hank_summary() -> dict:
     """Metadata and validation provenance for the US HANK member (instant,
     no solve).
 
-    States what the model is (a validated replication of Auclert, Bardóczy,
+    States what the model is (a replication of Auclert, Bardóczy,
     Rognlie & Straub, Econometrica 2021, at the paper's production grids),
     the available shock kinds and their units, the two variants, and the
-    scope limits: stylized shocks only, VAR-free sequence-space HANK, not a
+    scope limits: stylized shocks only, IRF magnitudes not validated, not a
     forecaster, no PolicyEngine-reform bridge (hank_shock is the supported
     entry point), distributional outputs are first-order approximations, and
     there is no transfer or tax-rate instrument because the labor tax is

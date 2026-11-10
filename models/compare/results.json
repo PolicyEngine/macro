@@ -1,0 +1,426 @@
+{
+  "schema": 1,
+  "version": "2026-11-06.3",
+  "date": "2026-11-06",
+  "title": "Same question, every model: cross-model scenario battery",
+  "issue": "https://github.com/PolicyEngine/macro/issues/213",
+  "about": "Battery run on 6 Nov 2026 on the hosted PolicyEngine Macro MCP (adapter 0.2.0). Cells with a stored path were fetched for this file; cells marked 'battery' are the values from the same day's battery (macro#213), stored with their exact call. Committed cells are read from a model repository's own outputs, with no solve. Regenerate the FRB/US cells with models/compare/run_battery.py --refresh frb-us.",
+  "models": {
+    "obr": {"name": "OBR emulator", "country": "UK", "href": "/obr", "repo": "https://github.com/PolicyEngine/obr-macroeconomic-model", "revision": "obr-macro-model 0.1.0 (March 2026 EFO, anchored)"},
+    "svar": {"name": "BoE SVAR", "country": "UK", "href": "/svar", "repo": "https://github.com/PolicyEngine/boe-var-model", "revision": "review branch 69f645e + PR #17"},
+    "frb-us": {"name": "FRB/US", "country": "US", "href": "/frb-us", "repo": "https://github.com/PolicyEngine/us-frb-model", "revision": "2508a2d3ee7d078fd82f38bc17567e4433489913"},
+    "us-hank": {"name": "US HANK", "country": "US", "href": "/us-hank", "repo": "https://github.com/PolicyEngine/us-hank-model", "revision": "19a8e5e5cd8e7120fbbd2e3de3c5b63509824f3c"},
+    "define": {"name": "DEFINE-UK", "country": "UK", "href": "/define", "repo": "https://github.com/PolicyEngine/define-uk-model", "revision": "committed outputs, define-uk-model issue #16"}
+  },
+  "benchmarks": {
+    "boe-1999": {
+      "label": "Bank of England, 1pp rise held one year",
+      "country": "UK",
+      "text": "Output −0.2% to −0.35% after about a year; inflation −0.2 to −0.4pp a year or so after that. 1pp × 4 quarters = 4 pp-quarters, so 0.05–0.09% of GDP per pp-quarter.",
+      "gdp_low": -0.35, "gdp_high": -0.2, "gdp_units": "% of GDP, peak",
+      "source": "Bank of England, The transmission mechanism of monetary policy, Quarterly Bulletin 1999 Q2",
+      "url": "https://www.bankofengland.co.uk/quarterly-bulletin/1999/q2/the-transmission-mechanism-of-monetary-policy"
+    },
+    "fed-2018": {
+      "label": "Fed FRB/US, 100bp funds-rate shock (VAR expectations), current model",
+      "country": "US",
+      "text": "The Board's own simulation of the current (post-2018) model: output gap trough −0.486pp, core PCE inflation trough −0.0345pp and unemployment peak +0.219pp, all at quarter 8. The previous model gives −0.459pp, −0.062pp and +0.215pp. The −0.4pp and −0.08pp in the 2014 FEDS Note describe the pre-2018 model.",
+      "gdp_low": -0.486, "gdp_high": -0.459, "gdp_units": "pp output gap, trough, current and previous model",
+      "source": "Laforte, Overview of the changes to the FRB/US model (2018), FEDS Notes, 7 Dec 2018, doi:10.17016/2380-7172.2306, Fig. 2 (accessible data table)",
+      "url": "https://www.federalreserve.gov/econres/notes/feds-notes/overview-of-the-changes-to-the-frb-us-model-2018-20181207.htm"
+    },
+    "purchases": {
+      "label": "Purchases multiplier, year 1",
+      "country": "US",
+      "text": "0.7–1.0 (Coenen et al. 2012; CBO WP 2015-02). OBR uses 0.6 for current spending on impact, tapering to zero over five years (OBR, Nov 2023).",
+      "source": "Coenen et al., AEJ: Macroeconomics 2012; Whalen and Reichling, CBO Working Paper 2015-02; OBR, Dynamic scoring of policy measures in OBR forecasts, Nov 2023",
+      "url": "https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md"
+    },
+    "tax": {
+      "label": "Tax multiplier",
+      "country": "US and UK",
+      "text": "CBO about 0.3 (band 0.15–0.45). OBR household tax 0.3 on impact, decaying.",
+      "source": "Whalen and Reichling, CBO Working Paper 2015-02; OBR, Dynamic scoring of policy measures in OBR forecasts, Nov 2023",
+      "url": "https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md"
+    }
+  },
+  "issues": {
+    "obr-50": {"label": "obr-macroeconomic-model #50", "url": "https://github.com/PolicyEngine/obr-macroeconomic-model/issues/50"},
+    "hank-5": {"label": "us-hank-model #5", "url": "https://github.com/PolicyEngine/us-hank-model/issues/5"},
+    "boe-11": {"label": "boe-var-model #11", "url": "https://github.com/PolicyEngine/boe-var-model/issues/11"},
+    "macro-211": {"label": "macro #211", "url": "https://github.com/PolicyEngine/macro/issues/211"},
+    "macro-212": {"label": "macro #212", "url": "https://github.com/PolicyEngine/macro/issues/212"},
+    "define-16": {"label": "define-uk-model #16", "url": "https://github.com/PolicyEngine/define-uk-model/issues/16"}
+  },
+  "questions": [
+    {
+      "id": "rate-up-100",
+      "chip": "Rate +100bp",
+      "title": "What does a 100bp rise in the policy rate do?",
+      "experiment": "A 1pp rise in the policy rate. The models do not share a rate path, so each row states its own and the size of the path in pp-quarters (annualised rate × quarters).",
+      "benchmarks": ["boe-1999", "fed-2018"],
+      "benchmark_rows": [
+        {"benchmark": "boe-1999", "name": "BoE benchmark", "gdp": "−0.2 to −0.35", "inflation": "−0.2 to −0.4", "timing": "After about a year", "ppq": "0.05–0.09%"},
+        {"benchmark": "fed-2018", "name": "Fed benchmark", "gdp": "−0.486 (output gap)", "inflation": "−0.0345 (core PCE)", "timing": "Trough at q8", "ppq": "not published"}
+      ],
+      "notes": [
+        "GDP per pp-quarter divides the peak GDP effect by the rate path's size to the peak. HANK's figure uses the realised real-rate path; the other rows use the nominal policy rate, which is close to the real rate in FRB/US because its inflation barely moves. On HANK's rstar path (10 pp-quarters at ρ = 0.9) the figure would be about 0.04%, so HANK's 0.16 and FRB/US's 0.15 are not like-for-like.",
+        "HANK reports inflation as a quarterly rate; this page multiplies it by 4 to give an annual rate."
+      ],
+      "cells": [
+        {
+          "model": "obr", "status": "answered",
+          "short": {"tag": "Off", "why": "GDP 3–5× below the BoE range; prices flat", "timing": "GDP peak q4", "inflation": "no response"},
+          "run": {"kind": "battery", "tool": "obr_shock", "args": {"var": "R", "shock": 1, "periods": 4}, "date": "2026-11-06", "adapter": "0.2.0", "label": "hosted run, 2026-11-06"},
+          "rate_path": "+1pp held 4 quarters, then zero", "pp_quarters": 4.0,
+          "gdp": {"value": -0.065, "units": "% of GDP, peak", "when": "q4"},
+          "inflation": {"value": 0, "units": "pp, annual rate", "measure": "CPI does not respond"},
+          "timing": "GDP peaks at q4; no price response",
+          "gdp_per_ppq": 0.016,
+          "solver": "converged: false in all 12 quarters (the iterative solver stalls)",
+          "verdict": "off", "verdict_label": "Off",
+          "reason": "GDP is 3–5× below the BoE 1999 range, through consumption only; inflation and unemployment are exactly zero.",
+          "issue": "obr-50"
+        },
+        {
+          "model": "svar", "status": "answered",
+          "short": {"tag": "Off, sign right", "why": "2–4× the BoE range; front-loaded", "timing": "Front-loaded, no reversion", "gdp": "h = 8", "inflation": "CPI level, h = 20"},
+          "run": {"kind": "committed", "tool": "committed fig3 fixture + PR #17", "args": {"shock": "1 s.d. UK monetary-policy shock (+25bp on impact), scaled ×4"}, "date": "2026-11-06", "source": "https://github.com/PolicyEngine/boe-var-model/pull/17", "label": "committed output"},
+          "rate_path": "+25bp on impact, still +0.17pp at h = 12 (a unit root: the rate does not revert); about 1.9 pp-quarters to h = 8 per 25bp", "pp_quarters": null,
+          "gdp": {"value": -1.6, "units": "% of GDP, at h = 8, scaled from −0.39% per 25bp", "when": "h = 8"},
+          "inflation": {"value": -2.5, "units": "% on the CPI level at h = 20, scaled from −0.63% per 25bp", "measure": "CPI level, still falling"},
+          "timing": "GDP already −0.14% per s.d. on impact, then flat; no reversion within 5 years",
+          "gdp_per_ppq": 0.2,
+          "verdict": "off", "verdict_label": "Off, sign right",
+          "reason": "2–4× the BoE range per pp-quarter and front-loaded, against the BoE's fullest effect after about a year.",
+          "draws": "The medians are from the repository's fast test fixture (600 posterior draws, about 50 accepted, unweighted; tests/conftest.py), not the published run (744 accepted draws, effective sample size 356.1; results/summary.md). An earlier sense check found bands wider than the paper's (186 accepted draws, effective sample size 91, against the paper's 10,000; results/sense_check.md).",
+          "issue": "boe-11"
+        },
+        {
+          "model": "frb-us", "status": "answered",
+          "short": {"tag": "Plausible", "why": "Matches the Board's current-model simulation", "timing": "Hump, peak q8"},
+          "run": {"kind": "hosted", "tool": "frbus_shock", "args": {"var": "rffintay_aerr", "shock": 1.0, "periods": 1, "horizon": 12, "start": "2026Q1", "policy_rule": "inertial_taylor"}, "date": "2026-11-06", "run_at": "2026-11-06T01:08:01Z", "adapter": "0.2.0", "label": "hosted run, 2026-11-06"},
+          "rate_path": "+1.00pp on impact, decays under the inertial rule, crosses zero at q8, undershoots", "pp_quarters": 3.6, "pp_quarters_note": "q1–q8",
+          "gdp": {"value": -0.551, "units": "% of GDP, peak", "when": "q8 (2027Q4)"},
+          "inflation": {"value": -0.034, "units": "pp, annual rate", "measure": "core PCE", "when": "q8"},
+          "timing": "Hump: GDP and inflation peak at q8",
+          "gdp_per_ppq": 0.15,
+          "verdict": "plausible", "verdict_label": "Plausible; matches the Board's current-model simulation",
+          "reason": "The Board's simulation of the current model gives an output-gap trough of −0.486pp and core PCE −0.0345pp at quarter 8 (Laforte 2018). This run gives core PCE −0.034pp at quarter 8; the same experiment's output-gap trough is −0.50pp (us-frb-model VALIDATION.md, Test 3). The −0.08pp in earlier Fed notes describes the pre-2018 model.",
+          "issue": null,
+          "benchmark": "fed-2018",
+          "path": {
+            "x": ["2026Q1","2026Q2","2026Q3","2026Q4","2027Q1","2027Q2","2027Q3","2027Q4","2028Q1","2028Q2","2028Q3","2028Q4"],
+            "gdp": [0.00062,-0.187241,-0.289735,-0.436345,-0.482623,-0.52782,-0.543998,-0.551202,-0.544043,-0.525862,-0.498603,-0.464479],
+            "gdp_units": "% deviation from baseline (xgdp)",
+            "inflation": [0.0,-0.01019,-0.021229,-0.024556,-0.030195,-0.032273,-0.033515,-0.033649,-0.033447,-0.032894,-0.032153,-0.031307],
+            "inflation_units": "pp, annual rate (picxfe, core PCE)",
+            "inflation_scale": 1
+          }
+        },
+        {
+          "model": "us-hank", "status": "answered",
+          "short": {"tag": "Plausible in-model", "why": "Inflation peaks on impact, not after two years", "timing": "Peak on impact"},
+          "run": {"kind": "hosted", "tool": "hank_shock", "args": {"kind": "monetary", "size": 0.0025, "persistence": 0.9, "horizon": 12, "variant": "two_asset"}, "date": "2026-11-06", "run_at": "2026-11-06T01:08:27Z", "adapter": "0.2.0", "label": "hosted run, 2026-11-06"},
+          "rate_path": "Policy-rate shock (rstar) +0.25pp a quarter (= +1pp annualised), AR(1) ρ = 0.9; realised real rate +1.36pp annualised on impact", "pp_quarters": 2.3, "pp_quarters_note": "real rate, 12 quarters",
+          "gdp": {"value": -0.361, "units": "% of GDP, peak", "when": "impact"},
+          "inflation": {"value": -1.34, "units": "pp, annual rate (−0.336pp a quarter × 4)", "when": "impact"},
+          "timing": "Both peak on impact; no hump",
+          "gdp_per_ppq": 0.16,
+          "verdict": "plausible-in-model", "verdict_label": "Plausible in-model, off on timing",
+          "reason": "Inflation is about 40× FRB/US and 3–7× the BoE range, and peaks on impact rather than after about two years, which is consistent with the model's forward-looking Phillips curve. The tool's unit label is easy to misread.",
+          "issue": "macro-211",
+          "benchmark": null,
+          "path": {
+            "x": ["q0","q1","q2","q3","q4","q5","q6","q7","q8","q9","q10","q11"],
+            "gdp": [-0.36117,-0.273095,-0.216021,-0.174831,-0.144155,-0.120573,-0.101893,-0.086698,-0.074058,-0.063352,-0.054154,-0.046168],
+            "gdp_units": "% deviation from steady state (Y)",
+            "inflation": [-0.335622,-0.320499,-0.300203,-0.277595,-0.254534,-0.232078,-0.210799,-0.190976,-0.17271,-0.156001,-0.140791,-0.126991],
+            "inflation_units": "pp, quarterly rate (pi); × 4 for an annual rate",
+            "inflation_scale": 4
+          }
+        },
+        {
+          "model": "define", "status": "no_instrument",
+          "reason": "DEFINE-UK has no monetary-policy instrument."
+        }
+      ]
+    },
+    {
+      "id": "rate-down-100",
+      "chip": "Rate −100bp",
+      "title": "Is a 100bp cut the mirror image of a 100bp rise?",
+      "experiment": "The same experiment with the sign flipped. A linear model gives exactly the opposite answer; the gap is the asymmetry.",
+      "benchmarks": [],
+      "notes": [],
+      "cells": [
+        {
+          "model": "obr", "status": "answered",
+          "short": {"tag": "Off", "why": "Not symmetric; solver residue persists", "result": "+0.061 vs −0.065"},
+          "run": {"kind": "battery", "tool": "obr_shock", "args": {"var": "R", "shock": -1, "periods": 4}, "date": "2026-11-06", "adapter": "0.2.0", "label": "hosted run, 2026-11-06"},
+          "gdp": {"value": 0.061, "units": "% of GDP, peak", "when": "q4"},
+          "symmetry": "Peak +0.061 against −0.065 for the rise; at q12 +0.011 against −0.018, so the cut's q12 tail is about 60% the size of the rise's. A tail of 0.01–0.02% persists after the shock ends.",
+          "solver": "converged: false in all 12 quarters",
+          "verdict": "off", "verdict_label": "Off",
+          "reason": "Not symmetric: the persistent tail is solver residue about the size of a 25bp signal.",
+          "issue": "obr-50"
+        },
+        {
+          "model": "svar", "status": "answered",
+          "short": {"tag": "Not tested", "why": "Linear VAR: exact mirror by construction", "result": "Exact mirror"},
+          "run": {"kind": "committed", "tool": "PR #17 identity test", "args": {"shock": "−1 s.d. against +1 s.d."}, "date": "2026-11-06", "source": "https://github.com/PolicyEngine/boe-var-model/pull/17", "label": "committed output"},
+          "symmetry": "Exact mirror (tested in PR #17).",
+          "verdict": "not-tested", "verdict_label": "Not tested (linear)",
+          "reason": "A linear VAR: the cut is the exact negative of the rise. Its size is off; see the +100bp question.",
+          "issue": "boe-11"
+        },
+        {
+          "model": "frb-us", "status": "answered",
+          "short": {"tag": "Plausible", "why": "Close to symmetric, as a nonlinear model allows", "result": "+0.567 vs −0.551 (2.8% apart)"},
+          "run": {"kind": "battery", "tool": "frbus_shock", "args": {"var": "rffintay_aerr", "shock": -1.0, "periods": 1, "horizon": 20, "start": "2026Q1", "policy_rule": "inertial_taylor"}, "date": "2026-11-06", "adapter": "0.2.0", "label": "hosted run, 2026-11-06"},
+          "gdp": {"value": 0.567, "units": "% of GDP, peak", "when": "q8"},
+          "symmetry": "+0.567 against −0.551 for the rise: 2.8% apart.",
+          "verdict": "plausible", "verdict_label": "Plausible",
+          "reason": "Close to symmetric; FRB/US is nonlinear, so a small gap is expected.",
+          "issue": null
+        },
+        {
+          "model": "us-hank", "status": "answered",
+          "short": {"tag": "Not tested", "why": "Linear by construction", "result": "Exact mirror"},
+          "run": {"kind": "battery", "tool": "hank_shock", "args": {"kind": "monetary", "size": -0.0025, "persistence": 0.9}, "date": "2026-11-06", "adapter": "0.2.0", "label": "hosted run, 2026-11-06"},
+          "symmetry": "Exact mirror: responses are first-order around the steady state.",
+          "verdict": "not-tested", "verdict_label": "Not tested (linear)",
+          "reason": "Linear by construction, so this tests nothing beyond the +100bp run.",
+          "issue": null
+        },
+        {"model": "define", "status": "no_instrument", "reason": "DEFINE-UK has no monetary-policy instrument."}
+      ]
+    },
+    {
+      "id": "rate-up-25",
+      "chip": "Rate +25bp",
+      "title": "Is a 25bp rise a quarter of a 100bp rise?",
+      "experiment": "A 25bp rise, compared with the 100bp result divided by four. A linear model gives the same GDP effect per 100bp at both sizes.",
+      "benchmarks": [],
+      "notes": [],
+      "cells": [
+        {
+          "model": "obr", "status": "answered",
+          "short": {"tag": "Off", "why": "Small shocks not proportional; solve does not converge", "result": "1.53× per bp at 25bp"},
+          "run": {"kind": "battery", "tool": "obr_shock", "args": {"var": "R", "shock": 0.25, "periods": 4}, "date": "2026-11-06", "adapter": "0.2.0", "label": "hosted run, 2026-11-06"},
+          "linearity": "Peak GDP per 100bp: 0.100 at 25bp, 0.065 at 100bp, 0.060 at 200bp. Not proportional: 1.53× per bp at 25bp.",
+          "solver": "converged: false in all 12 quarters; the stall residue is the size of the 25bp signal",
+          "verdict": "off", "verdict_label": "Off",
+          "reason": "Small shocks are not proportional because the solve does not converge.",
+          "issue": "obr-50"
+        },
+        {
+          "model": "svar", "status": "answered",
+          "short": {"tag": "Not tested", "why": "Linear VAR: exact by construction", "result": "Exact"},
+          "run": {"kind": "committed", "tool": "PR #17 identity test", "args": {"shock": "0.25 s.d. against 1 s.d."}, "date": "2026-11-06", "source": "https://github.com/PolicyEngine/boe-var-model/pull/17", "label": "committed output"},
+          "linearity": "Exact (tested in PR #17).",
+          "verdict": "not-tested", "verdict_label": "Not tested (linear)",
+          "reason": "A linear VAR. Its size is off; see the +100bp question.",
+          "issue": "boe-11"
+        },
+        {
+          "model": "frb-us", "status": "answered",
+          "short": {"tag": "Plausible", "why": "Close to proportional", "result": "1.0% apart"},
+          "run": {"kind": "battery", "tool": "frbus_shock", "args": {"var": "rffintay_aerr", "shock": 0.25, "periods": 1, "horizon": 20, "start": "2026Q1", "policy_rule": "inertial_taylor"}, "date": "2026-11-06", "adapter": "0.2.0", "label": "hosted run, 2026-11-06"},
+          "linearity": "25bp × 4 = −0.557% against −0.551% at 100bp: 1.0% apart.",
+          "verdict": "plausible", "verdict_label": "Plausible",
+          "reason": "Close to proportional.",
+          "issue": null
+        },
+        {
+          "model": "us-hank", "status": "answered",
+          "short": {"tag": "Not tested", "why": "Linear by construction", "result": "Exact"},
+          "run": {"kind": "battery", "tool": "hank_shock", "args": {"kind": "monetary", "size": 0.000625, "persistence": 0.9}, "date": "2026-11-06", "adapter": "0.2.0", "label": "hosted run, 2026-11-06"},
+          "linearity": "Exact: responses scale with the shock size.",
+          "verdict": "not-tested", "verdict_label": "Not tested (linear)",
+          "reason": "Linear by construction, so this tests nothing beyond the +100bp run.",
+          "issue": null
+        },
+        {"model": "define", "status": "no_instrument", "reason": "DEFINE-UK has no monetary-policy instrument."}
+      ]
+    },
+    {
+      "id": "spending",
+      "chip": "Spending +1% of GDP",
+      "title": "What does government spending of 1% of GDP do to output?",
+      "experiment": "Higher government purchases worth about 1% of GDP. The multiplier is the GDP change divided by the spending change, both in % of GDP. Financing and the monetary rule differ by model and drive most of the spread.",
+      "benchmarks": ["purchases"],
+      "benchmark_rows": [
+        {"benchmark": "purchases", "name": "Published range", "multiplier": "0.7–1.0 (year 1)"}
+      ],
+      "notes": ["FRB/US's hosted tool cannot run a sustained +1%-of-GDP experiment: the stored run is a one-quarter impulse of about 0.046% of GDP, and the year-1 figure comes from a committed sustained run (macro #212)."],
+      "cells": [
+        {
+          "model": "obr", "status": "answered",
+          "short": {"tag": "Off", "why": "An accounting identity; the OBR's own figure is 0.6", "multiplier": "1.00, flat", "inflation": "no response"},
+          "run": {"kind": "battery", "tool": "obr_shock", "args": {"var": "CGG", "shock": 7000, "periods": 4}, "date": "2026-11-06", "adapter": "0.2.0", "label": "hosted run, 2026-11-06"},
+          "experiment": "CGG +£7,000m a quarter (about 1.0% of GDP) for 4 quarters",
+          "gdp": {"value": 1.025, "units": "% of GDP, peak (+1.011% to +1.025% over q1–q4, about 0 from q5)", "when": "q1–q4"},
+          "multiplier": "1.00, flat",
+          "inflation": {"value": 0, "units": "pp, annual rate", "measure": "prices do not respond"},
+          "solver": "converged: false in all 12 quarters; the tool's own caveat calls the result an upper bound",
+          "verdict": "off", "verdict_label": "Off",
+          "reason": "An accounting identity, not a multiplier. The OBR's own figure is 0.6, tapering.",
+          "issue": null, "link": {"label": "OBR emulator limits", "href": "/obr/validation#caveats"}
+        },
+        {"model": "svar", "status": "no_instrument", "reason": "The BoE SVAR identifies no fiscal shock."},
+        {
+          "model": "frb-us", "status": "answered",
+          "short": {"tag": "Plausible", "why": "Inside the 0.7–1.0 band", "multiplier": "0.81 on impact; 0.725 year 1", "gdp": "per 0.046% of GDP"},
+          "run": {"kind": "hosted", "tool": "frbus_shock", "args": {"var": "egfe_aerr", "shock": 0.01, "periods": 1, "horizon": 12, "start": "2026Q1", "policy_rule": "inertial_taylor"}, "date": "2026-11-06", "run_at": "2026-11-06T01:13:48Z", "adapter": "0.2.0", "label": "hosted run, 2026-11-06"},
+          "experiment": "Federal purchases +1% (about 0.046% of GDP), one quarter",
+          "gdp": {"value": 0.037, "units": "% of GDP, peak, per 0.046% of GDP spent", "when": "impact"},
+          "multiplier": "about 0.81 on impact; 0.725 in year 1 for a committed sustained run (inertial rule)",
+          "inflation": {"value": 0.0008, "units": "pp, annual rate", "measure": "core PCE", "when": "q2"},
+          "verdict": "plausible", "verdict_label": "Plausible",
+          "reason": "Inside the 0.7–1.0 band.",
+          "issue": "macro-212",
+          "benchmark": null,
+          "path": {
+            "x": ["2026Q1","2026Q2","2026Q3","2026Q4","2027Q1","2027Q2","2027Q3","2027Q4","2028Q1","2028Q2","2028Q3","2028Q4"],
+            "gdp": [0.037296,0.024771,0.0251,0.018584,0.017614,0.015144,0.012169,0.009283,0.006569,0.003982,0.001558,-0.000639],
+            "gdp_units": "% deviation from baseline (xgdp)",
+            "inflation": [0.0,0.000821,0.000548,0.000565,0.000417,0.000454,0.000477,0.000491,0.000501,0.000511,0.000518,0.000522],
+            "inflation_units": "pp, annual rate (picxfe, core PCE)",
+            "inflation_scale": 1
+          }
+        },
+        {
+          "model": "us-hank", "status": "answered",
+          "short": {"tag": "Questionable", "why": "Sign flips while spending is still high", "multiplier": "0.175 (ρ = 0.8)"},
+          "run": {"kind": "hosted", "tool": "hank_shock", "args": {"kind": "fiscal_spending", "size": 0.01, "persistence": 0.8, "horizon": 12, "variant": "two_asset"}, "date": "2026-11-06", "run_at": "2026-11-06T01:13:54Z", "adapter": "0.2.0", "label": "hosted run, 2026-11-06"},
+          "experiment": "G +1% of GDP on impact, AR(1) ρ = 0.8, financed by the labour tax",
+          "gdp": {"value": 0.175, "units": "% of GDP, peak", "when": "impact"},
+          "multiplier": "0.175 (ρ = 0.8); 0.075 at ρ = 0.9. Output turns negative from q3 while spending is still 51–73% of impact",
+          "inflation": {"value": 0.84, "units": "pp, annual rate (+0.21pp a quarter × 4)", "when": "impact"},
+          "verdict": "questionable", "verdict_label": "Questionable",
+          "reason": "A balanced-budget multiplier can be below 1, but investment falls 2.6% and consumption 0.5–0.7% on impact, the sign flips while spending is still high, and the answer halves between ρ = 0.8 and 0.9. The 0.7–1.0 range above is the published purchases multiplier (Coenen et al.; CBO); this run is financed by the labour tax, so it is not directly comparable, and no balanced-budget benchmark is sourced.",
+          "issue": "hank-5",
+          "benchmark": null,
+          "path": {
+            "x": ["q0","q1","q2","q3","q4","q5","q6","q7","q8","q9","q10","q11"],
+            "gdp": [0.175259,0.068536,0.011221,-0.018172,-0.031503,-0.035878,-0.035504,-0.032824,-0.029222,-0.02545,-0.021889,-0.018709],
+            "gdp_units": "% deviation from steady state (Y)",
+            "inflation": [0.20871,0.197607,0.177334,0.154008,0.130942,0.109761,0.091128,0.075181,0.061782,0.050668,0.041534,0.034079],
+            "inflation_units": "pp, quarterly rate (pi); × 4 for an annual rate",
+            "inflation_scale": 4
+          }
+        },
+        {
+          "model": "define", "status": "answered",
+          "short": {"tag": "Unresolved", "why": "Impulse definition not settled; not comparable", "multiplier": "1.78–2.30"},
+          "run": {"kind": "committed", "tool": "committed green public investment scenario", "args": {"scenario": "green public investment", "frequency": "annual"}, "date": "2026-11-06", "source": "https://github.com/PolicyEngine/define-uk-model/issues/16", "label": "committed output"},
+          "experiment": "Green public investment, annual, investment-led",
+          "multiplier": "1.78, 2.30 or 1.94 depending on how the impulse is defined",
+          "verdict": "unresolved", "verdict_label": "Unresolved",
+          "reason": "The impulse definition is not settled, and an annual, investment-led scenario is not comparable to a 4-quarter purchases shock. No published benchmark. The 1.78 also includes a Baseline/policy parameter mismatch (define-uk-model #20).",
+          "issue": "define-16", "link": {"label": "DEFINE-UK limits", "href": "/define/validation#caveats"}
+        }
+      ]
+    },
+    {
+      "id": "tax",
+      "chip": "Income-tax rise",
+      "title": "What does a 1pp rise in the personal tax rate do?",
+      "experiment": "A rise in the effective personal income-tax rate of about 1pp.",
+      "benchmarks": ["tax"],
+      "benchmark_rows": [
+        {"benchmark": "tax", "name": "Published range", "multiplier": "0.15–0.45 (CBO); OBR 0.3, decaying"}
+      ],
+      "notes": ["FRB/US with periods = 4 stacks the tax add-factor to +2.37pp rather than +1pp, and the tool's label does not warn (macro #212). The stored run uses periods = 1."],
+      "cells": [
+        {
+          "model": "obr", "status": "answered",
+          "short": {"tag": "Off", "why": "Rises where the OBR's 0.3 decays", "multiplier": "0.15 year 1 → 0.34 q12"},
+          "run": {"kind": "committed", "tool": "score_reform route (README)", "args": {"reform": "1p on the basic rate", "shock": "£1,616m a quarter, sustained"}, "date": "2026-11-06", "source": "https://github.com/PolicyEngine/obr-macroeconomic-model", "label": "committed output"},
+          "multiplier": "0.15 in year 1, rising to 0.34 by q12",
+          "verdict": "off", "verdict_label": "Off: wrong profile",
+          "reason": "Right order of magnitude, but it rises where the OBR's 0.3 decays.",
+          "issue": null, "link": {"label": "OBR emulator limits", "href": "/obr/validation#caveats"}
+        },
+        {"model": "svar", "status": "no_instrument", "reason": "The BoE SVAR identifies no tax shock."},
+        {
+          "model": "frb-us", "status": "answered",
+          "short": {"tag": "Plausible", "why": "Inside the CBO band of 0.15–0.45", "multiplier": "0.22 year 1; 0.32 year 2"},
+          "run": {"kind": "hosted", "tool": "frbus_shock", "args": {"var": "trp_aerr", "shock": 0.01, "periods": 1, "horizon": 12, "start": "2026Q1", "policy_rule": "inertial_taylor"}, "date": "2026-11-06", "run_at": "2026-11-06T01:11:55Z", "adapter": "0.2.0", "label": "hosted run, 2026-11-06"},
+          "experiment": "+1pp on the effective personal rate on impact, decaying to +0.05pp by q8",
+          "gdp": {"value": -0.115, "units": "% of GDP, peak", "when": "impact"},
+          "multiplier": "0.22 in year 1, 0.32 in year 2 (committed tax-cut run)",
+          "inflation": {"value": -0.003, "units": "pp, annual rate", "measure": "core PCE", "when": "q2"},
+          "verdict": "plausible", "verdict_label": "Plausible",
+          "reason": "Inside the CBO band of 0.15–0.45.",
+          "issue": "macro-212",
+          "benchmark": null,
+          "path": {
+            "x": ["2026Q1","2026Q2","2026Q3","2026Q4","2027Q1","2027Q2","2027Q3","2027Q4","2028Q1","2028Q2","2028Q3","2028Q4"],
+            "gdp": [-0.114697,-0.088031,-0.104102,-0.079951,-0.077883,-0.067392,-0.057223,-0.045588,-0.034107,-0.022734,-0.011755,-0.001436],
+            "gdp_units": "% deviation from baseline (xgdp)",
+            "inflation": [0.0,-0.002738,-0.002247,-0.002692,-0.00218,-0.002322,-0.002335,-0.00239,-0.002399,-0.002403,-0.002391,-0.002365],
+            "inflation_units": "pp, annual rate (picxfe, core PCE)",
+            "inflation_scale": 1
+          }
+        },
+        {"model": "us-hank", "status": "no_instrument", "reason": "The labour tax is endogenous in US HANK, so there is no tax-rate instrument."},
+        {"model": "define", "status": "no_instrument", "reason": "No income-tax instrument in the committed scenarios."}
+      ]
+    },
+    {
+      "id": "energy",
+      "chip": "Energy shock",
+      "title": "What does a rise in oil and energy prices do?",
+      "experiment": "A rise in the oil price of about $10 a barrel. No sourced magnitude benchmark exists for any model, so only the sign and the transmission are judged.",
+      "benchmarks": [],
+      "notes": ["FRB/US's tool labels the oil lever's units 'model units'; they are dollars a barrel, so +10 is +15.4% on the oil price (macro #212)."],
+      "cells": [
+        {
+          "model": "obr", "status": "answered",
+          "short": {"tag": "Off", "why": "The price block does not respond to oil", "inflation": "no response"},
+          "run": {"kind": "committed", "tool": "transmission audit", "args": {"shock": "oil +$10/bbl"}, "date": "2026-11-06", "source": "https://github.com/PolicyEngine/obr-macroeconomic-model", "label": "committed output"},
+          "gdp": {"value": -0.02, "units": "% of GDP", "when": ""},
+          "inflation": {"value": 0, "units": "% on the CPI level", "measure": "CPI does not respond"},
+          "verdict": "off", "verdict_label": "Off",
+          "reason": "The price block does not respond to the oil price.",
+          "issue": null, "link": {"label": "OBR emulator limits", "href": "/obr/validation#caveats"}
+        },
+        {
+          "model": "svar", "status": "answered",
+          "short": {"tag": "Plausible on text", "why": "Bank Rate response matches the paper; size not benchmarked", "result": "Bank Rate: no significant response"},
+          "run": {"kind": "committed", "tool": "committed world energy shock", "args": {"shock": "world energy shock"}, "date": "2026-11-06", "source": "https://github.com/PolicyEngine/boe-var-model", "label": "committed output"},
+          "experiment": "World energy shock",
+          "result": "Bank Rate does not significantly respond: the 68% set straddles zero at h = 0–8, as the paper's text says.",
+          "verdict": "plausible", "verdict_label": "Plausible on the paper's text",
+          "reason": "Magnitudes are not benchmarked.",
+          "issue": "boe-11"
+        },
+        {
+          "model": "frb-us", "status": "answered",
+          "short": {"tag": "Plausible on sign", "why": "No sourced size benchmark; core PCE dip undiagnosed", "inflation": "CPI level, impact", "result": "Funds rate eases 0.017pp"},
+          "run": {"kind": "hosted", "tool": "frbus_shock", "args": {"var": "poil_aerr", "shock": 10, "periods": 4, "horizon": 12, "start": "2026Q1", "policy_rule": "inertial_taylor"}, "date": "2026-11-06", "run_at": "2026-11-06T01:11:55Z", "adapter": "0.2.0", "label": "hosted run, 2026-11-06"},
+          "experiment": "Oil +$10 a barrel (+15.4%) for 4 quarters",
+          "gdp": {"value": -0.039, "units": "% of GDP, peak", "when": "q4"},
+          "inflation": {"value": 0.14, "units": "% on the CPI level, on impact", "measure": "CPI level; core PCE −0.005pp", "when": "impact"},
+          "result": "The funds rate eases by 0.017pp, because the rule targets core inflation; everything reverts within a quarter of the shock ending, with no second-round effects.",
+          "verdict": "plausible", "verdict_label": "Plausible on sign",
+          "reason": "No sourced benchmark for the size. Core PCE falls 0.005pp after the oil rise; the cause is not yet diagnosed.",
+          "issue": "macro-212",
+          "benchmark": null,
+          "path": {
+            "x": ["2026Q1","2026Q2","2026Q3","2026Q4","2027Q1","2027Q2","2027Q3","2027Q4","2028Q1","2028Q2","2028Q3","2028Q4"],
+            "gdp": [-0.023343,-0.033113,-0.038198,-0.038517,-0.010373,-0.004268,-0.001248,-0.003868,-0.011213,-0.008668,-0.007027,-0.003808],
+            "gdp_units": "% deviation from baseline (xgdp)",
+            "inflation": [0.142169,0.138491,0.133689,0.12916,-0.004393,-0.004794,-0.00495,-0.004974,-0.005006,-0.005057,-0.005074,-0.005069],
+            "inflation_units": "% deviation of the CPI level from baseline (pcpi)",
+            "inflation_scale": 1
+          }
+        },
+        {"model": "us-hank", "status": "no_instrument", "reason": "US HANK has no energy-price instrument."},
+        {"model": "define", "status": "no_instrument", "reason": "No energy-price shock in the committed scenarios."}
+      ]
+    }
+  ]
+}
