@@ -26,13 +26,13 @@ verbatim — that registry is authoritative and this table is a copy of it.
 
 | # | model | status | repo |
 |---|-------|--------|------|
-| 01 | **`pe-microsim`** — PolicyEngine tax-benefit microsimulation | production-ready for selected household applications | [PolicyEngine/policyengine.py](https://github.com/PolicyEngine/policyengine.py) |
-| 02 | **`obr-macro`** — OBR macroeconometric emulator | validated for selected scenarios | [PolicyEngine/obr-macroeconomic-model](https://github.com/PolicyEngine/obr-macroeconomic-model) |
-| 03 | **`boe-svar`** — Bank of England structural VAR replication | validated replication for selected outputs | [PolicyEngine/boe-var-model](https://github.com/PolicyEngine/boe-var-model) |
-| 04 | **`frb-us`** — Federal Reserve FRB-US implementation | validated software replication with scope limits | [PolicyEngine/us-frb-model](https://github.com/PolicyEngine/us-frb-model) |
-| 05 | **`us-hank`** — US two-asset HANK (Auclert–Bardóczy–Rognlie–Straub 2021) | steady state replicates the paper (six of seven solved parameters); shock signs are tested, magnitudes are not validated; not a forecaster; distributional outputs are steady-state statistics and an MPC-proportional split of the aggregate | [PolicyEngine/us-hank-model](https://github.com/PolicyEngine/us-hank-model) |
-| 06 | **`psl-og`** — OG-UK overlapping generations model | research prototype; calibrated counterfactual | [PSLmodels/OG-UK](https://github.com/PSLmodels/OG-UK) |
-| 07 | **`define-uk`** — DEFINE-UK ecological stock-flow consistent model | experimental; partial replication — baseline macro block replicates manual Table 4; scenario deltas gated on the pinned oracle run, the published scenario definitions, and two paper anchors (no numeric v1.1 scenario results are published); unlicensed upstream is never hosted, so hosted calls return run instructions | [PolicyEngine/define-uk-model](https://github.com/PolicyEngine/define-uk-model) (upstream [DEFINE-model/DEFINE_UK_1.1](https://github.com/DEFINE-model/DEFINE_UK_1.1)) |
+| 01 | **`pe-microsim`** — PolicyEngine tax-benefit microsimulation | exact for implemented rules (household arithmetic); population estimates add survey error | [PolicyEngine/policyengine.py](https://github.com/PolicyEngine/policyengine.py) |
+| 02 | **`obr-macro`** — OBR macroeconometric emulator | anchored to the March 2026 EFO, not validated as a forecaster; predictive and policy checks weak | [PolicyEngine/obr-macroeconomic-model](https://github.com/PolicyEngine/obr-macroeconomic-model) |
+| 03 | **`boe-svar`** — Bank of England structural VAR replication | partial replication of Brignone and Piffer (2025): GDP decomposition consistent with the paper; CPI global-shock share about 8pp short; no forecast skill against a drifting random walk | [PolicyEngine/boe-var-model](https://github.com/PolicyEngine/boe-var-model) |
+| 04 | **`frb-us`** — Federal Reserve FRB-US implementation | replicates the Fed's pyfrbus on one 100bp funds-rate shock, within the gap between pyfrbus 1.0.0 and 1.1.1; a solver check, not a test of the economics | [PolicyEngine/us-frb-model](https://github.com/PolicyEngine/us-frb-model) |
+| 05 | **`us-hank`** — US two-asset HANK (Auclert–Bardóczy–Rognlie–Straub 2021) | partial replication of Auclert et al. (2021): six of seven solved parameters match (vphi misses by 17.3%, unresolved); steady-state targets are inputs; shock signs are tested, magnitudes are not; not a forecaster; distributional outputs are steady-state statistics and an MPC-proportional split of the aggregate | [PolicyEngine/us-hank-model](https://github.com/PolicyEngine/us-hank-model) |
+| 06 | **`psl-og`** — OG-UK overlapping generations model | calibrated; no outcome benchmark; research prototype | [PSLmodels/OG-UK](https://github.com/PSLmodels/OG-UK) |
+| 07 | **`define-uk`** — DEFINE-UK ecological stock-flow consistent model | partial replication of the DEFINE-UK manual: baseline macro block replicates Table 4; scenario deltas gated on the pinned oracle run, the published scenario definitions, and two paper anchors (no numeric v1.1 scenario results are published); experimental; unlicensed upstream is never hosted, so hosted calls return run instructions | [PolicyEngine/define-uk-model](https://github.com/PolicyEngine/define-uk-model) (upstream [DEFINE-model/DEFINE_UK_1.1](https://github.com/DEFINE-model/DEFINE_UK_1.1)) |
 | — | More model classes (incl. OG-USA) | planned | — |
 
 **One naming split to know about.** The site calls the overlapping-generations
@@ -218,7 +218,7 @@ that are directory prefixes with no index page. None of them has an
 | `/papers` | `/models#evidence` |
 | `/validation` | `/models#validation` |
 | `/score` | `/models#score` |
-| `/data` | `/forecasts#data` |
+| `/data` | `/economy#data` |
 | `/notes` | `/forecasts#notes` |
 | `/economy/topics` | `/economy#topics` |
 | `/economy/trends` | `/economy#trends` |
@@ -270,7 +270,7 @@ snap = json.load(urllib.request.urlopen(
 print(snap["observations"][-1])   # {'period': '2026Q2', 'value': 2.8}
 ```
 
-Browse it at [`/forecasts#data`](https://policyengine-macro.vercel.app/forecasts#data)
+Browse it at [`/economy#data`](https://policyengine-macro.vercel.app/economy#data)
 — the full catalogue, the schema, the release calendar and the recipe above,
 in the section that explains what a forecast round is scored against. The
 [forecast track record](forecasts/) records which vintage each score was
