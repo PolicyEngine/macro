@@ -1,0 +1,94 @@
+name: Hosted model drift check
+
+# Calls each hosted model once with a "canary" whose output the site quotes
+# (integration/drift/canaries.json) and fails when a value leaves its
+# tolerance, when the hosted provenance disagrees with the capability
+# registry, or when the hosted source revision is not modal_app.py's pin.
+# Added after the hosted OBR model served a wrong-sign score on a stale pin
+# while the pages quoted the correct numbers (macro #218, #226).
+#
+# Weekly only, by design: each run costs Modal compute (see the PR that added
+# this). Never schedule it daily. On drift it opens ONE issue labelled
+# `drift-check`, or comments on the open one, and fails the job.
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"  # Mondays 06:17 UTC
+  workflow_dispatch:
+    inputs:
+      max_cost:
+        description: "cheap = skip the SVAR forecast (the one moderate canary)"
+        type: choice
+        options: [moderate, cheap]
+        default: moderate
+
+concurrency:
+  group: drift-check
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift:
+    name: Quoted numbers vs the hosted models
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install client deps
+        # Talks to the public MCP endpoint over HTTP; no Modal auth and no
+        # model packages are needed (registry and pins are read from source).
+        run: pip install --upgrade pip && pip install "mcp[cli]>=1.9,<2" anyio
+      - name: Run the canaries
+        id: run
+        working-directory: integration
+        run: |
+          set +e
+          python drift/drift_check.py --max-cost "${{ github.event.inputs.max_cost || 'moderate' }}" \
+            --report "$RUNNER_TEMP/drift.md"
+          code=$?
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          cat "$RUNNER_TEMP/drift.md" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          exit 0
+      - name: Open or update the drift issue
+        if: steps.run.outputs.code != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create drift-check --color B60205 \
+            --description "Hosted model output drifted from the site" 2>/dev/null || true
+          body="$RUNNER_TEMP/body.md"
+          {
+            echo "The weekly drift check found hosted model output that no longer matches what the site quotes, or a deployment that is not on the committed pin."
+            echo
+            echo "Run: $RUN_URL (exit ${{ steps.run.outputs.code }}; 1 = drift, 2 = the check could not run)"
+            echo
+            cat "$RUNNER_TEMP/drift.md" 2>/dev/null || echo "_no report written_"
+            echo
+            echo "Canaries: \`integration/drift/canaries.json\`. Fix the deployment (redeploy at the modal_app.py pins) or, with evidence, the page and the canary in one PR."
+          } > "$body"
+          num=$(gh issue list --label drift-check --state open --json number -q '.[0].number')
+          if [ -n "$num" ]; then
+            gh issue comment "$num" --body-file "$body"
+          else
+            gh issue create --title "Hosted models drifted from the numbers the site quotes" \
+              --label drift-check --body-file "$body"
+          fi
+      - name: Note recovery on the open issue
+        if: steps.run.outputs.code == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          num=$(gh issue list --label drift-check --state open --json number -q '.[0].number')
+          if [ -n "$num" ]; then
+            gh issue comment "$num" --body "All canaries pass again (run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}). Close this when you have checked it."
+          fi
+      - name: Fail on drift
+        if: steps.run.outputs.code != '0'
+        run: exit 1
