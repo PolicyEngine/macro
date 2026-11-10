@@ -3,7 +3,7 @@
 \section{Data appendix}
 \label{app:data}
 
-Table~\ref{tab:data} documents every series in the dataset: source, series codes, and the construction applied. The dataset described here is the paper-vintage dataset, covering 1992Q1--2024Q2 (130 quarters, no missing values); the current data pipeline extends the same construction through 2026Q1. The binding start is the FRED Brent series \texttt{POILBREUSDQ}, which begins in 1992Q1. All variables enter the model as $100\cdot\log$ of the level except Bank Rate, which enters as the level in per cent. The full download-and-construction script ships with the repository (\texttt{scripts/download\_data.py}); raw source files are cached so the build is reproducible offline.
+Table~\ref{tab:data} documents every series in the dataset: source, series codes, and the construction applied. The dataset described here is the paper-vintage dataset, covering 1992Q1--2024Q2 (130 quarters, no missing values); the current data pipeline extends the same construction through 2026Q2. The binding start is the FRED Brent series \texttt{POILBREUSDQ}, which begins in 1992Q1. All variables enter the model as $100\cdot\log$ of the level except Bank Rate, which enters as the level in per cent. The full download-and-construction script ships with the repository (\texttt{scripts/download\_data.py}); raw source files are cached so the build is reproducible offline.
 
 \begin{table}[h]
 \centering
@@ -66,7 +66,7 @@ Covid dummies & 6 & One exogenous 0/1 dummy per quarter, 2020Q1--2021Q2. \\
 \section{Sampling and convergence diagnostics}
 \label{app:diagnostics}
 
-Posterior draws are i.i.d.\ (direct sampling from the conjugate NIW posterior; no Markov chain), so the relevant diagnostics concern the identification step: the sign-restriction acceptance rate and the effective sample size of the \citet{arias2018} importance weights. Table~\ref{tab:diagnostics} reports them for every run used in this paper. Acceptance rates of 7--8 per cent are typical for a restriction set of this size (23 sign restrictions across six shocks plus 13 zero restrictions), and are materially raised by the \citet{chan2025} permutation search relative to plain accept/reject. The weighted ESS of roughly 43--48 per cent of accepted draws (47.9 per cent in the production run, 42.6 per cent in the forecast-revision run) indicates moderately variable weights --- informative but not degenerate; no single draw dominates ($\max_i w_i / \sum_i w_i < 2$ per cent in the production run). Weighted and unweighted headline statistics are compared in Section~\ref{sec:validation}. The weights are there to recover the uniform-over-rotations posterior, but on this dataset they do not visibly move the headline shares: the unweighted 3{,}000-draw run gives one-year global FEVD shares of 38.1 (UK GDP) and 42.3 (UK CPI) per cent against the weighted production run's 37.4 and 42.3. The much larger spread of the 600-draw CI configuration (42.0 and 37.6) is Monte-Carlo noise from 51 accepted draws, not a weighting effect.
+Posterior draws are i.i.d.\ (direct sampling from the conjugate NIW posterior; no Markov chain), so the relevant diagnostics concern the identification step: the sign-restriction acceptance rate and the effective sample size of the \citet{arias2018} importance weights. Table~\ref{tab:diagnostics} reports them for every run used in this paper. Acceptance rates of 7--8 per cent are typical for a restriction set of this size (23 sign restrictions across six shocks plus 13 zero restrictions), and are materially raised by the \citet{chan2025} permutation search relative to plain accept/reject. The weighted ESS of roughly 43--48 per cent of accepted draws (47.9 per cent in the production run, 42.6 per cent in the forecast-revision run) indicates moderately variable weights --- informative but not degenerate; no single draw dominates ($\max_i w_i / \sum_i w_i < 2$ per cent in the production run). Weighted and unweighted headline statistics are compared in Section~\ref{sec:validation}. The weights are there to recover the uniform-over-rotations posterior, but on this dataset they do not visibly move the headline shares: the unweighted 3{,}000-draw run gives one-year global FEVD shares of 38.1 (UK GDP) and 42.3 (UK CPI) per cent against the weighted production run's 38.7 and 41.5. The much larger spread of the 600-draw CI configuration (40.1 and 40.1) is Monte-Carlo noise from 51 accepted draws, not a weighting effect.
 
 \begin{table}[h]
 \centering
@@ -77,7 +77,7 @@ Posterior draws are i.i.d.\ (direct sampling from the conjugate NIW posterior; n
 \toprule
 Run & Posterior draws & Accepted & Acceptance & Weights & ESS \\
 \midrule
-Production replication & 10{,}000 & 744 & 7.4\% & yes & 356.1 \\
+Production replication & 10{,}000 & 765 & 7.6\% & yes & 368.0 \\
 Forecast revision (2024Q2 edge) & 6{,}000 & 487 & 8.1\% & yes & 207.5 \\
 Paper figures, estimation sample & 3{,}000 & 241 & 8.0\% & no & --- \\
 Paper figures, 2024Q2 edge & 3{,}000 & 217 & 7.2\% & no & --- \\
