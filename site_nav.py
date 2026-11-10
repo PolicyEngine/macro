@@ -473,7 +473,10 @@ def all_html() -> list[Path]:
     return sorted(
         path
         for path in ROOT.rglob("*.html")
-        if not any(part.startswith(".") for part in path.relative_to(ROOT).parts)
+        if not any(
+            part.startswith(".") or part == "node_modules"
+            for part in path.relative_to(ROOT).parts
+        )
         and path.relative_to(ROOT).parts[0] not in SKIP_ROOTS
     )
 

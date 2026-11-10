@@ -5483,12 +5483,217 @@ a .model-id, a:hover .model-id { text-decoration: none; display: inline-block; }
   .kv.kv-text dt { padding-bottom: 0; border-bottom: 0; }
   .kv.kv-text dd { padding-top: 2px; }
 }
+/* === r5:ui-models === (placed here, not at the end, so it merges cleanly beside the r5:ui-home and r5:ui-data sections) */
+/* Model methodology pages (all seven): one column, not the two-sided
+   StepPanel. Each step's formal elements are one or two equations, too
+   little to fill a sticky column, so the diagrams were squeezed beside a
+   mostly empty panel. Now the diagram spans the card and the step's
+   .meth-inline card sits beside its paragraph on wide screens (stacked
+   below 1000px). Departure from DESIGN.md §4.9 for Methodology tabs. */
+@media (min-width: 900px) {
+  .meth-pair .step-diagram svg { width: 100%; max-width: 720px !important; height: auto; }
+}
+/* Round 2 (QA: methodology among the worst-looking pages): read like model
+   documentation. Each step is one column — the plain sentence, then the
+   equation card, then the diagram, then "About this step" — and the page
+   opens with a step map and ends with a notation table. Equations and
+   labels align left in one grid in every card (they alternated left and
+   centred before). */
+.meth-pair .meth-step > p:first-of-type { max-width: 72ch; }
+.meth-pair :is(.meth-inline, .meth-step > .kv, .meth-display) {
+  margin: var(--s-3) 0 var(--s-4);
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--primary);
+  border-radius: 8px;
+  background: var(--surface-card);
+  box-shadow: none;
+}
+.meth-pair .meth-inline { padding: 2px 0 6px; }
+.meth-pair .meth-inline > :not(.meth-panel-head) { margin-left: 16px; margin-right: 16px; }
+.meth-pair .meth-inline > :last-child { margin-bottom: 6px; }
+.meth-pair .meth-inline .meth-sec-title { margin-top: 12px; }
+.meth-pair .meth-inline .meth-eq {
+  display: grid;
+  grid-template-columns: minmax(0, 190px) minmax(0, 1fr);
+  column-gap: var(--s-4);
+  align-items: baseline;
+  margin: 0 16px;
+  padding: 9px 0;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  background: none;
+  overflow: visible;
+}
+.meth-pair .meth-inline .meth-eq:last-child, .meth-pair .meth-inline .meth-eq:has(+ .meth-sec-title) { border-bottom: 0; }
+.meth-pair .meth-inline .meth-eq-label { margin: 0; font-family: var(--body); letter-spacing: 0; color: var(--text-muted); font-size: var(--fs-body-sm); }
+.meth-pair .meth-inline .meth-eq-body,
+.meth-pair .meth-inline .meth-eq-body:has(> mjx-container, > .MathJax, > math) { text-align: left; overflow-x: auto; overflow-y: hidden; }
+.meth-pair .meth-step > .kv { padding: 0 16px; grid-template-columns: minmax(0, 190px) minmax(0, 1fr); column-gap: var(--s-4); }
+.meth-pair .meth-step > .kv dt { color: var(--text-muted); font-weight: 500; }
+.meth-pair .meth-step > .kv dd { text-align: left; padding-left: 0; font-weight: 400; color: var(--text-strong); overflow-x: auto; overflow-y: hidden; }
+.meth-pair .meth-step > .kv-title { margin-bottom: 0; }
+.meth-pair .meth-step > .kv-title + .kv, .meth-pair .meth-step > .kv-title + .meth-display { margin-top: 6px; }
+.meth-pair .meth-display { padding: 10px 16px; overflow-x: auto; overflow-y: hidden; }
+.meth-pair .meth-display mjx-container[display="true"] { text-align: left !important; margin: 0 !important; }
+.meth-pair .meth-step > .step-diagram { margin: var(--s-3) 0 var(--s-4); }
+/* step map: one row of linked steps (two rows of four for eight) */
+.meth-map { margin: var(--s-4) 0 var(--s-6); }
+.meth-map-cap { margin: 0 0 var(--s-3); color: var(--text-muted); font-size: var(--fs-body-sm); }
+.meth-map-list { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); column-gap: 26px; row-gap: 12px; }
+.meth-map-list:has(> li:nth-child(7)) { grid-auto-flow: row; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.meth-map-list li { position: relative; min-width: 0; }
+.meth-map-list a {
+  display: flex; flex-direction: column; gap: 8px; height: 100%; box-sizing: border-box;
+  padding: 12px 14px; border: 1px solid var(--hairline-strong); border-radius: 10px;
+  background: var(--surface-card); color: var(--text-strong); text-decoration: none;
+  font-size: var(--fs-body-sm); font-weight: 600; line-height: 1.35;
+}
+.meth-map-list a:hover { border-color: var(--brand); background: var(--surface-tint); }
+.meth-map-num { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; background: var(--surface-tint); color: var(--tab-teal); font-size: var(--fs-small); font-weight: 600; }
+.meth-map-list li:not(:last-child)::after {
+  content: ""; position: absolute; top: 50%; right: -20px; width: 14px; height: 2px; background: var(--primary);
+  clip-path: none;
+}
+.meth-map-list li:not(:last-child)::before {
+  content: ""; position: absolute; top: calc(50% - 4px); right: -21px; border: 5px solid transparent; border-left: 6px solid var(--primary); border-right: 0;
+}
+.meth-map-list:has(> li:nth-child(7)) li:nth-child(4)::after,
+.meth-map-list:has(> li:nth-child(7)) li:nth-child(4)::before { display: none; }
+@media (max-width: 900px) {
+  /* reflow: one column, arrows point down */
+  .meth-map-list, .meth-map-list:has(> li:nth-child(7)) { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); row-gap: 18px; }
+  .meth-map-list a { flex-direction: row; align-items: center; padding: 9px 12px; }
+  .meth-map-list li:not(:last-child)::after { top: auto; bottom: -14px; right: auto; left: 23px; width: 2px; height: 8px; }
+  .meth-map-list li:not(:last-child)::before { top: auto; bottom: -18px; right: auto; left: 19px; border: 5px solid transparent; border-top: 6px solid var(--primary); border-bottom: 0; }
+  .meth-map-list:has(> li:nth-child(7)) li:nth-child(4)::after,
+  .meth-map-list:has(> li:nth-child(7)) li:nth-child(4)::before { display: block; }
+}
+/* notation table: symbol, meaning, step it first appears in */
+.meth-notation { margin: var(--s-5) 0 0; padding-top: var(--s-5); border-top: 1px solid var(--hairline); }
+.meth-notation h3 { margin: 0 0 var(--s-3); }
+.meth-notation-table { width: 100%; border-collapse: collapse; font-size: var(--fs-body-sm); }
+.meth-notation-table th, .meth-notation-table td { padding: 6px 12px 6px 0; border-bottom: 1px solid var(--hairline); text-align: left; vertical-align: baseline; }
+.meth-notation-table thead th { color: var(--text-faint); font-size: var(--fs-small); font-weight: 500; }
+.meth-notation-table tbody th { width: 220px; font-weight: 400; color: var(--text-strong); white-space: nowrap; }
+.meth-notation-table td:last-child { width: 3.5em; text-align: right; padding-right: 0; font-variant-numeric: tabular-nums; }
+.meth-notation-table td:nth-child(2) { color: var(--text-body); }
+@media (max-width: 600px) {
+  .meth-pair .meth-inline .meth-eq, .meth-pair .meth-step > .kv { grid-template-columns: minmax(0, 1fr); }
+  .meth-pair .meth-inline .meth-eq-label { margin-bottom: 2px; font-size: var(--fs-small); }
+  .meth-pair .meth-step > .kv > div > dt { padding-bottom: 0; border-bottom: 0; font-size: var(--fs-small); }
+  .meth-pair .meth-step > .kv > div > dd { padding-top: 2px; }
+  .meth-notation-table tbody th { white-space: normal; width: 38%; }
+  /* step diagrams fit the column instead of scrolling inside the figure;
+     tapping still opens the full-size copy */
+  .meth-pair .step-diagram { overflow: visible; cursor: zoom-in; justify-content: center; }
+  .meth-pair .step-diagram svg { width: 100% !important; max-width: 100% !important; flex: 1 1 auto; }
+  .meth-pair .step-diagram { flex-direction: column; align-items: stretch; }
+  .meth-pair .step-diagram .expand-hint { position: static; opacity: 1; margin-top: 4px; text-align: right; }
+  .diagram-modal-body { overflow-x: auto; }
+  .diagram-modal-body svg { width: 580px; max-width: none; }
+}
+/* svar win-rate: eight count columns on a 0-8 scale. Stretched to the full
+   card (~800px) and a 340px floor, the columns read as slabs and the
+   ceiling line floats far above them; keep it at a column-chart shape. */
+@container (min-width: 640px) {
+  .vc-fig[data-chart="svar-winrate"] .vc-plot { max-width: 620px; }
+  .vc-fig[data-chart="svar-winrate"] .vchart { min-height: 300px; }
+}
+/* long display equations in a step card scroll inside it on a phone */
+.meth-inline .meth-eq-body { overflow-x: auto; overflow-y: hidden; }
+/* Round 3: step cards are padded on every page (rows inset 18px from the
+   card edge, the caption is the card's own header in sentence case, not a
+   lower-case mono tag floating on a rule). */
+.meth-pair .meth-inline { padding: 0 0 4px; }
+.meth-pair .meth-inline > :not(.meth-panel-head) { margin-left: 18px; margin-right: 18px; }
+.meth-pair .meth-inline .meth-eq { margin-left: 18px; margin-right: 18px; }
+.meth-pair .meth-step > .kv { padding: 4px 18px; }
+.meth-pair .meth-display { padding: 12px 18px; }
+.meth-pair .meth-inline .meth-sec-title {
+  display: block; margin: 0 0 2px; padding: 11px 18px 9px;
+  border-bottom: 1px solid var(--hairline); border-radius: 7px 7px 0 0;
+  background: var(--surface-tint);
+  font-family: var(--body); font-size: var(--fs-small); font-weight: 600; letter-spacing: 0;
+  color: var(--text-strong);
+}
+.meth-pair .meth-inline > .meth-sec-title { margin-left: 0; margin-right: 0; }
+.meth-pair .meth-inline .meth-eq ~ .meth-sec-title { margin-top: 10px; border-top: 1px solid var(--hairline); border-radius: 0; }
+.meth-pair .meth-inline .meth-sec-title::after { content: none; }
+.meth-pair .meth-inline .meth-sec-title + .meth-eq { padding-top: 9px; }
+/* Long equations: one line on wide screens, the same math broken over
+   lines on a phone (MathJax 3 has no automatic line breaking). */
+.eq-n { display: none; }
+@media (max-width: 600px) {
+  .eq-w { display: none; }
+  .eq-n { display: inline; }
+  .meth-display .eq-n { display: block; }
+}
+/* Diagrams on a phone: the 580px SVG would scale its labels to ~6px, so
+   stepper.js lays each one out as stacked boxes (labels at 12-14px); the
+   SVG stays for wide screens, print and the full-size view. */
+.diagram-phone { display: none; }
+@media (max-width: 600px) {
+  .meth-pair .step-diagram.has-phone > svg { display: none; }
+  .meth-pair .step-diagram.has-phone .diagram-phone { display: block; }
+}
+.diagram-phone { margin: 0; padding: 0; text-align: center; }
+.dp-title { margin: 0 0 10px; font-size: var(--fs-small); font-weight: 600; color: var(--text-muted); }
+.dp-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; align-items: start; }
+.dp-row.dp-flow { display: block; }
+.dp-row.dp-flow > .dp-box { max-width: 300px; margin: 0 auto; }
+.dp-box { padding: 9px 10px; border: 1.5px solid var(--hairline); border-radius: 9px; background: var(--surface-card); font-size: 12px; line-height: 1.35; color: var(--text-muted); }
+.dp-box b { display: block; margin-bottom: 2px; font-size: 13px; font-weight: 600; color: var(--text-strong); }
+.dp-box.dp-out { border-color: var(--primary); }
+.dp-box.dp-out b { color: var(--tab-teal); }
+.dp-box.dp-pri { border-color: var(--primary); background: var(--primary); color: #fff; }
+.dp-box.dp-pri b { color: #fff; }
+.dp-arrow { display: block; height: 18px; margin: 2px auto; width: 2px; background: var(--primary); position: relative; }
+.dp-arrow::after { content: ""; position: absolute; left: -4px; bottom: -2px; border: 5px solid transparent; border-top: 6px solid var(--primary); border-bottom: 0; }
+.dp-note { margin: 6px 0; font-size: 12px; line-height: 1.4; color: var(--text-muted); }
+/* Five diagrams are charts or matrices, not box flows (OBR add-factors,
+   HANK Jacobian, OG-UK generations, DEFINE matrix and closure): each carries
+   a second, phone-sized SVG drawn on a 310-unit canvas (labels 11-13px at
+   375px) with the same labels, values and proportions. */
+.step-diagram > svg.phone-alt { display: none; }
+@media (max-width: 600px) {
+  .meth-pair .step-diagram.has-phone-alt > svg:not(.phone-alt) { display: none; }
+  .meth-pair .step-diagram.has-phone-alt > svg.phone-alt { display: block; width: 100%; max-width: 400px !important; height: auto; margin: 0 auto; }
+}
+/* Notation: one expander at the end of each methodology page. */
+.meth-notation .meth-notation-x { margin: 0; }
+.meth-notation:has(> .meth-notation-x) { border-top: 0; padding-top: var(--s-3); }
+.meth-notation-n { margin-left: 6px; color: var(--text-faint); font-weight: 400; }
 /* one-level tables: the tinted mono label column goes (diagnosis 7) */
 .band :is(.cmp-compare, .fc-vs-cards) table :is(thead th:first-child, tbody th[scope="row"]) { background: none; }
 .band :is(.cmp-compare, .fc-vs-cards) table tbody th[scope="row"] { font-family: var(--body); font-weight: 600; color: var(--text-strong); }
 
 /* Router pills: the id sits at the pill's own size, after the name. */
 .qa summary strong .model-id { font-size: inherit; margin-left: 4px; }
+
+/* r5 fresh-eyes: a file path in a figure caption is a source note, not code to copy: caption type, faint, wraps */
+figcaption code { font-family: inherit; font-size: inherit; background: none; border: 0; padding: 0; color: var(--text-faint); overflow-wrap: anywhere; }
+
+/* r5 phone length (svar, obr validation): verdict and limits lead; each evidence step folds
+   behind a summary that states its result. Open, the step reads as before. */
+.meth-step.meth-fold { padding: 0; }
+.meth-step.meth-fold::before { display: none; }
+details.step-fold { margin: 0; }
+details.step-fold > summary { align-items: flex-start; gap: var(--s-3); padding: var(--s-3) 0; color: var(--text-strong); }
+details.step-fold > summary::after { margin-top: 14px; flex: 0 0 auto; }
+details.step-fold > summary .meth-step-num { margin-top: 2px; }
+.step-fold-text { display: block; min-width: 0; }
+.step-fold-text h3 { margin: 0; font-size: var(--fs-h3); line-height: 1.3; }
+details.step-fold > summary:hover h3 { color: var(--tab-teal); }
+.step-fold-result { display: block; margin-top: 4px; color: var(--text-body); font-size: var(--fs-body-sm); font-weight: 400; line-height: 1.45; }
+details.step-fold > :not(summary) { padding-left: 48px; padding-bottom: 0; color: inherit; font-size: inherit; }
+details.step-fold[open] { padding-bottom: var(--s-5); }
+details.dim-fold > summary { font-weight: 400; line-height: 1.45; padding: var(--s-2) 0; }
+/* a long summary must not squeeze the chevron into a tick shape */
+details.dim-fold > summary::after { flex: 0 0 auto; }
+@media (max-width: 600px) {
+  details.step-fold > :not(summary) { padding-left: 0; }
+}
 
 /* === r5:ui-home === */
 /* sub-tab icons for in-page anchor rows (/models, /connect): each tab gets an

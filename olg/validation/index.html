@@ -79,7 +79,7 @@
   <section class="band band-wide" id="trust">
     <div class="band-head" data-icon="shield">
       <h2>No ground truth. Calibration targets instead</h2>
-      <p class="section-intro">Calibrated, not outcome-validated: an imposed target cannot disagree.</p>
+      <p class="section-intro">Calibrated; no outcome benchmark: an imposed target cannot disagree.</p>
     </div>
     <div class="stat-row">
       <div class="stat stat-neutral">
@@ -138,7 +138,7 @@
                 <caption>OG-UK calibration targets against official UK aggregates</caption>
                 <thead><tr><th scope="col">Quantity</th><th scope="col">Official UK value</th><th scope="col">Source</th><th scope="col">Model treatment</th><th scope="col">Deviation</th></tr></thead>
                 <tbody>
-                  <tr><th scope="row">Government debt-to-GDP</th><td>94.9% (June 2026)</td><td>ONS &middot; HF6X, vintage 2026-07-26</td><td class="vc-warn">imposed via closure target</td><td>+0.1pp vs latest ONS (target 95.0%)</td></tr>
+                  <tr><th scope="row">Government debt-to-GDP</th><td>94.9% (June 2026)</td><td>ONS &middot; HF6X, vintage 2026-07-26</td><td class="vc-warn">imposed via <a class="gloss-link" href="/glossary#closure">closure</a> target</td><td>+0.1pp vs latest ONS (target 95.0%)</td></tr>
                   <tr><th scope="row">Household saving ratio</th><td>8.9% (2026Q1, down from 9.6%)</td><td>ONS quarterly sector accounts</td><td class="vc-warn">not targeted &mdash; &beta; = 0.965 fixed, not estimated</td><td>no model-produced value to compare</td></tr>
                   <tr><th scope="row">Potential growth</th><td>≈1.1% / yr</td><td>OBR EFO</td><td class="vc-warn">imposed, g<sub>y</sub> = 0.011</td><td>≈0</td></tr>
                   <tr><th scope="row">Depreciation / capital</th><td>≈6&ndash;7% (CFC / net stock)</td><td>ONS capital stocks bulletin</td><td class="vc-warn">imposed, δ = 0.065</td><td>within range</td></tr>
@@ -300,7 +300,7 @@
               <div class="table-scroll mo-tablecard cmp-compare"><table>
                 <thead><tr><th scope="col"></th><th scope="col">OG-UK</th><th scope="col">OBR UK OLG</th></tr></thead>
                 <tbody>
-                  <tr><th scope="row">Approach</th><td><strong>Parameterised capital mobility</strong> (ζ<sub>K</sub> for capital, ζ<sub>D</sub> for debt)</td><td><strong>Binary switch</strong>: fully open (r = 5% exogenous) or fully closed (r endogenous)</td></tr>
+                  <tr><th scope="row">Approach</th><td><strong>Parameterised capital mobility</strong> (ζ<sub>K</sub> for capital, ζ<sub>D</sub> for debt)</td><td><strong>Binary switch</strong>: fully open (r = 5% <a class="gloss-link" href="/glossary#exogenous">exogenous</a>) or fully closed (r endogenous)</td></tr>
                   <tr><th scope="row">Foreign capital</th><td>Continuous degree of openness</td><td>Either all or nothing</td></tr>
                   <tr><th scope="row">Net foreign assets</th><td>Derived from capital mobility parameters</td><td>NFA residually determined in open economy</td></tr>
                   <tr><th scope="row">Interest rate</th><td>Endogenous (influenced by openness parameters)</td><td>Either fixed at 5% (open) or MPK − δ (closed)</td></tr>
@@ -313,7 +313,7 @@
               <div class="vs-grid">
                 <div class="vs-card">
                   <div class="vs-card-head">OG-UK — Time Path Iteration</div>
-                  <div class="vs-line"><span class="icon">&rarr;</span><span>Households' Euler equations solved directly</span></div>
+                  <div class="vs-line"><span class="icon">&rarr;</span><span>Households' <a class="gloss-link" href="/glossary#euler-equation">Euler equations</a> solved directly</span></div>
                   <div class="vs-line"><span class="icon">&rarr;</span><span>Full year-by-year transition path; continuous state space, expectations over the whole path</span></div>
                   <div class="vs-line"><span class="icon">&rarr;</span><span>~17-minute solve</span></div>
                 </div>
@@ -347,7 +347,7 @@
               </p>
         </details>
         <p class="kv-title">The main differences</p>
-        <dl class="kv"><div><dt>OBR model</dt><dd>Working Paper No.&nbsp;22, April 2025</dd></div><div><dt>Dynamics</dt><dd>full paths vs steady state only</dd></div><div><dt>Production</dt><dd>multi-sector CES vs single-sector Cobb-Douglas</dd></div><div><dt>Households</dt><dd>permanent types vs stochastic earnings</dd></div><div><dt>Solve</dt><dd>~17 minutes vs under two minutes</dd></div></dl>
+        <dl class="kv"><div><dt>OBR model</dt><dd>Working Paper No.&nbsp;22, April 2025</dd></div><div><dt>Dynamics</dt><dd>full paths vs steady state only</dd></div><div><dt>Production</dt><dd>multi-sector CES vs single-sector Cobb-Douglas</dd></div><div><dt>Households</dt><dd>permanent types vs stochastic earnings</dd></div><div><dt>Solve</dt><dd>many minutes (not timed) vs under two minutes</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <p>
@@ -375,6 +375,10 @@
         <caption>Known limits of the overlapping-generations model</caption>
         <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
         <tbody>
+          <tr id="debt-share">
+            <th scope="row"><strong>The worked example&rsquo;s debt change depends on its denominator and baseline</strong></th>
+            <td>The <a href="/olg#showcase">worked example</a> divides reform-run aggregates by <em>baseline</em> GDP, which gives debt of 94.42% against 94.50% in 2030 (&minus;0.08pp). Divided by the reform run&rsquo;s own GDP, debt is 94.55%, so the change is +0.05pp: debt is higher under the tax rise, not lower. Draft <a href="https://github.com/PolicyEngine/og-model-dashboard/pull/4">og-model-dashboard #4</a> switches the dashboard to the reform-GDP denominator. Separately, the baseline debt path behind both figures is not the OBR&rsquo;s fiscal-target measure: its outturns are ONS HF6X, public sector net debt <em>including</em> the Bank of England, averaged across fiscal years in the wrong direction, and its forecast years match no OBR table (<a href="https://github.com/PolicyEngine/og-model-dashboard/issues/6">og-model-dashboard #6</a>). The calibration target in <a href="#targets">step 1</a> uses the same HF6X series. Draft <a href="https://github.com/PolicyEngine/og-model-dashboard/pull/7">#7</a> rebuilds the baseline as net debt excluding the Bank of England. The example table is unchanged here until those drafts merge and the run is regenerated.</td>
+          </tr>
           <tr>
             <th scope="row"><strong>Smoothed tax functions, not statutory bands</strong></th>
             <td>A single Gouveia&ndash;Strauss function fitted to PolicyEngine-UK output folds income tax and National Insurance together. Reforms changing <em>average</em> liability flow through cleanly; reforms whose mechanism is the kink itself (a new threshold, an allowance taper change) register only as far as the smoothed function shifts.</td>
