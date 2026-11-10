@@ -2,6 +2,7 @@
 
 import json
 
+import numpy as np
 import pytest
 
 from policyengine_macro import core
@@ -453,3 +454,46 @@ def test_svar_summary_serves_the_paper_comparable_fevd(monkeypatch):
         row["Variable"] == "UK GDP" and row["Group"] == "global" for row in groups
     )
     assert "renormalises" in rep["fevd_note"]
+
+
+def test_svar_forecast_reports_simple_yoy_rates_not_log_differences(monkeypatch):
+    """Issue #208. For a known level path, the adapter's YoY must be the
+    published simple rate 100*(P_t/P_{t-4}-1), not 100*log(P_t/P_{t-4})."""
+    import types
+
+    import pandas as pd
+
+    growth = 0.025  # 2.5% a quarter: ~10.4% a year, where the gap is ~0.5pp
+    hist = 100.0 * np.log(np.exp(np.arange(8) * growth))[:, None] * np.ones(2)
+
+    def sample_forecast(draw, y_full, horizons, rng):
+        last = y_full[-1]
+        return last + 100.0 * growth * np.arange(1, horizons + 1)[:, None]
+
+    def aggregate(paths, weights):
+        med = np.median(np.asarray(paths), axis=0)
+        return {k: med for k in ("median", "lo68", "hi68", "lo90", "hi90")}
+
+    forecast = types.SimpleNamespace(
+        sample_forecast=sample_forecast,
+        yoy=lambda x: np.asarray(x)[4:] - np.asarray(x)[:-4],
+    )  # an older boe_var without log_to_simple_pct: the fallback runs
+    analysis = types.SimpleNamespace(aggregate=aggregate)
+    est = {
+        "modules": (analysis, forecast), "y_full": hist,
+        "pairs": [(object(), None)], "weights": np.array([1.0]),
+        "df_full": pd.DataFrame(
+            hist, columns=[core._COL_GDP, core._COL_CPI],
+            index=pd.period_range("2024Q2", periods=8, freq="Q"),
+        ),
+        "n_accepted": 1, "ess": 1.0, "warnings": [],
+        "estimation_sample": "fake",
+    }
+    monkeypatch.setattr(core, "_estimate", lambda draws: est)
+    monkeypatch.setattr(core, "_FORECAST_CACHE", {})
+    res = core.svar_forecast(horizons=4, draws=100)
+    simple = 100.0 * (np.exp(4 * growth) - 1.0)  # 10.517
+    for row in res["cpi_inflation_yoy"] + res["gdp_growth_yoy"]:
+        assert row["median"] == pytest.approx(simple, abs=1e-3)
+        assert row["lo90"] == pytest.approx(simple, abs=1e-3)
+    assert "simple" in res["units"]

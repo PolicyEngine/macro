@@ -184,7 +184,7 @@ class USHankShockAdapter(ModelAdapter):
                 "endogenous labor tax",
             ],
             caveats=[
-                "validated replication scoring stylized shocks, not detailed "
+                "partial replication scoring stylized shocks, not detailed "
                 "tax reforms; NOT a forecaster",
                 "responses are first-order (linear) and scale exactly with "
                 "the shock size; no state dependence",
