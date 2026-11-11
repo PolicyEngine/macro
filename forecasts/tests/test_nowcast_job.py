@@ -15,6 +15,7 @@ the polling contract is pinned without a network or a Modal container.
 import ast
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from forecasts import nowcast
 
@@ -143,6 +144,102 @@ class AllowListTests(unittest.TestCase):
         body = server[server.index("def forecast_uk("):]
         body = body[: body.index("@mcp.tool()")]
         self.assertIn(f"core.{nowcast.JOB_ADAPTER}(", body)
+
+
+try:
+    import anyio  # noqa: F401 - the workflow installs it with the MCP client
+except ImportError:  # the plain-python CI gates run without it
+    anyio = None
+
+
+@unittest.skipIf(anyio is None, "needs anyio, as the round step installs it")
+class RealCallPathTests(unittest.TestCase):
+    """fetch_forecast's own call function, with the MCP client replaced by
+    fakes that hold a live anyio task group the way the real ones do.
+
+    The real streamablehttp_client and ClientSession both run task groups,
+    and anything raised inside a task group leaves it as an ExceptionGroup.
+    A tool error raised in there would reach run_as_job as a "transport
+    error" and be retried, and the redeploy message would never print.
+    """
+
+    def fake_mcp(self, replies):
+        import contextlib
+        import sys
+        import types
+
+        import anyio
+
+        @contextlib.asynccontextmanager
+        async def background_group():
+            async with anyio.create_task_group() as tg:
+                tg.start_soon(anyio.sleep_forever)
+                try:
+                    yield
+                finally:
+                    tg.cancel_scope.cancel()
+
+        @contextlib.asynccontextmanager
+        async def streamablehttp_client(url, timeout):
+            async with background_group():
+                yield (None, None, None)
+
+        class Result:
+            def __init__(self, is_error, text):
+                self.isError = is_error
+                self.content = [types.SimpleNamespace(text=text)]
+
+        class ClientSession:
+            def __init__(self, read, write):
+                self._group = background_group()
+
+            async def __aenter__(self):
+                await self._group.__aenter__()
+                return self
+
+            async def __aexit__(self, *exc):
+                return await self._group.__aexit__(*exc)
+
+            async def initialize(self):
+                return None
+
+            async def call_tool(self, tool, arguments):
+                return Result(*replies[tool])
+
+        mcp = types.ModuleType("mcp")
+        mcp.ClientSession = ClientSession
+        client = types.ModuleType("mcp.client")
+        transport = types.ModuleType("mcp.client.streamable_http")
+        transport.streamablehttp_client = streamablehttp_client
+        modules = {"mcp": mcp, "mcp.client": client,
+                   "mcp.client.streamable_http": transport}
+        return mock.patch.dict(sys.modules, modules)
+
+    def test_a_refused_job_tool_says_redeploy_through_real_task_groups(self):
+        refused = (True, "'svar_forecast' cannot be run as a job. Allowed: score_reform")
+        with self.fake_mcp({"start_job": refused}):
+            with self.assertRaises(SystemExit) as ctx:
+                nowcast.fetch_forecast(6000, 13)
+        self.assertIn("Redeploy", str(ctx.exception))
+
+    def test_a_failed_job_is_fatal_through_real_task_groups(self):
+        replies = {
+            "start_job": (False, '{"job_id": "fc-test", "status": "running"}'),
+            "get_job_result": (True, "LinAlgError: singular matrix"),
+        }
+        with self.fake_mcp(replies), mock.patch.object(nowcast.time, "sleep"):
+            with self.assertRaises(SystemExit) as ctx:
+                nowcast.fetch_forecast(6000, 13)
+        self.assertIn("hosted job fc-test failed", str(ctx.exception))
+        self.assertIn("LinAlgError", str(ctx.exception))
+
+    def test_a_finished_job_returns_its_result_through_real_task_groups(self):
+        replies = {
+            "start_job": (False, '{"job_id": "fc-test", "status": "running"}'),
+            "get_job_result": (False, '{"status": "done", "result": {"ok": 1}}'),
+        }
+        with self.fake_mcp(replies):
+            self.assertEqual(nowcast.fetch_forecast(6000, 13), {"ok": 1})
 
 
 if __name__ == "__main__":

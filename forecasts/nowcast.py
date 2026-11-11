@@ -216,8 +216,8 @@ def edge_gate(hosted_edge: str | None, archived: set[str]) -> tuple[bool, str]:
 # -----------------------------
 # Modal abandons any HTTP request to a web endpoint after 150 seconds and
 # answers HTTP 303. A 6000-draw forecast_uk takes ~5.5 minutes on a cold
-# container, so calling the tool directly could never return: the MCP client
-# refuses the 303 ("Redirect to .../mcp not followed", run 42963724470), and
+# container, so a direct call now fails: the MCP client refuses the 303
+# ("Redirect to .../mcp not followed", run 42963724470), and
 # following it would not help, because a 303 turns the POST into a GET and
 # Modal's result URL rejects that (integration/src/policyengine_macro/jobs.py).
 # So the round is generated the way score_reform is on the hosted server:
@@ -310,12 +310,16 @@ def fetch_forecast(draws: int, horizons: int) -> dict:
             async with ClientSession(read, write) as session:
                 await session.initialize()
                 result = await session.call_tool(tool, arguments)
-                text = "\n".join(
-                    c.text for c in result.content if getattr(c, "text", None)
-                )
-                if result.isError:
-                    raise HostedToolError(f"{tool}: {text[:1000]}")
-                return json.loads(text)
+        # Judge the reply only after both contexts have closed. Both run anyio
+        # task groups, which wrap anything raised inside them in an
+        # ExceptionGroup, so a HostedToolError raised in there would reach
+        # run_as_job looking like a transport error and be retried.
+        text = "\n".join(
+            c.text for c in result.content if getattr(c, "text", None)
+        )
+        if result.isError:
+            raise HostedToolError(f"{tool}: {text[:1000]}")
+        return json.loads(text)
 
     def call(tool: str, arguments: dict) -> dict:
         return anyio.run(one_call, tool, arguments)
