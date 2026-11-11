@@ -24,6 +24,7 @@ URL = os.environ.get(
     "https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp",
 )
 
+from remote_jobs import run_via_job
 from tool_surface import GOLDEN_TOOL_COUNT, GOLDEN_TOOLS, assert_surface
 
 EXPECTED_TOOLS = set(GOLDEN_TOOLS)
@@ -220,8 +221,11 @@ async def test_model_summary_returns_fevd():
 
 @pytest.mark.anyio
 async def test_obr_shock_cgg():
-    out = await _call(
-        "obr_shock", {"var": "CGG", "shock": 1250, "periods": 4}
+    # Through a job: direct, a cold obr_shock passes Modal's 150s ceiling and
+    # the client gets a 303 it cannot follow (failing on most runs since October).
+    out = await run_via_job(
+        _call, "obr_shock", {"var": "CGG", "shock": 1250, "periods": 4},
+        deadline=300,
     )
     assert len(out["results"]) >= 4
     # £1.25bn/quarter of extra spending should raise GDP by ~£1.25bn/quarter
@@ -294,17 +298,16 @@ async def test_score_reform_obr_refuses_corp_tax_actionably():
 async def test_score_reform_microsim_scoreresult():
     """score_reform(model='microsim') on the hosted server: a basic-rate
     rise must raise revenue, and the common ScoreResult block (#10) must be
-    present and coherent (units, basis, distributional)."""
-    import asyncio
+    present and coherent (units, basis, distributional).
 
-    out = await asyncio.wait_for(
-        _call(
-            "score_reform",
-            {"country": "uk",
-             "reform": {"gov.hmrc.income_tax.rates.uk[0].rate": 0.21},
-             "model": "microsim"},
-        ),
-        timeout=300,
+    Through a job: since the 30 Oct 2026 deploy a direct call usually passes
+    Modal's 150s ceiling and the client gets a 303 it cannot follow."""
+    out = await run_via_job(
+        _call, "score_reform",
+        {"country": "uk",
+         "reform": {"gov.hmrc.income_tax.rates.uk[0].rate": 0.21},
+         "model": "microsim"},
+        deadline=300,
     )
     assert out["budgetary_impact_bn"] > 0, out["budgetary_impact_bn"]
     score = out["score"]
