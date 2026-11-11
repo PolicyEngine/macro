@@ -34,7 +34,8 @@ def start_job(
     default five-year window takes longer than that, so calling it directly
     on the hosted server fails every time. obr_shock, frbus_shock, hank_shock,
     dynamic_reform_impact and population_reform_impact are also close enough
-    to the ceiling to fail on a cold server.
+    to the ceiling to fail on a cold server. A forecast_uk with thousands of
+    draws runs as tool="svar_forecast", with the same arguments.
 
     Returns a job id straight away. Poll it with get_job_result. The job
     itself has a 30-minute budget, so the 150-second ceiling stops applying.

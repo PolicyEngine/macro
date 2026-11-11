@@ -44,8 +44,9 @@ import argparse
 import json
 import re
 import subprocess
-import urllib.request
 import sys
+import time
+import urllib.request
 from datetime import date, datetime, timezone
 from pathlib import Path
 
@@ -211,25 +212,115 @@ def edge_gate(hosted_edge: str | None, archived: set[str]) -> tuple[bool, str]:
 
 # ------------------------------------------------------------- generate
 
+# Why the forecast runs as a job
+# -----------------------------
+# Modal abandons any HTTP request to a web endpoint after 150 seconds and
+# answers HTTP 303. A 6000-draw forecast_uk takes ~5.5 minutes on a cold
+# container, so calling the tool directly could never return: the MCP client
+# refuses the 303 ("Redirect to .../mcp not followed", run 42963724470), and
+# following it would not help, because a 303 turns the POST into a GET and
+# Modal's result URL rejects that (integration/src/policyengine_macro/jobs.py).
+# So the round is generated the way score_reform is on the hosted server:
+# start_job hands the call to a worker with a 30-minute budget, and short
+# get_job_result polls collect it, each well inside the ceiling.
+JOB_ADAPTER = "svar_forecast"  # the core adapter behind the forecast_uk tool
+POLL_WAIT_SECONDS = 30  # jobs.DEFAULT_WAIT_SECONDS: short polls are the reliable ones
+# Under the workflow step's 20-minute timeout, so a stuck job fails here with
+# its job id rather than being killed by the runner.
+JOB_DEADLINE_SECONDS = 17 * 60
+MAX_POLL_ERRORS = 10  # consecutive transport failures before giving up
+CALL_TIMEOUT_SECONDS = 120  # per HTTP request; a 30s poll plus a cold start
+
+
+class HostedToolError(RuntimeError):
+    """The server answered the tool call with an error (isError), as opposed
+    to the connection failing."""
+
+
+def run_as_job(call, arguments: dict, *, deadline: float = JOB_DEADLINE_SECONDS,
+               clock=time.monotonic, sleep=time.sleep) -> dict:
+    """Start ``JOB_ADAPTER`` as a hosted job and poll it to completion.
+
+    ``call(tool, arguments) -> dict`` makes one MCP tool call. It raises
+    HostedToolError when the server reports a tool error and anything else
+    when the transport fails. A failed poll is not a failed job (the job runs
+    on whatever happens to the connection watching it), so transport errors
+    on a poll are retried; a tool error is not.
+    """
+    try:
+        job = call("start_job", {"tool": JOB_ADAPTER, "arguments": arguments})
+    except HostedToolError as exc:
+        if "cannot be run as a job" in str(exc):
+            raise SystemExit(
+                f"the hosted server does not run {JOB_ADAPTER} as a job yet: "
+                "it was deployed before svar_forecast joined jobs.JOB_TOOLS. "
+                "Redeploy it (Actions -> Deploy MCP server to Modal, or any "
+                "merge touching integration/) and run this again.\n"
+                f"  server said: {exc}"
+            ) from None
+        raise SystemExit(f"start_job({JOB_ADAPTER}) failed: {exc}") from None
+    job_id = job["job_id"]
+    print(f"started hosted job {job_id} ({JOB_ADAPTER}, {arguments})", flush=True)
+
+    stop = clock() + deadline
+    errors = 0
+    while clock() < stop:
+        try:
+            out = call("get_job_result",
+                       {"job_id": job_id, "wait_seconds": POLL_WAIT_SECONDS})
+        except HostedToolError as exc:
+            raise SystemExit(f"hosted job {job_id} failed: {exc}") from None
+        except Exception as exc:  # noqa: BLE001 - transport, not the job
+            errors += 1
+            if errors > MAX_POLL_ERRORS:
+                raise SystemExit(
+                    f"hosted job {job_id}: {errors} polls in a row failed; "
+                    f"last error {type(exc).__name__}: {exc}"
+                ) from None
+            print(f"warning: poll failed ({type(exc).__name__}: {exc}); "
+                  "retrying -- the job keeps running", flush=True)
+            sleep(5)  # no tight reconnect loop against Modal
+            continue
+        errors = 0
+        status = out.get("status")
+        if status == "done":
+            return out["result"]
+        if status != "running":
+            raise SystemExit(f"hosted job {job_id}: unexpected reply {out}")
+        print(f"  {job_id}: still running", flush=True)
+    raise SystemExit(
+        f"hosted job {job_id} not done after {deadline:.0f}s; it may still "
+        "finish on Modal, but nothing was archived"
+    )
+
+
 def fetch_forecast(draws: int, horizons: int) -> dict:
-    """Call forecast_uk on the deployed server. Imported lazily so --due needs
-    no MCP client installed."""
+    """Run forecast_uk on the deployed server as a job. Imported lazily so
+    --due needs no MCP client installed."""
     import anyio
     from mcp import ClientSession
     from mcp.client.streamable_http import streamablehttp_client
 
-    async def call() -> dict:
-        async with streamablehttp_client(MCP_URL, timeout=600) as (read, write, _):
+    async def one_call(tool: str, arguments: dict) -> dict:
+        # A fresh session per call: the server is stateless, and a session
+        # held open across a long job is exactly what the ceiling breaks.
+        async with streamablehttp_client(
+            MCP_URL, timeout=CALL_TIMEOUT_SECONDS
+        ) as (read, write, _):
             async with ClientSession(read, write) as session:
                 await session.initialize()
-                result = await session.call_tool(
-                    "forecast_uk", {"horizons": horizons, "draws": draws}
+                result = await session.call_tool(tool, arguments)
+                text = "\n".join(
+                    c.text for c in result.content if getattr(c, "text", None)
                 )
                 if result.isError:
-                    raise SystemExit(f"forecast_uk failed: {result.content}")
-                return json.loads(result.content[0].text)
+                    raise HostedToolError(f"{tool}: {text[:1000]}")
+                return json.loads(text)
 
-    return anyio.run(call)
+    def call(tool: str, arguments: dict) -> dict:
+        return anyio.run(one_call, tool, arguments)
+
+    return run_as_job(call, {"horizons": horizons, "draws": draws})
 
 
 def refuse_on_warnings(response: dict) -> None:

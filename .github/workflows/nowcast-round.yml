@@ -103,8 +103,9 @@ jobs:
         if: steps.due.outputs.due == 'true' && steps.edge.outputs.ok == 'true'
         run: pip install --upgrade pip && pip install "mcp[cli]>=1.9,<2" anyio
 
-      # A cold Modal container plus 6000 draws runs several minutes; the
-      # measured time for this call is ~5.5 minutes.
+      # A cold Modal container plus 6000 draws runs several minutes (~5.5
+      # measured), past Modal's 150s HTTP ceiling, so nowcast.py runs it as a
+      # hosted job (start_job + get_job_result polls) and gives up after 17.
       - name: Generate and archive the round
         if: steps.due.outputs.due == 'true' && steps.edge.outputs.ok == 'true'
         timeout-minutes: 20
