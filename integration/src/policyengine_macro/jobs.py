@@ -51,6 +51,10 @@ JOB_TOOLS: tuple[str, ...] = (
     "frbus_shock",
     "hank_shock",
     "pe_population_impact",
+    # forecast_uk's adapter. A 6000-draw forecast (what forecasts/nowcast.py
+    # archives a round with) takes ~5.5 minutes on a cold container, so the
+    # scheduled round can only reach it as a job.
+    "svar_forecast",
 )
 
 # How long a get_job_result call blocks.
