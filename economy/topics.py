@@ -298,6 +298,56 @@ def year_earlier(series: dict, period: str) -> dict | None:
     )
 
 
+def previous_period(period: str) -> str:
+    """The month or quarter before ``period`` (2026-01 -> 2025-12)."""
+    year = int(period[:4])
+    if "Q" in period:
+        quarter = int(period[-1])
+        return f"{year - 1}Q4" if quarter == 1 else f"{year}Q{quarter - 1}"
+    month = int(period[5:])
+    return f"{year - 1}-12" if month == 1 else f"{year}-{month - 1:02d}"
+
+
+def latest_year_on_year(series: dict) -> tuple[dict, dict, list[dict]]:
+    """(now, before, unmatched) for the newest year-on-year comparison the
+    store can actually make.
+
+    ``now`` is the most recent observation with a counterpart a year earlier,
+    ``before`` is that counterpart, and ``unmatched`` lists any observations
+    newer than ``now`` that have none. It is usually empty. It is not for
+    us_cpi from 2026-10: FRED publishes no CPIAUCSL value for 2025-10 (the
+    row is blank in fredgraph.csv), so the October 2026 index has nothing to
+    be compared with and no rate is derived for it — the pages say so rather
+    than compare it with another month or interpolate one.
+    """
+    unmatched: list[dict] = []
+    for row in reversed(series["observations"]):
+        before = year_earlier(series, row["period"])
+        if before is not None:
+            return row, before, unmatched[::-1]
+        unmatched.append(row)
+    raise RuntimeError(
+        f"{series['series']}: no observation in the store has a counterpart a "
+        "year earlier, so no year-on-year rate can be derived"
+    )
+
+
+def no_year_earlier(series: dict, unmatched: list[dict]) -> str:
+    """Why the newest stored months carry no year-on-year rate ('' if none)."""
+    if not unmatched:
+        return ""
+    periods = [row["period"] for row in unmatched]
+    missing = [f"{int(p[:4]) - 1}{p[4:]}" for p in periods]
+    many = len(periods) > 1
+    return (
+        f" The newest stored {'months' if many else 'month'}, "
+        f"{esc(', '.join(periods))}, {'have' if many else 'has'} no "
+        "year-on-year rate here: the store holds no "
+        f"{esc(', '.join(missing))} {'observations' if many else 'observation'} "
+        f"to compare {'them' if many else 'it'} with, and none is interpolated."
+    )
+
+
 def yoy(series: dict, periods: int) -> list[dict]:
     """Year-on-year percent change computed from the stored levels.
 
@@ -594,19 +644,15 @@ def stat_card(series: dict, kind: str | None = None) -> str:
             series,
             now["period"],
         )
-    before = year_earlier(series, now["period"])
-    if before is None:
-        raise RuntimeError(
-            f"{series['series']}: no {now['period']} counterpart a year "
-            "earlier in the store, so a year-on-year card cannot be derived"
-        )
+    now, before, unmatched = latest_year_on_year(series)
     change = 100 * (now["value"] / before["value"] - 1)
     return _card(
         esc(f"{label(series)}, year on year"),
         f"{change:+.1f}%",
         f'derived here, not stored: {esc(stored(now["value"]))} in '
         f'{esc(now["period"])} against {esc(stored(before["value"]))} in '
-        f'{esc(before["period"])} &middot; {esc(series["units"])}',
+        f'{esc(before["period"])} &middot; {esc(series["units"])}'
+        + (f".{no_year_earlier(series, unmatched)}" if unmatched else ""),
         series,
         now["period"],
     )
@@ -654,6 +700,7 @@ def movement(name: str) -> str:
     against the month it names rather than the month that happens to sit there.
     """
     kind, periods, digits, window = MOVEMENT[name]
+    against = None
     series = load(name)
     observations = series["observations"]
     now = observations[-1]
@@ -671,6 +718,16 @@ def movement(name: str) -> str:
         gap = rates[-1]["value"] - rates[-1 - periods]["value"]
         change = f"{gap:+.{digits}f}pp on the year-on-year rate"
         before = rates[-1 - periods]
+        # yoy() skips a period with no counterpart a year earlier, so the
+        # rate one row back is not always the prior period: us_cpi has no
+        # rate for 2026-10, so from 2026-11 the row before is 2026-09. Name
+        # the comparison that was made instead of calling it "the prior month".
+        expected = previous_period(rates[-1]["period"])
+        if periods == 1 and before["period"] != expected:
+            against = (
+                f"{esc(before['period'])}, the latest earlier rate "
+                f"({esc(expected)} has none)"
+            )
     elif kind == "pp":
         change = f"{now['value'] - before['value']:+.{digits}f}pp"
     elif kind == "pct":
@@ -683,10 +740,9 @@ def movement(name: str) -> str:
         change = f"{sign}£{abs(gap):,.{digits}f}bn on the amount borrowed"
     if change.startswith("-"):
         change = "\u2212" + change[1:]
-    return (
-        f"{esc(label(series))} {change} against {window} "
-        f"({esc(before['period'])})"
-    )
+    if against is None:
+        against = f"{window} ({esc(before['period'])})"
+    return f"{esc(label(series))} {change} against {against}"
 
 
 def movement_note(names: tuple[str, ...]) -> str:
@@ -2194,8 +2250,7 @@ def us_growth_hook() -> str:
 
 def us_growth_note() -> str:
     gdp = load("us_real_gdp")
-    now = gdp["observations"][-1]
-    year_ago = year_earlier(gdp, now["period"])
+    now, year_ago, unmatched = latest_year_on_year(gdp)
     change = 100 * (now["value"] / year_ago["value"] - 1)
     return (
         "GDPC1 is a level, not a growth rate: FRED stores it as "
@@ -2205,6 +2260,7 @@ def us_growth_note() -> str:
         f"derived from the stored levels — {stored(now['value'])} in "
         f"{esc(now['period'])} against {stored(year_ago['value'])} in "
         f"{esc(year_ago['period'])} is {change:.1f}%."
+        + no_year_earlier(gdp, unmatched)
     )
 
 
@@ -2273,7 +2329,9 @@ def us_inflation_facts() -> dict:
 
 def us_inflation_hook() -> str:
     facts = us_inflation_facts()
-    now = latest(facts["cpi"])
+    # The index the rate is derived from: the rate's own month, which is not
+    # the newest stored month when that one has no year-earlier counterpart.
+    now, _, _ = latest_year_on_year(facts["cpi"])
     return (
         f"CPI is {facts['now']['value']:.1f}% up on the year in "
         f"{facts['now']['period']}, derived here from a stored index of "
@@ -2285,19 +2343,19 @@ def us_inflation_hook() -> str:
 
 def us_inflation_note() -> str:
     cpi = load("us_cpi")
-    now = cpi["observations"][-1]
-    year_ago = year_earlier(cpi, now["period"])
+    now, year_ago, unmatched = latest_year_on_year(cpi)
     change = 100 * (now["value"] / year_ago["value"] - 1)
+    newest = latest(cpi)
     months = len(cpi["observations"])
-    span = 12 * (int(now["period"][:4]) - int(cpi["first_period"][:4])) + (
-        int(now["period"][5:]) - int(cpi["first_period"][5:])
+    span = 12 * (int(newest["period"][:4]) - int(cpi["first_period"][:4])) + (
+        int(newest["period"][5:]) - int(cpi["first_period"][5:])
     ) + 1
     missing = span - months
     hole = (
         f" {'One' if missing == 1 else missing} month"
         f"{'s are' if missing != 1 else ' is'} missing from "
         f"the stored index between {esc(cpi['first_period'])} and "
-        f"{esc(now['period'])}, which is why the comparison above is matched "
+        f"{esc(newest['period'])}, which is why the comparison above is matched "
         "on the period it names rather than counted back twelve rows."
         if missing > 0
         else ""
@@ -2308,7 +2366,7 @@ def us_inflation_note() -> str:
         "them as rates; the figure above is derived from the stored index "
         f"instead — {stored(now['value'])} in {esc(now['period'])} against "
         f"{stored(year_ago['value'])} in {esc(year_ago['period'])} is "
-        f"{change:.1f}%.{hole}"
+        f"{change:.1f}%.{hole}{no_year_earlier(cpi, unmatched)}"
     )
 
 
