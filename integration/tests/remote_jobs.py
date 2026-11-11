@@ -19,6 +19,8 @@ from __future__ import annotations
 import asyncio
 import time
 
+import json
+
 POLL_WAIT_SECONDS = 30  # jobs.DEFAULT_WAIT_SECONDS: short polls are the reliable ones
 POLL_TIMEOUT_SECONDS = 180  # one poll: 30s server-side wait plus a cold start
 MAX_POLL_ERRORS = 5
@@ -63,3 +65,28 @@ async def run_via_job(call, tool: str, arguments: dict, deadline: float,
             return out["result"]
         assert out["status"] == "running", out
     raise AssertionError(f"{tool} job {job_id} did not finish within {deadline:.0f}s: {out}")
+
+
+def mcp_caller(url: str, timeout: float = 300):
+    """An async ``call(tool, arguments)`` for run_via_job, one session per call.
+
+    The reply is judged only after the MCP contexts have closed. Both
+    streamablehttp_client and ClientSession run anyio task groups, which wrap
+    anything raised inside them in an ExceptionGroup; an AssertionError for a
+    tool error raised in there would reach run_via_job looking like a
+    transport error and be retried instead of failing the test.
+    """
+
+    async def call(tool: str, arguments: dict) -> dict:
+        from mcp import ClientSession
+        from mcp.client.streamable_http import streamablehttp_client
+
+        async with streamablehttp_client(url, timeout=timeout) as (read, write, _):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                result = await session.call_tool(tool, arguments)
+        text = "\n".join(c.text for c in result.content if getattr(c, "text", None))
+        assert not result.isError, f"{tool} error: {text[:1000]}"
+        return json.loads(text)
+
+    return call

@@ -10,7 +10,7 @@ import asyncio
 
 import pytest
 
-from remote_jobs import MAX_POLL_ERRORS, run_via_job
+from remote_jobs import MAX_POLL_ERRORS, mcp_caller, run_via_job
 
 RUNNING = {"job_id": "fc-x", "status": "running", "waited_seconds": 30}
 RESULT = {"budgetary_impact_bn": 7.1}
@@ -83,3 +83,77 @@ def test_a_job_still_running_at_the_deadline_fails_with_its_id():
     server = Server([RUNNING] * 50, clock=clock)
     with pytest.raises(AssertionError, match="fc-x did not finish within 90s"):
         run(server, deadline=90, clock=clock)
+
+
+def _fake_mcp(monkeypatch, replies):
+    """Replace the MCP client with fakes that hold a live anyio task group,
+    as the real streamablehttp_client and ClientSession do."""
+    import contextlib
+    import sys
+    import types
+
+    import anyio
+
+    @contextlib.asynccontextmanager
+    async def background_group():
+        async with anyio.create_task_group() as tg:
+            tg.start_soon(anyio.sleep_forever)
+            try:
+                yield
+            finally:
+                tg.cancel_scope.cancel()
+
+    @contextlib.asynccontextmanager
+    async def streamablehttp_client(url, timeout):
+        async with background_group():
+            yield (None, None, None)
+
+    class ClientSession:
+        def __init__(self, read, write):
+            self._group = background_group()
+
+        async def __aenter__(self):
+            await self._group.__aenter__()
+            return self
+
+        async def __aexit__(self, *exc):
+            return await self._group.__aexit__(*exc)
+
+        async def initialize(self):
+            return None
+
+        async def call_tool(self, tool, arguments):
+            is_error, text = replies[tool]
+            return types.SimpleNamespace(
+                isError=is_error, content=[types.SimpleNamespace(text=text)]
+            )
+
+    mcp = types.ModuleType("mcp")
+    mcp.ClientSession = ClientSession
+    transport = types.ModuleType("mcp.client.streamable_http")
+    transport.streamablehttp_client = streamablehttp_client
+    monkeypatch.setitem(sys.modules, "mcp", mcp)
+    monkeypatch.setitem(sys.modules, "mcp.client", types.ModuleType("mcp.client"))
+    monkeypatch.setitem(sys.modules, "mcp.client.streamable_http", transport)
+
+
+def test_a_failed_job_fails_at_once_through_real_task_groups(monkeypatch):
+    """A tool error must surface as the job's failure, not be retried as if
+    the connection had dropped."""
+    _fake_mcp(monkeypatch, {
+        "start_job": (False, '{"job_id": "fc-x", "status": "running"}'),
+        "get_job_result": (True, "ValueError: reform rejected"),
+    })
+    with pytest.raises(AssertionError, match="reform rejected"):
+        asyncio.run(run_via_job(mcp_caller("http://fake"), "obr_shock", {},
+                                deadline=600, sleep=_no_sleep))
+
+
+def test_a_finished_job_returns_its_result_through_real_task_groups(monkeypatch):
+    _fake_mcp(monkeypatch, {
+        "start_job": (False, '{"job_id": "fc-x", "status": "running"}'),
+        "get_job_result": (False, '{"status": "done", "result": {"ok": 1}}'),
+    })
+    out = asyncio.run(run_via_job(mcp_caller("http://fake"), "obr_shock", {},
+                                  deadline=600, sleep=_no_sleep))
+    assert out == {"ok": 1}
