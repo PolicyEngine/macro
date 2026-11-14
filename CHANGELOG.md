@@ -12,7 +12,7 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ### Site redesign stack (#200)
 
-Bullets by PR, in merge order. #226 and #229 wait on the decision in #218; #231 and #232 sit on #206. Drop a PR's bullet here if it has not merged into #200 when #200 merges.
+Bullets by PR, in merge order. Every PR listed here merged with #200 on 10 November 2026.
 
 - **#200: site redesign.** Every page uses the Autumn Budget 2026 layout (header band, title band, sub-tabs, cards with expanders), with `DESIGN.md` as the spec. URLs, numbers and data are unchanged.
 - **#204: question router on `/models` and a new `/glossary`.** Model cards filter by question and country; `/connect` gives copy-paste setup and `/contact` lists self-serve routes. No numbers changed.
@@ -32,6 +32,10 @@ Bullets by PR, in merge order. #226 and #229 wait on the decision in #218; #231 
 
 - **#221: data pipeline.** A scheduled refresh now runs fetch, ingest, score and the CI gates in one driver (`data/refresh.py`) and updates one checked bot PR; the nowcast exits with an error when its calendar is stale instead of doing nothing.
 - **#228: snapshot recovery tool.** `data/recover_orphaned_snapshots.py` recovers the 50 orphaned refresh snapshots with repeat days dropped; the refresh carry step also drops repeated releases. No file under `data/vintages/` is added by this change.
+
+### Hosted tools
+
+- **`hank_shock` and `hank_shock_incidence`: `persistence` is required for `fiscal_spending`.** It used to default to 0.9. The spending multiplier depends on it (impact multiplier 0.175 at 0.8, 0.075 at 0.9), so a call without it now fails with that explanation (decision on us-hank-model #5). Monetary and productivity shocks keep the 0.9 default.
 
 ## [0.2.0] — 2026-08-11
 
