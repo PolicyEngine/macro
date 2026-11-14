@@ -1101,10 +1101,35 @@ def hank_list_shocks() -> list[dict]:
     return [dict(k) for k in HANK_SHOCK_KINDS]
 
 
+HANK_DEFAULT_PERSISTENCE = 0.9
+
+
+def _hank_persistence(kind: str, persistence: float | None) -> float:
+    """Resolve the AR(1) persistence of a HANK shock.
+
+    ``fiscal_spending`` has no default (decision on us-hank-model #5): the
+    impact multiplier is 0.175 at persistence 0.8 and 0.075 at 0.9, and the
+    20-quarter cumulative multiplier is negative at both, so a silent default
+    would pick the answer to "what is the multiplier". The other kinds keep
+    ``HANK_DEFAULT_PERSISTENCE``.
+    """
+    if persistence is None:
+        if kind == "fiscal_spending":
+            raise ValueError(
+                "persistence is required for kind='fiscal_spending': the "
+                "spending multiplier depends on it (impact multiplier 0.175 "
+                "at persistence=0.8, 0.075 at persistence=0.9), so there is "
+                "no default. Pass persistence in [0, 1) and quote it with "
+                "any multiplier."
+            )
+        return HANK_DEFAULT_PERSISTENCE
+    return float(persistence)
+
+
 def hank_shock(
     kind: str,
     size: float,
-    persistence: float = 0.9,
+    persistence: float | None = None,
     horizon: int = HANK_DEFAULT_HORIZON,
     variant: str = "two_asset",
     include_distribution: bool = False,
@@ -1137,7 +1162,7 @@ def hank_shock(
     horizon = int(horizon)
     if not 1 <= horizon <= HANK_T:
         raise ValueError(f"horizon must be between 1 and {HANK_T}, got {horizon}")
-    persistence = float(persistence)
+    persistence = _hank_persistence(kind, persistence)
     if not 0.0 <= persistence < 1.0:
         raise ValueError(
             f"persistence must be in [0, 1) — the shock path is "
@@ -3749,7 +3774,7 @@ def hank_shock_incidence(
     kind: str,
     size: float,
     year: int = 2026,
-    persistence: float = 0.9,
+    persistence: float | None = None,
     horizon: int = HANK_DEFAULT_HORIZON,
     variant: str = "two_asset",
     income_concept: str = "wage_bill",

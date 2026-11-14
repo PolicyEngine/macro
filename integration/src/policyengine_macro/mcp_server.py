@@ -352,7 +352,7 @@ def frbus_summary() -> dict:
 def hank_shock(
     kind: str,
     size: float,
-    persistence: float = 0.9,
+    persistence: float | None = None,
     horizon: int = 20,
     variant: str = "two_asset",
     include_distribution: bool = False,
@@ -385,7 +385,10 @@ def hank_shock(
             Z = 1, so 0.01 = 1% of TFP). The r and pi responses are quarterly
             rates. See hank_summary for the catalogue.
         persistence: AR(1) decay of the shock path size * persistence**t
-            (default 0.9; must be in [0, 1)).
+            (must be in [0, 1)). REQUIRED for fiscal_spending, which has no
+            default because the spending multiplier depends on it (impact
+            multiplier 0.175 at 0.8, 0.075 at 0.9); quote it with any
+            multiplier. Defaults to 0.9 for monetary and productivity.
         horizon: Quarters reported (default 20 = 5 years; max 300).
         variant: 'two_asset' (default — the paper model) or 'one_asset' (fast
             no-capital variant: monetary/productivity only, no investment
@@ -489,7 +492,7 @@ def hank_shock_incidence(
     kind: str,
     size: float,
     year: int = 2026,
-    persistence: float = 0.9,
+    persistence: float | None = None,
     horizon: int = 20,
     variant: str = "two_asset",
     income_concept: str = "wage_bill",
@@ -511,6 +514,7 @@ def hank_shock_incidence(
 
     Args:
         kind / size / persistence / horizon / variant: As in hank_shock
+            (persistence is required for fiscal_spending)
             (units differ per kind; see hank_summary). horizon must cover
             the incidence year's quarters.
         year: Calendar year averaged into the overlay and scored by the
