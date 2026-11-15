@@ -49,7 +49,7 @@
     <div class="hero-inner">
       <p class="eyebrow reveal" style="--d:0">tax-benefit microsimulation · UK · US · hosted</p>
       <h1 class="reveal page-title" style="--d:1;">PolicyEngine microsimulation</h1>
-      <p class="lede reveal" style="--d:2">Calculate taxes and benefits.</p>
+      <p class="lede reveal" style="--d:2">Computes what a reform costs and who gains or loses, for one household or the whole population.</p>
     </div>
   </section>
 
@@ -62,79 +62,36 @@
       <a class="model-tabs-link" href="/papers/pe-microsim">Paper</a>
     </div>
   </nav>
-  <section id="card" class="band band-wide">
-    <div class="band-head" data-icon="list">
-      <h2>PolicyEngine microsim at a glance</h2>
-    </div>
-    <p class="callout verdict-callout">
-      <strong>Verdict: exact for implemented rules (household arithmetic); population estimates add survey error.</strong>
-      Checked against implemented legislation rule by rule; costings are static and carry no interval.
-      <a href="/pe/validation">How far to trust it &rarr;</a>
-    </p>
-    <!-- Fields follow integration/src/policyengine_macro/capabilities.py MODELS["pe-microsim"]; one field order on all seven Overviews (DESIGN.md §4.13). -->
-    <dl class="model-card">
-      <div><dt>Answers</dt><dd>What a reform costs and who gains or loses, for one household or the whole population</dd></div>
-      <div><dt>Inputs</dt><dd>A household you describe, or survey microdata; a parameter reform</dd></div>
-      <div><dt>Outputs</dt><dd>Taxes, benefits, net income, revenue, distribution</dd></div>
-      <div><dt>Horizon</dt><dd>Single policy year</dd></div>
-      <div><dt>Data</dt><dd>UK: enhanced FRS (<code>enhanced_frs_2023_24</code>) &middot; US: CPS &middot; recorded per run</dd></div>
-      <div><dt>Uncertainty</dt><dd>None for household arithmetic; survey and calibration error for population estimates, no interval computed</dd></div>
-      <div><dt>Access</dt><dd>Hosted MCP, CLI, Python</dd></div>
-      <div><dt>Runtime</dt><dd>Sub-second per household, minutes per population run</dd></div>
-      <div class="model-card-wide"><dt>Status</dt><dd>Exact for implemented rules (household arithmetic); population estimates add survey error</dd></div>
-      <div class="model-card-wide"><dt>Cannot answer</dt><dd>GDP, inflation, interest rates or macro feedback: costings are static (<a href="/pe/validation#caveats">limits</a>)</dd></div>
-    </dl>
+  <section id="verdict" class="band band-result ov-verdict">
+    <p class="ov-verdict-line"><a class="chip chip-brand" href="/glossary#exact-for-rules">Exact for rules</a>
+      <span>Exact for implemented rules, checked rule by rule; population estimates add survey error, and costings are static with no interval.</span>
+      <a class="ov-verdict-link" href="/pe/validation">How far to trust it <span aria-hidden="true">&rarr;</span></a></p>
   </section>
 
-  <section id="overview" class="band band-wide">
-    <div class="band-head" data-icon="layers">
-      <h2>The suite&rsquo;s core: statute as code, for one household or a country</h2>
-      <p class="section-intro">Compare current law with a reform for a UK or US household, or estimate population-wide revenue and distributional effects.</p>
-    </div>
-
-    <div class="scrolly-wrap single">
-      <div class="scrolly-steps">
-
-      <div class="meth-step" id="what" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>What it is</h3></div>
-        <p class="mo-lead">Statute as code, at household resolution.</p>
-        <details class="more">
-                <summary>The four packages underneath</summary>
-                <p>
-                  <code>policyengine-core</code> (the simulation framework, forked from
-                  OpenFisca), <code>policyengine-uk</code> and
-                  <code>policyengine-us</code> (the statutory rules per country), and
-                  <code>policyengine</code> — the analyst-facing package covered here,
-                  adding dataset management, reforms, structured outputs and
-                  version-pinned release bundles for reproducibility. See also the
-                  <a href="/pe/code">code</a>, the
-                  <a href="/pe/methodology">methodology</a>, and
-                  <a href="/pe/validation">how far to trust it</a>.
-                </p>
-              </details>
-        <p class="kv-title">The rules engine</p>
-        <dl class="kv kv-text"><div><dt>Countries</dt><dd>UK and US</dd></div><div><dt>UK rules</dt><dd>income tax, NI, Universal Credit, Child Benefit, Pension Credit</dd></div><div><dt>US rules</dt><dd>income and payroll tax, SNAP, TANF, EITC, CTC, SSI, Social Security</dd></div><div><dt>Reform</dt><dd>a flat dict, parameter path &rarr; value</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p>
-                The package encodes UK and US tax-and-benefit rules as parameterised
-                statute and computes every variable for a household you describe —
-                UK: income tax, National Insurance, Universal Credit, Child Benefit,
-                Pension Credit; US: federal and state income tax, payroll tax, SNAP,
-                TANF, EITC, CTC, SSI and Social Security. A reform is a flat dict of
-                parameter path &rarr; new value, identical at household and population
-                level.
-              </p>
-          <p>
-                Its costings are static; the macro members of the suite exist to
-                supply what it cannot see.
-              </p>
-        </details>
+  <section id="fit" class="band ov-fit" aria-label="What it is good for and not for">
+    <div class="fit-pair">
+      <div class="fit-card fit-yes">
+        <h2>Good for</h2>
+        <ul>
+          <li><strong>Taxes, benefits and net income</strong> for one household</li>
+          <li><strong>Static costings and decile incidence</strong>, UK and US</li>
+          <li><strong>The costing every macro model starts from</strong></li>
+        </ul>
       </div>
+      <div class="fit-card fit-no">
+        <h2>Not for</h2>
+        <ul>
+          <li>Behavioural or macro feedback: <a href="/obr">OBR emulator</a>, <a href="/olg">OG-UK</a></li>
+          <li>Rules not yet implemented in the model</li>
+          <li>Intervals on population estimates: none computed (<a href="/pe/validation#caveats">limits</a>)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
-      <div class="meth-step" id="answers" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it can answer</h3></div>
-        <p class="mo-lead">What a reform costs and who pays, for one household or the population.</p>
+  <section id="answers" class="band ov-example">
+    <div class="band-head" data-icon="calculator"><h2>What it returns</h2>
+      <p class="section-intro">1p on the UK basic rate, costed on the enhanced FRS.</p></div>
         <figure class="vfig">
         <div class="vc-fig vc-two-rows" data-chart="pe-costing">
 <p class="vc-unit">Static revenue, £bn a year</p>
@@ -174,57 +131,50 @@
 </div><!-- /vc-fig -->
                 <figcaption>&pound;bn/yr. The microsimulation&rsquo;s static costing of a 1pp basic-rate rise, against HMRC&rsquo;s <em>Direct effects of illustrative tax changes</em> (June 2025 vintage). Both figures are scored runs on the hosted server (policyengine 6.11.1; <a href="https://github.com/PolicyEngine/macro/blob/main/papers/pe-microsim/figures/basic_rate_costing.json">run record</a>). Why this is a benchmark, not a validation: <a href="/pe/validation#hmrc">validation</a>.</figcaption>
               </figure>
-        <p class="chooser-note"><a href="/models#score">Score a reform end to end &rarr;</a></p>
-        <p class="kv-title">1p on the UK basic rate</p>
-        <dl class="kv"><div><dt>Direct yield</dt><dd>&pound;6.55bn in 2026</dd></div><div><dt>Incidence</dt><dd>decile by decile</dd></div><div><dt>Macro feedback</dt><dd>added by the <a href="/obr#answers">OBR emulator</a></dd></div><div><dt>Against HMRC</dt><dd>on the validation tab</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p><strong>Worked example.</strong> 1p on the basic rate: &pound;6.55bn direct yield in 2026 with decile-by-decile incidence, before the <a href="/obr#answers">macro feedback</a> is added — the full chain on <a href="/models#score">score a reform</a>.</p>
-          <p>Household and population reform impacts from <a href="/connect">any connected client</a> or at <a href="https://policyengine.org">policyengine.org</a>. How the costing compares with HMRC&rsquo;s, and why that is a benchmark rather than a validation, is on the <a href="/pe/validation#hmrc">validation tab</a>.</p>
-        </details>
-      </div>
-
-      <div class="meth-step" id="pe-bridge" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>With the macro models</h3></div>
-        <p class="mo-lead">Every bridge in the suite starts or ends here.</p>
-        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
-        <p class="kv-title">Where each model joins</p>
-        <dl class="kv"><div><dt>Out to</dt><dd>OBR emulator: the static costing</dd></div><div><dt>Both ways</dt><dd>OG-UK: statute in, wages back</dd></div><div><dt>In from</dt><dd>BoE SVAR, FRB/US, US HANK, DEFINE-UK</dd></div><div><dt>As</dt><dd>incidence on households, experimental</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p>This <em>is</em> the microsimulation: the static-costing input to the <a href="/obr">OBR emulator</a>, the incidence engine for the <a href="/svar">SVAR</a>, <a href="/frb-us">FRB/US</a>, and <a href="/us-hank">HANK</a> bridges, and both ends of the <a href="/olg">OLG</a> two-way loop.</p>
-          <p><code>score_reform</code> accepts <code>microsim</code>, <code>obr</code>, <code>og</code> and <code>og+microsim</code>; the other members connect the opposite way, as incidence.</p>
-        </details>
-      </div>
-
-      </div>
-    </div>
+    <p class="scen-note">The direct yield of 1p on the basic rate, with decile-by-decile incidence, before the macro feedback the <a href="/obr#answers">OBR emulator</a> adds; how it compares with HMRC is on <a href="/pe/validation#hmrc">Validation</a>. The full chain: <a href="/models#score">score a reform</a>.</p>
   </section>
 
-  <section class="band where-next" id="where-next">
-    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
-    <div class="entry-grid">
-      <a class="entry-card" href="/pe/methodology">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg></span>
-        <h3>Methodology</h3>
-        <p>Rules, microdata and reforms</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
-      <a class="entry-card" href="/models#compare">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg></span>
-        <h3>Compare the models</h3>
-        <p>All seven side by side</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
-      <a class="entry-card" href="/connect">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg></span>
-        <h3>Run it hosted</h3>
-        <p>MCP, CLI or Python, no account needed</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
+  <section id="pe-bridge" class="band ov-flow">
+    <div class="band-head" data-icon="layers"><h2>With the macro models</h2>
+      <p class="section-intro">Every bridge in the suite starts or ends here.</p></div>
+    <div class="pipeline">
+      <span class="pl-node"><strong>Reform</strong></span>
+      <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+      <span class="pl-node"><strong>PolicyEngine microsimulation</strong><span class="mono">static costing</span></span>
+      <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+      <a class="pl-node" href="/obr"><strong>OBR emulator &middot; OG-UK</strong><span class="mono">macro feedback</span></a>
+      <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+      <span class="pl-node pl-node-out"><strong>Dynamic score</strong></span>
     </div>
+    <p class="ov-flow-note"><code>score_reform</code> accepts microsim, obr, og and og+microsim. The BoE SVAR, FRB/US, US HANK and DEFINE-UK connect the other way, as incidence on households (<a href="/models#compose">every join in the suite</a>).</p>
+    <p class="callout callout-warn"><strong>Costings are static:</strong> behaviour and macro feedback are not included, and population figures carry survey and calibration error with no interval.</p>
   </section>
 
+  <section id="card" class="band ov-spec">
+    <details class="expander">
+      <summary>Model card <span class="expander-meta">inputs, outputs, horizon, data, access</span></summary>
+    <dl class="model-card">
+      <div><dt>Answers</dt><dd>What a reform costs and who gains or loses, for one household or the whole population</dd></div>
+      <div><dt>Inputs</dt><dd>A household you describe, or survey microdata; a parameter reform</dd></div>
+      <div><dt>Outputs</dt><dd>Taxes, benefits, net income, revenue, distribution</dd></div>
+      <div><dt>Horizon</dt><dd>Single policy year</dd></div>
+      <div><dt>Data</dt><dd>UK: enhanced FRS (<code>enhanced_frs_2023_24</code>) &middot; US: CPS &middot; recorded per run</dd></div>
+      <div><dt>Uncertainty</dt><dd>None for household arithmetic; survey and calibration error for population estimates, no interval computed</dd></div>
+      <div><dt>Access</dt><dd>Hosted MCP, CLI, Python</dd></div>
+      <div><dt>Runtime</dt><dd>Sub-second per household, minutes per population run</dd></div>
+      <div class="model-card-wide"><dt>Status</dt><dd>Exact for implemented rules (household arithmetic); population estimates add survey error</dd></div>
+      <div class="model-card-wide"><dt>Cannot answer</dt><dd>GDP, inflation, interest rates or macro feedback: costings are static (<a href="/pe/validation#caveats">limits</a>)</dd></div>
+    </dl>
+    </details>
+  </section>
+
+  <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
+    <div class="chip-row">
+      <a class="chip chip-brand" href="/pe/methodology">Methodology</a>
+      <a class="chip" href="/models#compare">Compare the models</a>
+      <a class="chip chip-brand" href="/connect">Run it hosted</a>
+    </div>
+  </nav>
 </main>
 
 <footer class="foot foot-bar">
@@ -239,6 +189,5 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
-<script src="/stepper.js" defer></script>
 </body>
 </html>

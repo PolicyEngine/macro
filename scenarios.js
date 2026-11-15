@@ -5,7 +5,7 @@
   function init(list) {
     var tabs = Array.prototype.slice.call(list.querySelectorAll('[role="tab"]'));
     function panel(tab) { return document.getElementById(tab.getAttribute('aria-controls')); }
-    function select(tab, focus) {
+    function select(tab, focus, initial) {
       tabs.forEach(function (t) {
         var on = t === tab;
         t.setAttribute('aria-selected', on ? 'true' : 'false');
@@ -14,6 +14,8 @@
         if (p) p.hidden = !on;
       });
       if (focus) tab.focus();
+      // Charts drawn at load inside a hidden panel redraw on resize.
+      if (!initial) window.dispatchEvent(new Event('resize'));
     }
     tabs.forEach(function (tab, i) {
       tab.addEventListener('click', function () { select(tab, false); });
@@ -28,7 +30,7 @@
     });
     var current = tabs.filter(function (t) { return t.getAttribute('aria-selected') === 'true'; })[0] || tabs[0];
     list.classList.add('is-live');
-    select(current, false);
+    select(current, false, true);
   }
   function run() { Array.prototype.forEach.call(document.querySelectorAll('.scen-switch[role="tablist"]'), init); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();

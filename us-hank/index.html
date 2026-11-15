@@ -49,7 +49,7 @@
     <div class="hero-inner">
       <p class="eyebrow reveal" style="--d:0">two-asset HANK · US · hosted · quarterly IRFs</p>
       <h1 class="reveal page-title" style="--d:1;">US HANK</h1>
-      <p class="lede reveal" style="--d:2">See who responds to a US shock, not just how much.</p>
+      <p class="lede reveal" style="--d:2">Shows how a stylized US shock moves through a household wealth distribution, and which households drive the response.</p>
     </div>
   </section>
 
@@ -62,16 +62,61 @@
       <a class="model-tabs-link" href="/reports/us-hank-open-source">HANK survey</a>
     </div>
   </nav>
-  <section id="card" class="band band-wide">
-    <div class="band-head" data-icon="list">
-      <h2>US HANK at a glance</h2>
+  <section id="verdict" class="band band-result ov-verdict">
+    <p class="ov-verdict-line"><a class="chip chip-brand" href="/glossary#partial-replication">Partial replication</a>
+      <span>Six of seven solved parameters match the paper, the seventh after a wage-markup conversion. Impulse-response magnitudes are not validated, and the headline targets are inputs, not results.</span>
+      <a class="ov-verdict-link" href="/us-hank/validation">How far to trust it <span aria-hidden="true">&rarr;</span></a></p>
+  </section>
+
+  <section id="fit" class="band ov-fit" aria-label="What it is good for and not for">
+    <div class="fit-pair">
+      <div class="fit-card fit-yes">
+        <h2>Good for</h2>
+        <ul>
+          <li><strong>How a shock transmits</strong>: monetary, fiscal spending, productivity</li>
+          <li><strong>MPCs by liquid wealth</strong> and the hand-to-mouth share</li>
+          <li><strong>Wage and labour paths</strong> for the incidence bridge (experimental)</li>
+        </ul>
+      </div>
+      <div class="fit-card fit-no">
+        <h2>Not for</h2>
+        <ul>
+          <li>Scoring statute: <code>score_reform</code> refuses it</li>
+          <li>Magnitudes to quote: impulse responses are not validated (<a href="/us-hank/validation#caveats">limits</a>)</li>
+          <li>US spending behaviour: its MPCs sit below US estimates (<a href="/us-hank/validation#mpc-level">why</a>)</li>
+        </ul>
+      </div>
     </div>
-    <p class="callout verdict-callout">
-      <strong>Verdict: partial replication; six of seven solved parameters of the paper match directly and the seventh, <code>vphi</code>, after a wage-markup convention conversion; IRF magnitudes are not validated; not a forecast-accuracy claim.</strong>
-      The headline targets are inputs, not results, and impulse-response magnitudes are not validated.
-      <a href="/us-hank/validation">How far to trust it &rarr;</a>
-    </p>
-    <!-- Fields follow integration/src/policyengine_macro/capabilities.py MODELS["us-hank"]; one field order on all seven Overviews (DESIGN.md §4.13). -->
+  </section>
+
+  <section id="answers" class="band ov-example">
+    <div class="band-head" data-icon="calculator"><h2>What it returns</h2>
+      <p class="section-intro">Stylized shocks around a calibrated steady state, with the household distribution attached.</p></div>
+    <div class="card-grid ov-mini">
+      <div class="card"><h3>Monetary easing</h3><p>Raises output, consumption, investment and inflation.</p></div>
+      <div class="card"><h3>Tax-financed spending</h3><p>Raises output on impact only: the endogenous labour tax turns the response negative within a year (<a href="/us-hank/validation#spending-sign">why</a>).</p></div>
+      <div class="card"><h3>By household</h3><p>The aggregate consumption response is split across wealth positions in proportion to each group&rsquo;s MPC.</p></div>
+    </div>
+    <p class="scen-note">Run it with <code>hank_shock</code> from any connected client. The by-wealth split is built in, not a solved household response, so its concentration among households with high MPCs and little liquid wealth follows from the method.</p>
+  </section>
+
+  <section id="pe-bridge" class="band ov-flow">
+    <div class="band-head" data-icon="layers"><h2>With the microsimulation</h2>
+      <p class="section-intro">Two distributional cuts of the same shock: the model&rsquo;s and the microsimulation&rsquo;s.</p></div>
+        <div class="pipeline">
+          <span class="pl-node"><strong>US HANK</strong><span class="mono">wage &middot; labor <a class="gloss-link" href="/glossary#irf">IRFs</a></span></span>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">US employment income</span></a>
+          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+          <span class="pl-node pl-node-out"><strong>Who bears it</strong></span>
+        </div>
+    <p class="ov-flow-note"><code>hank_shock_incidence</code> scales US employment income with the model&rsquo;s wage and labour responses; the microsimulation reports the change after taxes, SNAP and the EITC, decile by decile (<a href="/models#compose">every join in the suite</a>).</p>
+    <p class="callout callout-warn"><strong>The distribution is calibrated, not matched to US data:</strong> its hand-to-mouth share is about 54%, against about one third in US estimates. The incidence bridge is experimental.</p>
+  </section>
+
+  <section id="card" class="band ov-spec">
+    <details class="expander">
+      <summary>Model card <span class="expander-meta">inputs, outputs, horizon, data, access</span></summary>
     <dl class="model-card">
       <div><dt>Answers</dt><dd>How a stylized US shock transmits through a household wealth distribution, and which households drive the response</dd></div>
       <div><dt>Inputs</dt><dd>A stylized shock: kind (monetary, fiscal spending, productivity), size, persistence</dd></div>
@@ -85,116 +130,16 @@
       <div class="model-card-wide"><dt>Status</dt><dd>Partial replication of Auclert et al. (2021): six of seven solved parameters match directly and the seventh (vphi) after a wage-markup convention conversion; steady-state targets are inputs; shock signs are tested, magnitudes are not; not a forecaster; distributional outputs are steady-state statistics and an MPC-proportional split of the aggregate</dd></div>
       <div class="model-card-wide"><dt>Cannot answer</dt><dd>Forecasts; detailed tax reforms (the labor tax is <a class="gloss-link" href="/glossary#exogenous">endogenous</a>); PolicyEngine reforms; nonlinear or state-dependent dynamics</dd></div>
     </dl>
+    </details>
   </section>
 
-  <section id="overview" class="band band-wide">
-    <div class="band-head" data-icon="layers">
-      <h2>A heterogeneous-agent model of the US: who moves, not just how much</h2>
-      <p class="section-intro">Run stylized monetary, fiscal-spending, and productivity shocks through a two-asset heterogeneous-agent New Keynesian model — aggregate impulse responses plus distributional output: MPCs by liquid-wealth quartile and the hand-to-mouth share.</p>
+  <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
+    <div class="chip-row">
+      <a class="chip chip-brand" href="/us-hank/methodology">Methodology</a>
+      <a class="chip" href="/models#compare">Compare the models</a>
+      <a class="chip chip-brand" href="/connect">Run it hosted</a>
     </div>
-    <div class="scrolly-wrap single single">
-      <div class="scrolly-steps">
-
-      <div class="meth-step" id="what" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>What it is</h3></div>
-        <p class="mo-lead">The distributional member for the US: who moves, not just how much.</p>
-        <p class="kv-title">The replication</p>
-        <dl class="kv"><div><dt>Source</dt><dd>Auclert, Bard&oacute;czy, Rognlie &amp; Straub, 2021</dd></div><div><dt>Toolkit</dt><dd>the authors&rsquo; <code>sequence-jacobian</code></dd></div><div><dt>Grids</dt><dd>the paper&rsquo;s production sizes</dd></div><div><dt>Households</dt><dd>differ in liquid and illiquid wealth</dd></div><div><dt>Responses</dt><dd>first order, from the GE Jacobian</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p>
-                A replication of the two-asset heterogeneous-agent New Keynesian
-                model of Auclert, Bard&oacute;czy, Rognlie and Straub
-                (<em>Econometrica</em> 2021), built on the authors&rsquo;
-                <code>sequence-jacobian</code> toolkit at the paper&rsquo;s
-                production grids. Households differ in liquid and illiquid wealth,
-                and so in their marginal propensity to consume; that whole
-                distribution carries through the general-equilibrium response.
-              </p>
-          <p>
-                Where <a href="/frb-us">FRB/US</a> answers &ldquo;how much does US
-                output move after a shock&rdquo;, this model answers
-                <strong>who</strong> moves.
-                <a href="/us-hank/methodology">How it is solved &rarr;</a>
-              </p>
-        </details>
-      </div>
-
-      <div class="meth-step" id="answers" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it can answer</h3></div>
-        <p class="mo-lead">Stylized US shocks, with the household distribution attached.</p>
-        <p class="kv-title">Stylized shocks</p>
-        <dl class="kv"><div><dt>Shocks</dt><dd>monetary, fiscal spending, productivity</dd></div><div><dt>Around</dt><dd>a calibrated steady state</dd></div><div><dt>By household</dt><dd>the aggregate split in proportion to MPC</dd></div><div><dt>Tool</dt><dd><code>hank_shock</code></dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p>
-                Its job is the <em>transmission</em> of a stylized aggregate shock
-                through a two-asset household wealth distribution: a monetary easing
-                raising output, consumption, investment and inflation; a tax-financed
-                spending expansion raising output on impact only, because the
-                endogenous labor tax turns the response negative within a year
-                (<a href="/us-hank/validation#spending-sign">why</a>). Its MPCs sit
-                well below US estimates (<a href="/us-hank/validation#mpc-level">the
-                MPC limit</a>). The distribution is calibrated, not matched to
-                US data: its hand-to-mouth share is about 54%, against about one
-                third in US estimates. The by-wealth consumption split allocates the
-                aggregate response in proportion to each group's MPC, so its
-                concentration among <strong>high-MPC, low-liquid-wealth
-                households</strong> is built in, not a solved household response.
-              </p>
-          <p><strong>Worked example.</strong> One monetary shock, two answers: the HANK block splits the aggregate consumption response across wealth positions in proportion to MPC; the microsimulation reports the same earnings change after taxes, SNAP, and the EITC, decile by decile.</p>
-          <p>What it cannot do, in full: the <a href="/us-hank/validation#caveats">known limits</a>.</p>
-          <p>Run <code>hank_shock</code> from <a href="/connect">any connected client</a>.</p>
-        </details>
-      </div>
-
-      <div class="meth-step" id="pe-bridge" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>With the microsimulation</h3></div>
-        <p class="mo-lead">Two distributional cuts of the same shock: the model&rsquo;s and the microsimulation&rsquo;s.</p>
-        <div class="pipeline">
-          <span class="pl-node"><strong>US HANK</strong><span class="mono">wage &middot; labor <a class="gloss-link" href="/glossary#irf">IRFs</a></span></span>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">US employment income</span></a>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <span class="pl-node pl-node-out"><strong>Who bears it</strong></span>
-        </div>
-        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
-        <p class="kv-title">Shock to incidence</p>
-        <dl class="kv"><div><dt>Tool</dt><dd><code>hank_shock_incidence</code></dd></div><div><dt>What moves</dt><dd>pre-tax real wage and labor responses</dd></div><div><dt>Enters</dt><dd>US employment income, scaled</dd></div><div><dt>Status</dt><dd>experimental</dd></div><div><dt>Refused</dt><dd><code>score_reform</code> refuses <code>model="hank"</code></dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p>Shock-to-incidence bridge: <code>hank_shock_incidence</code> scales the US <a href="/pe">microsimulation</a>'s employment income with the model's wage and labor impulse responses — the model's MPC-by-wealth story on one side, statutory tax-and-transfer incidence on the other. Experimental illustration. <code>score_reform</code> refuses <code>model="hank"</code>: three stylized instruments map to no statute.</p>
-        </details>
-      </div>
-
-      </div>
-    </div>
-  </section>
-
-  <section class="band where-next" id="where-next">
-    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
-    <div class="entry-grid">
-      <a class="entry-card" href="/us-hank/methodology">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg></span>
-        <h3>Methodology</h3>
-        <p>The model blocks and the solver</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
-      <a class="entry-card" href="/models#compare">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg></span>
-        <h3>Compare the models</h3>
-        <p>All seven side by side</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
-      <a class="entry-card" href="/connect">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg></span>
-        <h3>Run it hosted</h3>
-        <p>MCP, CLI or Python, no account needed</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
-    </div>
-  </section>
-
+  </nav>
 </main>
 
 <footer class="foot foot-bar">
@@ -209,6 +154,5 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
-<script src="/stepper.js" defer></script>
 </body>
 </html>

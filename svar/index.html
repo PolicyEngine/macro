@@ -49,7 +49,7 @@
     <div class="hero-inner">
       <p class="eyebrow reveal" style="--d:0">Bank of England structural VAR · UK · hosted</p>
       <h1 class="reveal page-title" style="--d:1;">BoE SVAR</h1>
-      <p class="lede reveal" style="--d:2">Explain UK growth and inflation.</p>
+      <p class="lede reveal" style="--d:2">Decomposes UK GDP and inflation into six named shocks, and forecasts both with bands.</p>
     </div>
   </section>
 
@@ -62,43 +62,48 @@
       <a class="model-tabs-link" href="/papers/boe-svar">Paper</a>
     </div>
   </nav>
-  <section id="card" class="band band-wide">
-    <div class="band-head" data-icon="list">
-      <h2>BoE SVAR at a glance</h2>
-    </div>
-    <p class="callout verdict-callout">
-      <strong>Verdict: partial replication; GDP decomposition consistent with the paper, short on CPI; no forecast skill.</strong>
-      Against a drifting random walk no variable shows skill at any horizon once the tests are adjusted together.
-      <a href="/svar/validation#forecasters">How far to trust it &rarr;</a>
-    </p>
-    <!-- Fields follow integration/src/policyengine_macro/capabilities.py MODELS["boe-svar"]; one field order on all seven Overviews (DESIGN.md §4.13). -->
-    <dl class="model-card">
-      <div><dt>Answers</dt><dd>What is hitting the UK economy now, why the forecast changed, and how uncertain the baseline is</dd></div>
-      <div><dt>Inputs</dt><dd>Eight packaged quarterly series, all public (ONS, Bank of England, FRED)</dd></div>
-      <div><dt>Outputs</dt><dd>GDP and CPI forecasts with bands, identified shocks, decompositions, forecast revisions</dd></div>
-      <div><dt>Horizon</dt><dd>Quarterly short-run forecast</dd></div>
-      <div><dt>Data</dt><dd>Sample 1992Q1&ndash;2025Q1 &middot; conditioning data through 2026Q1</dd></div>
-      <div><dt>Uncertainty</dt><dd><a class="gloss-link" href="/glossary#prior-posterior">Posterior</a> 68% and 90% intervals, raw rather than calibrated to <a href="/svar/validation#rolling">measured coverage</a></dd></div>
-      <div><dt>Access</dt><dd>Hosted forecast and latest shocks, CLI, Python</dd></div>
-      <div><dt>Runtime</dt><dd>Minutes per estimation run</dd></div>
-      <div class="model-card-wide"><dt>Status</dt><dd>Partial replication of Brignone and Piffer (2025): GDP decomposition consistent with the paper; CPI global-shock share about 8pp short; no forecast skill against a drifting random walk</dd></div>
-      <div class="model-card-wide"><dt>Cannot answer</dt><dd>The effect of a statutory policy reform: <code>score_reform</code> does not accept it (<a href="/svar/validation#caveats">limits</a>)</dd></div>
-    </dl>
+  <section id="verdict" class="band band-result ov-verdict">
+    <p class="ov-verdict-line"><a class="chip chip-brand" href="/glossary#partial-replication">Partial replication</a>
+      <span>GDP decomposition consistent with the Bank of England&rsquo;s paper, CPI short of it; no forecast skill against a drifting random walk once the tests are adjusted together.</span>
+      <a class="ov-verdict-link" href="/svar/validation">How far to trust it <span aria-hidden="true">&rarr;</span></a></p>
   </section>
 
-  <section id="overview" class="band band-wide">
-    <div class="band-head" data-icon="layers">
-      <h2>The Bank of England&rsquo;s structural VAR, replicated in the open</h2>
-      <p class="section-intro">Decompose UK GDP and inflation into six structural shocks, forecast with credible bands, and explain revisions between quarters.</p>
+  <section id="fit" class="band ov-fit" aria-label="What it is good for and not for">
+    <div class="fit-pair">
+      <div class="fit-card fit-yes">
+        <h2>Good for</h2>
+        <ul>
+          <li><strong>What is hitting the economy now</strong>, as six named shocks</li>
+          <li><strong>GDP and CPI forecasts</strong> with 68% and 90% bands</li>
+          <li><strong>Why the forecast changed</strong> since last quarter</li>
+        </ul>
+      </div>
+      <div class="fit-card fit-no">
+        <h2>Not for</h2>
+        <ul>
+          <li>Scoring a statutory reform: <code>score_reform</code> does not accept it (<a href="/svar/validation#caveats">limits</a>)</li>
+          <li>Policy counterfactuals: <a href="/obr">OBR emulator</a>, <a href="/olg">OG-UK</a></li>
+          <li>Beating a simple benchmark: no forecast skill (<a href="/svar/validation">validation</a>)</li>
+        </ul>
+      </div>
     </div>
+  </section>
 
-    <div class="scrolly-wrap single">
-      <div class="scrolly-steps">
-
-      <div class="meth-step" id="what" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>What it is</h3></div>
-        <p class="mo-lead">The Bank&rsquo;s own empirical lens, replicated in the open.</p>
-        <div class="mo-figcard full">
+  <section id="answers" class="band ov-example">
+    <div class="band-head" data-icon="calculator"><h2>What it returns</h2>
+      <p class="section-intro">The latest round: the shocks behind 2026Q1 and the forecast that follows.</p></div>
+    <div class="glance-switch scen-switch" role="tablist" aria-label="Worked example">
+      <button type="button" role="tab" id="svar-scen-tab-0" aria-controls="svar-scen-0" aria-selected="true">Latest shocks</button>
+      <button type="button" role="tab" id="svar-scen-tab-1" aria-controls="svar-scen-1" aria-selected="false" tabindex="-1">Forecast</button>
+    </div>
+    <div class="scen-panel" id="svar-scen-0" role="tabpanel" aria-labelledby="svar-scen-tab-0">
+      <h3 class="scen-title">What hit the UK economy in 2026Q1</h3>
+      <div class="stat-row stat-row-3"><div class="stat"><span class="stat-label">World demand</span><span class="stat-value">0.71</span><span class="stat-sub">negative</span></div><div class="stat"><span class="stat-label">World energy</span><span class="stat-value">0.90</span><span class="stat-sub">negative</span></div><div class="stat"><span class="stat-label">World supply</span><span class="stat-value">0.87</span><span class="stat-sub">positive</span></div><div class="stat"><span class="stat-label">UK demand</span><span class="stat-value">0.81</span><span class="stat-sub">positive</span></div><div class="stat"><span class="stat-label">UK supply</span><span class="stat-value">0.71</span><span class="stat-sub">positive</span></div><div class="stat"><span class="stat-label">Monetary policy</span><span class="stat-value">0.84</span><span class="stat-sub">expansionary</span></div></div>
+      <p class="scen-note">The posterior probability that each named shock hitting the latest quarter had the sign shown (<code>latest_shocks</code>; 6,000 draws, 430 accepted, ESS 198). How each shock propagates: <a href="/svar/methodology">methodology</a>.</p>
+    </div>
+    <div class="scen-panel" id="svar-scen-1" role="tabpanel" aria-labelledby="svar-scen-tab-1">
+      <h3 class="scen-title">GDP and CPI forecast with bands</h3>
+      <div class="mo-figcard full">
 <!-- boe-current-outlook:begin -->
 <figure class="vfig current-outlook">
 <div class="vc-fig" data-chart="boe-current-outlook">
@@ -140,75 +145,13 @@
 </figure>
 <!-- boe-current-outlook:end -->
         </div>
-        <p class="vlinks mono"><a href="/svar/methodology#sources">the source paper, method papers and code &rarr;</a></p>
-        <p class="kv-title">The replication</p>
-        <dl class="kv kv-text"><div><dt>Source</dt><dd>BoE Macro Technical Paper No.&nbsp;3, July 2025</dd></div><div><dt>Family</dt><dd>Bayesian structural VAR</dd></div><div><dt>Shocks</dt><dd>six named structural shocks</dd></div><div><dt>Identification</dt><dd><a class="gloss-link" href="/glossary#sign-restrictions">zero and sign restrictions</a></dd></div><div><dt>Role</dt><dd>baseline and conditioning member</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p>In July 2025 the Bank of England published Macro Technical Paper
-                No.&nbsp;3 — <em>A structural VAR model for the UK economy</em> — with
-                no replication package. This project re-implements the full pipeline
-                in Python — public-source data assembly, Bayesian estimation,
-                identification, and every output figure — compared with the
-                paper's published results, gaps included (<a href="/svar/validation">validation</a>).</p>
-          <p>Within the suite it is the <strong>empirical, time-series
-                member</strong> — a structural VAR: a statistical model of a small
-                set of series, with just enough economic structure to name the shocks
-                driving them — and the <strong>baseline/conditioning member</strong>,
-                saying what is hitting the economy and how uncertain the baseline is
-                before you simulate changing it with the structural members.</p>
-        </details>
-      </div>
+      <p class="scen-note">Every archived round, scored against outturns: <a href="/forecasts">the forecast record</a>.</p>
+    </div>
+  </section>
 
-      <div class="meth-step" id="answers" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it can answer</h3></div>
-        <p class="mo-lead">What is hitting the economy now, and why, as posterior distributions.</p>
-        <div class="table-scroll mo-tablecard"><table>
-                <caption>The SVAR toolkit and what each output tells you</caption>
-                <thead><tr><th scope="col">tool</th><th scope="col">what it tells you</th></tr></thead>
-                <tbody>
-                  <tr>
-                    <th scope="row"><strong><a class="gloss-link" href="/glossary#irf">IRFs</a> &amp; <a class="gloss-link" href="/glossary#fevd">FEVDs</a></strong></th>
-                    <td>How each named shock propagates through the UK economy (the impulse response function, IRF), and how much of GDP and inflation variance each explains at every horizon (the FEVD).</td>
-                  </tr>
-                  <tr>
-                    <th scope="row"><strong><a class="gloss-link" href="/glossary#historical-decomposition">Historical decompositions</a></strong></th>
-                    <td>Which shocks drove each episode — how much of the 2022 inflation surge was world energy versus UK demand.</td>
-                  </tr>
-                  <tr>
-                    <th scope="row"><strong>Fan-chart forecasts</strong></th>
-                    <td>Unconditional forecasts with 68% and 90% credible bands, plus the probability that each shock hitting the latest quarter was positive or negative.</td>
-                  </tr>
-                  <tr>
-                    <th scope="row"><strong>Forecast-revision decomposition</strong></th>
-                    <td>The paper's Section 5 exercise: why did the forecast change since last quarter? Splits the revision into news (new shocks) and reassessment via composite impulse responses.</td>
-                  </tr>
-                </tbody>
-              </table></div>
-        <p class="kv-title">2026Q1 shock probabilities</p>
-        <dl class="kv"><div><dt>World demand</dt><dd>negative, 0.71</dd></div><div><dt>World energy</dt><dd>negative, 0.90</dd></div><div><dt>World supply</dt><dd>positive, 0.87</dd></div><div><dt>UK demand</dt><dd>positive, 0.81</dd></div><div><dt>UK supply</dt><dd>positive, 0.71</dd></div><div><dt>Monetary policy</dt><dd>expansionary, 0.84</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p>The 2026Q1 round reads world demand and world energy shocks as most likely negative, UK demand and both supply shocks as positive, and monetary policy as expansionary; the probabilities are alongside. Source: <a class="mono" href="/papers/boe-svar/figures/latest_shocks.json" download><code>latest_shocks.json</code></a>, 6,000 draws, 430 accepted, ESS 198.</p>
-          <p>
-                <strong>Worked example.</strong> UK benefit uprating is CPI-linked, so the
-                <code>svar_inflation_incidence</code> tool prices the gap between
-                this model&rsquo;s median CPI path and the March 2026 EFO through the
-                following April&rsquo;s uprating of a curated slice of CPI-linked
-                benefits (Universal Credit standard allowances and child element,
-                Child Benefit), and reports the cost and the decile incidence. A
-                curated slice, not the full fiscal sensitivity &mdash; the state pension
-                and frozen tax thresholds are deliberately excluded &mdash; and an
-                experimental illustration built on the forecast median, not a
-                scored reform.
-              </p>
-          <p>Results: the live UK fan chart on the <a href="/">home page</a> and every archived round under <a href="/forecasts#open">forecasts</a>.</p>
-        </details>
-      </div>
-
-      <div class="meth-step" id="pe-bridge" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>With the microsimulation</h3></div>
-        <p class="mo-lead">Its CPI forecast prices CPI-linked benefit uprating; it does not score reforms.</p>
+  <section id="pe-bridge" class="band ov-flow">
+    <div class="band-head" data-icon="layers"><h2>With the microsimulation</h2>
+      <p class="section-intro">Its CPI path prices the uprating of CPI-linked benefits.</p></div>
         <div class="pipeline">
           <span class="pl-node"><strong>BoE SVAR</strong><span class="mono">CPI path</span></span>
           <span class="pl-arrow" aria-hidden="true">&rarr;</span>
@@ -216,52 +159,35 @@
           <span class="pl-arrow" aria-hidden="true">&rarr;</span>
           <span class="pl-node pl-node-out"><strong>Who gains and loses</strong></span>
         </div>
-        <p class="callout callout-neutral"><strong>It does not score reforms.</strong> Mapping a policy reform
-                into identified structural innovations is conceptually dubious, not
-                merely unbuilt.</p>
-    <details class="about"><summary>More detail</summary><p>For reform scoring use the
-                <a href="/obr">OBR emulator</a> (short-run, fiscal) or the
-                <a href="/olg">OLG model</a> (long-run, structural) — both fed by the
-                <a href="/pe">PolicyEngine microsimulation</a>'s static costing, as
-                the <a href="/models#score">score a reform</a> workflow shows; this model
-                tells you what you are scoring <em>against</em>.</p></details>
-        <p class="vlinks mono"><a href="/models#compose">every join in the suite &rarr;</a></p>
-        <p class="kv-title">Forecast to incidence</p>
-        <dl class="kv kv-text"><div><dt>Tool</dt><dd><code>svar_inflation_incidence</code></dd></div><div><dt>What moves</dt><dd>this model&rsquo;s CPI path minus the official one</dd></div><div><dt>Enters</dt><dd>April 2028 uprating of CPI-linked benefits</dd></div><div><dt>Status</dt><dd>experimental</dd></div><div><dt>Refused</dt><dd><code>score_reform</code> does not accept it</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p>Forecast-to-incidence bridge: <code>svar_inflation_incidence</code> passes the gap between this model's CPI path and the official one through the April 2028 uprating of CPI-linked benefits in <a href="/pe">PolicyEngine</a>. Experimental, and labelled as such. No reform scoring — <code>score_reform</code> does not accept this model.</p>
-        </details>
-      </div>
-
-      </div>
-    </div>
+    <p class="ov-flow-note"><code>svar_inflation_incidence</code> prices the gap between the median CPI path and the March 2026 EFO through the next April&rsquo;s uprating of Universal Credit and Child Benefit, decile by decile (<a href="/models#compose">every join in the suite</a>).</p>
+    <p class="callout callout-warn"><strong>An experimental illustration, not a scored reform.</strong> It uses the forecast median and a curated slice of CPI-linked benefits; the state pension and frozen thresholds are excluded.</p>
   </section>
 
-  <section class="band where-next" id="where-next">
-    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
-    <div class="entry-grid">
-      <a class="entry-card" href="/svar/methodology">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg></span>
-        <h3>Methodology</h3>
-        <p>Estimation and identification choices</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
-      <a class="entry-card" href="/models#compare">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg></span>
-        <h3>Compare the models</h3>
-        <p>All seven side by side</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
-      <a class="entry-card" href="/connect">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg></span>
-        <h3>Run it hosted</h3>
-        <p>MCP, CLI or Python, no account needed</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
-    </div>
+  <section id="card" class="band ov-spec">
+    <details class="expander">
+      <summary>Model card <span class="expander-meta">inputs, outputs, horizon, data, access</span></summary>
+    <dl class="model-card">
+      <div><dt>Answers</dt><dd>What is hitting the UK economy now, why the forecast changed, and how uncertain the baseline is</dd></div>
+      <div><dt>Inputs</dt><dd>Eight packaged quarterly series, all public (ONS, Bank of England, FRED)</dd></div>
+      <div><dt>Outputs</dt><dd>GDP and CPI forecasts with bands, identified shocks, decompositions, forecast revisions</dd></div>
+      <div><dt>Horizon</dt><dd>Quarterly short-run forecast</dd></div>
+      <div><dt>Data</dt><dd>Sample 1992Q1&ndash;2025Q1 &middot; conditioning data through 2026Q1</dd></div>
+      <div><dt>Uncertainty</dt><dd><a class="gloss-link" href="/glossary#prior-posterior">Posterior</a> 68% and 90% intervals, raw rather than calibrated to <a href="/svar/validation#rolling">measured coverage</a></dd></div>
+      <div><dt>Access</dt><dd>Hosted forecast and latest shocks, CLI, Python</dd></div>
+      <div><dt>Runtime</dt><dd>Minutes per estimation run</dd></div>
+      <div class="model-card-wide"><dt>Status</dt><dd>Partial replication of Brignone and Piffer (2025): GDP decomposition consistent with the paper; CPI global-shock share about 8pp short; no forecast skill against a drifting random walk</dd></div>
+      <div class="model-card-wide"><dt>Cannot answer</dt><dd>The effect of a statutory policy reform: <code>score_reform</code> does not accept it (<a href="/svar/validation#caveats">limits</a>)</dd></div>
+    </dl>
+    </details>
   </section>
 
+  <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
+    <div class="chip-row">
+      <a class="chip chip-brand" href="/svar/methodology">Methodology</a>
+      <a class="chip" href="/models#compare">Compare the models</a>
+      <a class="chip chip-brand" href="/connect">Run it hosted</a>
+    </div>
+  </nav>
 </main>
 
 <footer class="foot foot-bar">
@@ -276,6 +202,6 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
-<script src="/stepper.js" defer></script>
+<script src="/scenarios.js" defer></script>
 </body>
 </html>
