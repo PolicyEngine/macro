@@ -391,14 +391,18 @@ def hank_shock(
             no-capital variant: monetary/productivity only, no investment
             series).
         include_distribution: two_asset only — add steady-state MPC by
-            liquid-wealth quartile, the hand-to-mouth share, and the impact
+            liquid-wealth quartile (with the windfall it is measured out of:
+            25% of mean quarterly post-tax labour income, about $6,000 per
+            household, far above rebate sizes), the hand-to-mouth share
+            (with its threshold and zero-liquid atom), and the impact
             consumption response by total-wealth quartile (first-order
             approximation from steady-state policies: the MPC-heterogeneity
             channel only, not full household-level dynamics).
         name: Optional label for the experiment.
 
     Returns per-quarter rows (Y, C, I in % deviation from steady state; pi
-    and r in pp deviations of quarterly rates; plus the shock path), a
+    and r in pp deviations of quarterly rates, where r is the ex-post real
+    return, so its quarter 0 is the inflation surprise; plus the shock path), a
     `peaks` block, and `series_meaning`. First call per variant pays the
     steady-state (~13s) and jacobian (~5s) solves; both are cached, so warm
     calls are effectively instant.
