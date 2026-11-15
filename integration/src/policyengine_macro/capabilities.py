@@ -457,11 +457,12 @@ MODEL_QUALITY = {
         ),
         "policy_counterfactual_validity": _quality(
             "moderate",
-            "The static costing of a 1p basic-rate rise gives £6.46bn in "
-            "2026-27, which is 6.4% BELOW HMRC's published ready reckoner at "
-            "£6.9bn -- not within its range, and the gap is reported rather "
-            "than tuned away. The reckoner stops at 2028-29, so the £7.38bn "
-            "this suite scores for 2030 has no year-matched counterpart. "
+            "The static costing of a 1p basic-rate rise gives £6.55bn in "
+            "2026-27, which is 5.1% BELOW HMRC's published ready reckoner at "
+            "£6.9bn (and £7.01bn against £8.2bn in 2028-29, 14.6% below) -- "
+            "not within its range, and the gap is reported rather than tuned "
+            "away. The reckoner stops at 2028-29, so the £7.48bn this suite "
+            "scores for 2030 has no year-matched counterpart. "
             "HMRC's income-tax reckoner is post-behavioural on administrative "
             "data and ours is static and survey-based, so this is one reform, "
             "one country, one tax, on a different basis: a benchmark and not "

@@ -1,0 +1,33 @@
+{
+  "_comment": "PolicyEngine static costing of a 1pp rise in the UK basic rate of income tax (gov.hmrc.income_tax.rates.uk[0].rate 0.20 -> 0.21), scored on the hosted server. Committed so the figures quoted on /pe and /obr have a recorded run behind them.",
+  "reform": {
+    "gov.hmrc.income_tax.rates.uk[0].rate": 0.21
+  },
+  "basis": "change in gov_balance (all modelled taxes incl. CGT and employer NI, minus benefit spending), £bn per year, static, PolicyEngine-UK fiscal year y = April y to March y+1",
+  "dataset": "enhanced_frs_2023_24 (53,508 households)",
+  "package": "policyengine 6.11.1, policyengine-uk 2.151.0",
+  "runs": [
+    {
+      "tool": "score_reform(model='obr', start_year=2026, years=5) via start_job",
+      "job_id": "fc-01M79WBAVFWAF8K05Q36X236G5",
+      "run_at": "2026-11-13T07:38:56Z",
+      "annual_costings_bn": {
+        "2026": 6.546,
+        "2027": 6.786,
+        "2028": 7.006,
+        "2029": 7.23,
+        "2030": 7.48
+      }
+    },
+    {
+      "tool": "pe_population_impact(country='uk', year=2026) via start_job",
+      "job_id": "fc-01M7FNV34YZMMVA2E6Y23V6HFR",
+      "run_at": "2026-11-15T13:23:34Z",
+      "budgetary_impact_bn": 6.546
+    }
+  ],
+  "hmrc_ready_reckoner_june_2025_bn": {
+    "2026-27": 6.9,
+    "2028-29": 8.2
+  }
+}
