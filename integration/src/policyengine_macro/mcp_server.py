@@ -35,7 +35,10 @@ def start_job(
     on the hosted server fails every time. population_reform_impact (two to
     three minutes hosted) runs as tool="pe_population_impact" and
     dynamic_reform_impact as tool="dynamic_population_reform_impact", with
-    the same arguments. obr_shock (several minutes), frbus_shock and
+    the same arguments. The four incidence tools (frbus_shock_incidence,
+    hank_shock_incidence, svar_inflation_incidence, define_scenario_incidence)
+    each end in a population microsimulation, so run them as jobs under
+    their own names. obr_shock (several minutes), frbus_shock and
     hank_shock are close enough to the ceiling to fail on a cold server. A
     forecast_uk with thousands of draws runs as tool="svar_forecast".
 
