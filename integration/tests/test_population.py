@@ -143,7 +143,7 @@ def test_population_impact_uk_real_basic_rate():
         "uk", reform={"gov.hmrc.income_tax.rates.uk[0].rate": 0.21}, year=2026
     )
     # This is the ONLY place in the project that recomputes the headline
-    # microsim costing. £6.46bn is published on /pe/validation, in the
+    # microsim costing. £6.55bn is published on /pe/validation, in the
     # pe-microsim and obr-macro papers, and frozen as a constant in the OBR
     # model repo's own gate -- none of which regenerate it. The band here used
     # to be 4.0-9.0, which admits HMRC's £6.9bn AND its £8.2bn, so it could not
@@ -155,7 +155,7 @@ def test_population_impact_uk_real_basic_rate():
     # data change moves it outside, that is the signal to update the published
     # figure everywhere -- which is the property worth having, since today
     # nothing forces those surfaces to move together.
-    PUBLISHED_BN = 6.46
+    PUBLISHED_BN = 6.55  # policyengine 6.11.1; 6.46 under 4.x
     measured = res["budgetary_impact_bn"]
     assert abs(measured - PUBLISHED_BN) / PUBLISHED_BN < 0.05, (
         f"basic-rate +1pp costing is £{measured:.2f}bn against the £"
