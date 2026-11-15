@@ -896,7 +896,9 @@ def frbus_summary() -> dict:
                     "passes at 6.7e-9 on a baseline whose every series has "
                     "been scrambled by a random factor, with every "
                     "accounting identity destroyed. It gates the software. "
-                    "Read vs_vendor_pyfrbus and the multipliers instead."
+                    "Read vs_vendor_pyfrbus and monetary_tightening_properties "
+                    "instead; the fiscal multipliers are on the site's "
+                    "/frb-us/validation page, not in this payload."
                 ),
             },
             "vs_vendor_pyfrbus": {
