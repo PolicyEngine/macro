@@ -97,8 +97,8 @@
       </div>
       <div class="stat">
         <span class="stat-label">Green investment multiplier</span>
-        <span class="stat-value">1.78</span>
-        <span class="stat-sub">cumulative to 2040; includes a <a href="#alpha-pp">parameter mismatch</a></span>
+        <span class="stat-value">2.30</span>
+        <span class="stat-sub">cumulative to 2040, per &pound; of power-sector spending; 1.78 per &pound; of all non-wage spending; includes a <a href="#alpha-pp">parameter mismatch</a></span>
         <span class="stat-foot"><a class="chip" href="#multiplier">Not comparable</a></span>
       </div>
       <div class="stat stat-neutral">
@@ -277,12 +277,16 @@
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>The fiscal multiplier</h3></div>
         <p class="mo-lead">Cumulative to 2040, with an <a class="gloss-link" href="/glossary#exogenous">endogenous</a> denominator: not comparable to short-horizon figures.</p>
         <p class="kv-title">Why it runs high</p>
-        <dl class="kv"><div><dt>Definition</dt><dd>cumulative &Delta;GDP over &Delta;SPEND_GVT to 2040</dd></div><div><dt>Not comparable to</dt><dd>OBR &asymp;1.0, a short-horizon figure</dd></div><div><dt>Denominator change</dt><dd>77% government power-sector spending (<code>SPEND_GVTPS</code>)</dd></div><div><dt>Bias direction</dt><dd>not established</dd></div><div><dt>Parameter mismatch</dt><dd>included in 1.78 (<a href="#alpha-pp">limits</a>)</dd></div><div><dt>Upstream summary</dt><dd>unusable, never quoted</dd></div></dl>
+        <dl class="kv"><div><dt>Headline</dt><dd>2.30: cumulative &Delta;GDP over &Delta;SPEND_GVTPS, the spending the policy switch sets, to 2040</dd></div><div><dt>Secondary</dt><dd>1.78: over all non-wage spending (&Delta;SPEND_GVT)</dd></div><div><dt>Not comparable to</dt><dd>OBR &asymp;1.0, a short-horizon figure</dd></div><div><dt>Denominator change</dt><dd>77% government power-sector spending (<code>SPEND_GVTPS</code>)</dd></div><div><dt>Bias direction</dt><dd>not established</dd></div><div><dt>Parameter mismatch</dt><dd>included in both; without it about 2.08&ndash;2.25 and 1.73&ndash;1.75 (<a href="#alpha-pp">limits</a>)</dd></div><div><dt>Upstream summary</dt><dd>unusable, never quoted</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <p>
                 The model's cumulative green-public-investment multiplier, on our own
-                computation — nominal cumulative ΔGDP over ΔSPEND_GVT to 2040 — is the tile above. It is <em>not</em> comparable to the OBR's
+                computation, is the tile above: nominal cumulative ΔGDP of 209.9 over
+                the cumulative change in ΔSPEND_GVTPS, the government power-sector
+                spending the policy switch sets, of 91.2 — 2.30 to 2040. Over all
+                non-wage government spending (ΔSPEND_GVT) it is 1.78, which was the
+                headline until define-uk-model #16 was decided on 15 November 2026. It is <em>not</em> comparable to the OBR's
                 &asymp;1.0: that is a short-horizon multiplier where ours is cumulative to
                 2040, and a demand-led <a class="gloss-link" href="/glossary#closure">closure</a> with Kaldor&ndash;Verdoorn
                 productivity implies a ratio above 1 over that horizon. The
@@ -293,7 +297,9 @@
                 &minus;19.3). Social benefits rise, so the direction of the bias
                 against an impulse-based multiplier is not established; an earlier
                 statement that benefits fall and that 1.78 is upper-leaning is
-                withdrawn. Which impulse definition to use has not been decided. The
+                withdrawn. The headline now uses the policy instrument alone as the
+                impulse, which removes the endogenous items from the denominator
+                (<a href="https://github.com/PolicyEngine/define-uk-model/issues/16">define-uk-model #16</a>). The
                 caveats travel with every served delta
                 (<code>GPI_MULTIPLIER_CAVEATS</code>, gated by test).
               </p>
@@ -401,8 +407,8 @@
           <tr><th scope="row"><strong>Multiplier runs high</strong></th><td>Our cumulative green-investment multiplier is not comparable to short-horizon published figures, and the direction of its denominator bias is not established (<a href="#multiplier">the multiplier</a>).</td></tr>
           <tr id="alpha-pp"><th scope="row"><strong>Baseline and policy runs use different &alpha;<sub>PP</sub></strong></th><td>The upstream Baseline runs production&rsquo;s own-input coefficient alpha_PPLR at 0.2748; every policy run uses 0.2762 (printed in each run&rsquo;s <code>Parameters-sorted_*.csv</code>). No policy switch acts before 2027Q1, so the 2023&ndash;26 deltas are this parameter change alone, not policy effects; real GDP sits about &minus;0.16% of baseline in 2025&ndash;26. After 2026 the two cannot be separated, so the published numbers stand and the range below bounds the policy-only effect (the parameter effect stopping in 2027, or persisting at its 2026 level or share of baseline): multiplier 1.78 &rarr; 1.73&ndash;1.75; green-investment GDP peak +0.92% &rarr; +0.92&ndash;1.08%; housing-regulation real GDP in 2035 &minus;2.3 &rarr; &minus;0.96 to &minus;2.3; fossil-fuel-ban real GDP in 2030 &minus;3.85 &rarr; &minus;2.65 to &minus;3.85; emissions deltas change by under 0.25%. Sized in <a href="https://github.com/PolicyEngine/define-uk-model/issues/20">define-uk-model #20</a>; the fix is not yet decided.</td></tr>
           <tr><th scope="row"><strong>Unlicensed upstream, never hosted</strong></th><td>The authors&rsquo; R code is fetched at a pinned commit and run locally; hosted tools return run instructions, never results.</td></tr>
-          <tr id="clean-room"><th scope="row"><strong>The clean-room model solves only part of the manual</strong></th><td>The clean-room Python now solves &sect;3.2&ndash;&sect;3.3.3 quarter by quarter, in draft <a href="https://github.com/PolicyEngine/define-uk-model/pull/19">define-uk-model #19</a>. &sect;3.1 and &sect;3.4 are still stubs whose values are read from the upstream run, so it cannot yet produce its own multiplier. Its solved GDP stays within 0.41% of the upstream run in every quarter, short of the 2e-3 tolerance, so milestone 2 is not passed. In the power sector, 17 equations reproduce the upstream outputs only in forms that differ from the manual as printed; they were classified in draft <a href="https://github.com/PolicyEngine/define-uk-model/pull/18">#18</a> and sent to the authors (<a href="https://github.com/PolicyEngine/define-uk-model/issues/17">define-uk-model #17</a>; <a href="/define/code#run-4">Code, step 4</a>).</td></tr>
-          <tr id="sfc-breaks"><th scope="row"><strong>Two cached scenarios are not stock-flow consistent</strong></th><td>In the fossil-fuel ban with no forward guidance (2035Q3 and 2036Q1) and with unexpected enforcement (2033Q1), the power sector&rsquo;s revenue is valued at a different electricity price from the one buyers pay, so the sectors&rsquo; net lending does not sum to zero. The other 28 cached files close. The fault is in the upstream outputs. Draft <a href="https://github.com/PolicyEngine/define-uk-model/pull/15">define-uk-model #15</a> stops serving these two scenarios and attaches a stock-flow check to every result; until it merges, the adapter on main still returns them (<a href="https://github.com/PolicyEngine/define-uk-model/issues/17">#17</a>).</td></tr>
+          <tr id="clean-room"><th scope="row"><strong>The clean-room model solves the whole manual but does not reproduce it</strong></th><td>The clean-room Python registers every printed equation of the manual (&sect;3.1&ndash;&sect;3.4.7) and solves the whole model quarter by quarter (<a href="https://github.com/PolicyEngine/define-uk-model/pull/19">define-uk-model #19</a>, merged). It does not reproduce the upstream run. Baseline GDP falls up to 44% below it by 2040, mostly through equity-revaluation equations that are not yet diagnosed, so milestone 2 is not passed (<a href="https://github.com/PolicyEngine/define-uk-model/issues/17">#17</a>). Its own green public investment multiplier is about 1.52 (2.30 upstream on the same impulse). The Taylor rule&rsquo;s inflation input is inferred from the upstream outputs, because the manual prints no equation for it, and two power-sector profit rates are still read from the upstream run (<a href="https://github.com/PolicyEngine/define-uk-model/issues/24">#24</a>). That figure is a diagnostic, not a served result: every served number still comes from the cached upstream run. Where the upstream outputs follow a form that differs from the manual as printed, the model records the form the outputs follow, found from those outputs alone (<code>empirical.py</code>; <a href="/define/code#run-4">Code, step 4</a>).</td></tr>
+          <tr id="sfc-breaks"><th scope="row"><strong>Two cached scenarios are not stock-flow consistent</strong></th><td>In the fossil-fuel ban with no forward guidance (2035Q3 and 2036Q1) and with unexpected enforcement (2033Q1), the power sector&rsquo;s revenue is valued at a different electricity price from the one buyers pay, so the sectors&rsquo; net lending does not sum to zero. The other 28 cached files close. The fault is in the upstream outputs. The adapter refuses these two scenarios and attaches a stock-flow check to every result (<a href="https://github.com/PolicyEngine/define-uk-model/pull/15">define-uk-model #15</a>, merged 6 Nov).</td></tr>
           <tr><th scope="row"><strong>No uncertainty</strong></th><td>Deterministic deltas from one calibration, with no interval and no sensitivity sweep.</td></tr>
         </tbody>
       </table></div>
