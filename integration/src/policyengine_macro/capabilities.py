@@ -145,7 +145,8 @@ MODELS = {
             # IRF magnitudes are not, and the by-wealth split is an
             # accounting allocation (distributional.py), not a solved response.
             "partial replication of Auclert et al. (2021): six of seven "
-            "solved parameters match (vphi misses by 17.3%, unresolved); "
+            "solved parameters match directly and the seventh (vphi) after "
+            "a wage-markup convention conversion; "
             "steady-state targets are inputs; shock signs are tested, "
             "magnitudes are not; not a forecaster; distributional outputs "
             "are steady-state statistics and an MPC-proportional split of "
@@ -379,9 +380,12 @@ MODEL_QUALITY = {
         "implementation_fidelity": _quality(
             "strong",
             "Built directly on the authors' sequence-jacobian toolkit at the "
-            "paper's production grids; the model repo's replication suite gates "
-            "steady-state targets, market clearing, and shock responses "
-            "against the published Econometrica 2021 results.",
+            "paper's production grids. The model repo's replication suite gates "
+            "the seven Table B.III parameters (vphi after the wage-markup "
+            "convention conversion), market clearing and shock-response signs "
+            "against Econometrica 2021; IRF magnitudes are regression pins on "
+            "this implementation, because the paper publishes no comparable "
+            "two-asset IRF figure.",
             "Keep the replication gates hard-failing and extend them across "
             "all three shock kinds and both variants.",
         ),
