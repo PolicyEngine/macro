@@ -11,7 +11,7 @@
         t.setAttribute('aria-selected', on ? 'true' : 'false');
         t.tabIndex = on ? 0 : -1;
         var p = panel(t);
-        if (p) p.hidden = !on;
+        if (p) { p.hidden = !on; p.tabIndex = 0; }
       });
       if (focus) tab.focus();
       // Charts drawn at load inside a hidden panel redraw on resize.

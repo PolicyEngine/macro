@@ -524,6 +524,11 @@ verdict (§2.1): an orange box on six of seven Overviews read as "this model is 
   JS the switch is hidden and every panel shows, stacked. Selected = fill, never a tick. Each
   panel: an `h3`, a `.stat-row` (headline numbers, their home; a `.stat-neutral` tile for the
   published benchmark), a `.spark` and one `.scen-note` sentence (≤ 45 words).
+  Tiles, sparkline and switch are used only where the model publishes numbers for the example
+  (OBR, SVAR, OG-UK, FRB/US tiles); DEFINE-UK publishes no numeric scenario results and US HANK's
+  magnitudes are not validated, so their `#answers` show what the model returns in words, and
+  PolicyEngine's is its costing chart. The collapsed model card restates the registry (§4.13)
+  and is exempt from §1.1 in the way the `.meth-panel`/`.meth-inline` pair is.
 - **Sparkline** `figure.spark`: one bar per period, no SVG text (§1.8), the axis and unit in an
   HTML `figcaption.spark-axis`, the full series in the SVG `aria-label`.
 - **Where next** `nav#where-next.where-next.ov-next > .chip-row`: 3–4 chips on every model tab
