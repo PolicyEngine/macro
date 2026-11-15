@@ -187,14 +187,19 @@ class USHankShockAdapter(ModelAdapter):
                 "partial replication scoring stylized shocks, not detailed "
                 "tax reforms; NOT a forecaster",
                 "responses are first-order (linear) and scale exactly with "
-                "the shock size; no state dependence",
+                "the shock size; no state dependence. The model is not linear "
+                "at typical sizes: for a 1%-of-GDP spending rise (persistence "
+                "0.8) the nonlinear impact multiplier is about 0.25 against the "
+                "linear 0.175, and about 0.125 for a cut",
                 "distributional outputs, where requested via hank_shock, are "
                 "first-order approximations from steady-state policies",
             ],
             validation=[
-                "us-hank-model's replication suite gates steady-state targets, "
-                "market clearing and shock responses against the published "
-                "Econometrica 2021 results",
+                "us-hank-model's replication suite gates the six steady-state "
+                "parameters that match Econometrica 2021 Table B.III, market "
+                "clearing and shock-response signs; IRF magnitudes are "
+                "regression pins on this implementation, not validated "
+                "against the paper",
             ],
             warnings=[payload["warning"]] if payload.get("warning") else [],
         )

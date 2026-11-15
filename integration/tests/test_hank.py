@@ -274,3 +274,52 @@ def test_tfp_units_are_scoped_to_the_variant():
     assert "two_asset" in units and "one_asset" in units
     doc = mcp_server.hank_shock.__doc__
     assert "one_asset steady-state" in doc
+
+
+def test_distribution_ships_the_mpc_windfall_and_htm_definition(monkeypatch):
+    """Issue #245: an MPC is only meaningful with the windfall it was
+    measured out of, and the hand-to-mouth share with its threshold and the
+    zero-liquid atom that drives it."""
+    import types
+
+    import numpy as np
+
+    T = core.HANK_T
+    irf = {v: np.full(T, 0.1) for v in ("Y", "C", "I", "pi", "r")}
+    irf.update(shock=np.full(T, -0.0025), shock_input="rstar")
+    fake = types.SimpleNamespace(shock=lambda *a, **k: dict(irf))
+    quartiles = {"Q1": 0.2, "Q2": 0.05, "Q3": 0.02, "Q4": 0.01}
+    distributional = types.SimpleNamespace(
+        summary=lambda ss: {
+            "aggregate_quarterly_mpc_liquid": 0.0581,
+            "mpc_by_liquid_quartile": quartiles,
+            "hand_to_mouth_share": 0.537,
+            "mpc_windfall_frac_of_quarterly_income": 0.25,
+            "mpc_windfall_model_units": 0.106,
+            "mean_quarterly_labour_income": 0.425,
+            "hand_to_mouth_breakdown": {"threshold": 0.05, "constrained_share": 0.512},
+        },
+        consumption_response_by_wealth_quantile=lambda ss, irf: dict(quartiles),
+    )
+    monkeypatch.setattr(core, "_hank_module", lambda variant: fake)
+    monkeypatch.setattr(core, "_hank_solved", lambda variant: ({}, {}))
+    monkeypatch.setattr(core, "_import_us_hank", lambda: (None, None, None, distributional))
+
+    d = core.hank_shock("monetary", -0.0025, horizon=4, include_distribution=True)["distributional"]
+    assert d["aggregate_quarterly_mpc_liquid"] == 0.0581
+    w = d["mpc_windfall"]
+    assert w["frac_of_mean_quarterly_post_tax_labour_income"] == 0.25
+    assert w["model_units"] == 0.106
+    assert w["approx_usd_per_household"] == 6100  # 0.106 x $58,000, to $100
+    assert "0.15-0.25" in w["note"]
+    h = d["hand_to_mouth_definition"]
+    assert h["liquid_threshold_model_units"] == 0.05
+    assert h["constrained_share_at_zero_liquid"] == 0.512
+
+
+def test_validation_text_does_not_claim_irf_magnitudes_are_validated():
+    """Issue #245: magnitudes are regression pins, not checks against ABRS."""
+    suite = core.hank_summary()["validation"]["suite"]
+    assert "not checks against the paper" in suite
+    assert "magnitudes against" not in suite
+    assert "ex-post" in core.HANK_HEADLINE["r"].lower()
