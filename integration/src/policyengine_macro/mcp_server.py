@@ -607,9 +607,11 @@ def forecast_uk(
 
     Args:
         horizons: Forecast horizon in quarters (1-40; default 12 = 3 years).
-        draws: Posterior draws (default 2000: ~135 accepted draws, ESS ~65,
-            a couple of minutes on first call; ~3500 draws reaches ESS >= 100;
-            500 is faster but yields ~35 accepted, ESS ~14, and a warning).
+        draws: Posterior draws (default 2000: ~159 accepted draws, ESS ~49,
+            a couple of minutes on first call, with a weak-inference warning;
+            3500 gives ~264 accepted, ESS ~92, still just under 100; 6000
+            gives 455 accepted, ESS ~181, as used for archived rounds; 500
+            is faster but yields ~34 accepted, ESS ~15).
             Must be between 50 and 10,000. Results are cached in-process, so
             repeated calls with the same
             (horizons, draws) are instant.

@@ -643,7 +643,7 @@ def hank_summary(as_json):
 @click.option("--horizons", default=12, show_default=True, help="Forecast horizon in quarters.")
 @click.option("--draws", default=2000, show_default=True,
               help="Posterior draws (more = slower, smoother; 2000 takes "
-                   "~2 min and ~3500 reaches importance-weight ESS >= 100).")
+                   "~2 min, ESS ~49; 6000 gives importance-weight ESS ~181).")
 @click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
 def forecast(horizons, draws, as_json):
     """UK SVAR forecast: YoY GDP growth and CPI inflation with bands."""

@@ -1369,14 +1369,14 @@ _SVAR_EST_START = "1992Q1"
 _SVAR_EST_END = "2025Q1"
 
 # Default posterior draws for hosted calls. Re-measured on the 1992Q1-2025Q1
-# estimation sample (seed 0), since the longer sample tightens the posterior
-# and lowers the sign-restriction acceptance rate: draws=500 -> 35 accepted,
-# ESS 13.6; 1000 -> 69, ESS 31.5; 2000 -> 135, ESS 65.3; 3500 -> 233,
-# ESS 101.4. Acceptance is ~6.8% and ESS ~3.3% of draws (was ~8% and ~3% on
-# the old 2023Q2 sample), so 2000 remains the smallest default that clears
-# the 100-accepted-draws reliability threshold -- 1000 would not (69).
-# Full ESS >= 100 still needs ~3500 draws; a `warnings` entry flags the
-# residual ESS shortfall honestly instead of hiding it. First-call runtime is
+# estimation sample with the 2026Q2 dataset pinned since #233 (seed 0, six
+# Covid dummies): draws=500 -> 34 accepted, ESS 15.0; 1000 -> 80, ESS 40.6;
+# 2000 -> 159, ESS 48.7; 3500 -> 264, ESS 91.5; 6000 -> 455, ESS 181.4 (the
+# hosted round of 12 Nov 2026). The 2026Q1 dataset gave 135 / ESS 65.3 at
+# 2000. 2000 remains the smallest default that clears the 100-accepted-draws
+# threshold -- 1000 would not (80). ESS is not proportional to draws, so ESS
+# >= 100 needs somewhat more than 3500; a `warnings` entry flags the
+# shortfall honestly instead of hiding it. First-call runtime is
 # a couple of minutes end to end and results are cached in-process.
 _SVAR_DEFAULT_DRAWS = 2000
 _SVAR_MIN_DRAWS = 50
@@ -4359,7 +4359,7 @@ def svar_summary() -> dict:
         "provenance": _provenance(
             model_id="boe-svar",
             distribution="boe_var",
-            data_vintage="estimation through 2025Q1; conditioning data through 2026Q1",
+            data_vintage="estimation through 2025Q1; conditioning data through 2026Q2",
             baseline="committed replication and forecast artefacts",
         ),
     }
