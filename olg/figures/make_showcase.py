@@ -58,10 +58,9 @@ def stats_tbody():
     rows.append(pp_row("Tax revenue (% GDP)", "Tax revenue"))
     rows.append(pp_row("Consumption (% GDP)", "Consumption"))
     rows.append(pp_row("Investment (% GDP)", "Investment"))
-    # The source title says "Gov. Consumption", but the baseline (44% of GDP
-    # in 2024, 52% in 2020) is total public spending; government consumption
-    # is about 20% of GDP (og-model-dashboard review, 5 Nov 2026).
-    rows.append(pp_row("Gov. Consumption (% GDP)", "Total public spending"))
+    # og-model-dashboard #4 replaced the total-managed-expenditure series the
+    # panel used to carry with OBR government final consumption (table 1.2).
+    rows.append(pp_row("Government consumption (% GDP)", "Government consumption"))
     rows.append(pp_row("Debt (% GDP)", "Debt"))
     # DESIGN.md §2.3: minus is U+2212 in generated numbers.
     return "\n".join(rows).replace("<td>-", "<td>\u2212").replace("(-", "(\u2212")
