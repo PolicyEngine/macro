@@ -504,6 +504,19 @@ _FRBUS_VAR_INDEX = {v["var"]: v for v in FRBUS_VARIABLES}
 _FRBUS_BASELINE_CACHE: dict[tuple[str, str, str], tuple] = {}
 
 
+def _portable_path(path) -> str:
+    """A filesystem path safe to return from a hosted tool.
+
+    Results travel to users, so a path under someone's home directory is
+    shortened to ``~/...`` rather than naming the account it was built on.
+    """
+    text = str(path)
+    home = os.path.expanduser("~")
+    if home not in ("", "/") and (text == home or text.startswith(home + os.sep)):
+        return "~" + text[len(home):]
+    return re.sub(r"^/(?:Users|home)/[^/]+(?=/|$)", "~", text)
+
+
 def _import_frbus():
     try:
         import frbus  # noqa: F401
@@ -931,7 +944,7 @@ def frbus_summary() -> dict:
         ),
     }
     try:
-        out["source"] = str(Path(_frbus_paths()[0]).parent)
+        out["source"] = _portable_path(Path(_frbus_paths()[0]).parent)
     except Exception as e:  # frbus not installed: metadata is still useful
         out["source_error"] = str(e)
     out["provenance"] = _provenance(
@@ -4355,7 +4368,7 @@ def svar_summary() -> dict:
     summary_path = rdir / "summary.md"
     fsummary_path = rdir / "forecast_summary.md"
     out: dict = {
-        "source": str(rdir),
+        "source": _portable_path(rdir),
         "provenance": _provenance(
             model_id="boe-svar",
             distribution="boe_var",

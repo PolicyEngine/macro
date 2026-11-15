@@ -23,9 +23,10 @@ installed here, so the fallback never fires), and _frbus_repo() falls back to
 POLICYENGINE_MACRO_FRB_REPO likewise. We bake the repos into the
 image at the SAME absolute paths and `pip install -e` them, so every path
 resolves in the container with zero patching:
-  - obr_macro:  /Users/janansadeqian/obr-macroeconomic-model  (+ data/)
-  - boe_var:    /Users/janansadeqian/boe-var-model            (+ data/, results/)
-  - frbus:      /Users/janansadeqian/us-frb-model             (+ vendor/, pruned)
+  - obr_macro:  {HOME}/obr-macroeconomic-model  (+ data/)
+  - boe_var:    {HOME}/boe-var-model            (+ data/, results/)
+  - frbus:      {HOME}/us-frb-model             (+ vendor/, pruned)
+where HOME is /opt/policyengine-models for the CI (GitHub-source) image.
 
 COST PROFILE
 ------------
@@ -115,7 +116,18 @@ from pathlib import Path
 
 import modal
 
-HOME = "/Users/janansadeqian"
+# Where the model checkouts live inside the image. The CI deploy fetches
+# reviewed commits from GitHub (POLICYENGINE_MACRO_IMAGE_SOURCE=github, below)
+# into a neutral directory. A developer deploying from local checkouts keeps
+# them at their own absolute path (~ or POLICYENGINE_MACRO_MODEL_HOME), since
+# that path is baked into the image unchanged. A personal home directory used
+# to be hard-coded here, and the hosted tools echoed it back in `source`.
+_IMAGE_SOURCE_IS_GITHUB = os.environ.get("POLICYENGINE_MACRO_IMAGE_SOURCE") == "github"
+HOME = (
+    "/opt/policyengine-models"
+    if _IMAGE_SOURCE_IS_GITHUB
+    else os.environ.get("POLICYENGINE_MACRO_MODEL_HOME", str(Path.home()))
+)
 OBR_REPO = f"{HOME}/obr-macroeconomic-model"
 BOE_REPO = f"{HOME}/boe-var-model"
 FRB_REPO = f"{HOME}/us-frb-model"
@@ -124,7 +136,7 @@ INTEGRATION = str(Path(__file__).parent)
 # POLICYENGINE_MACRO_IMAGE_SOURCE=github (used by CI) fetches reviewed model
 # commits instead of copying local checkouts. The absolute paths stay the same,
 # so all data-file resolution is unchanged.
-GITHUB_SOURCE = os.environ.get("POLICYENGINE_MACRO_IMAGE_SOURCE") == "github"
+GITHUB_SOURCE = _IMAGE_SOURCE_IS_GITHUB
 OBR_URL = "https://github.com/PolicyEngine/obr-macroeconomic-model"
 BOE_URL = "https://github.com/PolicyEngine/boe-var-model"
 FRB_URL = "https://github.com/PolicyEngine/us-frb-model"
