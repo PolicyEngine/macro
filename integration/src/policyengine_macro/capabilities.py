@@ -359,7 +359,8 @@ MODEL_QUALITY = {
             "moderate",
             "Selected monetary and fiscal multipliers lie in published ranges, but "
             "only VAR expectations are supported.",
-            "Implement and cross-validate model-consistent expectations before "
+            "Expose the package's cross-validated model-consistent expectations "
+            "in the hosted tools before "
             "forward-guidance or permanent-policy use.",
         ),
         "uncertainty_calibration": _quality(
