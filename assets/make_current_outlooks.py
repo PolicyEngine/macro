@@ -152,7 +152,7 @@ if __name__ == "__main__":
     import sys
 
     targets = (
-        (ROOT / "obr/index.html", "obr-current-outlook", obr_chart()),
+        (ROOT / "obr/methodology/index.html", "obr-current-outlook", obr_chart()),
         (ROOT / "svar/index.html", "boe-current-outlook", boe_chart()),
     )
     if "--check" in sys.argv[1:]:

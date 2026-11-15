@@ -448,12 +448,11 @@ The site's signature layout; keep it. Markup (already on 16 pages):
   not also the subject of the step beside it. Each panel ≤ 6 `.meth-eq` rows.
 - `.scrolly-code` on Code tabs: steps are code-length, not screen-length.
 
-**Where it is used (required):** every model's Overview, Methodology and Code tab; each model's
-Validation tab (OBR already; phase 2 converts the other six: svar, frb-us, us-hank, olg, pe,
-define); `/models#compose` (Combine); the
-`/connect` flow (MCP → CLI → Python, one step each, the panel showing the command for the chosen
-route). Overview pages that are not StepPanels today (svar, frb-us, us-hank, olg, pe, define)
-are converted in phase 2.
+**Where it is used (required):** every model's Methodology and Code tab; each model's
+Validation tab (the test steps); `/models#compose` (Combine); the `/connect` flow (MCP → CLI →
+Python, one step each, the panel showing the command for the chosen route). **Not on model
+Overviews** (r3): an Overview StepPanel had no panel of its own, so it was only numbering;
+Overviews follow the §7.3 template instead.
 
 ### 4.10 Intro card: `.intro-card`
 
@@ -491,7 +490,8 @@ hero uses the same treatment (§7.1).
 
 All seven models carry both, in one markup:
 
-- **Model card** (Overview, `section#card` under the verdict): `dl.model-card` of
+- **Model card** (Overview, `section#card`, last block before the "where next" chips, collapsed
+  inside one `details.expander` "Model card" since r3: reference material, not a headline): `dl.model-card` of
   `<div><dt>…</dt><dd>…</dd></div>` rows, two columns from 760 px, in this order (rows a model
   lacks are omitted): Answers · Inputs · Outputs · Horizon · Data · Uncertainty · Access ·
   Runtime · Joins pe-microsim · Status · Cannot answer. The last three are `.model-card-wide`.
@@ -509,6 +509,25 @@ All seven models carry both, in one markup:
 the default (brand) `.callout` on every model, whatever the verdict says. `.callout-warn` is for
 real caveats and provisional results (e.g. the OBR multiplier warning). The words carry the
 verdict (§2.1): an orange box on six of seven Overviews read as "this model is broken".
+
+### 4.14 Overview blocks (r3): verdict strip, fit pair, scenario switch, sparkline
+
+- **Verdict strip** `section#verdict.band-result.ov-verdict > p.ov-verdict-line`: a `.chip-brand`
+  naming the registry status class (≤ 5 words, links to its glossary entry), one sentence
+  (≤ 30 words) and "How far to trust it →" to the Validation tab. It replaces the r2 verdict
+  callout and is the Overview's one verdict line (§1.2).
+- **Fit pair** `section#fit > .fit-pair > .fit-card.fit-yes / .fit-no`: "Good for" and "Not
+  for", three bullets each, ≤ 15 words a bullet. "Not for" names the failure statements in words
+  and links each to the model that answers it or to `/<model>/validation#caveats`.
+- **Scenario switch** `.glance-switch.scen-switch[role=tablist]` over `.scen-panel[role=tabpanel]`
+  (one per worked example), driven by the shared `/scenarios.js` (arrow keys, Home/End). Without
+  JS the switch is hidden and every panel shows, stacked. Selected = fill, never a tick. Each
+  panel: an `h3`, a `.stat-row` (headline numbers, their home; a `.stat-neutral` tile for the
+  published benchmark), a `.spark` and one `.scen-note` sentence (≤ 45 words).
+- **Sparkline** `figure.spark`: one bar per period, no SVG text (§1.8), the axis and unit in an
+  HTML `figcaption.spark-axis`, the full series in the SVG `aria-label`.
+- **Where next** `nav#where-next.where-next.ov-next > .chip-row`: 3–4 chips on every model tab
+  (r3 replaced the three "Explore →" entry cards, which repeated the sub-tab row).
 
 ---
 
@@ -658,7 +677,7 @@ viewBox, so it keeps its CSS size (12 px, `--fs-label`) at every width. Block co
 | Fact | Home | Everywhere else |
 |---|---|---|
 | A model's validation numbers and verdict | that model's Validation tab | Overview: one verdict line + link; homepage and `/models`: verdict in words + link |
-| A model's worked example (e.g. 1p on the basic rate) | that model's Overview, step "What it can answer" | homepage joins card: link only |
+| A model's worked example (e.g. 1p on the basic rate) and its scenario headline figures | that model's Overview, `#answers` ("What it returns") | homepage joins card and the Validation limits: link only |
 | Join mechanics (what moves, where it enters) | `/models#compose` | homepage: the join named + link; model Overview step 1: its own join only |
 | Forecast rounds, bands, scores | `/forecasts#scored`, `#open`, `#rounds` | homepage proof card: link; topic pages: link |
 | Latest data readings | the topic page (`/economy/topics/<topic>#stands`) | `/economy` list: the question + link (today it restates the reading: phase 3) |
@@ -710,9 +729,9 @@ row (entry cards or chips): the next tab, `/models#compare`, and `/connect` for 
 
 | Tab | Layout | Must carry |
 |---|---|---|
-| Overview | lede (only here) → `section#card`: verdict callout (one line, default `.callout` tone on every model, links to Validation) + model card (§4.13) → StepPanel: 1 With the microsimulation (the join), 2 What it is, 3 What it can answer (worked example = home) | link to the paper, `/models#compose`, Validation caveats |
+| Overview | lede (one sentence: what it answers) → `#verdict` strip (§4.14) → `#fit` good for / not for → `#answers` "What it returns": worked examples behind a scenario switch, stat tiles + sparkline (home of those figures) → `#pe-bridge` the join as a pipeline, one line, and the page's **one** caveat callout → `section#card` model card, collapsed (§4.13) → chip row. No StepPanel, no "About this step" expanders. | link to `/models#compose`, Validation caveats; every other caveat lives on Validation |
 | Methodology | StepPanel, one step per model block; panel = equations (`.meth-eq`) | the model's source paper citation (link to Paper tab) |
-| Validation | stat row (the headline fit numbers: their home) + trust card (§4.13) → StepPanel of the tests (OBR is the reference) → limits card (`#caveats`, every failure statement in full) → "On this page" rail ≥ 1100 px | the verdict, every known limit, links to the code that produced each number |
+| Validation | stat row (the headline fit numbers: their home) + trust card (§4.13) → StepPanel of the tests (OBR is the reference) → limits card (`#caveats`, every failure statement in full, as `.limits` groups of `details.expander.limit` rows with a visible `h3` per group; r3) → "On this page" rail ≥ 1100 px | the verdict, every known limit, links to the code that produced each number |
 | Code | `.scrolly-code` StepPanel: install → run → reproduce; panel = commands | `/connect` for hosted use, repo paths |
 | Paper (`/papers/<id>`) | `.paper-viewer` card: title, meta line, Download PDF / All papers buttons, embedded PDF, abstract | status chip (draft/preprint/submitted/published), citation |
 

@@ -87,7 +87,7 @@ hand-written and part generated. Edit outside the markers freely; never inside.
 | `forecasts/nowcast.py` | generates a forecast round from the hosted MCP server and archives it *before* the outturn exists. No `--check`; it is scheduled (`nowcast-round.yml`) and refuses far more often than it writes. | scheduled only |
 | `validation/figures/make_charts.py` | every inline `<svg class="vchart" data-chart="…">` on `obr/validation`, `svar/validation`, `frb-us/validation` and `us-hank/validation`. | `site-provenance.yml` |
 | `assets/make_hero.py` | the `hero-fan` inline SVG in the homepage hero. | `site-provenance.yml` |
-| `assets/make_current_outlooks.py` | `obr-current-outlook` on `obr/index.html` and `boe-current-outlook` on `svar/index.html`. | `site-provenance.yml` |
+| `assets/make_current_outlooks.py` | `obr-current-outlook` on `obr/methodology/index.html` and `boe-current-outlook` on `svar/index.html`. | `site-provenance.yml` |
 | `olg/figures/make_showcase.py` | the `olg-stats` headline table on `olg/index.html`. | `site-provenance.yml` |
 | `papers/boe-svar/figures/make_current_forecast.py` | `papers/boe-svar/figures/current_forecast.json` — the moving artifact behind the hero fan, the OBR/SVAR outlook charts and every archived round. Calls the hosted adapter, so **run it from the integration environment**; it has no `--check`. | — |
 

@@ -6021,3 +6021,57 @@ section[data-q][hidden] { display: none; }
   .cmp-dl dd + dt { margin-top: 6px; }
   .cmp-why { max-width: none; }
 }
+
+/* ---------- 5.20 model Overview (DESIGN.md §7.3, r3 redesign) ----------
+   verdict strip → good for / not for → worked example with a scenario
+   switch → pipeline + the one caveat → collapsed model card → chip row. */
+.ov-verdict { padding-block: var(--s-4); }
+.ov-verdict-line { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3); margin: 0; color: var(--text-body); font-size: var(--fs-body); line-height: 1.5; }
+.ov-verdict-line > span { flex: 1 1 32ch; min-width: 0; }
+.ov-verdict-link { font-weight: 600; white-space: nowrap; }
+.ov-fit { padding: 0; background: none; border: 0; box-shadow: none; }
+.fit-pair { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.fit-card { padding: var(--s-4) var(--s-5); background: var(--surface-card); border: 1px solid var(--hairline); border-top: 3px solid var(--primary); border-radius: var(--radius-card); box-shadow: var(--shadow-card); }
+.fit-card.fit-no { border-top-color: var(--hairline-strong); }
+.fit-card h2 { margin: 0 0 var(--s-2); font-family: var(--body); font-size: var(--fs-h4); font-weight: 600; color: var(--text-strong); }
+.fit-card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; color: var(--text-body); font-size: var(--fs-body-sm); }
+.fit-card li::marker { color: var(--text-faint); }
+.scen-switch { flex-wrap: wrap; border-radius: 12px; max-width: 100%; }
+.scen-switch button { white-space: normal; text-align: center; }
+.scen-switch button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.scen-switch:not(.is-live) { display: none; }          /* no JS: every panel shows, no dead buttons */
+.scen-panel { margin-top: var(--s-4); }
+.scen-panel + .scen-panel { padding-top: var(--s-4); border-top: 1px solid var(--hairline); }
+.scen-switch.is-live ~ .scen-panel + .scen-panel { padding-top: 0; border-top: 0; }
+.scen-title { margin: 0 0 var(--s-2); font-size: var(--fs-h4); }
+.scen-panel .stat-row { margin: var(--s-3) 0; }
+.stat-row-4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
+.scen-note { max-width: 75ch; margin: var(--s-3) 0 0; color: var(--text-body); font-size: var(--fs-body-sm); }
+.scen-note .chip { margin-right: 6px; vertical-align: 1px; }
+.spark { margin: 0; max-width: 560px; }
+.spark svg { display: block; width: 100%; height: 64px; }
+.spark-bar { fill: var(--primary); }
+.spark-bar.spark-neg { fill: var(--teal-500); }
+.spark-zero { stroke: var(--hairline-strong); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.spark-axis { display: flex; justify-content: space-between; gap: var(--s-2); margin-top: 4px; color: var(--text-muted); font-size: var(--fs-label); }
+.ov-source { margin: var(--s-4) 0 0; color: var(--text-muted); font-size: var(--fs-label); }
+.ov-flow .pipeline { justify-content: flex-start; }
+.ov-flow-note { margin: var(--s-3) 0; color: var(--text-body); font-size: var(--fs-body-sm); }
+.ov-flow .callout { margin-bottom: 0; }
+.ov-spec { padding-block: var(--s-2); }
+.ov-spec .model-card { margin-top: var(--s-3); }
+.ov-next { padding: 0; background: none; border: 0; box-shadow: none; }
+@media (max-width: 640px) {
+  .scen-switch { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .scen-switch:not(.is-live) { display: none; }
+  .ov-verdict-link { white-space: normal; }
+}
+/* Validation limits as grouped expanders and visible sub-heads (r3). */
+.limits-h, .trust-h { margin: var(--s-5) 0 var(--s-2); font-family: var(--body); font-size: var(--fs-h4); font-weight: 600; color: var(--text-strong); }
+#caveats .callout + .limits-h { margin-top: var(--s-4); }
+.limits { border-top: 1px solid var(--hairline); }
+.limits .expander.limit { border-bottom: 1px solid var(--hairline); }
+.limits .expander.limit > summary { color: var(--text-strong); font-weight: 600; }
+.limits .expander.limit > p { max-width: 80ch; margin: 0 0 var(--s-3); color: var(--text-body); font-size: var(--fs-body-sm); }
+.trust-wrap { margin-bottom: var(--s-4); }
+.paper-more { margin: var(--s-2) 0 var(--s-4); color: var(--text-muted); font-size: var(--fs-body-sm); }
