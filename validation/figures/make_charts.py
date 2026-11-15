@@ -1149,8 +1149,16 @@ def chart_hank_targets():
 
     rows = [{"name": p["name"], "tag": how(p), "pub": p["published"], "ours": p["ours"]}
             for p in params]
-    rows.append({"name": miss["name"], "tag": "unresolved",
-                 "pub": miss["published"], "ours": miss["ours"]})
+    resolved = miss.get("resolution")
+    if resolved:
+        # us-hank-model #15: Table B.III's phi is in the working paper's
+        # wage-markup convention; ours follows the published appendix. The row
+        # shows the converted value, and the note says so.
+        rows.append({"name": miss["name"], "tag": "after × μw²",
+                     "pub": miss["published"], "ours": resolved["converted"]})
+    else:
+        rows.append({"name": miss["name"], "tag": "unresolved",
+                     "pub": miss["published"], "ours": miss["ours"]})
 
     imposed = [t for t in targets if "imposed" in t["kind"]]
     solver = [t for t in targets if "through a solver" in t["kind"]]
@@ -1189,9 +1197,16 @@ def chart_hank_targets():
         '<th scope="col" class="num">published</th><th scope="col" class="num">ours</th>'
         '<th scope="col" class="num">|diff|</th></tr></thead>',
         "<tbody>", *body, "</tbody></table></div>",
-        f'<p class="vc-notes"><span class="vc-warn">{word(agree).capitalize()} of seven agree '
-        f'to the last published digit; {miss["name"].split()[0]} misses by '
-        f'{fmt_signed(miss["gap_pct"], 1)}%.</span></p>',
+        (f'<p class="vc-notes">{word(agree).capitalize()} of seven agree to the last '
+         f'published digit directly; {miss["name"].split()[0]} solves to '
+         f'{miss["ours"]:.4f} and matches after multiplying by μw² = 1.21, because '
+         'Table B.III follows the working paper\'s wage-markup convention and this '
+         'implementation the published appendix\'s (<a href="'
+         f'{esc(resolved["source"])}">us-hank-model #15</a>).</p>')
+        if resolved else
+        (f'<p class="vc-notes"><span class="vc-warn">{word(agree).capitalize()} of seven agree '
+         f'to the last published digit; {miss["name"].split()[0]} misses by '
+         f'{fmt_signed(miss["gap_pct"], 1)}%.</span></p>'),
         '<p class="vc-notes"><strong>Calibration inputs</strong>, held fixed through the solve, '
         'so their deviations are identities:<br />' + "<br />".join(esc(t) for t in notes) + "</p>",
         f"</div>{chartkit.END}",
