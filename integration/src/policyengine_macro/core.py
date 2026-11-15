@@ -828,7 +828,7 @@ def frbus_shock(
         "horizon": horizon,
         "policy_rule": policy_rule,
         "policy_rule_description": FRBUS_POLICY_RULES[policy_rule]["description"],
-        "expectations": "VAR (backward-looking); MCE is not implemented",
+        "expectations": "VAR (backward-looking); this tool does not expose the package's opt-in MCE",
         "series_meaning": {v: modes[v][1] for v in wanted},
         "results": rows,
         "peaks": peaks,
@@ -869,8 +869,11 @@ def frbus_summary() -> dict:
                          "period by a damped Newton method with an analytic "
                          "sparse Jacobian (xtol=1e-8)",
         "data_vintage": "April 2026 LONGBASE",
-        "expectations": "VAR (backward-looking) only; MCE (model-consistent "
-                        "expectations) raises NotImplementedError",
+        "expectations": "VAR (backward-looking) in every hosted tool. The "
+                        "pinned package also supports opt-in MCE (model-"
+                        "consistent expectations, Frbus(path, mce=...), "
+                        "gated against the Board's pyfrbus at < 1e-6), but "
+                        "no hosted tool exposes them",
         "default_window": f"{FRBUS_DEFAULT_START} + {FRBUS_DEFAULT_HORIZON} quarters",
         "policy_rules": [
             {"rule": k, "description": v["description"],

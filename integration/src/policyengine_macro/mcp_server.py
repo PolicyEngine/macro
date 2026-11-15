@@ -337,7 +337,8 @@ def frbus_summary() -> dict:
     No solve, so effectively instant once the model package is loaded (the
     very first FRB/US call in a fresh container pays a ~3s import of frbus and
     its scipy/sympy stack): what the model is (284 endogenous equations, April
-    2026 LONGBASE vintage, VAR expectations — MCE is not implemented), the
+    2026 LONGBASE vintage, VAR expectations — the package's opt-in MCE is not
+    exposed by the hosted tools), the
     available monetary policy rules, and how the implementation was validated
     against the Federal Reserve's own pyfrbus: the tracking invariant holds to
     5.6e-17 and the 100bp monetary shock matches pyfrbus 1.0.0 to 6.0e-9
