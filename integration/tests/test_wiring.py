@@ -420,9 +420,10 @@ def test_obr_shock_carries_the_lever_caveat_in_the_payload():
     CGG carries one too, as of 2026-08. It was previously exempt because the
     "~1 by construction" reading was documented on the website -- but the
     website is exactly what an MCP caller never sees, which is the reason
-    the other two levers carry caveats at all. Measured: +1250/qtr gives
-    GDP +1.2500bn/qtr flat, a multiplier of 1.0000 against the OBR's
-    published 0.6. That is the largest published-vs-modelled gap of any
+    the other two levers carry caveats at all. Measured at obr 94f08b9:
+    +1250/qtr gives GDP +1.267bn rising to +1.311bn, a multiplier of 1.01
+    rising to 1.05, against the OBR's published 0.6 (1.0000 and flat under
+    the old published closure). That is the largest published-vs-modelled gap of any
     lever here, so it is the last one that should have shipped silent.
     """
     from policyengine_macro import core
@@ -431,7 +432,7 @@ def test_obr_shock_carries_the_lever_caveat_in_the_payload():
     assert levers["TCPRO"]["caveat"], "the slow-converging lever declares no caveat"
     assert levers["CGIPS"]["caveat"], "the dead lever declares no caveat"
     assert levers["CGG"]["caveat"], "the identity lever declares no caveat"
-    assert "1.0000" in levers["CGG"]["caveat"], "CGG caveat omits the measured multiplier"
+    assert "1.01" in levers["CGG"]["caveat"], "CGG caveat omits the measured multiplier"
     assert "0.6" in levers["CGG"]["caveat"], "CGG caveat omits the OBR published figure"
 
 

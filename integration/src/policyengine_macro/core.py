@@ -138,20 +138,19 @@ OBR_VARIABLES = [
         "description": "Real government consumption",
         "units": "£m per quarter (e.g. 1250 = £5bn/year increase)",
         "investment_closure": False,
-        # Measured: +1250/qtr moves GDP +1.2500bn/qtr, flat for twelve
-        # quarters, with consumption moving at most 0.6m and investment
-        # exactly zero. The impact multiplier is 1.0000 because the shock
-        # lands in the GDP identity and no behavioural equation responds --
-        # against the OBR's published 0.6 for day-to-day spending, tapering
-        # over five years. This is the largest known gap of any lever here,
-        # and it reached MCP callers uncaveated while the reading lived only
-        # on the website, which a JSON consumer never sees.
+        # Measured at obr 94f08b9 (nominal-GDP pin, every quarter
+        # converged): +1250/qtr moves GDP +1.267bn in the first quarter,
+        # rising to +1.311bn by the twelfth -- an impact multiplier of 1.01
+        # rising to 1.05. Most of it is the GDP identity; the small rise is
+        # induced spending. Under the published closure (pin e4d7faa) it was
+        # exactly 1.0000 and flat. Either way it is far above the OBR's
+        # published 0.6 for day-to-day spending, tapering over five years,
+        # and the reading must reach MCP callers, not only the website.
         "caveat": (
-            "this is an accounting identity, not a behavioural response: the "
-            "impact multiplier is exactly 1.0000 at any shock size and stays "
-            "flat, because the shock enters the GDP identity and nothing "
-            "else moves (consumption responds by <0.1% of the shock, "
-            "investment by zero). The OBR's published impact multiplier for "
+            "mostly an accounting identity, not a behavioural response: the "
+            "shock enters the GDP identity and little else moves, so the "
+            "multiplier is about 1.01 on impact, rising to about 1.05 by the "
+            "twelfth quarter. The OBR's published impact multiplier for "
             "day-to-day spending and welfare is 0.6, tapering over five "
             "years, so read this as an upper bound"
         ),
@@ -297,9 +296,9 @@ def obr_shock(
     peak = max(rows, key=lambda r: abs(r["pct_gdp"]))
     # A lever whose channel is dead or non-convergent must say so in the
     # payload, not only in a docstring nobody reads over MCP. Of the four
-    # fiscal instruments here exactly one contains behaviour: CGG is an
-    # accounting identity (multiplier exactly 1.0000, flat, against the OBR's
-    # published 0.6), CGIPS is dead, TCPRO converges only slowly, and the
+    # fiscal instruments here exactly one contains behaviour: CGG is mostly
+    # an accounting identity (multiplier 1.01 rising to 1.05, against the
+    # OBR's published 0.6), CGIPS is dead, TCPRO converges only slowly, and the
     # household-income lever is the only one with a response worth reading.
     caveat = next(
         (v.get("caveat") for v in OBR_VARIABLES if v["var"] == var), None
