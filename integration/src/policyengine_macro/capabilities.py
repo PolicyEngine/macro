@@ -589,14 +589,18 @@ MODEL_QUALITY = {
             "moderate",
             "The upstream R code runs unmodified at pinned commit 846081a and "
             "the manual's Table 4 macro block replicates within stated "
-            "tolerances. The clean-room Python reimplementation has landed "
-            "§2.2 accounting and §3.2, §3.3.1 and §3.3.2 — 118 equations, "
-            "Eqs. (21)-(138) contiguous — and surfaced defects in the manual "
-            "itself, thirteen of them pinned as machine-readable gap records "
-            "rather than absorbed into a tolerance. Four apparent "
-            "contradictions proved to be historical-mean calibration and are "
-            "recorded as such in the replication report.",
-            "Complete §3.3 and the oracle comparison, closing milestone 2.",
+            "tolerances. The clean-room Python reimplementation registers "
+            "every printed equation (§3.1-§3.4.7) and solves the whole model "
+            "quarter by quarter, but does not reproduce the upstream run: "
+            "baseline GDP falls up to 44% below it by 2040, mostly through "
+            "undiagnosed equity-revaluation equations, and its own green "
+            "public investment multiplier is about 1.52 against 2.30 "
+            "upstream. Every served number comes from the cached upstream "
+            "run. Where the outputs follow a different form from the manual "
+            "as printed, the form is recovered from the outputs alone "
+            "(empirical.py) rather than absorbed into a tolerance.",
+            "Diagnose the equity-revaluation gap and reproduce the upstream "
+            "run, closing milestone 2.",
         ),
         "predictive_validation": _quality(
             "not_applicable",
