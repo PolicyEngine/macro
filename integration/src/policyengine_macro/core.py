@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import re
+import time
 from datetime import datetime, timezone
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
@@ -3160,16 +3161,25 @@ def obr_score_reform(
     start, end = _obr_fiscal_window(window[0], window[-1])
     run_reform = _import_obr()
 
-    costings = [
-        pe_population_impact(
-            country="uk", reform=reform, year=y, dataset=dataset
+    # Stage timings ship with the result (#243): the hosted default-window
+    # job outran its 600s check from 31 Oct, and only the result can say
+    # whether the microsim costing or the OBR solve is the slow part.
+    t_start = time.perf_counter()
+    costings = []
+    costing_seconds = []
+    for y in window:
+        t = time.perf_counter()
+        costings.append(
+            pe_population_impact(
+                country="uk", reform=reform, year=y, dataset=dataset
+            )
         )
-        for y in window
-    ]
+        costing_seconds.append(round(time.perf_counter() - t, 1))
     annual_bn = [c["budgetary_impact_bn"] for c in costings]
     shock_path = obr_costing_to_shock(annual_bn)
 
     name = f"PE static costing via {OBR_BRIDGE_VAR}: {reform}"
+    t_solve = time.perf_counter()
     df = run_reform(
         name=name,
         var=OBR_BRIDGE_VAR,
@@ -3178,6 +3188,7 @@ def obr_score_reform(
         end=end,
         investment_closure=False,
     )
+    solve_seconds = round(time.perf_counter() - t_solve, 1)
     rows = _obr_result_rows(df)
     shocked = rows[: len(shock_path)]
     cumulative_gdp_bn = round(sum(r["delta_gdp_bn"] for r in shocked), 3)
@@ -3218,6 +3229,11 @@ def obr_score_reform(
         "solver": solver_diagnostics,
         "results": rows,
         "cumulative_delta_gdp_bn_over_shock_periods": cumulative_gdp_bn,
+        "timing_seconds": {
+            "static_costing_by_year": dict(zip(map(str, window), costing_seconds)),
+            "obr_solve": solve_seconds,
+            "total": round(time.perf_counter() - t_start, 1),
+        },
         "peak_pct_gdp": peak["pct_gdp"],
         "peak_period": peak["period"],
         "caveats": caveats,
