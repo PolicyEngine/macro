@@ -37,7 +37,7 @@ def _obr_response(gdp_m, revision, model_id="obr-macro", url=OBR_URL):
 
 
 # Bank Rate +1 x12, quarter-by-quarter ΔGDP (£m). NEW is the current pin
-# (obr 94f08b9, measured 15 Nov 2026, every quarter converged); OLD is the
+# (obr 6fbbe06, measured 15 Nov 2026, every quarter converged); OLD is the
 # previous pin e4d7faa, which the canaries must now reject.
 NEW_PIN_PATH = [-129, -356, -381, -405, -429, -448, -466, -480, -494, -505, -514, -522]
 OLD_PIN_PATH = [-121, -200, -300, -431, -460, -470, -480, -482, -470, -450, -430, -416]

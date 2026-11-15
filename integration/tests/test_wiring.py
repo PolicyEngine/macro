@@ -420,7 +420,7 @@ def test_obr_shock_carries_the_lever_caveat_in_the_payload():
     CGG carries one too, as of 2026-08. It was previously exempt because the
     "~1 by construction" reading was documented on the website -- but the
     website is exactly what an MCP caller never sees, which is the reason
-    the other two levers carry caveats at all. Measured at obr 94f08b9:
+    the other two levers carry caveats at all. Measured at obr 6fbbe06:
     +1250/qtr gives GDP +1.267bn rising to +1.311bn, a multiplier of 1.01
     rising to 1.05, against the OBR's published 0.6 (1.0000 and flat under
     the old published closure). That is the largest published-vs-modelled gap of any

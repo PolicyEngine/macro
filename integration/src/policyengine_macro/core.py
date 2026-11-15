@@ -138,7 +138,7 @@ OBR_VARIABLES = [
         "description": "Real government consumption",
         "units": "£m per quarter (e.g. 1250 = £5bn/year increase)",
         "investment_closure": False,
-        # Measured at obr 94f08b9 (nominal-GDP pin, every quarter
+        # Measured at obr 6fbbe06 (nominal-GDP pin, every quarter
         # converged): +1250/qtr moves GDP +1.267bn in the first quarter,
         # rising to +1.311bn by the twelfth -- an impact multiplier of 1.01
         # rising to 1.05. Most of it is the GDP identity; the small rise is
