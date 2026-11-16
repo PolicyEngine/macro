@@ -943,7 +943,7 @@ def render_status(card: dict) -> str:
         mae_value = f"{mae:.2f}pp"
         if len(naive) == scored:
             naive_mae = sum(naive) / len(naive)
-            mae_sub = f"No-change forecast: {naive_mae:.2f}pp on the same {scored}."
+            mae_sub = f"Same {scored} forecasts, both measured against the outturn."
             top = max(mae, naive_mae)
             bars = (
                 '          <div class="fc-bars" aria-hidden="true">'
@@ -974,9 +974,8 @@ def render_status(card: dict) -> str:
     def tile(ic: str, value: str, label: str, sub: str, extra: str = "") -> list[str]:
         return [
             '        <div class="fc-tile">',
-            f'          <span class="fc-badge">{icon(ic)}</span>',
+            f'          <span class="fc-tile-l">{icon(ic)}{label}</span>',
             f'          <span class="fc-tile-v">{value}</span>',
-            f'          <span class="fc-tile-l">{label}</span>',
             *([extra] if extra else []),
             f'          <span class="fc-tile-s">{sub}</span>',
             "        </div>",
@@ -985,9 +984,13 @@ def render_status(card: dict) -> str:
     verdict = ""
     if scored and len(naive) == scored:
         closer = "smaller" if mae < naive_mae else ("larger" if mae > naive_mae else "the same")
+        first = card["detail"][0]["round_id"] if card["detail"] else None
+        retro = sum(1 for d, _ in pairs if d["round_id"] == first)
+        retro_note = f", {retro} of them retroactive" if retro else ""
         verdict = (f'      <p class="fc-verdict">{icon("target")}<span><strong>So far:</strong> '
                    f'{in68} of {scored} outturns fell inside the 68% band, and the average miss was '
-                   f'{mae:.2f}pp, {closer} than a no-change forecast ({naive_mae:.2f}pp).</span></p>')
+                   f'{mae:.2f}pp, {closer} than a no-change forecast ({naive_mae:.2f}pp), on the same '
+                   f'{scored}{retro_note}. Too few to show skill: <a href="#limits">limits</a>.</span></p>')
     return "\n".join([
         asof,
         *([verdict] if verdict else []),
@@ -996,9 +999,7 @@ def render_status(card: dict) -> str:
         *tile("ruler", mae_value, "mean absolute error", mae_sub, bars),
         *tile("layers", f"{scored_rounds} of {rounds}", f"round{'' if rounds == 1 else 's'} scored",
               next_sub),
-        *([f'        <p class="fc-callout">{icon("info")}<span>{scored} score{' is' if scored == 1 else 's are'} '
-           'too few to show skill either way. <a href="#limits">Limits</a></span></p>']
-          if scored < 20 else []),
+        *([] if verdict else [f'        <p class="fc-callout">{icon("info")}<span>{scored} scores are too few to show skill either way. <a href="#limits">Limits</a></span></p>']),
         "      </div>",
     ])
 
@@ -1038,7 +1039,7 @@ def render_rounds(card: dict) -> str:
             '<div class="fc-node-card">'
             '<div class="fc-node-head"><div>'
             f'<p class="fc-node-date"><time datetime="{esc(detail["round_id"])}">{esc(chartkit.short_date(detail["round_id"]))}</time></p>'
-            f'<p class="fc-node-model">{icon("activity")}{esc(name)}</p>'
+            f'<p class="fc-node-model" title="{esc(name)}">{icon("activity")}<span>{esc(name)}</span></p>'
             f'</div><div class="fc-node-chips">{"".join(chips)}</div></div>'
             '<dl class="fc-mini">'
             f'<div><dt>Data edge</dt><dd>{esc(detail["data_edge"])}</dd></div>'
@@ -1048,7 +1049,7 @@ def render_rounds(card: dict) -> str:
             '<div class="fc-node-foot">'
             f'<span class="fc-node-arch">{icon("calendar")}Archived {esc(chartkit.short_date(archived))}</span>'
             f'<span class="fc-node-links"><a href="/{esc(detail["path"])}" download title="{esc(Path(detail["path"]).name)}">{icon("file")}Round file</a>'
-            f'<a href="{href}" aria-label="Git history of this round file" title="Git history">{icon("history")}</a></span>'
+            f'<a href="{href}" title="Git history of this round file">{icon("history")}History</a></span>'
             "</div></div></li>"
         )
     items.append("      </ol>")
