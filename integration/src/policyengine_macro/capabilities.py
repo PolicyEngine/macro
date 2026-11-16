@@ -93,7 +93,7 @@ MODELS = {
         "status": (
             "partial replication of Brignone and Piffer (2025): GDP "
             "decomposition consistent with the paper; CPI global-shock share "
-            "about 8pp short; no forecast skill against a drifting random walk"
+            "about 8.5pp short; no forecast skill against a drifting random walk"
         ),
         "estimation_sample": "1992Q1-2025Q1",
         "data_edge": "2026Q2",
@@ -359,7 +359,8 @@ MODEL_QUALITY = {
         "policy_counterfactual_validity": _quality(
             "moderate",
             "Selected monetary and fiscal multipliers lie in published ranges, but "
-            "only VAR expectations are supported.",
+            "the hosted tools expose only VAR expectations; the pinned package's "
+            "cross-validated model-consistent expectations are not yet exposed.",
             "Expose the package's cross-validated model-consistent expectations "
             "in the hosted tools before "
             "forward-guidance or permanent-policy use.",
