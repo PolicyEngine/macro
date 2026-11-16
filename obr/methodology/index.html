@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=26" />
-<link rel="stylesheet" href="/models/model-pages.css?v=8" />
+<link rel="stylesheet" href="/models/model-pages.css?v=9" />
 <link rel="stylesheet" href="/vendor/mathjax/chtml.css?v=4036f841f9" />
 </head>
 <body class="doc">
@@ -127,7 +127,15 @@
         <details class="about">
           <summary>About this step</summary>
           <h4>What comes out</h4>
-          <p>The result is the published listing in open code, runnable without an EViews licence. All 372 equations parse, but it is not a complete working copy of the OBR&rsquo;s model: about 79 are skipped at solve time because inputs they need are not published, some headline variables pass through at their published values rather than being computed, and business investment uses an equation the OBR had commented out of its listing, reconstructed here.</p>
+          <p>The result is the published listing in open code, runnable without an EViews licence.</p>
+          <ul>
+            <li>All 372 equations in the listing parse.</li>
+            <li>But it is not a complete working copy of the OBR&rsquo;s model.</li>
+            <li>About 79 are skipped at solve time because inputs they need are not published.</li>
+            <li>Some headline variables pass through at their published values rather than being computed.</li>
+            <li>Business investment uses an equation the OBR had commented out of its listing.</li>
+            <li>That business-investment equation is reconstructed here.</li>
+          </ul>
         </details>
       </div>
 
@@ -386,11 +394,30 @@
         <details class="about">
           <summary>About this step</summary>
           <h4>Static costing in, second-round effects out</h4>
-          <p><a href="/pe">PolicyEngine's microsimulation</a> costs a statutory reform year by year — who pays and how much — and <code>score_reform(country="uk", reform=..., model="obr")</code> hands this model the bill: each year's costing enters as <code>HHDI_ADDFACTOR</code>, minus the annual &pound;bn spread flat across its four quarters (&times;1000&nbsp;&divide;&nbsp;4 &rarr; &pound;m/qtr), held as an add-factor on household disposable income.</p>
+          <p><a href="/pe">PolicyEngine's microsimulation</a> costs a statutory reform year by year — who pays and how much.</p>
+          <ul>
+            <li><code>score_reform(country="uk", reform=..., model="obr")</code> then hands this model the bill.</li>
+            <li>Each year's costing enters the model as <code>HHDI_ADDFACTOR</code>.</li>
+            <li>It is minus the annual &pound;bn spread flat across its four quarters.</li>
+            <li>The conversion is &times;1000&nbsp;&divide;&nbsp;4 &rarr; &pound;m/qtr.</li>
+            <li>It is held as an add-factor on household disposable income.</li>
+          </ul>
           <h4>What the emulator computes</h4>
-          <p>Lower income moves consumption through the published consumption equation, and consumption moves GDP under the demand <a class="gloss-link" href="/glossary#closure">closure</a> — the second round, quarter by quarter, against the anchored baseline of step 4. The anchoring add-factors are held fixed in both the baseline and the shocked run, so they cancel in the difference. The <a href="/obr#answers">worked example</a> on the Overview shows what this returns for 1p on the basic rate.</p>
+          <p>Lower income moves consumption through the published consumption equation.</p>
+          <ul>
+            <li>Consumption then moves GDP under the demand <a class="gloss-link" href="/glossary#closure">closure</a>.</li>
+            <li>That second round runs quarter by quarter against the anchored baseline of step 4.</li>
+            <li>The anchoring add-factors are held fixed in both the baseline and the shocked run.</li>
+            <li>So they cancel in the difference.</li>
+            <li>The <a href="/obr#answers">worked example</a> on the Overview shows this for 1p on the basic rate.</li>
+          </ul>
           <h4>Two bases for the ratio</h4>
-          <p>The model reports GDP in chained volumes (real), while the costing is in current prices. GDP lost per pound of revenue is therefore quoted in current prices, the basis of the OBR&rsquo;s own multipliers; the real-GDP ratio that <code>obr_shock</code> returns is smaller by the GDP deflator (obr-macroeconomic-model #63).</p>
+          <p>The model reports GDP in chained volumes (real), while the costing is in current prices.</p>
+          <ul>
+            <li>GDP lost per pound of revenue is therefore quoted in current prices.</li>
+            <li>That is the basis of the OBR&rsquo;s own multipliers.</li>
+            <li>The real-GDP ratio that <code>obr_shock</code> returns is smaller by the GDP deflator (obr-macroeconomic-model #63).</li>
+          </ul>
           <h4>Where the bridge stops</h4>
           <p>Only household-borne costings enter; corporation tax and US reforms are refused (<a href="/obr/validation#caveats">limits</a>). Every join in the suite: <a href="/models#compose">combine the models</a>.</p>
         </details>
