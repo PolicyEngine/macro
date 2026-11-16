@@ -247,39 +247,42 @@ SUBTABS = {
         ("/models#choose", "All models"), ("/models/compare", "Same question"))),
     "obr": ("OBR emulator pages", (
         ("/obr", "Overview"), ("/obr/methodology", "Methodology"),
-        ("/obr/validation", "Validation"), ("/obr/code", "Code"),
-        ("/papers/obr-macro", "Paper"))),
+        ("/obr/validation", "Validation"), ("/obr/code", "Use it"))),
     "svar": ("BoE SVAR pages", (
         ("/svar", "Overview"), ("/svar/methodology", "Methodology"),
-        ("/svar/validation", "Validation"), ("/svar/code", "Code"),
-        ("/papers/boe-svar", "Paper"))),
+        ("/svar/validation", "Validation"), ("/svar/code", "Use it"))),
     "frb-us": ("FRB/US pages", (
         ("/frb-us", "Overview"), ("/frb-us/methodology", "Methodology"),
-        ("/frb-us/validation", "Validation"), ("/frb-us/code", "Code"),
-        ("/papers/frb-us", "Paper"))),
+        ("/frb-us/validation", "Validation"), ("/frb-us/code", "Use it"))),
     "us-hank": ("US HANK pages", (
         ("/us-hank", "Overview"), ("/us-hank/methodology", "Methodology"),
-        ("/us-hank/validation", "Validation"), ("/us-hank/code", "Code"),
+        ("/us-hank/validation", "Validation"), ("/us-hank/code", "Use it"),
         # us-hank has no paper; its fifth tab is a survey of other HANK models,
         # so it is labelled as such rather than as a page about this model.
         ("/reports/us-hank-open-source", "HANK survey"))),
     "olg": ("OG-UK pages", (
         ("/olg", "Overview"), ("/olg/methodology", "Methodology"),
-        ("/olg/validation", "Validation"), ("/olg/code", "Code"),
-        ("/papers/psl-og", "Paper"))),
+        ("/olg/validation", "Validation"), ("/olg/code", "Use it"))),
     "pe": ("PolicyEngine microsim pages", (
         ("/pe", "Overview"), ("/pe/methodology", "Methodology"),
-        ("/pe/validation", "Validation"), ("/pe/code", "Code"),
-        ("/papers/pe-microsim", "Paper"))),
+        ("/pe/validation", "Validation"), ("/pe/code", "Use it"))),
     "define": ("DEFINE-UK pages", (
         ("/define", "Overview"), ("/define/methodology", "Methodology"),
-        ("/define/validation", "Validation"), ("/define/code", "Code"),
-        ("/papers/define-uk", "Paper"))),
+        ("/define/validation", "Validation"), ("/define/code", "Use it"))),
 }
-# Pages that belong to a model's row without being one of its five URLs:
-# the replication report is read as DEFINE-UK's Paper tab, so on that page
-# the Paper tab points at the report itself and is the chosen one.
-SUBTAB_EXTRA = {"/reports/define-uk-replication": ("define", "Paper")}
+# Pages that belong to a model's row without being one of its URLs. r12:
+# the Paper tab folded into Methodology (Fable 5.2), so each paper (and
+# DEFINE-UK's replication report) shows the row with Methodology chosen; the
+# chosen tab still links back to the Methodology page itself.
+SUBTAB_EXTRA = {
+    "/papers/obr-macro": ("obr", "Methodology"),
+    "/papers/boe-svar": ("svar", "Methodology"),
+    "/papers/frb-us": ("frb-us", "Methodology"),
+    "/papers/psl-og": ("olg", "Methodology"),
+    "/papers/pe-microsim": ("pe", "Methodology"),
+    "/papers/define-uk": ("define", "Methodology"),
+    "/reports/define-uk-replication": ("define", "Methodology"),
+}
 SUBTAB_ROW = re.compile(r'<nav class="model-tabs" aria-label="[^"]* pages">.*?</nav>', re.DOTALL)
 
 
@@ -302,7 +305,10 @@ def subtabs(url: str) -> str | None:
     aria, tabs = SUBTABS[key]
     rows = []
     for href, label in tabs:
-        if label == chosen:
+        if label == chosen and url in SUBTAB_EXTRA:
+            # a page filed under this tab: highlight it, keep the route back
+            rows.append(f'      <a class="model-tabs-link" href="{href}" aria-current="true">{label}</a>')
+        elif label == chosen:
             href = url
             rows.append(f'      <a class="model-tabs-link" href="{href}" aria-current="page">{label}</a>')
         else:
