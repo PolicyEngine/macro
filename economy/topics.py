@@ -64,9 +64,9 @@ ECONOMY_PAGE = ROOT / "economy" / "index.html"
 US_TOPICS_DIR = ROOT / "economy" / "us" / "topics"
 US_PAGE = ROOT / "economy" / "us" / "index.html"
 FORECASTS_PAGE = ROOT / "forecasts" / "index.html"
-# The UK routes table lives on /models/combine (ui-home gave it a home there
+# The UK routes table lives on /models#joins (ui-home gave it a home there
 # in #204); /forecasts keeps the callout and links to it, so it appears once.
-MODELS_COMBINE_PAGE = ROOT / "models" / "combine" / "index.html"
+MODELS_COMBINE_PAGE = ROOT / "models" / "index.html"
 US_FORECASTS_PAGE = ROOT / "forecasts" / "us" / "index.html"
 SITEMAP = ROOT / "sitemap.xml"
 SITE = "https://policyengine-macro.vercel.app"
@@ -1676,14 +1676,14 @@ def uk_platform() -> str:
         <strong>pe-microsim does not forecast, and this section does not
         pretend it does.</strong> The forecast rows are
         {model_link("boe-svar")}; the scoreboard above is what those rounds
-        have been worth so far. <a href="/models/combine#score">See how a score is put together →</a>
+        have been worth so far. <a href="/models#score">See how a score is put together →</a>
       </p>
-      <p><a href="/models/combine#routes">The six routes and their commands →</a></p>
+      <p><a href="/models#routes">The six routes and their commands →</a></p>
     </div>"""
 
 
 def uk_routes() -> str:
-    """/models/combine#routes: the six things the platform can produce for the UK."""
+    """/models#routes: the six things the platform can produce for the UK."""
     microsim = MODELS["pe-microsim"]
     svar = MODELS["boe-svar"]
     rows = [
