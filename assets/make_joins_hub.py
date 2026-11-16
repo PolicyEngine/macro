@@ -46,7 +46,7 @@ USES = (
       ("landmark", "OBR emulator", "adds GDP feedback"),
       ("check-circle", "Cost + GDP feedback", "UK only"))),
     ("shock", "incidence", "users", "Who gains and loses from a shock", "Experimental", "exp",
-     (("activity", "A shock model", "BoE SVAR · FRB/US · US HANK · DEFINE-UK"),
+     (("activity", "A macro model's path", "BoE SVAR · FRB/US · US HANK · DEFINE-UK"),
       ("calculator", "Microsimulation", "splits it by household"),
       ("check-circle", "Winners and losers", "UK + US"))),
     ("long", "og-join", "hourglass", "Long-run dynamic score", "Local only", "local",
