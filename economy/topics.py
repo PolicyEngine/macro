@@ -615,18 +615,26 @@ def satellite_has_no_surface() -> bool:
 
 # --------------------------------------------------------------- page pieces
 
-def _card(heading: str, value: str, note: str, series: dict, period: str) -> str:
-    """A stat tile (DESIGN.md §4.2): this page is the home of the reading."""
-    return f"""      <div class="stat">
-        <span class="stat-label">{heading}</span>
+def _card(heading: str, value: str, note: str, series: dict, period: str,
+          change: str = "") -> str:
+    """A stat tile (DESIGN.md §4.2): value, label, change chip and period.
+
+    Vintage, units and the source code sit in a small info popover, so the
+    tile face carries the reading and nothing else.
+    """
+    chip = ""
+    if change:
+        head = change.split(" ", 1)[0]
+        arrow = "\u25b2" if head.startswith("+") else ("\u25bc" if head.startswith("\u2212") else "")
+        chip = f'<span class="stat-chg" title="{esc(change)}">{arrow} {esc(head)}</span>'
+    return f"""      <div class="stat tp-stat">
+        <span class="stat-label">{heading}<details class="stat-meta"><summary aria-label="About this reading">{site_nav.icon("info", 14)}</summary><span class="stat-meta-pop">{esc(period)} · vintage {esc(series["vintage"])}<br>{note}<br><a href="{esc(series["url"])}">{esc(series["source"])} · {esc(series["cdid"])}</a></span></details></span>
         <span class="stat-value">{value}</span>
-        <span class="stat-sub">{esc(period)} &middot; vintage {esc(series["vintage"])}</span>
-        <span class="stat-note">{note}</span>
-        <span class="stat-foot"><a class="chip" href="{esc(series["url"])}">{esc(series["source"])} &middot; {esc(series["cdid"])}</a></span>
+        <span class="stat-sub">{esc(period)} &middot; {chip or "latest reading"}</span>
       </div>"""
 
 
-def stat_card(series: dict, kind: str | None = None) -> str:
+def stat_card(series: dict, kind: str | None = None, change: str = "") -> str:
     """One reading, as the snapshot stores it — or explicitly derived from it.
 
     The ONS publishes CPI and the unemployment rate as rates, so a UK card can
@@ -643,6 +651,7 @@ def stat_card(series: dict, kind: str | None = None) -> str:
             esc(series["units"]),
             series,
             now["period"],
+            change,
         )
     now, before, unmatched = latest_year_on_year(series)
     change = 100 * (now["value"] / before["value"] - 1)
@@ -745,6 +754,15 @@ def movement(name: str) -> str:
     return f"{esc(label(series))} {change} against {against}"
 
 
+def _change_of(name: str) -> str:
+    """The signed change movement() computes, without the series label."""
+    if name not in MOVEMENT:
+        return ""
+    text = movement(name)
+    lab = esc(label(load(name))) + " "
+    return text[len(lab):] if text.startswith(lab) else ""
+
+
 def movement_note(names: tuple[str, ...]) -> str:
     joined = "; ".join(movement(name) for name in names)
     return (
@@ -761,7 +779,7 @@ def stands(cards: tuple[tuple[str, str | None], ...], note: str,
     distinct series the topic reads, which is what the movement note and the
     provenance table are keyed on.
     """
-    rendered = "\n".join(stat_card(load(name), kind) for name, kind in cards)
+    rendered = "\n".join(stat_card(load(name), kind, _change_of(name)) for name, kind in cards)
     measured = (
         '    <details class="about"><summary>How these are measured</summary>'
         f'<p class="economy-method">{note}</p></details>'
@@ -934,20 +952,13 @@ def growth_model() -> str:
             "</tr>"
         )
     return f"""    <div class="prose">
-      <p>
-        One model in the suite forecasts UK output: <a href="/svar">BoE SVAR</a>,
-        the {esc(model["display_name"])}. The round generated
-        {esc(forecast["generated"])} conditions on data through
-        {esc(forecast["data_edge"])}; its path, from {esc(facts["period"])}, is
-        in the chart below, after the last two years of ONS outturns.
-      </p>
+      <p class="model-chips"><a class="mchip" href="/svar">{site_nav.icon("activity", 14)}BoE SVAR</a><span class="mchip-t">forecasts UK GDP · round {esc(forecast["generated"])} · data to {esc(forecast["data_edge"])}</span></p>
       <figure class="vchart-figure">
 {path_chart("topic-gdp-path", "gdp", "UK real GDP", "% change on a year earlier", open_rows[:5], forecast["generated"], history=yoy(facts["gdp"], 4)[-8:], vintage=facts["gdp"]["vintage"], history_note="ABMI, growth derived from the stored level,")}
       </figure>
-      <p class="callout">
-        <strong>Predictive validation: {esc(quality["level"])}.</strong>
+      <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Predictive validation: {esc(quality["level"])}.</strong>
         {esc(verdict_line(quality["evidence"]))}
-        <a href="/svar/validation">Read the validation page →</a>
+        <a href="/svar/validation">Validation →</a>
       </p>
       <details class="about">
         <summary>Its limits</summary>
@@ -970,11 +981,7 @@ def growth_model() -> str:
         </table>
       </div>
       </details>
-      <p class="chooser-note">
-        Every round is archived before the outturn exists, and scored against
-        the outturn as published, with the snapshot it was read from recorded
-        — <a href="/forecasts#scored">see the scoreboard →</a>
-      </p>
+      <p class="link-row">{site_nav.icon("check-circle", 16)}<a href="/forecasts#scored">Every round is archived before its outturn and scored: see the scoreboard</a></p>
     </div>"""
 
 
@@ -1056,20 +1063,14 @@ def inflation_model() -> str:
         else "Its median stays below 3% across the archived horizon."
     )
     return f"""    <div class="prose">
-      <p>
-        <a href="/svar">BoE SVAR</a> — the {esc(model["display_name"])} — forecasts
-        headline CPI. The chart joins the last two years of ONS outturns to
-        the round generated {esc(facts["forecast"]["generated"])}, from
-        {esc(facts["period"])}, the first quarter without a published outturn.
-        {reaches}
-      </p>
+      <p class="model-chips"><a class="mchip" href="/svar">{site_nav.icon("activity", 14)}BoE SVAR</a><span class="mchip-t">forecasts UK CPI · round {esc(facts["forecast"]["generated"])} · path from {esc(facts["period"])}</span></p>
+      <p class="model-note">{reaches}</p>
       <figure class="vchart-figure">
 {path_chart("topic-cpi-path", "cpi", "UK CPI", "% change on a year earlier", open_rows[:5], facts["forecast"]["generated"], history=facts["cpi"]["observations"][-8:], vintage=facts["cpi"]["vintage"], history_note="D7G7,")}
       </figure>
-      <p class="callout">
-        <strong>Predictive validation: {esc(quality["level"])}.</strong>
+      <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Predictive validation: {esc(quality["level"])}.</strong>
         {esc(verdict_line(quality["evidence"]))}
-        <a href="/svar/validation">Read the validation page →</a>
+        <a href="/svar/validation">Validation →</a>
       </p>
       <details class="about">
         <summary>Its limits</summary>
@@ -1381,8 +1382,7 @@ def public_finances_model() -> str:
         f"Status: {esc(model['status'])}. Uncertainty: {esc(model['uncertainty'])}.",
         f"Baseline: {esc(model['data_vintage'])}, so every scenario is a deviation from that vintage, not from today's outturn.",
     ])}
-      <p class="callout">
-        <strong>Predictive validation: {esc(predictive["level"])}.</strong>
+      <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Predictive validation: {esc(predictive["level"])}.</strong>
         {esc(verdict_line(predictive["evidence"]))}
         <strong>Policy counterfactuals: {esc(counterfactual["level"])}.</strong>
         {esc(verdict_line(counterfactual["evidence"]))}
@@ -2252,8 +2252,7 @@ def us_growth_model() -> str:
 {us_baseline_chart("us-topic-gdp-path", "US real GDP", "% change on a year earlier", "gdp_yoy_pct", facts["gdp"], yoy(facts["gdp"], 4)[-8:], ", growth derived from the stored level")}
       </figure>
 {longbase_expander("gdp_yoy_pct", facts["now"]["period"])}
-      <p class="callout">
-        <strong>Predictive validation: {registry_terms([frbus["quality"]["predictive_validation"]["level"]])}.</strong>
+      <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Predictive validation: {registry_terms([frbus["quality"]["predictive_validation"]["level"]])}.</strong>
         {esc(frbus["quality"]["predictive_validation"]["evidence"])}
         <a href="/frb-us/validation">Read the validation page →</a>
       </p>
@@ -3187,7 +3186,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
-<link rel="stylesheet" href="/economy/topic-page.css?v=2" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=3" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -3215,11 +3214,11 @@ def page(topic: dict) -> str:
 
   <section class="band tp-next" aria-labelledby="next-h">
     <h2 id="next-h">Read next</h2>
-    <ul>
-      <li><a href="{COUNTRIES[topic["country"]]["hub"]}">{site_nav.icon("forecasts", 16)}Forecasts: the record and open rounds</a></li>
-      <li><a href="{COUNTRIES[topic["country"]]["data"]}">{site_nav.icon("list", 16)}{COUNTRIES[topic["country"]]["label"]} data: every topic and series</a></li>
-      <li><a href="/connect">{site_nav.icon("use", 16)}Run these models yourself</a></li>
-    </ul>
+    <p class="tp-chips">
+      <a href="{COUNTRIES[topic["country"]]["hub"]}">{site_nav.icon("forecasts", 16)}Track record</a>
+      <a href="{COUNTRIES[topic["country"]]["data"]}">{site_nav.icon("list", 16)}{COUNTRIES[topic["country"]]["label"]} data</a>
+      <a href="/connect">{site_nav.icon("use", 16)}Run the models</a>
+    </p>
   </section>
 </main>
 
