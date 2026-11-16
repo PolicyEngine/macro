@@ -831,9 +831,9 @@ def render_status(card: dict) -> str:
     pending = card.get("pending_detail")
     fetched = store_last_fetched()
     if pending:
-        who = ", ".join(f"{VARIABLE_LABELS.get(v, v)}" for v in pending["variables"])
-        next_sub = (f"Next: <span class=\"nowrap\">{esc(pending['period'])}</span>, {esc(who)}. "
-                    f"Store updated <span class=\"nowrap\">{esc(fetched)}</span>.")
+        short = {"gdp": "GDP", "cpi": "CPI", "unemployment": "unemployment"}
+        who = ", ".join(short.get(v, v) for v in pending["variables"])
+        next_sub = f"Next: <span class=\"nowrap\">{esc(pending['period'])}</span> {esc(who)}."
     else:
         next_sub = "Every archived period has an outturn."
     pips = bars = ""
@@ -845,11 +845,11 @@ def render_status(card: dict) -> str:
         naive_vs = (", lower than the model's"
                     if sum(naive) < sum(e["abs_error"] for e in entries) else "")
         cover_value = f"{in68} of {scored}"
-        cover_sub = f"{in90} of {scored} inside the 90% band. Bands as archived."
+        cover_sub = f"{in90} of {scored} in the 90% band; as archived."
         mae_value = f"{mae:.2f}pp"
         if len(naive) == scored:
             naive_mae = sum(naive) / len(naive)
-            mae_sub = f"No change: {naive_mae:.2f}pp over the same {scored} forecasts{naive_vs}."
+            mae_sub = f"No change: {naive_mae:.2f}pp{' (lower)' if naive_vs else ''}, same {scored}."
             top = max(mae, naive_mae)
             bars = (
                 '          <div class="fc-bars" aria-hidden="true">'
@@ -872,8 +872,8 @@ def render_status(card: dict) -> str:
     if scored:
         last = max(e["outturn_vintage"] for e in entries)
         asof = (f'      <p class="record-asof"><strong>Last scored <time datetime="{esc(last)}">'
-                f'{esc(long_date(last))}</time>.</strong> Outturns published after that date are '
-                'not in the record yet.</p>')
+                f'{esc(long_date(last))}</time>.</strong> Later outturns are not in yet. '
+                f'Store updated <span class="nowrap">{esc(fetched)}</span>.</p>')
     else:
         asof = '      <p class="record-asof"><strong>Nothing scored yet.</strong></p>'
 
@@ -894,7 +894,7 @@ def render_status(card: dict) -> str:
         *tile("target", cover_value, "inside the 68% band", cover_sub, pips),
         *tile("ruler", mae_value, "mean absolute error", mae_sub, bars),
         *tile("layers", f"{scored_rounds} of {rounds}", f"round{'' if rounds == 1 else 's'} scored",
-              f"{scored} forecast{'' if scored == 1 else 's'} in all. {next_sub}"),
+              next_sub),
         "      </div>",
         *([f'      <p class="fc-callout">{icon("info")}<span>{scored} score{' is' if scored == 1 else 's are'} '
            'too few to show skill either way. <a href="#limits">Limits</a></span></p>']
@@ -1011,7 +1011,7 @@ def render_results(card: dict) -> str:
         return "      <!-- nothing scored yet -->"
 
     body = [
-        '      <h3 class="sb-h" id="record">The record</h3>',
+        f'      <h3 class="sb-h" id="record">{icon("layers", "fc-ic fc-th-ic")}The record</h3>',
         '      <ul class="fc-legend" aria-hidden="true">'
         '<li><span class="fc-sw fc-sw-90"></span>90% band</li>'
         '<li><span class="fc-sw fc-sw-68"></span>68% band</li>'
@@ -1019,9 +1019,9 @@ def render_results(card: dict) -> str:
         '<li><span class="fc-sw fc-sw-out"></span>outturn</li>'
         '<li class="fc-legend-note">Each strip is scaled to its own 90% band, whose ends are labelled; bands as archived.</li></ul>',
         '      <div class="fc-board" role="table" aria-label="Every scored forecast: archived median and bands, outturn, error">',
-        '        <div class="fc-row fc-head" role="row"><span role="columnheader">Target and round</span>'
-        '<span role="columnheader">Median, bands and outturn</span>'
-        '<span role="columnheader">Error</span><span role="columnheader">Where it fell</span></div>',
+        f'        <div class="fc-row fc-head" role="row"><span role="columnheader">{icon("target", "fc-ic fc-th-ic")}Target and round</span>'
+        f'<span role="columnheader">{icon("gdp", "fc-ic fc-th-ic")}Median, bands and outturn</span>'
+        f'<span role="columnheader">{icon("ruler", "fc-ic fc-th-ic")}Error</span><span role="columnheader">{icon("inside", "fc-ic fc-th-ic")}Where it fell</span></div>',
     ]
     first_round = card["detail"][0]["round_id"] if card["detail"] else None
     for detail, e in rows:
