@@ -738,11 +738,13 @@ def render_status(card: dict) -> str:
         in90 = sum(1 for e in entries if e["in_90"])
         mae = sum(e["abs_error"] for e in entries) / scored
         naive = [e["naive_abs_error"] for e in entries if e.get("naive_abs_error") is not None]
+        naive_vs = (", lower than the model's"
+                    if sum(naive) < sum(e["abs_error"] for e in entries) else "")
         cover_value = f"{in68} of {scored}"
         cover_sub = f"bands as archived; {in90} of {scored} inside the 90% band"
         mae_value = f"{mae:.2f}pp"
         mae_sub = (
-            f"no change: {sum(naive) / len(naive):.2f}pp over the same {scored} forecasts; too few to show skill"
+            f"no change: {sum(naive) / len(naive):.2f}pp over the same {scored} forecasts{naive_vs}; too few to show skill either way"
             if len(naive) == scored else "no complete no-change baseline"
         )
     else:
