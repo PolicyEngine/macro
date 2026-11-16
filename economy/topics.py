@@ -1837,7 +1837,7 @@ def us_platform() -> str:
         </p>
       </details>
       <p>
-        Two UK rows are missing here; both absences are the registry's, not an oversight:
+        Two UK rows have no US equivalent:
       </p>
 {limits_list([
         "<strong>No reform with a macro second round.</strong> Both US "
