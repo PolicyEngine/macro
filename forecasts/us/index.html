@@ -20,8 +20,8 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=27" />
-<link rel="stylesheet" href="/forecasts/forecasts.css?v=18" />
+<link rel="stylesheet" href="/style.css?v=30" />
+<link rel="stylesheet" href="/forecasts/forecasts.css?v=19" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -82,7 +82,7 @@
     <ul class="fc-limits fc-limits-top">
       <li><span class="fc-li-ic"><svg class="fc-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></svg></span><span><strong><a href="/frb-us">FRB/US</a></strong> answers what a shock does; its <a href="/frb-us/validation">validation</a> makes no predictive claim.</span></li>
       <li><span class="fc-li-ic"><svg class="fc-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span><strong><a href="/us-hank">US HANK</a></strong> replicates Auclert et al. (2021); first-order, stylized, magnitudes <a href="/us-hank/validation">not validated</a>.</span></li>
-      <li><span class="fc-li-ic"><svg class="fc-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span><span><strong>The UK record exists</strong> because <a href="/svar">boe-svar</a> forecasts and accepts being scored.</span></li>
+      <li><span class="fc-li-ic"><svg class="fc-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span><span><strong>The UK record exists</strong> because <a href="/svar">BoE SVAR</a> forecasts and accepts being scored.</span></li>
     </ul>
   </section>
 
@@ -118,12 +118,12 @@
   </section>
 
   <section id="run" class="ab-sec">
-    <div class="sh"><span class="sh-icon" aria-hidden="true"><svg class="fc-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2M9 2v2M15 20v2M9 20v2M2 15h2M2 9h2M20 15h2M20 9h2"/></svg></span><h2>What the US side runs</h2><p>Four routes on pe-microsim; none takes a reform into a US macro model.</p></div>
+    <div class="sh"><span class="sh-icon" aria-hidden="true"><svg class="fc-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2M9 2v2M15 20v2M9 20v2M2 15h2M2 9h2M20 15h2M20 9h2"/></svg></span><h2>What the US side runs</h2><p>Four routes on the microsimulation; none takes a reform into a US macro model.</p></div>
     <div class="fc-run">
 <!-- us-forecasts-platform:begin -->
     <div class="prose">
       <ul>
-        <li><strong>No reform with macro feedback.</strong> <a href="/frb-us">frb-us</a> and <a href="/us-hank">us-hank</a> do not take PolicyEngine reforms; no mapping exists from a US statutory reform to a US macro model.</li>
+        <li><strong>No reform with macro feedback.</strong> <a href="/frb-us">FRB/US</a> and <a href="/us-hank">US HANK</a> do not take PolicyEngine reforms; no mapping exists from a US statutory reform to a US macro model.</li>
       </ul>
       <details class="about route-details">
         <summary>The routes, with the command for each</summary>
@@ -132,10 +132,10 @@
           <caption>What this section can produce for the US. Every command is checked against <code>cli.py</code> when this page is generated.</caption>
           <thead><tr><th scope="col">What you get</th><th scope="col">Models, in the order they run</th><th scope="col">What the chain does</th><th scope="col">Command</th></tr></thead>
           <tbody>
-          <tr><th scope="row">One household, exactly</th><td><a href="/pe">pe-microsim</a></td><td>arithmetic over the statutory rules; no sampling, no weights</td><td><code class="mono">pe-macro household-impact --country us --people &#x27;[{&quot;age&quot;:35,&quot;employment_income&quot;:50000}]&#x27; --household &#x27;{&quot;state_code&quot;:&quot;CA&quot;,&quot;county_fips&quot;:&quot;06037&quot;}&#x27; --reform &#x27;{&quot;gov.irs.credits.ctc.amount.adult_dependent&quot;:1000}&#x27;</code></td></tr>
-          <tr><th scope="row">The whole population, one policy year</th><td><a href="/pe">pe-microsim</a></td><td>revenue and distribution; a static costing</td><td><code class="mono">pe-macro score --country us --reform &#x27;{&quot;gov.irs.credits.ctc.amount.adult_dependent&quot;:1000}&#x27; --model microsim</code></td></tr>
-          <tr><th scope="row">A macro shock carried into household earnings</th><td><a href="/frb-us">frb-us</a> &rarr; <a href="/pe">pe-microsim</a></td><td>the wage-bill change applied through the automatic stabilisers</td><td><code class="mono">pe-macro frbus-shock-incidence --var rffintay_aerr --shock 1.0 --year 2027</code></td></tr>
-          <tr><th scope="row">The same question in the HANK member</th><td><a href="/us-hank">us-hank</a> &rarr; <a href="/pe">pe-microsim</a></td><td><a class="gloss-link" href="/glossary#irf">impulse responses</a> around a calibrated steady state</td><td><code class="mono">pe-macro hank-shock-incidence --kind monetary --size -0.0025 --year 2026</code></td></tr>
+          <tr><th scope="row">One household, exactly</th><td><a href="/pe">PolicyEngine microsimulation</a></td><td>arithmetic over the statutory rules; no sampling, no weights</td><td><code class="mono">pe-macro household-impact --country us --people &#x27;[{&quot;age&quot;:35,&quot;employment_income&quot;:50000}]&#x27; --household &#x27;{&quot;state_code&quot;:&quot;CA&quot;,&quot;county_fips&quot;:&quot;06037&quot;}&#x27; --reform &#x27;{&quot;gov.irs.credits.ctc.amount.adult_dependent&quot;:1000}&#x27;</code></td></tr>
+          <tr><th scope="row">The whole population, one policy year</th><td><a href="/pe">PolicyEngine microsimulation</a></td><td>revenue and distribution; a static costing</td><td><code class="mono">pe-macro score --country us --reform &#x27;{&quot;gov.irs.credits.ctc.amount.adult_dependent&quot;:1000}&#x27; --model microsim</code></td></tr>
+          <tr><th scope="row">A macro shock carried into household earnings</th><td><a href="/frb-us">FRB/US</a> &rarr; <a href="/pe">PolicyEngine microsimulation</a></td><td>the wage-bill change applied through the automatic stabilisers</td><td><code class="mono">pe-macro frbus-shock-incidence --var rffintay_aerr --shock 1.0 --year 2027</code></td></tr>
+          <tr><th scope="row">The same question in the HANK member</th><td><a href="/us-hank">US HANK</a> &rarr; <a href="/pe">PolicyEngine microsimulation</a></td><td><a class="gloss-link" href="/glossary#irf">impulse responses</a> around a calibrated steady state</td><td><code class="mono">pe-macro hank-shock-incidence --kind monetary --size -0.0025 --year 2026</code></td></tr>
           </tbody>
         </table>
       </div>
@@ -144,10 +144,10 @@
         <summary>About the engine</summary>
         <p>
           The engine underneath this section is
-          <a href="/pe">pe-microsim</a> — the only one that covers both countries, so the two
+          <a href="/pe">PolicyEngine microsimulation</a> — the only one that covers both countries, so the two
           household rows above are the same command as the UK ones with
           <span class="mono">--country us</span>. It reports
-          <span class="mono">taxes</span>, <span class="mono">benefits</span>, <span class="mono">net_income</span>, <span class="mono">revenue</span>, <span class="mono">distribution</span> over a single policy year.
+          taxes, benefits, net income, revenue, distribution over a single policy year.
         </p>
       </details>
       <details class="about">
@@ -198,7 +198,7 @@
   </nav>
 </footer>
 
-<script src="/reveal.js?v=2" defer></script>
+<script src="/reveal.js?v=3" defer></script>
 <script src="/stepper.js" defer></script>
 <script src="/assets/subnav.js" defer></script>
 </body>

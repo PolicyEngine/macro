@@ -41,15 +41,18 @@ MACRO = (
 # A step is (kind, text): "in" a plain input, "m" the microsimulation,
 # "x" a macro model, "out" the result; "v" is the verb on the next arrow.
 USES = (
-    ("score", "score", "calculator", "Score a tax reform", "UK · hosted", "hosted",
-     (("in", "Reform"), ("v", "is costed by"), ("m", "Microsimulation"), ("v", "sends the cost to"),
-      ("x", "OBR emulator"), ("v", "returns"), ("out", "Cost + GDP feedback"))),
-    ("shock", "incidence", "users", "Who gains and loses from a macro shock", "UK + US · experimental", "exp",
-     (("x2", "Any shock model|BoE SVAR · FRB/US · US HANK · DEFINE-UK"), ("v", "sends its macro path to"),
-      ("m", "Microsimulation"), ("v", "shows"), ("out", "Winners and losers"))),
-    ("long", "og-join", "hourglass", "Long-run dynamic score", "UK · local only, none published", "local",
-     (("x", "OG-UK"), ("v", "sends long-run wages to"), ("m", "Microsimulation"), ("v", "re-scores"),
-      ("out", "Dynamic score"))),
+    ("score", "score", "calculator", "Score a tax reform", "Hosted", "hosted",
+     (("calculator", "Microsimulation", "costs the reform"),
+      ("landmark", "OBR emulator", "adds GDP feedback"),
+      ("check-circle", "Cost + GDP feedback", "UK only"))),
+    ("shock", "incidence", "users", "Who gains and loses from a shock", "Experimental", "exp",
+     (("activity", "A shock model", "BoE SVAR · FRB/US · US HANK · DEFINE-UK"),
+      ("calculator", "Microsimulation", "splits it by household"),
+      ("check-circle", "Winners and losers", "UK + US"))),
+    ("long", "og-join", "hourglass", "Long-run dynamic score", "Local only", "local",
+     (("hourglass", "OG-UK", "long-run wages"),
+      ("calculator", "Microsimulation", "runs a second time"),
+      ("check-circle", "Dynamic score", "UK · none published"))),
 )
 W, H = 0, 0  # kept for callers that import the old geometry names
 
@@ -96,15 +99,19 @@ def render(page: str) -> str:
         f'<span class="mx-t"><strong>{name}</strong><small>{job}</small></span></a>'
         for mid, href, name, job in MACRO)
     uses = []
-    for key, panel, ic, title, status, cls, steps in USES:
+    for key, panel, ic, title, status, cls, nodes in USES:
         href = f"#{panel}" if on_models else f"/models#{panel}"
-        text = " → ".join(t.split("|")[0] for k, t in steps if k != "v")
+        steps = "".join(
+            f'<li class="vf-step{" vf-micro" if name == "Microsimulation" else ""}{" vf-out" if i == len(nodes) - 1 else ""}">'
+            f'<span class="vf-dot">{icon(nic, 14)}</span><span class="vf-t"><strong>{name}</strong><small>{verb}</small></span></li>'
+            for i, (nic, name, verb) in enumerate(nodes))
+        flow = " → ".join(n for _i, n, _v in nodes)
         uses.append(
-            f'      <li class="use use-{cls}"><a href="{href}">'
-            f'<span class="use-ic">{icon(ic, 18)}</span>'
-            f'<span class="use-main"><span class="use-head"><strong>{title}</strong><span class="use-chip">{status}</span></span>'
-            f'<span class="use-flow" role="img" aria-label="{text}">{_flow(steps)}</span>{_sub(steps)}</span>'
-            f'<span class="use-go" aria-hidden="true">{icon("arrow-right", 16)}</span></a></li>')
+            f'      <li class="uc uc-{cls}"><a href="{href}">'
+            f'<span class="uc-head"><span class="uc-ic">{icon(ic, 20)}</span><span class="uc-chip">{status}</span></span>'
+            f'<strong class="uc-title">{title}</strong>'
+            f'<ol class="vf" aria-label="{flow}">{steps}</ol>'
+            f'<span class="uc-go">Details {icon("arrow-right", 14)}</span></a></li>')
     macro_tier = (
         '<div class="hub2-tier hub2-macro">\n'
         f'    <p class="hub2-label">{icon("models", 14)}Six macro models: the economy-wide answer</p>\n'
@@ -114,14 +121,11 @@ def render(page: str) -> str:
     return f'''{OPEN}
 <div class="hub2" data-hub2>
   {macro_tier}
-  <ol class="hub2-uses" aria-label="What the microsimulation adds">
+  <ol class="hub2-uses uc-grid" aria-label="What the microsimulation adds">
 {chr(10).join(uses)}
   </ol>
-  <div class="hub2-tier hub2-micro">
-    <span class="hub2-micro-ic">{icon(MODEL_ICONS["pe-microsim"], 20)}</span>
-    <p><strong>The household layer: PolicyEngine microsimulation</strong><span>Every household&rsquo;s taxes and benefits, UK and US. <a href="/pe">Open the microsimulation</a></span></p>
-  </div>
-  <p class="hub2-note"><strong>No macro model feeds another.</strong> No US macro bridge: US reforms are scored statically.{note_link}</p>
+  <a class="hh-strip" href="/pe">{icon(MODEL_ICONS["pe-microsim"], 16)}<span><strong>The household layer:</strong> PolicyEngine microsimulation, every household&rsquo;s taxes and benefits, UK and US</span>{icon("arrow-right", 14)}</a>
+  <p class="hub2-note">{icon("info", 14)}<span>No macro model feeds another. No US macro bridge: US reforms are scored statically.{note_link}</span></p>
 </div>
 {CLOSE}'''
 
