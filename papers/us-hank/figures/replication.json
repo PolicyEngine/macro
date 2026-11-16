@@ -27,22 +27,54 @@
   "generated": "2026-07-29",
   "units_note": "Model units: steady-state annualized-quarterly, Y normalised to 1.",
   "targets": [
-    {"name": "Output Y", "target": 1.0, "achieved": 1.0,
-     "kind": "calibration input — imposed, not solved; deviation is an identity"},
-    {"name": "Capital K", "target": 10.0, "achieved": 10.0,
-     "kind": "calibration input — imposed, not solved; deviation is an identity"},
-    {"name": "Real rate r (quarterly)", "target": 0.0125, "achieved": 0.0125,
-     "kind": "calibration input — imposed, not solved; deviation is an identity"},
-    {"name": "Government spending G", "target": 0.2, "achieved": 0.2,
-     "kind": "calibration input — imposed, not solved; deviation is an identity"},
-    {"name": "Government debt Bg", "target": 2.8, "achieved": 2.8,
-     "kind": "calibration input — imposed, not solved; deviation is an identity"},
-    {"name": "Total wealth A+B", "target": 14.0, "achieved": 13.999999999999733,
-     "kind": "calibration input, reached through a solver — the residual is the solver's own convergence on a target it was given, i.e. a tolerance, not an accuracy"},
-    {"name": "Liquid assets B", "target": 1.04, "achieved": 1.0400000000000948,
-     "kind": "calibration input, reached through a solver — as above"},
-    {"name": "Discount factor beta", "target": 0.976, "achieved": 0.9762739008880044,
-     "kind": "SOLVED — the one row here compared against a number the paper publishes (Table B.III)"}
+    {
+      "name": "Output Y",
+      "target": 1.0,
+      "achieved": 1.0,
+      "kind": "calibration input — imposed, not solved; deviation is an identity"
+    },
+    {
+      "name": "Capital K",
+      "target": 10.0,
+      "achieved": 10.0,
+      "kind": "calibration input — imposed, not solved; deviation is an identity"
+    },
+    {
+      "name": "Real rate r (quarterly)",
+      "target": 0.0125,
+      "achieved": 0.0125,
+      "kind": "calibration input — imposed, not solved; deviation is an identity"
+    },
+    {
+      "name": "Government spending G",
+      "target": 0.2,
+      "achieved": 0.2,
+      "kind": "calibration input — imposed, not solved; deviation is an identity"
+    },
+    {
+      "name": "Government debt Bg",
+      "target": 2.8,
+      "achieved": 2.8,
+      "kind": "calibration input — imposed, not solved; deviation is an identity"
+    },
+    {
+      "name": "Total wealth A+B",
+      "target": 14.0,
+      "achieved": 13.999999999999734,
+      "kind": "calibration input, reached through a solver — the residual is the solver's own convergence on a target it was given, i.e. a tolerance, not an accuracy"
+    },
+    {
+      "name": "Liquid assets B",
+      "target": 1.04,
+      "achieved": 1.0400000000000948,
+      "kind": "calibration input, reached through a solver — as above"
+    },
+    {
+      "name": "Discount factor beta",
+      "target": 0.976,
+      "achieved": 0.9762739008880044,
+      "kind": "SOLVED — the one row here compared against a number the paper publishes (Table B.III)"
+    }
   ],
   "published_table_b3": {
     "_comment": [
@@ -57,26 +89,69 @@
     "recomputed": "2026-08-13",
     "gate": "us-hank-model tests/test_steady_state.py::test_internally_calibrated_parameters_match_published_table, |ours - published| < 5e-4",
     "parameters": [
-      {"name": "beta (discount factor)", "published": 0.976, "ours": 0.9762739008880044, "solved": "numerically"},
-      {"name": "chi1 (portfolio adjustment cost scale)", "published": 6.416, "ours": 6.4164195942140925, "solved": "numerically, from a 6.5 initial guess"},
-      {"name": "Z (TFP)", "published": 0.468, "ours": 0.4677898145312322, "solved": "analytically"},
-      {"name": "alpha (capital share)", "published": 0.33, "ours": 0.3299492385786802, "solved": "analytically"},
-      {"name": "mu_p (price markup)", "published": 1.015, "ours": 1.015228426395939, "solved": "analytically"},
-      {"name": "tau (labour tax rate)", "published": 0.356, "ours": 0.3560606060606061, "solved": "analytically"}
+      {
+        "name": "beta (discount factor)",
+        "published": 0.976,
+        "ours": 0.9762739008880044,
+        "solved": "numerically"
+      },
+      {
+        "name": "chi1 (portfolio adjustment cost scale)",
+        "published": 6.416,
+        "ours": 6.4164195942140925,
+        "solved": "numerically, from a 6.5 initial guess"
+      },
+      {
+        "name": "Z (TFP)",
+        "published": 0.468,
+        "ours": 0.4677898145312322,
+        "solved": "analytically"
+      },
+      {
+        "name": "alpha (capital share)",
+        "published": 0.33,
+        "ours": 0.3299492385786802,
+        "solved": "analytically"
+      },
+      {
+        "name": "mu_p (price markup)",
+        "published": 1.015,
+        "ours": 1.015228426395939,
+        "solved": "analytically"
+      },
+      {
+        "name": "tau (labour tax rate)",
+        "published": 0.356,
+        "ours": 0.3560606060606061,
+        "solved": "analytically"
+      }
     ],
     "unexplained_discrepancy": {
       "name": "vphi (wage Phillips curve disutility scale)",
       "published": 2.073,
       "ours": 1.7134759440504952,
       "gap_pct": -17.3,
-      "status": "UNRESOLVED and deliberately not asserted in the upstream test suite. This DAG's union_ss block yields 1.7135 where Table B.III publishes 2.073. The implementation is internally self-consistent (wnkpc = 0 at the steady state) and no asset or wealth target depends on it, but asserting a value we cannot reconcile with the paper would launder the discrepancy. It is reported here so the six agreements above are not read as a clean sweep — they are six of seven."
+      "status": "RESOLVED as a convention difference (see resolution): 1.7135 as solved, 2.0733 after multiplying by mu_w^2, against a published 2.073.",
+      "resolution": {
+        "converted": 2.0733059,
+        "converted_deviation": 0.00031,
+        "factor": "mu_w^2 = 1.21",
+        "explanation": "Resolved upstream (us-hank-model #15, merged 15 Nov 2026; issue #12). This DAG solves phi from the wage Phillips curve as the published Econometrica online appendix writes it (Appendix B.3), with the after-tax wage term divided by mu_w. The NBER working paper (w26123, eq. 69) writes mu_w multiplying that term, and its steady state is exactly mu_w^2 = 1.21 times ours, 2.0733059. Both versions print 2.073 in the calibration table, so Table B.III's phi follows the working paper's convention. The two values describe the same steady state; the upstream test now asserts vphi * mu_w^2 = 2.073.",
+        "source": "https://github.com/PolicyEngine/us-hank-model/pull/15"
+      }
     }
   },
   "residuals": [
-    {"name": "Goods market clearing", "value": 3.2936184668486135e-08,
-     "kind": "UNTARGETED — holds only by Walras' law, so this is the honest measure of steady-state accuracy"},
-    {"name": "Asset market clearing", "value": 3.126388037344441e-13,
-     "kind": "SOLVER TARGET — this is the tolerance the root-finder converged to, not an accuracy. Quoting it as the model's precision would overstate it by roughly five orders of magnitude."}
+    {
+      "name": "Goods market clearing",
+      "value": 3.2936184668486135e-08,
+      "kind": "UNTARGETED — holds only by Walras' law, so this is the honest measure of steady-state accuracy"
+    },
+    {
+      "name": "Asset market clearing",
+      "value": 3.126388037344441e-13,
+      "kind": "SOLVER TARGET — this is the tolerance the root-finder converged to, not an accuracy. Quoting it as the model's precision would overstate it by roughly five orders of magnitude."
+    }
   ],
   "independent_resolve": {
     "date": "2026-08-13",
