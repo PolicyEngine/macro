@@ -326,3 +326,42 @@
     if (rows > 14 && table.tHead) table.parentElement.classList.add("tbl-long");
   });
 })();
+
+/* Disclosure icons (r15): a details.about/.expander/.more summary with no
+   icon of its own gets a real one chosen from its words, so the old generic
+   fallback glyph never shows. Bare icon, no tile. */
+(function () {
+  "use strict";
+  var P = {
+    calendar: '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
+    code: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+    history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+    table: '<path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/>',
+    shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+    book: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+    info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>'
+  };
+  var RULES = [
+    [/^\s*why\b|what (it|this) is/i, "info"],
+    [/as it was|published on|vintage|history|archive|snapshot/i, "history"],
+    [/release|calendar|announc|schedule|date/i, "calendar"],
+    [/endpoint|file format|api|command|code|run it|cli|python|mcp|install/i, "code"],
+    [/limit|caveat|warning|known issue|fails?|not\b/i, "alert"],
+    [/evidence|validat|check|test|grade|trust/i, "shield"],
+    [/table|figures|numbers|by dimension|full/i, "table"],
+    [/data|series|source|store/i, "database"],
+    [/method|how|paper|read|equation|about/i, "book"]
+  ];
+  document.querySelectorAll("details:is(.about, .expander, .more):not(.xp) > summary").forEach(function (s) {
+    if (s.querySelector("svg")) return;
+    var text = s.textContent, key = "info";
+    for (var i = 0; i < RULES.length; i++) { if (RULES[i][0].test(text)) { key = RULES[i][1]; break; } }
+    var span = document.createElement("span");
+    span.className = "sum-ic"; span.setAttribute("aria-hidden", "true");
+    span.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">' + P[key] + "</svg>";
+    s.insertBefore(span, s.firstChild);
+    s.classList.add("has-ic");
+  });
+})();

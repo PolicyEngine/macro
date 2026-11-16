@@ -8308,3 +8308,44 @@ main .table-scroll > table :is(th, td).num { text-align: right; font-feature-set
   main .table-scroll > table.tbl-stack tbody tr:nth-child(even) > * { background: none; }
   main .table-scroll > table.tbl-stack tbody tr > [data-label]:not(:first-child) { border-top-color: #F1F3F5; }
 }
+
+/* =====================================================================
+   31. Disclosure icons, grouped accordions, compact "Read next" (r15)
+   ===================================================================== */
+/* no generic fallback glyph: the summary carries a real icon (reveal.js) */
+main details:is(.about, .expander, .more):not(.xp) > summary::before { content: none !important; display: none !important; }
+.sum-ic { display: inline-grid; place-items: center; flex: 0 0 auto; width: 18px; height: 18px; color: var(--ab-teal-700); }
+.sum-ic svg { width: 16px; height: 16px; }
+/* adjacent expanders render as one accordion card with hairline rows */
+main :is(details.xp, details.about, details.expander, details.more):has(+ :is(details.xp, details.about, details.expander, details.more)) {
+  margin-bottom: 0 !important; border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;
+}
+main :is(details.xp, details.about, details.expander, details.more) + :is(details.xp, details.about, details.expander, details.more) {
+  margin-top: 0 !important; border-top: 1px solid #F1F3F5 !important; border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;
+}
+main :is(details.xp, details.about, details.expander, details.more) + :is(details.xp, details.about, details.expander, details.more):not(:has(+ :is(details.xp, details.about, details.expander, details.more))) {
+  border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  main :is(details.xp, details.about, details.expander, details.more) + :is(details.xp, details.about, details.expander, details.more) { border-top-color: var(--border) !important; }
+}
+/* "Read next": one compact row of link chips everywhere */
+main :is(.where-next .chip-row, .tp-next .tp-chips, .where-next .entry-grid, #where-next .fc-notes) {
+  display: flex !important; flex-wrap: wrap; gap: 8px; grid-template-columns: none; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important;
+}
+main :is(.where-next .chip-row > a, .tp-next .tp-chips > a, .where-next .entry-grid > a, .next-row .next-btn, #where-next .fc-notes > a) {
+  display: inline-flex !important; flex: 0 0 auto; align-items: center; gap: 8px; min-height: 0 !important; height: 36px !important;
+  padding: 0 32px 0 12px !important; border: 1px solid var(--ab-border) !important; border-radius: 999px !important;
+  background: var(--card) !important; color: var(--text-strong) !important; font-size: 13px !important; font-weight: 600; text-decoration: none; white-space: nowrap; transform: none !important;
+}
+main :is(.where-next .chip-row > a, .tp-next .tp-chips > a, .where-next .entry-grid > a, .next-row .next-btn, #where-next .fc-notes > a)::after {
+  content: "" !important; position: absolute; right: 12px; top: 50%; width: 13px; height: 13px; transform: translateY(-50%); background: var(--ab-teal-700);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+#where-next .fc-notes > a { position: relative; }
+#where-next .fc-notes > a > span:not(.fc-li-ic) { display: none; }
+#where-next .fc-notes > a > strong { font-weight: 600; }
+main .where-next .entry-grid > a p { display: none; }
+main .where-next .entry-grid > a h3 { font-size: 13px; }
+main :is(.where-next, .tp-next, #where-next) .sh > p { display: none; }
