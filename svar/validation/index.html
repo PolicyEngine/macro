@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=27" />
-<link rel="stylesheet" href="/models/model-pages.css?v=15" />
+<link rel="stylesheet" href="/models/model-pages.css?v=16" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -81,7 +81,7 @@
     <div class="rail-main">
   <section class="band band-wide" id="trust">
     <div class="band-head" data-icon="shield">
-      <h2>Partial replication: GDP decomposition consistent; no forecast skill against a drifting random walk</h2>
+      <h2>GDP decomposition consistent with the paper; no forecast skill</h2>
       <p class="section-intro">Two checks: replication against the published paper, and forecasts scored against outturns.</p>
     </div>
     <div class="stat-row">
@@ -104,17 +104,14 @@
         <span class="stat-foot"><a class="chip chip-warn" href="#forecasters">No skill</a></span>
       </div>
     </div>
-    <p class="callout callout-neutral">This is an independent replication built from Bank of England Macro
-        Technical Paper No. 3 and public data. It is not produced,
-        maintained, or endorsed by the Bank of England, and its results
-        should not be presented as Bank of England estimates.</p>
+    <p class="callout callout-neutral">An independent replication built from Bank of England Macro Technical Paper No. 3 and public data. It is not produced, maintained or endorsed by the Bank of England; do not present its results as Bank of England estimates.</p>
   </section>
 
   <section class="band band-wide" id="tests">
     <div class="band-head" data-icon="chart">
-      <h2>Replication, one frozen origin, 50 origins, the benchmark</h2>
+      <h2>The four tests</h2>
     </div>
-    <p class="section-intro">Run vintage: every replication and evaluation figure on this tab comes from the model repository as refreshed to 2026Q2 data in <a href="https://github.com/PolicyEngine/boe-var-model/pull/24">boe-var-model #24</a>, with data through 2026Q2 and the estimation sample 1992Q1&ndash;2025Q1. The figures before that refresh are at commit <a href="https://github.com/PolicyEngine/boe-var-model/tree/845e2a4">845e2a4</a>.</p>
+    <p class="section-intro">Every figure here uses data through 2026Q2 and the estimation sample 1992Q1&ndash;2025Q1 (<a href="https://github.com/PolicyEngine/boe-var-model/pull/24">boe-var-model #24</a>); earlier figures are at commit <a href="https://github.com/PolicyEngine/boe-var-model/tree/845e2a4">845e2a4</a>.</p>
     <details class="expander dim-fold">
       <summary><span><strong>Evidence by dimension:</strong> implementation fidelity strong; identification, uncertainty and vintage reproducibility moderate; predictive validation weak; policy counterfactuals not applicable</span></summary>
     <!-- Levels and next gates: integration/src/policyengine_macro/capabilities.py MODEL_QUALITY["boe-svar"]. -->
@@ -135,12 +132,10 @@
     </details>
     <details class="expander">
       <summary>What CI gates, and what is refreshed by hand</summary>
-      <p>Checks differ in how they are run.</p>
       <ul>
         <li><strong>Gated in CI:</strong> the replication invariants and the forecast archive's append-only rule.</li>
         <li><strong>Computed once and refreshed by hand:</strong> the 50-origin rolling evaluation and the coverage study.</li>
-        <li>The <a class="gloss-link" href="/glossary#sign-restrictions">sign and zero restrictions</a> are <em>imposed</em> by the identification scheme.</li>
-        <li>So that gate protects the software and cannot be evidence about the economy.</li>
+        <li>The <a class="gloss-link" href="/glossary#sign-restrictions">sign and zero restrictions</a> are <em>imposed</em> by the identification scheme, so that gate protects the software and cannot be evidence about the economy.</li>
       </ul>
     </details>
     <div class="scrolly-wrap single">
@@ -151,7 +146,7 @@
           <summary><span class="meth-step-num mono">1</span><span class="step-fold-text"><h3>Against the Bank of England paper</h3><span class="step-fold-result">UK GDP share 38.7% vs ~40%; UK CPI 41.5% vs ~50%, about 8.5pp short; figures 2&ndash;6 replicate qualitatively</span></span></summary>
         <p class="mo-lead">Global shocks&rsquo; variance shares, against Brignone &amp; Piffer (2025).</p>
         <div class="table-scroll mo-tablecard"><table>
-                <caption>Check by check against Brignone &amp; Piffer (2025); the forecast evidence is below</caption>
+                <caption>Check by check against Brignone &amp; Piffer (2025)</caption>
                 <thead><tr><th scope="col">Check</th><th scope="col">This replication</th><th scope="col">The paper</th></tr></thead>
                 <tbody>
                   <tr>
@@ -230,18 +225,9 @@
                 opinion on the production run.
               </p>
               </details>
-        <p class="kv-title">Four-quarter FEVD, ours vs paper</p>
-        <dl class="kv"><div><dt>Global, UK GDP</dt><dd>38.7% vs ~40%</dd></div><div><dt>Global, UK CPI</dt><dd>41.5% vs ~50%, about 8.5pp short</dd></div><div><dt>Identified total</dt><dd>77.3% / 78.3% vs &ldquo;around 80%&rdquo;</dd></div><div><dt>Figures 2&ndash;6</dt><dd>replicate qualitatively</dd></div><div><dt>Adding-up identity</dt><dd>exact per draw, by construction</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
-          <p>The comparison uses the paper's own definition.</p>
-          <ul>
-            <li>That is the posterior mean of the per-draw group share.</li>
-            <li>The share is of <em>total</em> four-quarter-ahead variance, which leaves about a fifth unexplained.</li>
-            <li>Identified global shocks explain <strong>38.7%</strong> of UK GDP forecast-error variance.</li>
-            <li>Brignone &amp; Piffer's figure for UK GDP is ~40%.</li>
-            <li>For UK CPI it is <strong>41.5%</strong> against ~50%.</li>
-          </ul>
+          <p>The comparison uses the paper's own definition: the posterior mean of the per-draw group share of <em>total</em> four-quarter-ahead variance, which leaves about a fifth unexplained.</p>
         </details>
               </details>
       </div>
@@ -317,7 +303,7 @@
 </ul>
 <p class="vc-notes">Each panel starts at the frozen 2024Q2 edge; the 6 quarters right of the dashed rule are not evaluated.</p>
 </div><!-- /vc-fig -->
-                <figcaption>Every outturn inside the 68% band &mdash; see the over-dispersion caveat above. Frozen 2024Q2 data edge; source: <code>papers/boe-svar/figures/figure_numbers.json</code>.</figcaption>
+                <figcaption>Every outturn sits inside the 68% band, which is over-dispersion, not a pass. Frozen 2024Q2 data edge; source: <code>papers/boe-svar/figures/figure_numbers.json</code>.</figcaption>
               </figure>
         <p class="chart-note">
               The model was right that the 2025 inflation hump would mean-revert and
@@ -334,13 +320,7 @@
                 <strong>Out-of-sample.</strong> Seven quarters ahead from the frozen
                 2024Q2 edge, the <a class="gloss-link" href="/glossary#rmse">RMSE</a> in the tiles above holds for both GDP growth and CPI inflation.
               </p>
-          <p><strong>Every outturn inside the 68% band is over-dispersion, not a pass.</strong></p>
-          <ul>
-            <li>A correct interval should contain about 9.5 of 14.</li>
-            <li>One frozen origin yields two or three effectively independent observations.</li>
-            <li>So the reading to weight is the 50-origin coverage below.</li>
-            <li>That coverage finds the opposite problem.</li>
-          </ul>
+          <p><strong>Why 14 of 14 is not a pass.</strong> A correct 68% interval should contain about 9.5 of 14, and one frozen origin yields only two or three effectively independent observations. Weight the <a href="#rolling">50-origin coverage</a> instead, which finds the opposite problem.</p>
         </details>
               </details>
       </div>
@@ -348,7 +328,7 @@
       <div class="meth-step meth-fold" data-step="2">
         <details class="expander step-fold" id="rolling">
           <summary><span class="meth-step-num mono">3</span><span class="step-fold-text"><h3>Across 50 origins</h3><span class="step-fold-result">68% band 70% at h=1, 57% at h=8; the 90% band under-covers at every horizon</span></span></summary>
-        <p class="mo-lead">The rolling evaluation, and the reading to weight over the single origin.</p>
+        <p class="mo-lead">The rolling evaluation: the reading to weight over the single origin.</p>
         <figure class="vfig">
         <div class="vc-fig" data-chart="svar-coverage" style="--vc-min-h:260px">
 <p class="vc-unit">Share of outturns inside the band, %</p>
@@ -419,13 +399,7 @@
         <dl class="kv kv-text"><div><dt>Run</dt><dd>evaluation model without Covid dummies</dd></div><div><dt>68% band, h=1</dt><dd>70%, just above nominal</dd></div><div><dt>68% band, h=8</dt><dd>57%</dd></div><div><dt>90% band</dt><dd>under-covers at every horizon</dd></div><div><dt>Unemployment satellite</dt><dd>beats no-change at h=1&ndash;4 only, not significant</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
-          <p><strong>Rolling-origin audit.</strong> One frozen origin is not evidence of broad forecast superiority.</p>
-          <ul>
-            <li>Across 50 expanding-window origins, no variable beats a drifting random walk.</li>
-            <li>That holds at any horizon once the 64 tests are adjusted together.</li>
-            <li>The detail is in the <a href="#forecasters">benchmark section below</a>.</li>
-            <li>Three attempts to recalibrate the bands after the fact are in the <a href="#coverage-fixes">limits</a>.</li>
-          </ul>
+          <p><strong>Rolling-origin audit.</strong> One frozen origin is not evidence of broad forecast superiority: across 50 expanding-window origins, no variable beats a drifting random walk at any horizon once the 64 tests are adjusted together (<a href="#forecasters">test 4</a>). Three attempts to recalibrate the bands after the fact are in the <a href="#coverage-fixes">limits</a>.</p>
           <p>
                 <strong>The svar-unemployment satellite.</strong> It beats
                 no-change only at horizons 1&ndash;4 (relative RMSE 0.82&ndash;0.99,
@@ -441,7 +415,7 @@
       <div class="meth-step meth-fold" data-step="3">
         <details class="expander step-fold" id="forecasters">
           <summary><span class="meth-step-num mono">4</span><span class="step-fold-text"><h3>Against a drifting random walk</h3><span class="step-fold-result">No forecasting win survives the number of tests run: Bank Rate closest at 0.79, adjusted wins zero at every horizon</span></span></summary>
-        <p class="mo-lead">No forecasting win survives the number of tests run.</p>
+        <p class="mo-lead">Error ratios for eight variables at horizons 1&ndash;8, across the same 50 origins.</p>
         <details class="more">
               <summary>Benchmark diagnostics, and what official forecasters report</summary>
               <h4>BoE SVAR against a random walk, computed from our own runs</h4>
@@ -728,13 +702,7 @@
                 emulator's</a> tracking of the official forecast (replication, not
                 forecasting).
               </p>
-          <p><strong>No forecasting win survives the number of tests run.</strong></p>
-          <ul>
-            <li>Bank Rate comes closest: 0.79 against a drifting random walk at one quarter.</li>
-            <li>That is the smallest of 64 variable&times;horizon tests, at p&nbsp;=&nbsp;0.018.</li>
-            <li>Adjusted together (Benjamini&ndash;Hochberg), nothing clears a 10% false-discovery rate.</li>
-            <li>That holds on any variable at any horizon.</li>
-          </ul>
+          <p><strong>The closest to a win.</strong> Bank Rate at one quarter, 0.79 against a drifting random walk, is the smallest of 64 variable&times;horizon tests at p&nbsp;=&nbsp;0.018. Adjusted together (Benjamini&ndash;Hochberg), nothing clears a 10% false-discovery rate on any variable at any horizon.</p>
         </details>
               </details>
       </div>
@@ -749,7 +717,7 @@
     </div>
     <div class="prose">
       <div class="table-scroll mo-tablecard"><table>
-        <caption>Known limits of the structural VAR replication</caption>
+        <caption>Known limits of the replication</caption>
         <thead><tr><th scope="col">Limit</th><th scope="col">Detail</th></tr></thead>
         <tbody>
           <tr>
@@ -786,16 +754,13 @@
           </tr>
         </tbody>
       </table></div>
-      <p class="opt-note">
-        every deviation is enumerated in the repository's
-        <code>docs/methodology.md</code>.
-      </p>
+      <p class="opt-note">Every deviation is listed in the repository's <code>docs/methodology.md</code>.</p>
     </div>
   </section>
 
   <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
     <div class="chip-row">
-      <a class="chip chip-brand" href="/svar/code">Code</a>
+      <a class="chip chip-brand" href="/svar/code">Use it</a>
       <a class="chip" href="/models#validation">Every model&rsquo;s verdict</a>
       <a class="chip chip-brand" href="/papers/boe-svar">The working paper</a>
     </div>

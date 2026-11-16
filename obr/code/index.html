@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=27" />
-<link rel="stylesheet" href="/models/model-pages.css?v=15" />
+<link rel="stylesheet" href="/models/model-pages.css?v=16" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -72,40 +72,29 @@
     <div class="band-head" data-icon="play">
       <h2>Shock a variable, read the deviation</h2>
     </div>
-    <div class="prose">
-      <p>
-        Four steps, from hosted tools to a local run.
-      </p>
-    </div>
 
     <div class="scrolly-wrap scrolly-code single">
       <div class="scrolly-steps">
       <div class="meth-step" id="code-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Start hosted: the MCP server</h3></div>
-        <p>
-          The quickest route is the <a href="/connect">hosted MCP server</a> —
-          no install, no credentials.</p>
+        <p>The quickest route is the <a href="/connect">hosted MCP server</a>: no install, no credentials, three tools.</p>
         <details class="about">
-          <summary>About this step</summary>
-          <p><code>obr_shock</code> shocks one
-          variable in model units and reads the per-quarter GDP deviation;
-          <code>list_reform_variables</code> lists the shockable levers with
-          units; <code>score_reform</code> with <code>model="obr"</code>
-          scores a PolicyEngine reform end to end through the static-costing
-          bridge (<a href="/obr#pe-bridge">how a reform reaches it</a>; <a href="/obr/validation#caveats">limits</a>).
-        </p>
+          <summary>The three tools</summary>
+          <ul>
+            <li><code>obr_shock</code> shocks one variable in model units and returns the per-quarter GDP deviation.</li>
+            <li><code>list_reform_variables</code> lists the shockable levers with units.</li>
+            <li><code>score_reform</code> with <code>model="obr"</code> scores a PolicyEngine reform end to end through the static-costing bridge (<a href="/obr#pe-bridge">how a reform reaches it</a>).</li>
+          </ul>
         </details>
       </div>
 
       <div class="meth-step" id="code-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Or from the CLI</h3></div>
         <p>
-          The <code>pe-macro</code> CLI mirrors the hosted tools one for one:
-          shock a variable, list the levers, or score a reform from the
-          terminal. <code>pe-macro compare</code> runs the same reform through
+          The <code>pe-macro</code> CLI mirrors the hosted tools one for one.
+          <code>pe-macro compare</code> runs the same reform through
           the static and the macro route side by side.
         </p>
-        <p class="kv-title">CLI equivalents</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro obr-shock --var CGG --shock 1250
 pe-macro variables
 pe-macro score --country uk \
@@ -116,10 +105,9 @@ pe-macro score --country uk \
       <div class="meth-step" id="code-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Install and run locally</h3></div>
         <p>
-          Locally, the package installs straight from GitHub — the equation
-          listing, the March 2026 EFO forecast tables, and the ONS snapshot
-          ship inside it, so there is no data step.</p>
-        <p class="kv-title">Install and run</p>
+          The package installs from GitHub. The equation listing, the
+          March 2026 EFO forecast tables and the ONS snapshot ship inside
+          it, so there is no data step.</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/obr-macroeconomic-model</code></pre></div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> obr_macro <span class="kw">import</span> run_reform
 
@@ -137,15 +125,13 @@ results = run_reform(
           <summary>About this step</summary>
           <p>A reform is one call:
           pick an <a class="gloss-link" href="/glossary#exogenous">exogenous</a> variable, apply a shock, read the deviation from
-          the anchored March 2026 baseline (<a href="/obr/methodology#meth-5">why the deviation is clean</a>).
+          the anchored March 2026 baseline (<a href="/obr/methodology#meth-5">why the deviation is clean</a>). It is two solves, so about a minute.
         </p>
           <p class="opt-note">
-          Two solves, so about a minute.
           <code>python -m obr_macro.reform_analysis</code> runs the five
-          bundled scenarios — a £5bn spending rise, a 5pp corporation-tax cut
-          and rise, £10bn public real investment (~£3bn nominal
-          <code>CGIPS</code> per quarter, which the <a href="/obr/validation#caveats">limits</a> say not to score), and a £10bn spending cut — with
-          charts landing in <code>outputs/</code>.
+          bundled scenarios, with charts landing in <code>outputs/</code>: a £5bn spending rise, a 5pp corporation-tax cut
+          and rise, a £10bn spending cut, and £10bn public real investment (~£3bn nominal
+          <code>CGIPS</code> per quarter, which should not be scored).
         </p>
           <p class="opt-note">
           To score a statutory reform end to end from Python, install the
@@ -159,17 +145,15 @@ results = run_reform(
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Pick a lever</h3></div>
         <p>
           Reforms enter through the 253 exogenous inputs; results come out of
-          the 383 variables the model solves for — the test is simply whether
-          a variable has its own equation. The most useful levers and readouts
-          are listed below.
+          the 383 variables the model solves for. A variable is a readout if
+          it has its own equation.
         </p>
-        <p class="kv-title">Levers and readouts</p>
         <div class="dial-cards">
           <div class="dial-card">
             <div class="dial-name mono">levers — set these (exogenous)</div>
             <div class="dial-choice"><code>CGG</code><span class="dial-tradeoff"><strong>Government consumption</strong> — spending shocks, £m per quarter</span></div>
-            <div class="dial-choice"><code>CGIPS</code><span class="dial-tradeoff"><strong>Central government investment</strong> — public investment, £m per quarter (nominal). <strong>Dead channel:</strong> total investment has no live equation, so GDP does not move, against the OBR&rsquo;s published 1.0. Do not score capital spending with it (<a href="/obr/validation#caveats">limits</a>)</span></div>
-            <div class="dial-choice"><code>TCPRO</code><span class="dial-tradeoff"><strong>Corporation tax rate</strong> — rate, e.g. &minus;0.05 for a 5pp cut. <strong>Converges slowly:</strong> since the log-space anchor fix the response reaches a plateau, but the root is slow &mdash; a 12-quarter run captures only ~40% of the full effect, and the result reports its <code>plateau_fraction</code></span></div>
+            <div class="dial-choice"><code>CGIPS</code><span class="dial-tradeoff"><strong>Central government investment</strong> — £m per quarter (nominal). <strong>Dead channel:</strong> total investment has no live equation, so GDP does not move, against the OBR&rsquo;s published 1.0. Do not score capital spending with it</span></div>
+            <div class="dial-choice"><code>TCPRO</code><span class="dial-tradeoff"><strong>Corporation tax rate</strong> — rate, e.g. &minus;0.05 for a 5pp cut. <strong>Converges slowly:</strong> a 12-quarter run captures only ~40% of the full effect, and the result reports its <code>plateau_fraction</code></span></div>
             <div class="dial-choice"><code>HHDI_ADDFACTOR</code><span class="dial-tradeoff"><strong>Externally costed household reform</strong> — virtual instrument, quarterly £m; positive revenue lowers HHDI via a held add-factor</span></div>
             <div class="dial-choice"><code>R / GILT / RX</code><span class="dial-tradeoff"><strong>Bank Rate &middot; gilt yields &middot; exchange rate</strong> — monetary &amp; market assumptions</span></div>
           </div>
@@ -184,8 +168,8 @@ results = run_reform(
         <details class="about">
           <summary>About this step</summary>
           <p class="opt-note">
-          The full glossary — all 636 codes with descriptions, ONS series and
-          equations — is the model package's variable and equation references.
+          All 636 codes, with descriptions, ONS series and equations, are in
+          the model package's variable and equation references.
           Read each lever&rsquo;s caveat before quoting a result: the
           <a href="/obr/validation#caveats">limits</a> say which carry behaviour.
         </p>

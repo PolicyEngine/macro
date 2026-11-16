@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=27" />
-<link rel="stylesheet" href="/models/model-pages.css?v=15" />
+<link rel="stylesheet" href="/models/model-pages.css?v=16" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -79,7 +79,7 @@
     <div class="rail-main">
   <section class="band band-wide" id="trust">
     <div class="band-head" data-icon="shield">
-      <h2>Checked rule by rule, not against a forecast</h2>
+      <h2>Headline numbers</h2>
       <p class="section-intro">Household maths is exact; population costings are survey-weighted estimates with no interval.</p>
     </div>
     <div class="stat-row">
@@ -115,7 +115,8 @@
 
   <section class="band band-wide" id="tests">
     <div class="band-head" data-icon="chart">
-      <h2>The rules, and the one costing benchmark</h2>
+      <h2>The two checks</h2>
+      <p class="section-intro">Rule arithmetic by hand, and one costing against HMRC.</p>
     </div>
     <div class="scrolly-wrap single single">
       <div class="scrolly-steps">
@@ -124,14 +125,10 @@
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Checked rule by rule</h3></div>
         <p class="mo-lead">No forecast error to report: the model applies published rules.</p>
         <p class="kv-title">Exact rule arithmetic</p>
-        <dl class="kv kv-text"><div><dt>Check</dt><dd>the worked &pound;50,000 case, by pencil</dd></div><div><dt>Where</dt><dd>the code tab</dd></div><div><dt>Verifies</dt><dd>the implemented rules</dd></div><div><dt>Does not verify</dt><dd>that every area is covered by a test</dd></div></dl>
+        <dl class="kv kv-text"><div><dt>Check</dt><dd>the worked &pound;50,000 case, by pencil</dd></div><div><dt>Where</dt><dd>the <a href="/pe/code">Use it</a> tab</dd></div><div><dt>Verifies</dt><dd>the implemented rules</dd></div><div><dt>Does not verify</dt><dd>that every area is covered by a test</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
-          <p>
-                The worked £50,000 case on the <a href="/pe/code">code page</a> can be
-                checked with a pencil. That verifies the implemented rules — not that
-                every area of legislation is covered by a test.
-              </p>
+          <p>A hand check verifies the implemented rules, not that every area of legislation is covered by a test.</p>
         </details>
       </div>
 
@@ -142,27 +139,13 @@
         <dl class="kv"><div><dt>Ours, 2026</dt><dd>&pound;6.55bn, static</dd></div><div><dt>HMRC, 2026&ndash;27</dt><dd>&pound;6.9bn, post-behavioural</dd></div><div><dt>Ours vs HMRC, 2028&ndash;29</dt><dd>&pound;7.01bn vs &pound;8.2bn (&minus;14.5%)</dd></div><div><dt>Ours, 2030</dt><dd>&pound;7.48bn, no counterpart</dd></div><div><dt>Executable check</dt><dd>2026 within &plusmn;5%, skipped without microdata</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
-          <p>Population costings are a different kind of number: survey-weighted estimates (<a href="#caveats">limits</a>).</p>
           <ul>
-            <li>No interval is published because the pipeline produces none.</li>
-            <li>The one external comparison is a 1p rise in the UK basic rate.</li>
-            <li>It is scored at <strong>£6.55bn</strong> in 2026 against HMRC's June 2025 ready reckoner.</li>
-            <li>The reckoner gives £6.9bn for 2026&ndash;27, so ours is 5.1% below.</li>
-            <li>That 2026 gap is shown in the tiles above.</li>
-            <li>For 2028&ndash;29 it is £7.01bn against £8.2bn, 14.5% below.</li>
-            <li>HMRC's estimate is post-behavioural on administrative SPI data.</li>
-            <li>Ours is static and survey-based, so this is a benchmark, not a validation.</li>
-            <li>A static costing below a post-behavioural one runs against intuition.</li>
-            <li>The paper&rsquo;s leading explanation is the data basis.</li>
-            <li>Administrative data capture the top of the income distribution more completely than a survey.</li>
-            <li>But nothing yet decomposes the gap between them.</li>
-            <li>The 2030 figure, £7.48bn, has no counterpart at all: the reckoner stops at 2028&ndash;29.</li>
-            <li>Every figure here comes from hosted runs under policyengine 6.11.1.</li>
-            <li>Their job ids are recorded in <code>papers/pe-microsim/figures/basic_rate_costing.json</code>.</li>
-            <li>Under policyengine 4.x they were £6.46bn and £7.38bn.</li>
-            <li>The only executable check is the second tile, <code>test_population_impact_uk_real_basic_rate</code>.</li>
-            <li>It sits in <code>integration/tests/test_population.py</code> and is skipped without microdata access.</li>
-            <li>The full account is in <a href="/papers/pe-microsim">the paper</a>.</li>
+            <li>Population costings are survey-weighted estimates; the pipeline produces no interval (<a href="#caveats">limits</a>).</li>
+            <li>HMRC&rsquo;s June 2025 ready reckoner is post-behavioural on administrative SPI data. Ours is static and survey-based, so this is a benchmark, not a validation.</li>
+            <li>A static costing below a post-behavioural one runs against intuition. <a href="/papers/pe-microsim">The paper</a>&rsquo;s leading explanation is the data basis: administrative data capture the top of the income distribution more completely than a survey. Nothing yet decomposes the gap.</li>
+            <li>The reckoner stops at 2028&ndash;29, so the 2030 figure has no counterpart.</li>
+            <li>Every figure comes from hosted runs under policyengine 6.11.1; job ids are in <code>papers/pe-microsim/figures/basic_rate_costing.json</code>. Under policyengine 4.x they were £6.46bn and £7.38bn.</li>
+            <li>The executable check is <code>test_population_impact_uk_real_basic_rate</code> in <code>integration/tests/test_population.py</code>.</li>
           </ul>
         </details>
       </div>
@@ -173,7 +156,8 @@
 
   <section class="band band-wide" id="caveats">
     <div class="band-head" data-icon="alert">
-      <h2>Scope and vintage</h2>
+      <h2>Limits</h2>
+      <p class="section-intro">What the model leaves out, and the data and versions it runs on.</p>
     </div>
     <div class="prose">
       <div class="table-scroll"><table>
@@ -202,18 +186,13 @@
           </tr>
         </tbody>
       </table></div>
-      <p class="opt-note">
-        bridges into the macro members:
-        <a href="/papers/obr-macro">OBR</a>,
-        <a href="/papers/psl-og">OLG</a>. Suite-wide evidence:
-        <a href="/models#validation">validation</a>.
-      </p>
+      <p class="opt-note">Papers on the macro models this one feeds: <a href="/papers/obr-macro">OBR</a>, <a href="/papers/psl-og">OLG</a>.</p>
     </div>
   </section>
 
   <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
     <div class="chip-row">
-      <a class="chip chip-brand" href="/pe/code">Code</a>
+      <a class="chip chip-brand" href="/pe/code">Use it</a>
       <a class="chip" href="/models#validation">Every model&rsquo;s verdict</a>
       <a class="chip chip-brand" href="/papers/pe-microsim">The paper</a>
     </div>

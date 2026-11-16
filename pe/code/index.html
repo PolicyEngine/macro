@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=27" />
-<link rel="stylesheet" href="/models/model-pages.css?v=15" />
+<link rel="stylesheet" href="/models/model-pages.css?v=16" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -70,22 +70,17 @@
 
   <section id="run" class="band band-wide">
     <div class="band-head" data-icon="play">
-      <h2>A household in one call</h2>
-    </div>
-    <div class="prose">
-      <p>
-        Four steps from nothing to a population-wide costing; each step's
-        code sits alongside its narrative.
-      </p>
+      <h2>Run it in four steps</h2>
+      <p class="section-intro">From a route in to a population-wide costing.</p>
     </div>
 
     <div class="scrolly-wrap scrolly-code single">
       <div class="scrolly-steps">
       <div class="meth-step" id="code-route" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Pick a route: hosted MCP, CLI, or Python</h3></div>
-        <p>The quickest route is the <a href="/connect">hosted MCP server</a>, with five tools — <code>calculate_household</code>, <code>household_reform_impact</code>, <code>population_reform_impact</code>, <code>list_reform_parameters</code>, and <code>score_reform</code> with <code>model="microsim"</code>. The UK microdata credential is provisioned server-side.</p>
+        <p>The quickest route is the <a href="/connect">hosted MCP server</a>: five tools, each with a <code>pe-macro</code> CLI mirror. The UK microdata credential is provisioned server-side.</p>
         <div class="table-scroll mo-tablecard"><table>
-          <caption>The three routes in, tool by tool</caption>
+          <caption>The five tools and their CLI mirrors</caption>
           <thead><tr><th scope="col">MCP tool</th><th scope="col">CLI mirror</th></tr></thead>
           <tbody>
             <tr><th scope="row"><code>calculate_household</code></th><td><code>pe-macro household</code></td></tr>
@@ -112,18 +107,13 @@ pe-macro population-impact --country uk \
 pe-macro parameters   <span class="cm"># the levers you can write reforms against</span></code></pre></div>
         <details class="about">
           <summary>About this step</summary>
-          <h4>Hosted MCP server</h4>
-          <h4>CLI and Python</h4>
-          <p>The <code>pe-macro</code> CLI mirrors the same tools one for one; the Python package underneath is what the rest of this page walks through.</p>
-          <p>The third route is the Python package directly — <code>import policyengine as pe</code>, walked through below.</p>
+          <p>The third route is the Python package, <code>import policyengine as pe</code>, used in the steps below.</p>
         </details>
       </div>
 
       <div class="meth-step" id="code-install" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Install</h3></div>
-        <h4>From PyPI</h4>
-        <p>The base install is shared tooling only; add <code>[models]</code> for the pinned UK + US country models, or a single country extra.</p>
-        <p class="kv-title">Install</p>
+        <p>The base install is shared tooling only. Add <code>[models]</code> for the pinned UK + US country models, or a single country extra.</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install policyengine            <span class="cm"># shared tooling, no country models</span>
 pip install "policyengine[models]"  <span class="cm"># + pinned UK and US models</span>
 pip install "policyengine[uk]"      <span class="cm"># UK model only</span>
@@ -132,8 +122,7 @@ pip install "policyengine[us]"      <span class="cm"># US model only</span></cod
 
       <div class="meth-step" id="code-household" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Calculate a household</h3></div>
-        <p>Describe the people, pick a year, read the results — no data access or credentials needed.</p>
-        <p class="kv-title">Household calculation</p>
+        <p>Describe the people, pick a year, read the results. No data access or credentials needed.</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
 
 <span class="cm"># UK: single adult earning £50,000 — current law</span>
@@ -156,30 +145,21 @@ us = pe.us.calculate_household(
 <span class="kw">print</span>(us.tax_unit.income_tax, us.household.household_net_income)</code></pre></div>
         <details class="about">
           <summary>About this step</summary>
-          <h4>Describe, pick a year, read</h4>
-          <p>Pass a <code>reform</code> dict to apply parameter changes. A US household also needs its five-digit <code>county_fips</code>, or an explicit <code>spm={"geography_kind": "national"}</code>: US results include the Supplemental Poverty Measure, and a state alone does not identify its geography.</p>
+          <h4>US households</h4>
+          <p>A US household needs its five-digit <code>county_fips</code>, or an explicit <code>spm={"geography_kind": "national"}</code>: US results include the Supplemental Poverty Measure, and a state alone does not identify its geography.</p>
           <h4>Household-level reform impact</h4>
-          <p class="opt-note">
-          differencing runs with and without <code>reform</code> gives the
-          household-level impact: for the UK earner opposite, a 25% basic rate
-          (<code>{"gov.hmrc.income_tax.rates.uk[0].rate": 0.25}</code>) adds
-          <strong>£1,872</strong> of income tax and cuts net income by the
-          same amount.
-        </p>
+          <p>Run with and without <code>reform</code> and take the difference. For the UK earner above, a 25% basic rate (<code>{"gov.hmrc.income_tax.rates.uk[0].rate": 0.25}</code>) adds <strong>£1,872</strong> of income tax and cuts net income by the same amount.</p>
         </details>
       </div>
 
       <div class="meth-step" id="code-population" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Score a whole population</h3></div>
-        <p>The same package runs whole representative datasets — the enhanced UK Family Resources Survey, the US CPS — aggregating any variable by decile, entity or demographic. For the full budgetary, decile, poverty and regional breakdown use <code>pe.uk.economic_impact_analysis</code> (hosted: <code>population_reform_impact</code>).</p>
+        <p>The same package runs whole representative datasets (the enhanced UK Family Resources Survey, the US CPS) and aggregates any variable by decile, entity or demographic. For the full budgetary, decile, poverty and regional breakdown use <code>pe.uk.economic_impact_analysis</code> (hosted: <code>population_reform_impact</code>).</p>
         <div class="callout">
-          UK population microdata is gated — set
+          UK population microdata is gated. To run UK population examples locally, set
           <code>HUGGING_FACE_TOKEN</code> from an account with access to
-          <code>policyengine/policyengine-uk-data</code> before running UK
-          population examples locally. The hosted MCP server provisions this
-          credential server-side.
+          <code>policyengine/policyengine-uk-data</code>.
         </div>
-        <p class="kv-title">Population scoring</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
 <span class="kw">from</span> policyengine.core <span class="kw">import</span> Simulation
 <span class="kw">from</span> policyengine.outputs.aggregate <span class="kw">import</span> Aggregate, AggregateType
@@ -196,9 +176,8 @@ agg.run()
 <span class="kw">print</span>(f<span class="kw">"Total UC spending: £{agg.result / 1e9:.1f}bn"</span>)</code></pre></div>
         <details class="about">
           <summary>About this step</summary>
-          <h4>Representative datasets</h4>
           <h4>Reproduce the headline costing</h4>
-          <p>The validation tab&rsquo;s 1p basic-rate figure is re-run by one test, which needs the microdata token: <code>HUGGING_FACE_TOKEN=&hellip; pytest integration/tests/test_population.py --runslow -k basic_rate</code>.</p>
+          <p>One test re-runs the <a href="/pe/validation">validation tab</a>&rsquo;s 1p basic-rate figure. It needs the microdata token: <code>HUGGING_FACE_TOKEN=&hellip; pytest integration/tests/test_population.py --runslow -k basic_rate</code>.</p>
         </details>
       </div>
       </div>
