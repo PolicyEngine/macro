@@ -482,7 +482,7 @@ def header(path: Path) -> str:
   </div>
 </header>
 
-""" % ("\n".join(links), GITHUB, NAV_CTA)
+""" % ("\n".join(links), GITHUB, "" if page_href == "/connect" else NAV_CTA)
 
 
 def expander(icon_key: str, title: str, summary: str, body: str, open_: bool = False, id_: str = "") -> str:
