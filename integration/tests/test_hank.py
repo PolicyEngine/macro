@@ -66,6 +66,21 @@ def test_fiscal_shock_is_refused_in_the_one_asset_variant():
         core.hank_shock(kind="fiscal_spending", size=0.01, variant="one_asset")
 
 
+def test_fiscal_spending_requires_an_explicit_persistence():
+    """us-hank-model #5: the multiplier is 0.175 at 0.8 and 0.075 at 0.9, so
+    the hosted tool must not choose one silently. Raised before any solve."""
+    with pytest.raises(ValueError, match="persistence is required"):
+        core.hank_shock(kind="fiscal_spending", size=0.01)
+    with pytest.raises(ValueError, match="persistence is required"):
+        core.hank_shock_incidence(kind="fiscal_spending", size=0.01)
+
+
+def test_other_kinds_keep_the_default_persistence():
+    assert core._hank_persistence("monetary", None) == core.HANK_DEFAULT_PERSISTENCE
+    assert core._hank_persistence("productivity", None) == 0.9
+    assert core._hank_persistence("fiscal_spending", 0.8) == 0.8
+
+
 def test_unknown_variant_is_rejected():
     with pytest.raises(ValueError, match="variant must be one of"):
         core.hank_shock(kind="monetary", size=-0.0025, variant="three_asset")
@@ -246,7 +261,7 @@ def test_tax_financing_path_is_surfaced_when_the_package_returns_it(monkeypatch)
     fake = types.SimpleNamespace(shock=lambda *a, **k: dict(irf))
     monkeypatch.setattr(core, "_hank_module", lambda variant: fake)
     monkeypatch.setattr(core, "_hank_solved", lambda variant: ({}, {}))
-    res = core.hank_shock("fiscal_spending", 0.01, horizon=4)
+    res = core.hank_shock("fiscal_spending", 0.01, persistence=0.9, horizon=4)
     assert "tax" in res["series_meaning"]
     assert "pp" in res["series_meaning"]["tax"]
     assert res["results"][0]["tax"] == 0.1

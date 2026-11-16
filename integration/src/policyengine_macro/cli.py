@@ -409,8 +409,9 @@ def frbus_shock_incidence(var, shock, year, start, periods, horizon,
 @click.option("--year", default=2026, show_default=True,
               help="Calendar year whose four quarters are averaged into the "
                    "earnings overlay and scored by the microsim.")
-@click.option("--persistence", default=0.9, show_default=True, type=float,
-              help="AR(1) decay of the shock path (in [0, 1)).")
+@click.option("--persistence", default=None, type=float,
+              help="AR(1) decay of the shock path (in [0, 1)). Required for "
+                   "fiscal_spending; 0.9 if omitted for the other kinds.")
 @click.option("--horizon", default=core.HANK_DEFAULT_HORIZON,
               show_default=True,
               help="Quarters simulated (must cover the incidence year).")
@@ -562,8 +563,9 @@ def frbus_summary(as_json):
               help="Impact size in model units; UNITS DIFFER PER KIND "
                    "(quarterly-rate level for monetary, level of G for "
                    "fiscal_spending, level of Z for productivity).")
-@click.option("--persistence", default=0.9, show_default=True, type=float,
-              help="AR(1) decay of the shock path (in [0, 1)).")
+@click.option("--persistence", default=None, type=float,
+              help="AR(1) decay of the shock path (in [0, 1)). Required for "
+                   "fiscal_spending; 0.9 if omitted for the other kinds.")
 @click.option("--horizon", default=core.HANK_DEFAULT_HORIZON, show_default=True,
               help="Quarters reported.")
 @click.option("--variant", default="two_asset", show_default=True,

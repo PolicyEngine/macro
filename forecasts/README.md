@@ -46,6 +46,12 @@ modifies, renames or deletes an already-archived round.
 - **Outturns are versioned, not overwritten.** ONS revisions get a new vintage
   entry. Scoring always records which vintage it used, so any published score
   can be reproduced.
+- **Only forecasts fixed before publication are scored.** `score.py` compares
+  the round's `archived_utc` with the time the publisher first released the
+  outturn: the earliest ONS release stamp across that period's vintages, plus
+  the 07:00 UK release hour. It does not use the day our store fetched the
+  value. A round whose numbers were fixed before it was archived is listed in
+  `FIXED_BEFORE_ARCHIVE`, with the commit and source hash as evidence.
 - **No headline accuracy figure until there is one to state.** With zero scored
   periods the page says zero. An impressive number derived from one observation
   is worse than an empty record, because the empty record is honest.
