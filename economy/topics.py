@@ -624,13 +624,14 @@ def _card(heading: str, value: str, note: str, series: dict, period: str,
     """
     chip = ""
     if change:
-        head = change.split(" ", 1)[0]
+        parts = change.split(" ")
+        head = " ".join(parts[:2]) if len(parts) > 1 and parts[1] == "y/y" else parts[0]
         arrow = "\u25b2" if head.startswith("+") else ("\u25bc" if head.startswith("\u2212") else "")
         chip = f'<span class="stat-chg" title="{esc(change)}">{arrow} {esc(head)}</span>'
     return f"""      <div class="stat tp-stat">
         <span class="stat-label">{heading}<details class="stat-meta"><summary aria-label="About this reading">{site_nav.icon("info", 14)}</summary><span class="stat-meta-pop">{esc(period)} · vintage {esc(series["vintage"])}<br>{note}<br><a href="{esc(series["url"])}">{esc(series["source"])} · {esc(series["cdid"])}</a></span></details></span>
         <span class="stat-value">{value}</span>
-        <span class="stat-sub">{esc(period)} &middot; {chip or "latest reading"}</span>
+        <span class="stat-sub">{esc(period)} &middot; {chip or "latest"}</span>
       </div>"""
 
 
@@ -760,7 +761,14 @@ def _change_of(name: str) -> str:
         return ""
     text = movement(name)
     lab = esc(label(load(name))) + " "
-    return text[len(lab):] if text.startswith(lab) else ""
+    rest = text[len(lab):] if text.startswith(lab) else ""
+    head, _, tail = rest.partition(" ")
+    if "year-on-year rate" in tail:
+        head += " y/y"
+    elif tail.startswith("thousand"):
+        head += "k"
+        tail = tail[len("thousand"):].lstrip()
+    return f"{head} {tail}".strip()
 
 
 def movement_note(names: tuple[str, ...]) -> str:
@@ -1211,6 +1219,8 @@ def jobs_model() -> str:
         else "The satellite is exposed in the run surface below."
     )
     return f"""    <div class="prose">
+      <p class="model-chips"><a class="mchip" href="/svar">{site_nav.icon("activity", 14)}BoE SVAR satellite</a><span class="mchip-t">maps the GDP forecast onto UK unemployment</span></p>
+      <details class="about"><summary>How the satellite works</summary>
       <p>
         The labour market is covered by a satellite, not a model of its own: the
         BoE SVAR unemployment satellite maps the <a href="/svar">BoE SVAR</a> GDP
@@ -1221,6 +1231,7 @@ def jobs_model() -> str:
         {esc(facts["period"])} at {facts["values"]["median"]:.1f}%, 68%
         {band_text(facts["values"])}.
       </p>
+      </details>
       <figure class="vchart-figure">
 {jobs_chart(facts)}
       </figure>
@@ -1286,9 +1297,7 @@ def rates_model() -> str:
     og = MODELS["og-uk"]
     frbus = MODELS["frb-us"]
     return f"""    <div class="prose">
-      <p>
-        <strong>No model in this suite forecasts Bank Rate or gilt yields.</strong>
-      </p>
+      <p class="model-chips"><span class="mchip mchip-none">{site_nav.icon("x-circle", 14)}No forecast</span><span class="mchip-t">No model in this suite forecasts Bank Rate or gilt yields.</span></p>
       <details class="about"><summary>What each model covers instead</summary>
 {limits_list([
         f"<a href=\"/svar\">BoE SVAR</a> outputs {registry_terms(svar['outputs'])} — no interest-rate path is among them.",
@@ -3186,7 +3195,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
-<link rel="stylesheet" href="/economy/topic-page.css?v=5" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=6" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
