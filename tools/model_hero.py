@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=13" />'
+CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=14" />'
 CSS_RE = re.compile(r'<link rel="stylesheet" href="/models/model-pages\.css(?:\?v=\d+)?" />\n?')
 
 sys.path.insert(0, str(ROOT))
@@ -103,7 +103,10 @@ def hero(rel: str, old: str) -> str:
 
 
 LEVELS = {"weak": "weak", "moderate": "moderate", "strong": "strong", "not applicable": "na", "not assessed": "na"}
-LEVEL_RE = re.compile(r'<span class="chip"(?: data-level="[a-z]+")?>(weak|moderate|strong|not applicable|not assessed)</span>')
+# The grade lives on the row, so the chip keeps the exact markup the
+# registry tests read (<td><span class="chip">level</span></td>).
+OLD_CHIP_RE = re.compile(r'<span class="chip" data-level="[a-z]+">')
+ROW_RE = re.compile(r'<tr(?: data-level="[a-z]+")?>((?:(?!</tr>).)*?<td><span class="chip">(weak|moderate|strong|not applicable|not assessed)</span></td>)', re.S)
 LIMITS_RE = re.compile(r'(?:[ \t]*<details class="expander limit".*?</details>\n?)+', re.S)
 # The trust label now sits in the hero on every tab; the Overview verdict
 # line keeps its sentence and link and drops its duplicate chip.
@@ -148,7 +151,8 @@ def signed(out: str) -> str:
 
 def body(rel: str, source: str) -> str:
     out = signed(source)
-    out = LEVEL_RE.sub(lambda m: f'<span class="chip" data-level="{LEVELS[m.group(1)]}">{m.group(1)}</span>', out)
+    out = OLD_CHIP_RE.sub('<span class="chip">', out)
+    out = ROW_RE.sub(lambda m: f'<tr data-level="{LEVELS[m.group(2)]}">{m.group(1)}', out)
     out = VERDICT_CHIP_RE.sub(r"\1", out)
     if rel == f"{PAGES[rel]}/index.html":
         out = verdict(PAGES[rel], out)
