@@ -211,3 +211,38 @@
     }
   });
 })();
+
+/* Shared table component (r12, style.css §15). Every .table-scroll table
+   gets: data-label on each cell so phones can show it as stacked cards,
+   and an edge fade while the table scrolls sideways. Tables with merged
+   cells or more than six columns keep scrolling instead of stacking. */
+(function () {
+  "use strict";
+  var SKIP = ".sb-grid, .cap-grid, .vc-table, .vc-narrow-table";
+  document.querySelectorAll(".table-scroll").forEach(function (box) {
+    var table = box.querySelector(":scope > table");
+    if (!table || table.matches(SKIP)) return;
+    box.classList.add("tbl");
+    var head = table.tHead && table.tHead.rows[table.tHead.rows.length - 1];
+    var labels = head ? Array.from(head.cells).map(function (c) { return c.textContent.trim(); }) : [];
+    var merged = table.querySelector("[colspan]:not([colspan='1']), [rowspan]:not([rowspan='1'])");
+    if (labels.length && labels.length <= 6 && !merged) {
+      table.classList.add("tbl-stack");
+      Array.from(table.tBodies).forEach(function (body) {
+        Array.from(body.rows).forEach(function (row) {
+          Array.from(row.cells).forEach(function (cell, i) {
+            if (labels[i] && !cell.hasAttribute("data-label")) cell.setAttribute("data-label", labels[i]);
+          });
+        });
+      });
+    }
+    function edge() {
+      var more = box.scrollWidth - box.clientWidth > 2;
+      box.classList.toggle("is-scroll", more);
+      box.classList.toggle("at-end", !more || box.scrollLeft + box.clientWidth >= box.scrollWidth - 2);
+    }
+    edge();
+    box.addEventListener("scroll", edge, { passive: true });
+    window.addEventListener("resize", edge);
+  });
+})();

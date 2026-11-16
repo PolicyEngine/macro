@@ -7431,3 +7431,98 @@ main > .lp-section:last-child { margin-bottom: 80px; }
     padding-right: 32px;
   }
 }
+
+/* =====================================================================
+   15. Table (r12): one shared component for every .table-scroll table.
+   AB spec: white card, 12px muted uppercase header, hairline row rules,
+   no cell borders, tabular numbers right-aligned, hover tint. Narrow:
+   sticky first column + edge fade; phones: stacked cards (label: value),
+   via data-label set in reveal.js. Skips chart tables.
+   ===================================================================== */
+main .table-scroll.tbl, main .table-scroll:has(> table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table)) {
+  position: relative; margin: 16px 0; overflow-x: auto;
+  background: var(--card); border: 1px solid var(--ab-border); border-radius: 12px;
+}
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) {
+  width: 100%; margin: 0; border-collapse: separate; border-spacing: 0;
+  font-size: var(--fs-ab-small); line-height: 1.45; font-variant-numeric: tabular-nums; background: none;
+}
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) caption {
+  caption-side: top; padding: 14px 16px 0; text-align: left; color: var(--text-faint); font-size: var(--fs-ab-cap);
+}
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) :is(th, td) {
+  padding: 12px 16px; border: 0; border-bottom: 1px solid #F3F4F6; text-align: left; vertical-align: top; background: none;
+}
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) thead th {
+  padding-block: 10px; border-bottom: 1px solid var(--ab-border);
+  color: var(--text-faint); font-size: var(--fs-ab-micro); font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+  white-space: nowrap; background: var(--ab-inset);
+}
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) tbody th { color: var(--text-strong); font-weight: 600; }
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) tbody tr:last-child > * { border-bottom: 0; }
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) tbody tr:hover > * { background: color-mix(in srgb, var(--primary) 4%, var(--card)); }
+main .table-scroll > table :is(th, td).num { text-align: right; white-space: nowrap; }
+@media (prefers-color-scheme: dark) {
+  main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) :is(th, td) { border-bottom-color: var(--border); }
+}
+/* narrow: sticky first column and an edge fade while it scrolls */
+@media (max-width: 1100px) {
+  main .table-scroll.is-scroll > table :is(thead th, tbody > tr > :first-child):first-child {
+    position: sticky; left: 0; z-index: 1; background: var(--card); box-shadow: 1px 0 0 var(--ab-border);
+  }
+  main .table-scroll.is-scroll > table thead th:first-child { background: var(--ab-inset); }
+  main .table-scroll.is-scroll:not(.at-end) {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+  }
+}
+/* phones: stacked cards */
+@media (max-width: 560px) {
+  main .table-scroll:has(> table.tbl-stack) { background: none; border: 0; overflow: visible; -webkit-mask-image: none; mask-image: none; }
+  main .table-scroll > table.tbl-stack, main .table-scroll > table.tbl-stack :is(tbody, tr, th, td) { display: block; width: auto; }
+  main .table-scroll > table.tbl-stack thead { display: none; }
+  main .table-scroll > table.tbl-stack caption { display: block; padding: 0 0 8px; }
+  main .table-scroll > table.tbl-stack tbody tr {
+    margin: 0 0 10px; padding: 12px 14px; background: var(--card); border: 1px solid var(--ab-border); border-radius: 12px;
+  }
+  main .table-scroll > table.tbl-stack tbody tr:hover > * { background: none; }
+  main .table-scroll > table.tbl-stack tbody tr > * { padding: 6px 0; border: 0; position: static; box-shadow: none; text-align: left; white-space: normal; }
+  main .table-scroll > table.tbl-stack tbody tr > :first-child { padding-top: 0; font-size: var(--fs-ab-body); color: var(--text-strong); font-weight: 600; }
+  main .table-scroll > table.tbl-stack tbody tr > [data-label]:not(:first-child) { display: grid; grid-template-columns: minmax(96px, 38%) minmax(0, 1fr); gap: 12px; border-top: 1px solid #F3F4F6; }
+  main .table-scroll > table.tbl-stack tbody tr > [data-label]:not(:first-child)::before {
+    content: attr(data-label); color: var(--text-faint); font-size: var(--fs-ab-micro); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; padding-top: 2px;
+  }
+  @media (prefers-color-scheme: dark) { main .table-scroll > table.tbl-stack tbody tr > [data-label]:not(:first-child) { border-top-color: var(--border); } }
+}
+/* table cell visuals (shared): country chips, yes/no, run chips, footnotes */
+.cc { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; margin: 0 4px 2px 0; border-radius: 6px; border: 1px solid var(--ab-border); background: var(--ab-inset); color: var(--text-strong); font-size: var(--fs-ab-micro); font-weight: 700; letter-spacing: .04em; }
+.cc-uk { box-shadow: inset 3px 0 0 #1D4ED8; }
+.cc-us { box-shadow: inset 3px 0 0 #B91C1C; }
+.yn { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; white-space: nowrap; }
+.yn svg { width: 16px; height: 16px; }
+.yn-yes { color: var(--ab-teal-700); }
+.yn-no { color: var(--text-faint); font-weight: 500; }
+.rc { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px; border-radius: 999px; font-size: var(--fs-ab-cap); font-weight: 600; white-space: nowrap; }
+.rc svg { width: 13px; height: 13px; }
+.rc-hosted { background: color-mix(in srgb, var(--ab-gain) 12%, transparent); color: var(--ab-teal-700); }
+.rc-local { background: color-mix(in srgb, var(--ab-loss) 12%, transparent); color: #92400E; }
+@media (prefers-color-scheme: dark) { .rc-local { color: #FCD34D; } }
+.tn { margin-left: 3px; font-size: 10px; font-weight: 700; }
+.tn a { color: var(--text-faint); text-decoration: none; }
+.tbl-notes { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; padding: 10px 16px 14px; color: var(--text-faint); font-size: var(--fs-ab-cap); }
+.tbl-notes span { display: inline-grid; place-items: center; width: 16px; height: 16px; margin-right: 4px; border-radius: 50%; background: var(--ab-inset); border: 1px solid var(--ab-border); font-size: 10px; font-weight: 700; color: var(--text-muted); }
+.cm-name { display: inline-flex; align-items: center; gap: 10px; color: var(--text-strong); text-decoration: none; font-weight: 600; }
+.cm-name:hover { color: var(--ab-teal-700); }
+.cm-name .row-ico { margin: 0 !important; float: none !important; flex: 0 0 auto; }
+.mp #compare tbody th { min-width: 220px; }
+.mp #compare .tbl-stack tbody tr > [data-label] { align-items: center; }
+#compare .yn { width: auto; height: auto; margin: 0; vertical-align: baseline; }
+#compare .yn-yes { color: var(--ab-teal-700); }
+#compare .yn-no { color: var(--text-faint); }
+.mp #compare td:nth-child(4), .mp #compare td:nth-child(5) { white-space: nowrap; }
+@media (max-width: 560px) {
+  main .table-scroll > table.tbl-stack tbody tr > [data-label]:not(:first-child) { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+  main .table-scroll > table.tbl-stack tbody tr > [data-label]:not(:first-child)::before { flex: 0 0 36%; padding-top: 0; }
+  main .table-scroll > table.tbl-stack tbody tr > [data-label]:not(:first-child) > :not(sup) { max-width: 100%; }
+  .mp #compare td:nth-child(4), .mp #compare td:nth-child(5) { white-space: normal; }
+}
