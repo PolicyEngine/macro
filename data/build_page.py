@@ -110,6 +110,20 @@ def unit_short(series: dict) -> str:
     return f' <span class="unit">{esc(units)}</span>'
 
 
+def value_with_unit(value: float, series: dict) -> str:
+    """A latest value with its unit placed as readers expect: '£757.0 per
+    week', '£83,534m', '4.0%'. The stored number is not rounded."""
+    units = str(series.get("units", "")).split(",")[0].strip()
+    text = f"{int(value):,}" if float(value).is_integer() and units.startswith("£m") else fmt_value(value)
+    if units.lower().startswith("percent"):
+        return f"{text}%"
+    if units.startswith("£m"):
+        return f"£{text}m"
+    if units.startswith("£ "):
+        return f"£{text} {esc(units[2:])}"
+    return text + unit_short(series)
+
+
 def fmt_value(value: float) -> str:
     """Show the stored number, thousands-separated, with no rounding applied."""
     return f"{value:,}"
@@ -219,7 +233,7 @@ def catalogue_rows() -> str:
             f"                </th>\n"
             f'                <td>{esc(series["source"])}</td>\n'
             f'                <td>{esc(series["frequency"])}</td>\n'
-            f'                <td class="num">{fmt_value(now["value"])}{unit_short(series)} '
+            f'                <td class="num">{value_with_unit(now["value"], series)} '
             f'<span class="mono">{esc(now["period"])}</span></td>\n'
             f'                <td class="num">{len(vintages)}</td>\n'
             f"              </tr>\n"

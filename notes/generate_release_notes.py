@@ -324,7 +324,7 @@ def rebuild_indexes() -> None:
         )
     latest = pages[0].parent.name if pages else ""
     summary_row = (
-        f'        <a href="/notes/releases"><span>{len(pages)} automated release '
+        f'        <a href="/notes/releases"><span class="fc-li-ic"><svg class="fc-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg></span><span>{len(pages)} automated release '
         f"digests, newest first</span><strong>Release digests</strong></a>"
     )
     marker_replace(NOTES_INDEX, "generated-release-notes", summary_row)

@@ -181,22 +181,6 @@ PUBLIC_LABELS = {
 }
 
 FORECAST_FILE = ROOT / "papers" / "boe-svar" / "figures" / "current_forecast.json"
-
-
-def latest_svar_round() -> tuple[dict, str]:
-    """The newest archived BoE SVAR round, shaped like current_forecast.json.
-
-    Topic pages lead with the same round as the Forecasts page, read-only
-    from forecasts/rounds/<date>/boe-svar.json (append-only, never edited).
-    """
-    rounds = sorted(p for p in (ROOT / "forecasts" / "rounds").glob("*/boe-svar.json")
-                    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.parent.name))
-    path = rounds[-1]
-    raw = json.loads(path.read_text())
-    info = raw.get("information_set", {})
-    shaped = {"generated": raw.get("round_id", path.parent.name),
-              "data_edge": info.get("data_edge"), "forecast": raw["forecast"]}
-    return shaped, "/" + path.relative_to(ROOT).as_posix()
 # The archived round keeps the filename it was generated under; the satellite's
 # display name is "svar-unemployment satellite".
 UNEMPLOYMENT_ROUND = (
@@ -512,9 +496,9 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
         legend.append(("ln-out", f"ONS outturn, snapshot {esc(vintage)}"))
     legend += [("ln-s1", f"{esc(model)} median, round {esc(generated)}"),
                ("sw-band68", "68% band (raw)"), ("sw-band90", "90% band (raw)")]
-    source = source or (f"BoE SVAR round {esc(generated)}, "
-                        f'<a class="mono" href="/forecasts/rounds/{esc(generated)}/boe-svar.json">'
-                        f"forecasts/rounds/{esc(generated)}/boe-svar.json</a>")
+    source = source or (f"BoE SVAR round generated {esc(generated)}, "
+                        '<a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/'
+                        'papers/boe-svar/figures/current_forecast.json">current_forecast.json</a>')
     if hist:
         source = f"ONS, {history_note} snapshot {esc(vintage)}; " + source
     short = (("ONS · " if hist else "") + f"{esc(model)} round, {chartkit.short_date(generated)}")
@@ -958,7 +942,7 @@ def growth_facts() -> dict:
     gdp = load("uk_gdp_cvm")
     growth = yoy(gdp, 4)
     now = growth[-1]
-    forecast, _round_path = latest_svar_round()
+    forecast = json.loads(FORECAST_FILE.read_text())
     period, values = next_open(forecast["forecast"], "gdp", now["period"])
     return {
         "gdp": gdp, "now": now, "forecast": forecast,
@@ -1064,7 +1048,7 @@ def growth_run() -> str:
 def inflation_facts() -> dict:
     cpi = load("uk_cpi_yoy")
     core = load("uk_core_cpi_yoy")
-    forecast, _round_path = latest_svar_round()
+    forecast = json.loads(FORECAST_FILE.read_text())
     now = latest(cpi)
     period, values = next_open(forecast["forecast"], "cpi", now["period"])
     above = next(
@@ -1112,10 +1096,11 @@ def inflation_model() -> str:
             f"<td>{values['cpi']['lo90']:.2f}%–{values['cpi']['hi90']:.2f}%</td>"
             "</tr>"
         )
-    later = [(q, v["cpi"]["median"]) for q, v in facts["forecast"]["forecast"].items()
-             if q > facts["now"]["period"]]
-    peak_q, peak_v = max(later, key=lambda r: r[1]) if later else (None, None)
-    reaches = (f"Median peaks at {peak_v:.1f}% in {esc(peak_q)}." if peak_q else "")
+    reaches = (
+        f"Its median does not return to 3% until {esc(facts['above'])}."
+        if facts["above"]
+        else "Its median stays below 3% across the archived horizon."
+    )
     return f"""    <div class="prose">
       <p class="model-chips"><a class="mchip" href="/svar">{site_nav.icon("activity", 14)}BoE SVAR</a><span class="mchip-t">forecasts UK CPI · round {esc(facts["forecast"]["generated"])} · path from {esc(facts["period"])}</span></p>
       <p class="model-note">{reaches}</p>
@@ -2308,7 +2293,7 @@ def us_growth_run() -> str:
         command("pe-macro frbus-summary", "implementation, provenance and scope limits"),
         command("pe-macro frbus-variables", "the shockable FRB/US levers and their units"),
         command("pe-macro frbus-shock --var rffintay_aerr --shock 1.0 --horizon 20", "output response to a 1pp policy surprise"),
-        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6", "the same question in the HANK model, as an IRF"),
+        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "the same question in the HANK model, as an IRF"),
     )}
 {us_run_note()}
     </div>"""
@@ -2400,7 +2385,7 @@ def us_inflation_run() -> str:
 {codeblock(
         command("pe-macro frbus-shock --var rffintay_aerr --shock 1.0 --horizon 20", "price response to a 1pp policy surprise"),
         command("pe-macro hank-summary", "shock catalogue, units and scope limits"),
-        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6", "a 25bp-per-quarter (about 100bp annualised) easing, quarterly IRF"),
+        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "a 25bp-per-quarter (about 100bp annualised) easing, quarterly IRF"),
     )}
 {us_run_note()}
     </div>"""
