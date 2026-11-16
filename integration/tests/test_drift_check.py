@@ -275,8 +275,8 @@ def test_household_ratio_sign_matches_a_tax_rise():
 def test_svar_canary_matches_the_committed_forecast_file():
     f = json.loads((REPO / "papers/boe-svar/figures/current_forecast.json").read_text())
     exp = {ch["name"]: ch["expected"] for ch in CANARIES["svar_forecast_median"]["checks"]}
-    assert exp["gdp_2026Q2_median"] == f["forecast"]["2026Q2"]["gdp"]["median"]
-    assert exp["cpi_2026Q2_median"] == f["forecast"]["2026Q2"]["cpi"]["median"]
+    assert exp["gdp_2026Q3_median"] == f["forecast"]["2026Q3"]["gdp"]["median"]
+    assert exp["cpi_2026Q3_median"] == f["forecast"]["2026Q3"]["cpi"]["median"]
 
 
 def test_every_canary_has_an_anchor():
