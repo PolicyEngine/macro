@@ -162,11 +162,11 @@
                   <option value="energy" selected>Energy</option>
                   <option value="manufacturing">Manufacturing</option>
                   <option value="construction">Construction</option>
-                  <option value="trade_transport">Trade &amp; Transport</option>
-                  <option value="info_finance">Info &amp; Finance</option>
-                  <option value="real_estate">Real Estate</option>
-                  <option value="business_services">Business Services</option>
-                  <option value="public_other">Public &amp; Other</option>
+                  <option value="trade_transport">Trade &amp; transport</option>
+                  <option value="info_finance">Info &amp; finance</option>
+                  <option value="real_estate">Real estate</option>
+                  <option value="business_services">Business services</option>
+                  <option value="public_other">Public &amp; other</option>
                 </select></label>
               </div>
               <div class="olg-chart" id="olg-detail-chart"></div>
@@ -348,7 +348,18 @@
   // table 1.2); it used to be total managed expenditure under a
   // "Gov. Consumption" title. No relabel is needed any more.
   var TITLE_FIX = {};
-  function shownTitle(p) { return TITLE_FIX[p.title] || p.title; }
+  // The run's labels are Title Case ("Real Estate — Capital"); show them in
+  // sentence case (DESIGN.md §1), keeping acronyms.
+  var KEEP = { GDP: 1, OBR: 1, ONS: 1 };
+  function sentence(s) {
+    var i = 0;
+    return String(s).replace(/[A-Za-z][A-Za-z.]*/g, function (w) {
+      var out = KEEP[w] ? w : (i === 0 ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w.toLowerCase());
+      i++;
+      return out;
+    });
+  }
+  function shownTitle(p) { return sentence(TITLE_FIX[p.title] || p.title); }
 
   // Panel tagging, ported from the dashboard's ExampleTab.jsx.
   var MACRO_MAP = { 'consumption': 'consumption', 'investment': 'investment',
@@ -405,7 +416,7 @@
     var legend = document.getElementById('olg-sector-legend');
     var lg = data.sector3[0].traces.map(function (t) {
       return '<span class="li"><span class="ln" style="border-top-color:' +
-             esc(t.color) + '"></span>' + esc(t.name) + '</span>';
+             esc(t.color) + '"></span>' + esc(sentence(t.name)) + '</span>';
     });
     lg.push('<span class="li"><span class="ln dashed gold"></span>Reform start (2027)</span>');
     legend.innerHTML = lg.join('');
