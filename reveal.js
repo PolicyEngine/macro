@@ -16,7 +16,7 @@
       targets.push(child);
     });
   });
-  targets = targets.filter(function (el, i, all) { return all.indexOf(el) === i && !el.closest(".hero, .lp-hero, .mp-hero"); });
+  targets = targets.filter(function (el, i, all) { return all.indexOf(el) === i && !el.closest(".hero, .lp-hero, .mp-hero, [data-no-reveal]"); });
   targets.forEach(function (el) { el.classList.add("scroll-reveal"); });
   function showAll() { targets.forEach(function (el) { el.classList.add("in-view", "reveal-initial"); }); }
   window.addEventListener("beforeprint", showAll);
