@@ -942,17 +942,6 @@
 }
 .doc main:has(> .hero.mh) .meth-lead { max-width: 72ch; margin: 0 0 12px; color: var(--text-body); font-size: var(--fs-ab-body, 16px); line-height: 1.55; }
 .doc main:has(> .hero.mh) .proof-more { max-width: none; }
-/* scorecard on phones: one compact card per check (check + chip, result, then the benchmark) */
-@media (max-width: 640px) {
-  .doc main:has(> .hero.mh) .scorecard table.t-stack tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: start; padding: 12px 0; }
-  .doc main:has(> .hero.mh) .scorecard table.t-stack tr > * { padding: 0 !important; margin: 0; border: 0 !important; background: none; }
-  .doc main:has(> .hero.mh) .scorecard table.t-stack tr > :first-child { grid-column: 1; grid-row: 1; }
-  .doc main:has(> .hero.mh) .scorecard table.t-stack tr > td:last-child { grid-column: 2; grid-row: 1; }
-  .doc main:has(> .hero.mh) .scorecard table.t-stack tr > td.sc-num { grid-column: 1 / -1; grid-row: 2; white-space: normal; }
-  .doc main:has(> .hero.mh) .scorecard table.t-stack tr > td:nth-child(2) { grid-column: 1 / -1; grid-row: 3; color: var(--text-muted); font-size: 13px; line-height: 1.45; }
-  .doc main:has(> .hero.mh) .scorecard table.t-stack td::before,
-  .doc main:has(> .hero.mh) .scorecard table.t-stack th::before { display: none !important; }
-}
 /* r-polish Fable fixes */
 .doc main:has(> .hero.mh) [data-result="none"] .chip { background: none; color: var(--text-muted); border-style: dashed; }
 /* scorecard: fixed columns at desktop so labels never break mid-word */
@@ -990,3 +979,10 @@
 .doc main:has(> .hero.mh) :is(.scen-note, .ov-flow-note) { grid-column: 1 / -1; width: auto; }
 .doc main:has(> .hero.mh) :not(.stat-row, .vfig, figure.spark, .mo-figcard) + :is(.scen-note, .ov-flow-note),
 .doc main:has(> .hero.mh) :is(.scen-note, .ov-flow-note):first-child { padding: 0; background: none; border: 0; border-radius: 0; margin-top: 10px; }
+/* final Fable pass */
+.doc main:has(> .hero.mh) .band > p:is(.scen-note, .ov-flow-note, .proof-more, .run-more) { max-width: none; }
+.doc main:has(> .hero.mh) .scorecard td:last-child { padding-right: 16px; }
+@media (max-width: 640px) {
+  .doc main:has(> .hero.mh) .proof-num { white-space: normal; min-width: 0; font-size: 14px; }
+  .doc main:has(> .hero.mh) .proof-link { align-items: start; }
+}
