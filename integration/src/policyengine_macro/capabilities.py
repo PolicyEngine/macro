@@ -96,8 +96,8 @@ MODELS = {
             "about 8pp short; no forecast skill against a drifting random walk"
         ),
         "estimation_sample": "1992Q1-2025Q1",
-        "data_edge": "2026Q1",
-        "data_vintage": "2026Q1 conditioning data; estimation ends 2025Q1",
+        "data_edge": "2026Q2",
+        "data_vintage": "2026Q2 conditioning data; estimation ends 2025Q1",
     },
     "frb-us": {
         "display_name": "Federal Reserve FRB-US implementation",
@@ -145,7 +145,8 @@ MODELS = {
             # IRF magnitudes are not, and the by-wealth split is an
             # accounting allocation (distributional.py), not a solved response.
             "partial replication of Auclert et al. (2021): six of seven "
-            "solved parameters match (vphi misses by 17.3%, unresolved); "
+            "solved parameters match directly and the seventh (vphi) after "
+            "a wage-markup convention conversion; "
             "steady-state targets are inputs; shock signs are tested, "
             "magnitudes are not; not a forecaster; distributional outputs "
             "are steady-state statistics and an MPC-proportional split of "
@@ -319,8 +320,9 @@ MODEL_QUALITY = {
         ),
         "uncertainty_calibration": _quality(
             "moderate",
-            "Posterior 68% and 90% intervals are produced, but empirical coverage "
-            "has been checked over only seven forecast quarters.",
+            "Posterior 68% and 90% intervals are produced. A 50-origin "
+            "out-of-sample coverage study finds they run narrow: the 90% band "
+            "covers about 77% of outturns and the 68% band about 63%.",
             "Report rolling empirical coverage and proper predictive scores.",
         ),
         "vintage_reproducibility": _quality(
@@ -378,9 +380,12 @@ MODEL_QUALITY = {
         "implementation_fidelity": _quality(
             "strong",
             "Built directly on the authors' sequence-jacobian toolkit at the "
-            "paper's production grids; the model repo's replication suite gates "
-            "steady-state targets, market clearing, and shock responses "
-            "against the published Econometrica 2021 results.",
+            "paper's production grids. The model repo's replication suite gates "
+            "the seven Table B.III parameters (vphi after the wage-markup "
+            "convention conversion), market clearing and shock-response signs "
+            "against Econometrica 2021; IRF magnitudes are regression pins on "
+            "this implementation, because the paper publishes no comparable "
+            "two-asset IRF figure.",
             "Keep the replication gates hard-failing and extend them across "
             "all three shock kinds and both variants.",
         ),

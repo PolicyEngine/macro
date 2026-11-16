@@ -352,7 +352,7 @@ def frbus_summary() -> dict:
 def hank_shock(
     kind: str,
     size: float,
-    persistence: float = 0.9,
+    persistence: float | None = None,
     horizon: int = 20,
     variant: str = "two_asset",
     include_distribution: bool = False,
@@ -385,20 +385,27 @@ def hank_shock(
             Z = 1, so 0.01 = 1% of TFP). The r and pi responses are quarterly
             rates. See hank_summary for the catalogue.
         persistence: AR(1) decay of the shock path size * persistence**t
-            (default 0.9; must be in [0, 1)).
+            (must be in [0, 1)). REQUIRED for fiscal_spending, which has no
+            default because the spending multiplier depends on it (impact
+            multiplier 0.175 at 0.8, 0.075 at 0.9); quote it with any
+            multiplier. Defaults to 0.9 for monetary and productivity.
         horizon: Quarters reported (default 20 = 5 years; max 300).
         variant: 'two_asset' (default — the paper model) or 'one_asset' (fast
             no-capital variant: monetary/productivity only, no investment
             series).
         include_distribution: two_asset only — add steady-state MPC by
-            liquid-wealth quartile, the hand-to-mouth share, and the impact
+            liquid-wealth quartile (with the windfall it is measured out of:
+            25% of mean quarterly post-tax labour income, about $6,000 per
+            household, far above rebate sizes), the hand-to-mouth share
+            (with its threshold and zero-liquid atom), and the impact
             consumption response by total-wealth quartile (first-order
             approximation from steady-state policies: the MPC-heterogeneity
             channel only, not full household-level dynamics).
         name: Optional label for the experiment.
 
     Returns per-quarter rows (Y, C, I in % deviation from steady state; pi
-    and r in pp deviations of quarterly rates; plus the shock path), a
+    and r in pp deviations of quarterly rates, where r is the ex-post real
+    return, so its quarter 0 is the inflation surprise; plus the shock path), a
     `peaks` block, and `series_meaning`. First call per variant pays the
     steady-state (~13s) and jacobian (~5s) solves; both are cached, so warm
     calls are effectively instant.
@@ -489,7 +496,7 @@ def hank_shock_incidence(
     kind: str,
     size: float,
     year: int = 2026,
-    persistence: float = 0.9,
+    persistence: float | None = None,
     horizon: int = 20,
     variant: str = "two_asset",
     income_concept: str = "wage_bill",
@@ -511,6 +518,7 @@ def hank_shock_incidence(
 
     Args:
         kind / size / persistence / horizon / variant: As in hank_shock
+            (persistence is required for fiscal_spending)
             (units differ per kind; see hank_summary). horizon must cover
             the incidence year's quarters.
         year: Calendar year averaged into the overlay and scored by the
@@ -607,9 +615,11 @@ def forecast_uk(
 
     Args:
         horizons: Forecast horizon in quarters (1-40; default 12 = 3 years).
-        draws: Posterior draws (default 2000: ~135 accepted draws, ESS ~65,
-            a couple of minutes on first call; ~3500 draws reaches ESS >= 100;
-            500 is faster but yields ~35 accepted, ESS ~14, and a warning).
+        draws: Posterior draws (default 2000: ~159 accepted draws, ESS ~49,
+            a couple of minutes on first call, with a weak-inference warning;
+            3500 gives ~264 accepted, ESS ~92, still just under 100; 6000
+            gives 455 accepted, ESS ~181, as used for archived rounds; 500
+            is faster but yields ~34 accepted, ESS ~15).
             Must be between 50 and 10,000. Results are cached in-process, so
             repeated calls with the same
             (horizons, draws) are instant.

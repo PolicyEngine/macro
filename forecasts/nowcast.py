@@ -413,6 +413,35 @@ def archived_data_edges() -> set[str]:
     return edges
 
 
+def pending_data_edges(ref: str) -> set[str]:
+    """Data edges of this model's rounds on ``ref``, the open round PR's branch.
+
+    The job runs from main, so a round that is archived on the PR branch but
+    not merged yet is invisible to ``archived_data_edges``. The next due day
+    then regenerated it and force-pushed over it: round 2026-11-11 (bcf528f)
+    was replaced by round 2026-11-12 (1dc2592) on PR #238. The forecast is
+    seeded, so the two were identical to the last digit; the only things that
+    changed were the archive time and the CI result, at the cost of a second
+    ~5.5-minute Modal solve. An unreadable ref (no open PR, branch not
+    fetched) yields no edges, so the gate behaves as before.
+    """
+    listing = git("ls-tree", "-r", "--name-only", ref, "--", "forecasts/rounds/")
+    edges = set()
+    for path in (listing or "").splitlines():
+        if not path.endswith(f"/{MODEL}.json"):
+            continue
+        text = git("show", f"{ref}:{path}")
+        if not text:
+            continue
+        try:
+            edge = json.loads(text).get("information_set", {}).get("data_edge")
+        except ValueError:
+            continue
+        if edge:
+            edges.add(edge)
+    return edges
+
+
 def write_round(payload: dict, round_id: str, allow_same_edge: bool) -> int:
     target = ROUNDS / round_id / f"{MODEL}.json"
     if target.exists():
@@ -458,6 +487,12 @@ def main() -> int:
              "call) is newer than every archived round's, 1 if a round would "
              "only be refused as already archived",
     )
+    ap.add_argument(
+        "--pending-ref", metavar="REF",
+        help="with --edge-gate: also count rounds on this git ref (the open "
+             "round PR's branch) as archived, so an unmerged round is not "
+             "regenerated and overwritten",
+    )
     ap.add_argument("--draws", type=int, default=DEFAULT_DRAWS)
     ap.add_argument("--horizons", type=int, default=HORIZONS)
     ap.add_argument("--round", help="round id (default: today, UTC)")
@@ -498,7 +533,18 @@ def main() -> int:
     if args.edge_gate:
         revision = hosted_revision()
         edge = hosted_data_edge(revision) if revision else None
-        proceed, reason = edge_gate(edge, archived_data_edges())
+        archived = archived_data_edges()
+        proceed, reason = edge_gate(edge, archived)
+        pending = pending_data_edges(args.pending_ref) if args.pending_ref else set()
+        if proceed and pending and not edge_gate(edge, archived | pending)[0]:
+            proceed = False
+            reason = (
+                f"skip: a round with data edge {max(pending, key=quarter_key)} "
+                f"is already waiting on {args.pending_ref} and the hosted "
+                f"model's data ends {edge}; a new call would return the same "
+                "forecast and overwrite that round's archive time, so no Modal "
+                "call. Merge or close the open round PR"
+            )
         print(f"boe-var-model {revision or 'unknown'}: {reason}")
         return 0 if proceed else 1
 
