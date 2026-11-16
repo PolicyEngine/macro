@@ -100,6 +100,16 @@ def display_url(url: str) -> str:
     return url
 
 
+def unit_short(series: dict) -> str:
+    """The unit beside a latest value: '%' for rates, else the first clause."""
+    units = str(series.get("units", "")).split(",")[0].strip()
+    if not units:
+        return ""
+    if units.lower().startswith("percent"):
+        return "%"
+    return f' <span class="unit">{esc(units)}</span>'
+
+
 def fmt_value(value: float) -> str:
     """Show the stored number, thousands-separated, with no rounding applied."""
     return f"{value:,}"
@@ -209,7 +219,7 @@ def catalogue_rows() -> str:
             f"                </th>\n"
             f'                <td>{esc(series["source"])}</td>\n'
             f'                <td>{esc(series["frequency"])}</td>\n'
-            f'                <td class="num">{fmt_value(now["value"])} '
+            f'                <td class="num">{fmt_value(now["value"])}{unit_short(series)} '
             f'<span class="mono">{esc(now["period"])}</span></td>\n'
             f'                <td class="num">{len(vintages)}</td>\n'
             f"              </tr>\n"
