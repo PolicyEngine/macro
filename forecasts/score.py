@@ -890,7 +890,7 @@ def render_status(card: dict) -> str:
 
     return "\n".join([
         asof,
-        '      <div class="fc-tiles" aria-label="The record so far">',
+        '      <div class="fc-tiles ab-card" aria-label="The record so far">',
         *tile("target", cover_value, "inside the 68% band", cover_sub, pips),
         *tile("ruler", mae_value, "mean absolute error", mae_sub, bars),
         *tile("layers", f"{scored_rounds} of {rounds}", f"round{'' if rounds == 1 else 's'} scored",
@@ -1018,7 +1018,7 @@ def render_results(card: dict) -> str:
         '<li><span class="fc-sw fc-sw-med"></span>median</li>'
         '<li><span class="fc-sw fc-sw-out"></span>outturn</li>'
         '<li class="fc-legend-note">Each strip is scaled to its own 90% band, whose ends are labelled; bands as archived.</li></ul>',
-        '      <div class="fc-board" role="table" aria-label="Every scored forecast: archived median and bands, outturn, error">',
+        '      <div class="fc-board ab-card" role="table" aria-label="Every scored forecast: archived median and bands, outturn, error">',
         f'        <div class="fc-row fc-head" role="row"><span role="columnheader">{icon("target", "fc-ic fc-th-ic")}Target and round</span>'
         f'<span role="columnheader">{icon("gdp", "fc-ic fc-th-ic")}Median, bands and outturn</span>'
         f'<span role="columnheader">{icon("ruler", "fc-ic fc-th-ic")}Error</span><span role="columnheader">{icon("inside", "fc-ic fc-th-ic")}Where it fell</span></div>',
