@@ -96,8 +96,8 @@ MODELS = {
             "about 8pp short; no forecast skill against a drifting random walk"
         ),
         "estimation_sample": "1992Q1-2025Q1",
-        "data_edge": "2026Q1",
-        "data_vintage": "2026Q1 conditioning data; estimation ends 2025Q1",
+        "data_edge": "2026Q2",
+        "data_vintage": "2026Q2 conditioning data; estimation ends 2025Q1",
     },
     "frb-us": {
         "display_name": "Federal Reserve FRB-US implementation",
@@ -319,8 +319,9 @@ MODEL_QUALITY = {
         ),
         "uncertainty_calibration": _quality(
             "moderate",
-            "Posterior 68% and 90% intervals are produced, but empirical coverage "
-            "has been checked over only seven forecast quarters.",
+            "Posterior 68% and 90% intervals are produced. A 50-origin "
+            "out-of-sample coverage study finds they run narrow: the 90% band "
+            "covers about 77% of outturns and the 68% band about 63%.",
             "Report rolling empirical coverage and proper predictive scores.",
         ),
         "vintage_reproducibility": _quality(
