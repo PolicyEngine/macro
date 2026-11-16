@@ -7617,3 +7617,53 @@ main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table)
   }
   .model-tabs-link:not([aria-current]) { color: #CBD5E1; }
 }
+
+/* =====================================================================
+   17. Header and footer, matched to the Autumn Budget dashboard header
+   (siteHeader.css): white wordmark straight on the band, no tile; static
+   brand on hover; underline tabs that grow from the centre; compact footer.
+   ===================================================================== */
+.nav::after { box-shadow: 0 1px 0 rgba(0, 0, 0, .12), 0 2px 6px rgba(0, 0, 0, .08); border-bottom: .5px solid var(--teal-700); }
+.brand, .brand:hover, .brand:focus, .brand:active { gap: 12px; color: #FFFFFF; text-decoration: none; }
+.brand-logo { width: auto; height: 24px; padding: 0; border-radius: 0; background: none; box-shadow: none; }
+.brand-name, .brand:hover .brand-name { color: #FFFFFF; font-size: 17px; font-weight: 600; letter-spacing: 0; opacity: .95; }
+.brand-name b { color: inherit; }
+.brand:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 4px; border-radius: 4px; }
+.nav-end { margin-left: 40px; }
+@media (max-width: 1100px) { .brand-logo { height: 20px; } .brand-name { font-size: 15px; } }
+
+/* tab bar: no boxes; a 2px teal underline grows from the centre */
+.nav-links a, .nav-links a:hover, .nav-links a[aria-current] { background: none !important; }
+.nav-links a::after {
+  content: ""; position: absolute; left: 12px; right: 12px; bottom: -1px; top: auto; height: 2px; border-radius: 2px;
+  background: var(--ab-teal-700); transform: scaleX(0); transform-origin: center;
+  transition: transform .25s cubic-bezier(.4, 0, .2, 1);
+}
+.nav-links a:hover::after, .nav-links a:focus-visible::after { transform: scaleX(1); opacity: .45; }
+.nav-links a[aria-current]::after { transform: scaleX(1); opacity: 1; left: 12px; right: 12px; height: 2px; background: var(--ab-teal-700); }
+.nav-links a:hover { color: var(--text-strong); }
+.nav-links a[aria-current] { color: var(--ab-highlight); }
+@media (prefers-reduced-motion: reduce) { .nav-links a::after { transition: none; } }
+@media (prefers-color-scheme: dark) {
+  .nav-links a, .nav-links a:hover, .nav-links a[aria-current] { background: none !important; }
+  .nav-links a::after, .nav-links a[aria-current]::after { background: var(--primary); }
+  .nav-links a[aria-current] { color: var(--text-strong) !important; }
+}
+.nav-cta, .nav-cta:hover { background: #FFFFFF; color: var(--ab-teal-700); }
+.nav-cta:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 2px; }
+
+/* compact footer: wordmark, one row of main links, one legal line */
+.foot.foot-bar { gap: 12px; margin-top: 0; padding-top: 24px; padding-bottom: 18px; }
+.foot-bar .footer-links { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 32px; }
+.foot-bar .footer-links .footer-policyengine, .foot-bar .footer-links .footer-policyengine:hover { display: inline-flex; align-items: center; gap: 10px; color: #FFFFFF; font-size: 15px; font-weight: 600; text-decoration: none; }
+.foot-bar .footer-links .footer-policyengine img { width: auto; height: 20px; padding: 0; background: none; border-radius: 0; }
+.foot-main { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 22px; }
+.foot-bar .foot-main a { display: inline-flex; align-items: center; gap: 6px; color: rgba(255, 255, 255, .85); font-size: var(--fs-ab-small); }
+.foot-bar .foot-main a svg { width: 15px; height: 15px; opacity: .8; }
+.foot-bar .foot-main a:hover { color: #FFFFFF; text-decoration: underline; text-underline-offset: 3px; }
+.foot-bar .footer-legal { padding-top: 12px; margin: 0; font-size: var(--fs-ab-micro); }
+@media (max-width: 640px) { .foot-bar .footer-links { justify-content: flex-start; } .foot-main { gap: 8px 18px; } }
+.repo-list { margin-top: 0; }
+.repo-row .pp-title { gap: 10px; }
+.repo-owner { color: var(--text-faint); font-size: var(--fs-ab-micro); font-weight: 500; }
+.repo-issue .pp-ic { color: var(--ab-loss); }
