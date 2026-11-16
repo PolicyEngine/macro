@@ -41,7 +41,7 @@ FLOWS = (
     ("back", "Back: long-run wages", "dynamic score"),
     ("in", "In: macro path", "who gains and loses"),
 )
-DEFAULT = "No macro model feeds another."
+DEFAULT = "No macro model feeds another. Hover or tap a model to see its link."
 
 W, H = 1000, 440
 CX, CY = 500, 220
