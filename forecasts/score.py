@@ -1016,7 +1016,7 @@ def render_results(card: dict) -> str:
         '<li><span class="fc-sw fc-sw-68"></span>68% band</li>'
         '<li><span class="fc-sw fc-sw-med"></span>median</li>'
         '<li><span class="fc-sw fc-sw-out"></span>outturn</li>'
-        '<li class="fc-legend-note">Each strip spans its own 90% band.</li></ul>',
+        f'<li class="fc-legend-note">{icon("info", "fc-ic fc-th-ic")}Each strip spans its own 90% band.</li></ul>',
         '      <div class="fc-board ab-card" role="table" aria-label="Every scored forecast: archived median and bands, outturn, error">',
         f'        <div class="fc-row fc-head" role="row"><span role="columnheader">{icon("target", "fc-ic fc-th-ic")}Target and round</span>'
         f'<span role="columnheader">{icon("gdp", "fc-ic fc-th-ic")}Median, bands and outturn</span>'
