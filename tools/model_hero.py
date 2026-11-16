@@ -20,29 +20,18 @@ ROOT = Path(__file__).resolve().parent.parent
 CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=4" />'
 CSS_RE = re.compile(r'<link rel="stylesheet" href="/models/model-pages\.css(?:\?v=\d+)?" />\n?')
 
-# Tabler-style 24px stroke icons.
-ICONS = {
-    # PolicyEngine microsimulation: a population of households
-    "pe": '<path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0-8 0M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M21 21v-2a4 4 0 0 0-3-3.85"/>',
-    # OBR: a balance sheet / fiscal ledger
-    "obr": '<path d="M3 21h18"/><path d="M5 21V10"/><path d="M19 21V10"/><path d="M9 21v-7"/><path d="M15 21v-7"/><path d="m3 10 9-6 9 6"/>',
-    # SVAR: shock decomposition — stacked waves
-    "svar": '<path d="M3 12h4l3 8 4-16 3 8h4"/>',
-    # FRB/US: a gauge / policy dial
-    "frb-us": '<path d="M12 6a2 2 0 1 0 4 0a2 2 0 1 0-4 0M4 6h8M16 6h4M6 12a2 2 0 1 0 4 0a2 2 0 1 0-4 0M4 12h2M10 12h10M15 18a2 2 0 1 0 4 0a2 2 0 1 0-4 0M4 18h11M19 18h1"/>',
-    # US HANK: distribution — histogram bars
-    "us-hank": '<path d="M3 21h18M6 21v-4M10 21V10M14 21V5M18 21v-8"/>',
-    # OG-UK: generations over time — hourglass
-    "olg": '<path d="M6.5 7h11M6.5 17h11M6 20v-2a6 6 0 1 1 12 0v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zM6 4v2a6 6 0 1 0 12 0V4a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/>',
-    # DEFINE-UK: stock-flow loop with a leaf (ecological)
-    "define": '<path d="M5 21c.5-4.5 2.5-8 7-10M9 18c6.2 0 10.5-3.3 11-12V4h-4c-9 0-12 4-12 9 0 1 0 3 2 5h3z"/>',
-}
+sys.path.insert(0, str(ROOT))
+import site_nav  # noqa: E402  one icon system: session-wide Lucide set
+
+PUBLIC_ID = {"pe": "pe-microsim", "obr": "obr-macro", "svar": "boe-svar", "frb-us": "frb-us",
+             "us-hank": "us-hank", "olg": "psl-og", "define": "define-uk"}
+ICONS = {key: site_nav.ICONS[site_nav.MODEL_ICONS[pid]] for key, pid in PUBLIC_ID.items()}
 META_ICONS = {
-    "country": '<circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8"/><path d="M3.6 15h16.8"/><path d="M12 3a15 15 0 0 1 0 18"/><path d="M12 3a15 15 0 0 0 0 18"/>',
-    "trust": '<path d="M12 3 4 6v6c0 5 3.4 8.3 8 9 4.6-.7 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>',
+    "country": site_nav.ICONS["globe"],
+    "trust": site_nav.ICONS["shield-check"],
     "hosted": '<path d="M7 18a4.5 4.5 0 0 1-.5-9 6 6 0 0 1 11.5 1.5A3.8 3.8 0 0 1 17.5 18H7Z"/>',
     "local": '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/>',
-    "cadence": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    "cadence": site_nav.ICONS["clock"],
 }
 
 # kind line, country, (trust label, glossary anchor), access, cadence
