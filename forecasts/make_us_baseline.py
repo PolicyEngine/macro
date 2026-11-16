@@ -47,9 +47,8 @@ def render() -> str:
         [
             "      <div class=\"table-scroll\">",
             "        <table>",
-            "          <caption>FRB/US April 2026 LONGBASE conditioning "
-            "baseline — the Fed-style path frb-us shocks deviate from. Not a "
-            "PolicyEngine forecast; no bands; never scored.</caption>",
+            "          <caption>FRB/US April 2026 LONGBASE. Not a PolicyEngine "
+            "forecast; no bands; never scored.</caption>",
             "          <thead><tr><th scope=\"col\">Quarter</th>"
             "<th scope=\"col\">Real GDP, y/y</th>"
             "<th scope=\"col\">CPI, y/y</th>"

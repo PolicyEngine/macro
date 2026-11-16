@@ -556,8 +556,7 @@ VS_OFFICIAL_SPECS = {
         "series": "UK real GDP, year-on-year growth, percent",
         "unit": "UK real GDP, % change on a year earlier",
         "source_note": (
-            "EFO path derived from the March 2026 EFO real-GDP level path stored "
-            "in <code>papers/obr-macro/figures/fig_anchored_data.csv</code>"
+            "OBR March 2026 EFO"
         ),
         "intro": (
             "GDP growth from the {round_id} round: our median and bands "

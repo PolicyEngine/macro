@@ -1809,10 +1809,6 @@ def us_platform() -> str:
         ),
     ]
     return f"""    <div class="prose">
-      <p>
-        Four routes, each built on {model_link("pe-microsim")}; the household
-        rows are the UK commands with <span class="mono">--country us</span>.
-      </p>
       <details class="about route-details">
         <summary>The routes, with the command for each</summary>
       <div class="table-scroll">
@@ -1839,16 +1835,10 @@ def us_platform() -> str:
         Two UK rows have no US equivalent:
       </p>
 {limits_list([
-        "<strong>No reform with a macro second round.</strong> Both US "
-        f'members — {model_link("frb-us")} and {model_link("us-hank")} — record '
-        f'{registry_terms([registry_cannot("frb-us", "policyengine")])} in '
-        "their own cannot-answer field, and us-hank adds "
-        f'{registry_terms([registry_cannot("us-hank", "detailed tax")])}. No '
-        "mapping exists from a US statutory reform to a US macro model, and "
-        "none is invented here.",
-        f"<strong>No forecast.</strong> {no_us_forecaster()} A section called "
-        "Forecasts showing a US path anyway would claim a forecast no model "
-        "here makes.",
+        "<strong>No reform with macro feedback.</strong> "
+        f'{model_link("frb-us")} and {model_link("us-hank")} do not take PolicyEngine '
+        "reforms; no mapping exists from a US statutory reform to a US macro model.",
+        f'<strong>No forecast.</strong> Only {model_link("boe-svar")} forecasts, and it is UK-only.',
     ])}
       <details class="about">
         <summary>The bridge that does exist, and the MCP routes</summary>
