@@ -251,27 +251,26 @@
         <dl class="kv"><div><dt>Growth, mean 2025&ndash;40</dt><dd>2.4% vs &asymp;1.65%</dd></div><div><dt>Unemployment, 2025</dt><dd>4.39% vs 4.88%</dd></div><div><dt>Emissions, 2024</dt><dd>401.5 vs 371 MtCO2e</dd></div><div><dt>Emissions 2030 vs NDC</dt><dd>342.8 vs &asymp;260 MtCO2e</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
-          <p>
-                Every row is recomputed from the cached pinned run against pinned
-                external observations and committed as
-                <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/validation/baseline_vs_external.csv">baseline_vs_external.csv</a>;
-                the suite fails on any drift. The annual-mean convention puts 2025 growth (tile above) where Table&nbsp;4 prints 4.96% — the same
-                &minus;0.30pp anchoring gap as the Table&nbsp;4 gate above.
-              </p>
+          <p>Every row is recomputed from the cached pinned run against pinned external observations.</p>
+          <ul>
+            <li>The recomputed rows are committed as <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/validation/baseline_vs_external.csv">baseline_vs_external.csv</a>.</li>
+            <li>The suite fails on any drift.</li>
+            <li>The annual-mean convention puts 2025 growth at the tile above.</li>
+            <li>Table&nbsp;4 prints 4.96% for the same year.</li>
+            <li>That is the same &minus;0.30pp anchoring gap as the Table&nbsp;4 gate above.</li>
+          </ul>
           <p class="opt-note">
                 external sources: ONS national accounts and MGSX (2026-07-26
                 vintages), ONS population and labour-force estimates, DESNZ 2024
                 provisional territorial emissions, OBR March 2026 EFO, and the UK
                 NDC — attributed row by row in the committed CSV.
               </p>
-          <p>
-                So the levels are not forecasts and are never served as such: the
-                manual says the baseline &ldquo;should not be seen as a
-                prediction&rdquo;, and near-term levels are not competitive with the
-                <a href="/obr">OBR emulator</a> or the <a href="/svar">BoE SVAR</a>.
-                Only scenario <em>deltas</em> are defensible, carrying the demand-led
-                caveat.
-              </p>
+          <p>So the levels are not forecasts and are never served as such.</p>
+          <ul>
+            <li>The manual says the baseline &ldquo;should not be seen as a prediction&rdquo;.</li>
+            <li>Near-term levels are not competitive with the <a href="/obr">OBR emulator</a> or the <a href="/svar">BoE SVAR</a>.</li>
+            <li>Only scenario <em>deltas</em> are defensible, carrying the demand-led caveat.</li>
+          </ul>
         </details>
       </div>
 
@@ -282,29 +281,25 @@
         <dl class="kv"><div><dt>Headline</dt><dd>2.30: cumulative &Delta;GDP over &Delta;SPEND_GVTPS, the spending the policy switch sets, to 2040</dd></div><div><dt>Secondary</dt><dd>1.78: over all non-wage spending (&Delta;SPEND_GVT)</dd></div><div><dt>Not comparable to</dt><dd>OBR &asymp;1.0, a short-horizon figure</dd></div><div><dt>Denominator change</dt><dd>77% government power-sector spending (<code>SPEND_GVTPS</code>)</dd></div><div><dt>Bias direction</dt><dd>not established</dd></div><div><dt>Parameter mismatch</dt><dd>included in both; without it about 2.08&ndash;2.25 and 1.73&ndash;1.75 (<a href="#alpha-pp">limits</a>)</dd></div><div><dt>Upstream summary</dt><dd>unusable, never quoted</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
-          <p>
-                The model's cumulative green-public-investment multiplier, on our own
-                computation, is the tile above: nominal cumulative ΔGDP of 209.9 over
-                the cumulative change in ΔSPEND_GVTPS, the government power-sector
-                spending the policy switch sets, of 91.2 — 2.30 to 2040. Over all
-                non-wage government spending (ΔSPEND_GVT) it is 1.78, which was the
-                headline until define-uk-model #16 was decided on 15 November 2026. It is <em>not</em> comparable to the OBR's
-                &asymp;1.0: that is a short-horizon multiplier where ours is cumulative to
-                2040, and a demand-led <a class="gloss-link" href="/glossary#closure">closure</a> with Kaldor&ndash;Verdoorn
-                productivity implies a ratio above 1 over that horizon. The
-                denominator mixes the policy impulse with endogenous items: in the
-                cached run its cumulative change of 118.2 is government power-sector
-                spending +91.2, other consumption +21.1, social benefits +8.0 and
-                government investment &minus;2.3 (green +17.0 offset by conventional
-                &minus;19.3). Social benefits rise, so the direction of the bias
-                against an impulse-based multiplier is not established; an earlier
-                statement that benefits fall and that 1.78 is upper-leaning is
-                withdrawn. The headline now uses the policy instrument alone as the
-                impulse, which removes the endogenous items from the denominator
-                (<a href="https://github.com/PolicyEngine/define-uk-model/issues/16">define-uk-model #16</a>). The
-                caveats travel with every served delta
-                (<code>GPI_MULTIPLIER_CAVEATS</code>, gated by test).
-              </p>
+          <p>The tile above is our own computation of the cumulative green-public-investment multiplier.</p>
+          <ul>
+            <li>Nominal cumulative ΔGDP of 209.9 over cumulative ΔSPEND_GVTPS of 91.2 gives 2.30 to 2040.</li>
+            <li>ΔSPEND_GVTPS is the government power-sector spending the policy switch sets.</li>
+            <li>Over all non-wage government spending (ΔSPEND_GVT) it is 1.78.</li>
+            <li>1.78 was the headline until define-uk-model #16 was decided on 15 November 2026.</li>
+            <li>It is <em>not</em> comparable to the OBR's &asymp;1.0, a short-horizon multiplier.</li>
+            <li>Ours is cumulative to 2040, not short-horizon.</li>
+            <li>A demand-led <a class="gloss-link" href="/glossary#closure">closure</a> with Kaldor&ndash;Verdoorn productivity implies a ratio above 1 over that horizon.</li>
+            <li>The denominator mixes the policy impulse with endogenous items.</li>
+            <li>In the cached run its cumulative change is 118.2.</li>
+            <li>That is government power-sector spending +91.2, other consumption +21.1 and social benefits +8.0.</li>
+            <li>Government investment is &minus;2.3: green +17.0 offset by conventional &minus;19.3.</li>
+            <li>Social benefits rise, so the bias against an impulse-based multiplier has no established direction.</li>
+            <li>An earlier statement that benefits fall and 1.78 is upper-leaning is withdrawn.</li>
+            <li>The headline now uses the policy instrument alone as the impulse.</li>
+            <li>That removes the endogenous items from the denominator (<a href="https://github.com/PolicyEngine/define-uk-model/issues/16">define-uk-model #16</a>).</li>
+            <li>The caveats travel with every served delta (<code>GPI_MULTIPLIER_CAVEATS</code>, gated by test).</li>
+          </ul>
           <p>
                 Upstream's own <code>Multiplier_Summary.csv</code> is
                 <strong>unusable</strong> and never quoted: its multiplier columns are
