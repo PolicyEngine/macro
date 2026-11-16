@@ -874,3 +874,70 @@
 .doc main:has(> .hero.mh) .codeblock + .scen-note { margin-top: 12px; }
 .doc main:has(> .hero.mh) details.step-fold { border-top: 0; }
 .doc main:has(> .hero.mh) .scrolly-wrap + .xp { margin-top: 16px; }
+
+/* ===== Polish run (16–17 Nov): proof list, run tabs, validation scorecard ===== */
+/* result chips: one closed vocabulary, keyed on [data-result] (the registry trust card keeps [data-level]) */
+.doc main:has(> .hero.mh) [data-result] .chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border: 1px solid var(--hairline-strong);
+  border-radius: 999px; font-size: 11.5px; font-weight: 600; white-space: nowrap;
+  background: var(--surface-sunken); color: var(--text-body);
+}
+.doc main:has(> .hero.mh) [data-result] .chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.doc main:has(> .hero.mh) [data-result="pass"] .chip { background: var(--surface-tint); color: var(--teal-700); border-color: color-mix(in srgb, var(--primary) 30%, transparent); }
+.doc main:has(> .hero.mh) [data-result="weak"] .chip { background: var(--warn-bg); color: var(--warn-ink); border-color: var(--warn-line); }
+.doc main:has(> .hero.mh) [data-result="fail"] .chip { background: color-mix(in srgb, #DC2626 10%, var(--card)); color: #B91C1C; border-color: color-mix(in srgb, #DC2626 40%, transparent); }
+.doc main:has(> .hero.mh) [data-result="na"] .chip { background: none; color: var(--text-faint); border-color: var(--hairline); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .doc main:has(> .hero.mh) [data-result="fail"] .chip { color: #FCA5A5; }
+}
+:root[data-theme="dark"] .doc main:has(> .hero.mh) [data-result="fail"] .chip { color: #FCA5A5; }
+
+/* Overview: How far to trust it (3-row proof list) */
+.doc main:has(> .hero.mh) .proof-list { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--ab-border); border-radius: 12px; overflow: hidden; }
+.doc main:has(> .hero.mh) .proof-row { margin: 0; padding: 0; }
+.doc main:has(> .hero.mh) .proof-row::before { display: none; }
+.doc main:has(> .hero.mh) .proof-row + .proof-row { border-top: 1px solid var(--ab-border); }
+.doc main:has(> .hero.mh) .proof-link {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto 16px; align-items: center; gap: 16px;
+  padding: 14px 20px; color: inherit; text-decoration: none;
+}
+.doc main:has(> .hero.mh) .proof-link::after { content: "→"; color: var(--text-faint); transition: transform 150ms; }
+.doc main:has(> .hero.mh) .proof-link:hover { background: var(--ab-teal-50); }
+.doc main:has(> .hero.mh) .proof-link:hover::after { transform: translateX(3px); color: var(--ab-teal-700); }
+.doc main:has(> .hero.mh) .proof-link:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.doc main:has(> .hero.mh) .proof-check { color: var(--text-strong); font-size: var(--fs-ab-small, 14px); font-weight: 600; line-height: 1.35; }
+.doc main:has(> .hero.mh) .proof-check small { display: block; margin-top: 2px; color: var(--text-faint); font-size: var(--fs-ab-cap, 13px); font-weight: 400; }
+.doc main:has(> .hero.mh) .proof-num { color: var(--text-strong); font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.doc main:has(> .hero.mh) .proof-more, .doc main:has(> .hero.mh) .run-more { margin: 10px 0 0; font-size: var(--fs-ab-cap, 13px); }
+@media (max-width: 640px) {
+  .doc main:has(> .hero.mh) .proof-link { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; padding: 12px 14px; }
+  .doc main:has(> .hero.mh) .proof-link::after { display: none; }
+  .doc main:has(> .hero.mh) .proof-check { grid-column: 1 / -1; }
+}
+
+/* Overview: Run it (MCP / CLI / Python tabs on the shared scenario switch) */
+.doc main:has(> .hero.mh) .run-panel { margin-top: 12px; }
+.doc main:has(> .hero.mh) .run-panel > .codeblock { margin: 0; }
+.doc main:has(> .hero.mh) .run-prompt {
+  margin: 0; padding: 14px 18px; background: var(--card); border: 1px solid var(--ab-border); border-left: 3px solid var(--ab-teal-700);
+  border-radius: 10px; color: var(--text-strong); font-size: var(--fs-ab-small, 14px); line-height: 1.55;
+}
+.doc main:has(> .hero.mh) .run-prompt small { display: block; margin-top: 6px; color: var(--text-faint); font-size: var(--fs-ab-cap, 13px); }
+
+/* Validation: scorecard table, first under the heading */
+.doc main:has(> .hero.mh) .table-scroll.scorecard { margin: 0 0 16px; }
+.doc main:has(> .hero.mh) .scorecard th[scope="row"] a { color: var(--text-strong); font-weight: 600; text-decoration: none; }
+.doc main:has(> .hero.mh) .scorecard th[scope="row"] a:hover { color: var(--ab-teal-700); text-decoration: underline; }
+.doc main:has(> .hero.mh) .scorecard .sc-num { color: var(--text-strong); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.doc main:has(> .hero.mh) .scorecard td:last-child { white-space: nowrap; }
+.doc main:has(> .hero.mh) .trust-sub { margin: 20px 0 8px; color: var(--text-strong); font-size: var(--fs-ab-body, 16px); font-weight: 600; }
+
+/* Methodology: the step index reads as one connected strip */
+.doc main:has(> .hero.mh) .meth-map-list li { position: relative; }
+@media (min-width: 768px) {
+  .doc main:has(> .hero.mh) .meth-map-list li:not(:nth-child(3n)):not(:last-child)::after {
+    display: block; content: ""; position: absolute; top: 50%; right: -8px; width: 8px; height: 2px; background: var(--ab-teal-100);
+  }
+}
+.doc main:has(> .hero.mh) .meth-lead { max-width: 72ch; margin: 0 0 12px; color: var(--text-body); font-size: var(--fs-ab-body, 16px); line-height: 1.55; }
+.doc main:has(> .hero.mh) .proof-more { max-width: none; }
