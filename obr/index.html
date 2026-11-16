@@ -68,9 +68,9 @@
     </div>
     <p class="callout verdict-callout">
       <strong>Verdict: anchored to the EFO by construction, not validated as a forecaster; weak free-running.</strong>
-      The household tax route transmits, but no quarter of the solve converges
-      to tolerance; the spending lever&rsquo;s multiplier is
-      fixed by construction and capital spending does not transmit. CPI does
+      The household tax route transmits and every quarter of the solve
+      converges; the spending lever&rsquo;s multiplier is
+      close to 1 by construction and capital spending does not transmit. CPI does
       not respond to rate or oil shocks.
       <a href="/obr/validation">How far to trust it &rarr;</a>
     </p>
@@ -191,7 +191,7 @@
           autoregression).
         </div>
         <p class="kv-title">1p on the basic rate, April 2026</p>
-        <dl class="kv kv-text"><div><dt>Direct yield</dt><dd>from PolicyEngine microsimulation; the second round changes GDP, not this costing</dd></div><div><dt>Second round</dt><dd>GDP falls, building to ~0.34&times; the revenue raised by quarter 12 of a run from 2025Q1</dd></div><div><dt>Vs OBR</dt><dd>published 0.3 for income tax &amp; NICs</dd></div><div><dt>Per-quarter</dt><dd>not reliable &mdash; no quarter converges to tolerance</dd></div></dl>
+        <dl class="kv kv-text"><div><dt>Direct yield</dt><dd>from PolicyEngine microsimulation; the second round changes GDP, not this costing</dd></div><div><dt>Second round</dt><dd>GDP falls, building to ~0.37&times; the revenue raised by quarter 12 of a run from 2025Q1 (current prices; 0.33&times; in real GDP)</dd></div><div><dt>Vs OBR</dt><dd>published 0.3 for income tax &amp; NICs</dd></div><div><dt>Per-quarter</dt><dd>every quarter converges</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
           <h4>The half of the workflow it does</h4>
@@ -207,16 +207,20 @@
           1p on the basic rate of income tax from April 2026, with the
           direct yield costed by the <a href="/pe#answers">microsimulation</a>.
           The second round is a GDP fall that builds from about
-          0.15&times; the revenue raised in the first year to roughly
-          <strong>0.34&times;</strong> by the twelfth quarter &mdash; against the OBR's published <strong>0.3</strong>
-          for income tax and NICs. Both ratios come from a 12-quarter run,
+          0.16&times; the revenue raised in the first year to roughly
+          <strong>0.37&times;</strong> by the twelfth quarter &mdash; against the OBR's published <strong>0.3</strong>
+          for income tax and NICs. Those are current-price GDP per pound of
+          revenue, the OBR's like-for-like basis. In real GDP, which
+          <code>obr_shock</code> reports, the same run gives 0.145&times; and
+          <strong>0.33&times;</strong>, smaller by the GDP deflator
+          (obr-macroeconomic-model #63). Both ratios come from a 12-quarter run,
           2025Q1&ndash;2027Q4, with the yield entered as a household-income
           shock of &pound;1,615.75m a quarter (<code>obr_shock</code>). The hosted
           <code>score_reform(model="obr")</code> default scores a different
           window, 2026Q2&ndash;2031Q1, and returns different ratios
-          (<a href="/obr/validation#hosted">hosted results</a>). Read the direction and the scale, not the
-          individual quarters: <a href="/obr/validation#caveats">no quarter of
-          the solve converges to tolerance</a>. The static costing itself is benchmarked against HMRC on the
+          (<a href="/obr/validation#hosted">hosted results</a>). Every quarter of the solve converges to
+          tolerance under the nominal-GDP pin; the <a href="/obr/validation#caveats">limits</a>
+          say which channels are still inert. The static costing itself is benchmarked against HMRC on the
           <a href="/pe/validation#hmrc">microsimulation&rsquo;s validation tab</a>;
           the full walkthrough is under <a href="/models#score">score a reform</a>.
         </p>
@@ -242,9 +246,9 @@
   --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
   --model obr</code></pre></div>
         <p class="callout">
-          <strong>Same-breath caveats.</strong> No quarter of the solve
-          converges: read the direction and the scale (<a href="#answers">step 2</a>),
-          not single quarters. Corporation tax is refused (<a href="/obr/validation#caveats">why</a>);
+          <strong>Same-breath caveats.</strong> Read the direction and the
+          scale (<a href="#answers">step 2</a>), not single quarters: there are no
+          confidence bands. Corporation tax is refused (<a href="/obr/validation#caveats">why</a>);
           for a US reform, see <a href="/models#choose">the gap in the model router</a>.
         </p>
         <p class="vlinks mono">

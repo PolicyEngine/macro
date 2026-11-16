@@ -68,7 +68,7 @@ MODELS = {
         "cannot_answer": ["arbitrary statutory reform incidence", "borrowing through the current adapter"],
         "horizon": "quarterly, typically 3-5 years",
         "access": ["hosted", "CLI", "Python"],
-        "runtime": "seconds for raw shocks; minutes for translated reform scenarios",
+        "runtime": "about one to five minutes for a raw shock on the hosted server; over ten minutes for a translated reform scenario on the default five-year window",
         "uncertainty": "not comprehensive",
         "status": (
             "anchored to the March 2026 EFO, not validated as a forecaster; "
