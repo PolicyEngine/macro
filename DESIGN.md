@@ -494,7 +494,7 @@ All seven models carry both, in one markup:
   inside one `details.expander` "Model card" since r3: reference material, not a headline): `dl.model-card` of
   `<div><dt>…</dt><dd>…</dd></div>` rows, two columns from 760 px, in this order (rows a model
   lacks are omitted): Answers · Inputs · Outputs · Horizon · Data · Uncertainty · Access ·
-  Runtime · Joins pe-microsim · Status · Cannot answer. The last three are `.model-card-wide`.
+  Runtime · Joins the microsimulation · Status · Cannot answer. The last three are `.model-card-wide`.
   Values follow `integration/src/policyengine_macro/capabilities.py` `MODELS`; Status quotes the
   registry verbatim and Horizon quotes it
   (`test_model_cards_quote_the_capability_registry` enforces order, Status and Horizon).
@@ -529,10 +529,18 @@ verdict (§2.1): an orange box on six of seven Overviews read as "this model is 
   magnitudes are not validated, so their `#answers` show what the model returns in words, and
   PolicyEngine's is its costing chart. The collapsed model card restates the registry (§4.13)
   and is exempt from §1.1 in the way the `.meth-panel`/`.meth-inline` pair is.
+  OG-UK's panels are a table and three charts under one shared `h3` above the switch, because
+  the four views show one reform.
 - **Sparkline** `figure.spark`: one bar per period, no SVG text (§1.8), the axis and unit in an
-  HTML `figcaption.spark-axis`, the full series in the SVG `aria-label`.
+  HTML `figcaption.spark-axis`, the full series in the SVG `aria-label`. From 900 px a panel with a
+  sparkline lays the sparkline (3fr) beside its note (2fr); `.scen-panel[hidden]` must stay
+  `display: none` under that grid.
+- **Join** `#pe-bridge` is headed "With the microsimulation" on the six macro models and "With
+  the macro models" on PolicyEngine, which is the microsimulation; the model card's matching row
+  is "Joins the microsimulation".
 - **Where next** `nav#where-next.where-next.ov-next > .chip-row`: 3–4 chips on every model tab
-  (r3 replaced the three "Explore →" entry cards, which repeated the sub-tab row).
+  (r3 replaced the three "Explore →" entry cards, which repeated the sub-tab row). On Overviews:
+  Methodology, Run it hosted/locally, then the neutral "Compare the models" last.
 
 ---
 
