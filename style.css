@@ -8349,3 +8349,39 @@ main :is(.where-next .chip-row > a, .tp-next .tp-chips > a, .where-next .entry-g
 main .where-next .entry-grid > a p { display: none; }
 main .where-next .entry-grid > a h3 { font-size: 13px; }
 main :is(.where-next, .tp-next, #where-next) .sh > p { display: none; }
+
+/* =====================================================================
+   32. Scroll reveal (r15 polish). Hidden only when reveal.js opts in
+   (html.rv-on); 200ms fade + 8px rise; grid children stagger via --rv-d.
+   Without JS, with reduced motion, and in print, everything is at rest.
+   ===================================================================== */
+.scroll-reveal { opacity: 1; transform: none; transition: none; }
+.rv-on .scroll-reveal { opacity: 0; transform: translateY(8px); transition: opacity 220ms ease-out, transform 220ms ease-out; transition-delay: var(--rv-d, 0ms); }
+.rv-on .scroll-reveal.in-view { opacity: 1; transform: none; }
+.rv-on .scroll-reveal.reveal-initial { transition: none; }
+@media (prefers-reduced-motion: reduce) { .rv-on .scroll-reveal { opacity: 1 !important; transform: none !important; } }
+@media print { .scroll-reveal, .rv-on .scroll-reveal { opacity: 1 !important; transform: none !important; } }
+
+/* Home trust ladder: strongest check first, models link to their evidence */
+.tl { margin-top: 20px; padding: 18px 20px; background: var(--card); border: 1px solid var(--ab-border); border-radius: 12px; }
+.tl-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 12px; }
+.tl-head h3 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: var(--fs-ab-h3); color: var(--text-strong); }
+.tl-head h3 svg { color: var(--ab-teal-700); }
+.tl-head span { color: var(--text-faint); font-size: var(--fs-ab-cap); }
+.tl-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.tl-rung { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1.4fr); align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid #F1F3F5; }
+.tl-rung:first-child { border-top: 0; }
+.tl-step { display: grid; place-items: center; color: var(--tl); }
+.tl-gain { --tl: var(--ab-gain); } .tl-mid { --tl: #64748B; } .tl-loss { --tl: var(--ab-loss); }
+.tl-what { display: flex; flex-direction: column; min-width: 0; }
+.tl-what strong { color: var(--text-strong); font-size: var(--fs-ab-small); }
+.tl-what small { color: var(--text-faint); font-size: var(--fs-ab-cap); }
+.tl-models { display: flex; flex-wrap: wrap; gap: 6px; }
+.tl-model { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--ab-border); border-radius: 999px; color: var(--text-body); font-size: var(--fs-ab-cap); font-weight: 600; text-decoration: none; }
+.tl-model svg:first-child { color: var(--ab-teal-700); }
+.tl-model svg:last-child { color: var(--text-faint); }
+.tl-model:hover { border-color: var(--ab-teal-700); color: var(--ab-teal-700); }
+.tl-foot { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid #F1F3F5; color: var(--text-muted); font-size: var(--fs-ab-cap); }
+.tl-foot a { margin-left: 6px; font-weight: 600; }
+@media (max-width: 720px) { .tl-rung { grid-template-columns: 24px minmax(0, 1fr); } .tl-models { grid-column: 2; } }
+@media (prefers-color-scheme: dark) { .tl-rung, .tl-foot { border-color: var(--border); } }

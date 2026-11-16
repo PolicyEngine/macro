@@ -1,37 +1,78 @@
-// A restrained, one-time reveal for section-level content. The hero and
-// navigation paint immediately; only content reached by scrolling moves.
+// Scroll reveal (r15 polish): a subtle fade and 8px rise as blocks enter,
+// a short stagger inside card grids, and a gentle count-up on stat values.
+// Progressive enhancement: nothing is hidden unless this script runs and
+// motion is allowed (html.rv-on); anything above the viewport — after an
+// anchor jump or a fast scroll — is shown at once, so no block is ever left
+// faded; print and reduced motion show everything at rest.
 (function () {
   "use strict";
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const targets = document.querySelectorAll(
-    "main .band > *, main .model-evidence-links-top"
-  );
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var BLOCKS = "main .band > *, main .model-evidence-links-top, main section > .lp-wrap > *, main .ab-sec > *, main .gl-sec > *, main .fc-body > section > *";
+  var GRIDS = "main :is(.mc-grid, .uc-grid, .qc-grid, .stat-row, .stat-grid, .fc-tiles, .ct-grid, .pp-list, .tr-list, .lp-models)";
+  var targets = Array.from(document.querySelectorAll(BLOCKS));
+  document.querySelectorAll(GRIDS).forEach(function (grid) {
+    Array.from(grid.children).forEach(function (child, i) {
+      child.style.setProperty("--rv-d", Math.min(i, 6) * 45 + "ms");
+      targets.push(child);
+    });
+  });
+  targets = targets.filter(function (el, i, all) { return all.indexOf(el) === i && !el.closest(".hero, .lp-hero, .mp-hero"); });
   targets.forEach(function (el) { el.classList.add("scroll-reveal"); });
-  if (reduce || !("IntersectionObserver" in window)) {
-    targets.forEach(function (el) { el.classList.add("in-view"); });
-    return;
+  function showAll() { targets.forEach(function (el) { el.classList.add("in-view", "reveal-initial"); }); }
+  window.addEventListener("beforeprint", showAll);
+  if (reduce || !("IntersectionObserver" in window)) { showAll(); return; }
+  document.documentElement.classList.add("rv-on");
+
+  var COUNT = ".stat-value, .stat-num, .fc-tile-v, .lp-stat-v";
+  function countUp(root) {
+    root.querySelectorAll(COUNT).forEach(function (el) {
+      if (el.dataset.counted || el.children.length) return;
+      var text = el.textContent;
+      var m = text.match(/^(\s*[^\d\-−]*)(-|−)?(\d+(?:\.\d+)?)(.*)$/s);
+      if (!m) return;
+      var end = parseFloat(m[3]); if (!isFinite(end) || end === 0) return;
+      var decimals = (m[3].split(".")[1] || "").length;
+      if (!decimals && end >= 1900 && end <= 2100) return;   /* years and quarters do not count */
+      el.dataset.counted = "1";
+      var start = null, dur = 600;
+      function step(ts) {
+        if (start === null) start = ts;
+        var t = Math.min(1, (ts - start) / dur), e = 1 - Math.pow(1 - t, 3);
+        el.textContent = m[1] + (m[2] || "") + (end * e).toFixed(decimals) + m[4];
+        if (t < 1) requestAnimationFrame(step); else el.textContent = text;
+      }
+      requestAnimationFrame(step);
+    });
   }
-  const io = new IntersectionObserver(
-    function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting) {
-          e.target.classList.add("in-view");
-          io.unobserve(e.target);
-        }
-      });
-    },
-    { threshold: 0.08, rootMargin: "0px 0px -7% 0px" }
-  );
+  function reveal(el, animate) {
+    if (el.classList.contains("in-view")) return;
+    if (!animate) el.classList.add("reveal-initial");
+    el.classList.add("in-view");
+    if (animate) countUp(el);
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) { reveal(e.target, true); io.unobserve(e.target); } });
+  }, { threshold: 0.06, rootMargin: "0px 0px -6% 0px" });
+  var vh = window.innerHeight;
   targets.forEach(function (el) {
-    if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
-      el.classList.add("in-view", "reveal-initial");
-    } else if (el.offsetHeight > window.innerHeight * 0.7) {
-      // Tall blocks (long walkthroughs, scrollytelling wrappers) may never
-      // reach the 8% intersection threshold — show them without animation.
-      el.classList.add("in-view", "reveal-initial");
-    } else {
-      io.observe(el);
-    }
+    var r = el.getBoundingClientRect();
+    if (r.top < vh * 0.94 || r.height > vh * 0.8) reveal(el, false);
+    else io.observe(el);
+  });
+  /* catch-up: anything that is now at or above the viewport is shown */
+  var ticking = false;
+  window.addEventListener("scroll", function () {
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(function () {
+      ticking = false;
+      var h = window.innerHeight;
+      targets.forEach(function (el) {
+        if (!el.classList.contains("in-view") && el.getBoundingClientRect().top < h) reveal(el, el.getBoundingClientRect().bottom > 0);
+      });
+    });
+  }, { passive: true });
+  window.addEventListener("hashchange", function () {
+    targets.forEach(function (el) { if (el.getBoundingClientRect().top < window.innerHeight) reveal(el, false); });
   });
 })();
 
