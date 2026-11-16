@@ -1065,6 +1065,7 @@ def chart_svar_coverage():
     def ymap(v):
         return base_y - (v - lo_v) * (base_y - top_y) / (hi_v - lo_v)
 
+    below68 = next((i + 1 for i, v in enumerate(series[68]) if v < 0.68), None)
     desc = ("Line chart of empirical interval coverage by forecast horizon, averaged "
             "across the eight model variables, against the nominal 68 and 90 percent "
             "levels; a vertical bar at each horizon spans the best and worst variable. " +
@@ -1073,9 +1074,10 @@ def chart_svar_coverage():
                 ", ".join(f"{v:.0%}" for v in series[lv])
                 for lv in (68, 90)
             ) +
-            f". The 68 per cent band covers {series[68][0]:.0%} at one quarter, just above "
-            f"nominal, and falls below nominal from horizon "
-            f"{next(i + 1 for i, v in enumerate(series[68]) if v < 0.68)} onward to {series[68][-1]:.0%} "
+            f". The 68 per cent band covers {series[68][0]:.0%} at one quarter, "
+            f"{'just above' if series[68][0] >= 0.68 else 'below'} nominal, and "
+            + (f"falls below nominal from horizon {below68} onward to {series[68][-1]:.0%} "
+               if below68 else f"stays at or above nominal to {series[68][-1]:.0%} ") +
             f"at eight; the 90 per cent band under-covers at every horizon, from "
             f"{series[90][0]:.0%} down to {series[90][-1]:.0%}. The mean hides how bad the "
             f"worst variable is: the lowest cell in the grid is {worst_var} at the "
