@@ -1734,6 +1734,23 @@ def svar_forecast(horizons: int = 12,
     return out
 
 
+def _shock_reading(name: str, p: float, quarter: str, weak: bool) -> str:
+    """One sentence on a shock's sign. With a weak identification sample
+    (fewer than 100 accepted draws or an ESS under 100) the payload already
+    warns that its quantiles are unreliable, so the reading must not say
+    "clearly": it says at most "probably" and ends by saying it is indicative."""
+    p_dom = max(p, 1 - p)
+    sign = "positive" if p >= 0.5 else "negative"
+    conf = "clearly" if p_dom >= 0.8 else ("probably" if p_dom >= 0.65 else "ambiguously")
+    if weak and conf == "clearly":
+        conf = "probably"
+    reading = (f"{name} shock was {conf} {sign} in {quarter} "
+               f"(P({'+' if p >= 0.5 else '−'}) = {p_dom:.2f}).")
+    if weak:
+        reading += " Indicative only: weak identification sample."
+    return reading
+
+
 def svar_latest_shocks(draws: int = _SVAR_DEFAULT_DRAWS) -> dict:
     """P(sign) of the 6 identified structural shocks in the latest data quarter."""
     key = _bounded_int("draws", draws, _SVAR_MIN_DRAWS, _SVAR_MAX_DRAWS)
@@ -1762,19 +1779,16 @@ def svar_latest_shocks(draws: int = _SVAR_DEFAULT_DRAWS) -> dict:
 
     identified = sorted(WORLD_SHOCKS + UK_SHOCKS)
 
+    weak = est["n_accepted"] < 100 or est["ess"] < 100
     shocks = []
     for j in identified:
         p = float(dist["p_pos"][j])
-        p_dom = max(p, 1 - p)
-        sign = "positive" if p >= 0.5 else "negative"
-        conf = "clearly" if p_dom >= 0.8 else ("probably" if p_dom >= 0.65 else "ambiguously")
         shocks.append(
             {
                 "shock": SHOCK_NAMES[j],
                 "p_positive": round(p, 3),
                 "p_negative": round(1 - p, 3),
-                "reading": f"{SHOCK_NAMES[j]} shock was {conf} {sign} in {last_q} "
-                           f"(P({'+' if p >= 0.5 else '−'}) = {p_dom:.2f}).",
+                "reading": _shock_reading(SHOCK_NAMES[j], p, last_q, weak),
             }
         )
     out = {

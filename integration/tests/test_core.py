@@ -497,3 +497,15 @@ def test_svar_forecast_reports_simple_yoy_rates_not_log_differences(monkeypatch)
         assert row["median"] == pytest.approx(simple, abs=1e-3)
         assert row["lo90"] == pytest.approx(simple, abs=1e-3)
     assert "simple" in res["units"]
+
+
+def test_shock_reading_softens_under_weak_identification():
+    from policyengine_macro.core import _shock_reading
+
+    assert _shock_reading("UK supply", 0.84, "2026Q2", False) == (
+        "UK supply shock was clearly positive in 2026Q2 (P(+) = 0.84)."
+    )
+    weak = _shock_reading("UK supply", 0.84, "2026Q2", True)
+    assert "clearly" not in weak
+    assert "probably positive" in weak and "Indicative only" in weak
+    assert "ambiguously" in _shock_reading("World supply", 0.6, "2026Q2", True)

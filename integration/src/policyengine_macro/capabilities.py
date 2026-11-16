@@ -751,6 +751,17 @@ def _no_model_warning(question_type: str, country: str, needs_distribution: bool
     )
 
 
+# Tools that feed a macro model's path into the microsimulation. Experimental,
+# so recommend() never lists their models as candidates for a distributional
+# question; it only names the tools in the no-model warning.
+EXPERIMENTAL_INCIDENCE_TOOLS = {
+    "frb-us": "frbus_shock_incidence",
+    "us-hank": "hank_shock_incidence",
+    "boe-svar": "svar_inflation_incidence",
+    "define-uk": "define_scenario_incidence",
+}
+
+
 def recommend(
     question_type: str,
     country: str = "uk",
@@ -781,6 +792,22 @@ def recommend(
         if needs_distribution and model_id not in ("pe-microsim", "og+microsim"):
             continue
         candidates.append(model_id)
+    warning = None if candidates else _no_model_warning(
+        question_type, country, needs_distribution
+    )
+    if needs_distribution and not candidates:
+        tools = [
+            EXPERIMENTAL_INCIDENCE_TOOLS[model_id]
+            for model_id, model in MODELS.items()
+            if model_id in EXPERIMENTAL_INCIDENCE_TOOLS
+            and country in model["geography"]
+            and question_type in model["question_types"]
+        ]
+        if tools:
+            warning += (
+                f" Experimental, not a recommendation: {', '.join(tools)} feed "
+                "this model's macro path into the microsimulation."
+            )
     return {
         "question_type": question_type,
         "country": country,
@@ -788,8 +815,6 @@ def recommend(
         "horizon": horizon,
         "primary_model": candidates[0] if candidates else None,
         "candidate_models": candidates,
-        "warning": None if candidates else _no_model_warning(
-            question_type, country, needs_distribution
-        ),
+        "warning": warning,
         "details": [get_status(model_id) for model_id in candidates],
     }
