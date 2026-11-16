@@ -553,22 +553,18 @@
    Cards only for charts, stat-tile rows and expanders. Gains teal, losses
    amber, sign always printed. 48px between sections, 20px between cards.
    ===================================================================== */
-.doc main:has(> .hero.mh) {
-  --ab-gain: #319795;
-  --ab-loss: #D97706;
-  --ab-loss-ink: #B45309;      /* 5.0:1 on white, for text */
-  --ab-none: #9CA3AF;
-  --ab-inset: var(--gray-50);
-}
+/* gain/loss/none/inset come from the shell (style.css section 11); this page
+   adds only an AA-safe amber for text and the dark-mode tones. */
+.doc main:has(> .hero.mh) { --ab-loss-ink: #B45309; }
 @media (prefers-color-scheme: dark) {
-  .doc main:has(> .hero.mh) { --ab-loss: #F59E0B; --ab-loss-ink: #FBBF24; --ab-gain: #38B2AC; --ab-inset: #141A26; }
+  .doc main:has(> .hero.mh) { --ab-loss: #F59E0B; --ab-loss-ink: #FBBF24; --ab-gain: #38B2AC; }
 }
 
 /* 1. no section card: drop the painted surface behind every band */
 .doc main:has(> .hero.mh) .band:has(> .band-head:first-child):not(.band .band):not(.glance-band)::after,
 .doc main:has(> .hero.mh) .band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child::after { content: none; }
 .doc main:has(> .hero.mh) .band:has(> .band-head:first-child):not(.band .band):not(.glance-band) {
-  margin-top: 48px;
+  margin-top: var(--section-y, 48px);
   padding: 0;
   overflow: visible;
   border-radius: 0;
@@ -578,7 +574,7 @@
 }
 .doc main:has(> .hero.mh) .band-head .section-intro,
 .doc main:has(> .hero.mh) .band-head > p { font-size: 15px; color: var(--gray-500); }
-.doc main:has(> .hero.mh) .band-head > h2 { font-size: 20px; font-weight: 600; color: var(--gray-800); }
+.doc main:has(> .hero.mh) .band-head > h2 { font-size: var(--fs-ab-h2, 20px); font-weight: 600; color: var(--gray-800); }
 .doc main:has(> .hero.mh) .band > p,
 .doc main:has(> .hero.mh) .band > .prose > p { max-width: 72ch; }
 
@@ -605,7 +601,7 @@
   border-radius: 0;
   min-width: 0;
 }
-.doc main:has(> .hero.mh) .stat-row .stat-value { order: -1; font-size: 28px; line-height: 1.2; font-weight: 700; color: var(--text-strong); font-variant-numeric: tabular-nums; }
+.doc main:has(> .hero.mh) .stat-row .stat-value { order: -1; font-size: var(--fs-ab-stat, 28px); line-height: 1.2; font-weight: 700; color: var(--text-strong); font-variant-numeric: tabular-nums; }
 .doc main:has(> .hero.mh) .stat-row .stat-label { margin-top: 4px; font-size: 14px; color: var(--gray-600); min-height: 0; }
 .doc main:has(> .hero.mh) .stat-row .stat-sub { font-size: 13px; font-weight: 600; color: var(--gray-500); }
 .doc main:has(> .hero.mh) .stat-row .stat-neutral { padding: 12px 14px; margin: -12px -14px; border-radius: 10px; border: 1px dashed var(--hairline-strong); }
@@ -712,3 +708,5 @@
 .doc main:has(> .hero.mh) .band table th { border-left: 0; border-right: 0; font-variant-numeric: tabular-nums; }
 .doc main:has(> .hero.mh) .band table tbody tr { border-bottom: 1px solid var(--gray-100); }
 .doc main:has(> .hero.mh) .band table thead th { font-size: 12px; font-weight: 500; color: var(--gray-500); }
+/* long inline identifiers wrap on phones instead of pushing the page wide */
+.doc main:has(> .hero.mh) :not(pre) > code { overflow-wrap: anywhere; }
