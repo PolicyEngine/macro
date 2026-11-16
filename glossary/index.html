@@ -19,7 +19,7 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=30" />
+<link rel="stylesheet" href="/style.css?v=31" />
 </head>
 <body class="doc gl-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -175,6 +175,22 @@
     var n = items.filter(function (d) { return !d.hidden; }).length;
     idx.hidden = !!q;
     empty.hidden = n > 0;
+  });
+})();
+</script>
+<script>
+/* Long definitions show two lines with a "more" toggle (r14). */
+(function () {
+  document.querySelectorAll("dl.glossary dd > p:first-child").forEach(function (p) {
+    p.classList.add("gl-clamp");
+    if (p.scrollHeight <= p.clientHeight + 2) { p.classList.remove("gl-clamp"); return; }
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "gl-more"; b.textContent = "more"; b.setAttribute("aria-expanded", "false");
+    b.addEventListener("click", function () {
+      var open = p.classList.toggle("gl-clamp") === false;
+      b.textContent = open ? "less" : "more"; b.setAttribute("aria-expanded", String(open));
+    });
+    p.after(b);
   });
 })();
 </script>
