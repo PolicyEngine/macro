@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=8" />'
+CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=9" />'
 CSS_RE = re.compile(r'<link rel="stylesheet" href="/models/model-pages\.css(?:\?v=\d+)?" />\n?')
 
 sys.path.insert(0, str(ROOT))
