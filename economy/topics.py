@@ -1453,6 +1453,24 @@ def reform_hook() -> str:
     )
 
 
+def route_card(icon: str, title: str, model: str, line: str, status: str,
+               chips: list[tuple[str, str]]) -> str:
+    """One scoring route: icon, name, model, one line, status, three chips.
+
+    Chip text is short; the registry's full wording is the tooltip.
+    """
+    chip_html = "".join(f'<span class="rt-chip" title="{esc(full)}">{esc(short)}</span>'
+                        for short, full in chips)
+    return (f'        <article class="rt-card">'
+            f'<p class="rt-head">{site_nav.icon(icon, 18)}<strong>{esc(title)}</strong></p>'
+            f'<p class="rt-model">{model}</p><p class="rt-line">{esc(line)}</p>'
+            f'<p class="rt-status">{esc(status)}</p><p class="rt-chips">{chip_html}</p></article>')
+
+
+def route_grid(cards: list[str]) -> str:
+    return '    <div class="rt-grid">\n' + "\n".join(cards) + "\n    </div>"
+
+
 def reform_capability_card(title: str, value: str, note: str, facts: list[tuple[str, str]]) -> str:
     rows = "\n".join(
         f"            <div><dt>{esc(name)}</dt><dd>{esc(text)}</dd></div>"
@@ -1469,66 +1487,35 @@ def reform_capability_card(title: str, value: str, note: str, facts: list[tuple[
 
 
 def reform_stands() -> str:
-    microsim = MODELS["pe-microsim"]
-    obr = MODELS["obr-macro"]
-    dynamic = MODELS["og+microsim"]
-    cards = "\n".join((
-        reform_capability_card(
-            "pe-microsim", ", ".join(microsim["geography"]).upper(),
-            microsim["model_class"],
-            [("Horizon", microsim["horizon"]), ("Runtime", microsim["runtime"]),
-             ("Access", ", ".join(microsim["access"]))],
-        ),
-        reform_capability_card(
-            "obr-macro bridge", ", ".join(obr["geography"]).upper(),
-            obr["model_class"],
-            [("Horizon", obr["horizon"]), ("Runtime", obr["runtime"]),
-             ("Access", ", ".join(obr["access"]))],
-        ),
-        reform_capability_card(
-            site_name("og+microsim"), ", ".join(dynamic["geography"]).upper(),
-            dynamic["model_class"],
-            [("Horizon", dynamic["horizon"]), ("Runtime", dynamic["runtime"]),
-             ("Access", ", ".join(dynamic["access"]))],
-        ),
-    ))
-    return f"""    <div class="economy-grid">
-{cards}
-    </div>
-{icon_items([
-        ("info", "Capabilities, not data: no official series here."),
-        ("code", "One reform dictionary works on every route below."),
-    ])}"""
+    microsim, obr, dynamic = MODELS["pe-microsim"], MODELS["obr-macro"], MODELS["og+microsim"]
+    return route_grid([
+        route_card("calculator", "Static costing", '<a href="/pe">PolicyEngine microsimulation</a>',
+                   f"Applies the reform to household microdata: {', '.join(term_label(o) for o in microsim['outputs'])}.", "Exact for implemented rules",
+                   [("Single year", microsim["horizon"]), ("Seconds to minutes", microsim["runtime"]),
+                    ("Hosted", ", ".join(microsim["access"]))]),
+        route_card("landmark", "Macro feedback", '<a href="/obr">OBR emulator</a>',
+                   "Adds second-round GDP, consumption and investment effects.", "Household-income channel; not corporation tax",
+                   [("3 to 5 years", obr["horizon"]), ("10+ min for a reform", obr["runtime"]),
+                    ("Hosted", ", ".join(obr["access"]))]),
+        route_card("hourglass", "Long-run dynamic", '<a href="/olg">OG-UK + microsimulation</a>',
+                   "Feeds steady-state wage changes into a second microsimulation run.",
+                   "Experimental, local only",
+                   [("Steady state", dynamic["horizon"]), ("10+ min cold", dynamic["runtime"]),
+                    ("CLI", ", ".join(dynamic["access"]))]),
+    ])
 
 
 def reform_model() -> str:
-    microsim = MODELS["pe-microsim"]
-    obr = MODELS["obr-macro"]
-    dynamic = MODELS["og+microsim"]
+    microsim, obr, dynamic = MODELS["pe-microsim"], MODELS["obr-macro"], MODELS["og+microsim"]
     return f"""    <div class="prose">
-      <p>
-        <a href="/pe">PolicyEngine microsimulation</a> is the scorer: it applies the reform to
-        household microdata and reports {registry_terms(microsim["outputs"])}.
-        Its registry status: {esc(microsim["status"])}. The limit is structural, and it is the
-        reason this topic needs a bridge at all:
-      </p>
-{limits_list([
-        f"pe-microsim cannot answer {(cannot('pe-microsim'))}. A costing from it is a static costing.",
-        f"The <a href=\"/obr\">OBR emulator</a> supplies the macro feedback through a reviewed reform translation, but only for {registry_terms(obr['question_types'])}, and it cannot answer {(cannot('obr-macro'))}.",
-        f"<a href=\"/olg\">{site_name('og+microsim')}</a> goes further — {esc(dynamic['model_class'])} — but is {esc(dynamic['status'])}.",
-        f"{site_name('og+microsim')} also cannot answer {(cannot('og+microsim'))}.",
+      <h3 class="tp-sub">What each can&rsquo;t do</h3>
+{icon_items([
+        ("calculator", f"Microsimulation: no {esc(', '.join(microsim['cannot_answer'][:3]))}."),
+        ("landmark", f"OBR emulator: no corporation-tax reforms; no {esc(obr['cannot_answer'][0])}, no {esc(obr['cannot_answer'][1])}."),
+        ("hourglass", "OG-UK + microsimulation: steady state only, no transition path or price-level effects."),
     ])}
-      <p>
-        Nothing here averages those answers together. They use different
-        horizons and mechanisms, so the comparison command prints them side by
-        side with an explicit comparability field on every row and a warning
-        that related-but-not-like-for-like results must not be added, averaged
-        or ranked.
-      </p>
-      <p class="chooser-note">
-        Reform scoring is the one place where the macro models and the household
-        model meet — <a href="/models#score">see how a score is put together →</a>
-      </p>
+      <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Side by side, never averaged.</strong>
+        Different horizons and mechanisms. <a href="/models#score">How a score is built →</a></p>
     </div>"""
 
 
@@ -1559,20 +1546,10 @@ def reform_run() -> str:
 def reform_data() -> str:
     microsim = MODELS["pe-microsim"]
     return f"""    <div class="prose">
-      <p>
-        There is no vintage table on this page because no series in the store
-        feeds a reform score. The provenance is different in kind: the microdata
-        and parameter tree come from the PolicyEngine country package, and the
-        registry describes that vintage as
-        &ldquo;{esc(microsim["data_vintage"])}&rdquo;. Every run records its own,
-        which is why two scores taken months apart can differ without either
-        being wrong.
-      </p>
-      <p>
-        The store still matters here, one step removed: it holds the outturns
-        the macro side of any score is judged against, and the dated snapshots
-        that make a past score reproducible.
-      </p>
+      <p>Microdata and parameters come from the PolicyEngine country package, recorded per run.</p>
+      <details class="about tg-info"><summary>Why there is no vintage table</summary>
+      <p>No stored series feeds a reform score. The registry describes the package vintage as &ldquo;{esc(microsim["data_vintage"])}&rdquo;; every run records its own, so two scores months apart can differ without either being wrong. The store still holds the outturns the macro side is judged against, and the snapshots that make a past score reproducible.</p>
+      </details>
       <p class="link-row">{site_nav.icon("database", 16)}<a href="/economy#data">Data store: every dated snapshot</a></p>
     </div>"""
 
@@ -2563,52 +2540,35 @@ def us_reform_hook() -> str:
 
 
 def us_reform_stands() -> str:
-    microsim = MODELS["pe-microsim"]
-    frbus = MODELS["frb-us"]
-    hank = MODELS["us-hank"]
-    cards = "\n".join((
-        reform_capability_card(
-            "pe-microsim", ", ".join(microsim["geography"]).upper(),
-            microsim["model_class"],
-            [("Horizon", microsim["horizon"]), ("Runtime", microsim["runtime"]),
-             ("Access", ", ".join(microsim["access"]))],
-        ),
-        reform_capability_card(
-            "frb-us", ", ".join(frbus["geography"]).upper(),
-            frbus["model_class"],
-            [("Horizon", frbus["horizon"]), ("Runtime", frbus["runtime"]),
-             ("Reform bridge",
-              f"none; cannot answer {registry_cannot('frb-us', 'policyengine')}")],
-        ),
-        reform_capability_card(
-            "us-hank", ", ".join(hank["geography"]).upper(),
-            hank["model_class"],
-            [("Horizon", hank["horizon"]), ("Runtime", hank["runtime"]),
-             ("Reform bridge",
-              f"none; cannot answer {registry_cannot('us-hank', 'policyengine')}")],
-        ),
-    ))
-    return f"""    <div class="economy-grid">
-{cards}
-    </div>
-{icon_items([
-        ("info", "Capabilities, not data: no official series here."),
-        ("x-circle", "Microsimulation covers UK and US; the US macro models take shocks, not reforms."),
-    ])}"""
+    microsim, frbus, hank = MODELS["pe-microsim"], MODELS["frb-us"], MODELS["us-hank"]
+    return route_grid([
+        route_card("calculator", "Static costing", '<a href="/pe">PolicyEngine microsimulation</a>',
+                   f"Applies the reform to US household microdata: {', '.join(term_label(o) for o in microsim['outputs'])}.", "Exact for implemented rules",
+                   [("Single year", microsim["horizon"]), ("Seconds to minutes", microsim["runtime"]),
+                    ("Hosted", ", ".join(microsim["access"]))]),
+        route_card("x-circle", "Macro feedback", "None for the US",
+                   "FRB/US and US HANK take shocks, not PolicyEngine reforms.", "Not available",
+                   [("No mapping", f"FRB/US cannot answer: {registry_cannot('frb-us', 'policyengine')}"),
+                    ("No tax levers", f"US HANK cannot answer: {registry_cannot('us-hank', 'detailed tax')}"),
+                    ("UK only", "The UK bridges (OBR emulator, OG-UK) are UK-only")]),
+        route_card("users", "Shock incidence", '<a href="/frb-us">FRB/US</a> · <a href="/us-hank">US HANK</a>',
+                   "Pushes a macro shock's earnings effects through households.", "Experimental",
+                   [("Quarterly", frbus["horizon"]), ("Seconds to minutes", frbus["runtime"]),
+                    ("Hosted", ", ".join(hank["access"]))]),
+    ])
 
 
 def us_reform_model() -> str:
     microsim = MODELS["pe-microsim"]
-    obr = MODELS["obr-macro"]
     return f"""    <div class="prose">
+      <h3 class="tp-sub">What each can&rsquo;t do</h3>
 {icon_items([
-        ("calculator", f'<a href="/pe">Microsimulation</a> scores the reform: {registry_terms(microsim["outputs"])}.'),
-        ("alert", "A static costing: no macro feedback."),
-        ("landmark", f'The UK bridges that gap (OBR emulator, OG-UK + microsimulation); both {registry_terms(obr["geography"])}-only.'),
-        ("x-circle", "No US bridge: the US macro models do not take PolicyEngine reforms."),
-        ("activity", "Incidence runs the other way: a macro shock pushed through households."),
+        ("calculator", f"Microsimulation: no {esc(', '.join(microsim['cannot_answer'][:3]))}; a static costing."),
+        ("building", "FRB/US: no PolicyEngine reforms; shocks under a declared policy rule only."),
+        ("users", "US HANK: no detailed tax reforms; monetary, fiscal-spending and productivity shocks only."),
     ])}
-      <p class="link-row">{site_nav.icon("scale", 16)}<a href="/models#score">How a score is put together</a></p>
+      <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Side by side, never averaged.</strong>
+        A shock&rsquo;s incidence is not a reform score. <a href="/models#score">How a score is built →</a></p>
     </div>"""
 
 
@@ -2641,23 +2601,10 @@ def us_reform_run() -> str:
 def us_reform_data() -> str:
     microsim = MODELS["pe-microsim"]
     return f"""    <div class="prose">
-      <p>
-        There is no vintage table on this page because no series in the store
-        feeds a reform score. The provenance is different in kind: the
-        microdata and parameter tree come from the
-        <span class="mono">policyengine-us</span> country package, and the
-        registry describes that vintage as
-        &ldquo;{esc(microsim["data_vintage"])}&rdquo;. Every run records its
-        own, which is why two scores taken months apart can differ without
-        either being wrong.
-      </p>
-      <p>
-        The store still matters here, one step removed: the six FRED series it
-        holds are the outturns any macro leg of a US score would have to be
-        judged against — and the absence of a US fiscal series in it is why
-        this site has no US public-finances topic to carry the other half of a
-        costing.
-      </p>
+      <p>Microdata and parameters come from the PolicyEngine US package, recorded per run.</p>
+      <details class="about tg-info"><summary>Why there is no vintage table</summary>
+      <p>No stored series feeds a reform score. The registry describes the package vintage as &ldquo;{esc(microsim["data_vintage"])}&rdquo;; every run records its own, so two scores months apart can differ without either being wrong.</p>
+      </details>
       <p class="link-row">{site_nav.icon("database", 16)}<a href="/economy#data">Data store: every dated snapshot</a></p>
     </div>"""
 
@@ -3046,12 +2993,12 @@ SHORT_LEDES = {
     ("uk", "jobs"): "UK unemployment, pay and vacancies, as last published.",
     ("uk", "rates"): "Bank Rate and gilt yields, as last published.",
     ("uk", "public-finances"): "UK borrowing as published, and what the models add.",
-    ("uk", "reform"): "What a UK tax or benefit reform does, and how far models follow.",
+    ("uk", "reform"): "Score a UK tax or benefit reform: static cost first, then macro feedback.",
     ("us", "growth"): "US output now, and what the US models can say.",
     ("us", "inflation"): "US CPI as published, with no US forecast beside it.",
     ("us", "jobs"): "US unemployment and payrolls, as last published.",
     ("us", "rates"): "The fed funds rate and Treasury yields, as last published.",
-    ("us", "reform"): "What a US reform does, and how far models follow.",
+    ("us", "reform"): "Score a US tax or benefit reform: a static cost, with no US macro feedback.",
 }
 
 
@@ -3105,7 +3052,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
-<link rel="stylesheet" href="/economy/topic-page.css?v=15" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=16" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
