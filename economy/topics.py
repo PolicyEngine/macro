@@ -789,7 +789,7 @@ def stands(cards: tuple[tuple[str, str | None], ...], note: str,
     """
     rendered = "\n".join(stat_card(load(name), kind, _change_of(name)) for name, kind in cards)
     measured = (
-        '    <details class="about"><summary>How these are measured</summary>'
+        '    <details class="about tg-info"><summary>How these are measured</summary>'
         f'<p class="economy-method">{note}</p></details>'
         if note else ""
     )
@@ -968,7 +968,7 @@ def growth_model() -> str:
         {esc(verdict_line(quality["evidence"]))}
         <a href="/svar/validation">Validation →</a>
       </p>
-      <details class="about">
+      <details class="about tg-limits">
         <summary>Its limits</summary>
 {limits_list([
         f"Status: {esc(model['status'])}.",
@@ -977,7 +977,7 @@ def growth_model() -> str:
         f"Estimated on {esc(model['estimation_sample'])} but conditioned on {esc(model['data_edge'])} data, so the estimation sample stops well short of the quarters being forecast.",
     ])}
       </details>
-      <details class="about">
+      <details class="about tg-table">
         <summary>Quarter by quarter</summary>
       <div class="table-scroll">
         <table>
@@ -1080,7 +1080,7 @@ def inflation_model() -> str:
         {esc(verdict_line(quality["evidence"]))}
         <a href="/svar/validation">Validation →</a>
       </p>
-      <details class="about">
+      <details class="about tg-limits">
         <summary>Its limits</summary>
 {limits_list([
         f"Status: {esc(model['status'])}.",
@@ -1089,7 +1089,7 @@ def inflation_model() -> str:
         f"Uncertainty is {esc(model['uncertainty'])}; the sample ends {esc(model['estimation_sample'].split('-')[-1])} while the conditioning data run to {esc(model['data_edge'])}.",
     ])}
       </details>
-      <details class="about">
+      <details class="about tg-table">
         <summary>Quarter by quarter</summary>
       <div class="table-scroll">
         <table>
@@ -1178,7 +1178,7 @@ def jobs_table(facts: dict) -> str:
             f"<td>{v['lo90']:.2f}%–{v['hi90']:.2f}%</td>"
             "</tr>"
         )
-    return f"""      <details class="about">
+    return f"""      <details class="about tg-table">
         <summary>Quarter by quarter</summary>
       <div class="table-scroll">
         <table>
@@ -1220,7 +1220,7 @@ def jobs_model() -> str:
     )
     return f"""    <div class="prose">
       <p class="model-chips"><a class="mchip" href="/svar">{site_nav.icon("activity", 14)}BoE SVAR satellite</a><span class="mchip-t">maps the GDP forecast onto UK unemployment</span></p>
-      <details class="about"><summary>How the satellite works</summary>
+      <details class="about tg-layers"><summary>How the satellite works</summary>
       <p>
         The labour market is covered by a satellite, not a model of its own: the
         BoE SVAR unemployment satellite maps the <a href="/svar">BoE SVAR</a> GDP
@@ -1298,7 +1298,7 @@ def rates_model() -> str:
     frbus = MODELS["frb-us"]
     return f"""    <div class="prose">
       <p class="model-chips"><span class="mchip mchip-none">{site_nav.icon("x-circle", 14)}No forecast</span><span class="mchip-t">No model in this suite forecasts Bank Rate or gilt yields.</span></p>
-      <details class="about"><summary>What each model covers instead</summary>
+      <details class="about tg-layers"><summary>What each model covers instead</summary>
 {limits_list([
         f"<a href=\"/svar\">BoE SVAR</a> outputs {registry_terms(svar['outputs'])} — no interest-rate path is among them.",
         f"<a href=\"/pe\">pe-microsim</a> lists {esc(microsim['cannot_answer'][2])} in its own cannot-answer field.",
@@ -2175,7 +2175,7 @@ def us_baseline_chart(chart_id: str, name: str, unit: str, column: str,
 
 
 def longbase_expander(column: str, last_observed: str) -> str:
-    return f"""      <details class="about">
+    return f"""      <details class="about tg-table">
         <summary>Quarter by quarter</summary>
 {longbase_layer(column, last_observed)}
       </details>"""
@@ -3195,7 +3195,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
-<link rel="stylesheet" href="/economy/topic-page.css?v=6" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=7" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -3222,7 +3222,7 @@ def page(topic: dict) -> str:
   </section>
 
   <section class="band tp-next" aria-labelledby="next-h">
-    <h2 id="next-h">Read next</h2>
+    <h2 id="next-h"><span class="tp-h-ic" aria-hidden="true">{site_nav.icon("arrow-right", 16)}</span>Read next</h2>
     <p class="tp-chips">
       <a href="{COUNTRIES[topic["country"]]["hub"]}">{site_nav.icon("forecasts", 16)}Track record</a>
       <a href="{COUNTRIES[topic["country"]]["data"]}">{site_nav.icon("list", 16)}{COUNTRIES[topic["country"]]["label"]} data</a>
