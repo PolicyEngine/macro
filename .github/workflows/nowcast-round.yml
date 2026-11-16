@@ -84,18 +84,37 @@ jobs:
       # round's, the round would be refused as "already archived" after a
       # ~5.5-minute cold solve — as on 12-13 and 17-19 Aug 2026 (#224). Skip
       # instead; the job stays green and the log says why.
+      # The job runs from main, so a round that sits unmerged on the round
+      # PR's branch is not in forecasts/rounds/ here. Fetch that branch when
+      # its PR is open so the gate below can see the round and leave it alone
+      # instead of regenerating it and force-pushing over it. A closed PR's
+      # branch is not fetched: a rejected round must not block the next one.
+      - name: Fetch the open round PR's branch, if there is one
+        if: steps.due.outputs.due == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          open="$(gh pr list --head forecasts/nowcast-round --state open --json number --jq '.[0].number // empty' || true)"
+          if [ -n "$open" ]; then
+            git fetch --depth=1 origin "+refs/heads/forecasts/nowcast-round:refs/remotes/origin/forecasts/nowcast-round" \
+              && echo "round PR #$open is open; its branch is fetched for the gate" \
+              || echo "::warning::could not fetch forecasts/nowcast-round; the gate will not see the open round"
+          else
+            echo "no open round PR"
+          fi
+
       - name: Can the hosted model produce a new round?
         if: steps.due.outputs.due == 'true'
         id: edge
         run: |
           set +e
-          python3 forecasts/nowcast.py --edge-gate
+          python3 forecasts/nowcast.py --edge-gate --pending-ref origin/forecasts/nowcast-round
           code=$?
           set -e
           case "$code" in
             0) echo "ok=true" >> "$GITHUB_OUTPUT" ;;
             1) echo "ok=false" >> "$GITHUB_OUTPUT"
-               echo "::notice::round skipped, no Modal call: hosted model data edge is already archived (see #224)" ;;
+               echo "::notice::round skipped, no Modal call: the hosted model's data edge is already archived on main (#224) or waiting in the open round PR; the step log says which" ;;
             *) exit "$code" ;;
           esac
 

@@ -165,6 +165,17 @@ def test_obr_bridge_costs_each_year_and_injects_hhdi_path(fake_bridge):
     json.dumps(res)
 
 
+def test_obr_bridge_reports_stage_timings(fake_bridge):
+    """#243: the result says where the time went, costing vs OBR solve."""
+    res = core.obr_score_reform({"gov.x": 1}, start_year=2026, years=2)
+    t = res["timing_seconds"]
+    assert list(t["static_costing_by_year"]) == ["2026", "2027"]
+    assert all(v >= 0 for v in t["static_costing_by_year"].values())
+    assert t["obr_solve"] >= 0
+    assert t["total"] >= t["obr_solve"]
+    json.dumps(res)
+
+
 def test_obr_bridge_score_block(fake_bridge):
     res = core.obr_score_reform({"gov.x": 1}, years=1)
     score = res["score"]
