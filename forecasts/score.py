@@ -27,6 +27,7 @@ import argparse
 import json
 import re
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -118,15 +119,92 @@ def load_rounds() -> list[dict]:
     return rounds
 
 
+# ONS stamps a release with midnight UK time, written in UTC
+# ("2026-11-12T00:00:00.000Z", or "2026-07-21T23:00:00.000Z" in summer).
+# Statistics are published at 07:00 UK time on that day, so the moment of
+# publication is the stamp plus seven hours.
+ONS_RELEASE_HOUR = timedelta(hours=7)
+
+# Rounds whose forecast was fixed before ``archived_utc``. Rounds are
+# append-only, so this cannot be recorded in the round file itself. Each
+# entry needs evidence that anyone can check: the commit that first put the
+# exact bytes of the round's source file (``provenance.source_sha256``) on
+# main, and that commit's time. test_score_guard.py checks the hash.
+FIXED_BEFORE_ARCHIVE = {
+    "forecasts/rounds/2026-07-21/boe-svar.json": {
+        "fixed_utc": "2026-07-21T13:54:00Z",
+        "commit": "b66cadf9",
+        "source_sha256": (
+            "991ba7fcf99a74a971486cb7c286ea5f41e718727b8a21e6f459dbd74e639dfd"
+        ),
+        "note": (
+            "papers/boe-svar/figures/current_forecast.json with this hash was "
+            "committed to main at 14:54 BST on 21 July 2026 (#78), before the "
+            "ONS published 2026Q2 CPI at 07:00 on 22 July. The round was "
+            "archived from it on 25 July."
+        ),
+    },
+}
+
+
+def _parse_utc(stamp: str) -> datetime | None:
+    try:
+        when = datetime.fromisoformat(stamp.replace("Z", "+00:00"))
+    except (AttributeError, ValueError):
+        return None
+    return when if when.tzinfo else when.replace(tzinfo=timezone.utc)
+
+
+def published_utc(obs: dict) -> datetime | None:
+    """When the publisher released this observation.
+
+    The ONS release stamp plus the 07:00 release hour, when there is one. If
+    there is no stamp, fall back to midnight UTC on the day our store fetched
+    it. That is the latest the value can have been published, so the
+    comparison errs towards excluding a forecast.
+    """
+    stamp = _parse_utc(obs.get("release_updated") or "")
+    if stamp is not None:
+        return stamp + ONS_RELEASE_HOUR
+    return _parse_utc(f"{obs['vintage']}T00:00:00Z") if obs.get("vintage") else None
+
+
 def latest_outturns(observations: list[dict]) -> dict[tuple[str, str], dict]:
-    """Latest vintage per (period, variable). Later vintages supersede earlier."""
+    """Latest vintage per (period, variable). Later vintages supersede earlier.
+
+    Each returned observation also carries ``first_published_utc``: the
+    earliest publication time across every stored vintage of that period
+    and variable. The scoring guard compares against that, because a
+    revision does not make an earlier release unpublished.
+    """
     best: dict[tuple[str, str], dict] = {}
+    first: dict[tuple[str, str], datetime] = {}
     for obs in observations:
         key = (obs["period"], obs["variable"])
         current = best.get(key)
         if current is None or obs.get("vintage", "") >= current.get("vintage", ""):
             best[key] = obs
-    return best
+        when = published_utc(obs)
+        if when is not None and (key not in first or when < first[key]):
+            first[key] = when
+    return {
+        key: {
+            **obs,
+            "first_published_utc": (
+                first[key].strftime("%Y-%m-%dT%H:%M:%SZ") if key in first else None
+            ),
+        }
+        for key, obs in best.items()
+    }
+
+
+def forecast_fixed_utc(rnd: dict) -> datetime | None:
+    """When the round's numbers were fixed: archived_utc, or an earlier
+    documented time from FIXED_BEFORE_ARCHIVE."""
+    exception = FIXED_BEFORE_ARCHIVE.get(rnd.get("_path", ""))
+    if exception is not None:
+        return _parse_utc(exception["fixed_utc"])
+    return _parse_utc(rnd.get("archived_utc") or "")
 
 
 def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
@@ -137,13 +215,16 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
             if obs is None:
                 continue
 
-            # A forecast only counts if it was archived before the outturn was
-            # published. A round archived after the release still gets listed
-            # under rounds/, but its already-answered periods are never scored:
-            # scoring them would launder hindsight into the track record.
-            archived = (rnd.get("archived_utc") or "")[:10]
-            vintage = obs.get("vintage") or ""
-            if archived and vintage and archived > vintage:
+            # A forecast only counts if it was fixed before the outturn was
+            # first published. A round archived after the release still gets
+            # listed under rounds/, but its already-answered periods are never
+            # scored: scoring them would launder hindsight into the track
+            # record. The comparison uses the publisher's release time for the
+            # first vintage of the period (#242), not the day our store
+            # fetched it, and an unknown time on either side excludes it.
+            fixed = forecast_fixed_utc(rnd)
+            published = _parse_utc(obs.get("first_published_utc") or "")
+            if fixed is None or published is None or fixed >= published:
                 continue
 
             point = stats["median"]
