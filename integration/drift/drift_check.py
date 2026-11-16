@@ -425,6 +425,12 @@ def main(argv=None) -> int:
                 continue
             except Exception as e:  # noqa: BLE001
                 resp = {"__error__": f"local: {type(e).__name__}: {e}"[:500]}
+            if isinstance(resp, dict) and resp.get("available") is False:
+                # A local-only model (DEFINE-UK) without its cached run
+                # answers with install instructions, not numbers: that is a
+                # setup gap on this machine, not drift.
+                rows.append(skipped_row(c, "model not set up locally (available: false)"))
+                continue
             rows.append(evaluate(c, resp, registry, pins, source="local"))
 
     report = render(rows)

@@ -381,6 +381,7 @@ def anyio_backend():
     return "asyncio"
 
 
+@pytest.mark.slow
 @pytest.mark.anyio
 async def test_score_reform_default_window_works_through_a_job():
     """The path the ceiling used to make impossible.
@@ -394,7 +395,14 @@ async def test_score_reform_default_window_works_through_a_job():
     Note the existing bridge test uses years=1 to stay under the ceiling,
     which is exactly why the ceiling survived so long without CI noticing:
     nothing in the smoke suite exercised the default a real caller gets.
-    This does.
+    This does, in the weekly deep run (validate-deployment.yml --runslow).
+
+    It is slow-marked because the default window takes over ten minutes
+    hosted (five yearly microsimulation costings; macro #243). It failed the
+    deploy smoke step on all four deploys of 16 Nov 2026 (runs 43854680368,
+    43904111325, 43939637511, 43947081639) only by still running at 600s, with
+    every other remote test passing. The deploy smoke step now runs the
+    two-year window below; this keeps the default-window check, with room.
     """
     import asyncio
 
@@ -417,10 +425,9 @@ async def test_score_reform_default_window_works_through_a_job():
 
     # Poll. Each call blocks server-side well inside the 150s ceiling, so the
     # loop is what makes an arbitrarily long job reachable over this transport.
-    # Bounded so a broken job path fails the deploy quickly rather than
-    # sitting on the runner: deploy (~4 min) + this must stay under the
-    # workflow's 25-minute cap.
-    deadline = 10 * 60
+    # Bounded, but past the >600s the default window was measured to need
+    # on 16 Nov 2026; provisional until the first deep run times it.
+    deadline = 25 * 60
     waited = 0
     out = None
     while waited < deadline:
@@ -440,6 +447,62 @@ async def test_score_reform_default_window_works_through_a_job():
     # Same invariants as the direct bridge test, over the full default window.
     assert result["bridge_variable"] == "HHDI_ADDFACTOR"
     assert len(result["annual_costings_bn"]) == 5, "not the default 5-year window"
+    assert all(c["budgetary_impact_bn"] > 0 for c in result["annual_costings_bn"])
+    assert result["cumulative_delta_gdp_bn_over_shock_periods"] < 0
+    assert result["score"]["caveats"]
+
+
+@pytest.mark.anyio
+async def test_score_reform_two_year_window_works_through_a_job():
+    """The job path on every deploy: start_job -> poll get_job_result ->
+    result, over years=2 (the documented fast path, macro #243), so the
+    deploy smoke step stays inside its 25-minute cap. The default five-year
+    window is checked by the slow test above in the weekly deep run."""
+    import asyncio
+
+    started = await _call(
+        "start_job",
+        {
+            "tool": "score_reform",
+            "arguments": {
+                "country": "uk",
+                "reform": {"gov.hmrc.income_tax.rates.uk[0].rate": 0.21},
+                "model": "obr",
+                "years": 2,
+            },
+        },
+    )
+    assert started["status"] == "running", started
+    job_id = started["job_id"]
+    assert job_id, started
+    # The handle must tell an agent how to collect it.
+    assert "get_job_result" in started["next_step"]
+
+    # Poll. Each call blocks server-side well inside the 150s ceiling, so the
+    # loop is what makes an arbitrarily long job reachable over this transport.
+    # Bounded so a broken job path fails the deploy quickly rather than
+    # sitting on the runner: deploy (~4 min) + this must stay under the
+    # workflow's 25-minute cap. The two-year window has not been timed yet.
+    deadline = 10 * 60
+    waited = 0
+    out = None
+    while waited < deadline:
+        out = await asyncio.wait_for(
+            _call("get_job_result", {"job_id": job_id, "wait_seconds": 30}),
+            timeout=180,
+        )
+        if out["status"] == "done":
+            break
+        assert out["status"] == "running", out
+        waited += out["waited_seconds"] or 1
+    assert out is not None and out["status"] == "done", (
+        f"score_reform did not finish within {deadline}s: {out}"
+    )
+
+    result = out["result"]
+    # Same invariants as the direct bridge test, over two years.
+    assert result["bridge_variable"] == "HHDI_ADDFACTOR"
+    assert len(result["annual_costings_bn"]) == 2, "not the requested 2-year window"
     assert all(c["budgetary_impact_bn"] > 0 for c in result["annual_costings_bn"])
     assert result["cumulative_delta_gdp_bn_over_shock_periods"] < 0
     assert result["score"]["caveats"]

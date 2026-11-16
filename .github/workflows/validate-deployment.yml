@@ -46,10 +46,12 @@ jobs:
     # runs on the weekly Sunday cron and on a manual `deep` dispatch. Deployment
     # fetches the reviewed commits recorded in modal_app.py, so the fast suite
     # is enough to confirm a functional deploy on the automatic path.
-    # 35 min: the slow leg now includes the OBR bridge end-to-end test (up to
-    # ~9 min against a cold server) on top of the closure probe (~7 min); the
-    # 20-min cap already timed out once on 2026-07-17.
-    timeout-minutes: 35
+    # 65 min: the slow leg includes the OBR bridge end-to-end test (up to
+    # ~9 min against a cold server), the closure probe (~7 min) and, since
+    # 16 Nov 2026, the default-window score_reform job (over 10 min; up to 25
+    # allowed), moved here from the deploy smoke step. The 20-min cap already
+    # timed out once on 2026-07-17.
+    timeout-minutes: 65
     # On workflow_run, only validate when the deploy actually succeeded;
     # schedule/manual runs always validate.
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}

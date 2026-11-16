@@ -224,11 +224,16 @@ def obr_shock(
 
     Args:
         var: Policy variable to shock. Common choices (see list_reform_variables):
-            CGG (real government consumption), TCPRO (corporation tax main rate),
-            CGIPS (nominal central government investment).
+            R (Bank Rate), HHDI_ADDFACTOR (household income, the costing
+            channel score_reform uses), CGG (real government consumption),
+            TCPRO (corporation tax main rate), CGIPS (nominal central
+            government investment).
         shock: Shock size, applied each quarter. UNITS DEPEND ON THE VARIABLE:
-            CGG and CGIPS are in £ million per quarter (e.g. 1250 = £5bn/year);
-            TCPRO is a rate change in decimal (e.g. -0.05 = 5 percentage point cut).
+            R is in percentage points (1.0 = +1pp); HHDI_ADDFACTOR is £ million
+            of revenue raised per quarter (positive = household income falls;
+            1637.5 = £6.55bn/year); CGG and CGIPS are in £ million per quarter
+            (e.g. 1250 = £5bn/year); TCPRO is a rate change in decimal (e.g.
+            -0.05 = 5 percentage point cut).
         periods: Number of quarters the shock is applied from 2025Q1 (1-25;
             default 12 = 3 years). The solve runs to 2027Q4 or to the last
             shocked quarter if later; the databank ends 2031Q1.
@@ -240,7 +245,11 @@ def obr_shock(
 
     Returns per-period rows (period, delta_gdp_bn, pct_gdp, delta_cons_m,
     delta_if_m), the cumulative GDP effect in £bn over the shocked periods, and
-    the peak percent-of-GDP effect. Takes roughly 10-60 seconds.
+    the peak percent-of-GDP effect, plus a caveat for levers whose channel is
+    partial and, for HHDI_ADDFACTOR, the GDP-per-pound ratio on both bases
+    (gdp_per_revenue_current_price is the one to compare with the OBR's 0.3).
+    Takes about one to two minutes (two solves); on a cold hosted server use
+    start_job.
     """
     return core.obr_shock(
         var=var, shock=shock, periods=periods, name=name,

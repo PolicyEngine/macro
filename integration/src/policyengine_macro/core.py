@@ -180,6 +180,40 @@ OBR_VARIABLES = [
         ),
     },
     {
+        "var": "R",
+        "description": "Bank Rate",
+        "units": "percentage points, held each shocked quarter (e.g. 1.0 = +1pp)",
+        "investment_closure": False,
+        # Measured at obr 2965e82d (October 2026 EFO): +1pp held 12 quarters
+        # lowers GDP by £128m, £406m, £475m and £503m at q1/q4/q8/q12; +1pp
+        # for four quarters peaks at about -0.06% of GDP, against the Bank of
+        # England's published -0.2% to -0.35% for a comparable rise.
+        "caveat": (
+            "only consumption and interest flows respond to the policy rate in "
+            "this model; business investment and CPI do not, so the GDP fall is "
+            "about 3.5-6 times smaller than the Bank of England's published range "
+            "for a comparable rise. Read the sign and rough size, not the "
+            "magnitude"
+        ),
+    },
+    {
+        "var": "HHDI_ADDFACTOR",
+        "description": "Household disposable income add-factor (the costing channel)",
+        "units": "£m per quarter of revenue raised (positive = household income falls; e.g. 1637.5 = £6.55bn/year)",
+        "investment_closure": False,
+        # The channel score_reform feeds with the microsimulation's costing.
+        # Measured at obr 2965e82d: +1,637.5/qtr lowers real GDP by £540m at
+        # q12; GDP per pound raised is 0.211 after a year and 0.376 after three
+        # in current prices (0.33 at q12 in real GDP).
+        "caveat": (
+            "the one live household channel: income falls by the revenue and "
+            "consumption follows. The per-quarter GDP rows are chained-volume "
+            "(real) while the shock is current-price revenue, so compare the "
+            "OBR's 0.3 income-tax multiplier with gdp_per_revenue_current_price, "
+            "not with -delta_gdp/shock"
+        ),
+    },
+    {
         "var": "CGIPS",
         "description": "Nominal central government investment (feeds real GGI via the GGIPS/GGIDEF chain)",
         "units": "£m nominal per quarter (e.g. 3000 ≈ £2.5bn real per quarter)",
@@ -337,6 +371,18 @@ def obr_shock(
     }
     if caveat:
         result["caveat"] = caveat
+    # The household channel's like-for-like ratio. The rows are chained-volume
+    # GDP but the shock is current-price revenue, so the model records both
+    # bases on the frame (obr #63/#66); without them an MCP caller can only
+    # form -delta_gdp/shock, the real-GDP ratio, and compare it with the
+    # OBR's current-price 0.3.
+    attrs = getattr(df, "attrs", {}) or {}
+    for key in ("gdp_per_revenue_current_price", "gdp_per_revenue_real"):
+        values = attrs.get(key)
+        if values is not None:
+            result[key] = [round(float(v), 4) for v in list(values)[: len(rows)]]
+    if attrs.get("gdp_per_revenue_basis_note"):
+        result["gdp_per_revenue_basis_note"] = str(attrs["gdp_per_revenue_basis_note"])
     return result
 
 
@@ -1688,6 +1734,23 @@ def svar_forecast(horizons: int = 12,
     return out
 
 
+def _shock_reading(name: str, p: float, quarter: str, weak: bool) -> str:
+    """One sentence on a shock's sign. With a weak identification sample
+    (fewer than 100 accepted draws or an ESS under 100) the payload already
+    warns that its quantiles are unreliable, so the reading must not say
+    "clearly": it says at most "probably" and ends by saying it is indicative."""
+    p_dom = max(p, 1 - p)
+    sign = "positive" if p >= 0.5 else "negative"
+    conf = "clearly" if p_dom >= 0.8 else ("probably" if p_dom >= 0.65 else "ambiguously")
+    if weak and conf == "clearly":
+        conf = "probably"
+    reading = (f"{name} shock was {conf} {sign} in {quarter} "
+               f"(P({'+' if p >= 0.5 else '−'}) = {p_dom:.2f}).")
+    if weak:
+        reading += " Indicative only: weak identification sample."
+    return reading
+
+
 def svar_latest_shocks(draws: int = _SVAR_DEFAULT_DRAWS) -> dict:
     """P(sign) of the 6 identified structural shocks in the latest data quarter."""
     key = _bounded_int("draws", draws, _SVAR_MIN_DRAWS, _SVAR_MAX_DRAWS)
@@ -1716,19 +1779,16 @@ def svar_latest_shocks(draws: int = _SVAR_DEFAULT_DRAWS) -> dict:
 
     identified = sorted(WORLD_SHOCKS + UK_SHOCKS)
 
+    weak = est["n_accepted"] < 100 or est["ess"] < 100
     shocks = []
     for j in identified:
         p = float(dist["p_pos"][j])
-        p_dom = max(p, 1 - p)
-        sign = "positive" if p >= 0.5 else "negative"
-        conf = "clearly" if p_dom >= 0.8 else ("probably" if p_dom >= 0.65 else "ambiguously")
         shocks.append(
             {
                 "shock": SHOCK_NAMES[j],
                 "p_positive": round(p, 3),
                 "p_negative": round(1 - p, 3),
-                "reading": f"{SHOCK_NAMES[j]} shock was {conf} {sign} in {last_q} "
-                           f"(P({'+' if p >= 0.5 else '−'}) = {p_dom:.2f}).",
+                "reading": _shock_reading(SHOCK_NAMES[j], p, last_q, weak),
             }
         )
     out = {

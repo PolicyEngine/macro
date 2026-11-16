@@ -275,8 +275,8 @@ def test_household_ratio_sign_matches_a_tax_rise():
 def test_svar_canary_matches_the_committed_forecast_file():
     f = json.loads((REPO / "papers/boe-svar/figures/current_forecast.json").read_text())
     exp = {ch["name"]: ch["expected"] for ch in CANARIES["svar_forecast_median"]["checks"]}
-    assert exp["gdp_2026Q2_median"] == f["forecast"]["2026Q2"]["gdp"]["median"]
-    assert exp["cpi_2026Q2_median"] == f["forecast"]["2026Q2"]["cpi"]["median"]
+    assert exp["gdp_2026Q3_median"] == f["forecast"]["2026Q3"]["gdp"]["median"]
+    assert exp["cpi_2026Q3_median"] == f["forecast"]["2026Q3"]["cpi"]["median"]
 
 
 def test_every_canary_has_an_anchor():
@@ -295,6 +295,21 @@ def test_skipped_local_rows_do_not_count_as_drift(tmp_path, monkeypatch):
     assert dc.main(["--from-raw", str(raw), "--only", "obr_bank_rate_100bp",
                     "--local", "--report", str(report)]) == 0
     assert "skipped" in report.read_text() and "obr_macro" in report.read_text()
+
+
+def test_unavailable_local_model_is_skipped_not_drift(tmp_path, monkeypatch):
+    """DEFINE-UK is local-only: without its cached run it answers with install
+    instructions (available: false). That is a setup gap, not drift."""
+    monkeypatch.setattr(dc, "_local_call",
+                        lambda canary: {"model": "define-uk", "available": False})
+    raw = tmp_path / "raw.json"
+    raw.write_text("{}")
+    rows_report = tmp_path / "r2.md"
+    dc.main(["--from-raw", str(raw), "--only", "define_green_public_investment",
+             "--local", "--report", str(rows_report)])
+    text = rows_report.read_text()
+    local = [l for l in text.splitlines() if "| local |" in l]
+    assert local and "skipped" in local[0] and "available: false" in local[0]
 
 
 def test_via_job_only_for_allow_listed_job_tools():
