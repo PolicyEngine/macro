@@ -942,3 +942,51 @@
 }
 .doc main:has(> .hero.mh) .meth-lead { max-width: 72ch; margin: 0 0 12px; color: var(--text-body); font-size: var(--fs-ab-body, 16px); line-height: 1.55; }
 .doc main:has(> .hero.mh) .proof-more { max-width: none; }
+/* scorecard on phones: one compact card per check (check + chip, result, then the benchmark) */
+@media (max-width: 640px) {
+  .doc main:has(> .hero.mh) .scorecard table.t-stack tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: start; padding: 12px 0; }
+  .doc main:has(> .hero.mh) .scorecard table.t-stack tr > * { padding: 0 !important; margin: 0; border: 0 !important; background: none; }
+  .doc main:has(> .hero.mh) .scorecard table.t-stack tr > :first-child { grid-column: 1; grid-row: 1; }
+  .doc main:has(> .hero.mh) .scorecard table.t-stack tr > td:last-child { grid-column: 2; grid-row: 1; }
+  .doc main:has(> .hero.mh) .scorecard table.t-stack tr > td.sc-num { grid-column: 1 / -1; grid-row: 2; white-space: normal; }
+  .doc main:has(> .hero.mh) .scorecard table.t-stack tr > td:nth-child(2) { grid-column: 1 / -1; grid-row: 3; color: var(--text-muted); font-size: 13px; line-height: 1.45; }
+  .doc main:has(> .hero.mh) .scorecard table.t-stack td::before,
+  .doc main:has(> .hero.mh) .scorecard table.t-stack th::before { display: none !important; }
+}
+/* r-polish Fable fixes */
+.doc main:has(> .hero.mh) [data-result="none"] .chip { background: none; color: var(--text-muted); border-style: dashed; }
+/* scorecard: fixed columns at desktop so labels never break mid-word */
+.doc main:has(> .hero.mh) .scorecard table { table-layout: fixed; width: 100%; }
+.doc main:has(> .hero.mh) .scorecard th, .doc main:has(> .hero.mh) .scorecard td { overflow-wrap: normal; word-break: normal; hyphens: none; vertical-align: top; }
+.doc main:has(> .hero.mh) .scorecard thead th:nth-child(1) { width: 24%; }
+.doc main:has(> .hero.mh) .scorecard thead th:nth-child(2) { width: 38%; }
+.doc main:has(> .hero.mh) .scorecard thead th:nth-child(3) { width: 22%; }
+.doc main:has(> .hero.mh) .scorecard thead th:nth-child(4) { width: 16%; }
+.doc main:has(> .hero.mh) .scorecard .sc-num { white-space: normal; }
+/* below 900px every scorecard row is a compact card (also between 640 and 900, where the shared stack does not apply) */
+@media (max-width: 900px) {
+  .doc main:has(> .hero.mh) .scorecard { overflow: visible; }
+  .doc main:has(> .hero.mh) .scorecard table, .doc main:has(> .hero.mh) .scorecard tbody { display: block; width: 100%; table-layout: auto; }
+  .doc main:has(> .hero.mh) .scorecard thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .doc main:has(> .hero.mh) .scorecard caption { display: block; text-align: left; }
+  .doc main:has(> .hero.mh) .scorecard tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: start; padding: 12px 16px; border-bottom: 1px solid var(--ab-border); }
+  .doc main:has(> .hero.mh) .scorecard tr:last-child { border-bottom: 0; }
+  .doc main:has(> .hero.mh) .scorecard tr > * { display: block; padding: 0 !important; margin: 0; border: 0 !important; background: none; width: auto; }
+  .doc main:has(> .hero.mh) .scorecard tr > :first-child { grid-column: 1; grid-row: 1; }
+  .doc main:has(> .hero.mh) .scorecard tr > td:last-child { grid-column: 2; grid-row: 1; }
+  .doc main:has(> .hero.mh) .scorecard tr > td.sc-num { grid-column: 1 / -1; grid-row: 2; }
+  .doc main:has(> .hero.mh) .scorecard tr > td:nth-child(2) { grid-column: 1 / -1; grid-row: 3; color: var(--text-muted); font-size: 13px; line-height: 1.45; }
+  .doc main:has(> .hero.mh) .scorecard td::before, .doc main:has(> .hero.mh) .scorecard th::before { display: none !important; }
+}
+/* code: readable tokens in light mode, visible copy button, long lines scroll */
+.doc main:has(> .hero.mh) .codeblock .kw { color: var(--ab-teal-700); font-weight: 600; }
+.doc main:has(> .hero.mh) .codeblock .cm { color: var(--text-muted); }
+.doc main:has(> .hero.mh) .codeblock .cb-copy { color: var(--text-body); border-color: var(--hairline-strong); }
+.doc main:has(> .hero.mh) .codeblock pre { overflow-x: auto; }
+@media (max-width: 640px) { .doc main:has(> .hero.mh) .codeblock:has(> .cb-copy) { padding-top: 36px; padding-right: 12px; } }
+/* run tabs: three equal columns, never 2 + 1 */
+.doc main:has(> .hero.mh) .run-switch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: min(100%, 420px); }
+/* notes: only a note attached under a card is a strip; a free note is plain muted text, full width */
+.doc main:has(> .hero.mh) :is(.scen-note, .ov-flow-note) { grid-column: 1 / -1; width: auto; }
+.doc main:has(> .hero.mh) :not(.stat-row, .vfig, figure.spark, .mo-figcard) + :is(.scen-note, .ov-flow-note),
+.doc main:has(> .hero.mh) :is(.scen-note, .ov-flow-note):first-child { padding: 0; background: none; border: 0; border-radius: 0; margin-top: 10px; }

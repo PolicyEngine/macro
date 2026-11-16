@@ -119,8 +119,8 @@ VERDICT_CHIP_RE = re.compile(r'(<p class="ov-verdict-line">)<a class="chip chip-
 SHORT_VERDICT = {
     "obr": "Scores fiscal changes; not a forecaster.",
     "pe": "Exact for rules; costings static, no interval.",
-    "svar": "GDP matches the Bank; CPI falls short.",
-    "frb-us": "Solver matches pyfrbus; economics not tested.",
+    "svar": "GDP variance share consistent with the paper; no forecast skill.",
+    "frb-us": "Solver matches the Fed&rsquo;s code; economic checks weak.",
     "us-hank": "Parameters match the paper; responses not validated.",
     "olg": "Targets met by construction; no outcome benchmark.",
     "define": "Deltas only, never levels.",
