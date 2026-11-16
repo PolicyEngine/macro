@@ -65,6 +65,7 @@ def obr_chart() -> str:
         '<figure class="vfig current-outlook">',
         chartkit.figure("\n".join(out), unit="October 2026 EFO outlook, index, 2026Q1 = 100",
                         legend=[("ln-s2s", "Real GDP"), ("ln-s3", "Household consumption")],
+                        source_short="OBR October 2026 EFO",
                         source='<a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/'
                                'papers/obr-macro/figures/current_outlook.csv">'
                                'papers/obr-macro/figures/current_outlook.csv</a>'),

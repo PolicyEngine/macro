@@ -776,7 +776,10 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
         ("sw-band90", "90% band (re-calibrated)"),
         ("ln-s2", efo_name),
         *([("sw-dot-out", "ONS outturn")] if dots else []),
-    ], unit=spec["unit"], y_gutter=True, source=(
+    ], unit=spec["unit"], y_gutter=True,
+       source_short=(f"BoE SVAR round, {chartkit.short_date(SVAR_ROUND.parent.name)} · {efo_name}"
+                     + (" · ONS" if dots else "")),
+       source=(
         f'archived round <a class="mono" href="/forecasts/rounds/{SVAR_ROUND.parent.name}/'
         f'{SVAR_ROUND.name}">{SVAR_ROUND.parent.name}/{SVAR_ROUND.name}</a>; '
         + source_note

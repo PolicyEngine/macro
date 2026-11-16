@@ -501,8 +501,9 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
                         'papers/boe-svar/figures/current_forecast.json">current_forecast.json</a>')
     if hist:
         source = f"ONS, {history_note} snapshot {esc(vintage)}; " + source
+    short = (("ONS · " if hist else "") + f"{esc(model)} round, {chartkit.short_date(generated)}")
     return chartkit.figure(svg, legend=legend, unit=f"{name}, {unit}", source=source,
-                           y_gutter=True)
+                           source_short=short, y_gutter=True)
 
 
 def band_text(values: dict) -> str:
