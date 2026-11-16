@@ -640,7 +640,7 @@ def stat_card(series: dict, kind: str | None = None) -> str:
         return _card(
             esc(label(series)),
             esc(display(series, now["value"])),
-            f'stored as {esc(stored(now["value"]))} &middot; {esc(series["units"])}',
+            esc(series["units"]),
             series,
             now["period"],
         )
@@ -748,8 +748,7 @@ def movement(name: str) -> str:
 def movement_note(names: tuple[str, ...]) -> str:
     joined = "; ".join(movement(name) for name in names)
     return (
-        '    <p class="economy-method">How those readings have moved, derived '
-        f"from the same stored observations rather than typed in: {joined}.</p>"
+        f'    <p class="economy-method">Change: {joined}.</p>'
     )
 
 
@@ -798,7 +797,7 @@ def data_layer(names: tuple[str, ...], closing: str) -> str:
     return f"""    <div class="prose">
       <div class="table-scroll">
         <table>
-          <caption>Every value on this page is read from the vintage file linked here, not from a live call.</caption>
+          <caption>Each value is read from the vintage file linked here.</caption>
           <thead><tr><th scope="col">Series</th><th scope="col">Publisher</th><th scope="col">Coverage</th><th scope="col">Snapshots</th><th scope="col">This vintage</th><th scope="col">Next release</th></tr></thead>
           <tbody>
 {data_rows(names)}
@@ -2809,16 +2808,13 @@ UK_TOPICS = [
         "series": ("uk_cpi_yoy", "uk_core_cpi_yoy"),
         "hook": inflation_hook,
         "stands_note": (
-            "Both series are published by the ONS as year-on-year rates, so the "
-            "values above are the published rates themselves, not a "
-            "transformation applied here."
+            "Both are ONS-published year-on-year rates."
         ),
         "model": inflation_model,
         "run": inflation_run,
         "data_note": (
             "Headline CPI is stored quarterly and core CPI monthly, so the two "
-            "observation periods above do not line up — that is the data, not a "
-            "presentation choice."
+            "observation periods above do not line up."
         ),
     },
     {
@@ -2989,8 +2985,7 @@ US_TOPICS = [
         "run": us_rates_run,
         "data_note": (
             "One monthly series and one daily series, so the two observation "
-            "dates above never line up — that is the data, not a presentation "
-            "choice. " + US_DATA_CLOSING
+            "dates above never line up. " + US_DATA_CLOSING
         ),
     },
     {
@@ -3152,7 +3147,6 @@ def topic_where_next(topic: dict) -> str:
     entry = COUNTRIES[topic["country"]]
     cards = [
         (entry["hub"], "chart", "Forecasts", "The record, open rounds and how they score"),
-        ("/economy#data", "data", "The data store", "Every vintage behind these numbers"),
         (entry["data"], "list", f'{entry["label"]} data', "Every topic and series in one place"),
     ]
     return site_nav.where_next(cards)
@@ -3215,7 +3209,7 @@ def page(topic: dict) -> str:
 
 {band("model", "02", "what the models see", "The model view, with its limits beside it.", topic["model"](), alt=True)}
 
-{band("run", "03", "run it yourself", "Every number above is a command away.", topic["run"]())}
+{band("run", "03", "run it yourself", "The commands behind this page.", topic["run"]())}
 
 {band("data", "04", "the data behind it", "Source, coverage, and the immutable file.", data_body, alt=True)}
 
