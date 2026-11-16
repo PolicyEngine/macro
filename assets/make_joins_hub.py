@@ -33,15 +33,15 @@ NODES = (
      "Its scenario income deltas drive employment-income incidence.", "incidence"),
     ("obr", "obr-macro", "/obr", "OBR emulator", "out", "Hosted", 87.5, 27,
      "A reform's static cost goes in as an add-factor; GDP feedback comes out. UK only.", "score"),
-    ("og", "psl-og", "/olg", "OG-UK", "back", "Local only", 87.5, 73,
+    ("og", "psl-og", "/olg", "OG-UK", "back", "Local only · none published", 87.5, 73,
      "Long-run wage and rate changes feed a second microsimulation run. None published.", "og-join"),
 )
 FLOWS = (
-    ("out", "Cost out", "macro feedback"),
-    ("back", "Long-run wages back", "dynamic score"),
-    ("in", "Macro path in", "who gains and loses"),
+    ("out", "Out: reform cost", "macro feedback"),
+    ("back", "Back: long-run wages", "dynamic score"),
+    ("in", "In: macro path", "who gains and loses"),
 )
-DEFAULT = "Every join starts or ends at the microsimulation. No macro model feeds another."
+DEFAULT = "No macro model feeds another. Hover or tap a model to see its link."
 
 W, H = 1000, 440
 CX, CY = 500, 220
@@ -93,6 +93,7 @@ def render(page: str) -> str:
   </ul>
   </div>
   <p class="hub-cap" id="hub-cap" aria-live="polite" data-default="{DEFAULT}">{icon("info", 16)}<span>{DEFAULT}</span></p>
+  <p class="hub-note"><strong>No US macro bridge:</strong> US reforms are scored statically.{'' if on_models else ' <a href="/models#joins">See every join</a>'}</p>
 </div>
 {CLOSE}'''
 
