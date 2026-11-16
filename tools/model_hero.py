@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=4" />'
+CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=5" />'
 CSS_RE = re.compile(r'<link rel="stylesheet" href="/models/model-pages\.css(?:\?v=\d+)?" />\n?')
 
 sys.path.insert(0, str(ROOT))
@@ -102,8 +102,8 @@ def hero(rel: str, old: str) -> str:
     return "\n".join(lines)
 
 
-LEVELS = {"weak": "weak", "moderate": "moderate", "strong": "strong", "not applicable": "na"}
-LEVEL_RE = re.compile(r'<span class="chip"(?: data-level="[a-z]+")?>(weak|moderate|strong|not applicable)</span>')
+LEVELS = {"weak": "weak", "moderate": "moderate", "strong": "strong", "not applicable": "na", "not assessed": "na"}
+LEVEL_RE = re.compile(r'<span class="chip"(?: data-level="[a-z]+")?>(weak|moderate|strong|not applicable|not assessed)</span>')
 LIMITS_RE = re.compile(r'(?:[ \t]*<details class="expander limit".*?</details>\n?)+', re.S)
 # The trust label now sits in the hero on every tab; the Overview verdict
 # line keeps its sentence and link and drops its duplicate chip.
@@ -113,8 +113,8 @@ VERDICT_CHIP_RE = re.compile(r'(<p class="ov-verdict-line">)<a class="chip chip-
 def body(rel: str, source: str) -> str:
     out = LEVEL_RE.sub(lambda m: f'<span class="chip" data-level="{LEVELS[m.group(1)]}">{m.group(1)}</span>', source)
     out = VERDICT_CHIP_RE.sub(r"\1", out)
-    if rel.endswith("validation/index.html") and '<div class="limit-list">' not in out:
-        out = LIMITS_RE.sub(lambda m: '      <div class="limit-list">\n' + m.group(0) + '      </div>\n', out, count=1)
+    # undo the earlier wrapper: .limits groups are styled as lists directly
+    out = re.sub(r'      <div class="limit-list">\n((?:[ \t]*<details class="expander limit".*?</details>\n?)+)      </div>\n', r"\1", out, flags=re.S)
     return out
 
 
