@@ -3034,55 +3034,50 @@ def subnav(country: str, current: str | None) -> str:
     ancestor, not the current URL, so it takes ``aria-current="true"``.
     """
     entry = COUNTRIES[country]
-    # r13 (Vahid: "make it better, group them?"): two labelled groups.
-    # Forecasts = the two country records; Data = this country's data hub and
-    # a Topics menu. "Track record" is gone: it was the same URL as the
-    # country's Forecasts link. assets/subnav.js turns each group into a
-    # dropdown at 820px and below, and the Topics list into a menu when wide.
-    fc = []
-    for code, other in COUNTRIES.items():
-        here = current is None and code == country
-        attr = ' aria-current="page"' if here else ""
-        fc.append(f'        <a class="model-tabs-link"{attr} href="{other["hub"]}">{other["label"]}</a>')
-    dl = []
-    for code, other in COUNTRIES.items():
-        here = current == "data" and code == country
-        attr = ' aria-current="page"' if here else ""
-        dl.append(f'          <a class="model-tabs-link"{attr} href="{other["data"]}">{other["label"]}</a>')
-    topic_links = []
-    current_title = None
+    # r14 (Vahid: grouped UK/US pairs were "confusing how to choose"): two
+    # independent controls. Left, section tabs: Forecasts · Data · Topics ▾.
+    # Right, one UK | US toggle that switches the country for the page open
+    # (scope_target picks the counterpart); a topic with no US page shows US
+    # disabled rather than jumping somewhere else.
+    TOPIC_ICONS = {"growth": "forecasts", "inflation": "activity", "jobs": "users",
+                   "rates": "landmark", "public-finances": "scale", "reform": "calculator"}
+    fc_attr = ' aria-current="page"' if current is None else ""
+    data_attr = ' aria-current="page"' if current == "data" else ""
+    topic_links, current_title = [], None
     for topic in topics_for(country):
         title = esc(topic.get("tab", topic["title"]))
         attr = ' aria-current="page"' if topic["slug"] == current else ""
         if attr:
             current_title = title
-        topic_links.append(f'          <a class="model-tabs-link"{attr} href="{topic_url(topic)}">{title}</a>')
+        topic_links.append(
+            f'          <a class="model-tabs-link"{attr} href="{topic_url(topic)}">'
+            f'{site_nav.icon(TOPIC_ICONS.get(topic["slug"], "book-open"), 16)}{title}</a>')
     btn_attr = ' aria-current="true"' if current_title else ""
-    btn_label = f"Topics: {current_title}" if current_title else "Topics"
-    fc_open = "Forecasts" + (f": {entry['label']}" if current is None else "")
-    data_open = "Data" + (f": {entry['label']}" if current == "data" else (f": {current_title}" if current_title else ""))
-    return f"""  <nav class="economy-subnav sn2" aria-label="Forecasts and data">
+    btn_label = current_title or "Topics"
+    toggle = []
+    for code, other in COUNTRIES.items():
+        is_topic = current not in (None, "data")
+        has_page = (not is_topic) or (code, current) in TOPIC_BY_SLUG
+        if code == country:
+            toggle.append(f'      <span class="cc-tog is-on" aria-current="true">{other["label"]}</span>')
+        elif has_page:
+            toggle.append(f'      <a class="cc-tog" href="{scope_target(code, current)}">{other["label"]}</a>')
+        else:
+            toggle.append(f'      <span class="cc-tog is-off" aria-disabled="true" title="No {other["label"]} page for this topic">{other["label"]}</span>')
+    return f"""  <nav class="economy-subnav sn3" aria-label="Forecasts and data">
     <div class="economy-subnav-row">
-      <div class="sn-group" data-sn-group>
-        <button type="button" class="model-tabs-link sn-group-btn" aria-expanded="false"{' aria-current="true"' if current is None else ''}>{site_nav.icon("forecasts", 16)}{fc_open}<span class="sn-chev" aria-hidden="true"></span></button>
-        <span class="sn-label">{site_nav.icon("forecasts", 14)}Forecasts</span>
-        <div class="sn-items">
-{chr(10).join(fc)}
-        </div>
-      </div>
-      <span class="sn-div" aria-hidden="true"></span>
-      <div class="sn-group" data-sn-group>
-        <button type="button" class="model-tabs-link sn-group-btn" aria-expanded="false"{' aria-current="true"' if current is not None else ''}>{site_nav.icon("database", 16)}{data_open}<span class="sn-chev" aria-hidden="true"></span></button>
-        <span class="sn-label">{site_nav.icon("database", 14)}Data</span>
-        <div class="sn-items">
-{chr(10).join(dl)}
-          <div class="sn-menu" data-sn-menu>
-            <button type="button" class="model-tabs-link sn-menu-btn" aria-expanded="false"{btn_attr}>{btn_label}<span class="sn-chev" aria-hidden="true"></span></button>
-            <div class="sn-pop" role="group" aria-label="Topics">
+      <div class="sn-tabs">
+        <a class="model-tabs-link"{fc_attr} href="{entry["hub"]}">{site_nav.icon("forecasts", 16)}Forecasts</a>
+        <a class="model-tabs-link"{data_attr} href="{entry["data"]}">{site_nav.icon("database", 16)}Data</a>
+        <div class="sn-menu" data-sn-menu>
+          <button type="button" class="model-tabs-link sn-menu-btn" aria-expanded="false"{btn_attr}>{site_nav.icon("book-open", 16)}{btn_label}<span class="sn-chev" aria-hidden="true"></span></button>
+          <div class="sn-pop" role="group" aria-label="Topics">
 {chr(10).join(topic_links)}
-            </div>
           </div>
         </div>
+      </div>
+      <div class="sn-country" role="group" aria-label="Country">
+{chr(10).join(toggle)}
       </div>
     </div>
   </nav>"""
