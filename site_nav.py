@@ -22,7 +22,7 @@ STYLESHEET = re.compile(r'href="/style\.css(?:\?v=[0-9]+)?"')
 # changes in a way a cached copy would render wrongly; ``render`` writes it
 # into every page and the generators read it from here (economy/topics.py,
 # notes/generate_release_notes.py), so no page can be left on an old copy.
-STYLE_VERSION = 35
+STYLE_VERSION = 36
 STYLE_HREF = f"/style.css?v={STYLE_VERSION}"
 
 # Inter (latin) is the body face on every page, but the browser only finds the
@@ -118,6 +118,26 @@ def icon(key: str, size: int = 16, cls: str = "i") -> str:
         'stroke="currentColor" stroke-width="1.75" stroke-linecap="round" '
         f'stroke-linejoin="round" aria-hidden="true">{ICONS[key]}</svg>'
     )
+
+# Small flag marks for the UK | US segmented control (style.css "Country switch").
+FLAGS = {
+    "uk": ('<rect width="60" height="30" fill="#012169"/>'
+           '<path d="M0 0l60 30M60 0L0 30" stroke="#FFF" stroke-width="6"/>'
+           '<path d="M0 0l60 30M60 0L0 30" stroke="#C8102E" stroke-width="2"/>'
+           '<path d="M30 0v30M0 15h60" stroke="#FFF" stroke-width="10"/>'
+           '<path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/>', "0 0 60 30"),
+    "us": ('<rect width="19" height="13" fill="#B22234"/>'
+           '<path d="M0 1.5h19M0 3.5h19M0 5.5h19M0 7.5h19M0 9.5h19M0 11.5h19" stroke="#FFF" stroke-width="1"/>'
+           '<rect width="8" height="7" fill="#3C3B6E"/>', "0 0 19 13"),
+}
+
+
+def flag(code: str) -> str:
+    """A 16x11 flag mark for a country segment (decorative; the label carries the name)."""
+    body, box = FLAGS[code]
+    return (f'<svg class="flag" viewBox="{box}" width="16" height="11" '
+            f'preserveAspectRatio="none" aria-hidden="true">{body}</svg>')
+
 
 MODEL_ROOTS = {"models", "obr", "svar", "frb-us", "us-hank", "olg", "pe", "define"}
 EVIDENCE_ROOTS = {"papers", "reports"}

@@ -169,3 +169,28 @@ def test_mcp_docstring_lists_every_question_type():
     doc = mcp_server.recommend_model.__doc__
     for q in capabilities.question_types():
         assert q in doc, q
+
+
+def test_distributional_shock_warning_names_the_experimental_incidence_tools():
+    from policyengine_macro.capabilities import recommend
+
+    us = recommend("economic_shock", country="us", needs_distribution=True)
+    assert us["candidate_models"] == [] and us["primary_model"] is None
+    assert "Do not infer a mapping" in us["warning"]
+    assert "frbus_shock_incidence" in us["warning"]
+    assert "hank_shock_incidence" in us["warning"]
+    uk = recommend("economic_shock", country="uk", needs_distribution=True)
+    assert "incidence" not in uk["warning"]
+
+
+def test_experimental_incidence_tools_are_published_tools_of_registered_models():
+    import importlib.util
+    from pathlib import Path
+    from policyengine_macro.capabilities import EXPERIMENTAL_INCIDENCE_TOOLS, MODELS
+
+    spec = importlib.util.spec_from_file_location(
+        "tool_surface", Path(__file__).with_name("tool_surface.py"))
+    surface = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(surface)
+    assert set(EXPERIMENTAL_INCIDENCE_TOOLS.values()) <= surface.GOLDEN_TOOLS
+    assert set(EXPERIMENTAL_INCIDENCE_TOOLS) <= set(MODELS)

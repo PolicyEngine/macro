@@ -130,7 +130,7 @@ def boe_chart() -> str:
         ], unit="UK real GDP, % change on a year earlier",
             notes=[f"Forecast made {data['generated']} from data through {data['data_edge']}."]),
         f"<figcaption>Bands are raw posterior quantiles, not rescaled to measured coverage; the calibrated version is on the <a href='/forecasts'>forecast record</a>."
-        f"<details class=\"expander\"><summary>Run details</summary><p>Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through {data['data_edge']}; forecast begins {data['forecast_start']}. Estimated on {data['estimation_sample'].replace('-', '&ndash;')}; {data['draws']:,} posterior draws, {data['accepted']} accepted; five stochastic paths per accepted draw. A separate run from the shock probabilities, so the draw counts differ. Source and provenance: <code>papers/boe-svar/figures/current_forecast.json</code>.</p></details></figcaption>",
+        f"<details class=\"expander\"><summary>Run details</summary><p>Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through {data['data_edge']}; forecast begins {data['forecast_start']}. Estimated on {data['estimation_sample'].replace('-', '&ndash;')}; {data['draws']:,} posterior draws, {data['accepted']} accepted. A separate run from the shock probabilities, so the draw counts differ. Source: the archived round <a href='/forecasts/rounds/{data['source_round']}/boe-svar.json'><code>forecasts/rounds/{data['source_round']}/boe-svar.json</code></a>, shown through <code>papers/boe-svar/figures/current_forecast.json</code>.</p></details></figcaption>",
         "</figure>",
     ])
 

@@ -8535,3 +8535,63 @@ main .band-head[data-icon]::before, main .band-head::before {
 @media (max-width: 720px) {
   .model-tabs-row { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); padding-right: 28px !important; scroll-padding-right: 28px; }
 }
+
+/* =====================================================================
+   38. Mid-run review (group A)
+   ===================================================================== */
+.cc, .cc-uk, .cc-us { box-shadow: none !important; border: 1px solid var(--ab-border); border-radius: 999px !important; background: var(--card); }
+.mc-grid > .mc-card[href="/pe"] > .mc-fail { grid-column: 1 / -1 !important; grid-area: auto !important; }
+@media (min-width: 1025px) { .mc-grid > .mc-card[href="/pe"] { grid-template-areas: "icon name pill verdict go" "icon q pill verdict go" "fail fail fail fail fail" !important; } .mc-grid > .mc-card[href="/pe"] > .mc-fail { grid-area: fail !important; } }
+@media (min-width: 768px) and (max-width: 1100px) { .mc-grid > .mc-card[href="/pe"] { grid-template-areas: "icon name pill" "icon q pill" "verdict verdict verdict" "fail fail fail" !important; } .mc-grid > .mc-card[href="/pe"] > .mc-fail { grid-area: fail !important; } }
+@media (min-width: 641px) { .lp-term pre { white-space: pre-wrap !important; overflow-wrap: anywhere; font-size: 12px; } }
+.lp-capchip svg, .lp-capline svg { margin-right: 6px !important; flex: 0 0 auto; }
+.fv-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.fv-list li { display: grid; gap: 3px; padding-bottom: 12px; border-bottom: 1px solid #F1F3F5; }
+.fv-list li:last-child { border-bottom: 0; padding-bottom: 0; }
+.fv-list strong { color: var(--text-strong); font-size: var(--fs-ab-small); }
+.fv-class { color: var(--ab-teal-700); font-size: var(--fs-ab-cap); font-weight: 600; }
+.fv-line { display: flex; align-items: flex-start; gap: 6px; color: var(--text-muted); font-size: var(--fs-ab-cap); line-height: 1.45; }
+.fv-line svg { flex: 0 0 auto; margin-top: 2px; color: var(--text-faint); }
+.gl-proof { margin-top: 4px; font-size: var(--fs-ab-cap); }
+.gl-clamp { -webkit-line-clamp: 2; line-height: 1.55; max-height: calc(1.55em * 2); }
+@media (max-width: 960px) { .lp-hero-grid { align-items: stretch !important; } }
+
+/* =====================================================================
+   39. Country switch — one segmented control for every UK | US choice
+   (Forecasts/Data sub-nav, Models chooser). Equal segments, a small flag,
+   the active segment filled teal. reveal.js adds a sliding indicator
+   (.seg.has-ind); without JS the active segment carries its own fill.
+   ===================================================================== */
+.seg { position: relative; isolation: isolate; display: inline-grid !important; grid-auto-flow: column; grid-auto-columns: 1fr; align-items: center; align-self: center; height: 34px; padding: 3px !important; border-radius: 999px; background: var(--ab-inset) !important; border: 1px solid var(--ab-border) !important; flex: 0 0 auto; }
+.seg > .cc-tog, .seg > .mc-seg { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 64px; height: 26px !important; min-height: 0 !important; padding: 0 12px !important; border: 0; border-radius: 999px; background: transparent; box-shadow: none; color: var(--text-muted); font: inherit; font-size: 13px; font-weight: 600; letter-spacing: .02em; line-height: 1; text-decoration: none; white-space: nowrap; cursor: pointer; transition: color .2s ease; }
+.seg > a.cc-tog:hover, .seg > .mc-seg[aria-pressed="false"]:hover { color: var(--text-strong); background: color-mix(in srgb, var(--card) 70%, transparent); }
+.seg > .is-on, .seg > .mc-seg[aria-pressed="true"] { background: var(--ab-teal-700); color: #FFFFFF; box-shadow: none; }
+.seg > .cc-tog:focus-visible, .seg > .mc-seg:focus-visible { outline: 2px solid var(--ab-teal-700); outline-offset: 2px; }
+.seg .flag { flex: none; width: 16px; height: 11px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(17, 24, 39, .14); }
+.seg > .is-on .flag, .seg > [aria-pressed="true"] .flag { box-shadow: 0 0 0 1px rgba(255, 255, 255, .55); }
+.seg .seg-globe { width: 14px; height: 14px; flex: none; }
+/* sliding indicator (JS) */
+.seg-ind { position: absolute; z-index: 0; top: 3px; bottom: 3px; left: 0; width: var(--seg-w, 0); transform: translateX(var(--seg-x, 0)); border-radius: 999px; background: var(--ab-teal-700); transition: transform .24s cubic-bezier(.2, .7, .2, 1), width .24s cubic-bezier(.2, .7, .2, 1); pointer-events: none; }
+.seg.has-ind > .is-on, .seg.has-ind > .mc-seg[aria-pressed="true"] { background: transparent; }
+.seg.seg-still .seg-ind { transition: none; }
+@media (prefers-reduced-motion: reduce) { .seg-ind, .seg > .cc-tog, .seg > .mc-seg { transition: none !important; } }
+/* no page for this country: muted, not struck through, with a tooltip on hover and focus */
+.seg > .is-off { color: var(--ab-none); cursor: not-allowed; text-decoration: none; }
+.seg > .is-off .flag { filter: grayscale(1); opacity: .55; }
+.seg > [data-tip]:hover::after, .seg > [data-tip]:focus-visible::after { content: attr(data-tip); position: absolute; z-index: 30; top: calc(100% + 9px); right: -4px; white-space: nowrap; padding: 6px 9px; border-radius: 6px; background: #111827; color: #FFFFFF; font-size: 12px; font-weight: 500; letter-spacing: 0; line-height: 1.3; box-shadow: 0 4px 12px rgba(17, 24, 39, .18); pointer-events: none; }
+@media (prefers-color-scheme: dark) {
+  .seg > .is-on, .seg > .mc-seg[aria-pressed="true"], .seg-ind { background: var(--hub-core-dark); }
+  .seg.has-ind > .is-on, .seg.has-ind > .mc-seg[aria-pressed="true"] { background: transparent; }
+  .seg .flag { box-shadow: 0 0 0 1px rgba(255, 255, 255, .22); }
+  .seg > [data-tip]:hover::after, .seg > [data-tip]:focus-visible::after { background: #F3F4F6; color: #111827; }
+}
+@media (max-width: 820px) { .seg > .cc-tog, .seg > .mc-seg { min-width: 56px; padding: 0 10px !important; } }
+@media (max-width: 480px) {
+  .sn3 .seg { height: 32px; }
+  .seg > .cc-tog, .seg > .mc-seg { min-width: 0; height: 24px !important; padding: 0 9px !important; gap: 5px; font-size: 12.5px; }
+  /* phone sub-nav: labels only, so the switch never crowds the tabs */
+  .sn3 .seg .flag { display: none; }
+  .sn3 .seg > .cc-tog { min-width: 38px; padding: 0 8px !important; }
+  .sn3 .economy-subnav-row { column-gap: 8px !important; }
+  .sn3 .sn-tabs .model-tabs-link { padding: 0 6px !important; }
+}

@@ -86,7 +86,14 @@ def test_monetary_caveat_is_on_the_page_not_folded():
 
 
 def test_failures_and_flags_are_plain():
-    assert "converged: false" in PAGE
+    # Every row's solver flag is printed as stored, so a non-converged solve
+    # can never be hidden. (This asserted the literal "converged: false" while
+    # the OBR rows were run at e4d7faa; at 2965e82d every quarter converges.)
+    import html as _html
+    solvers = [c["solver"] for q in DATA["questions"] for c in q["cells"] if c.get("solver")]
+    assert solvers
+    for flag in solvers:
+        assert _html.escape(flag) in PAGE or flag in PAGE, flag
     assert PAGE.count("No instrument") == sum(
         c["status"] == "no_instrument" for q in DATA["questions"] for c in q["cells"])
     for issue in DATA["issues"].values():

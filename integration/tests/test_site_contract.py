@@ -91,11 +91,14 @@ def test_mobile_css_does_not_hide_document_overflow():
 
 def test_current_boe_forecast_starts_after_latest_complete_data_edge():
     payload = json.loads(_read("papers/boe-svar/figures/current_forecast.json"))
-    assert payload["data_edge"] == "2026Q1"
-    assert payload["forecast_start"] == "2026Q2"
-    assert list(payload["forecast"])[0] == "2026Q2"
-    assert list(payload["forecast"])[-1] == "2029Q2"
-    assert "2026Q2 to 2029Q2" in _read("index.html")
+    assert payload["data_edge"] == "2026Q2"
+    assert payload["forecast_start"] == "2026Q3"
+    assert list(payload["forecast"])[0] == "2026Q3"
+    assert list(payload["forecast"])[-1] == "2029Q3"
+    assert "2026Q3 to 2029Q3" in _read("index.html")
+    # The live chart is an archived round, reshaped, never a new unarchived run.
+    round_file = ROOT / "forecasts/rounds" / payload["source_round"] / "boe-svar.json"
+    assert json.loads(round_file.read_text())["forecast"] == payload["forecast"]
     assert "frozen 2024Q2 validation experiment" in _read("svar/index.html")
 
 

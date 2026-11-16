@@ -2923,11 +2923,11 @@ def subnav(country: str, current: str | None) -> str:
         is_topic = current not in (None, "data")
         has_page = (not is_topic) or (code, current) in TOPIC_BY_SLUG
         if code == country:
-            toggle.append(f'      <span class="cc-tog is-on" aria-current="true">{other["label"]}</span>')
+            toggle.append(f'      <span class="cc-tog is-on" aria-current="page">{site_nav.flag(code)}{other["label"]}</span>')
         elif has_page:
-            toggle.append(f'      <a class="cc-tog" href="{scope_target(code, current)}">{other["label"]}</a>')
+            toggle.append(f'      <a class="cc-tog" href="{scope_target(code, current)}">{site_nav.flag(code)}{other["label"]}</a>')
         else:
-            toggle.append(f'      <span class="cc-tog is-off" aria-disabled="true" title="No {other["label"]} page for this topic">{other["label"]}</span>')
+            toggle.append(f'      <span class="cc-tog is-off" role="link" aria-disabled="true" tabindex="0" data-tip="No {other["label"]} page for this topic yet">{site_nav.flag(code)}{other["label"]}</span>')
     return f"""  <nav class="economy-subnav sn3" aria-label="Forecasts and data">
     <div class="economy-subnav-row">
       <div class="sn-tabs">
@@ -2940,7 +2940,7 @@ def subnav(country: str, current: str | None) -> str:
           </div>
         </div>
       </div>
-      <div class="sn-country" role="group" aria-label="Country">
+      <div class="sn-country seg" role="group" aria-label="Country">
 {chr(10).join(toggle)}
       </div>
     </div>
@@ -3099,7 +3099,7 @@ def page(topic: dict) -> str:
 {site_nav.FOOTER_LINKS}
   </nav>
 </footer>
-<script src="/reveal.js?v=4" defer></script>
+<script src="/reveal.js?v=5" defer></script>
 {site_nav.SUBNAV_TAG}
 </body>
 </html>

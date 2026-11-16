@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>DEFINE-UK validation — PolicyEngine Macro</title>
-<meta name="description" content="How far to trust the DEFINE-UK adapter: the manual's Table 4 macro block matches except 2025 growth, the emissions path diverges from the published table, scenario switch sets are design-gated, the calibration gap to ONS/DESNZ/OBR is computed — and no numeric v1.1 scenario results are published, so deltas only." />
+<meta name="description" content="How far to trust the DEFINE-UK adapter: the manual's Table 4 macro block matches within every gate, two by only 0.01pp, the emissions path diverges from the published table, scenario switch sets are design-gated, the calibration gap to ONS/DESNZ/OBR is computed — and no numeric v1.1 scenario results are published, so deltas only." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/define/validation" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://policyengine-macro.vercel.app/define/validation" />
@@ -20,8 +20,8 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=35" />
-<link rel="stylesheet" href="/models/model-pages.css?v=22" />
+<link rel="stylesheet" href="/style.css?v=36" />
+<link rel="stylesheet" href="/models/model-pages.css?v=23" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -51,7 +51,7 @@
           <li class="mh-chip"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>UK</li>
           <li><a class="mh-chip mh-trust" href="/glossary#partial-replication"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Partial replication</a></li>
           <li class="mh-chip mh-local"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/></svg>Runs locally</li>
-          <li class="mh-chip"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Annual to 2037</li>
+          <li class="mh-chip"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Annual, 2023&ndash;2040; default to 2037</li>
         </ul>
       </div>
     </div>
@@ -80,7 +80,7 @@
   <section class="band band-wide" id="trust">
     <div class="band-head" data-icon="shield">
       <h2>Partial replication; deltas only</h2>
-      <p class="section-intro">The macro block matches the manual within its gates; no numeric v1.1 scenario results exist to check.</p>
+      <p class="section-intro">The macro block matches Table&nbsp;4 within every gate; 2025 growth (&minus;0.30pp, gate &plusmn;0.31) and 2040 unemployment (&minus;0.19pp, gate &plusmn;0.2) clear by only 0.01pp. No numeric v1.1 scenario results exist to check.</p>
     </div>
     <div class="table-scroll scorecard"><table data-stack="yes">
         <caption>What was checked, against what, and the result</caption>
@@ -123,7 +123,7 @@
 
       <div class="meth-step" id="gates" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>The replication gates</h3></div>
-        <p class="mo-lead">Every row is enforced by tests against the cached pinned run.</p>
+        <p class="mo-lead">Every row is enforced by tests against the <a href="https://github.com/DEFINE-model/DEFINE_UK_1.1/tree/846081a580a6033159d5c421632ad8f0b30d0ded">cached pinned run</a> (<a href="https://github.com/PolicyEngine/define-uk-model/tree/main/tests">define-uk-model <code>tests/</code></a>; results in <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/VALIDATION.md"><code>VALIDATION.md</code></a>).</p>
         <details class="xp">
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>table, notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
@@ -134,7 +134,7 @@
                   <tr>
                     <th scope="row">Manual Table&nbsp;4, macro block — growth, unemployment, population 16+, labour force, S1 baseline</th>
                     <td>population and labour force &plusmn;0.01m; growth &plusmn;0.31pp; unemployment &plusmn;0.2pp</td>
-                    <td><strong>PASS</strong> (2026-08-04) — but 2025 growth misses by &minus;0.30pp (gate &plusmn;0.31, set after the run) and 2040 unemployment by &minus;0.19pp (gate &plusmn;0.2): both clear by 0.01pp</td>
+                    <td><strong>PASS</strong> (2026-08-04) — but 2025 growth misses by &minus;0.30pp (gate &plusmn;0.31, set after the run) and 2040 unemployment by &minus;0.19pp (gate &plusmn;0.2): both clear by only 0.01pp</td>
                   </tr>
                   <tr>
                     <th scope="row">Manual Table&nbsp;4, total emissions, S1 baseline</th>
@@ -347,7 +347,7 @@
 <li><span class="vc-sw sw-b2" aria-hidden="true"></span>published Table 4</li>
 </ul>
 </div><!-- /vc-fig -->
-                <figcaption>S1 baseline total emissions: the cached pinned run (upstream <code>846081a</code>) against the published Table&nbsp;4. What is gated is the ratio of the two — 0.965 / 0.898 / 0.767, pinned to &plusmn;0.02 in the adapter's <code>validation/reference_outputs.json</code>, which is where the percentages above come from; the bar labels round the published levels.
+                <figcaption>S1 baseline total emissions: the cached pinned run (upstream <code>846081a</code>) against the published Table&nbsp;4. What is gated is the ratio of the two — 0.965 / 0.898 / 0.767, pinned to &plusmn;0.02 in the adapter's <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/validation/reference_outputs.json"><code>validation/reference_outputs.json</code></a>, which is where the percentages above come from; the bar labels round the published levels.
 <p class="vc-src-line"><svg class="vc-src-ic" viewBox="0 0 24 24" width="14" height="14" style="width:14px;height:14px;flex:0 0 14px" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span style="min-width:0;flex:1">Source: PolicyEngine validation data</span></p>
 <details class="vc-src"><summary>Source details</summary>
 <p class="vc-source">Source: <code>validation/figures/data/define_emissions_divergence.csv</code>.</p>
@@ -452,7 +452,7 @@
   </nav>
 </footer>
 
-<script src="/reveal.js?v=4" defer></script>
+<script src="/reveal.js?v=5" defer></script>
 <script src="/stepper.js" defer></script>
 </body>
 </html>

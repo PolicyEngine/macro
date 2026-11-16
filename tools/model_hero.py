@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=22" />'
+CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=23" />'
 CSS_RE = re.compile(r'<link rel="stylesheet" href="/models/model-pages\.css(?:\?v=\d+)?" />\n?')
 
 sys.path.insert(0, str(ROOT))
@@ -40,10 +40,10 @@ MODELS = {
     "pe": ("Tax-benefit microsimulation", "UK · US", ("Exact for rules", "exact-for-rules"), "hosted", "Annual"),
     "obr": ("Emulator of the OBR macroeconometric model", "UK", ("Anchored, not validated", "anchored-not-validated"), "hosted", "Quarterly"),
     "svar": ("Bank of England structural VAR", "UK", ("Partial replication", "partial-replication"), "hosted", "Quarterly"),
-    "frb-us": ("Fed FRB/US, rebuilt", "US", ("Replicates one published shock", "replicates"), "hosted", "Quarterly"),
+    "frb-us": ("Fed FRB/US, rebuilt", "US", ("Replicates the Fed&rsquo;s solver", "replicates"), "hosted", "Quarterly"),
     "us-hank": ("Two-asset HANK", "US", ("Partial replication", "partial-replication"), "hosted", "Quarterly IRFs"),
     "olg": ("OG-UK overlapping generations", "UK", ("Calibrated", "calibrated-counterfactual"), "local", "Long-run steady state"),
-    "define": ("DEFINE-UK ecological stock-flow", "UK", ("Partial replication", "partial-replication"), "local", "Annual to 2037"),
+    "define": ("DEFINE-UK ecological stock-flow", "UK", ("Partial replication", "partial-replication"), "local", "Annual, 2023&ndash;2040; default to 2037"),
 }
 
 # page -> model key; the two reports keep their own kind line
