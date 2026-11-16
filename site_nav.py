@@ -42,6 +42,8 @@ DESTINATIONS = (
     # Shell v3 (redesign r12): a product header. The brand is the way home,
     # so there is no Home tab; the three sections follow in reading order:
     # the scored record, the models, then how to run them.
+    # Home leads the tab bar (Vahid, 16 Nov), as well as the brand linking home.
+    ("home", "/", "Home", "nav-tab"),
     ("forecasts", "/forecasts", "Forecasts", "nav-tab"),
     ("models", "/models", "Models", "nav-tab"),
     ("use", "/connect", "Use", "nav-tab"),
@@ -409,23 +411,26 @@ _FOOTER_COLUMNS = (
 )
 
 
+_FOOTER_MAIN = (
+    ("/forecasts", "Forecasts", "forecasts"), ("/models", "Models", "models"),
+    ("/connect", "Use", "use"), ("/glossary", "Glossary", "book-open"),
+    ("https://github.com/PolicyEngine/macro", "GitHub", "github"), ("/contact", "Contact", "mail"),
+)
+
+
 def _footer_links() -> str:
-    cols = [
-        '    <div class="foot-brand">\n'
-        '      <a class="footer-policyengine" href="/"><img src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro</a>\n'
-        '      <p>Open economic models for UK and US policy, each labelled with how far it can be checked.</p>\n'
-        '    </div>'
-    ]
-    for title, links in _FOOTER_COLUMNS:
-        items = "\n".join(
-            f'        <li><a class="footer-text" href="{href}">{label}</a></li>'
-            for href, label in links
-        )
-        cols.append(
-            f'    <div class="foot-col">\n      <p class="foot-head">{title}</p>\n'
-            f'      <ul>\n{items}\n      </ul>\n    </div>'
-        )
-    return "\n".join(cols)
+    """Compact footer (Vahid, 16 Nov: "much less height, keep only mains"):
+    the wordmark and one row of main links. Model pages, papers, release
+    notes and issues are reachable from Models, Use and GitHub."""
+    items = "\n".join(
+        f'      <a class="footer-text" href="{href}">{icon(key, 15)}{label}</a>'
+        for href, label, key in _FOOTER_MAIN
+    )
+    return (
+        '    <a class="footer-policyengine" href="/" aria-label="PolicyEngine Macro home">'
+        '<img src="/assets/policyengine-white.png" alt="" width="96" height="20" /><span>Macro</span></a>\n'
+        f'    <div class="foot-main">\n{items}\n    </div>'
+    )
 
 
 FOOTER_LINKS = _footer_links()
@@ -476,18 +481,17 @@ def header(path: Path) -> str:
         )
     return """<header class="nav">
   <a class="brand" href="/" aria-label="PolicyEngine Macro home">
-    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="24" height="24" /><span class="brand-name">PolicyEngine <b>Macro</b></span>
+    <img class="brand-logo" src="/assets/policyengine-white.png" alt="" width="115" height="24" /><span class="brand-name">Macro</span>
   </a>
   <nav class="nav-links" aria-label="Primary">
 %s
   </nav>
   <div class="nav-end">
 %s
-%s
   </div>
 </header>
 
-""" % ("\n".join(links), GITHUB, "" if page_href == "/connect" else NAV_CTA)
+""" % ("\n".join(links), "" if page_href == "/connect" else NAV_CTA)
 
 
 def expander(icon_key: str, title: str, summary: str, body: str, open_: bool = False, id_: str = "") -> str:
