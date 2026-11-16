@@ -153,7 +153,8 @@ def swatch(kind: str) -> str:
 
 
 _MONTHS = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
-_INFO_ICON = ('<svg class="vc-src-ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" '
+_INFO_ICON = ('<svg class="vc-src-ic" viewBox="0 0 24 24" width="14" height="14" '
+              'style="width:14px;height:14px;flex:0 0 14px" aria-hidden="true" fill="none" '
               'stroke="currentColor" stroke-width="1.75" stroke-linecap="round" '
               'stroke-linejoin="round"><circle cx="12" cy="12" r="10"/>'
               '<path d="M12 16v-4"/><path d="M12 8h.01"/></svg>')
@@ -194,7 +195,7 @@ def source_block(source: str, short: str | None = None) -> str:
     …</p>``) inside the expander, so provenance checks that match it still do.
     """
     return (
-        f'<p class="vc-src-line">{_INFO_ICON}<span>Source: {short or short_source(source)}</span></p>\n'
+        f'<p class="vc-src-line">{_INFO_ICON}<span style="min-width:0;flex:1">Source: {short or short_source(source)}</span></p>\n'
         '<details class="vc-src"><summary>Source details</summary>\n'
         f'<p class="vc-source">Source: {source}</p>\n</details>'
     )

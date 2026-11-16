@@ -2028,7 +2028,7 @@ def us_path_chart(chart_id: str, name: str, unit: str,
                   lines: list[tuple[str, str, list[dict]]],
                   baseline: list[dict] | None = None,
                   zero: bool = True, source: str = "",
-                  notes: list[str] | None = None) -> str:
+                  notes: list[str] | None = None, source_short: str = "") -> str:
     """Outturn lines from the FRED snapshot, and the LONGBASE path if one exists.
 
     ``lines`` is (css class, legend label, observations) for each outturn
@@ -2136,7 +2136,7 @@ def us_path_chart(chart_id: str, name: str, unit: str,
     if baseline:
         legend.append(("ln-s2", LONGBASE_LABEL))
     return chartkit.figure(svg, legend=legend, unit=f"{name}, {unit}", source=source,
-                           notes=notes, y_gutter=True)
+                           source_short=source_short or None, notes=notes, y_gutter=True)
 
 
 def missing_months(obs: list[dict]) -> list[str]:
@@ -2160,6 +2160,9 @@ def gap_note(obs: list[dict]) -> list[str]:
             "stored series, so the line breaks there."]
 
 
+FRED_PUBLISHER = {"GDPC1": "BEA", "CPIAUCSL": "BLS", "UNRATE": "BLS", "PAYEMS": "BLS"}
+
+
 def us_baseline_chart(chart_id: str, name: str, unit: str, column: str,
                       series: dict, outturns: list[dict], derived: str = "") -> str:
     """One US topic chart: a FRED outturn line plus the LONGBASE path."""
@@ -2170,6 +2173,7 @@ def us_baseline_chart(chart_id: str, name: str, unit: str, column: str,
         chart_id, name, unit,
         [("vc-out-line", f"Outturn, FRED snapshot {esc(series['vintage'])}", outturns)],
         baseline=baseline, zero=False, source=source,
+        source_short=f"{FRED_PUBLISHER.get(series['cdid'], 'FRED')} via FRED · FRB/US LONGBASE, 29 Jul 2026",
         notes=gap_note(outturns) + ["Baseline quarters are drawn at their middle month."]
         if "Q" not in outturns[0]["period"] else gap_note(outturns))
 
@@ -2471,7 +2475,8 @@ def us_rates_chart() -> str:
         "us-topic-rates", "US policy rate and 10-year Treasury yield", "%",
         [("vc-out-line", f"Effective federal funds rate, monthly, snapshot {esc(funds['vintage'])}", monthly),
          ("vc-s3", f"10-year Treasury yield, daily, snapshot {esc(ten['vintage'])}", daily)],
-        zero=False, source=source, notes=gap_note(monthly))
+        zero=False, source=source, notes=gap_note(monthly),
+        source_short="Federal Reserve via FRED")
 
 
 def us_rates_model() -> str:

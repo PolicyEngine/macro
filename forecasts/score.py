@@ -896,6 +896,8 @@ _ICON_PATHS = {
     "file": '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/>',
     "history": '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
     "clock": '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    "activity": '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+    "calendar": '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
     "equal": '<path d="M5 9h14"/><path d="M5 15h14"/>',
 }
 
@@ -1016,26 +1018,31 @@ def render_rounds(card: dict) -> str:
             days = _gap_days(details[i - 1]["round_id"], detail["round_id"])
             gap = f'<span class="fc-gap">{days} day{"" if days == 1 else "s"} later</span>'
         state = "is-scored" if n else "is-open"
-        flag = ' is-retro' if i == 0 else ""
+        flag = " is-retro" if i == 0 else ""
+        name = MODEL_DISPLAY.get(detail["model"], (detail.get("label", detail["model"]), None))[0]
+        chips = []
+        if i == 0:
+            chips.append('<a class="fc-chip fc-chip-retro" href="#retro" title="Archived retroactively; see the note below">Retroactive</a>')
+        chips.append(f'<span class="fc-chip fc-chip-scored">Scored {n}</span>' if n
+                     else '<span class="fc-chip fc-chip-open">Open</span>')
         items.append(
             f'        <li class="fc-node {state}{flag}">{gap}'
             '<span class="fc-dot" aria-hidden="true"></span>'
             '<div class="fc-node-card">'
-            f'<p class="fc-node-h"><span class="fc-node-date">{esc(detail["round_id"])}</span>'
-            + ('<span class="fc-chip-open">Open</span>' if not n else "")
-            + (' <a class="fc-retro-mark" href="#retro" title="Archived retroactively; see the note below">Retroactive</a>' if i == 0 else "")
-            + "</p>"
-            f'<p class="fc-node-model">{model_html(detail)}</p>'
+            '<div class="fc-node-head"><div>'
+            f'<p class="fc-node-date"><time datetime="{esc(detail["round_id"])}">{esc(chartkit.short_date(detail["round_id"]))}</time></p>'
+            f'<p class="fc-node-model">{icon("activity")}{esc(name)}</p>'
+            f'</div><div class="fc-node-chips">{"".join(chips)}</div></div>'
             '<dl class="fc-mini">'
             f'<div><dt>Data edge</dt><dd>{esc(detail["data_edge"])}</dd></div>'
             f'<div><dt>Periods</dt><dd>{detail["periods_forecast"]}</dd></div>'
             f'<div><dt>Scored</dt><dd>{n}</dd></div>'
             "</dl>"
-            f'<p class="fc-node-arch">{icon("clock")}Archived {esc(archived)}</p>'
-            f'<p class="fc-node-files"><a href="/{esc(detail["path"])}" download>{icon("file")}'
-            f'<code>{esc(Path(detail["path"]).name)}</code></a>'
-            f'<a href="{href}">{icon("history")}history</a></p>'
-            "</div></li>"
+            '<div class="fc-node-foot">'
+            f'<span class="fc-node-arch">{icon("calendar")}Archived {esc(chartkit.short_date(archived))}</span>'
+            f'<span class="fc-node-links"><a href="/{esc(detail["path"])}" download title="{esc(Path(detail["path"]).name)}">{icon("file")}Round file</a>'
+            f'<a href="{href}" aria-label="Git history of this round file" title="Git history">{icon("history")}</a></span>'
+            "</div></div></li>"
         )
     items.append("      </ol>")
     return "\n".join(items)
