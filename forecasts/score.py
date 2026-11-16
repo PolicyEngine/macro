@@ -231,7 +231,12 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
             actual = obs["value"]
             error = point - actual
             naive = naive_random_walk(variable, rnd["information_set"]["data_edge"])
-            official = official_paths().get(variable, {}).get(period)
+            # The OBR's number is the latest EFO published before the round
+            # was fixed; benchmarks likewise only count if they were public by
+            # then (an edition fixed after the round never appears beside it).
+            obr = latest_edition(OBR_EDITIONS(), fixed, variable, period)
+            official = obr[2] if obr else None
+            official_label = obr[0] if obr else None
             # Every published path stored for this period and variable, each
             # with the date its information set closed. They are context for
             # the error, not a league table: each was fixed months before the
@@ -239,13 +244,13 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
             benchmarks = [
                 {
                     "label": label,
-                    "fixed": fixed,
+                    "fixed": closed,
                     "value": value,
                     "abs_error": abs(value - actual),
                 }
-                for label, fixed, paths in BENCHMARKS()
+                for label, closed, paths in BENCHMARKS()
                 for value in [paths.get(variable, {}).get(period)]
-                if value is not None
+                if value is not None and published_before(closed, fixed)
             ]
 
             entries.append(
@@ -272,7 +277,7 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
                     # Official forecaster's number for the same period, where a
                     # sourced path is stored (currently the March 2026 EFO).
                     "official": official,
-                    "official_label": OFFICIAL_LABEL if official is not None else None,
+                    "official_label": official_label,
                     "official_abs_error": (
                         abs(official - actual) if official is not None else None
                     ),
@@ -444,10 +449,11 @@ def _official_csv(path: Path) -> dict[str, dict[str, float]]:
 
     with path.open() as fh:
         body = [line for line in fh if not line.startswith("#")]
-    paths: dict[str, dict[str, float]] = {"cpi": {}, "gdp": {}}
+    paths: dict[str, dict[str, float]] = {"cpi": {}, "gdp": {}, "unemployment": {}}
     for row in csv.DictReader(body):
-        for var, col in (("cpi", "cpi_yoy_pct"), ("gdp", "gdp_yoy_pct")):
-            if row[col]:
+        for var, col in (("cpi", "cpi_yoy_pct"), ("gdp", "gdp_yoy_pct"),
+                         ("unemployment", "unemployment_pct")):
+            if row.get(col):
                 paths[var][row["quarter"]] = float(row[col])
     return paths
 
@@ -485,18 +491,78 @@ def sef_paths() -> dict[str, dict[str, float]]:
     return _SEF_CACHE
 
 
+OFFICIAL_DIR = HERE / "official"
+OBR_OCT_LABEL = "OBR October 2026 EFO"
+BOE_NOV_LABEL = "BoE Nov 2026 MPR"
+SEF_OCT_LABEL = "BoE SEF Oct 2026"
+_EDITION_CACHE: dict[str, dict[str, dict[str, float]]] = {}
+
+
+def _edition(name: str) -> dict[str, dict[str, float]]:
+    if name not in _EDITION_CACHE:
+        _EDITION_CACHE[name] = _official_csv(OFFICIAL_DIR / name)
+    return _EDITION_CACHE[name]
+
+
+def OBR_EDITIONS() -> list[tuple[str, str, dict[str, dict[str, float]]]]:
+    """Every stored OBR EFO path, oldest first, with its publication date."""
+    return [
+        (OFFICIAL_LABEL, "2026-03", official_paths()),
+        (OBR_OCT_LABEL, "2026-10-28", _edition("obr_efo_oct_2026.csv")),
+    ]
+
+
+def BOE_EDITIONS() -> list[tuple[str, str, dict[str, dict[str, float]]]]:
+    return [
+        (BOE_LABEL, "2026-02", boe_paths()),
+        (BOE_NOV_LABEL, "2026-11-05", _edition("boe_mpr_nov_2026_central.csv")),
+    ]
+
+
+def SEF_EDITIONS() -> list[tuple[str, str, dict[str, dict[str, float]]]]:
+    return [
+        (SEF_LABEL, "2026-04-16", sef_paths()),
+        (SEF_OCT_LABEL, "2026-10-23", _edition("boe_sef_oct_2026.csv")),
+    ]
+
+
 def BENCHMARKS() -> list[tuple[str, str, dict[str, dict[str, float]]]]:
     """(label, date the information set closed, paths) for every stored path.
 
-    The dates are the publications' own: the BoE February 2026 MPR central
-    projection, the OBR March 2026 EFO, and the Survey of External
-    Forecasters as of 16 April 2026 (forecasts/official/*.csv headers).
+    The dates are the publications' own (forecasts/official/*.csv headers):
+    BoE MPR central projections of February and November 2026, OBR EFOs of
+    March and October 2026, and the Survey of External Forecasters as of
+    16 April and 23 October 2026. A benchmark appears beside a round only if
+    it was published before the round was fixed (published_before), so a
+    later edition never sits beside an earlier forecast.
     """
-    return [
-        (BOE_LABEL, "2026-02", boe_paths()),
-        (OFFICIAL_LABEL, "2026-03", official_paths()),
-        (SEF_LABEL, "2026-04-16", sef_paths()),
-    ]
+    return BOE_EDITIONS() + OBR_EDITIONS() + SEF_EDITIONS()
+
+
+def _closed_date(closed: str) -> datetime:
+    """'2026-03' -> end of March 2026 (conservative); '2026-10-28' -> that day's end."""
+    import calendar
+    parts = [int(x) for x in closed.split("-")]
+    if len(parts) == 2:
+        parts.append(calendar.monthrange(parts[0], parts[1])[1])
+    return datetime(parts[0], parts[1], parts[2], 23, 59, 59, tzinfo=timezone.utc)
+
+
+def published_before(closed: str, fixed: datetime | None) -> bool:
+    return fixed is not None and _closed_date(closed) < fixed
+
+
+def latest_edition(editions, fixed, variable, period):
+    """(label, closed, value) from the newest edition published before
+    ``fixed``, or None if there is none or it has no value for the period.
+    One edition per comparison: an older edition never fills a newer one's
+    gaps, so a path is never stitched from two publications."""
+    live = [e for e in editions if published_before(e[1], fixed)]
+    if not live:
+        return None
+    label, closed, paths = live[-1]
+    value = paths.get(variable, {}).get(period)
+    return (label, closed, value) if value is not None else None
 
 
 BAND_CALIBRATION = HERE / "band_calibration.json"
@@ -521,12 +587,13 @@ def build_vs_official(variable: str) -> list[dict]:
     factor). The archived round artifact itself is never modified.
     """
     rnd = json.loads(SVAR_ROUND.read_text())
-    efo = official_paths()[variable]
+    fixed = _parse_utc(rnd.get("archived_utc") or "")
     edge = _quarter_index(rnd["information_set"]["data_edge"])
     k = _calibration_k(variable)
     rows = []
     for period in sorted(rnd["forecast"]):
-        if period not in efo or variable not in rnd["forecast"][period]:
+        efo = latest_edition(OBR_EDITIONS(), fixed, variable, period)
+        if efo is None or variable not in rnd["forecast"][period]:
             continue
         g = rnd["forecast"][period][variable]
         h = min(max(_quarter_index(period) - edge, 1), 8)
@@ -540,9 +607,10 @@ def build_vs_official(variable: str) -> list[dict]:
                 "hi68": med + (g["hi68"] - med) * k68,
                 "lo90": med + (g["lo90"] - med) * k90,
                 "hi90": med + (g["hi90"] - med) * k90,
-                "efo": efo[period],
-                "boe": boe_paths()[variable].get(period),
-                "sef": sef_paths()[variable].get(period),
+                "efo": efo[2],
+                "efo_label": efo[0],
+                "boe": (latest_edition(BOE_EDITIONS(), fixed, variable, period) or (None, None, None))[2],
+                "sef": (latest_edition(SEF_EDITIONS(), fixed, variable, period) or (None, None, None))[2],
             }
         )
     return rows
@@ -574,9 +642,10 @@ VS_OFFICIAL_SPECS = {
             "<code>papers/obr-macro/figures/efo_march_2026_cpi.csv</code>"
         ),
         "intro": (
-            "Same round, CPI: the model projects inflation staying higher "
-            "than the EFO — partly because a VAR estimated through the 2021–23 "
-            "surge mean-reverts toward a higher sample mean."
+            "Same round, CPI: the model sits close to the EFO through 2027Q3, "
+            "then stays higher as the EFO returns towards 2% — partly because a "
+            "VAR estimated through the 2021–23 surge mean-reverts toward a higher "
+            "sample mean."
         ),
     },
 }
@@ -592,13 +661,31 @@ def outturn_values(variable: str) -> dict[str, float]:
     }
 
 
+OCT_EFO_SOURCE = {
+    "gdp": ("OBR October 2026 EFO path: four-quarter growth of Table 1.1 real GDP, "
+            "detailed economy tables, stored in "
+            "<code>forecasts/official/obr_efo_oct_2026.csv</code>"),
+    "cpi": ("EFO path from Table 1.7 of the October 2026 EFO detailed economy "
+            "tables, stored in <code>forecasts/official/obr_efo_oct_2026.csv</code>"),
+}
+
+
+def efo_label(rows: list[dict]) -> str:
+    """The EFO edition(s) a fan is drawn against: the newest published before
+    the open round was fixed (build_vs_official)."""
+    return " / ".join(dict.fromkeys(r["efo_label"] for r in rows))
+
+
 def render_vs_official_variable(variable: str, include_note: bool = False) -> str:
-    """Fan chart: archived boe-svar path with 68/90% bands vs March 2026 EFO."""
+    """Fan chart: archived boe-svar path with 68/90% bands vs the latest EFO
+    published before the round."""
     rows = build_vs_official(variable)
     spec = VS_OFFICIAL_SPECS[variable]
     chart_id = spec["chart_id"]
     if not rows:
         return "      <!-- no overlapping quarters -->"
+    efo_name = efo_label(rows)
+    source_note = OCT_EFO_SOURCE[variable] if efo_name == OBR_OCT_LABEL else spec["source_note"]
 
     # SVG geometry mirrors the validation-page vchart conventions.
     width, height = 760, 300
@@ -662,11 +749,11 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
             f'{plot_w + 8} {plot_h + 8}" '
             f'role="img" aria-labelledby="{chart_id}-t {chart_id}-d">',
             f'<title id="{chart_id}-t">BoE SVAR {spec["name"]} forecast vs '
-            "OBR March 2026 EFO</title>",
+            f"{efo_name}</title>",
             f'<desc id="{chart_id}-d">Fan chart of {spec["series"]}. '
             "The BoE SVAR archived median with its 68 and 90 percent bands, "
             "empirically re-calibrated for measured under-coverage, is shown beside "
-            "the OBR March 2026 EFO path over the overlapping quarters."
+            f"the {efo_name} path over the overlapping quarters."
             + "".join(f" ONS outturn for {rows[i]['period']}: {v:.2f} percent." for i, v in dots)
             + "</desc>",
             *gridlines,
@@ -684,12 +771,12 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
         ("ln-s1", "BoE SVAR median"),
         ("sw-band68", "68% band (re-calibrated)"),
         ("sw-band90", "90% band (re-calibrated)"),
-        ("ln-s2", "OBR March 2026 EFO"),
+        ("ln-s2", efo_name),
         *([("sw-dot-out", "ONS outturn")] if dots else []),
     ], unit=spec["unit"], y_gutter=True, source=(
         f'archived round <a class="mono" href="/forecasts/rounds/{SVAR_ROUND.parent.name}/'
         f'{SVAR_ROUND.name}">{SVAR_ROUND.parent.name}/{SVAR_ROUND.name}</a>; '
-        + spec["source_note"]
+        + source_note
         + ('; outturns from the <a href="/economy#data">data store</a>' if dots else "")
     ))
     return "\n".join([
@@ -730,7 +817,7 @@ def vs_official_table(variable: str, rows: list[dict]) -> str:
         <summary>Quarter by quarter: the numbers in this fan</summary>
       <div class="table-scroll">
         <table>
-          <caption>BoE SVAR {esc(spec["name"])} forecast, round {SVAR_ROUND.parent.name}, beside the {OFFICIAL_LABEL}: % change on a year earlier. Bands are re-calibrated, as drawn.</caption>
+          <caption>BoE SVAR {esc(spec["name"])} forecast, round {SVAR_ROUND.parent.name}, beside the {efo_label(rows)}: % change on a year earlier. Bands are re-calibrated, as drawn.</caption>
           <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68% band</th><th scope="col">90% band</th><th scope="col">EFO</th></tr></thead>
           <tbody>
 {body}
@@ -1077,10 +1164,11 @@ def render_results(card: dict) -> str:
         '      <div class="table-scroll">',
         '        <table class="scoreboard sb-grid" data-stack="yes">',
         "          <caption>Absolute error against the same outturn, in percentage "
-        "points; each benchmark's own value beneath. The BoE MPR (February), OBR EFO "
-        "(March) and SEF (April 2026) were fixed before the rounds scored here, on less data: "
-        "they show where views differed, not a test of skill. The October 2026 EFO and "
-        "November 2026 MPR are not included: their quarterly paths are not yet stored.</caption>",
+        "points; each benchmark's own value beneath. A benchmark appears only beside "
+        "rounds fixed after it was published, so a later edition never sits beside an "
+        "earlier forecast; the October 2026 EFO and November 2026 MPR, published after "
+        "2026Q3 ended, are close to nowcasts for it. They show where views differed, "
+        "not a test of skill.</caption>",
         "          <thead><tr>" + "".join(head) + "</tr></thead>",
         "          <tbody>",
     ]
