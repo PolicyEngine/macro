@@ -3235,7 +3235,7 @@ def page(topic: dict) -> str:
 {site_nav.FOOTER_LINKS}
   </nav>
 </footer>
-<script src="/reveal.js?v=2" defer></script>
+<script src="/reveal.js?v=3" defer></script>
 {site_nav.SUBNAV_TAG}
 </body>
 </html>
