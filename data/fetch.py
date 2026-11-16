@@ -47,9 +47,19 @@ USER_AGENT = "PolicyEngine-Macro/1.0 (+https://policyengine-macro.vercel.app)"
 
 # The ONS time-series API is keyed by CDID and source dataset, reached through
 # the topic path the series is published under.
+#
+# A series can list ``alternates``: other ONS datasets that publish the same
+# CDID. fetch_series reads them all and keeps the one released most recently.
+# Real GDP needs this. ABMI appears in two datasets, and each is updated by a
+# different release. PN2 changes only at the GDP first quarterly estimate
+# (Feb, May, Aug, Nov). QNA changes only at the Quarterly National Accounts
+# (Mar, Jun, Sep, Dec). Reading QNA alone loses every first estimate, so a
+# quarter arrives about six weeks late (#241). Reading PN2 alone loses every
+# QNA revision.
 ONS_SERIES = {
     "uk_gdp_cvm": {
         "path": "economy/grossdomesticproductgdp/timeseries/abmi/qna",
+        "alternates": ["economy/grossdomesticproductgdp/timeseries/abmi/pn2"],
         "title": "UK real GDP, chained volume measure, seasonally adjusted",
         "frequency": "quarterly",
         "units": "£m, chained volume measure",
@@ -279,7 +289,27 @@ def release_stamp(payload: dict) -> str | None:
     return max(stamps) if stamps else None
 
 
-def build_snapshot(name: str, spec: dict, payload: dict) -> dict:
+def newest_ons_payload(spec: dict) -> tuple[str, dict]:
+    """Fetch every dataset that publishes the series; return the newest release.
+
+    Returns ``(path, payload)``. Every dataset must answer: if one of them
+    failed and we kept the other, a stale dataset could be stored as the
+    latest vintage. A network error therefore propagates and the series is
+    reported as failed. On a tie in the release stamp, the dataset listed first
+    (``path``) wins.
+    """
+    best_path, best_payload, best_stamp = None, None, None
+    for path in [spec["path"], *spec.get("alternates", [])]:
+        payload = get_json(f"https://www.ons.gov.uk/{path}/data")
+        stamp = release_stamp(payload) or ""
+        if best_payload is None or stamp > best_stamp:
+            best_path, best_payload, best_stamp = path, payload, stamp
+    return best_path, best_payload
+
+
+def build_snapshot(
+    name: str, spec: dict, payload: dict, path: str | None = None
+) -> dict:
     observations = (
         parse_months(payload)
         if spec["frequency"] == "monthly"
@@ -295,7 +325,7 @@ def build_snapshot(name: str, spec: dict, payload: dict) -> dict:
         "title": payload.get("description", {}).get("title") or spec["title"],
         "frequency": spec["frequency"],
         "units": spec["units"],
-        "url": f"https://www.ons.gov.uk/{spec['path']}/data",
+        "url": f"https://www.ons.gov.uk/{path or spec['path']}/data",
         "release_updated": release_stamp(payload),
         "next_release": payload.get("description", {}).get("nextRelease") or None,
         "first_period": observations[0]["period"],
@@ -317,6 +347,19 @@ def same_data(a: dict, b: dict) -> bool:
     return all(a.get(k) == b.get(k) for k in keys)
 
 
+def older_than(snapshot: dict, stored: dict) -> bool:
+    """True if ``snapshot`` is an earlier release than ``stored``.
+
+    Compares the release stamp and the last period. A stamp of None is never
+    treated as older, because the oldest vintages predate the field.
+    """
+    new_stamp, old_stamp = snapshot.get("release_updated"), stored.get("release_updated")
+    if new_stamp and old_stamp and new_stamp < old_stamp:
+        return True
+    new_last, old_last = snapshot.get("last_period"), stored.get("last_period")
+    return bool(new_last and old_last and new_last < old_last)
+
+
 def latest_vintage(series_dir: Path) -> Path | None:
     files = sorted(series_dir.glob("*.json"))
     return files[-1] if files else None
@@ -324,15 +367,28 @@ def latest_vintage(series_dir: Path) -> Path | None:
 
 def fetch_series(name: str, spec: dict, vintage: str) -> str:
     """Returns one of 'written', 'unchanged', 'exists'."""
-    payload = get_json(f"https://www.ons.gov.uk/{spec['path']}/data")
-    snapshot = build_snapshot(name, spec, payload)
+    path, payload = newest_ons_payload(spec)
+    snapshot = build_snapshot(name, spec, payload, path)
 
     series_dir = VINTAGES / "ons" / name
     previous = latest_vintage(series_dir)
-    if previous and same_data(json.loads(previous.read_text()), snapshot):
-        # Nothing changed upstream. Writing a new vintage anyway would bury the
-        # real revisions in a stream of identical files.
-        return "unchanged"
+    if previous:
+        stored = json.loads(previous.read_text())
+        if same_data(stored, snapshot):
+            # Nothing changed upstream. Writing a new vintage anyway would bury
+            # the real revisions in a stream of identical files.
+            return "unchanged"
+        if older_than(snapshot, stored):
+            # The store only moves forward. An older release than the one
+            # already stored is a stale dataset or a stale cache, not a
+            # revision.
+            print(
+                f"FAIL {name}: fetched release {snapshot['release_updated']} "
+                f"(to {snapshot['last_period']}) is older than stored "
+                f"{stored.get('release_updated')} (to {stored.get('last_period')})",
+                file=sys.stderr,
+            )
+            return "stale"
 
     out = series_dir / f"{vintage}.json"
     if out.exists():
@@ -576,6 +632,8 @@ def main() -> int:
             print(f"FAIL {name}: {type(exc).__name__} {exc}", file=sys.stderr)
             failures += 1
             continue
+        if result == "stale":
+            failures += 1
         print(f"{result:>9}  {name}")
 
     rebuild_latest()

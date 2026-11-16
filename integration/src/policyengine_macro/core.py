@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import re
+import time
 from datetime import datetime, timezone
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
@@ -897,7 +898,9 @@ def frbus_summary() -> dict:
                     "passes at 6.7e-9 on a baseline whose every series has "
                     "been scrambled by a random factor, with every "
                     "accounting identity destroyed. It gates the software. "
-                    "Read vs_vendor_pyfrbus and the multipliers instead."
+                    "Read vs_vendor_pyfrbus and monetary_tightening_properties "
+                    "instead; the fiscal multipliers are on the site's "
+                    "/frb-us/validation page, not in this payload."
                 ),
             },
             "vs_vendor_pyfrbus": {
@@ -1022,7 +1025,10 @@ HANK_HEADLINE = {
     "C": "Aggregate consumption, % deviation from steady state",
     "I": "Investment, % deviation from steady state (two_asset only)",
     "pi": "Inflation (quarterly rate), pp deviation from steady state",
-    "r": "Real interest rate (quarterly rate), pp deviation from steady state",
+    "r": "Ex-post real return on liquid assets (quarterly rate), pp "
+         "deviation from steady state: r_t = (1 + i_{t-1})/(1 + pi_t) - 1, "
+         "so quarter 0 moves only with the inflation surprise and a policy "
+         "rate move shows from quarter 1 (not the ex-ante real rate)",
     "w": "Pre-tax real wage, % deviation from steady state",
     "N": "Labor, % deviation from steady state",
     # The financing. The DAG holds bond supply fixed, so a G shock is paid
@@ -1101,10 +1107,35 @@ def hank_list_shocks() -> list[dict]:
     return [dict(k) for k in HANK_SHOCK_KINDS]
 
 
+HANK_DEFAULT_PERSISTENCE = 0.9
+
+
+def _hank_persistence(kind: str, persistence: float | None) -> float:
+    """Resolve the AR(1) persistence of a HANK shock.
+
+    ``fiscal_spending`` has no default (decision on us-hank-model #5): the
+    impact multiplier is 0.175 at persistence 0.8 and 0.075 at 0.9, and the
+    20-quarter cumulative multiplier is negative at both, so a silent default
+    would pick the answer to "what is the multiplier". The other kinds keep
+    ``HANK_DEFAULT_PERSISTENCE``.
+    """
+    if persistence is None:
+        if kind == "fiscal_spending":
+            raise ValueError(
+                "persistence is required for kind='fiscal_spending': the "
+                "spending multiplier depends on it (impact multiplier 0.175 "
+                "at persistence=0.8, 0.075 at persistence=0.9), so there is "
+                "no default. Pass persistence in [0, 1) and quote it with "
+                "any multiplier."
+            )
+        return HANK_DEFAULT_PERSISTENCE
+    return float(persistence)
+
+
 def hank_shock(
     kind: str,
     size: float,
-    persistence: float = 0.9,
+    persistence: float | None = None,
     horizon: int = HANK_DEFAULT_HORIZON,
     variant: str = "two_asset",
     include_distribution: bool = False,
@@ -1137,7 +1168,7 @@ def hank_shock(
     horizon = int(horizon)
     if not 1 <= horizon <= HANK_T:
         raise ValueError(f"horizon must be between 1 and {HANK_T}, got {horizon}")
-    persistence = float(persistence)
+    persistence = _hank_persistence(kind, persistence)
     if not 0.0 <= persistence < 1.0:
         raise ValueError(
             f"persistence must be in [0, 1) — the shock path is "
@@ -1242,6 +1273,7 @@ def hank_shock(
 
     if include_distribution:
         _, _, _, distributional = _import_us_hank()
+        stats = distributional.summary(ss)
         result["distributional"] = {
             "note": (
                 "FIRST-ORDER APPROXIMATION from steady-state policies: the "
@@ -1251,15 +1283,34 @@ def hank_shock(
                 "household-level dynamics."
             ),
             "aggregate_quarterly_mpc_liquid": round(
-                float(distributional.aggregate_mpc(ss)), 4
+                float(stats["aggregate_quarterly_mpc_liquid"]), 4
             ),
             "mpc_by_liquid_quartile": {
                 k: round(float(v), 4)
-                for k, v in distributional.mpc_by_liquid_quartile(ss).items()
+                for k, v in stats["mpc_by_liquid_quartile"].items()
             },
+            # An MPC means nothing without the windfall it was measured
+            # out of (us-hank-model: "Quote the number with its windfall
+            # size, or not at all"), so the convention ships with it.
+            "mpc_windfall": _hank_mpc_windfall(stats),
             "hand_to_mouth_share": round(
-                float(distributional.hand_to_mouth_share(ss)), 4
+                float(stats["hand_to_mouth_share"]), 4
             ),
+            "hand_to_mouth_definition": {
+                "liquid_threshold_model_units": round(
+                    float(stats["hand_to_mouth_breakdown"]["threshold"]), 4
+                ),
+                "constrained_share_at_zero_liquid": round(
+                    float(stats["hand_to_mouth_breakdown"]["constrained_share"]), 4
+                ),
+                "note": (
+                    "Share with liquid assets below the threshold (model units, "
+                    "steady-state quarterly output = 1). Most of it is the atom "
+                    "of households holding exactly zero liquid assets "
+                    "(constrained_share_at_zero_liquid), so the count barely "
+                    "depends on the threshold."
+                ),
+            },
             "impact_consumption_response_pct_by_wealth_quartile": {
                 k: round(float(v), 4)
                 for k, v in distributional.consumption_response_by_wealth_quantile(
@@ -1268,6 +1319,34 @@ def hank_shock(
             },
         }
     return result
+
+
+# us-hank-model README (main) maps model units to dollars at 2025 US GDP per
+# household, about $58,000 a quarter (steady-state quarterly output Y = 1).
+HANK_USD_PER_MODEL_UNIT_PER_HOUSEHOLD = 58_000
+
+
+def _hank_mpc_windfall(stats: dict) -> dict:
+    """The windfall convention behind the reported MPCs, in words and dollars."""
+    frac = stats.get("mpc_windfall_frac_of_quarterly_income")
+    units = stats.get("mpc_windfall_model_units")
+    usd = (
+        None if units is None
+        else int(round(units * HANK_USD_PER_MODEL_UNIT_PER_HOUSEHOLD, -2))
+    )
+    return {
+        "frac_of_mean_quarterly_post_tax_labour_income": frac,
+        "model_units": None if units is None else round(float(units), 4),
+        "approx_usd_per_household": usd,
+        "note": (
+            "MPCs are measured out of this windfall. It is far larger than "
+            "the 2001 and 2008 US tax rebates ($300-900) that the empirical "
+            "MPC range of roughly 0.15-0.25 comes from, and the model's MPC "
+            "falls with windfall size, so do not compare it with that range. "
+            "Dollar figure: model units x about $58,000 (2025 US GDP per "
+            "household per quarter), as in the us-hank-model README."
+        ),
+    }
 
 
 def hank_summary() -> dict:
@@ -1309,13 +1388,21 @@ def hank_summary() -> dict:
         "solution_method": "first-order (linear) impulse responses via the "
                            "general-equilibrium sequence-space Jacobian "
                            f"(T={HANK_T}); responses scale exactly with the "
-                           "shock size",
+                           "shock size. The model itself is not linear at "
+                           "the sizes users run: for a 1%-of-GDP spending "
+                           "rise (persistence 0.8) its nonlinear transition "
+                           "gives an impact multiplier of about 0.25 against "
+                           "the linear 0.175, and a cut of the same size "
+                           "about 0.125",
         "runtime": "steady state ~13s and jacobian ~5s on first use per "
                    "variant, both cached in-process; IRFs are then instant",
         "validation": {
-            "suite": "the model repo's replication suite gates the steady-state "
-                     "calibration targets, market clearing, and shock-response "
-                     "signs/magnitudes against the published paper results",
+            "suite": "the model repo's replication suite gates the six "
+                     "steady-state parameters that match the paper's Table "
+                     "B.III, market clearing, and shock-response signs; IRF "
+                     "magnitudes are regression pins on this implementation, "
+                     "not checks against the paper, which publishes no "
+                     "comparable two-asset IRF figure",
             "note": "a replication gate, not a forecast-accuracy claim: no "
                     "predictive validation exists or is claimed for this model",
         },
@@ -1369,14 +1456,14 @@ _SVAR_EST_START = "1992Q1"
 _SVAR_EST_END = "2025Q1"
 
 # Default posterior draws for hosted calls. Re-measured on the 1992Q1-2025Q1
-# estimation sample (seed 0), since the longer sample tightens the posterior
-# and lowers the sign-restriction acceptance rate: draws=500 -> 35 accepted,
-# ESS 13.6; 1000 -> 69, ESS 31.5; 2000 -> 135, ESS 65.3; 3500 -> 233,
-# ESS 101.4. Acceptance is ~6.8% and ESS ~3.3% of draws (was ~8% and ~3% on
-# the old 2023Q2 sample), so 2000 remains the smallest default that clears
-# the 100-accepted-draws reliability threshold -- 1000 would not (69).
-# Full ESS >= 100 still needs ~3500 draws; a `warnings` entry flags the
-# residual ESS shortfall honestly instead of hiding it. First-call runtime is
+# estimation sample with the 2026Q2 dataset pinned since #233 (seed 0, six
+# Covid dummies): draws=500 -> 34 accepted, ESS 15.0; 1000 -> 80, ESS 40.6;
+# 2000 -> 159, ESS 48.7; 3500 -> 264, ESS 91.5; 6000 -> 455, ESS 181.4 (the
+# hosted round of 12 Nov 2026). The 2026Q1 dataset gave 135 / ESS 65.3 at
+# 2000. 2000 remains the smallest default that clears the 100-accepted-draws
+# threshold -- 1000 would not (80). ESS is not proportional to draws, so ESS
+# >= 100 needs somewhat more than 3500; a `warnings` entry flags the
+# shortfall honestly instead of hiding it. First-call runtime is
 # a couple of minutes end to end and results are cached in-process.
 _SVAR_DEFAULT_DRAWS = 2000
 _SVAR_MIN_DRAWS = 50
@@ -3160,16 +3247,25 @@ def obr_score_reform(
     start, end = _obr_fiscal_window(window[0], window[-1])
     run_reform = _import_obr()
 
-    costings = [
-        pe_population_impact(
-            country="uk", reform=reform, year=y, dataset=dataset
+    # Stage timings ship with the result (#243): the hosted default-window
+    # job outran its 600s check from 31 Oct, and only the result can say
+    # whether the microsim costing or the OBR solve is the slow part.
+    t_start = time.perf_counter()
+    costings = []
+    costing_seconds = []
+    for y in window:
+        t = time.perf_counter()
+        costings.append(
+            pe_population_impact(
+                country="uk", reform=reform, year=y, dataset=dataset
+            )
         )
-        for y in window
-    ]
+        costing_seconds.append(round(time.perf_counter() - t, 1))
     annual_bn = [c["budgetary_impact_bn"] for c in costings]
     shock_path = obr_costing_to_shock(annual_bn)
 
     name = f"PE static costing via {OBR_BRIDGE_VAR}: {reform}"
+    t_solve = time.perf_counter()
     df = run_reform(
         name=name,
         var=OBR_BRIDGE_VAR,
@@ -3178,6 +3274,7 @@ def obr_score_reform(
         end=end,
         investment_closure=False,
     )
+    solve_seconds = round(time.perf_counter() - t_solve, 1)
     rows = _obr_result_rows(df)
     shocked = rows[: len(shock_path)]
     cumulative_gdp_bn = round(sum(r["delta_gdp_bn"] for r in shocked), 3)
@@ -3218,6 +3315,11 @@ def obr_score_reform(
         "solver": solver_diagnostics,
         "results": rows,
         "cumulative_delta_gdp_bn_over_shock_periods": cumulative_gdp_bn,
+        "timing_seconds": {
+            "static_costing_by_year": dict(zip(map(str, window), costing_seconds)),
+            "obr_solve": solve_seconds,
+            "total": round(time.perf_counter() - t_start, 1),
+        },
         "peak_pct_gdp": peak["pct_gdp"],
         "peak_period": peak["period"],
         "caveats": caveats,
@@ -3749,7 +3851,7 @@ def hank_shock_incidence(
     kind: str,
     size: float,
     year: int = 2026,
-    persistence: float = 0.9,
+    persistence: float | None = None,
     horizon: int = HANK_DEFAULT_HORIZON,
     variant: str = "two_asset",
     income_concept: str = "wage_bill",
@@ -4359,7 +4461,7 @@ def svar_summary() -> dict:
         "provenance": _provenance(
             model_id="boe-svar",
             distribution="boe_var",
-            data_vintage="estimation through 2025Q1; conditioning data through 2026Q1",
+            data_vintage="estimation through 2025Q1; conditioning data through 2026Q2",
             baseline="committed replication and forecast artefacts",
         ),
     }

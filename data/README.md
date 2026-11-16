@@ -90,3 +90,13 @@ Add an entry to `ONS_SERIES` in `fetch.py` with the ONS topic path, CDID,
 frequency and units. Confirm the path by opening
 `https://www.ons.gov.uk/<path>/data` in a browser first — the API 404s rather
 than redirecting when a series moves between topics.
+
+If the same CDID is published in more than one ONS dataset and each dataset is
+updated by a different release, list the others under `alternates`. The
+fetcher reads every listed dataset, stores the one with the latest release
+stamp, and records that dataset in the snapshot's `url`. If any listed dataset
+fails, the whole series fails, and the fetcher never stores a release older
+than the latest one it holds. Real GDP (`uk_gdp_cvm`, ABMI) needs this:
+PN2 carries the first quarterly estimate and QNA carries the Quarterly
+National Accounts, so reading QNA alone stored each quarter about six weeks
+late (#241).
