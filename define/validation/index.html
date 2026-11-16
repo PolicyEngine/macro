@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=27" />
-<link rel="stylesheet" href="/models/model-pages.css?v=14" />
+<link rel="stylesheet" href="/models/model-pages.css?v=18" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -137,6 +137,8 @@
       <div class="meth-step" id="gates" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>The replication gates</h3></div>
         <p class="mo-lead">Every row is enforced by tests against the cached pinned run.</p>
+        <details class="about">
+          <summary>About this step</summary>
         <div class="table-scroll mo-tablecard"><table>
                 <caption>DEFINE-UK replication gates against the manual and the papers</caption>
                 <thead><tr><th scope="col">What is checked</th><th scope="col">Tolerance</th><th scope="col">Status</th></tr></thead>
@@ -183,13 +185,8 @@
                 DEFINE-UK belongs to George, Dafermos, Nikolaidi and co-authors;
                 nothing here is produced or endorsed by them, and no result is theirs.
               </div>
-        <p class="kv-title">Check by check</p>
-        <dl class="kv"><div><dt>Table 4, macro</dt><dd>PASS; 2025 growth &minus;0.30pp</dd></div><div><dt>Table 4, emissions</dt><dd>DIVERGENCE, pinned</dd></div><div><dt>Scenario design</dt><dd>PASS, 10 tests</dd></div><div><dt>FMM-2023 anchors</dt><dd>PASS, regression pins</dd></div><div><dt>Clean-room, milestone 1</dt><dd>PASS, 62 tests</dd></div><div><dt>V1.1 scenario results</dt><dd>none exist</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
           <p>
-                Every row below is enforced by tests against the cached pinned run
-                (upstream commit <code>846081a</code>) and recorded in the adapter's
+                The pinned run is upstream commit <code>846081a</code>. Results are recorded in the adapter's
                 <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/VALIDATION.md">VALIDATION.md</a>,
                 so drift fails loudly.
               </p>
@@ -198,7 +195,9 @@
 
       <div class="meth-step" id="calibration" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>The baseline against official numbers</h3></div>
-        <p class="mo-lead">Computed from the cached run against pinned external observations, not prose.</p>
+        <p class="mo-lead">Recomputed from the cached pinned run against pinned external observations.</p>
+        <details class="about">
+          <summary>About this step</summary>
         <div class="table-scroll mo-tablecard"><table>
                 <caption>DEFINE-UK baseline (cached pinned run) against external observations, from validation/baseline_vs_external.csv</caption>
                 <thead><tr><th scope="col">Quantity</th><th scope="col">Model</th><th scope="col">External</th><th scope="col">Verdict</th></tr></thead>
@@ -247,11 +246,7 @@
                   </tr>
                 </tbody>
               </table></div>
-        <p class="kv-title">Model vs external</p>
-        <dl class="kv"><div><dt>Growth, mean 2025&ndash;40</dt><dd>2.4% vs &asymp;1.65%</dd></div><div><dt>Unemployment, 2025</dt><dd>4.39% vs 4.88%</dd></div><div><dt>Emissions, 2024</dt><dd>401.5 vs 371 MtCO2e</dd></div><div><dt>Emissions 2030 vs NDC</dt><dd>342.8 vs &asymp;260 MtCO2e</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p>Every row is recomputed from the cached pinned run against pinned external observations.</p>
+          
           <ul>
             <li>The recomputed rows are committed as <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/validation/baseline_vs_external.csv">baseline_vs_external.csv</a>.</li>
             <li>The suite fails on any drift.</li>
@@ -277,10 +272,10 @@
       <div class="meth-step" id="multiplier" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>The fiscal multiplier</h3></div>
         <p class="mo-lead">Cumulative to 2040, with an <a class="gloss-link" href="/glossary#exogenous">endogenous</a> denominator: not comparable to short-horizon figures.</p>
-        <p class="kv-title">Why it runs high</p>
-        <dl class="kv"><div><dt>Headline</dt><dd>2.30: cumulative &Delta;GDP over &Delta;SPEND_GVTPS, the spending the policy switch sets, to 2040</dd></div><div><dt>Secondary</dt><dd>1.78: over all non-wage spending (&Delta;SPEND_GVT)</dd></div><div><dt>Not comparable to</dt><dd>OBR &asymp;1.0, a short-horizon figure</dd></div><div><dt>Denominator change</dt><dd>77% government power-sector spending (<code>SPEND_GVTPS</code>)</dd></div><div><dt>Bias direction</dt><dd>not established</dd></div><div><dt>Parameter mismatch</dt><dd>included in both; without it about 2.08&ndash;2.25 and 1.73&ndash;1.75 (<a href="#alpha-pp">limits</a>)</dd></div><div><dt>Upstream summary</dt><dd>unusable, never quoted</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
+        <p class="kv-title">Why it runs high</p>
+        <dl class="kv"><div><dt>Headline</dt><dd>2.30: cumulative &Delta;GDP over &Delta;SPEND_GVTPS, the spending the policy switch sets, to 2040</dd></div><div><dt>Secondary</dt><dd>1.78: over all non-wage spending (&Delta;SPEND_GVT)</dd></div><div><dt>Not comparable to</dt><dd>OBR &asymp;1.0, a short-horizon figure</dd></div><div><dt>Denominator change</dt><dd>77% government power-sector spending (<code>SPEND_GVTPS</code>)</dd></div><div><dt>Bias direction</dt><dd>not established</dd></div><div><dt>Parameter mismatch</dt><dd>included in both; without it about 2.08&ndash;2.25 and 1.73&ndash;1.75 (<a href="#alpha-pp">limits</a>)</dd></div><div><dt>Upstream summary</dt><dd>unusable, never quoted</dd></div></dl>
           <p>The tile above is our own computation of the cumulative green-public-investment multiplier.</p>
           <ul>
             <li>Nominal cumulative ΔGDP of 209.9 over cumulative ΔSPEND_GVTPS of 91.2 gives 2.30 to 2040.</li>
@@ -355,9 +350,7 @@
 </div><!-- /vc-fig -->
                 <figcaption>S1 baseline total emissions: the cached pinned run (upstream <code>846081a</code>) against the published Table&nbsp;4. What is gated is the ratio of the two — 0.965 / 0.898 / 0.767, pinned to &plusmn;0.02 in the adapter's <code>validation/reference_outputs.json</code>, which is where the percentages above come from; the bar labels round the published levels. Source: <code>validation/figures/data/define_emissions_divergence.csv</code>.</figcaption>
               </figure>
-        <p class="kv-title">Pinned run vs Table 4</p>
-        <dl class="kv"><div><dt>2025</dt><dd>&minus;3.5%</dd></div><div><dt>2030</dt><dd>&minus;10.2%</dd></div><div><dt>Gated</dt><dd>the ratio, pinned to &plusmn;0.02</dd></div><div><dt>Raised</dt><dd>DEFINE_UK_1.1#1</dd></div></dl>
-        <details class="about">
+                <details class="about">
           <summary>About this step</summary>
           <p>
                 The one open divergence: the pinned upstream code runs
@@ -383,19 +376,15 @@
         <div class="band-head" data-icon="alert">
       <h2>No numeric v1.1 scenario results are published. That is the ceiling</h2>
     </div>
-        <div class="callout">
-        No machine-readable numeric scenario results are published for
-        DEFINE-UK v1.1: the manual stops at the baseline plus scenario
+        <p>
+        For DEFINE-UK v1.1 the manual stops at the baseline plus scenario
         <em>design</em> parameters, and the accompanying papers are paywalled
         with figure-only results. A published-figure replication of the
         scenarios is not possible today, and every delta this adapter serves
-        carries that status.
-      </div>
-        <p>
-        So what is gated is design and self-consistency — the switch sets, and
-        the delta paths against the cached pinned run — plus the two coarse
-        FMM-2023 anchors above.</p>
-        <div class="table-scroll" id="caveats"><table>
+        carries that status. What is gated is design and self-consistency (the
+        switch sets, and the delta paths against the cached pinned run), plus
+        the two coarse FMM-2023 anchors above.</p>
+        <div class="table-scroll mo-tablecard" id="caveats"><table>
         <caption>Every known limit of the DEFINE-UK adapter, with the evidence that holds it</caption>
         <thead><tr><th scope="col">Limit</th><th scope="col">Detail</th></tr></thead>
         <tbody>

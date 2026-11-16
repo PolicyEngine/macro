@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=27" />
-<link rel="stylesheet" href="/models/model-pages.css?v=14" />
+<link rel="stylesheet" href="/models/model-pages.css?v=18" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -70,18 +70,12 @@
 
   <section id="methodology" class="band band-wide">
     <div class="band-head" data-icon="flask">
-      <h2>Rules, entities, and a dependency graph</h2>
-    </div>
-    <div class="prose">
-      <p>
-        Three steps, from statute encoded as a variable graph to the survey
-        microdata population runs rest on. The full account is in the
-        <a href="/papers/pe-microsim">working paper</a>.
-      </p>
+      <h2>How it works</h2>
+      <p class="section-intro">Statute as code, a reform as a parameter change, and survey microdata for population runs.</p>
     </div>
 
     <figure class="meth-map" aria-labelledby="meth-map-cap">
-      <figcaption id="meth-map-cap" class="meth-map-cap">How the model works, in one picture: the 3 steps below, in order.</figcaption>
+      <figcaption id="meth-map-cap" class="meth-map-cap">The 3 steps, in order.</figcaption>
       <ol class="meth-map-list">
         <li><a href="#meth-1"><span class="meth-map-num mono">1</span><span class="meth-map-t">Statute as a dependency graph</span></a></li>
         <li><a href="#meth-2"><span class="meth-map-num mono">2</span><span class="meth-map-t">Reforms and reproducibility</span></a></li>
@@ -93,13 +87,7 @@
       <div class="scrolly-steps">
       <div class="meth-step" id="meth-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Statute as a dependency graph</h3></div>
-        <p>Every quantity — an allowance, a taper, a means test — is a variable with a formula and dated parameters. Asking for one variable resolves the graph beneath it, so a net-income figure comes from the statutory chain, not an approximating schedule.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">Rules, entities, dependency graph</div>
-        <div class="meth-eq"><div class="meth-eq-label">Variable</div><div class="meth-eq-body">formula + dated parameters</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">Resolution</div><div class="meth-eq-body">request a variable &rarr; resolve the graph beneath it</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">Entities</div><div class="meth-eq-body">UK: 3 &middot; US: 6</div></div>
-        </div>
+        <p>Every quantity (an allowance, a taper, a means test) is a variable. Asking for one resolves the graph beneath it, so net income comes from the statutory chain, not an approximating schedule.</p>
         <figure class="step-diagram" data-title="Statute as a dependency graph" tabindex="0" role="button" aria-label="Expand diagram: Statute as a dependency graph">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
                 <defs><marker id="arr-s1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -126,19 +114,20 @@
         </figure>
         <details class="about">
           <summary>About this step</summary>
+        <div class="meth-inline">
+        <div class="meth-sec-title">Rules, entities, dependency graph</div>
+        <div class="meth-eq"><div class="meth-eq-label">Variable</div><div class="meth-eq-body">formula + dated parameters</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Resolution</div><div class="meth-eq-body">request a variable &rarr; resolve the graph beneath it</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Entities</div><div class="meth-eq-body">UK: 3 &middot; US: 6</div></div>
+        </div>
           <h4>Entities</h4>
-          <p>Variables attach to <strong>entities</strong>, which differ by country — UK: three (person, benefit unit, household); US: six (person, tax unit, SPM unit, family, marital unit, household) — because US programmes are assessed on differently drawn units.</p>
+          <p>Variables attach to <strong>entities</strong>. UK: three (person, benefit unit, household). US: six (person, tax unit, SPM unit, family, marital unit, household), because US programmes are assessed on differently drawn units.</p>
         </details>
       </div>
 
       <div class="meth-step" id="meth-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Reforms and reproducibility</h3></div>
-        <p>A reform re-dates a parameter and re-resolves the same graph, so the household and population APIs take reforms in the identical format — a flat dict of parameter path &rarr; new value.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">Reform mechanics</div>
-        <div class="meth-eq"><div class="meth-eq-label">Reform</div><div class="meth-eq-body">{parameter path &rarr; new value}</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">Evaluation</div><div class="meth-eq-body">re-date parameter &rarr; re-resolve same graph</div></div>
-        </div>
+        <p>A reform is a flat dict of parameter path &rarr; new value. The household and population APIs take the same format.</p>
         <figure class="step-diagram" data-title="One reform format" tabindex="0" role="button" aria-label="Expand diagram: One reform format">
           <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
                 <defs><marker id="arr-s2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -163,6 +152,11 @@
         </figure>
         <details class="about">
           <summary>About this step</summary>
+        <div class="meth-inline">
+        <div class="meth-sec-title">Reform mechanics</div>
+        <div class="meth-eq"><div class="meth-eq-label">Reform</div><div class="meth-eq-body">{parameter path &rarr; new value}</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Evaluation</div><div class="meth-eq-body">re-date parameter &rarr; re-resolve same graph</div></div>
+        </div>
           <h4>Version-pinned releases</h4>
           <p>Each release pins the country-model and dataset versions it certifies, so a published estimate traces to the exact bundle that produced it.</p>
         </details>
@@ -170,13 +164,7 @@
 
       <div class="meth-step" id="meth-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Survey microdata, enhanced</h3></div>
-        <p>Household calculations need no data and no credentials — the inputs are the ones you type.</p>
-        <div class="meth-inline">
-        <div class="meth-sec-title">Data enhancement</div>
-        <div class="meth-eq"><div class="meth-eq-label">UK dataset</div><div class="meth-eq-body">enhanced FRS &middot; <code>enhanced_frs_2023_24</code></div></div>
-        <div class="meth-eq"><div class="meth-eq-label">US dataset</div><div class="meth-eq-body">Current Population Survey (CPS)</div></div>
-        <div class="meth-eq"><div class="meth-eq-label">Enhancement</div><div class="meth-eq-body">impute under-reported incomes + reweight to administrative totals</div></div>
-        </div>
+        <p>Population runs apply the same rule graph to a representative survey. Household calculations need no data and no credentials.</p>
         <figure class="step-diagram" data-title="Enhanced survey microdata" tabindex="0" role="button" aria-label="Expand diagram: Enhanced survey microdata">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
                 <defs><marker id="arr-s3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -203,12 +191,20 @@
         </figure>
         <details class="about">
           <summary>About this step</summary>
-          <h4>Two modes, two data needs</h4>
-          <p>Population results run the same rule graph over a representative survey: for the UK the <strong>enhanced Family Resources Survey</strong> (currently the <code>enhanced_frs_2023_24</code> vintage), for the US the <strong>Current Population Survey</strong>.</p>
-          <h4>Imputation and reweighting</h4>
-          <p>The UK enhancement imputes under-reported incomes and reweights the survey so aggregates better match administrative totals; the resulting microdata is distributed via a gated Hugging Face repository (<code>policyengine/policyengine-uk-data</code>).</p>
+        <div class="meth-inline">
+        <div class="meth-sec-title">Data enhancement</div>
+        <div class="meth-eq"><div class="meth-eq-label">UK dataset</div><div class="meth-eq-body">enhanced FRS &middot; <code>enhanced_frs_2023_24</code></div></div>
+        <div class="meth-eq"><div class="meth-eq-label">US dataset</div><div class="meth-eq-body">Current Population Survey (CPS)</div></div>
+        <div class="meth-eq"><div class="meth-eq-label">Enhancement</div><div class="meth-eq-body">impute under-reported incomes + reweight to administrative totals</div></div>
+        </div>
+          <h4>The surveys</h4>
+          <p>UK: the <strong>enhanced Family Resources Survey</strong> (currently the <code>enhanced_frs_2023_24</code> vintage). US: the <strong>Current Population Survey</strong>.</p>
+          <h4>Gated UK microdata</h4>
+          <p>The enhanced UK microdata is distributed via a gated Hugging Face repository (<code>policyengine/policyengine-uk-data</code>).</p>
           <h4>Inherited error</h4>
-          <p>Population estimates therefore inherit sampling, imputation and ageing error that a household calculation, which is deterministic, does not; no interval is computed (<a href="/pe/validation#caveats">limits</a>). The same microdata feeds the <a href="/olg">OLG model</a>&rsquo;s tax functions, and the static costings feed the <a href="/obr">OBR emulator</a> (<a href="/pe#pe-bridge">every join</a>).</p>
+          <p>Population estimates inherit sampling, imputation and ageing error that a deterministic household calculation does not. No interval is computed (<a href="/pe/validation#caveats">limits</a>).</p>
+          <h4>Where the outputs go</h4>
+          <p>The same microdata feeds the <a href="/olg">OLG model</a>&rsquo;s tax functions, and the static costings feed the <a href="/obr">OBR emulator</a> (<a href="/pe#pe-bridge">every join</a>).</p>
         </details>
       </div>
 

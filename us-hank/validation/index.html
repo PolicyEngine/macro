@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=27" />
-<link rel="stylesheet" href="/models/model-pages.css?v=14" />
+<link rel="stylesheet" href="/models/model-pages.css?v=18" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -126,7 +126,7 @@
     </div>
     <p class="callout callout-neutral">An independent replication of a published academic model, built on the
         authors' own <a href="https://github.com/shade-econ/sequence-jacobian">sequence-jacobian</a>
-        toolkit — not produced or endorsed by them. Results are model
+        toolkit, not produced or endorsed by them. Results are model
         counterfactuals, not official estimates or forecasts.</p>
   </section>
 
@@ -157,27 +157,17 @@
 <p class="vc-notes">Six of seven agree to the last published digit directly; vphi solves to 1.7135 and matches after multiplying by μw² = 1.21, because Table B.III follows the working paper's wage-markup convention and this implementation the published appendix's (<a href="https://github.com/PolicyEngine/us-hank-model/pull/15">us-hank-model #15</a>).</p>
 <p class="vc-notes"><strong>Calibration inputs</strong>, held fixed through the solve, so their deviations are identities:<br />Constants equalling themselves: Output Y 1, Capital K 10, Real rate r 0.0125, Government spending G 0.2, Government debt Bg 2.8.<br />Solver targets: Total wealth A+B 14 hit to 2.7e-13, Liquid assets B 1.04 hit to 9.5e-14 — tolerances, not accuracies.<br />Market clearing: goods 3.3e-08 untargeted (Walras’ law), assets 3.1e-13 is the solver’s own target.</p>
 </div><!-- /vc-fig -->
-                <figcaption><strong>Calibration, not replication.</strong> Y, K, r, G, Bg and the wealth rows are imposed and held fixed through the solve, so their deviations are identities or solver tolerances rather than accuracies; The rows the model solves for are the replication: six reproduce Table&nbsp;B.III to the last published digit directly, and <code>vphi</code> does after the wage-markup convention conversion (tile above). Same for the residuals: asset-market clearing at 3.1e&minus;13 is the solver's own target, while goods-market clearing is untargeted — it holds only by Walras' law, which makes it the check that counts. Solved 2026-07-29 at production grids (n<sub>B</sub>=50, n<sub>A</sub>=70, n<sub>K</sub>=50), re-solved independently 2026-08-13. Source: <code>papers/us-hank/figures/replication.json</code>.</figcaption>
+                <figcaption><strong>Calibration, not replication:</strong> only the rows the model solves for are the replication. Goods-market clearing is untargeted and holds only by Walras' law, which makes it the check that counts. Solved 2026-07-29 at production grids (n<sub>B</sub>=50, n<sub>A</sub>=70, n<sub>K</sub>=50), re-solved independently 2026-08-13. Source: <code>papers/us-hank/figures/replication.json</code>.</figcaption>
               </figure>
-        <p class="kv-title">What had somewhere to miss</p>
-        <dl class="kv kv-text"><div><dt>&beta;</dt><dd>0.9762739 vs 0.976</dd></div><div><dt>&chi;<sub>1</sub></dt><dd>6.4164196 vs 6.416, from a 6.5 guess</dd></div><div><dt>Z, &alpha;, &mu;<sub>p</sub>, &tau;</dt><dd>analytic, to the last digit</dd></div><div><dt><code>vphi</code></dt><dd>1.7135 as solved; 2.0733 &times; &mu;<sub>w</sub>&sup2;, asserted upstream</dd></div></dl>
+        
         <details class="about">
           <summary>About this step</summary>
-          <p>The parameters the model solves for internally reproduce Auclert et al. (2021) Table&nbsp;B.III.</p>
           <ul>
-            <li>They match to the last published digit on six of seven.</li>
-            <li>&beta;&nbsp;0.9762739 against 0.976, and &chi;<sub>1</sub>&nbsp;6.4164196 against 6.416.</li>
-            <li>&chi;<sub>1</sub> is solved numerically from a 6.5 starting guess, the strongest single check.</li>
+            <li>&beta;&nbsp;0.9762739 against 0.976, and &chi;<sub>1</sub>&nbsp;6.4164196 against 6.416. &chi;<sub>1</sub> is solved numerically from a 6.5 starting guess, the strongest single check.</li>
             <li>Z, &alpha;, &mu;<sub>p</sub> and &tau; are solved analytically.</li>
-            <li>The seventh, <code>vphi</code>, is the wage Phillips curve disutility scale.</li>
-            <li>It solves to 1.7135 against a published 2.073.</li>
-            <li>The gap is a convention, not an error.</li>
-            <li>This implementation follows the published Econometrica appendix's wage Phillips curve.</li>
-            <li>That divides the after-tax wage by &mu;<sub>w</sub>.</li>
-            <li>The NBER working paper multiplies by &mu;<sub>w</sub> instead.</li>
-            <li>That gives exactly &mu;<sub>w</sub>&sup2; = 1.21 times ours, 2.0733.</li>
-            <li>Both versions print 2.073, so Table&nbsp;B.III follows the working paper.</li>
-            <li>The two values describe the same steady state.</li>
+            <li>The seventh, <code>vphi</code>, solves to 1.7135 against a published 2.073: a convention, not an error.</li>
+            <li>This implementation follows the published Econometrica appendix, which divides the after-tax wage by &mu;<sub>w</sub>. The NBER working paper multiplies by &mu;<sub>w</sub> instead, giving exactly &mu;<sub>w</sub>&sup2; = 1.21 times ours, 2.0733.</li>
+            <li>Both versions print 2.073, so Table&nbsp;B.III follows the working paper. The two values describe the same steady state.</li>
             <li>The model repo now asserts the conversion (<a href="https://github.com/PolicyEngine/us-hank-model/pull/15">us-hank-model #15</a>).</li>
           </ul>
         </details>
@@ -186,19 +176,12 @@
       <div class="meth-step" id="gated" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What is gated, and what is not</h3></div>
         <p class="mo-lead">Imposed inputs carry no information; signs and timing are gated, magnitudes are not.</p>
-        <p class="kv-title">Read the rows correctly</p>
-        <dl class="kv kv-text"><div><dt>Imposed</dt><dd>Y, K, r, G, Bg &mdash; identities</dd></div><div><dt>Solver-reached</dt><dd>total wealth, liquid assets &mdash; tolerances</dd></div><div><dt>Asset clearing</dt><dd>3.1e&minus;13, the solver&rsquo;s own target</dd></div><div><dt>IRF signs, timing</dt><dd>gated</dd></div><div><dt>IRF magnitudes</dt><dd>not gated</dd></div></dl>
         <details class="about">
           <summary>About this step</summary>
-          <p>
-                Signs and timing of the shock responses are gated too.
-                <strong>Magnitudes are not</strong> — the paper publishes no impulse
-                response to match them against.
-              </p>
-          <p class="opt-note">
-                where this sits among other open HANK implementations:
-                <a href="/reports/us-hank-open-source">the landscape report</a>.
-              </p>
+        <p class="kv-title">How to read each row</p>
+        <dl class="kv kv-text"><div><dt>Imposed</dt><dd>Y, K, r, G, Bg &mdash; identities</dd></div><div><dt>Solver-reached</dt><dd>total wealth, liquid assets &mdash; tolerances</dd></div><div><dt>Asset clearing</dt><dd>3.1e&minus;13, the solver&rsquo;s own target</dd></div><div><dt>IRF signs, timing</dt><dd>gated</dd></div><div><dt>IRF magnitudes</dt><dd>not gated</dd></div></dl>
+          <p>Magnitudes are not gated because the paper publishes no impulse response to match them against.</p>
+          <p class="opt-note">Where this sits among other open HANK implementations: <a href="/reports/us-hank-open-source">the landscape report</a>.</p>
         </details>
       </div>
 
@@ -258,7 +241,7 @@
 
   <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
     <div class="chip-row">
-      <a class="chip chip-brand" href="/us-hank/code">Code</a>
+      <a class="chip chip-brand" href="/us-hank/code">Use it</a>
       <a class="chip" href="/models#validation">Every model&rsquo;s verdict</a>
       <a class="chip chip-brand" href="/reports/us-hank-open-source">The landscape report</a>
     </div>

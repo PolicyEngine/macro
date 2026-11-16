@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=27" />
-<link rel="stylesheet" href="/models/model-pages.css?v=14" />
+<link rel="stylesheet" href="/models/model-pages.css?v=18" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -74,9 +74,9 @@
     </div>
     <div class="prose">
       <p>
-        Four routes into the model, hosted to local. Because the upstream is
-        unlicensed, the hosted server discovers and bridges but never runs
-        the model — scenario deltas are produced on your machine.
+        The upstream is unlicensed, so the hosted server lists scenarios and
+        bridges results but never runs the model: you produce the deltas on
+        your machine.
       </p>
     </div>
 
@@ -84,51 +84,51 @@
       <div class="scrolly-steps">
       <div class="meth-step" id="run-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Hosted MCP tools</h3></div>
-        <p>Three tools on the <a href="/connect">hosted MCP server</a> reach this model; the unlicensed upstream never executes on our servers.</p>
+        <p>Three tools on the <a href="/connect">hosted MCP server</a> reach this model. None of them runs it.</p>
 <details class="about"><summary>More detail</summary><p><code>define_list_scenarios</code> returns the curated scenario set; <code>define_scenario</code> returns local run instructions; and <code>define_scenario_incidence</code> (experimental) takes a <code>define_payload</code> of locally produced deltas and turns them into a pre-tax earnings overlay on <a href="/pe">PolicyEngine</a>'s UK population.</p></details>
         <details class="about">
           <summary>About this step</summary>
-          <h4>Discovery and the incidence bridge</h4>
-          <h4>Where to read the results</h4>
+          
           <p>What each scenario represents is on the <a href="/define">overview</a>; the gates behind the numbers are on the <a href="/define/validation">validation</a> page.</p>
         </details>
       </div>
 
       <div class="meth-step" id="run-2" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>CLI scenario runs</h3></div>
-        <h4>Deltas from the terminal</h4>
-        <p>The CLI lists the curated scenarios and runs any of them locally: <code>pe-macro define-scenarios</code> to browse, <code>pe-macro define-scenario</code> to produce a scenario's deltas vs baseline — real GDP, emissions, unemployment, real consumption. Deltas only, never levels.</p>
-        <p class="kv-title">CLI commands</p>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro define-scenarios              <span class="cm"># list the curated set</span>
-pe-macro define-scenario &lt;name&gt;        <span class="cm"># scenario deltas vs baseline</span></code></pre></div>
-      </div>
-
-      <div class="meth-step" id="run-3" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Install locally</h3></div>
-        <p>The adapter installs from GitHub. Nothing upstream is vendored: at runtime it fetches <code>DEFINE-model/DEFINE_UK_1.1</code> at pinned commit <code>846081a</code> and executes the published notebook unmodified.</p>
-        <p class="kv-title">Install</p>
+        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Install locally</h3></div>
+        <p>The adapter installs from GitHub. Nothing upstream is vendored: at runtime it fetches <code>DEFINE-model/DEFINE_UK_1.1</code> at pinned commit <code>846081a</code> and runs the published notebook unmodified.</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/define-uk-model</code></pre></div>
         <details class="about">
           <summary>About this step</summary>
-          <h4>One pip install, upstream fetched at runtime</h4>
-          <h4>R does the heavy lifting once</h4>
+        <p class="kv-title">Install</p>
+          
           <p>A fresh full run needs local R with the notebook's packages; after that, scenario deltas are instant from the cached pinned run.</p>
+        </details>
+      </div>
+
+      <div class="meth-step" id="run-3" data-step="2">
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>CLI scenario runs</h3></div>
+        <p>List the curated scenarios, then run one locally for its deltas against baseline: real GDP, emissions, unemployment, real consumption. Deltas only, never levels.</p>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro define-scenarios              <span class="cm"># list the curated set</span>
+pe-macro define-scenario &lt;name&gt;        <span class="cm"># scenario deltas vs baseline</span></code></pre></div>
+        <details class="more"><summary><span class="more-title">More detail</span><span class="more-sub">notes</span></summary>
+        <p class="kv-title">CLI commands</p>
         </details>
       </div>
 
       <div class="meth-step" id="run-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Development: gates and the clean room</h3></div>
         <p>The test suite carries the validation gate; in CI the oracle comparisons must skip.</p>
-<details class="about"><summary>More detail</summary><p>Hermetic artifact checks always run, and the oracle comparisons against the pinned upstream run execute wherever a local cache exists. In CI they must skip, because a passing oracle test there would mean the unlicensed upstream was fetched.</p></details>
-        <p class="kv-title">Development</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/define-uk-model
 cd define-uk-model
 pytest                    <span class="cm"># hermetic gate everywhere; oracle tests need the local cache</span></code></pre></div>
+        <details class="more"><summary><span class="more-title">More detail</span><span class="more-sub">notes</span></summary>
+        <p class="kv-title">Development</p>
+        </details>
+        <details class="about"><summary>More detail</summary><p>Hermetic artifact checks always run, and the oracle comparisons against the pinned upstream run execute wherever a local cache exists. In CI they must skip, because a passing oracle test there would mean the unlicensed upstream was fetched.</p></details>
         <details class="about">
           <summary>About this step</summary>
-          <h4>Clone to rebuild the validation record</h4>
-          <h4>The path to hosting</h4>
-          <p class="opt-note">a clean-room Python reimplementation of the published Model Manual v1.1 is the route to a hostable model — protocol and milestones in <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">REIMPLEMENTATION.md</a>, upstream code used only as a numerical oracle.</p>
+          
+          <p class="opt-note">A clean-room Python reimplementation of the published Model Manual v1.1 is the route to a hostable model — protocol and milestones in <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">REIMPLEMENTATION.md</a>, upstream code used only as a numerical oracle.</p>
           <p>Four slices have landed. The §2.2 accounting core &mdash; the transactions and balance-sheet matrices &mdash; is satisfied identically at the manual's own initial values. §3.2 adds the high-level macroeconomic block, §3.3.1 domestic production, and §3.3.2 the power generation sector: <strong>118 equations, Eqs. (21)&ndash;(138), contiguous</strong>. §3.3.3 input&ndash;output and the comparison against the upstream oracle are outstanding, so <strong>nothing here is hostable yet</strong> and the hosted tools continue to return run instructions.</p>
           <p>Reimplementing from the manual is also what surfaces its gaps, and <strong>thirteen</strong> are now pinned by tests as machine-readable gap records rather than absorbed into a tolerance, with more written up in the reimplementation notes &mdash; a net-lending residual the manual itself says &ldquo;should equal 0&rdquo;, identities that fail at the manual's own initial values, and symbols the equations use that the parameter tables never list. The largest is a blocker: <strong>§3.3.2 as published cannot be simulated forward.</strong> Six parameters it uses are absent from Table 5, and two variables are never defined anywhere in the manual, so credit rationing collapses to a constant and desired power-sector investment turns negative. That is the section the climate-policy scenarios run through, and it is <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">recorded in full</a> for the authors.</p>
         </details>

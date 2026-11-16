@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=27" />
-<link rel="stylesheet" href="/models/model-pages.css?v=14" />
+<link rel="stylesheet" href="/models/model-pages.css?v=18" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -107,7 +107,7 @@
         <span class="stat-foot"><span class="chip">The yardstick</span></span>
       </div>
     </div>
-    <p>Fidelity to the Fed&rsquo;s baseline is not the baseline being right: against 2026 outturns the LONGBASE baseline misses core PCE inflation (<a href="#caveats">limits</a>).</p>
+    <p>Matching the Fed&rsquo;s baseline does not make the baseline right: against 2026 outturns LONGBASE misses core PCE inflation (<a href="#caveats">limits</a>).</p>
     <!-- Levels and next gates: integration/src/policyengine_macro/capabilities.py MODEL_QUALITY["frb-us"]. -->
     <div class="prose">
     <div class="table-scroll trust-card"><table data-stack="yes">
@@ -133,19 +133,14 @@
         simulation design, and model-consistent expectations are not yet
         available through the hosted tools.
       </p>
-      <p>CI does more than re-check a committed CSV.</p>
       <ul>
-        <li>A dedicated job re-runs the Board's pyfrbus from source.</li>
-        <li>CI gates against that fresh solution.</li>
+        <li>A dedicated CI job re-runs the Board's pyfrbus from source and gates against that fresh solution, not a committed CSV.</li>
         <li>A weekly run repeats the suite across Python 3.10–3.12.</li>
         <li>The multiplier comparisons are refreshed manually.</li>
-        <li>Full tables are in <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md">VALIDATION.md</a> and the <a href="/papers/frb-us">working paper</a>.</li>
+        <li>Full tables: <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md">VALIDATION.md</a> and the <a href="/papers/frb-us">working paper</a>.</li>
       </ul>
     </details>
-    <p class="callout callout-neutral">This is an independent implementation built from the Federal Reserve
-        Board's published model equations and data. It is not produced,
-        maintained, or endorsed by the Federal Reserve, and its results
-        should not be presented as official Federal Reserve estimates.</p>
+    <p class="callout callout-neutral">An independent implementation of the Federal Reserve Board's published model equations and data. It is not produced, maintained or endorsed by the Federal Reserve; do not present its results as official Federal Reserve estimates.</p>
   </section>
 
   <section class="band band-wide" id="tests">
@@ -203,8 +198,10 @@
 <li><span class="vc-sw sw-ring" aria-hidden="true"></span>tracking identity &mdash; round-off, not fidelity</li>
 </ul>
 </div><!-- /vc-fig -->
-                <figcaption>Maximum absolute residuals, log scale — lower is closer. The top two bars are the tracking identity and are <strong>not</strong> a ranking: they compare two implementations' round-off, not their fidelity to the Fed's economics. Source: papers/frb-us validation tables.</figcaption>
+                <figcaption>The top two rows are the tracking identity, <strong>not</strong> a ranking: they compare two implementations' round-off, not their fidelity to the Fed's economics. Source: papers/frb-us validation tables.</figcaption>
               </figure>
+        <details class="about">
+          <summary>About this step</summary>
         <div id="solver-table" class="table-scroll"><table>
                 <caption>Validation results against the Federal Reserve Board's own artefacts</caption>
                 <thead><tr><th scope="col">Test</th><th scope="col">What it checks</th><th scope="col">Result</th></tr></thead>
@@ -212,7 +209,7 @@
                   <tr>
                     <th scope="row"><strong>Tracking invariant</strong></th>
                     <td>Re-solving the baseline reproduces LONGBASE, 284 <a class="gloss-link" href="/glossary#exogenous">endogenous</a> variables over 2026Q1–2030Q4.</td>
-                    <td>Against a 1e&minus;8 gate (tile above) — but <strong>an identity, not a comparison</strong>. <code>init_trac</code> sets each add-factor to minus that equation's residual at the input data, so the solve reproduces whatever it was tracked to, for any input: the model repository's <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/tests/test_tracking.py"><code>test_tracking_invariant_holds_for_arbitrary_data</code></a> passes at 6.7e&minus;9 on a scrambled baseline with every accounting identity destroyed. Read the row below, not this one, as evidence.</td>
+                    <td>Against a 1e&minus;8 gate (tile above), but <strong>an identity, not a comparison</strong>. <code>init_trac</code> sets each add-factor to minus that equation's residual at the input data, so the solve reproduces whatever it was tracked to, for any input: the model repository's <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/tests/test_tracking.py"><code>test_tracking_invariant_holds_for_arbitrary_data</code></a> passes at 6.7e&minus;9 on a scrambled baseline with every accounting identity destroyed. Read the row below, not this one, as evidence.</td>
                   </tr>
                   <tr>
                     <th scope="row"><strong>Cross-validation</strong></th>
@@ -221,16 +218,10 @@
                   </tr>
                 </tbody>
               </table></div>
-        <p class="kv-title">What the residuals mean</p>
-        <dl class="kv"><div><dt>Shock</dt><dd>100bp <code>rffintay_aerr</code>, all 284 variables</dd></div><div><dt>Scrambled baseline</dt><dd>still tracks, at 6.7e&minus;9</dd></div><div><dt>Residuals sit in</dt><dd><code>wpsn</code>, <code>zgap05</code></dd></div><div><dt>Tracking rows</dt><dd>round-off, not a ranking</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
           <p>The Fed-vs-Fed tile frames the other three.</p>
           <ul>
-            <li>The Board's two releases ship a <em>byte-identical</em> <code>model.xml</code> and LONGBASE.</li>
-            <li>They differ only in how <a class="gloss-link" href="/glossary#gauss-seidel">Newton</a> reuses its LU factorisation.</li>
-            <li>Yet they disagree by as much as this implementation disagrees with either.</li>
-            <li>Agreement sits at the reference's own numerical noise, not at a chosen tolerance.</li>
+            <li>The Board's two releases ship a <em>byte-identical</em> <code>model.xml</code> and LONGBASE, and differ only in how <a class="gloss-link" href="/glossary#gauss-seidel">Newton</a> reuses its LU factorisation.</li>
+            <li>Yet they disagree by as much as this implementation disagrees with either, so agreement sits at the reference's own numerical noise, not at a chosen tolerance.</li>
             <li>All three residuals concentrate in the same near-zero expectational-gap series (<code>wpsn</code>, <code>zgap05</code>).</li>
           </ul>
         </details>
@@ -238,7 +229,9 @@
 
       <div class="meth-step" id="multipliers" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Fiscal multipliers</h3></div>
-        <p class="mo-lead">Plausibility bands against published ranges, not a test passed.</p>
+        <p class="mo-lead">Purchases multipliers sit inside CBO&rsquo;s ranges and 0.2&ndash;0.3 below FRB-US in 2010: plausibility bands, not a test passed.</p>
+        <details class="about">
+          <summary>About this step</summary>
         <div class="table-scroll"><table>
                 <caption>FRB/US fiscal multipliers (1% of GDP, sustained) against published ranges</caption>
                 <thead><tr><th scope="col">Quantity</th><th scope="col">Ours</th><th scope="col">Published</th><th scope="col">Reading</th></tr></thead>
@@ -252,21 +245,11 @@
                   <tr><th scope="row">Transfers, yr 1</th><td>0.28&ndash;0.32</td><td>no matched published cell</td><td>depends on the regime: 0.28 under the inertial Taylor rule with the surplus rule on, 0.32 with the funds rate pegged and the fiscal rule off. FRB/US gives transfer recipients the same MPC as earners (hand-to-mouth share 0.31)</td></tr>
                 </tbody>
               </table></div>
-        <p class="kv-title">1% of GDP, sustained</p>
-        <dl class="kv"><div><dt>Purchases, yr 1</dt><dd>0.72 for a +1%-of-GDP rise (about 0.80 for small shocks, 0.90 for a cut), inside CBO 0.45&ndash;1.82</dd></div><div><dt>Purchases, yr 2 pegged</dt><dd>0.90, inside CBO 0.50&ndash;2.50</dd></div><div><dt>Against FRB-US in 2010</dt><dd>0.2&ndash;0.3 below</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <p><strong>Multipliers.</strong> Read these as plausibility bands, not as a test passed.</p>
           <ul>
-            <li>CBO ranges marked &ldquo;converted&rdquo; come from Whalen and Reichling.</li>
-            <li>The source is CBO Working Paper 2015-02, Table&nbsp;2.</li>
-            <li>It gives the quarterly response to a one-quarter $1 impulse.</li>
-            <li>We cumulate it into this page&rsquo;s calendar-year ratio for a sustained shock.</li>
-            <li>The conversion is ours, not CBO&rsquo;s.</li>
-            <li>The tax-cut ranges are from CBO (Feb 2015, Table&nbsp;3).</li>
-            <li>That source assumes the Fed did not tighten.</li>
-            <li>Coenen et al. (AEJ: Macroeconomics 2012) values are read from their charts (&plusmn;0.1).</li>
-            <li>They cover the 2009&ndash;10 FRB-US, whose expectations mode they do not state.</li>
+            <li>CBO ranges marked &ldquo;converted&rdquo; come from Whalen and Reichling, CBO Working Paper 2015-02, Table&nbsp;2: the quarterly response to a one-quarter $1 impulse.</li>
+            <li>We cumulate it into this page&rsquo;s calendar-year ratio for a sustained shock. The conversion is ours, not CBO&rsquo;s.</li>
+            <li>The tax-cut ranges are from CBO (Feb 2015, Table&nbsp;3), which assumes the Fed did not tighten.</li>
+            <li>Coenen et al. (AEJ: Macroeconomics 2012) values are read from their charts (&plusmn;0.1) and cover the 2009&ndash;10 FRB-US, whose expectations mode they do not state.</li>
             <li>Ramey&rsquo;s survey range pools estimates across horizons and monetary regimes.</li>
             <li>Sources and the conversion: <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/docs/benchmarks.md">us-frb-model docs/benchmarks.md</a>.</li>
           </ul>
@@ -275,9 +258,10 @@
 
       <div class="meth-step" id="worked-shock" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>A worked shock, against the Board</h3></div>
-        <p class="mo-lead">One command reproduces a 100bp tightening under the inertial Taylor rule. The like-for-like reference is the Board&rsquo;s own simulation of the same shock in the current (post-2018) model: <a href="https://www.federalreserve.gov/econres/notes/feds-notes/overview-of-the-changes-to-the-frb-us-model-2018-20181207.htm">Laforte (2018)</a>, FEDS Notes, doi:10.17016/2380-7172.2306, Figure&nbsp;2, VAR expectations.</p>
-              <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code></pre></div>
-              <div class="table-scroll mo-tablecard cmp-compare">
+        <p class="mo-lead">A 100bp tightening under the inertial Taylor rule, against the Board&rsquo;s own simulation of the same shock.</p>
+        <details class="more"><summary><span class="more-title">More detail</span><span class="more-sub">table, code, notes</span></summary>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code></pre></div>
+        <div class="table-scroll mo-tablecard cmp-compare">
               <table>
                 <thead><tr><th scope="col">Response</th><th scope="col">Ours</th><th scope="col">Board, current model (Laforte 2018)</th></tr></thead>
                 <tbody>
@@ -289,10 +273,8 @@
                 </tbody>
               </table>
               </div>
-              <p class="forecast-note">
-                The exact cross-check is numerical: the same shock
-                in the Board's own <code>pyfrbus</code> matches to the cross-validation tile above.
-              </p>
+        <p class="forecast-note">The reference is the current (post-2018) model in <a href="https://www.federalreserve.gov/econres/notes/feds-notes/overview-of-the-changes-to-the-frb-us-model-2018-20181207.htm">Laforte (2018)</a>, FEDS Notes, doi:10.17016/2380-7172.2306, Figure&nbsp;2, VAR expectations. The exact cross-check is numerical: the same shock in the Board's own <code>pyfrbus</code> matches to the cross-validation tile above.</p>
+        </details>
       </div>
 
       </div>
@@ -347,7 +329,7 @@
 
   <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
     <div class="chip-row">
-      <a class="chip chip-brand" href="/frb-us/code">Code</a>
+      <a class="chip chip-brand" href="/frb-us/code">Use it</a>
       <a class="chip" href="/models#validation">Every model&rsquo;s verdict</a>
       <a class="chip chip-brand" href="/papers/frb-us">The working paper</a>
     </div>

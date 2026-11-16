@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=27" />
-<link rel="stylesheet" href="/models/model-pages.css?v=14" />
+<link rel="stylesheet" href="/models/model-pages.css?v=18" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -72,32 +72,23 @@
   <section id="run" class="band band-wide">
     <div class="band-head" data-icon="play">
       <h2>Ask the server, or install it</h2>
-    </div>
-    <div class="prose">
-      <p>
-        Four steps from a hosted call to the local Python API; the commands sit
-        in the panel beside each step. For every other model and client, see
-        <a href="/connect">Use</a>.
-      </p>
+      <p class="section-intro">Four steps, from a hosted call to the local Python API.</p>
     </div>
 
     <div class="scrolly-wrap scrolly-code single">
       <div class="scrolly-steps">
       <div class="meth-step" id="code-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Ask the hosted server</h3></div>
-        <p>Quickest is the <a href="/connect">hosted MCP server</a>: <code>hank_shock</code> runs a stylized shock, optionally with the distributional block; <code>hank_summary</code> lists shock kinds, units, variants and scope limits, instantly, with no solve; <code>hank_shock_incidence</code> passes the wage and labor responses to the US microsimulation (<a href="/us-hank#pe-bridge">the join</a>).</p>
+        <p>The <a href="/connect">hosted MCP server</a> has three tools: <code>hank_shock</code> runs a stylised shock, optionally with the distributional block; <code>hank_summary</code> lists shock kinds, units, variants and scope limits, with no solve; <code>hank_shock_incidence</code> passes the wage and labour responses to the US microsimulation (<a href="/us-hank#pe-bridge">the join</a>).</p>
         <details class="about">
           <summary>About this step</summary>
-          <h4>Three MCP tools</h4>
           <p>The first call per variant is slow; the <a href="/us-hank#card">model card</a> gives the timings.</p>
         </details>
       </div>
 
       <div class="meth-step" id="code-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Or use the CLI</h3></div>
-        <h4>Same two calls</h4>
-        <p>The same two operations on the command line: <code>hank-summary</code> to see what the model accepts, <code>hank-shock</code> to run one — here a monetary easing of 25bp on the quarterly policy rate (about 100bp annualised) with the distributional block on.</p>
-        <p class="kv-title">Pe-macro CLI</p>
+        <p><code>hank-summary</code> shows what the model accepts; <code>hank-shock</code> runs one shock, here a monetary easing of 25bp on the quarterly policy rate with the distributional block on.</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro hank-summary
 pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6 --distribution</code></pre></div>
       </div>
@@ -107,18 +98,14 @@ pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.6 --distribut
         <p><code>monetary</code>: level change in the <em>quarterly</em> policy rate (&minus;0.0025 = a 25bp cut in the quarterly rate, about 100bp annualised); <code>fiscal_spending</code>: level change in G (steady-state output is 1, so 0.01 = 1% of GDP); <code>productivity</code>: level change in TFP.</p>
         <details class="about">
           <summary>About this step</summary>
-          <h4>Units differ per kind</h4>
-          <h4>Two variants</h4>
-          <p><code>variant</code> selects the paper's <code>two_asset</code> model (the default) or a fast <code>one_asset</code> textbook variant — no capital, so no investment response, and monetary/productivity shocks only.</p>
+          <p><code>variant</code> selects the paper's <code>two_asset</code> model (the default) or a fast <code>one_asset</code> textbook variant: no capital, so no investment response, and monetary and productivity shocks only.</p>
         </details>
       </div>
 
       <div class="meth-step" id="code-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Install and script it</h3></div>
-        <p>Beyond the hosted surface, install the package and use the Python API directly: solve the steady state once, solve the Jacobian once, then draw impulse responses and distributional summaries instantly.</p>
-        <p class="kv-title">Install</p>
+        <p>Install the package, solve the steady state and the Jacobian once, then draw impulse responses and distributional summaries instantly.</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/us-hank-model</code></pre></div>
-        <p class="kv-title">Python api</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> us_hank <span class="kw">import</span> model, distributional
 
 ss = model.solve_steady_state()          <span class="cm"># ~13s, cached</span>
@@ -129,9 +116,8 @@ irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0
 <span class="kw">print</span>(distributional.summary(ss))        <span class="cm"># MPCs by quartile, hand-to-mouth share</span></code></pre></div>
         <details class="about">
           <summary>About this step</summary>
-          <h4>The Python API</h4>
-          <h4>What sits behind it</h4>
-          <p>The solve behind these calls — steady state, Jacobian, then instant <a class="gloss-link" href="/glossary#irf">IRFs</a> — is on the <a href="/us-hank/methodology">methodology page</a>; what to trust the results for, on the <a href="/us-hank/validation">validation page</a>.</p>
+        <p class="kv-title">Python API</p>
+          <p>The solve behind these calls (steady state, Jacobian, then instant <a class="gloss-link" href="/glossary#irf">IRFs</a>) is on <a href="/us-hank/methodology">Methodology</a>; what to trust the results for is on <a href="/us-hank/validation">Validation</a>.</p>
         </details>
       </div>
       </div>
@@ -140,9 +126,9 @@ irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0
 
   <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
     <div class="chip-row">
+      <a class="chip chip-brand" href="/connect">Every route to run it</a>
       <a class="chip chip-brand" href="/reports/us-hank-open-source">The landscape report</a>
       <a class="chip" href="/models#compare">Compare the models</a>
-      <a class="chip chip-brand" href="/connect">Every route to run it</a>
     </div>
   </nav>
 </main>
