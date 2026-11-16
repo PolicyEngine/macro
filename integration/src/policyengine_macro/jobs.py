@@ -51,6 +51,13 @@ JOB_TOOLS: tuple[str, ...] = (
     "frbus_shock",
     "hank_shock",
     "pe_population_impact",
+    # The four incidence tools each end in a population microsimulation,
+    # which takes two to three minutes hosted under policyengine 6.11.1:
+    # past the 150-second ceiling, so they can only be reached as jobs.
+    "frbus_shock_incidence",
+    "hank_shock_incidence",
+    "svar_inflation_incidence",
+    "define_scenario_incidence",
     # forecast_uk's adapter. A 6000-draw forecast (what forecasts/nowcast.py
     # archives a round with) takes ~5.5 minutes on a cold container, so the
     # scheduled round can only reach it as a job.

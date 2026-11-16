@@ -32,10 +32,15 @@ def start_job(
     USE THIS FOR score_reform. The hosted server sits behind a transport that
     abandons any HTTP request after 150 seconds, and score_reform over its
     default five-year window takes longer than that, so calling it directly
-    on the hosted server fails every time. obr_shock, frbus_shock, hank_shock,
-    dynamic_reform_impact and population_reform_impact are also close enough
-    to the ceiling to fail on a cold server. A forecast_uk with thousands of
-    draws runs as tool="svar_forecast", with the same arguments.
+    on the hosted server fails every time. population_reform_impact (two to
+    three minutes hosted) runs as tool="pe_population_impact" and
+    dynamic_reform_impact as tool="dynamic_population_reform_impact", with
+    the same arguments. The four incidence tools (frbus_shock_incidence,
+    hank_shock_incidence, svar_inflation_incidence, define_scenario_incidence)
+    each end in a population microsimulation, so run them as jobs under
+    their own names. obr_shock (several minutes), frbus_shock and
+    hank_shock are close enough to the ceiling to fail on a cold server. A
+    forecast_uk with thousands of draws runs as tool="svar_forecast".
 
     Returns a job id straight away. Poll it with get_job_result. The job
     itself has a 30-minute budget, so the 150-second ceiling stops applying.
@@ -163,8 +168,12 @@ def score_reform(
                     to a negative held household-income add-factor), and the
                     second-round demand effects on GDP/consumption/investment
                     come out. Demand-side incidence only; corporation-tax
-                    reforms are refused (use obr_shock var='TCPRO'). Takes a
-                    few minutes (one microsim run per year + two OBR solves).
+                    reforms are refused (use obr_shock var='TCPRO'). Slow: one
+                    population costing per year (minutes each on the hosted
+                    server) plus two OBR solves (about 3 minutes), so the
+                    default five-year window takes over ten minutes. Run it
+                    through start_job, or pass years=1 or 2 for a quicker
+                    answer.
             'microsim' — the PolicyEngine population costing itself (static,
                     no macro feedback), wrapped in the same ScoreResult.
             'og+microsim' — dynamic scoring: the OG-UK long-run wage change
@@ -798,10 +807,12 @@ def population_reform_impact(
         dataset: Optional dataset name override (UK default:
             enhanced_frs_2023_24).
 
-    Runtime (measured): ~6 seconds per simulation run plus ~20s of model
-    import on the first call in a fresh process — expect ~30-40s for the
-    first reform scored, then ~10s per further reform (the baseline is
-    cached in-process). The VERY FIRST call ever in an environment also
+    Runtime: on the hosted server one call takes about two to three
+    minutes (measured 15 Nov 2026, policyengine 6.11.1), so start it with
+    start_job(tool="pe_population_impact"). The baseline is cached
+    in-process, so a further reform in a warm process pays only the reform
+    run. The ~6 s per run measured under policyengine 4.x no longer holds.
+    The VERY FIRST call ever in an environment also
     downloads the microdata (~125MB; UK data is private and needs
     HUGGING_FACE_TOKEN) and builds a ~92MB per-year dataset file — allow a
     few extra minutes for that one call. Peak memory ~2GB.
