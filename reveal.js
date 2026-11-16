@@ -64,8 +64,7 @@
     var h = window.innerHeight;
     targets.forEach(function (el) {
       if (el.classList.contains("in-view")) return;
-      var r = el.getBoundingClientRect();
-      if (r.top < h) reveal(el, r.bottom > 0);
+      if (el.getBoundingClientRect().top < h) reveal(el, false);   /* catch-up is instant */
     });
   }
   var timer = null;
