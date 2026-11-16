@@ -1495,7 +1495,7 @@ def reform_stands() -> str:
                    [("Single year", microsim["horizon"]), ("Seconds to minutes", microsim["runtime"]),
                     ("Hosted", ", ".join(microsim["access"]))]),
         route_card("landmark", "Macro feedback", '<a href="/obr">OBR emulator</a>',
-                   "Adds second-round GDP, consumption and investment effects.", "Household-income channel; not corporation tax",
+                   "Adds second-round GDP, consumption and investment effects.", "Checked for income tax and NICs only; no corporation tax",
                    [("3 to 5 years", obr["horizon"]), ("10+ min for a reform", obr["runtime"]),
                     ("Hosted", ", ".join(obr["access"]))]),
         route_card("hourglass", "Long-run dynamic", '<a href="/olg">OG-UK + microsimulation</a>',
@@ -2934,7 +2934,7 @@ def subnav(country: str, current: str | None) -> str:
         <a class="model-tabs-link"{fc_attr} href="{entry["hub"]}">{site_nav.icon("forecasts", 16)}Forecasts</a>
         <a class="model-tabs-link"{data_attr} href="{entry["data"]}">{site_nav.icon("database", 16)}Data</a>
         <div class="sn-menu" data-sn-menu>
-          <button type="button" class="model-tabs-link sn-menu-btn" aria-expanded="false"{btn_attr}>{site_nav.icon("book-open", 16)}{btn_label}<span class="sn-chev" aria-hidden="true"></span></button>
+          <button type="button" class="model-tabs-link sn-menu-btn" aria-expanded="false"{btn_attr}>{site_nav.icon("book-open", 16)}<span class="sn-lbl">{btn_label}</span><span class="sn-chev" aria-hidden="true"></span></button>
           <div class="sn-pop" role="group" aria-label="Topics">
 {chr(10).join(topic_links)}
           </div>
