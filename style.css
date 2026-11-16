@@ -7526,3 +7526,79 @@ main .table-scroll > table :is(th, td).num { text-align: right; white-space: now
   main .table-scroll > table.tbl-stack tbody tr > [data-label]:not(:first-child) > :not(sup) { max-width: 100%; }
   .mp #compare td:nth-child(4), .mp #compare td:nth-child(5) { white-space: normal; }
 }
+
+/* =====================================================================
+   16. Status-class legend, flow stepper, aligned label/value grids (r12).
+   ===================================================================== */
+.sc-card { margin: 0 0 16px; background: var(--card); border: 1px solid var(--ab-border); border-radius: 12px; overflow: hidden; }
+.sc-head { margin: 0; padding: 12px 16px; background: var(--ab-inset); border-bottom: 1px solid var(--ab-border); color: var(--text-faint); font-size: var(--fs-ab-micro); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.sc-head a { text-transform: none; letter-spacing: 0; }
+.sc-list { margin: 0; padding: 0; list-style: none; }
+.sc-row { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); align-items: center; gap: 12px 24px; padding: 12px 16px; border-top: 1px solid #F3F4F6; }
+.sc-row:first-child { border-top: 0; }
+.sc-class { display: inline-flex; align-items: center; gap: 8px; color: var(--text-strong); font-size: var(--fs-ab-small); font-weight: 600; }
+.sc-class svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.sc-gain .sc-class svg { color: var(--ab-gain); }
+.sc-mid .sc-class svg { color: #64748B; }
+.sc-loss .sc-class svg { color: var(--ab-loss); }
+.sc-models { display: flex; flex-wrap: wrap; gap: 6px; }
+.sc-model { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--ab-border); border-radius: 999px; background: var(--card); color: var(--text-body); font-size: var(--fs-ab-cap); font-weight: 500; text-decoration: none; }
+.sc-model svg { width: 14px; height: 14px; color: var(--ab-teal-700); }
+.sc-model:hover { border-color: var(--ab-teal-700); color: var(--ab-teal-700); }
+@media (max-width: 640px) { .sc-row { grid-template-columns: 1fr; gap: 8px; } }
+@media (prefers-color-scheme: dark) { .sc-row { border-top-color: var(--border); } }
+
+/* Flow stepper: every .pipeline. Numbered circle nodes joined by a line,
+   labels under each node, no boxes. Vertical below 820px. */
+.pipeline {
+  counter-reset: pl; display: flex; align-items: flex-start; gap: 0; flex-wrap: nowrap;
+  margin: 16px 0; padding: 4px 0; border: 0; background: none; overflow: visible;
+}
+.pipeline .pl-node {
+  counter-increment: pl; position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  flex: 0 1 160px; min-width: 0; padding: 0 6px; border: 0 !important; background: none !important; box-shadow: none !important;
+  text-align: center; color: inherit; text-decoration: none;
+}
+.pipeline .pl-node::before {
+  content: counter(pl); display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 8px;
+  border-radius: 50%; background: var(--ab-teal-50); box-shadow: inset 0 0 0 1px var(--ab-teal-100);
+  color: var(--ab-teal-700); font-size: var(--fs-ab-cap); font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.pipeline .pl-node:first-child::before { background: var(--card); box-shadow: inset 0 0 0 1.5px var(--ab-teal-700); }
+.pipeline .pl-node:last-child::before { background: var(--ab-teal-700); color: #FFFFFF; box-shadow: none; }
+.pipeline .pl-node strong { color: var(--text-strong); font-size: var(--fs-ab-small); font-weight: 600; line-height: 1.3; }
+.pipeline .pl-node .mono, .pipeline .pl-node small { color: var(--text-faint); font-size: var(--fs-ab-micro); line-height: 1.35; font-family: inherit; }
+.pipeline a.pl-node:hover strong { color: var(--ab-teal-700); text-decoration: underline; }
+.pipeline .pl-arrow {
+  flex: 1 1 40px; min-width: 24px; height: 2px; margin-top: 21px; position: relative;
+  background: var(--ab-teal-100); font-size: 0; color: transparent; rotate: none;
+}
+.pipeline .pl-arrow::after {
+  content: ""; position: absolute; right: -1px; top: -4px; width: 8px; height: 8px;
+  border-top: 2px solid var(--ab-teal-100); border-right: 2px solid var(--ab-teal-100); transform: rotate(45deg);
+}
+.pipeline .pl-node-stop strong, .pipeline .pl-node-stop .mono { color: var(--text-faint); }
+@media (max-width: 820px) {
+  .pipeline { flex-direction: column; align-items: stretch; }
+  .pipeline .pl-node { flex: none; flex-direction: row; flex-wrap: wrap; align-items: center; column-gap: 12px; padding: 0; text-align: left; }
+  .pipeline .pl-node::before { margin: 0; flex: 0 0 auto; }
+  .pipeline .pl-node strong { flex: 1 1 auto; }
+  .pipeline .pl-node .mono, .pipeline .pl-node small { flex-basis: 100%; padding-left: 46px; margin-top: -4px; }
+  .pipeline .pl-arrow { flex: none; width: 2px; height: 20px; min-width: 0; margin: 4px 0 4px 16px; }
+  .pipeline .pl-arrow::after { right: auto; left: -4px; top: auto; bottom: -1px; transform: rotate(135deg); }
+}
+
+/* Label/value pairs (dl.kv): one aligned inset grid, not floating pairs. */
+main dl.kv {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 0; margin: 16px 0;
+  background: var(--ab-inset); border: 1px solid var(--ab-border); border-radius: 10px; overflow: hidden;
+}
+main dl.kv > div { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-right: 1px solid var(--ab-border); border-bottom: 1px solid var(--ab-border); margin: -1px -1px 0 0; }
+main dl.kv dt { color: var(--text-faint); font-size: var(--fs-ab-micro); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+main dl.kv dd { margin: 0; color: var(--text-strong); font-size: var(--fs-ab-small); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.45; }
+main dl.kv.kv-text dd { font-weight: 500; color: var(--text-body); }
+.pipeline .pl-node, .pipeline .pl-node.pl-node-out, .pipeline .pl-node.pl-node-stop { color: var(--text-body) !important; }
+.pipeline .pl-node.pl-node-out strong, .pipeline .pl-node:last-child strong { color: var(--text-strong) !important; }
+.pipeline .pl-node.pl-node-out .mono, .pipeline .pl-node:last-child .mono { color: var(--text-faint) !important; }
+.pipeline .pl-arrow { background: color-mix(in srgb, var(--ab-teal-700) 35%, transparent); }
+.pipeline .pl-arrow::after { border-color: color-mix(in srgb, var(--ab-teal-700) 35%, transparent); }
