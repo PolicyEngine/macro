@@ -1024,7 +1024,8 @@ def render_results(card: dict) -> str:
     ]
     first_round = card["detail"][0]["round_id"] if card["detail"] else None
     for detail, e in rows:
-        retro = (' <a class="fc-retro-mark" href="#retro" aria-label="Note on the first round">*</a>'
+        retro = ('<a class="fc-retro-mark" href="#retro" title="Archived retroactively; see the archive" '
+                 'aria-label="Archived retroactively; see the archive">*</a>'
                  if detail["round_id"] == first_round else "")
         vfile = vintage_file(e.get("outturn_series") or "", e["outturn_vintage"] or "")
         vint = (f'<a class="fc-vint" href="{vfile}">vintage {esc(e["outturn_vintage"])}</a>'
@@ -1036,7 +1037,7 @@ def render_results(card: dict) -> str:
             '        <div class="fc-row" role="row">'
             f'<div class="fc-tgt" role="rowheader"><span class="fc-var">{icon(e["variable"] if e["variable"] in _ICON_PATHS else "target")}</span>'
             f'<span><strong>{_target(e)}</strong>'
-            f'<a class="fc-round" href="/{esc(detail["path"])}">{esc(detail["round_id"])} · {model_html(detail)}</a>{retro}</span></div>'
+            f'<span class="fc-round-line"><a class="fc-round" href="/{esc(detail["path"])}">{esc(detail["round_id"])} · {esc(MODEL_DISPLAY.get(detail["model"], (detail.get("label", detail["model"]), None))[0])}</a>{retro}</span></span></div>'
             f'<div role="cell"><span class="visually-hidden">Median {e["forecast"]:.2f}%, 68% band '
             f'{e["lo68"]:.2f}–{e["hi68"]:.2f}, 90% band {e["lo90"]:.2f}–{e["hi90"]:.2f}, outturn {e["outturn"]:.2f}%.</span>'
             f"{_strip(e)}</div>"
