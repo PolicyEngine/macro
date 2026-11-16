@@ -82,30 +82,39 @@
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-variables
 pe-macro frbus-shock --var rffintay_aerr --shock 1.0
 pe-macro frbus-summary</code></pre></div>
-        <details class="about">
-          <summary>About this step</summary>
+        <details class="xp">
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <div class="xp-body">
         <p class="kv-title">The same three on the CLI</p>
           <p>The CLI runs them locally, with no server round-trip.</p>
-        </details>
+        
+  </div>
+</details>
       </div>
 
       <div class="meth-step" id="code-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Two traps</h3></div>
         <p><strong>Units differ by lever.</strong> <code>rffintay_aerr</code> is in percentage points (1.0 = a 100bp tightening); spending levers such as <code>egfe_aerr</code> are in log points of quarterly growth, not billions of dollars. A dollar-sized number diverges the solver.</p>
-        <details class="about">
-          <summary>About this step</summary>
+        <details class="xp">
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <div class="xp-body">
         <p><strong>Each rule reads its own add-error.</strong> <code>rffintay_aerr</code> works only under <code>inertial_taylor</code>; <code>taylor</code> rejects it and points to <code>rfftay_aerr</code>.</p>
           <p>The rejection replaces what would otherwise be silent all-zero responses.</p>
-        </details>
+        
+  </div>
+</details>
       </div>
 
       <div class="meth-step" id="code-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Choose the policy rule</h3></div>
         <p><code>frbus_shock</code> takes a <code>policy_rule</code>: <code>inertial_taylor</code> (the default, the LONGBASE rule, used by the validation numbers), <code>taylor</code> (the non-inertial variant), or <code>fixed_funds_rate</code>, which holds the funds rate on its baseline path, so there is no <a class="gloss-link" href="/glossary#exogenous">endogenous</a> monetary offset.</p>
-        <details class="about">
-          <summary>About this step</summary>
+        <details class="xp">
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <div class="xp-body">
           <p>The rule is usually the point of the exercise: a four-quarter federal-purchases shock of 0.01 log points peaks higher on real GDP with the funds rate fixed, and the price-level response is larger still.</p>
-        </details>
+        
+  </div>
+</details>
       </div>
 
       <div class="meth-step" id="code-4" data-step="3">
@@ -114,10 +123,13 @@ pe-macro frbus-summary</code></pre></div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/us-frb-model
 cd us-frb-model
 uv venv &amp;&amp; uv pip install -e ".[dev]"</code></pre></div>
-        <details class="about">
-          <summary>About this step</summary>
+        <details class="xp">
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <div class="xp-body">
           <p>The Board's raw materials are vendored unmodified, so there is no data download, but you clone rather than pip-install from an index.</p>
-        </details>
+        
+  </div>
+</details>
       </div>
 
       <div class="meth-step" id="code-5" data-step="4">
@@ -143,8 +155,9 @@ with_adds.loc[start, <span class="kw">"rffintay_aerr"</span>] += 1
 sim = model.solve(start, end, with_adds)
 
 <span class="kw">print</span>((sim.loc[start:end, <span class="kw">"xgdp"</span>] / with_adds.loc[start:end, <span class="kw">"xgdp"</span>] - 1) * 100)</code></pre></div>
-        <details class="about">
-          <summary>About this step</summary>
+        <details class="xp">
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>table, notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <div class="xp-body">
         <div class="table-scroll"><table>
           <caption>Frequently used FRB/US series</caption>
           <thead><tr><th scope="col">code</th><th scope="col">variable</th><th scope="col">role</th></tr></thead>
@@ -162,7 +175,9 @@ sim = model.solve(start, end, with_adds)
           (<code>Frbus(path)</code>, <code>.init_trac()</code>,
           <code>.solve()</code>, <code>.exogenize()</code>), so the Board's
           demo scripts port across with minimal change.</p>
-        </details>
+        
+  </div>
+</details>
       </div>
       </div>
     </div>

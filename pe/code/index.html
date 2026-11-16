@@ -88,8 +88,9 @@ pe-macro population-impact --country uk \
   --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}'
 
 pe-macro parameters   <span class="cm"># the levers you can write reforms against</span></code></pre></div>
-        <details class="about">
-          <summary>About this step</summary>
+        <details class="xp">
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>table, notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <div class="xp-body">
         <div class="table-scroll mo-tablecard"><table>
           <caption>The five tools and their CLI mirrors</caption>
           <thead><tr><th scope="col">MCP tool</th><th scope="col">CLI mirror</th></tr></thead>
@@ -108,7 +109,9 @@ pe-macro parameters   <span class="cm"># the levers you can write reforms agains
         </div>
         <p class="kv-title">CLI mirrors</p>
           <p>The third route is the Python package, <code>import policyengine as pe</code>, used in the steps below.</p>
-        </details>
+        
+  </div>
+</details>
       </div>
 
       <div class="meth-step" id="code-install" data-step="1">
@@ -143,13 +146,16 @@ us = pe.us.calculate_household(
     reform={<span class="kw">"gov.irs.credits.ctc.amount.adult_dependent"</span>: 1000},
 )
 <span class="kw">print</span>(us.tax_unit.income_tax, us.household.household_net_income)</code></pre></div>
-        <details class="about">
-          <summary>About this step</summary>
+        <details class="xp">
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <div class="xp-body">
           <h4>US households</h4>
           <p>A US household needs its five-digit <code>county_fips</code>, or an explicit <code>spm={"geography_kind": "national"}</code>: US results include the Supplemental Poverty Measure, and a state alone does not identify its geography.</p>
           <h4>Household-level reform impact</h4>
           <p>Run with and without <code>reform</code> and take the difference. For the UK earner above, a 25% basic rate (<code>{"gov.hmrc.income_tax.rates.uk[0].rate": 0.25}</code>) adds <strong>£1,872</strong> of income tax and cuts net income by the same amount.</p>
-        </details>
+        
+  </div>
+</details>
       </div>
 
       <div class="meth-step" id="code-population" data-step="3">
@@ -169,8 +175,9 @@ agg = Aggregate(simulation=simulation, variable=<span class="kw">"universal_cred
                 aggregate_type=AggregateType.SUM, entity=<span class="kw">"benunit"</span>)
 agg.run()
 <span class="kw">print</span>(f<span class="kw">"Total UC spending: £{agg.result / 1e9:.1f}bn"</span>)</code></pre></div>
-        <details class="about">
-          <summary>About this step</summary>
+        <details class="xp">
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <div class="xp-body">
         <div class="callout">
           UK population microdata is gated. To run UK population examples locally, set
           <code>HUGGING_FACE_TOKEN</code> from an account with access to
@@ -178,7 +185,9 @@ agg.run()
         </div>
           <h4>Reproduce the headline costing</h4>
           <p>One test re-runs the <a href="/pe/validation">validation tab</a>&rsquo;s 1p basic-rate figure. It needs the microdata token: <code>HUGGING_FACE_TOKEN=&hellip; pytest integration/tests/test_population.py --runslow -k basic_rate</code>.</p>
-        </details>
+        
+  </div>
+</details>
       </div>
       </div>
     </div>

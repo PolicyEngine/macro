@@ -243,8 +243,29 @@ MORE_OPEN = re.compile(r'<details class="more"><summary><span class="more-title"
 DETAILS_TAG = re.compile(r"<(/?)details\b[^>]*>")
 
 
+ABOUT_OPEN = re.compile(r'<details class="about"(?: id="[^"]*")?>\s*<summary(?: [^>]*)?>(.*?)</summary>', re.S)
+
+
+def _close(html: str, start: int):
+    depth = 1
+    for t in DETAILS_TAG.finditer(html, start):
+        depth += -1 if t.group(1) else 1
+        if depth == 0:
+            return t
+    raise ValueError("unbalanced details")
+
+
 def to_shared_expander(html: str) -> str:
-    """Our r12 'more' folds become the shell's one expander (.xp)."""
+    """Our r12 'more' folds and the plain 'About this step' folds become the
+    shell's one expander (.xp), so every tab has a single expander style."""
+    while True:
+        m = ABOUT_OPEN.search(html)
+        if not m:
+            break
+        end = _close(html, m.end())
+        body = html[m.end():end.start()].strip("\n")
+        title = re.sub(r"<[^>]+>", "", m.group(1)).strip() or "More detail"
+        html = html[:m.start()] + site_nav.expander("list", title, _summarise(body), body) + html[end.end():]
     while True:
         m = MORE_OPEN.search(html)
         if not m:
