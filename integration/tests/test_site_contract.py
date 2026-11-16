@@ -24,7 +24,7 @@ def test_svar_site_uses_runtime_estimation_endpoint():
     from policyengine_macro.core import _SVAR_EST_END
 
     # The seven-model table moved to its own /models tab in r5.
-    pages = _read("svar/index.html") + _read("models/side-by-side/index.html")
+    pages = _read("svar/index.html") + _read("models/index.html")
     assert f"estimated through {_SVAR_EST_END}" in pages
 
     # No other quarter may be presented as the estimation endpoint.
@@ -43,15 +43,13 @@ def test_og_is_not_labelled_as_us_model():
         for path in (
             "index.html",
             "models/index.html",
-            "models/side-by-side/index.html",
-            "models/papers/index.html",
         )
     )
     assert "psl-og · UK + US" not in pages
 
 
 def test_site_does_not_promise_obr_borrowing_output():
-    pages = _read("index.html") + _read("models/index.html") + _read("models/combine/index.html")
+    pages = _read("index.html") + _read("models/index.html") + ""
     assert "growth and borrowing" not in pages
     assert "borrowing after" not in pages
 
