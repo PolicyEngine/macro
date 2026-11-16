@@ -2009,9 +2009,9 @@ def longbase_layer(column: str, last_observed: str) -> str:
 
 LONGBASE_LABEL = "FRB/US LONGBASE baseline (Fed staff, April 2026 vintage)"
 LONGBASE_SOURCE = (
-    'FRB/US LONGBASE, <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/'
-    'papers/frb-us/figures/longbase_baseline_yoy.csv">longbase_baseline_yoy.csv</a>, '
-    "extracted 2026-07-29 from LONGBASE.TXT; no bands, because none are published"
+    '<a href="https://github.com/PolicyEngine/macro/blob/main/'
+    'papers/frb-us/figures/longbase_baseline_yoy.csv">FRB/US LONGBASE</a> '
+    "(extracted 2026-07-29); no bands"
 )
 
 
