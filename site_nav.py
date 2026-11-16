@@ -119,6 +119,26 @@ def icon(key: str, size: int = 16, cls: str = "i") -> str:
         f'stroke-linejoin="round" aria-hidden="true">{ICONS[key]}</svg>'
     )
 
+# Small flag marks for the UK | US segmented control (style.css "Country switch").
+FLAGS = {
+    "uk": ('<rect width="60" height="30" fill="#012169"/>'
+           '<path d="M0 0l60 30M60 0L0 30" stroke="#FFF" stroke-width="6"/>'
+           '<path d="M0 0l60 30M60 0L0 30" stroke="#C8102E" stroke-width="2"/>'
+           '<path d="M30 0v30M0 15h60" stroke="#FFF" stroke-width="10"/>'
+           '<path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/>', "0 0 60 30"),
+    "us": ('<rect width="19" height="13" fill="#B22234"/>'
+           '<path d="M0 1.5h19M0 3.5h19M0 5.5h19M0 7.5h19M0 9.5h19M0 11.5h19" stroke="#FFF" stroke-width="1"/>'
+           '<rect width="8" height="7" fill="#3C3B6E"/>', "0 0 19 13"),
+}
+
+
+def flag(code: str) -> str:
+    """A 16x11 flag mark for a country segment (decorative; the label carries the name)."""
+    body, box = FLAGS[code]
+    return (f'<svg class="flag" viewBox="{box}" width="16" height="11" '
+            f'preserveAspectRatio="none" aria-hidden="true">{body}</svg>')
+
+
 MODEL_ROOTS = {"models", "obr", "svar", "frb-us", "us-hank", "olg", "pe", "define"}
 EVIDENCE_ROOTS = {"papers", "reports"}
 

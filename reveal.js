@@ -409,3 +409,54 @@
     s.classList.add("has-ic");
   });
 })();
+
+/* Country switch (.seg): one sliding indicator under the active segment.
+   Without this script the active segment carries its own fill (style.css §39). */
+(function () {
+  var segs = document.querySelectorAll(".seg");
+  if (!segs.length) return;
+  var ACTIVE = '.is-on, [aria-pressed="true"]';
+  function place(seg, target, animate) {
+    var on = target || seg.querySelector(ACTIVE);
+    var ind = seg.querySelector(".seg-ind");
+    if (!ind) return;
+    if (!on || !on.offsetWidth) { ind.style.opacity = "0"; return; }
+    ind.style.opacity = "1";
+    if (!animate) seg.classList.add("seg-still");
+    seg.style.setProperty("--seg-x", on.offsetLeft + "px");
+    seg.style.setProperty("--seg-w", on.offsetWidth + "px");
+    if (!animate) { void ind.offsetWidth; seg.classList.remove("seg-still"); }
+  }
+  Array.prototype.forEach.call(segs, function (seg) {
+    var ind = document.createElement("span");
+    ind.className = "seg-ind";
+    ind.setAttribute("aria-hidden", "true");
+    seg.insertBefore(ind, seg.firstChild);
+    seg._segHome = seg.querySelector(".is-on");
+    place(seg, null, false);
+    seg.classList.add("has-ind");
+    if (window.MutationObserver) {
+      new MutationObserver(function (list) {
+        for (var i = 0; i < list.length; i++) if (list[i].target !== seg && list[i].target !== ind) { place(seg, null, true); return; }
+      }).observe(seg, { subtree: true, attributes: true, attributeFilter: ["aria-pressed", "class"] });
+    }
+    /* a country link navigates: slide to it first so the switch reads as one control */
+    seg.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest("a.cc-tog");
+      if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+      var cur = seg.querySelector(".is-on");
+      if (cur && cur !== a) { cur.classList.remove("is-on"); a.classList.add("is-on"); }
+    });
+  });
+  function all() { Array.prototype.forEach.call(segs, function (s) { place(s, null, false); }); }
+  window.addEventListener("resize", all);
+  /* back from a country link (bfcache): put the current country back */
+  window.addEventListener("pageshow", function () {
+    Array.prototype.forEach.call(segs, function (s) {
+      var home = s._segHome, cur = s.querySelector(".is-on");
+      if (home && cur && cur !== home) { cur.classList.remove("is-on"); home.classList.add("is-on"); }
+    });
+    all();
+  });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(all);
+})();
