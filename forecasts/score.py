@@ -897,6 +897,7 @@ _ICON_PATHS = {
     "history": '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
     "clock": '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
     "activity": '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+    "alert": '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
     "calendar": '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
     "equal": '<path d="M5 9h14"/><path d="M5 15h14"/>',
 }
@@ -959,41 +960,9 @@ def render_status(card: dict) -> str:
         next_sub = f"Next: <span class=\"nowrap\">{esc(pending['period'])}</span> {esc(who)}."
     else:
         next_sub = "Every archived period has an outturn."
-    pips = bars = ""
-    if scored:
-        in68 = sum(1 for e in entries if e["in_68"])
-        in90 = sum(1 for e in entries if e["in_90"])
-        mae = sum(e["abs_error"] for e in entries) / scored
-        naive = [e["naive_abs_error"] for e in entries if e.get("naive_abs_error") is not None]
-        naive_vs = (", lower than the model's"
-                    if sum(naive) < sum(e["abs_error"] for e in entries) else "")
-        st = record_stats(card)
-        cover_value = f"{st['exante_in68']} of {st['exante']}"
-        cover_sub = (f"Made before the outturn. Retroactive: {st['retro_in68']} of {st['retro']}; "
-                     f"all {scored}: {in68} inside 68%, {in90} inside 90%. Bands as archived.")
-        mae_value = f"{mae:.2f}pp"
-        if len(naive) == scored:
-            naive_mae = sum(naive) / len(naive)
-            mae_sub = f"Same {scored} forecasts, both measured against the outturn."
-            top = max(mae, naive_mae)
-            bars = (
-                '          <div class="fc-bars" aria-hidden="true">'
-                f'<span class="fc-bar-l">This model {mae:.2f}pp</span><span class="fc-bar"><i class="fc-bar-ours" style="width:{mae / top * 100:.0f}%"></i></span>'
-                f'<span class="fc-bar-l">No-change baseline {naive_mae:.2f}pp</span><span class="fc-bar"><i class="fc-bar-naive" style="width:{naive_mae / top * 100:.0f}%"></i></span>'
-                "</div>"
-            )
-        else:
-            mae_sub = "No complete no-change baseline."
-        first = card["detail"][0]["round_id"] if card["detail"] else None
-        ex = [e for d, e in pairs if d["round_id"] != first]
-        pips = (
-            f'          <span class="fc-pips" role="img" aria-label="{st["exante_in68"]} of {st["exante"]} ex-ante forecasts inside the 68% band">'
-            + "".join(f'<i class="{"in" if e["in_68"] else "out"}"></i>' for e in ex)
-            + "</span>"
-        )
-    else:
-        cover_value, cover_sub = "—", "Nothing scored yet."
-        mae_value, mae_sub = "—", "Nothing scored yet."
+    st = record_stats(card)
+    first = card["detail"][0]["round_id"] if card["detail"] else None
+    ex = [e for d, e in pairs if d["round_id"] != first]
     # Say plainly how current the record is (r5 usability test, #220): the date
     # is the newest outturn snapshot any scored forecast was read from.
     if scored:
@@ -1004,40 +973,45 @@ def render_status(card: dict) -> str:
     else:
         asof = '      <p class="record-asof"><strong>Nothing scored yet.</strong></p>'
 
-    def tile(ic: str, value: str, label: str, sub: str, extra: str = "") -> list[str]:
+    def tile(ic: str, label: str, value: str, sub: str, extra: str = "", cls: str = "") -> list[str]:
         return [
-            '        <div class="fc-tile">',
+            f'        <div class="fc-tile{(" " + cls) if cls else ""}">',
             f'          <span class="fc-tile-l">{icon(ic)}{label}</span>',
-            f'          <span class="fc-tile-v">{value}</span>',
+            *([f'          <span class="fc-tile-v">{value}</span>'] if value else []),
             *([extra] if extra else []),
             f'          <span class="fc-tile-s">{sub}</span>',
             "        </div>",
         ]
 
-    verdict = ""
-    bias_tile = []
-    if scored and len(naive) == scored:
-        closer = "smaller" if mae < naive_mae else ("larger" if mae > naive_mae else "the same")
-        verdict = (f'      <p class="fc-verdict">{icon("target")}<span><strong>So far:</strong> '
-                   f'{scored} forecasts of {st["outturns"]} outturns. Made before the outturn, '
-                   f'{st["exante_in68"]} of {st["exante"]} fell inside the 68% band; the {st["retro"]} archived '
-                   f'retroactively are shown apart. Average miss {mae:.2f}pp, {closer} than a no-change '
-                   f'forecast ({naive_mae:.2f}pp); {st["low"]} of {scored} ran low. Too few to show skill: '
-                   '<a href="#limits">limits</a>.</span></p>')
-        sign = "\u2212" if st["bias"] < 0 else "+"
-        bias_tile = tile("scale", f'{sign}{abs(st["bias"]):.2f}pp', "Bias (mean error)",
-                         f'{st["low"]} of {scored} ran low' if st["bias"] < 0 else f'{scored - st["low"]} of {scored} ran high')
+    if not scored:
+        return "\n".join([asof, '      <div class="fc-tiles ab-card" aria-label="The record so far"></div>'])
+    pips = (f'          <span class="fc-pips" role="img" aria-label="{st["exante_in68"]} of {st["exante"]} '
+            'ex-ante forecasts inside the 68% band">'
+            + "".join(f'<i class="{"in" if e["in_68"] else "out"}"></i>' for e in ex) + "</span>")
+    tiles = tile("target", "Inside the 68% band, made before the outturn",
+                 f'{st["exante_in68"]} of {st["exante"]}',
+                 f'+{st["retro"]} retroactive · {scored} forecasts of {st["outturns"]} outturns', pips)
+    if st["naive_mae"] is not None:
+        top = max(st["mae"], st["naive_mae"])
+        bars = ('          <div class="fc-bars" role="img" aria-label="Average miss: this model '
+                f'{st["mae"]:.2f}pp, no-change forecast {st["naive_mae"]:.2f}pp">'
+                f'<span class="fc-bar-l">This model {st["mae"]:.2f}pp</span><span class="fc-bar"><i class="fc-bar-ours" style="width:{st["mae"] / top * 100:.0f}%"></i></span>'
+                f'<span class="fc-bar-l">No change {st["naive_mae"]:.2f}pp</span><span class="fc-bar"><i class="fc-bar-naive" style="width:{st["naive_mae"] / top * 100:.0f}%"></i></span>'
+                "</div>")
+        tiles += tile("ruler", "Average miss", "", "Lower is better; same forecasts, same outturns.", bars)
+    sign = "\u2212" if st["bias"] < 0 else "+"
+    runs = (f'Ran low on {st["low"]} of {scored}' if st["bias"] < 0
+            else f'Ran high on {scored - st["low"]} of {scored}')
+    tiles += tile("scale", "Bias, mean error", f'{sign}{abs(st["bias"]):.2f}pp', runs)
+    tiles += tile("layers", "Rounds", f'{scored_rounds} scored', next_sub)
+    chip = (f'      <p class="fc-skill"><span class="fc-skill-chip">{icon("alert")}Too few to show skill</span>'
+            '<a href="#limits">Limits</a></p>')
     return "\n".join([
         asof,
-        *([verdict] if verdict else []),
         '      <div class="fc-tiles ab-card" aria-label="The record so far">',
-        *tile("target", cover_value, "Inside the 68% band", cover_sub, pips),
-        *tile("ruler", mae_value, "Mean absolute error", mae_sub, bars),
-        *bias_tile,
-        *tile("layers", f"{scored_rounds} of {rounds}", f"Round{'' if rounds == 1 else 's'} scored",
-              next_sub),
-        *([] if verdict else [f'        <p class="fc-callout">{icon("info")}<span>{scored} scores are too few to show skill either way. <a href="#limits">Limits</a></span></p>']),
+        *tiles,
         "      </div>",
+        chip,
     ])
 
 
