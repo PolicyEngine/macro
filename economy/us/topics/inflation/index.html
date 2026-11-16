@@ -106,21 +106,7 @@
       <p class="section-intro">The model view, with its limits beside it.</p>
     </div>
     <div class="prose">
-      <p>
-        <strong>No model in this suite forecasts the US economy. The only member whose question types include <span class="mono">forecast</span> is <a href="/svar">boe-svar</a>, and its geography is UK-only.</strong> Both US models report a price
-        response, and neither reports a price <em>path</em>:
-      </p>
-      <ul>
-        <li><a href="/frb-us">frb-us</a> answers <span class="mono">economic_shock</span> and nothing else. Its predictive validation is <span class="mono">not_assessed</span> — &ldquo;LONGBASE is an illustrative tracking baseline, not an official Fed forecast, and no historical forecast evaluation is published here.&rdquo;</li>
-        <li><a href="/us-hank">us-hank</a> answers <span class="mono">economic_shock</span>, and the first thing it cannot answer is forecasts (<a class="gloss-link" href="/glossary#irf">IRFs</a> around a calibrated steady state, not a forecaster). Its predictive validation is <span class="mono">not_applicable</span> — &ldquo;The model produces impulse responses around a calibrated steady state; it is not a forecaster and makes no predictive claims.&rdquo;</li>
-        <li>us-hank outputs <span class="mono">gdp</span>, <span class="mono">consumption</span>, <span class="mono">investment</span>, <span class="mono">inflation</span>, <span class="mono">real_rate</span> as quarterly impulse responses, typically 5 years around a calibrated steady state, with uncertainty none quantified; deterministic linear IRFs.</li>
-        <li>Neither model is scored against an inflation outturn anywhere on this site, because neither produces one to score.</li>
-      </ul>
-      <p>
-        The conditioning baseline the frb-us experiments deviate from does
-        carry a CPI path, and it is shown for the same reason as on the growth
-        page, with the same caveat:
-      </p>
+      <p class="model-chips"><span class="mchip mchip-none"><svg class="i" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>No forecast</span><a class="mchip" href="/frb-us"><svg class="i" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>FRB/US baseline</a><span class="mchip-t">the CPI path frb-us shocks deviate from; not a forecast</span></p>
       <figure class="vchart-figure">
 <div class="vc-fig vc-ygutter" data-chart="us-topic-cpi-path">
 <p class="vc-unit">US CPI inflation, % change on a year earlier</p>
@@ -181,15 +167,18 @@
         </table>
       </div>
       </details>
-      <p class="callout">
-        <strong>No core CPI.</strong> The UK inflation topic carries core CPI
-        beside the headline because the ONS series DKO8 is in the store. There
-        is no US core series in the store at all: adding one means adding
-        CPILFESL to the FRED table in
-        <span class="mono">data/fetch.py</span> and letting the append-only
-        fetcher accumulate vintages for it. Until that happens this page shows
-        headline only, and says so rather than leaving the gap to be noticed.
-      </p>
+      <details class="about tg-layers"><summary>Why there is no US price path</summary>
+      <p>Only <a href="/svar">boe-svar</a> forecasts, and it is UK-only. Both US models report a price response, and neither reports a price <em>path</em>:</p>
+      <ul>
+        <li><a href="/frb-us">frb-us</a> answers <span class="mono">economic_shock</span> and nothing else. Its predictive validation is <span class="mono">not_assessed</span> — &ldquo;LONGBASE is an illustrative tracking baseline, not an official Fed forecast, and no historical forecast evaluation is published here.&rdquo;</li>
+        <li><a href="/us-hank">us-hank</a> answers <span class="mono">economic_shock</span>, and the first thing it cannot answer is forecasts (<a class="gloss-link" href="/glossary#irf">IRFs</a> around a calibrated steady state, not a forecaster). Its predictive validation is <span class="mono">not_applicable</span> — &ldquo;The model produces impulse responses around a calibrated steady state; it is not a forecaster and makes no predictive claims.&rdquo;</li>
+        <li>us-hank outputs <span class="mono">gdp</span>, <span class="mono">consumption</span>, <span class="mono">investment</span>, <span class="mono">inflation</span>, <span class="mono">real_rate</span> as quarterly impulse responses, typically 5 years around a calibrated steady state, with uncertainty none quantified; deterministic linear IRFs.</li>
+        <li>Neither model is scored against an inflation outturn anywhere on this site, because neither produces one to score.</li>
+      </ul>
+      </details>
+      <details class="about tg-info"><summary>No core CPI</summary>
+      <p>There is no US core series in the store, so this page shows headline CPI only. Adding one means adding CPILFESL to the FRED table in <span class="mono">data/fetch.py</span> and letting vintages accumulate.</p>
+      </details>
     </div>
   </section>
 
