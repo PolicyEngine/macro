@@ -1282,8 +1282,6 @@ def rates_model() -> str:
     return f"""    <div class="prose">
       <p>
         <strong>No model in this suite forecasts Bank Rate or gilt yields.</strong>
-        This page does not present that gap as coverage. What the registry
-        says:
       </p>
 {limits_list([
         f"<a href=\"/svar\">BoE SVAR</a> outputs {registry_terms(svar['outputs'])} — no interest-rate path is among them.",
@@ -1291,17 +1289,9 @@ def rates_model() -> str:
         f"<a href=\"/olg\">{site_name('og-uk')}</a> does report an interest rate, but only as part of a {esc(og['horizon'].split(';')[0])}, and it cannot answer a {esc(og['cannot_answer'][0])}. A long-run comparative static is not a market view.",
         f"<a href=\"/frb-us\">frb-us</a> produces a {esc(frbus['outputs'][-1])}, for the {esc(', '.join(frbus['geography']).upper())} only.",
     ])}
-      <p>
-        So the numbers above stand alone: observed Bank of England data, dated
-        and archived, with no forecast beside them. They still do work here —
-        they are the market backdrop the other topics are read against, and the
-        conditioning environment any future rate model would have to beat.
-      </p>
       <p class="callout">
-        This is the one topic where the useful output is a refusal. If you need
-        a rate forecast, the suite does not have one; the
-        <a href="/models">model directory</a> shows what it does have, and
-        <a href="/models#validation">the evidence page</a> shows how well.
+        The numbers above stand alone: observed data with no forecast beside them.
+        <a href="/models">See what the models do cover →</a>
       </p>
     </div>"""
 
@@ -2553,12 +2543,9 @@ def us_rates_model() -> str:
 {us_rates_chart()}
       </figure>
       <p class="callout">
-        This is the one US topic where the useful output is a refusal, and it
-        is the same refusal the <a href="/economy/topics/rates">UK rates and
-        gilts page</a> reaches for Bank Rate and gilt yields. If you need a
-        rate forecast, the suite does not have one; the
-        <a href="/models">model directory</a> shows what it does have, and
-        <a href="/models#validation">the evidence page</a> shows how well.
+        No model here forecasts US rates, as on the
+        <a href="/economy/topics/rates">UK rates page</a>.
+        <a href="/models">See what the models do cover →</a>
       </p>
     </div>"""
 
@@ -3132,6 +3119,21 @@ def topic_where_next(topic: dict) -> str:
     return site_nav.where_next(cards)
 
 
+SHORT_LEDES = {
+    ("uk", "growth"): "UK output now, and the model's near-term path.",
+    ("uk", "inflation"): "UK CPI and core CPI now, and the model's path.",
+    ("uk", "jobs"): "UK unemployment, pay and vacancies, as last published.",
+    ("uk", "rates"): "Bank Rate and gilt yields, as last published.",
+    ("uk", "public-finances"): "UK borrowing as published, and what the models add.",
+    ("uk", "reform"): "What a UK tax or benefit reform does, and how far models follow.",
+    ("us", "growth"): "US output now, and what the US models can say.",
+    ("us", "inflation"): "US CPI as published, with no US forecast beside it.",
+    ("us", "jobs"): "US unemployment and payrolls, as last published.",
+    ("us", "rates"): "The fed funds rate and Treasury yields, as last published.",
+    ("us", "reform"): "What a US reform does, and how far models follow.",
+}
+
+
 def page(topic: dict) -> str:
     slug = topic["slug"]
     url = topic_url(topic)
@@ -3148,6 +3150,18 @@ def page(topic: dict) -> str:
         if "data" in topic
         else data_layer(topic["series"], topic["data_note"])
     )
+    moved = re.search(r'\s*<p class="economy-method">Change: (.*?)\.</p>', stands_body, re.S)
+    stands_main = stands_body.replace(moved.group(0), "") if moved else stands_body
+    xp_moved = ""
+    if moved:
+        rows = "".join(
+            f"<li>{part.strip()}</li>" for part in moved.group(1).split(";") if part.strip()
+        )
+        xp_moved = site_nav.expander(
+            "activity", "How it moved", "Change since the previous reading.",
+            f'<ul class="xp-list">{rows}</ul>',
+        )
+    short = SHORT_LEDES.get((topic["country"], slug))
     head = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -3170,6 +3184,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=1" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -3179,21 +3194,21 @@ def page(topic: dict) -> str:
   <section class="hero model-hero">
     <div class="hero-inner">
       <h1 class="page-title">{esc(topic["country"].upper())} {esc(topic["title"][0].lower() + topic["title"][1:])}</h1>
-      <p class="lede">{esc(topic["heading"])} {topic_lede(topic)}</p>
+      <p class="lede">{esc(short) if short else esc(topic["heading"])}</p>
     </div>
   </section>
 
 {subnav(topic["country"], slug)}
 
-{band("stands", "01", "where it stands", "The numbers, as the snapshot stores them.", stands_body)}
+{band("stands", "01", "where it stands", "Latest readings from the stored snapshot.", stands_main)}
 
 {band("model", "02", "what the models see", "The model view, with its limits beside it.", topic["model"](), alt=True)}
 
-{band("run", "03", "run it yourself", "The commands behind this page.", topic["run"]())}
-
-{band("data", "04", "the data behind it", "Source, coverage, and the immutable file.", data_body, alt=True)}
-
-{topic_where_next(topic)}
+  <section class="band xp-stack" aria-label="More detail">
+{xp_moved}
+{site_nav.expander("terminal", "Run it yourself", "The commands and MCP tools behind this page.", topic["run"](), id_="run")}
+{site_nav.expander("database", "Data and sources", "Series, coverage and the append-only snapshot files.", data_body, id_="data")}
+  </section>
 </main>
 
 <footer class="foot foot-bar">
