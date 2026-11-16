@@ -649,7 +649,7 @@ def chart_svar_fan():
         f"{rmse['cpi']:.2f} on CPI. GDP "
         f"medians run {med_g} per cent over the evaluated quarters against outturns of {out_g}; "
         f"CPI medians {med_c} against outturns of {out_c}. A dashed rule in each panel marks "
-        f"{quarters[n_out - 1]}, the last quarter with an outturn: the six quarters to its right "
+        f"{quarters[n_out - 1]}, the last quarter scored (the test was not re-scored on the 2026Q2 refresh): the six quarters to its right "
         f"are forecast with nothing yet to check them against, so the fit shown covers seven of "
         f"the thirteen quarters plotted. This run is {meta['n_draws']:,} posterior draws at seed "
         f"{meta['seed']}, {meta['accepted_forecast']} of which were accepted by the sign "
@@ -720,9 +720,9 @@ def chart_svar_fan():
     out.append("</svg>")
     return chartkit.figure("\n".join(out), legend=[
         ("ln-s1", "median forecast"), ("sw-band", "68% band"), ("sw-dot-out", "ONS outturn"),
-        ("ln-edge", f"last quarter with an outturn ({quarters[n_out - 1]})"),
-    ], unit="% change on a year earlier", notes=[f"Each panel starts at the frozen 2024Q2 edge; the "
-              f"{npts - n_out} quarters right of the dashed rule are not evaluated."])
+        ("ln-edge", f"last quarter scored ({quarters[n_out - 1]})"),
+    ], unit="% change on a year earlier", notes=[f"Each panel starts at the frozen 2024Q2 edge; scored through {quarters[n_out - 1]} and not "
+              f"re-scored on the 2026Q2 refresh; the {npts - n_out} quarters right of the dashed rule are not evaluated."])
 
 
 def chart_obr_computed_share():
