@@ -431,3 +431,99 @@
 @media (max-width: 899px) {
   .doc main:has(> .hero.mh) .stat-row:has(> .stat:nth-child(4):last-child) { grid-template-columns: 1fr 1fr; display: grid; }
 }
+
+/* ================= r12 terse pass: icons everywhere ================= */
+:root {
+  --mi-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5L20 7'/%3E%3C/svg%3E");
+  --mi-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 6 6 6-6 6'/%3E%3C/svg%3E");
+  --mi-gauge: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v18h18'/%3E%3Cpath d='m7 15 4-4 3 3 6-7'/%3E%3C/svg%3E");
+  --mi-shield: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 4 6v6c0 5 3.4 8.3 8 9 4.6-.7 8-4 8-9V6l-8-3Z'/%3E%3Cpath d='m9 12 2 2 4-4'/%3E%3C/svg%3E");
+  --mi-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m13 6 6 6-6 6'/%3E%3C/svg%3E");
+}
+.doc main:has(> .hero.mh) .mi::before,
+.doc main:has(> .hero.mh) .ov-verdict-short::before,
+.doc main:has(> .hero.mh) .stat-row .stat-label::before,
+.doc main:has(> .hero.mh) .prose ul > li::before,
+.doc main:has(> .hero.mh) .meth-step ul > li::before,
+.doc main:has(> .hero.mh) .expander ul > li::before {
+  content: "";
+  display: inline-block;
+  flex: 0 0 auto;
+  background: currentColor;
+  -webkit-mask: var(--mi) center / contain no-repeat;
+          mask: var(--mi) center / contain no-repeat;
+}
+
+/* verdict: chip-length line + Evidence link; the full sentence folds away */
+.doc main:has(> .hero.mh) .ov-verdict-line { align-items: center; }
+.doc main:has(> .hero.mh) .ov-verdict-short {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+.doc main:has(> .hero.mh) .ov-verdict-short::before { --mi: var(--mi-shield); width: 18px; height: 18px; color: var(--teal-600); }
+.doc main:has(> .hero.mh) .ov-verdict-more { flex: 1 0 100%; margin: 0; }
+.doc main:has(> .hero.mh) .ov-verdict-more > summary {
+  cursor: pointer;
+  width: fit-content;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.doc main:has(> .hero.mh) .ov-verdict-more > p { margin: 6px 0 0; font-size: 14px; color: var(--text-muted); max-width: 72ch; }
+
+/* stat tiles: a small chart glyph before every label */
+.doc main:has(> .hero.mh) .stat-row .stat-label { display: flex; align-items: center; gap: 6px; }
+.doc main:has(> .hero.mh) .stat-row .stat-label::before { --mi: var(--mi-gauge); width: 13px; height: 13px; color: var(--primary); }
+
+/* itemised lists: icon bullet + phrase, on every model tab */
+.doc main:has(> .hero.mh) .prose ul,
+.doc main:has(> .hero.mh) .meth-step ul,
+.doc main:has(> .hero.mh) .expander ul { list-style: none; padding-left: 0; }
+.doc main:has(> .hero.mh) .prose ul > li,
+.doc main:has(> .hero.mh) .meth-step ul > li,
+.doc main:has(> .hero.mh) .expander ul > li {
+  position: relative;
+  padding-left: 24px;
+  margin: 6px 0;
+}
+.doc main:has(> .hero.mh) .prose ul > li::before,
+.doc main:has(> .hero.mh) .meth-step ul > li::before,
+.doc main:has(> .hero.mh) .expander ul > li::before {
+  --mi: var(--mi-chevron);
+  position: absolute;
+  left: 2px;
+  top: .42em;
+  width: 14px;
+  height: 14px;
+  color: var(--primary);
+}
+
+/* CTAs: icon-led link cards */
+.doc main:has(> .hero.mh) .where-next .chip::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  background: var(--primary);
+  -webkit-mask: var(--cta-icon, var(--mi-arrow)) center / contain no-repeat;
+          mask: var(--cta-icon, var(--mi-arrow)) center / contain no-repeat;
+}
+.doc main:has(> .hero.mh) .where-next .chip { justify-content: flex-start; }
+.doc main:has(> .hero.mh) .where-next .chip::after { margin-left: auto; }
+.doc main:has(> .hero.mh) .where-next .chip[href$="/validation"] { --cta-icon: var(--mi-shield); }
+.doc main:has(> .hero.mh) .where-next .chip[href*="/papers/"],
+.doc main:has(> .hero.mh) .where-next .chip[href*="/reports/"] { --cta-icon: var(--i-doc); }
+.doc main:has(> .hero.mh) .where-next .chip[href$="/methodology"] { --cta-icon: var(--i-book); }
+.doc main:has(> .hero.mh) .where-next .chip[href^="/connect"],
+.doc main:has(> .hero.mh) .where-next .chip[href$="/code"] { --cta-icon: var(--i-code); }
+.doc main:has(> .hero.mh) .where-next .chip[href^="/models"] { --cta-icon: var(--i-layers); }
+
+/* tighter reading measure: long paragraphs on model tabs */
+.doc main:has(> .hero.mh) .prose > p,
+.doc main:has(> .hero.mh) .meth-step > p { max-width: 68ch; }

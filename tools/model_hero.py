@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=7" />'
+CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=8" />'
 CSS_RE = re.compile(r'<link rel="stylesheet" href="/models/model-pages\.css(?:\?v=\d+)?" />\n?')
 
 sys.path.insert(0, str(ROOT))
@@ -110,9 +110,38 @@ LIMITS_RE = re.compile(r'(?:[ \t]*<details class="expander limit".*?</details>\n
 VERDICT_CHIP_RE = re.compile(r'(<p class="ov-verdict-line">)<a class="chip chip-brand" href="/glossary#[^"]*">[^<]*</a>\s*')
 
 
+# Overview verdicts: at most 8 words visible; the full evidence sentence
+# stays one click away in an expander, and the link goes to Validation.
+SHORT_VERDICT = {
+    "obr": "Scores fiscal changes; not a forecaster.",
+    "pe": "Exact for rules; costings static, no interval.",
+    "svar": "GDP matches the Bank; CPI falls short.",
+    "frb-us": "Solver matches pyfrbus; economics not tested.",
+    "us-hank": "Parameters match the paper; responses not validated.",
+    "olg": "Targets met by construction; no outcome benchmark.",
+    "define": "Deltas only, never levels.",
+}
+VERDICT_RE = re.compile(
+    r'<p class="ov-verdict-line"><span>(?P<full>.*?)</span>\s*'
+    r'<a class="ov-verdict-link" href="(?P<href>[^"]+)">How far to trust it <span aria-hidden="true">&rarr;</span></a></p>',
+    re.S)
+
+
+def verdict(key: str, out: str) -> str:
+    def repl(m: re.Match) -> str:
+        return (
+            f'<div class="ov-verdict-line"><span class="ov-verdict-short">{SHORT_VERDICT[key]}</span>\n'
+            f'      <a class="ov-verdict-link" href="{m.group("href")}">Evidence <span aria-hidden="true">&rarr;</span></a>\n'
+            f'      <details class="ov-verdict-more"><summary>Why</summary><p>{m.group("full")}</p></details></div>'
+        )
+    return VERDICT_RE.sub(repl, out, count=1)
+
+
 def body(rel: str, source: str) -> str:
     out = LEVEL_RE.sub(lambda m: f'<span class="chip" data-level="{LEVELS[m.group(1)]}">{m.group(1)}</span>', source)
     out = VERDICT_CHIP_RE.sub(r"\1", out)
+    if rel == f"{PAGES[rel]}/index.html":
+        out = verdict(PAGES[rel], out)
     # undo the earlier wrapper: .limits groups are styled as lists directly
     out = re.sub(r'      <div class="limit-list">\n((?:[ \t]*<details class="expander limit".*?</details>\n?)+)      </div>\n', r"\1", out, flags=re.S)
     return out
