@@ -8385,3 +8385,42 @@ main :is(.where-next, .tp-next, #where-next) .sh > p { display: none; }
 .tl-foot a { margin-left: 6px; font-weight: 600; }
 @media (max-width: 720px) { .tl-rung { grid-template-columns: 24px minmax(0, 1fr); } .tl-models { grid-column: 2; } }
 @media (prefers-color-scheme: dark) { .tl-rung, .tl-foot { border-color: var(--border); } }
+
+/* =====================================================================
+   33. Fable review of #270: last boxed icons, one table header, zebra
+   that reads as one band, scoreboard and wide tables.
+   ===================================================================== */
+/* 1. bare icons: forecast variable glyph and flow dots */
+.fc-var { background: none !important; border-radius: 0 !important; box-shadow: none !important; }
+.fc-var svg, .fc-var .fc-ic { width: 18px; height: 18px; color: var(--ab-teal-700); }
+.vf-dot, .vf-micro .vf-dot, .vf-out .vf-dot { background: var(--card) !important; box-shadow: none !important; color: var(--ab-teal-700) !important; }
+.vf-micro .vf-dot svg { color: var(--ab-teal-700); }
+.pp-ic, .pp-row .pp-ic, .repo-row .pp-ic { width: 18px !important; height: 18px !important; }
+/* 4. one header and a visible zebra on every shared table */
+main .table-scroll > table:not(.vc-table, .vc-narrow-table) thead th,
+main table.compare-models th, main table.cap-grid thead th, main table.scoreboard thead th {
+  font-size: 12px !important; font-weight: 500 !important; color: #6B7280 !important; letter-spacing: 0 !important; text-transform: none !important;
+}
+main .table-scroll > table:not(.vc-table, .vc-narrow-table) tbody tr > * { background: transparent !important; }
+main .table-scroll > table:not(.vc-table, .vc-narrow-table) tbody tr:nth-child(even) > * { background: #F9FAFB !important; }
+main .table-scroll > table:not(.vc-table, .vc-narrow-table) tbody tr:hover > * { background: color-mix(in srgb, var(--primary) 6%, var(--card)) !important; }
+@media (max-width: 1100px) { main .table-scroll.is-scroll > table tbody tr > :first-child { background: var(--card) !important; } main .table-scroll.is-scroll > table tbody tr:nth-child(even) > :first-child { background: #F9FAFB !important; } }
+@media (prefers-color-scheme: dark) {
+  main .table-scroll > table:not(.vc-table, .vc-narrow-table) thead th { color: var(--text-muted) !important; }
+  main .table-scroll > table:not(.vc-table, .vc-narrow-table) tbody tr:nth-child(even) > * { background: color-mix(in srgb, var(--card) 90%, var(--background)) !important; }
+}
+@media (max-width: 560px) { main .table-scroll > table.tbl-stack tbody tr > *, main .table-scroll > table.tbl-stack tbody tr:nth-child(even) > * { background: none !important; } }
+/* 3. scoreboard: wrap headers, dividers, left target column, scroll cue */
+main table.scoreboard thead th { white-space: normal !important; min-width: 92px; vertical-align: bottom; line-height: 1.3; }
+main table.scoreboard :is(th, td) { border-bottom: 1px solid #F1F3F5; }
+main table.scoreboard :is(th, td):first-child { text-align: left !important; }
+main :has(> table.scoreboard) { overflow-x: auto; }
+main table.scoreboard td small, main table.scoreboard td .fc-note, main table.scoreboard td .sb-note { display: block; margin-top: 2px; }
+/* 5. wide tables: first column stays one line and sticks while scrolling */
+main .table-scroll.is-scroll > table tbody tr > :first-child { white-space: nowrap; min-width: 140px; }
+main .table-scroll > table thead th[colspan] { text-align: center; }
+/* 6. yes/no in the compare table as chips, like Hosted / Local */
+#compare .yn { height: 24px; padding: 0 9px 0 7px; border-radius: 999px; font-size: 12px; }
+#compare .yn-yes { background: color-mix(in srgb, var(--ab-gain) 12%, transparent); }
+#compare .yn-no { background: #F3F4F6; }
+@media (prefers-color-scheme: dark) { #compare .yn-no { background: color-mix(in srgb, var(--card) 70%, var(--background)); } }
