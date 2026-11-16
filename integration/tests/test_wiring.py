@@ -445,7 +445,7 @@ def test_obr_bank_rate_and_household_levers_are_listed_with_caveats():
     from policyengine_macro import core
 
     levers = {v["var"]: v for v in core.obr_list_variables()}
-    assert "3-5 times" in levers["R"]["caveat"]
+    assert "3.5-6 times" in levers["R"]["caveat"]
     assert "pp" in levers["R"]["units"]
     assert "current_price" in levers["HHDI_ADDFACTOR"]["caveat"]
     assert "positive = household income falls" in levers["HHDI_ADDFACTOR"]["units"]

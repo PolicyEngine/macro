@@ -191,7 +191,7 @@ OBR_VARIABLES = [
         "caveat": (
             "only consumption and interest flows respond to the policy rate in "
             "this model; business investment and CPI do not, so the GDP fall is "
-            "about 3-5 times smaller than the Bank of England's published range "
+            "about 3.5-6 times smaller than the Bank of England's published range "
             "for a comparable rise. Read the sign and rough size, not the "
             "magnitude"
         ),
