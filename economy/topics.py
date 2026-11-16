@@ -2345,11 +2345,15 @@ def us_inflation_note() -> str:
 def us_inflation_model() -> str:
     facts = us_inflation_facts()
     hank = MODELS["us-hank"]
+    no_us_forecaster()  # raises if a US forecaster enters the registry
     return f"""    <div class="prose">
-      <p>
-        <strong>{no_us_forecaster()}</strong> Both US models report a price
-        response, and neither reports a price <em>path</em>:
-      </p>
+      <p class="model-chips"><span class="mchip mchip-none">{site_nav.icon("x-circle", 14)}No forecast</span><a class="mchip" href="/frb-us">{site_nav.icon("building", 14)}FRB/US baseline</a><span class="mchip-t">the CPI path frb-us shocks deviate from; not a forecast</span></p>
+      <figure class="vchart-figure">
+{us_baseline_chart("us-topic-cpi-path", "US CPI inflation", "% change on a year earlier", "cpi_yoy_pct", facts["cpi"], yoy(facts["cpi"], 12)[-24:], ", inflation derived from the stored index")}
+      </figure>
+{longbase_expander("cpi_yoy_pct", facts["now"]["period"])}
+      <details class="about tg-layers"><summary>Why there is no US price path</summary>
+      <p>Only <a href="/svar">boe-svar</a> forecasts, and it is UK-only. Both US models report a price response, and neither reports a price <em>path</em>:</p>
 {us_model_limits([
         f'us-hank outputs {registry_terms(hank["outputs"])} as '
         f'{esc(hank["horizon"])} around a calibrated steady state, with '
@@ -2357,24 +2361,10 @@ def us_inflation_model() -> str:
         "Neither model is scored against an inflation outturn anywhere on this "
         "site, because neither produces one to score.",
     ])}
-      <p>
-        The conditioning baseline the frb-us experiments deviate from does
-        carry a CPI path, and it is shown for the same reason as on the growth
-        page, with the same caveat:
-      </p>
-      <figure class="vchart-figure">
-{us_baseline_chart("us-topic-cpi-path", "US CPI inflation", "% change on a year earlier", "cpi_yoy_pct", facts["cpi"], yoy(facts["cpi"], 12)[-24:], ", inflation derived from the stored index")}
-      </figure>
-{longbase_expander("cpi_yoy_pct", facts["now"]["period"])}
-      <p class="callout">
-        <strong>No core CPI.</strong> The UK inflation topic carries core CPI
-        beside the headline because the ONS series DKO8 is in the store. There
-        is no US core series in the store at all: adding one means adding
-        CPILFESL to the FRED table in
-        <span class="mono">data/fetch.py</span> and letting the append-only
-        fetcher accumulate vintages for it. Until that happens this page shows
-        headline only, and says so rather than leaving the gap to be noticed.
-      </p>
+      </details>
+      <details class="about tg-info"><summary>No core CPI</summary>
+      <p>There is no US core series in the store, so this page shows headline CPI only. Adding one means adding CPILFESL to the FRED table in <span class="mono">data/fetch.py</span> and letting vintages accumulate.</p>
+      </details>
     </div>"""
 
 
