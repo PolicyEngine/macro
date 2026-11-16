@@ -762,10 +762,15 @@ def stands(cards: tuple[tuple[str, str | None], ...], note: str,
     provenance table are keyed on.
     """
     rendered = "\n".join(stat_card(load(name), kind) for name, kind in cards)
+    measured = (
+        '    <details class="about"><summary>How these are measured</summary>'
+        f'<p class="economy-method">{note}</p></details>'
+        if note else ""
+    )
     return f"""    <div class="stat-row">
 {rendered}
     </div>
-    <p class="economy-method">{note}</p>
+{measured}
 {movement_note(names)}"""
 
 
@@ -805,7 +810,7 @@ def data_layer(names: tuple[str, ...], closing: str) -> str:
         </table>
       </div>
       <p class="chooser-note">{closing}</p>
-      <p class="chooser-note">The snapshot files are append-only and never edited, so a number published here can be reproduced against the data as it stood — <a href="/economy#data">browse the store, its release calendar, and the as-of recipe →</a></p>
+      <p class="chooser-note">The snapshot files are append-only and never edited, so a number published here can be reproduced against the data as it stood. <a href="/economy#data">browse the store, its release calendar, and the as-of recipe →</a></p>
     </div>"""
 
 
@@ -1283,12 +1288,14 @@ def rates_model() -> str:
       <p>
         <strong>No model in this suite forecasts Bank Rate or gilt yields.</strong>
       </p>
+      <details class="about"><summary>What each model covers instead</summary>
 {limits_list([
         f"<a href=\"/svar\">BoE SVAR</a> outputs {registry_terms(svar['outputs'])} — no interest-rate path is among them.",
         f"<a href=\"/pe\">pe-microsim</a> lists {esc(microsim['cannot_answer'][2])} in its own cannot-answer field.",
         f"<a href=\"/olg\">{site_name('og-uk')}</a> does report an interest rate, but only as part of a {esc(og['horizon'].split(';')[0])}, and it cannot answer a {esc(og['cannot_answer'][0])}. A long-run comparative static is not a market view.",
         f"<a href=\"/frb-us\">frb-us</a> produces a {esc(frbus['outputs'][-1])}, for the {esc(', '.join(frbus['geography']).upper())} only.",
     ])}
+      </details>
       <p class="callout">
         The numbers above stand alone: observed data with no forecast beside them.
         <a href="/models">See what the models do cover →</a>
@@ -1799,14 +1806,10 @@ def us_platform() -> str:
         ),
     ]
     return f"""    <div class="prose">
-      <p>
-        Two things the UK side has and the US does not:
-      </p>
 {limits_list([
         "<strong>No reform with macro feedback.</strong> "
         f'{model_link("frb-us")} and {model_link("us-hank")} do not take PolicyEngine '
         "reforms; no mapping exists from a US statutory reform to a US macro model.",
-        f'<strong>No forecast.</strong> Only {model_link("boe-svar")} forecasts, and it is UK-only.',
     ])}
       <details class="about route-details">
         <summary>The routes, with the command for each</summary>
@@ -2775,7 +2778,7 @@ UK_TOPICS = [
         "series": ("uk_cpi_yoy", "uk_core_cpi_yoy"),
         "hook": inflation_hook,
         "stands_note": (
-            "Both are ONS-published year-on-year rates."
+            ""
         ),
         "model": inflation_model,
         "run": inflation_run,
