@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=18" />'
+CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=19" />'
 CSS_RE = re.compile(r'<link rel="stylesheet" href="/models/model-pages\.css(?:\?v=\d+)?" />\n?')
 
 sys.path.insert(0, str(ROOT))
@@ -130,7 +130,11 @@ VERDICT_RE = re.compile(
     re.S)
 
 
+WHY_RE = re.compile(r'<details class="ov-verdict-more"><summary>Why</summary><p>(.*?)</p></details>', re.S)
+
+
 def verdict(key: str, out: str) -> str:
+    out = WHY_RE.sub(r'<span class="ov-verdict-why">\1</span>', out)
     def repl(m: re.Match) -> str:
         return (
             f'<div class="ov-verdict-line"><span class="ov-verdict-short">{SHORT_VERDICT[key]}</span>\n'
