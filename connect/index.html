@@ -73,17 +73,17 @@
 <button id="client-tab-chatgpt" role="tab" data-seg="chatgpt" aria-selected="false" aria-controls="client-panel-chatgpt" tabindex="-1"><img src="/assets/chatgpt-mark.svg" alt="" width="18" height="18" />ChatGPT</button>
 <button id="client-tab-other" role="tab" data-seg="other" aria-selected="false" aria-controls="client-panel-other" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></svg>Other<span class="seg-long"> clients</span></button>
 </div>
-<div class="seg-panel" id="client-panel-claude" role="tabpanel" aria-labelledby="client-tab-claude">
+<div class="seg-panel" id="client-panel-claude" data-for="claude" role="tabpanel" aria-labelledby="client-tab-claude">
 <p class="use-p">Settings → Connectors → Add custom connector → paste the URL. Some plans gate this.</p>
 <p class="use-sub"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg>Claude Code</p>
 <div class="cfield"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg><code>claude mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" class="copy-btn" data-copy aria-label="Copy the Claude Code command"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></div>
 </div>
-<div class="seg-panel" id="client-panel-chatgpt" role="tabpanel" aria-labelledby="client-tab-chatgpt" hidden>
-<p class="use-p">Eligible web plans: Settings → Apps → Advanced → Developer mode → new custom app with the URL. Admins may need to grant access.</p>
-<p class="use-sub"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg>Codex CLI</p>
+<div class="seg-panel" id="client-panel-chatgpt" data-for="chatgpt" role="tabpanel" aria-labelledby="client-tab-chatgpt" hidden>
+<p class="use-p">Needs an eligible ChatGPT web plan: Settings → Apps → Advanced Settings → Developer mode → new custom app with the URL. Admins may need to grant access.</p>
+<p class="use-sub"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg>For Codex CLI</p>
 <div class="cfield"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg><code>codex mcp add policyengine-macro --url https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" class="copy-btn" data-copy aria-label="Copy the Codex CLI command"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></div>
 </div>
-<div class="seg-panel" id="client-panel-other" role="tabpanel" aria-labelledby="client-tab-other" hidden>
+<div class="seg-panel" id="client-panel-other" data-for="other" role="tabpanel" aria-labelledby="client-tab-other" hidden>
 <p class="use-p">Add it as a remote HTTP MCP server in Gemini CLI, Cursor, VS Code, Windsurf, Le Chat or any MCP client.</p>
 <p class="use-sub"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg>Gemini CLI</p>
 <div class="cfield"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg><code>gemini mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" class="copy-btn" data-copy aria-label="Copy the Gemini CLI command"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></div>
@@ -362,7 +362,12 @@ household = core.pe_household(
   }
   fromHash();
   window.addEventListener("hashchange", fromHash);
-  bindTabs(document.getElementById("seg-client"));
+  // Client tabs switch every view tagged with data-for (the setup panel today).
+  bindTabs(document.getElementById("seg-client"), function (btn) {
+    document.querySelectorAll("[data-for]").forEach(function (view) {
+      view.hidden = view.dataset.for !== btn.dataset.seg;
+    });
+  });
   bindTabs(document.getElementById("seg-py"));
 
   // Copy buttons. data-copy copies the sibling <code>; data-copy-pre the
