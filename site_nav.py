@@ -22,7 +22,7 @@ STYLESHEET = re.compile(r'href="/style\.css(?:\?v=[0-9]+)?"')
 # changes in a way a cached copy would render wrongly; ``render`` writes it
 # into every page and the generators read it from here (economy/topics.py,
 # notes/generate_release_notes.py), so no page can be left on an old copy.
-STYLE_VERSION = 23
+STYLE_VERSION = 25
 STYLE_HREF = f"/style.css?v={STYLE_VERSION}"
 
 # Inter (latin) is the body face on every page, but the browser only finds the
@@ -106,7 +106,7 @@ PAGE_NAMES = {
     "/models/compare": "Same question",
     "/obr": "OBR emulator",
     "/svar": "BoE SVAR",
-    "/frb-us": "FRB-US",
+    "/frb-us": "FRB/US",
     "/us-hank": "US HANK",
     "/olg": "OG-UK",
     "/define": "DEFINE-UK",
@@ -131,7 +131,7 @@ PAGE_NAMES = {
     "/olg/code": "Code",
     "/olg/methodology": "Methodology",
     "/olg/validation": "Validation",
-    "/pe": "PolicyEngine microsim",
+    "/pe": "PolicyEngine microsimulation",
     # Papers are each model's fifth tab, so the leaf reads like the other
     # tabs ("Paper") and the crumb runs through the model (CRUMB_PARENTS).
     "/papers/pe-microsim": "Paper",
@@ -211,7 +211,7 @@ SUBTABS = {
         ("/svar", "Overview"), ("/svar/methodology", "Methodology"),
         ("/svar/validation", "Validation"), ("/svar/code", "Code"),
         ("/papers/boe-svar", "Paper"))),
-    "frb-us": ("FRB-US pages", (
+    "frb-us": ("FRB/US pages", (
         ("/frb-us", "Overview"), ("/frb-us/methodology", "Methodology"),
         ("/frb-us/validation", "Validation"), ("/frb-us/code", "Code"),
         ("/papers/frb-us", "Paper"))),

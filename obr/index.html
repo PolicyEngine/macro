@@ -20,7 +20,7 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=23" />
+<link rel="stylesheet" href="/style.css?v=25" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -49,7 +49,7 @@
     <div class="hero-inner">
       <p class="eyebrow reveal" style="--d:0">OBR macroeconometric model · UK · hosted</p>
       <h1 class="reveal page-title" style="--d:1;">OBR emulator</h1>
-      <p class="lede reveal" style="--d:2">UK fiscal reform, quarter by quarter.</p>
+      <p class="lede reveal" style="--d:2">Scores the second-round effect of a UK tax or spending change on GDP, quarter by quarter.</p>
     </div>
   </section>
 
@@ -62,19 +62,104 @@
       <a class="model-tabs-link" href="/papers/obr-macro">Paper</a>
     </div>
   </nav>
-  <section id="card" class="band band-wide">
-    <div class="band-head" data-icon="list">
-      <h2>OBR emulator at a glance</h2>
+  <section id="verdict" class="band band-result ov-verdict">
+    <p class="ov-verdict-line"><a class="chip chip-brand" href="/glossary#anchored-not-validated">Anchored, not validated</a>
+      <span>Tracks the March 2026 <a class="gloss-link" href="/glossary#efo">EFO</a> by construction and is weak when run free: a scoring model for fiscal changes, not a forecaster.</span>
+      <a class="ov-verdict-link" href="/obr/validation">How far to trust it <span aria-hidden="true">&rarr;</span></a></p>
+  </section>
+
+  <section id="fit" class="band ov-fit" aria-label="What it is good for and not for">
+    <div class="fit-pair">
+      <div class="fit-card fit-yes">
+        <h2>Good for</h2>
+        <ul>
+          <li><strong>Income tax and NICs changes</strong>: the one live household channel</li>
+          <li><strong>GDP, consumption and investment</strong>, quarter by quarter, against the official path</li>
+          <li><strong>Direct shocks</strong> to Bank Rate or the corporation tax rate</li>
+        </ul>
+      </div>
+      <div class="fit-card fit-no">
+        <h2>Not for</h2>
+        <ul>
+          <li>Who gains and loses: <a href="/pe">PolicyEngine microsimulation</a></li>
+          <li>Long-run structural change: <a href="/olg">OG-UK</a>; where the economy is today: <a href="/svar">BoE SVAR</a></li>
+          <li>Spending multipliers, capital spending, borrowing, prices (CPI does not respond to rate or oil shocks): <a href="/obr/validation#caveats">limits</a></li>
+        </ul>
+      </div>
     </div>
-    <p class="callout verdict-callout">
-      <strong>Verdict: anchored to the EFO by construction, not validated as a forecaster; weak free-running.</strong>
-      The household tax route transmits and every quarter of the solve
-      converges; the spending lever&rsquo;s multiplier is
-      close to 1 by construction and capital spending does not transmit. CPI does
-      not respond to rate or oil shocks.
-      <a href="/obr/validation">How far to trust it &rarr;</a>
-    </p>
-    <!-- Fields follow integration/src/policyengine_macro/capabilities.py MODELS["obr-macro"]; one field order on all seven Overviews (DESIGN.md §4.13). -->
+  </section>
+
+  <section id="answers" class="band ov-example">
+    <div class="band-head" data-icon="calculator"><h2>What it returns</h2>
+      <p class="section-intro">Four sustained shocks, applied from 2025Q1 (the first quarter of the OBR databank) and solved for 12 quarters; GDP is the change from the anchored baseline.</p></div>
+    <div class="glance-switch scen-switch" role="tablist" aria-label="Worked example">
+      <button type="button" role="tab" id="scen-tab-tax" aria-controls="scen-tax" aria-selected="true">Income tax</button>
+      <button type="button" role="tab" id="scen-tab-spend" aria-controls="scen-spend" aria-selected="false" tabindex="-1">Spending</button>
+      <button type="button" role="tab" id="scen-tab-rate" aria-controls="scen-rate" aria-selected="false" tabindex="-1">Bank Rate</button>
+      <button type="button" role="tab" id="scen-tab-ct" aria-controls="scen-ct" aria-selected="false" tabindex="-1">Corporation tax</button>
+    </div>
+
+    <div class="scen-panel" id="scen-tax" role="tabpanel" aria-labelledby="scen-tab-tax">
+      <h3 class="scen-title">1p on the basic rate of income tax</h3>
+      <div class="stat-row stat-row-3">
+        <div class="stat"><span class="stat-label">GDP fall per &pound; raised, after 1 year</span><span class="stat-value">0.21</span><span class="stat-sub">current prices</span></div>
+        <div class="stat"><span class="stat-label">GDP fall per &pound; raised, after 3 years</span><span class="stat-value">0.37</span><span class="stat-sub">current prices</span></div>
+        <div class="stat stat-neutral"><span class="stat-label">OBR multiplier</span><span class="stat-value">0.3</span><span class="stat-sub">income tax and NICs, fading</span></div>
+      </div>
+      <figure class="spark"><svg viewBox="0 0 240 64" preserveAspectRatio="none" role="img" aria-label="Real GDP change, £m a quarter: q1 -150, q2 -210, q3 -264, q4 -311, q5 -351, q6 -388, q7 -420, q8 -449, q9 -474, q10 -496, q11 -516, q12 -533"><line class="spark-zero" x1="0" y1="2.0" x2="240" y2="2.0"/><rect class="spark-bar spark-neg" x="3.6" y="2.0" width="12.8" height="16.9" rx="1"/><rect class="spark-bar spark-neg" x="23.6" y="2.0" width="12.8" height="23.6" rx="1"/><rect class="spark-bar spark-neg" x="43.6" y="2.0" width="12.8" height="29.8" rx="1"/><rect class="spark-bar spark-neg" x="63.6" y="2.0" width="12.8" height="35.0" rx="1"/><rect class="spark-bar spark-neg" x="83.6" y="2.0" width="12.8" height="39.5" rx="1"/><rect class="spark-bar spark-neg" x="103.6" y="2.0" width="12.8" height="43.7" rx="1"/><rect class="spark-bar spark-neg" x="123.6" y="2.0" width="12.8" height="47.4" rx="1"/><rect class="spark-bar spark-neg" x="143.6" y="2.0" width="12.8" height="50.5" rx="1"/><rect class="spark-bar spark-neg" x="163.6" y="2.0" width="12.8" height="53.4" rx="1"/><rect class="spark-bar spark-neg" x="183.6" y="2.0" width="12.8" height="55.9" rx="1"/><rect class="spark-bar spark-neg" x="203.6" y="2.0" width="12.8" height="58.1" rx="1"/><rect class="spark-bar spark-neg" x="223.6" y="2.0" width="12.8" height="60.0" rx="1"/></svg><figcaption class="spark-axis"><span>q1</span><span>Real GDP change, £m a quarter</span><span>q12</span></figcaption></figure>
+      <p class="scen-note">The <a href="/pe#answers">microsimulation&rsquo;s costing</a> enters as lower household income, and consumption falls. The ratio builds up where the OBR&rsquo;s fades. In real GDP, which <code>obr_shock</code> reports, the q12 ratio is <strong>0.33&times;</strong> (<a href="/obr/methodology#meth-6">why two bases</a>). The run uses an earlier costing, &pound;1.6bn a quarter (&pound;6.46bn a year); at the current &pound;6.55bn the model, linear in shock size, gives the same ratios and GDP about 1.4% larger.</p>
+    </div>
+
+    <div class="scen-panel" id="scen-spend" role="tabpanel" aria-labelledby="scen-tab-spend">
+      <h3 class="scen-title">Government consumption up &pound;1.25bn a quarter</h3>
+      <div class="stat-row stat-row-3">
+        <div class="stat"><span class="stat-label">GDP, q1</span><span class="stat-value">+&pound;1,267m</span><span class="stat-sub">ratio 1.01</span></div>
+        <div class="stat"><span class="stat-label">GDP, q12</span><span class="stat-value">+&pound;1,312m</span><span class="stat-sub">ratio 1.05</span></div>
+        <div class="stat stat-neutral"><span class="stat-label">OBR multiplier</span><span class="stat-value">0.6</span><span class="stat-sub">fading</span></div>
+      </div>
+      <figure class="spark"><svg viewBox="0 0 240 64" preserveAspectRatio="none" role="img" aria-label="Real GDP change, £m a quarter: q1 +1,267, q2 +1,273, q3 +1,278, q4 +1,284, q5 +1,288, q6 +1,293, q7 +1,297, q8 +1,300, q9 +1,303, q10 +1,306, q11 +1,309, q12 +1,312"><line class="spark-zero" x1="0" y1="62.0" x2="240" y2="62.0"/><rect class="spark-bar" x="3.6" y="4.0" width="12.8" height="58.0" rx="1"/><rect class="spark-bar" x="23.6" y="3.8" width="12.8" height="58.2" rx="1"/><rect class="spark-bar" x="43.6" y="3.5" width="12.8" height="58.5" rx="1"/><rect class="spark-bar" x="63.6" y="3.3" width="12.8" height="58.7" rx="1"/><rect class="spark-bar" x="83.6" y="3.1" width="12.8" height="58.9" rx="1"/><rect class="spark-bar" x="103.6" y="2.9" width="12.8" height="59.1" rx="1"/><rect class="spark-bar" x="123.6" y="2.7" width="12.8" height="59.3" rx="1"/><rect class="spark-bar" x="143.6" y="2.5" width="12.8" height="59.5" rx="1"/><rect class="spark-bar" x="163.6" y="2.4" width="12.8" height="59.6" rx="1"/><rect class="spark-bar" x="183.6" y="2.2" width="12.8" height="59.8" rx="1"/><rect class="spark-bar" x="203.6" y="2.1" width="12.8" height="59.9" rx="1"/><rect class="spark-bar" x="223.6" y="2.0" width="12.8" height="60.0" rx="1"/></svg><figcaption class="spark-axis"><span>q1</span><span>Real GDP change, £m a quarter</span><span>q12</span></figcaption></figure>
+      <p class="scen-note"><span class="chip chip-warn">By construction</span> The shock enters the expenditure identity directly, so GDP rises by about the shock. That is accounting, not a behavioural multiplier (<a href="/obr/validation#caveats">limits</a>).</p>
+    </div>
+
+    <div class="scen-panel" id="scen-rate" role="tabpanel" aria-labelledby="scen-tab-rate">
+      <h3 class="scen-title">Bank Rate up 1 percentage point, sustained</h3>
+      <div class="stat-row stat-row-4" id="rate-series"><div class="stat"><span class="stat-label">GDP, q1</span><span class="stat-value">&minus;£129m</span></div><div class="stat"><span class="stat-label">GDP, q4</span><span class="stat-value">&minus;£405m</span></div><div class="stat"><span class="stat-label">GDP, q8</span><span class="stat-value">&minus;£480m</span></div><div class="stat"><span class="stat-label">GDP, q12</span><span class="stat-value">&minus;£522m</span></div></div>
+      <figure class="spark"><svg viewBox="0 0 240 64" preserveAspectRatio="none" role="img" aria-label="Real GDP change, £m a quarter: q1 -129, q2 -356, q3 -381, q4 -405, q5 -429, q6 -448, q7 -466, q8 -481, q9 -494, q10 -505, q11 -514, q12 -522"><line class="spark-zero" x1="0" y1="2.0" x2="240" y2="2.0"/><rect class="spark-bar spark-neg" x="3.6" y="2.0" width="12.8" height="14.8" rx="1"/><rect class="spark-bar spark-neg" x="23.6" y="2.0" width="12.8" height="40.9" rx="1"/><rect class="spark-bar spark-neg" x="43.6" y="2.0" width="12.8" height="43.8" rx="1"/><rect class="spark-bar spark-neg" x="63.6" y="2.0" width="12.8" height="46.6" rx="1"/><rect class="spark-bar spark-neg" x="83.6" y="2.0" width="12.8" height="49.3" rx="1"/><rect class="spark-bar spark-neg" x="103.6" y="2.0" width="12.8" height="51.5" rx="1"/><rect class="spark-bar spark-neg" x="123.6" y="2.0" width="12.8" height="53.5" rx="1"/><rect class="spark-bar spark-neg" x="143.6" y="2.0" width="12.8" height="55.2" rx="1"/><rect class="spark-bar spark-neg" x="163.6" y="2.0" width="12.8" height="56.7" rx="1"/><rect class="spark-bar spark-neg" x="183.6" y="2.0" width="12.8" height="58.0" rx="1"/><rect class="spark-bar spark-neg" x="203.6" y="2.0" width="12.8" height="59.1" rx="1"/><rect class="spark-bar spark-neg" x="223.6" y="2.0" width="12.8" height="60.0" rx="1"/></svg><figcaption class="spark-axis"><span>q1</span><span>Real GDP change, £m a quarter</span><span>q12</span></figcaption></figure>
+      <p class="scen-note">Only consumption and household and corporate interest flows respond. Investment, sterling, house prices and gilt yields have no interest-rate equation, so the fall is about 3&ndash;5&times; below the Bank of England&rsquo;s published range (<a href="/models/validation#shops">benchmark</a>, <a href="/obr/validation#bank-rate">limits</a>).</p>
+    </div>
+
+    <div class="scen-panel" id="scen-ct" role="tabpanel" aria-labelledby="scen-tab-ct">
+      <h3 class="scen-title">Corporation tax main rate up 5 points</h3>
+      <div class="stat-row">
+        <div class="stat"><span class="stat-label">GDP, q4</span><span class="stat-value">&minus;&pound;77m</span><span class="stat-sub">business investment falls by the same</span></div>
+        <div class="stat"><span class="stat-label">GDP, q12</span><span class="stat-value">&minus;&pound;382m</span><span class="stat-sub">about 40% of the plateau</span></div>
+              </div>
+      <figure class="spark"><svg viewBox="0 0 240 64" preserveAspectRatio="none" role="img" aria-label="Real GDP change, £m a quarter: q1 +0, q2 +0, q3 -41, q4 -77, q5 -115, q6 -159, q7 -200, q8 -239, q9 -278, q10 -314, q11 -349, q12 -382"><line class="spark-zero" x1="0" y1="2.0" x2="240" y2="2.0"/><rect class="spark-bar" x="3.6" y="2.0" width="12.8" height="0.8" rx="1"/><rect class="spark-bar" x="23.6" y="2.0" width="12.8" height="0.8" rx="1"/><rect class="spark-bar spark-neg" x="43.6" y="2.0" width="12.8" height="6.4" rx="1"/><rect class="spark-bar spark-neg" x="63.6" y="2.0" width="12.8" height="12.2" rx="1"/><rect class="spark-bar spark-neg" x="83.6" y="2.0" width="12.8" height="18.0" rx="1"/><rect class="spark-bar spark-neg" x="103.6" y="2.0" width="12.8" height="24.9" rx="1"/><rect class="spark-bar spark-neg" x="123.6" y="2.0" width="12.8" height="31.4" rx="1"/><rect class="spark-bar spark-neg" x="143.6" y="2.0" width="12.8" height="37.5" rx="1"/><rect class="spark-bar spark-neg" x="163.6" y="2.0" width="12.8" height="43.6" rx="1"/><rect class="spark-bar spark-neg" x="183.6" y="2.0" width="12.8" height="49.3" rx="1"/><rect class="spark-bar spark-neg" x="203.6" y="2.0" width="12.8" height="54.8" rx="1"/><rect class="spark-bar spark-neg" x="223.6" y="2.0" width="12.8" height="60.0" rx="1"/></svg><figcaption class="spark-axis"><span>q1</span><span>Real GDP change, £m a quarter</span><span>q12</span></figcaption></figure>
+      <p class="scen-note">A direct shock to the rate (<code>obr_shock</code>, <code>TCPRO</code>) through the cost of capital under the investment closure. There is no published OBR benchmark. The reform bridge refuses corporation tax, and the run is still far from its plateau after 12 quarters (<a href="/obr/validation#caveats">limits</a>).</p>
+    </div>
+    <p class="ov-source">Measured at model pin 6fbbe06 (obr-macroeconomic-model), every quarter converged. Reproduce with <a href="/obr/code">the Code tab</a>.</p>
+  </section>
+
+  <section id="pe-bridge" class="band ov-flow">
+    <div class="band-head" data-icon="layers"><h2>With the microsimulation</h2>
+      <p class="section-intro">How a reform reaches it: a static costing in, second-round effects out, the order the OBR scores in.</p></div>
+    <div class="pipeline">
+      <span class="pl-node"><strong>Reform</strong></span>
+      <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+      <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">static costing</span></a>
+      <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+      <span class="pl-node"><strong>OBR emulator</strong><span class="mono">household income add-factor</span></span>
+      <span class="pl-arrow" aria-hidden="true">&rarr;</span>
+      <span class="pl-node pl-node-out"><strong>GDP, consumption, investment</strong></span>
+    </div>
+    <p class="ov-flow-note">The costing enters as an add-factor on household disposable income (<a href="/obr/methodology#meth-6">mechanics</a>; <a href="/models#compose">every join in the suite</a>).</p>
+    <p class="callout callout-warn"><strong>Read the direction and scale, not single quarters.</strong> These are point estimates with no confidence bands, and several channels do not transmit (<a href="/obr/validation#caveats">all limits</a>).</p>
+  </section>
+
+  <section id="card" class="band ov-spec">
+    <details class="expander">
+      <summary>Model card <span class="expander-meta">inputs, outputs, horizon, data, access</span></summary>
+      <!-- Fields follow integration/src/policyengine_macro/capabilities.py MODELS["obr-macro"]; one field order on all seven Overviews (DESIGN.md §4.13). -->
     <dl class="model-card">
       <div><dt>Answers</dt><dd>The second-round effect of a UK fiscal change on GDP, consumption and investment</dd></div>
       <div><dt>Inputs</dt><dd>A PolicyEngine microsimulation static costing, or a curated shock to one model variable</dd></div>
@@ -83,217 +168,22 @@
       <div><dt>Data</dt><dd>March 2026 EFO baseline &middot; October 2025 equation listing &middot; vendored ONS snapshot</dd></div>
       <div><dt>Uncertainty</dt><dd>Not comprehensive: read direction and scale, not single quarters</dd></div>
       <div><dt>Access</dt><dd>Hosted MCP, CLI, Python</dd></div>
-      <div><dt>Runtime</dt><dd>Seconds for a raw shock, minutes for a translated reform</dd></div>
+      <div><dt>Runtime</dt><dd>About a minute for a raw shock, several minutes for a translated reform</dd></div>
+      <div class="model-card-wide"><dt>Joins the microsimulation</dt><dd>The static costing enters as a household income add-factor (<a href="#pe-bridge">the join above</a>)</dd></div>
       <div class="model-card-wide"><dt>Status</dt><dd>Anchored to the March 2026 EFO, not validated as a forecaster; predictive and policy checks weak</dd></div>
       <div class="model-card-wide"><dt>Cannot answer</dt><dd>Borrowing (not returned by the adapter), statutory incidence, capital spending, corporation tax through the bridge (<a href="/obr/validation#caveats">limits</a>)</dd></div>
     </dl>
+    </details>
   </section>
 
-  <section id="overview" class="band band-wide">
-    <div class="band-head" data-icon="layers">
-      <h2>The OBR&rsquo;s published equations, run as a scoring model</h2>
-      <p class="section-intro">Run selected UK tax and spending scenarios and trace GDP, consumption, and investment over 3–5 years against the March 2026 EFO baseline. Borrowing is not yet returned by the PolicyEngine Macro adapter.</p>
+  <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
+    <div class="chip-row">
+      <a class="chip chip-brand" href="/obr/methodology">Methodology</a>
+      <a class="chip chip-brand" href="/connect">Run it hosted</a>
+      <a class="chip" href="/models#compare">Compare the models</a>
     </div>
+  </nav>
 
-    <div class="scrolly-wrap single">
-      <div class="scrolly-steps">
-
-      <div class="meth-step" id="what" data-step="0">
-        <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>What it is</h3></div>
-        <p class="mo-lead">
-          An open Python implementation of the OBR's published equations.
-        </p>
-        <div class="mo-figcard full">
-<!-- obr-current-outlook:begin -->
-<figure class="vfig current-outlook">
-<div class="vc-fig" data-chart="obr-current-outlook">
-<p class="vc-unit">March 2026 EFO outlook, index, 2026Q1 = 100</p>
-<div class="vc-plot">
-<svg class="vchart" viewBox="56 36.0 688 248.0" role="img" aria-labelledby="obr-current-t obr-current-d" preserveAspectRatio="none">
-<title id="obr-current-t">March 2026 OBR outlook for real GDP and household consumption</title>
-<desc id="obr-current-d">Indexed line chart from 2026Q1 to 2031Q1. Real GDP rises from 100 to 108.0 and household consumption from 100 to 108.8.</desc>
-<line class="vc-grid" x1="62" y1="256.5" x2="738" y2="256.5"/>
-<line class="vc-grid" x1="62" y1="213.6" x2="738" y2="213.6"/>
-<line class="vc-grid" x1="62" y1="170.7" x2="738" y2="170.7"/>
-<line class="vc-grid" x1="62" y1="127.8" x2="738" y2="127.8"/>
-<line class="vc-grid" x1="62" y1="84.9" x2="738" y2="84.9"/>
-<line class="vc-grid" x1="62" y1="42.0" x2="738" y2="42.0"/>
-<polyline class="vc-s2 vc-solid" points="62.0,256.5 95.8,249.3 129.6,241.1 163.4,232.1 197.2,223.3 231.0,214.8 264.8,206.2 298.6,197.5 332.4,188.9 366.2,180.2 400.0,171.4 433.8,162.7 467.6,154.2 501.4,145.7 535.2,137.3 569.0,128.9 602.8,120.3 636.6,111.7 670.4,103.0 704.2,94.1 738.0,85.4"/>
-<polyline class="vc-s3" points="62.0,256.5 95.8,251.4 129.6,245.1 163.4,237.8 197.2,229.3 231.0,220.4 264.8,211.2 298.6,201.7 332.4,191.7 366.2,181.4 400.0,171.0 433.8,160.5 467.6,149.9 501.4,139.4 535.2,129.0 569.0,118.7 602.8,108.4 636.6,98.1 670.4,87.8 704.2,77.5 738.0,67.1"/>
-<path class="vc-s2-dot vc-dotp" d="M738 85.4h0" stroke-width="7"/>
-<path class="vc-s3-dot vc-dotp" d="M738 67.1h0" stroke-width="7"/>
-</svg>
-<div class="vc-labels" aria-hidden="true">
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.87%;top:88.91%">100</span>
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.87%;top:71.61%">102</span>
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.87%;top:54.31%">104</span>
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.87%;top:37.02%">106</span>
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.87%;top:19.72%">108</span>
-<span class="vc-t vc-tick vc-y vc-a-s" style="left:0.87%;top:2.42%">110</span>
-<span class="vc-t vc-tick vc-x vc-a-s" style="left:0.87%;top:97.58%">2026Q1</span>
-<span class="vc-t vc-tick vc-x vc-minor vc-a-m" style="left:20.52%;top:97.58%">2027Q1</span>
-<span class="vc-t vc-tick vc-x vc-a-m" style="left:40.17%;top:97.58%">2028Q1</span>
-<span class="vc-t vc-tick vc-x vc-minor vc-a-m" style="left:59.83%;top:97.58%">2029Q1</span>
-<span class="vc-t vc-tick vc-x vc-minor vc-a-m" style="left:79.48%;top:97.58%">2030Q1</span>
-<span class="vc-t vc-tick vc-x vc-a-e" style="left:99.13%;top:97.58%">2031Q1</span>
-</div>
-</div>
-<ul class="vc-legend">
-<li><span class="vc-sw ln-s2s" aria-hidden="true"></span>Real GDP</li>
-<li><span class="vc-sw ln-s3" aria-hidden="true"></span>Household consumption</li>
-</ul>
-<p class="vc-source">Source: <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/papers/obr-macro/figures/current_outlook.csv">papers/obr-macro/figures/current_outlook.csv</a></p>
-</div><!-- /vc-fig -->
-</figure>
-<!-- obr-current-outlook:end -->
-        <p class="chart-note">The March 2026 EFO path the emulator is anchored to; every scenario is read as a deviation from it (<a href="/obr/validation">how far to trust it</a>).</p>
-        </div>
-        <p class="kv-title">The listing</p>
-        <dl class="kv kv-text"><div><dt>Equations</dt><dd>372 published, in 17 thematic groups</dd></div><div><dt>Variables</dt><dd>636 &mdash; 383 solved, 253 <a class="gloss-link" href="/glossary#exogenous">exogenous</a></dd></div><div><dt>Of the 383</dt><dd>~29 estimated, 216 identities, 138 calibrated or technical</dd></div><div><dt>Tradition</dt><dd>HM Treasury / Cowles-Commission structural</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <h4>The published listing, made runnable</h4>
-          <p>
-          The OBR's model is a computational representation of the UK National
-          Accounts &mdash; built by HM Treasury in 1970, jointly maintained by the
-          OBR and the Treasury since 2010. The OBR publishes its full equation
-          listing, but as EViews source few can run. This project transpiles it
-          to Python and solves it: <strong>372 published equations</strong> in
-          <strong>17 thematic groups</strong> over <strong>636
-          variables</strong> &mdash; 383 solved by the model (roughly 29
-          econometrically estimated, 216 identities, 138 calibrated or
-          technical) and 253 exogenous inputs, the judgements and assumptions
-          you get to change. Not every equation can run on published inputs:
-          <a href="/obr/methodology#meth-1">what is skipped and why</a>.
-        </p>
-          <h4>Where it sits</h4>
-          <p>
-          It is a <strong>structural macroeconometric model</strong> in the
-          HM Treasury / Cowles-Commission tradition: where the
-          <a href="/olg">OLG model</a> derives behaviour from optimising
-          households and firms, this one reproduces the estimated relationships
-          the official forecaster actually relies on.
-        </p>
-        </details>
-      </div>
-
-      <div class="meth-step" id="answers" data-step="1">
-        <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What it can answer</h3></div>
-        <p class="mo-lead">
-          Second-round effects on a static costing.
-        </p>
-        <div class="callout callout-neutral">
-          <strong>It cannot</strong> tell you who wins and loses &mdash; that is
-          <a href="/pe">PolicyEngine</a>'s distributional analysis. Nor a
-          long-run structural counterfactual &mdash; that is the
-          <a href="/olg">OLG model</a>. Nor what state the economy is in
-          today &mdash; that is the <a href="/svar">SVAR</a> (structural vector
-          autoregression).
-        </div>
-        <p class="kv-title">1p on the basic rate, April 2026</p>
-        <dl class="kv kv-text"><div><dt>Direct yield</dt><dd>from PolicyEngine microsimulation; the second round changes GDP, not this costing</dd></div><div><dt>Second round</dt><dd>GDP falls, building to ~0.37&times; the revenue raised by quarter 12 of a run from 2025Q1 (current prices; 0.33&times; in real GDP)</dd></div><div><dt>Vs OBR</dt><dd>published 0.3 for income tax &amp; NICs</dd></div><div><dt>Per-quarter</dt><dd>every quarter converges</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <h4>The half of the workflow it does</h4>
-          <p>
-          The emulator does the second half of the official workflow:
-          microsimulation supplies the direct Exchequer effect, the macro model
-          the economy-wide feedback. A static-costing bridge wires
-          <a href="/pe">PolicyEngine's microsimulation</a> into the emulator so
-          a statutory reform can be scored end to end.
-        </p>
-          <h4>Worked example</h4>
-          <p>
-          1p on the basic rate of income tax from April 2026, with the
-          direct yield costed by the <a href="/pe#answers">microsimulation</a>.
-          The second round is a GDP fall that builds from about
-          0.16&times; the revenue raised in the first year to roughly
-          <strong>0.37&times;</strong> by the twelfth quarter &mdash; against the OBR's published <strong>0.3</strong>
-          for income tax and NICs. Those are current-price GDP per pound of
-          revenue, the OBR's like-for-like basis. In real GDP, which
-          <code>obr_shock</code> reports, the same run gives 0.145&times; and
-          <strong>0.33&times;</strong>, smaller by the GDP deflator
-          (obr-macroeconomic-model #63). Both ratios come from a 12-quarter run,
-          2025Q1&ndash;2027Q4, with the yield entered as a household-income
-          shock of &pound;1,615.75m a quarter (<code>obr_shock</code>). The hosted
-          <code>score_reform(model="obr")</code> default scores a different
-          window, 2026Q2&ndash;2031Q1, and returns different ratios
-          (<a href="/obr/validation#hosted">hosted results</a>). Every quarter of the solve converges to
-          tolerance under the nominal-GDP pin; the <a href="/obr/validation#caveats">limits</a>
-          say which channels are still inert. The static costing itself is benchmarked against HMRC on the
-          <a href="/pe/validation#hmrc">microsimulation&rsquo;s validation tab</a>;
-          the full walkthrough is under <a href="/models#score">score a reform</a>.
-        </p>
-        </details>
-      </div>
-
-      <div class="meth-step" id="pe-bridge" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>With the microsimulation</h3></div>
-        <p class="mo-lead">
-          Microsimulation supplies the direct cost; this model returns the
-          feedback.
-        </p>
-        <div class="pipeline">
-          <span class="pl-node"><strong>Reform</strong></span>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <a class="pl-node" href="/pe"><strong>PolicyEngine microsimulation</strong><span class="mono">cost &middot; who pays</span></a>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <span class="pl-node"><strong>OBR emulator</strong><span class="mono">macro feedback</span></span>
-          <span class="pl-arrow" aria-hidden="true">&rarr;</span>
-          <span class="pl-node pl-node-out"><strong>Scored result</strong></span>
-        </div>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro score --country uk \
-  --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
-  --model obr</code></pre></div>
-        <p class="callout">
-          <strong>Same-breath caveats.</strong> Read the direction and the
-          scale (<a href="#answers">step 2</a>), not single quarters: there are no
-          confidence bands. Corporation tax is refused (<a href="/obr/validation#caveats">why</a>);
-          for a US reform, see <a href="/models#choose">the gap in the model router</a>.
-        </p>
-        <p class="vlinks mono">
-          <a href="/models#compose">every join in the suite &rarr;</a>
-          <a href="/#joins">this join on the landing page &rarr;</a>
-        </p>
-        <p class="kv-title">The join</p>
-        <dl class="kv kv-text"><div><dt>Entry point</dt><dd><code>HHDI_ADDFACTOR</code> &mdash; household disposable income, &pound;m/qtr</dd></div><div><dt>Spreading</dt><dd>&minus;(annual &pound;bn) &times; 1000 &divide; 4, flat across four quarters</dd></div><div><dt>Solved chain</dt><dd>income &rarr; consumption &rarr; GDP, against the anchored baseline</dd></div><div><dt>Refused</dt><dd>corporation tax; US reforms (scored statically)</dd></div></dl>
-        <details class="about">
-          <summary>About this step</summary>
-          <h4>The combination</h4>
-          <p><code>score_reform(country="uk", reform=..., model="obr")</code> runs <a href="/pe">PolicyEngine</a>'s static costing for each year of the window, then hands this model the bill &mdash; the OBR's own workflow: static costing in, second-round effects out.</p>
-          <h4>The mechanism</h4>
-          <p>Each year&rsquo;s costing enters as a held add-factor on household disposable income (<code>HHDI_ADDFACTOR</code>); the emulator solves income &rarr; consumption &rarr; GDP against the anchored March 2026 baseline. Spreading, transmission and why the anchors cancel: <a href="/obr/methodology#meth-6">methodology</a>.</p>
-          <p>No PolicyEngine reform? Shock the model&rsquo;s own variables directly, in model units: <a href="/obr/code#code-4">levers and their caveats</a>.</p>
-        </details>
-      </div>
-
-      </div>
-    </div>
-  </section>
-
-  <section class="band where-next" id="where-next">
-    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
-    <div class="entry-grid">
-      <a class="entry-card" href="/obr/methodology">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg></span>
-        <h3>Methodology</h3>
-        <p>How the published listing becomes a runnable model</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
-      <a class="entry-card" href="/models#compare">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg></span>
-        <h3>Compare the models</h3>
-        <p>All seven side by side</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
-      <a class="entry-card" href="/connect">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg></span>
-        <h3>Run it hosted</h3>
-        <p>MCP, CLI or Python, no account needed</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
-    </div>
-  </section>
 </main>
 
 <footer class="foot foot-bar">
@@ -308,6 +198,6 @@
 </footer>
 
 <script src="/reveal.js?v=2" defer></script>
-<script src="/stepper.js" defer></script>
+<script src="/scenarios.js" defer></script>
 </body>
 </html>

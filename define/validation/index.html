@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>DEFINE-UK validation — PolicyEngine Macro</title>
-<meta name="description" content="How far to trust the DEFINE-UK adapter: the manual's Table 4 macro block replicates, the emissions path diverges from the published table, scenario switch sets are design-gated, the calibration gap to ONS/DESNZ/OBR is computed — and no numeric v1.1 scenario results are published, so deltas only." />
+<meta name="description" content="How far to trust the DEFINE-UK adapter: the manual's Table 4 macro block matches except 2025 growth, the emissions path diverges from the published table, scenario switch sets are design-gated, the calibration gap to ONS/DESNZ/OBR is computed — and no numeric v1.1 scenario results are published, so deltas only." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/define/validation" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://policyengine-macro.vercel.app/define/validation" />
@@ -20,7 +20,7 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=23" />
+<link rel="stylesheet" href="/style.css?v=25" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -112,7 +112,7 @@
     <div class="prose">
     <div class="table-scroll trust-card"><table data-stack="yes">
       <caption>Evidence by dimension: the registry&rsquo;s categorical judgement, and what would change it</caption>
-      <thead><tr><th scope="col">dimension</th><th scope="col">level</th><th scope="col">what would change it</th></tr></thead>
+      <thead><tr><th scope="col">Dimension</th><th scope="col">Level</th><th scope="col">What would change it</th></tr></thead>
       <tbody>
         <tr><th scope="row">Implementation fidelity</th><td><span class="chip">moderate</span></td><td>Section 3.3 and the oracle comparison completed, closing milestone 2 of the clean-room track</td></tr>
         <tr><th scope="row">Predictive validation</th><td><span class="chip">not applicable</span></td><td>None: explicitly not a forecaster</td></tr>
@@ -137,7 +137,7 @@
         <p class="mo-lead">Every row is enforced by tests against the cached pinned run.</p>
         <div class="table-scroll mo-tablecard"><table>
                 <caption>DEFINE-UK replication gates against the manual and the papers</caption>
-                <thead><tr><th scope="col">what is checked</th><th scope="col">tolerance</th><th scope="col">status</th></tr></thead>
+                <thead><tr><th scope="col">What is checked</th><th scope="col">Tolerance</th><th scope="col">Status</th></tr></thead>
                 <tbody>
                   <tr>
                     <th scope="row">Manual Table&nbsp;4, macro block — growth, unemployment, population 16+, labour force, S1 baseline</th>
@@ -199,7 +199,7 @@
         <p class="mo-lead">Computed from the cached run against pinned external observations, not prose.</p>
         <div class="table-scroll mo-tablecard"><table>
                 <caption>DEFINE-UK baseline (cached pinned run) against external observations, from validation/baseline_vs_external.csv</caption>
-                <thead><tr><th scope="col">quantity</th><th scope="col">model</th><th scope="col">external</th><th scope="col">verdict</th></tr></thead>
+                <thead><tr><th scope="col">Quantity</th><th scope="col">Model</th><th scope="col">External</th><th scope="col">Verdict</th></tr></thead>
                 <tbody>
                   <tr>
                     <th scope="row">Real GDP growth, 2025</th>
@@ -400,12 +400,12 @@
         FMM-2023 anchors above.</p>
         <div class="table-scroll" id="caveats"><table>
         <caption>Every known limit of the DEFINE-UK adapter, with the evidence that holds it</caption>
-        <thead><tr><th scope="col">limit</th><th scope="col">detail</th></tr></thead>
+        <thead><tr><th scope="col">Limit</th><th scope="col">Detail</th></tr></thead>
         <tbody>
           <tr><th scope="row"><strong>Deltas only, never levels</strong></th><td>The baseline sits far from official outturns, so levels are never served (<a href="#calibration">baseline against official numbers</a>).</td></tr>
           <tr><th scope="row"><strong>Emissions divergence</strong></th><td>The pinned upstream run sits below the manual&rsquo;s published emissions table, widening to 2040; pinned, raised with the authors (<a href="#emissions">the divergence</a>).</td></tr>
           <tr><th scope="row"><strong>Multiplier runs high</strong></th><td>Our cumulative green-investment multiplier is not comparable to short-horizon published figures, and the direction of its denominator bias is not established (<a href="#multiplier">the multiplier</a>).</td></tr>
-          <tr id="alpha-pp"><th scope="row"><strong>Baseline and policy runs use different &alpha;<sub>PP</sub></strong></th><td>The upstream Baseline runs production&rsquo;s own-input coefficient alpha_PPLR at 0.2748; every policy run uses 0.2762 (printed in each run&rsquo;s <code>Parameters-sorted_*.csv</code>). No policy switch acts before 2027Q1, so the 2023&ndash;26 deltas are this parameter change alone, not policy effects; real GDP sits about &minus;0.16% of baseline in 2025&ndash;26. After 2026 the two cannot be separated, so the published numbers stand and the range below bounds the policy-only effect (the parameter effect stopping in 2027, or persisting at its 2026 level or share of baseline): multiplier 1.78 &rarr; 1.73&ndash;1.75; green-investment GDP peak +0.92% &rarr; +0.92&ndash;1.08%; housing-regulation real GDP in 2035 &minus;2.3 &rarr; &minus;0.96 to &minus;2.3; fossil-fuel-ban real GDP in 2030 &minus;3.85 &rarr; &minus;2.65 to &minus;3.85; emissions deltas change by under 0.25%. Sized in <a href="https://github.com/PolicyEngine/define-uk-model/issues/20">define-uk-model #20</a>; the fix is not yet decided.</td></tr>
+          <tr id="alpha-pp"><th scope="row"><strong>Baseline and policy runs use different &alpha;<sub>PP</sub></strong></th><td>The upstream Baseline runs production&rsquo;s own-input coefficient alpha_PPLR at 0.2748; every policy run uses 0.2762 (printed in each run&rsquo;s <code>Parameters-sorted_*.csv</code>). No policy switch acts before 2027Q1, so the 2023&ndash;26 deltas are this parameter change alone, not policy effects; real GDP sits about &minus;0.16% of baseline in 2025&ndash;26. After 2026 the two cannot be separated, so the published numbers stand and the range below bounds the policy-only effect (the parameter effect stopping in 2027, or persisting at its 2026 level or share of baseline): headline multiplier 2.30 &rarr; about 2.08&ndash;2.25 (the secondary 1.78 &rarr; 1.73&ndash;1.75); green-investment GDP peak +0.92% &rarr; +0.92&ndash;1.08%; housing-regulation real GDP in 2035 &minus;2.3 &rarr; &minus;0.96 to &minus;2.3; fossil-fuel-ban real GDP in 2030 &minus;3.85 &rarr; &minus;2.65 to &minus;3.85; emissions deltas change by under 0.25%. Sized in <a href="https://github.com/PolicyEngine/define-uk-model/issues/20">define-uk-model #20</a>; the fix is not yet decided.</td></tr>
           <tr><th scope="row"><strong>Unlicensed upstream, never hosted</strong></th><td>The authors&rsquo; R code is fetched at a pinned commit and run locally; hosted tools return run instructions, never results.</td></tr>
           <tr id="clean-room"><th scope="row"><strong>The clean-room model solves the whole manual but does not reproduce it</strong></th><td>The clean-room Python registers every printed equation of the manual (&sect;3.1&ndash;&sect;3.4.7) and solves the whole model quarter by quarter (<a href="https://github.com/PolicyEngine/define-uk-model/pull/19">define-uk-model #19</a>, merged). It does not reproduce the upstream run. Baseline GDP falls up to 44% below it by 2040, mostly through equity-revaluation equations that are not yet diagnosed, so milestone 2 is not passed (<a href="https://github.com/PolicyEngine/define-uk-model/issues/17">#17</a>). Its own green public investment multiplier is about 1.52 (2.30 upstream on the same impulse). The Taylor rule&rsquo;s inflation input is inferred from the upstream outputs, because the manual prints no equation for it, and two power-sector profit rates are still read from the upstream run (<a href="https://github.com/PolicyEngine/define-uk-model/issues/24">#24</a>). That figure is a diagnostic, not a served result: every served number still comes from the cached upstream run. Where the upstream outputs follow a form that differs from the manual as printed, the model records the form the outputs follow, found from those outputs alone (<code>empirical.py</code>; <a href="/define/code#run-4">Code, step 4</a>).</td></tr>
           <tr id="sfc-breaks"><th scope="row"><strong>Two cached scenarios are not stock-flow consistent</strong></th><td>In the fossil-fuel ban with no forward guidance (2035Q3 and 2036Q1) and with unexpected enforcement (2033Q1), the power sector&rsquo;s revenue is valued at a different electricity price from the one buyers pay, so the sectors&rsquo; net lending does not sum to zero. The other 28 cached files close. The fault is in the upstream outputs. The adapter refuses these two scenarios and attaches a stock-flow check to every result (<a href="https://github.com/PolicyEngine/define-uk-model/pull/15">define-uk-model #15</a>, merged 6 Nov).</td></tr>
@@ -422,29 +422,13 @@
         </details>
       </section>
 
-  <section class="band where-next" id="where-next">
-    <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
-    <div class="entry-grid">
-      <a class="entry-card" href="/define/code">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span>
-        <h3>Code</h3>
-        <p>Run the adapter and reproduce each gate</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
-      <a class="entry-card" href="/models#validation">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
-        <h3>Every model&rsquo;s verdict</h3>
-        <p>How the seven are checked</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
-      <a class="entry-card" href="/reports/define-uk-replication">
-        <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>
-        <h3>The replication report</h3>
-        <p>The record in full</p>
-        <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-      </a>
+  <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
+    <div class="chip-row">
+      <a class="chip chip-brand" href="/define/code">Code</a>
+      <a class="chip" href="/models#validation">Every model&rsquo;s verdict</a>
+      <a class="chip chip-brand" href="/reports/define-uk-replication">The replication report</a>
     </div>
-  </section>
+  </nav>
     </div>
   </div>
 

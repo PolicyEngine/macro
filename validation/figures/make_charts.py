@@ -203,8 +203,8 @@ def chart_obr_anchored():
     desc = (
         f"Line chart. Quarterly percentage deviation of the anchored emulator from the "
         f"published March 2026 EFO, {quarters[0]} to {quarters[-1]}. Real GDP ranges from "
-        f"{min(gdp):+.2f}% to {max(gdp):+.2f}% (mean absolute deviation {mape_g:.2f}%); "
-        f"consumption from {min(cons):+.2f}% to {max(cons):+.2f}% (mean absolute deviation "
+        f"{min(gdp):+.2f}% to {max(gdp):+.2f}% (mean absolute percentage error {mape_g:.2f}%); "
+        f"consumption from {min(cons):+.2f}% to {max(cons):+.2f}% (mean absolute percentage error "
         f"{mape_c:.2f}%). Continuous integration hard-fails the build if either mean absolute "
         f"deviation reaches 1%; it does not test single quarters{over_note}."
     )
@@ -500,10 +500,10 @@ def chart_obr_freerun():
         f"Line chart of quarterly real GDP levels in billions of pounds, {quarters[0]} to "
         f"{quarters[-1]}. The published March 2026 EFO path rises from {efo[0]:.1f} to "
         f"{efo[-1]:.1f}. The anchored emulator tracks it closely, running "
-        f"from {anchored[0]:.1f} to {anchored[-1]:.1f} (mean absolute deviation {mad_a:.2f} per "
+        f"from {anchored[0]:.1f} to {anchored[-1]:.1f} (mean absolute percentage error {mad_a:.2f} per "
         f"cent, recomputed here from the plotted series). The free-running emulator, de-seeded "
         f"and with no add-factors, contracts from {freerun[0]:.1f} to {freerun[-1]:.1f} — a gap "
-        f"that widens to {gap:.0f} billion pounds, {mad_f:.2f} per cent mean absolute deviation "
+        f"that widens to {gap:.0f} billion pounds, {mad_f:.2f} per cent mean absolute percentage error "
         f"over the horizon. Free-running and EFO paths from "
         f"papers/obr-macro/figures/fig_free_running_data.csv; anchored path from "
         f"papers/obr-macro/figures/fig_anchored_data.csv. Coordinates: value v in billions maps "
@@ -542,9 +542,9 @@ def chart_obr_freerun():
     # apart and both rise into the edge, so a label below either one would sit
     # on the line.
     return chartkit.figure("\n".join(out), unit="Real GDP, £bn per quarter", legend=[
-        ("ln-s1", f"anchored ({mad_a:.2f}% MAD)"),
+        ("ln-s1", f"anchored ({mad_a:.2f}% MAPE)"),
         ("ln-s2", "EFO March 2026"),
-        ("ln-s3", f"free-running ({mad_f:.2f}% MAD)"),
+        ("ln-s3", f"free-running ({mad_f:.2f}% MAPE)"),
     ])
 
 
@@ -1065,6 +1065,7 @@ def chart_svar_coverage():
     def ymap(v):
         return base_y - (v - lo_v) * (base_y - top_y) / (hi_v - lo_v)
 
+    below68 = next((i + 1 for i, v in enumerate(series[68]) if v < 0.68), None)
     desc = ("Line chart of empirical interval coverage by forecast horizon, averaged "
             "across the eight model variables, against the nominal 68 and 90 percent "
             "levels; a vertical bar at each horizon spans the best and worst variable. " +
@@ -1073,8 +1074,10 @@ def chart_svar_coverage():
                 ", ".join(f"{v:.0%}" for v in series[lv])
                 for lv in (68, 90)
             ) +
-            f". The 68 per cent band covers {series[68][0]:.0%} at one quarter, just above "
-            f"nominal, and falls below nominal from horizon two onward to {series[68][-1]:.0%} "
+            f". The 68 per cent band covers {series[68][0]:.0%} at one quarter, "
+            f"{'just above' if series[68][0] >= 0.68 else 'below'} nominal, and "
+            + (f"falls below nominal from horizon {below68} onward to {series[68][-1]:.0%} "
+               if below68 else f"stays at or above nominal to {series[68][-1]:.0%} ") +
             f"at eight; the 90 per cent band under-covers at every horizon, from "
             f"{series[90][0]:.0%} down to {series[90][-1]:.0%}. The mean hides how bad the "
             f"worst variable is: the lowest cell in the grid is {worst_var} at the "

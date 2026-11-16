@@ -410,8 +410,9 @@ def test_cli_score_still_rejects_a_genuinely_unknown_model(runner):
 def test_obr_shock_carries_the_lever_caveat_in_the_payload():
     """None of the three OBR levers reads straight, and the payload says so.
 
-    Measured in the model repo: CGIPS moves business investment by exactly
-    zero in all twelve quarters and leaves a wrong-signed residual, and
+    Measured in the model repo: CGIPS moves total fixed investment by exactly
+    zero in all twelve quarters (business investment moves only as an
+    accounting offset), and
     TCPRO's response converges only slowly (a 12-quarter run captures ~40%
     of the plateau, since the 2026-08 log-space anchor fix gave it a steady
     state at all). A docstring does not reach an MCP caller reading a JSON

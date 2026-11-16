@@ -575,8 +575,8 @@ VS_OFFICIAL_SPECS = {
             "<code>papers/obr-macro/figures/efo_march_2026_cpi.csv</code>"
         ),
         "intro": (
-            "Same round, CPI: the model sees stickier inflation than the "
-            "EFO — partly because a VAR estimated through the 2021–23 "
+            "Same round, CPI: the model projects inflation staying higher "
+            "than the EFO — partly because a VAR estimated through the 2021–23 "
             "surge mean-reverts toward a higher sample mean."
         ),
     },
@@ -800,7 +800,9 @@ def render_status(card: dict) -> str:
     skill claim on their own (DESIGN.md §7.5).
     """
     rounds = card["rounds"]
-    entries = [e for _, e in scored_entries(card)]
+    pairs = scored_entries(card)
+    entries = [e for _, e in pairs]
+    scored_rounds = len({d["round_id"] for d, _ in pairs})
     scored = len(entries)
     pending = card.get("pending_detail")
     fetched = store_last_fetched()
@@ -809,17 +811,21 @@ def render_status(card: dict) -> str:
         next_sub = f"next <span class=\"nowrap\">{esc(pending['period'])}</span>, {esc(who)}; store updated <span class=\"nowrap\">{esc(fetched)}</span>"
     else:
         next_sub = "every archived period has an outturn"
-    rounds_sub = f"from {rounds} archived round{'' if rounds == 1 else 's'}; {next_sub}"
+    rounds_sub = (f"from {scored_rounds} of {rounds} archived round{'' if rounds == 1 else 's'}; {next_sub}"
+                  if scored and scored_rounds != rounds else
+                  f"from {rounds} archived round{'' if rounds == 1 else 's'}; {next_sub}")
     if scored:
         in68 = sum(1 for e in entries if e["in_68"])
         in90 = sum(1 for e in entries if e["in_90"])
         mae = sum(e["abs_error"] for e in entries) / scored
         naive = [e["naive_abs_error"] for e in entries if e.get("naive_abs_error") is not None]
+        naive_vs = (", lower than the model's"
+                    if sum(naive) < sum(e["abs_error"] for e in entries) else "")
         cover_value = f"{in68} of {scored}"
         cover_sub = f"bands as archived; {in90} of {scored} inside the 90% band"
         mae_value = f"{mae:.2f}pp"
         mae_sub = (
-            f"no change: {sum(naive) / len(naive):.2f}pp over the same {scored} forecasts; too few to show skill"
+            f"no change: {sum(naive) / len(naive):.2f}pp over the same {scored} forecasts{naive_vs}; too few to show skill either way"
             if len(naive) == scored else "no complete no-change baseline"
         )
     else:
