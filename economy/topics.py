@@ -3099,7 +3099,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
-<link rel="stylesheet" href="/economy/topic-page.css?v=12" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=13" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -3108,7 +3108,7 @@ def page(topic: dict) -> str:
     body = f"""<main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <h1 class="page-title">{esc(topic["country"].upper())} {esc(topic["title"][0].lower() + topic["title"][1:])}</h1>
+      <h1 class="page-title tp-h1">{topic_icon(slug, 24)}{esc(topic["country"].upper())} {esc(topic["title"][0].lower() + topic["title"][1:])}</h1>
       <p class="lede">{esc(short) if short else esc(topic["heading"])}</p>
     </div>
   </section>
@@ -3152,17 +3152,36 @@ def page(topic: dict) -> str:
 
 # --------------------------------------------------- economy page + sitemap
 
+TOPIC_ICONS = {
+    "growth": '<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
+    "inflation": '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
+    "jobs": '<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>',
+    "rates": '<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+    "public-finances": '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+    "reform": '<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+}
+
+
+def topic_icon(slug: str, size: int = 20) -> str:
+    """The one icon for a topic, wherever it appears (bare, accent colour)."""
+    return (f'<svg class="tp-icon" viewBox="0 0 24 24" width="{size}" height="{size}" fill="none" '
+            'stroke="currentColor" stroke-width="1.75" stroke-linecap="round" '
+            f'stroke-linejoin="round" aria-hidden="true">{TOPIC_ICONS.get(slug, TOPIC_ICONS["growth"])}</svg>')
+
+
 def directory_block(country: str) -> str:
-    """The hub's topic list: each row is the topic's question and a link.
+    """The hub's topic cards: icon, short name, the question as a subtitle.
 
     The readings are not restated here; they live on the topic page.
     """
     rows = []
     for topic in topics_for(country):
         rows.append(
-            f'        <a href="{topic_url(topic)}">'
-            f'<span>{esc(topic["heading"])}</span>'
-            f'<strong>{esc(topic["title"])}</strong></a>'
+            f'        <a class="tp-card" href="{topic_url(topic)}">{topic_icon(topic["slug"], 22)}'
+            f'<span class="tp-card-t"><strong>{esc(topic.get("tab", topic["title"]))}</strong>'
+            f'<small>{esc(topic["heading"])}</small></span>'
+            '<svg class="tp-chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" '
+            'stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>'
         )
     return "\n".join(rows)
 
