@@ -824,7 +824,7 @@ def vs_official_table(variable: str, rows: list[dict]) -> str:
       <div class="table-scroll">
         <table>
           <caption>BoE SVAR {esc(spec["name"])} forecast, round {SVAR_ROUND.parent.name}, beside the {efo_label(rows)}: % change on a year earlier. Bands are re-calibrated, as drawn.</caption>
-          <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68% band</th><th scope="col">90% band</th><th scope="col">EFO</th></tr></thead>
+          <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68% band (re-calibrated)</th><th scope="col">90% band (re-calibrated)</th><th scope="col">EFO</th></tr></thead>
           <tbody>
 {body}
           </tbody>
@@ -907,6 +907,35 @@ def icon(name: str, cls: str = "fc-ic") -> str:
             f"{_ICON_PATHS[name]}</svg>")
 
 
+def record_stats(card: dict) -> dict:
+    """Aggregates the scoreboard and the home strip both print.
+
+    Read-only over scorecard.json. The first round was archived
+    retroactively, so its scores are counted apart from the ex-ante ones;
+    several forecasts can score the same outturn, so outturns are counted too.
+    """
+    pairs = scored_entries(card)
+    first = card["detail"][0]["round_id"] if card["detail"] else None
+    retro = [e for d, e in pairs if d["round_id"] == first]
+    exante = [e for d, e in pairs if d["round_id"] != first]
+    entries = [e for _, e in pairs]
+    naive = [e["naive_abs_error"] for e in entries if e.get("naive_abs_error") is not None]
+    n = len(entries)
+    return {
+        "scored": n,
+        "outturns": len({(e["period"], e["variable"]) for e in entries}),
+        "rounds": len({d["round_id"] for d, _ in pairs}),
+        "in68": sum(e["in_68"] for e in entries),
+        "in90": sum(e["in_90"] for e in entries),
+        "exante": len(exante), "exante_in68": sum(e["in_68"] for e in exante),
+        "retro": len(retro), "retro_in68": sum(e["in_68"] for e in retro),
+        "mae": sum(e["abs_error"] for e in entries) / n if n else 0.0,
+        "naive_mae": sum(naive) / len(naive) if n and len(naive) == n else None,
+        "bias": sum(e["error"] for e in entries) / n if n else 0.0,
+        "low": sum(e["error"] < 0 for e in entries),
+    }
+
+
 def render_status(card: dict) -> str:
     """The record in three tiles: band coverage, mean error against no change,
     and how much there is to go on.
@@ -938,8 +967,10 @@ def render_status(card: dict) -> str:
         naive = [e["naive_abs_error"] for e in entries if e.get("naive_abs_error") is not None]
         naive_vs = (", lower than the model's"
                     if sum(naive) < sum(e["abs_error"] for e in entries) else "")
-        cover_value = f"{in68} of {scored}"
-        cover_sub = f"{in90} of {scored} inside 90%. Bands as archived."
+        st = record_stats(card)
+        cover_value = f"{st['exante_in68']} of {st['exante']}"
+        cover_sub = (f"Made before the outturn. Retroactive: {st['retro_in68']} of {st['retro']}; "
+                     f"all {scored}: {in68} inside 68%, {in90} inside 90%. Bands as archived.")
         mae_value = f"{mae:.2f}pp"
         if len(naive) == scored:
             naive_mae = sum(naive) / len(naive)
@@ -953,9 +984,11 @@ def render_status(card: dict) -> str:
             )
         else:
             mae_sub = "No complete no-change baseline."
+        first = card["detail"][0]["round_id"] if card["detail"] else None
+        ex = [e for d, e in pairs if d["round_id"] != first]
         pips = (
-            f'          <span class="fc-pips" role="img" aria-label="{in68} inside the 68% band, {scored - in68} outside">'
-            + "".join(f'<i class="{"in" if e["in_68"] else "out"}"></i>' for e in entries)
+            f'          <span class="fc-pips" role="img" aria-label="{st["exante_in68"]} of {st["exante"]} ex-ante forecasts inside the 68% band">'
+            + "".join(f'<i class="{"in" if e["in_68"] else "out"}"></i>' for e in ex)
             + "</span>"
         )
     else:
@@ -982,21 +1015,25 @@ def render_status(card: dict) -> str:
         ]
 
     verdict = ""
+    bias_tile = []
     if scored and len(naive) == scored:
         closer = "smaller" if mae < naive_mae else ("larger" if mae > naive_mae else "the same")
-        first = card["detail"][0]["round_id"] if card["detail"] else None
-        retro = sum(1 for d, _ in pairs if d["round_id"] == first)
-        retro_note = f", {retro} of them retroactive" if retro else ""
         verdict = (f'      <p class="fc-verdict">{icon("target")}<span><strong>So far:</strong> '
-                   f'{in68} of {scored} outturns fell inside the 68% band, and the average miss was '
-                   f'{mae:.2f}pp, {closer} than a no-change forecast ({naive_mae:.2f}pp), on the same '
-                   f'{scored}{retro_note}. Too few to show skill: <a href="#limits">limits</a>.</span></p>')
+                   f'{scored} forecasts of {st["outturns"]} outturns. Made before the outturn, '
+                   f'{st["exante_in68"]} of {st["exante"]} fell inside the 68% band; the {st["retro"]} archived '
+                   f'retroactively are shown apart. Average miss {mae:.2f}pp, {closer} than a no-change '
+                   f'forecast ({naive_mae:.2f}pp); {st["low"]} of {scored} ran low. Too few to show skill: '
+                   '<a href="#limits">limits</a>.</span></p>')
+        sign = "\u2212" if st["bias"] < 0 else "+"
+        bias_tile = tile("scale", f'{sign}{abs(st["bias"]):.2f}pp', "Bias (mean error)",
+                         f'{st["low"]} of {scored} ran low' if st["bias"] < 0 else f'{scored - st["low"]} of {scored} ran high')
     return "\n".join([
         asof,
         *([verdict] if verdict else []),
         '      <div class="fc-tiles ab-card" aria-label="The record so far">',
         *tile("target", cover_value, "Inside the 68% band", cover_sub, pips),
         *tile("ruler", mae_value, "Mean absolute error", mae_sub, bars),
+        *bias_tile,
         *tile("layers", f"{scored_rounds} of {rounds}", f"Round{'' if rounds == 1 else 's'} scored",
               next_sub),
         *([] if verdict else [f'        <p class="fc-callout">{icon("info")}<span>{scored} scores are too few to show skill either way. <a href="#limits">Limits</a></span></p>']),
@@ -1127,7 +1164,7 @@ def render_results(card: dict) -> str:
         f'<li class="fc-legend-note">{icon("info", "fc-ic fc-th-ic")}Each strip spans its own 90% band.</li></ul>',
         '      <div class="fc-board ab-card" role="table" aria-label="Every scored forecast: archived median and bands, outturn, error">',
         f'        <div class="fc-row fc-head" role="row"><span role="columnheader">{icon("target", "fc-ic fc-th-ic")}Target and round</span>'
-        f'<span role="columnheader">{icon("gdp", "fc-ic fc-th-ic")}Median, bands and outturn</span>'
+        f'<span role="columnheader">{icon("gdp", "fc-ic fc-th-ic")}Median, archived bands and outturn</span>'
         f'<span role="columnheader">{icon("ruler", "fc-ic fc-th-ic")}Error</span><span role="columnheader">{icon("inside", "fc-ic fc-th-ic")}Where it fell</span></div>',
     ]
     first_round = card["detail"][0]["round_id"] if card["detail"] else None
@@ -1141,13 +1178,19 @@ def render_results(card: dict) -> str:
         band = _band_label(e)
         inside = e["in_68"] or e["in_90"]
         badge_cls = "fc-in" if e["in_68"] else ("fc-mid" if e["in_90"] else "fc-out-b")
+        h = _quarter_index(e["period"]) - _quarter_index(detail["data_edge"])
+        y, q = int(e["period"][:4]), int(e["period"][-1])
+        q_end = f"{y}-{3 * q:02d}-{[31, 30, 30, 31][q - 1]}"
+        back = detail["round_id"] > q_end
+        horizon = (f'<span class="fc-h" title="Quarters after the round\'s data edge">h{h}</span>'
+                   + ('<span class="fc-h fc-h-back" title="The quarter had already ended when the round was archived">backcast</span>' if back else ""))
         note = ('<a class="fc-row-note" href="#limits">Satellite band understates uncertainty</a>'
                 if e["variable"] == "unemployment" else "")
         body.append(
             '        <div class="fc-row" role="row">'
             f'<div class="fc-tgt" role="rowheader"><span class="fc-var">{icon(e["variable"] if e["variable"] in _ICON_PATHS else "target")}</span>'
             f'<span><strong>{_target(e)}</strong>'
-            f'<span class="fc-round-line"><a class="fc-round" href="#rounds">{esc(detail["round_id"])} · {esc(MODEL_DISPLAY.get(detail["model"], (detail.get("label", detail["model"]), None))[0].replace("BoE SVAR unemployment satellite", "unemployment satellite"))}</a>{retro}</span></span></div>'
+            f'<span class="fc-round-line"><a class="fc-round" href="#rounds">{esc(detail["round_id"])} · {esc(MODEL_DISPLAY.get(detail["model"], (detail.get("label", detail["model"]), None))[0].replace("BoE SVAR unemployment satellite", "unemployment satellite"))}</a>{retro}{horizon}</span></span></div>'
             f'<div role="cell"><span class="visually-hidden">Median {e["forecast"]:.2f}%, 68% band '
             f'{e["lo68"]:.2f}–{e["hi68"]:.2f}, 90% band {e["lo90"]:.2f}–{e["hi90"]:.2f}, outturn {e["outturn"]:.2f}%.</span>'
             f"{_strip(e)}</div>"
@@ -1179,7 +1222,8 @@ def render_results(card: dict) -> str:
             f'<th scope="col" class="num">{icon("target", "fc-ic fc-th-ic")}This round</th>']
     if has_naive:
         head.append(f'<th scope="col" class="num">{icon("equal", "fc-ic fc-th-ic")}No change</th>')
-    head += [f'<th scope="col" class="num">{icon("file", "fc-ic fc-th-ic")}{esc(lbl)}</th>' for lbl in labels]
+    show = {SEF_LABEL: "BoE survey of external forecasters (Apr 2026)"}
+    head += [f'<th scope="col" class="num">{icon("file", "fc-ic fc-th-ic")}{esc(show.get(lbl, lbl).replace("BoE SEF", "BoE survey of external forecasters"))}</th>' for lbl in labels]
     body += [
         '      <details class="fc-more" id="benchmarks">',
         f'        <summary>{icon("scale")}<span>Against the benchmarks <span class="fc-more-sub">absolute error on the same outturns</span></span>{icon("chev", "fc-ic fc-chev")}</summary>',
@@ -1256,7 +1300,7 @@ def render_home_record(card: dict) -> str:
     scored = len(pairs)
     rounds = len({d["round_id"] for d, _ in pairs})
     in68 = sum(1 for _, e in pairs if e["in_68"])
-    expected = round(0.68 * scored)
+    st = record_stats(card)
     name = {"gdp": "GDP", "cpi": "CPI", "unemployment": "Unemployment"}
     months = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
 
@@ -1323,12 +1367,12 @@ def render_home_record(card: dict) -> str:
         "          </ul>",
         "          </div>",
         '          <dl class="lp-recstats">',
-        f'            <div><dt>inside the 68% band &middot; expected &asymp;{expected}</dt><dd>{in68}<small> of {scored}</small></dd></div>',
-        f'            <div><dt>{"round" if rounds == 1 else "rounds"} scored</dt><dd>{rounds}</dd></div>',
+        f'            <div><dt>inside the 68% band, made before the outturn</dt><dd>{st["exante_in68"]}<small> of {st["exante"]}</small></dd></div>',
+        f'            <div><dt>bias, mean error</dt><dd>{"&minus;" if st["bias"] < 0 else "+"}{abs(st["bias"]):.2f}<small>pp</small></dd></div>',
         "          </dl>",
         "        </div>",
         f'        <p class="lp-score-foot"><span class="chip chip-warn">{_lucide("alert", 14)}Too few to show skill</span>'
-        f'<span>{plural(scored, "forecast")} over {plural(rounds, "round")}.</span>'
+        f'<span>{plural(scored, "forecast")} of {plural(st["outturns"], "outturn")}; {st["retro"]} archived retroactively.</span>'
         '<a href="/forecasts#scored">See every score &rarr;</a></p>',
     ])
 
