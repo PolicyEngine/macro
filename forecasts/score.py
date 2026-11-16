@@ -852,8 +852,8 @@ def render_status(card: dict) -> str:
             top = max(mae, naive_mae)
             bars = (
                 '          <div class="fc-bars" aria-hidden="true">'
-                f'<span class="fc-bar-l">This model</span><span class="fc-bar"><i class="fc-bar-ours" style="width:{mae / top * 100:.0f}%"></i></span>'
-                f'<span class="fc-bar-l">No change</span><span class="fc-bar"><i class="fc-bar-naive" style="width:{naive_mae / top * 100:.0f}%"></i></span>'
+                f'<span class="fc-bar-l">This model {mae:.2f}pp</span><span class="fc-bar"><i class="fc-bar-ours" style="width:{mae / top * 100:.0f}%"></i></span>'
+                f'<span class="fc-bar-l">No-change baseline {naive_mae:.2f}pp</span><span class="fc-bar"><i class="fc-bar-naive" style="width:{naive_mae / top * 100:.0f}%"></i></span>'
                 "</div>"
             )
         else:
@@ -930,7 +930,7 @@ def render_rounds(card: dict) -> str:
             '<div class="fc-node-card">'
             f'<p class="fc-node-h"><span class="fc-node-date">{esc(detail["round_id"])}</span>'
             + ('<span class="fc-chip-open">Open</span>' if not n else "")
-            + (' <a class="fc-retro-mark" href="#retro" aria-label="Note on the first round">*</a>' if i == 0 else "")
+            + (' <a class="fc-retro-mark" href="#retro" title="Archived retroactively; see the note below">Retroactive</a>' if i == 0 else "")
             + "</p>"
             f'<p class="fc-node-model">{model_html(detail)}</p>'
             '<dl class="fc-mini">'
@@ -1025,7 +1025,7 @@ def render_results(card: dict) -> str:
     first_round = card["detail"][0]["round_id"] if card["detail"] else None
     for detail, e in rows:
         retro = ('<a class="fc-retro-mark" href="#retro" title="Archived retroactively; see the archive" '
-                 'aria-label="Archived retroactively; see the archive">*</a>'
+                 '>Retroactive</a>'
                  if detail["round_id"] == first_round else "")
         vfile = vintage_file(e.get("outturn_series") or "", e["outturn_vintage"] or "")
         vint = (f'<a class="fc-vint" href="{vfile}">vintage {esc(e["outturn_vintage"])}</a>'

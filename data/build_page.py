@@ -429,9 +429,7 @@ def render_fragment() -> str:
     return f"""{BEGIN}
     <div class="prose">
       <p>
-        Every series this site reads is archived as dated snapshots, never
-        edited or deleted: {series_count} series, {snapshot_count} snapshots
-        since {earliest}.
+        {series_count} series, {snapshot_count} snapshots since {earliest}.
       </p>
       <div class="table-scroll">
         <table id="series-table" class="series-table">
