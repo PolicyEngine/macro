@@ -23,17 +23,17 @@ OPEN, CLOSE = "<!-- joins-hub:begin -->", "<!-- joins-hub:end -->"
 
 # key, model id, href, name, flow, status, x%, y%, caption, panel (on /models)
 NODES = (
-    ("svar", "boe-svar", "/svar", "BoE SVAR", "in", "Experimental", 12.5, 15,
+    ("svar", "boe-svar", "/svar", "BoE SVAR", "in", "Experimental join", 12.5, 15,
      "Its CPI path drives benefit-uprating incidence.", "incidence"),
-    ("frbus", "frb-us", "/frb-us", "FRB/US", "in", "Experimental", 12.5, 38.3,
+    ("frbus", "frb-us", "/frb-us", "FRB/US", "in", "Experimental join", 12.5, 38.3,
      "Its wage and hours paths drive employment-income incidence.", "incidence"),
-    ("hank", "us-hank", "/us-hank", "US HANK", "in", "Experimental", 12.5, 61.7,
+    ("hank", "us-hank", "/us-hank", "US HANK", "in", "Experimental join", 12.5, 61.7,
      "Its wage and labour responses drive employment-income incidence.", "incidence"),
-    ("define", "define-uk", "/define", "DEFINE-UK", "in", "Experimental", 12.5, 85,
+    ("define", "define-uk", "/define", "DEFINE-UK", "in", "Experimental join", 12.5, 85,
      "Its scenario income deltas drive employment-income incidence.", "incidence"),
-    ("obr", "obr-macro", "/obr", "OBR emulator", "out", "Hosted", 87.5, 27,
+    ("obr", "obr-macro", "/obr", "OBR emulator", "out", "Hosted join", 87.5, 27,
      "A reform's static cost goes in as an add-factor; GDP feedback comes out. UK only.", "score"),
-    ("og", "psl-og", "/olg", "OG-UK", "back", "Local only · none published", 87.5, 73,
+    ("og", "psl-og", "/olg", "OG-UK", "back", "Local join · none published", 87.5, 73,
      "Long-run wage and rate changes feed a second microsimulation run. None published.", "og-join"),
 )
 FLOWS = (
