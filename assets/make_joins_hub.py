@@ -108,8 +108,7 @@ def render(page: str) -> str:
         flow = " → ".join(n for _i, n, _v in nodes)
         uses.append(
             f'      <li class="uc uc-{cls}"><a href="{href}">'
-            f'<span class="uc-head"><span class="uc-ic">{icon(ic, 20)}</span><span class="uc-chip">{status}</span></span>'
-            f'<strong class="uc-title">{title}</strong>'
+            f'<span class="uc-head"><span class="uc-ic">{icon(ic, 20)}</span><strong class="uc-title">{title}</strong><span class="uc-chip">{status}</span></span>'
             f'<ol class="vf" aria-label="{flow}">{steps}</ol>'
             f'<span class="uc-go">Details {icon("arrow-right", 14)}</span></a></li>')
     macro_tier = (
