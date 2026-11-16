@@ -470,7 +470,7 @@ def hank_shock_incidence(kind, size, year, persistence, horizon, variant,
               help="SVAR posterior draws (first call takes minutes).")
 @click.option("--reference", default="obr", show_default=True,
               type=click.Choice(["obr", "target"]),
-              help="CPI reference path: the March 2026 EFO (obr) or a flat "
+              help="CPI reference path: the October 2026 EFO (obr) or a flat "
                    "2.0% (target).")
 @click.option("--dataset", default=None,
               help="Microdata dataset name override.")

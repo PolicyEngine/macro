@@ -71,10 +71,10 @@ MODELS = {
         "runtime": "about one to five minutes for a raw shock on the hosted server; over ten minutes for a translated reform scenario on the default five-year window",
         "uncertainty": "not comprehensive",
         "status": (
-            "anchored to the March 2026 EFO, not validated as a forecaster; "
+            "anchored to the October 2026 EFO, not validated as a forecaster; "
             "predictive and policy checks weak"
         ),
-        "data_vintage": "March 2026 EFO baseline",
+        "data_vintage": "October 2026 EFO baseline",
     },
     "boe-svar": {
         "display_name": "Bank of England structural VAR replication",
@@ -114,9 +114,9 @@ MODELS = {
         "runtime": "seconds to minutes",
         "uncertainty": "not comprehensive",
         "status": (
-            "replicates the Fed's pyfrbus on one 100bp funds-rate shock, "
-            "within the gap between pyfrbus 1.0.0 and 1.1.1; a solver check, "
-            "not a test of the economics"
+            "replicates the Fed's pyfrbus (1.0.0 and 1.1.1) on one 100bp "
+            "funds-rate shock, within a 1e-6 tolerance; a solver check, not a "
+            "test of the economics"
         ),
         "data_vintage": "LONGBASE file from the installed frbus package",
     },
@@ -235,14 +235,14 @@ MODEL_QUALITY = {
     "obr-macro": {
         "implementation_fidelity": _quality(
             "moderate",
-            "Anchored GDP/consumption reproduce the March 2026 EFO within 1%, "
+            "Anchored GDP/consumption reproduce the October 2026 EFO within 1%, "
             "but passthrough and inactive equations limit equation coverage.",
             "Exercise every published behavioural equation and eliminate or "
             "explicitly scope every inactive channel.",
         ),
         "predictive_validation": _quality(
             "weak",
-            "Free-running GDP and consumption MAPE are 4.12% and 6.90% under "
+            "Free-running GDP and consumption MAPE are 4.25% and 7.24% under "
             "the nominal-GDP pin (8 of 11 computed lines in band); the "
             "anchored fit is by construction.",
             "Pass rolling-origin historical-vintage tests against simple "
@@ -270,7 +270,7 @@ MODEL_QUALITY = {
         ),
         "vintage_reproducibility": _quality(
             "moderate",
-            "The live March 2026 baseline and November 2025 paper vintage are "
+            "The live October 2026 baseline and November 2025 paper vintage are "
             "labelled, but a multi-vintage archive is not yet a test fixture.",
             "Archive source hashes and reproduce at least three historical EFO "
             "vintages end to end.",

@@ -120,7 +120,7 @@ def quarter_of(period: str) -> str:
 
 
 def longbase_baseline() -> list[dict]:
-    """FRB/US April 2026 LONGBASE conditioning baseline, near-term y/y path."""
+    """FRB/US October 2026 LONGBASE conditioning baseline, near-term y/y path."""
     path = ROOT / "papers" / "frb-us" / "figures" / "longbase_baseline_yoy.csv"
     lines = [
         line for line in path.read_text().splitlines()

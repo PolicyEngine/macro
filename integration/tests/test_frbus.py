@@ -168,7 +168,7 @@ def test_tracking_invariant_holds_after_init_trac():
     endogenous variables. If this fails, every deviation the shock tool reports
     is measured against a baseline that is already wrong, so nothing else in
     this file means anything. The model repo gates at 1e-8; we assert the same
-    bound rather than the achieved 5.6e-17, so a solver change that stays
+    bound rather than the achieved 7.3e-12, so a solver change that stays
     within the published gate does not fail us.
     """
     import pandas as pd
@@ -191,7 +191,7 @@ def test_tracking_invariant_holds_after_init_trac():
 def test_monetary_tightening_has_the_documented_signs_and_magnitudes():
     """VALIDATION.md Test 3: 100bp rffintay_aerr shock in 2026Q1.
 
-    Documented: rff +1.00pp on impact, xgdp trough -0.55%, lur peak +0.26pp,
+    Documented: rff +1.00pp on impact, xgdp trough -0.56%, lur peak +0.28pp,
     picxfe trough -0.034pp. Asserted with wide bands (roughly +/-40% on the
     real-side magnitudes) so a LONGBASE re-vintage does not break the build,
     while a sign flip, a decoupled lever or an order-of-magnitude error does.
@@ -212,8 +212,8 @@ def test_monetary_tightening_has_the_documented_signs_and_magnitudes():
     lur = [r["lur"] for r in res["results"]]
     picxfe = [r["picxfe"] for r in res["results"]]
 
-    assert -0.85 < min(gdp) < -0.30, f"xgdp trough {min(gdp)} (expected ~-0.55%)"
-    assert 0.15 < max(lur) < 0.40, f"lur peak {max(lur)} (expected ~+0.26pp)"
+    assert -0.85 < min(gdp) < -0.30, f"xgdp trough {min(gdp)} (expected ~-0.56%)"
+    assert 0.15 < max(lur) < 0.40, f"lur peak {max(lur)} (expected ~+0.28pp)"
     assert min(picxfe) < 0, "core inflation must fall after a tightening"
     assert abs(min(picxfe)) < 0.5, "inflation response is implausibly large"
 

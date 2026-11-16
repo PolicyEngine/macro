@@ -184,8 +184,8 @@ def chart_obr_anchored():
     quarters, gdp, cons = load_obr_anchored()
     W, H = 760, 326
     x0, x1 = 58.0, 724.0
-    # Frame runs -0.3pp to +1.2pp: the March 2026 vintage with the recovered
-    # ONS series drifts above the EFO to about +1.2% on consumption by 2027Q4.
+    # Frame runs -0.3pp to +1.5pp: on the October 2026 vintage consumption
+    # drifts above the EFO to about +1.3% by 2027Q4.
     zero_y = 244.0
     per_unit = 46.0 / 0.3          # px per percentage point
     step = (x1 - x0) / (len(quarters) - 1)
@@ -202,19 +202,19 @@ def chart_obr_anchored():
 
     desc = (
         f"Line chart. Quarterly percentage deviation of the anchored emulator from the "
-        f"published March 2026 EFO, {quarters[0]} to {quarters[-1]}. Real GDP ranges from "
+        f"published October 2026 EFO, {quarters[0]} to {quarters[-1]}. Real GDP ranges from "
         f"{min(gdp):+.2f}% to {max(gdp):+.2f}% (mean absolute percentage error {mape_g:.2f}%); "
         f"consumption from {min(cons):+.2f}% to {max(cons):+.2f}% (mean absolute percentage error "
         f"{mape_c:.2f}%). Continuous integration hard-fails the build if either mean absolute "
         f"deviation reaches 1%; it does not test single quarters{over_note}."
     )
-    y_top, y_bot = ymap(1.2), ymap(-0.3)
+    y_top, y_bot = ymap(1.5), ymap(-0.3)
     out = svg_open(x1 - x0 + 12, y_bot - y_top + 12, "obr-anchored",
-                   "OBR emulator: anchored baseline vs March 2026 EFO, quarterly deviation",
+                   "OBR emulator: anchored baseline vs October 2026 EFO, quarterly deviation",
                    desc, origin=(x0 - 6, y_top - 6))
 
     # y grid: labels inside the plot, above their gridline; zero is vc-zero.
-    for tick in (-0.3, 0.0, 0.3, 0.6, 0.9, 1.2):
+    for tick in (-0.3, 0.0, 0.3, 0.6, 0.9, 1.2, 1.5):
         y = ymap(tick)
         cls = "vc-zero" if tick == 0 else "vc-grid"
         label = "0" if tick == 0 else f"{tick:+.1f}%".replace("-", "\u2212")
@@ -250,7 +250,7 @@ def chart_obr_anchored():
             f"{name}, peak {fmt_signed(max(series, key=abs))}%", ink))
 
     out.append("</svg>")
-    return chartkit.figure("\n".join(out), unit="% deviation from the March 2026 EFO")
+    return chartkit.figure("\n".join(out), unit="% deviation from the October 2026 EFO")
 
 
 def _crowds_last(tick_idx: list[int], j: int) -> bool:
@@ -422,9 +422,10 @@ def chart_frbus_residuals():
             "minus the residuals at the input data, so re-solving reproduces the input for any "
             "input at all — and are shown for completeness, not as evidence. The framing "
             "comparison is the last row: the Federal Reserve's own two pyfrbus releases "
-            "disagree with each other by as much as this implementation disagrees with either, "
-            "so our agreement sits at the scale of the reference implementation's own "
-            "numerical noise rather than at a chosen tolerance.")
+            "disagree with each other by about as much as this implementation disagrees with "
+            "either (the same order of magnitude), so our agreement sits at the scale of the "
+            "reference implementation's own numerical noise; the pass criterion is the 1e-6 "
+            "gate.")
 
     # A dot strip, not bars: on a log axis a bar's length is measured from an
     # arbitrary origin (1e-18 here) and encodes nothing. Each row is a track
@@ -498,7 +499,7 @@ def chart_obr_freerun():
 
     desc = (
         f"Line chart of quarterly real GDP levels in billions of pounds, {quarters[0]} to "
-        f"{quarters[-1]}. The published March 2026 EFO path rises from {efo[0]:.1f} to "
+        f"{quarters[-1]}. The published October 2026 EFO path rises from {efo[0]:.1f} to "
         f"{efo[-1]:.1f}. The anchored emulator tracks it closely, running "
         f"from {anchored[0]:.1f} to {anchored[-1]:.1f} (mean absolute percentage error {mad_a:.2f} per "
         f"cent, recomputed here from the plotted series). The free-running emulator, de-seeded "
@@ -511,7 +512,7 @@ def chart_obr_freerun():
         f"of {len(quarters)} maps to x = {x0:g} + i * {step:.3f}."
     )
     out = svg_open(x1 - x0 + 12, base_y - top_y + 12, "obr-freerun",
-                   "OBR emulator: real GDP level, anchored vs free-running vs the March 2026 EFO (£bn/qtr)",
+                   "OBR emulator: real GDP level, anchored vs free-running vs the October 2026 EFO (£bn/qtr)",
                    desc, origin=(x0 - 6, top_y - 6))
 
     tick = lo
@@ -543,7 +544,7 @@ def chart_obr_freerun():
     # on the line.
     return chartkit.figure("\n".join(out), unit="Real GDP, £bn per quarter", legend=[
         ("ln-s1", f"anchored ({mad_a:.2f}% MAPE)"),
-        ("ln-s2", "EFO March 2026"),
+        ("ln-s2", "EFO October 2026"),
         ("ln-s3", f"free-running ({mad_f:.2f}% MAPE)"),
     ])
 
@@ -744,7 +745,10 @@ def chart_obr_computed_share():
     in_band = sum(g["count"] for g in grades if g["in_band"])
     trivial = sum(g["count"] for g in grades if g.get("trivial"))
     nontrivial = computed - trivial
-    off = next(g for g in grades if g["key"] == "off")
+    # The worst computed variables: the 'off' grade where there is one,
+    # otherwise the ones that fit badly.
+    off = next((g for g in grades if g["key"] == "off"), None) or next(
+        g for g in grades if not g["in_band"])
 
     desc = (
         f"Two stacked bars. Of {total} headline variables in the OBR emulator "
@@ -756,7 +760,8 @@ def chart_obr_computed_share():
         f"within band, but {word(trivial)} of those is an accounting identity that closes "
         f"over passthrough inputs, so {in_band - trivial} of the {nontrivial} non-trivial "
         f"computed variables are in band. The worst are "
-        + " and ".join(off["examples"])
+        + (", ".join(off["examples"][:-1]) + " and " + off["examples"][-1]
+           if len(off["examples"]) > 1 else off["examples"][0])
         + "."
     )
 

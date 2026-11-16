@@ -35,7 +35,7 @@ def obr_chart() -> str:
     out = [
         f'<svg class="vchart" data-chart="obr-current-outlook" viewBox="{x0 - 6} {top_v - 6:.1f} '
         f'{x1 - x0 + 12} {bot - top_v + 12:.1f}" role="img" aria-labelledby="obr-current-t obr-current-d">',
-        '<title id="obr-current-t">March 2026 OBR outlook for real GDP and household consumption</title>',
+        '<title id="obr-current-t">October 2026 OBR outlook for real GDP and household consumption</title>',
         '<desc id="obr-current-d">Indexed line chart from 2026Q1 to 2031Q1. Real GDP rises from 100 to %.1f and household consumption from 100 to %.1f.</desc>'
         % (g[-1], c[-1]),
     ]
@@ -63,7 +63,7 @@ def obr_chart() -> str:
     out.append("</svg>")
     return "\n".join([
         '<figure class="vfig current-outlook">',
-        chartkit.figure("\n".join(out), unit="March 2026 EFO outlook, index, 2026Q1 = 100",
+        chartkit.figure("\n".join(out), unit="October 2026 EFO outlook, index, 2026Q1 = 100",
                         legend=[("ln-s2s", "Real GDP"), ("ln-s3", "Household consumption")],
                         source='<a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/'
                                'papers/obr-macro/figures/current_outlook.csv">'
