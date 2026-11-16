@@ -1464,7 +1464,8 @@ def route_card(icon: str, title: str, model: str, line: str, status: str,
     return (f'        <article class="rt-card">'
             f'<p class="rt-head">{site_nav.icon(icon, 18)}<strong>{esc(title)}</strong></p>'
             f'<p class="rt-model">{model}</p><p class="rt-line">{esc(line)}</p>'
-            f'<p class="rt-status">{esc(status)}</p><p class="rt-chips">{chip_html}</p></article>')
+            f'<p class="rt-status{"" if status.startswith("Exact") else " rt-status-neutral"}">{esc(status)}</p>'
+            f'<p class="rt-chips">{chip_html}</p></article>')
 
 
 def route_grid(cards: list[str]) -> str:
@@ -2712,6 +2713,8 @@ UK_TOPICS = [
         "series": (),
         "hook": reform_hook,
         "stands": reform_stands,
+        "stands_sub": "Three routes to a score, each with its status.",
+        "model_sub": "What each route leaves out.",
         "model": reform_model,
         "run": reform_run,
         "data": reform_data,
@@ -2825,6 +2828,8 @@ US_TOPICS = [
         "series": (),
         "hook": us_reform_hook,
         "stands": us_reform_stands,
+        "stands_sub": "The routes to a US score, each with its status.",
+        "model_sub": "What each route leaves out.",
         "model": us_reform_model,
         "run": us_reform_run,
         "data": us_reform_data,
@@ -3052,7 +3057,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
-<link rel="stylesheet" href="/economy/topic-page.css?v=16" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=17" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -3068,9 +3073,9 @@ def page(topic: dict) -> str:
 
 {subnav(topic["country"], slug)}
 
-{band("stands", "01", "where it stands", "Latest readings from the stored snapshot.", stands_main)}
+{band("stands", "01", "where it stands", topic.get("stands_sub", "Latest readings from the stored snapshot."), stands_main)}
 
-{band("model", "02", "what the models see", "The model view, with its limits beside it.", topic["model"](), alt=True)}
+{band("model", "02", "what the models see", topic.get("model_sub", "The model view, with its limits beside it."), topic["model"](), alt=True)}
 
   <section class="band xp-stack" aria-label="More detail">
 {xp_moved}
