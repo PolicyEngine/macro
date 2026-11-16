@@ -193,8 +193,9 @@
 // without each page marking them by hand.
 (function () {
   "use strict";
-  var NUM = /^[\s(]*[+\-−±~≈]?\s*[£$€]?\s*\d[\d,]*(\.\d+)?\s*(%|pp|bp|bn|m|k|x|×)?[\s)]*$/i;
-  document.querySelectorAll("main .band table").forEach(function (table) {
+  var ONE = "[+\\-−±~≈]?\\s*[£$€]?\\s*\\d[\\d,]*(\\.\\d+)?\\s*(%|pp|bp|bn|m|k|x|×)?";
+  var NUM = new RegExp("^[\\s(]*" + ONE + "(\\s*[–\\-—to]+\\s*" + ONE + ")?[\\s)]*[*†‡¹²³]*$", "i");
+  document.querySelectorAll("main table:not(.sb-grid):not(.cap-grid)").forEach(function (table) {
     var rows = Array.from(table.tBodies).reduce(function (all, body) {
       return all.concat(Array.from(body.rows));
     }, []);
@@ -203,7 +204,9 @@
     for (var c = 1; c < width; c++) {
       var cells = rows.map(function (r) { return r.cells[c]; }).filter(Boolean);
       var filled = cells.filter(function (cell) { return cell.textContent.trim() && cell.textContent.trim() !== "—"; });
-      if (!filled.length || !filled.every(function (cell) { return NUM.test(cell.textContent.trim()); })) continue;
+      if (!filled.length) continue;
+      var hits = filled.filter(function (cell) { return NUM.test(cell.textContent.trim()); }).length;
+      if (hits / filled.length < 0.6) continue;
       cells.forEach(function (cell) { cell.classList.add("num"); });
       if (table.tHead) Array.from(table.tHead.rows).forEach(function (r) {
         if (r.cells.length === width && r.cells[c]) r.cells[c].classList.add("num");
@@ -226,7 +229,8 @@
     var head = table.tHead && table.tHead.rows[table.tHead.rows.length - 1];
     var labels = head ? Array.from(head.cells).map(function (c) { return c.textContent.trim(); }) : [];
     var merged = table.querySelector("[colspan]:not([colspan='1']), [rowspan]:not([rowspan='1'])");
-    if (labels.length && labels.length <= 6 && !merged) {
+    var own = table.matches(".t-stack") || box.matches(".has-t-stack, .mo-tablecard");
+    if (labels.length && labels.length <= 6 && !merged && !own) {
       table.classList.add("tbl-stack");
       Array.from(table.tBodies).forEach(function (body) {
         Array.from(body.rows).forEach(function (row) {
