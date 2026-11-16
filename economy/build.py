@@ -315,11 +315,7 @@ def us_trends_note() -> str:
         index[name]["coverage"][0] for name in FRED_SERIES + US_MARKET_SERIES
     )
     uk_start = min(index[name]["coverage"][0] for name in ONS_SERIES)
-    return f"""    <p class="economy-method">
-      The one place the whole path is drawn, from the committed point-in-time
-      observations; each source link opens the official series.
-    </p>
-    <details class="about">
+    return f"""    <details class="about">
       <summary>Why the US charts are shorter</summary>
       <p>
         The topic pages carry the current reading and, where one exists, the
