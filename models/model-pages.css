@@ -242,7 +242,6 @@
 .doc main:has(> .hero.mh) .stat-row .stat-label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
 .doc main:has(> .hero.mh) .stat-row .stat-value { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
 .doc main:has(> .hero.mh) .stat-row .stat-sub { font-size: 12px; }
-.doc main:has(> .hero.mh) .stat-row .stat-neutral { background: none; border: 1px dashed var(--hairline-strong); }
 .doc main:has(> .hero.mh) .stat-row .stat-neutral .stat-value { color: var(--text-strong); }
 .doc main:has(> .hero.mh) .scen-note { font-size: 13.5px; max-width: 72ch; color: var(--text-muted); }
 .doc main:has(> .hero.mh) .ov-source {
@@ -257,17 +256,10 @@
   .doc main:has(> .hero.mh) .stat-row .stat-value { font-size: 24px; }
 }
 
-/* pipeline */
-.doc main:has(> .hero.mh) .pl-node { border-radius: 8px; padding: 10px 14px; font-size: 13px; }
-.doc main:has(> .hero.mh) .pl-node-out { background: var(--teal-700); border-color: var(--teal-700); color: #fff; }
-.doc main:has(> .hero.mh) .pl-node-out strong { color: #fff; }
-@media (prefers-color-scheme: dark) {
-  .doc main:has(> .hero.mh) .pl-node-out { background: #285E61; border-color: #285E61; }
-}
-.doc main:has(> .hero.mh) .pl-arrow { color: var(--text-faint); }
-@media (max-width: 640px) {
-  .doc main:has(> .hero.mh) .pipeline { flex-direction: column; align-items: stretch; }
-  .doc main:has(> .hero.mh) .pl-arrow { align-self: center; transform: rotate(90deg); }
+/* pipeline: the shared style.css pipeline owns layout; at <=820 it draws one
+   vertical connector under the step number. Cancel the older 640px rotation. */
+@media (max-width: 820px) {
+  .doc main:has(> .hero.mh) .pipeline .pl-arrow { align-self: flex-start; transform: none; rotate: none; }
 }
 .doc main:has(> .hero.mh) .callout { border-radius: 8px; font-size: 14px; }
 
@@ -413,13 +405,7 @@
   font-weight: 500;
 }
 .doc main:has(> .hero.mh) .stat-foot a.chip-warn { color: var(--warn-ink); }
-/* free-running tile on Validation is a weak result, not a reference */
-.doc main:has(> .hero.mh) .stat-row .stat-neutral:has(a.chip-warn) {
-  background: var(--warn-bg);
-  border: 1px solid var(--warn-line);
-}
 /* tab bar sits at one height across tabs */
-@media (min-width: 721px) { .doc main > .hero.mh .lede { min-height: 3.1em; } }
 /* room between tiles and the chart */
 .doc main:has(> .hero.mh) .stat-row { margin-bottom: 20px; }
 .doc main:has(> .hero.mh) .limits + .limits,
@@ -604,8 +590,6 @@
 .doc main:has(> .hero.mh) .stat-row .stat-value { order: -1; font-size: var(--fs-ab-stat, 28px); line-height: 1.2; font-weight: 700; color: var(--text-strong); font-variant-numeric: tabular-nums; }
 .doc main:has(> .hero.mh) .stat-row .stat-label { margin-top: 4px; font-size: 14px; color: var(--gray-600); min-height: 0; }
 .doc main:has(> .hero.mh) .stat-row .stat-sub { font-size: 13px; font-weight: 600; color: var(--gray-500); }
-.doc main:has(> .hero.mh) .stat-row .stat-neutral { padding: 12px 14px; margin: -12px -14px; border-radius: 10px; border: 1px dashed var(--hairline-strong); }
-.doc main:has(> .hero.mh) .stat-row .stat-neutral:has(a.chip-warn) { background: color-mix(in srgb, var(--ab-loss) 8%, var(--card)); border: 1px solid color-mix(in srgb, var(--ab-loss) 35%, transparent); }
 .doc main:has(> .hero.mh) .stat-value.is-gain { color: var(--ab-gain); }
 .doc main:has(> .hero.mh) .stat-value.is-loss { color: var(--ab-loss-ink); }
 @media (max-width: 768px) { .doc main:has(> .hero.mh) .stat-row { padding: 16px; gap: 16px; } }
@@ -665,7 +649,7 @@
 }
 .doc main:has(> .hero.mh) .limits > details.expander[open] { background: var(--surface-card); grid-column: 1 / -1; }
 .doc main:has(> .hero.mh) .limits > details.expander[open] > :not(summary) { padding: 0 20px 18px 64px; font-size: 15px; }
-@media (max-width: 1024px) { .doc main:has(> .hero.mh) .limits { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 767px) { .doc main:has(> .hero.mh) .limits { grid-template-columns: minmax(0, 1fr); } }
 .doc main:has(> .hero.mh) .dial-cards { gap: 20px; }
 .doc main:has(> .hero.mh) .dial-cards > * {
   --accent: var(--ab-gain);
@@ -730,7 +714,6 @@
 /* ---- Fable spec review, six models ---- */
 .doc main:has(> .hero.mh) .stat-row { gap: 8px; padding: 12px 10px; }
 .doc main:has(> .hero.mh) .stat-row .stat { padding: 12px 14px; }
-.doc main:has(> .hero.mh) .stat-row .stat-neutral { margin: 0; }
 @media (max-width: 768px) { .doc main:has(> .hero.mh) .stat-row { gap: 6px; padding: 8px 6px; } }
 .doc main:has(> .hero.mh) :is(.band > .prose, .scen-panel) > .table-scroll { background: var(--surface-card); border: 1px solid var(--hairline); border-radius: 12px; padding: 8px 24px 16px; }
 @media (max-width: 768px) { .doc main:has(> .hero.mh) :is(.band > .prose, .scen-panel) > .table-scroll { padding: 4px 16px 12px; } }
@@ -800,7 +783,6 @@
 .doc main:has(> .hero.mh) details.more[open] { padding-bottom: 8px; }
 
 /* ---- Fable text/flow pass: frb-us, us-hank, olg, define ---- */
-.doc main:has(> .hero.mh) .pl-node-out .mono { color: rgba(255, 255, 255, .8); }
 .doc main:has(> .hero.mh) .meth-step > details.about + details.about,
 .doc main:has(> .hero.mh) .meth-step > details.more + details.about { border-top: 0; }
 .doc main:has(> .hero.mh) #answers > .callout { max-width: none; }
@@ -820,13 +802,75 @@
 .doc main:has(> .hero.mh) .band > .ov-flow-note,
 .doc main:has(> .hero.mh) .band > .prose > .note,
 .doc main:has(> .hero.mh) .scen-note { max-width: none; }
-/* pipeline stacks before its last chip can strand an arrow */
-@media (max-width: 900px) {
-  .doc main:has(> .hero.mh) .pipeline { flex-direction: column; align-items: stretch; }
-  .doc main:has(> .hero.mh) .pl-arrow { align-self: center; transform: rotate(90deg); }
-}
 /* pe chart: padded, compact */
 .doc main:has(> .hero.mh) .band > .vfig svg { max-height: 300px; }
 .doc main:has(> .hero.mh) .ov-verdict-line > span.ov-verdict-why { flex: 1 0 100%; order: 3; margin-top: 2px; }
 .doc main:has(> .hero.mh) .stat-row .stat-bench { position: relative; }
 .doc main:has(> .hero.mh) .stat-row .stat-bench .stat-eyebrow { position: absolute; top: -4px; left: 14px; line-height: 1; }
+
+/* ---- Round 4 (Fable screenshot review of #267) ---- */
+/* every tile is the same tile: no dashed or tinted "neutral" box */
+.doc main:has(> .hero.mh) .stat-row .stat-neutral { background: none; border: 0; margin: 0; }
+.doc main:has(> .hero.mh) .limits { gap: 12px; }
+.doc main:has(> .hero.mh) .limits > details.expander > summary { padding: 14px 16px; font-size: 14.5px; }
+.doc main:has(> .hero.mh) .limits-h { display: flex; align-items: center; gap: 10px; }
+.doc main:has(> .hero.mh) .limits-ic { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--ab-teal-50); box-shadow: inset 0 0 0 1px var(--ab-teal-100); color: var(--ab-teal-700); flex: 0 0 auto; }
+/* configuration cards (obr/validation): two-line facts, detail in an expander */
+.doc main:has(> .hero.mh) .cfg-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 12px; }
+@media (max-width: 767px) { .doc main:has(> .hero.mh) .cfg-cards { grid-template-columns: minmax(0, 1fr); } }
+.doc main:has(> .hero.mh) .cfg-card { padding: 16px 18px; background: var(--card); border: 1px solid var(--ab-border); border-radius: 12px; }
+.doc main:has(> .hero.mh) .cfg-card h3 { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 8px; margin: 0 0 8px; font-size: var(--fs-ab-body, 16px); }
+.doc main:has(> .hero.mh) .cfg-card p { margin: 0; color: var(--text-body); font-size: var(--fs-ab-small, 14px); line-height: 1.45; }
+.doc main:has(> .hero.mh) .cfg-card .cfg-fact { margin-top: 6px; color: var(--text-strong); font-weight: 600; font-variant-numeric: tabular-nums; }
+.doc main:has(> .hero.mh) dl.cfg-detail { margin: 0; }
+.doc main:has(> .hero.mh) dl.cfg-detail dt { margin-top: 12px; color: var(--text-strong); font-weight: 600; }
+.doc main:has(> .hero.mh) dl.cfg-detail dt:first-child { margin-top: 0; }
+.doc main:has(> .hero.mh) dl.cfg-detail dd { margin: 2px 0 0; }
+/* a row with a "Benchmark" eyebrow reserves that row on every tile, so values share one baseline */
+.doc main:has(> .hero.mh) .stat-row:has(.stat-eyebrow) > .stat { position: relative; padding-top: 34px; }
+.doc main:has(> .hero.mh) .stat-row:has(.stat-eyebrow) .stat-eyebrow { position: absolute; top: 12px; left: 14px; margin: 0; line-height: 1.2; }
+/* sparkline: first and last values on the axis; its notes sit inside the card */
+.doc main:has(> .hero.mh) .spark-axis b { color: var(--text-strong); font-weight: 600; font-variant-numeric: tabular-nums; }
+.doc main:has(> .hero.mh) figure.spark > .scen-points { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--ab-border); }
+/* trailing notes: one card-footer style. Under a card they attach to it; elsewhere they are a quiet inset strip. */
+.doc main:has(> .hero.mh) :is(.scen-note, .ov-flow-note) {
+  max-width: none; margin: 12px 0 0; padding: 10px 16px;
+  background: var(--ab-inset); border: 1px solid var(--ab-border); border-radius: 10px;
+  color: var(--text-muted); font-size: var(--fs-ab-cap, 13px); line-height: 1.5;
+}
+.doc main:has(> .hero.mh) :is(.stat-row, .vfig, figure.spark, .mo-figcard):has(+ :is(.scen-note, .ov-flow-note)) {
+  margin-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+}
+.doc main:has(> .hero.mh) :is(.stat-row, .vfig, figure.spark, .mo-figcard) + :is(.scen-note, .ov-flow-note) {
+  margin-top: 0; border-top: 0; border-radius: 0 0 12px 12px;
+}
+.doc main:has(> .hero.mh) :is(.scen-note, .ov-flow-note) + :is(.callout, .xp, details) { margin-top: 16px; }
+/* step index: a compact chip grid (3 across), not a second set of step cards */
+.doc main:has(> .hero.mh) .meth-map { margin: 8px 0 24px; }
+.doc main:has(> .hero.mh) .meth-map-list,
+.doc main:has(> .hero.mh) .meth-map-list:has(> li:nth-child(7)) { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.doc main:has(> .hero.mh) .meth-map-list li::before,
+.doc main:has(> .hero.mh) .meth-map-list li::after { display: none; }
+.doc main:has(> .hero.mh) .meth-map-list a {
+  flex-direction: row; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px 6px 6px;
+  border: 1px solid var(--ab-border); border-radius: 999px; background: var(--card);
+  font-size: var(--fs-ab-cap, 13px); font-weight: 600; line-height: 1.25;
+}
+.doc main:has(> .hero.mh) .meth-map-list a:hover { border-color: var(--ab-teal-700); background: var(--ab-teal-50); }
+.doc main:has(> .hero.mh) .meth-map-num { flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%; background: var(--ab-teal-50); box-shadow: inset 0 0 0 1px var(--ab-teal-100); color: var(--ab-teal-700); }
+.doc main:has(> .hero.mh) .meth-map-t { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+@media (max-width: 767px) { .doc main:has(> .hero.mh) .meth-map-list, .doc main:has(> .hero.mh) .meth-map-list:has(> li:nth-child(7)) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 420px) { .doc main:has(> .hero.mh) .meth-map-list, .doc main:has(> .hero.mh) .meth-map-list:has(> li:nth-child(7)) { grid-template-columns: minmax(0, 1fr); } }
+/* r4 Fable follow-ups */
+@media (max-width: 820px) {
+  .doc main:has(> .hero.mh) .pipeline .pl-arrow { margin-block: 6px; }
+  .doc main:has(> .hero.mh) .pipeline .pl-arrow::after { display: none; }
+}
+.doc main:has(> .hero.mh) .limits > details.expander:not([open]) { align-self: stretch; display: flex; flex-direction: column; }
+.doc main:has(> .hero.mh) .limits > details.expander > summary { flex: 1 1 auto; align-items: center; }
+.doc main:has(> .hero.mh) .limits > details.expander > summary::after { flex: 0 0 auto; }
+.doc main:has(> .hero.mh) .scen-panel > figure.spark + .xp,
+.doc main:has(> .hero.mh) .scen-panel > :is(figure.spark, .scen-note) + .xp { margin-top: 16px; }
+.doc main:has(> .hero.mh) .codeblock + .scen-note { margin-top: 12px; }
+.doc main:has(> .hero.mh) details.step-fold { border-top: 0; }
+.doc main:has(> .hero.mh) .scrolly-wrap + .xp { margin-top: 16px; }

@@ -108,14 +108,14 @@ def render(page: str) -> str:
         flow = " → ".join(n for _i, n, _v in nodes)
         uses.append(
             f'      <li class="uc uc-{cls}"><a href="{href}">'
-            f'<span class="uc-head"><span class="uc-ic">{icon(ic, 20)}</span><strong class="uc-title">{title}</strong><span class="uc-chip">{status}</span></span>'
+            f'<span class="uc-head"><span class="uc-ic">{icon(ic, 20)}</span><span class="uc-tt"><strong class="uc-title">{title}</strong><span class="uc-chip">{status}</span></span></span>'
             f'<ol class="vf" aria-label="{flow}">{steps}</ol>'
             f'<span class="uc-go">Details {icon("arrow-right", 14)}</span></a></li>')
     macro_tier = (
         '<div class="hub2-tier hub2-macro">\n'
         f'    <p class="hub2-label">{icon("models", 14)}Six macro models: the economy-wide answer</p>\n'
         f'    <div class="mx-grid">\n{cards}\n    </div>\n  </div>'
-    ) if on_models else ""
+    ) if False else ""
     note_link = '' if on_models else ' <a href="/models#joins">See how each link works</a>'
     return f'''{OPEN}
 <div class="hub2" data-hub2>

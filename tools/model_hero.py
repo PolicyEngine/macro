@@ -12,12 +12,13 @@ every tab. Idempotent: re-running replaces the strip in place.
 
 from __future__ import annotations
 
+import html as html_lib
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=21" />'
+CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=22" />'
 CSS_RE = re.compile(r'<link rel="stylesheet" href="/models/model-pages\.css(?:\?v=\d+)?" />\n?')
 
 sys.path.insert(0, str(ROOT))
@@ -255,6 +256,9 @@ def _close(html: str, start: int):
     raise ValueError("unbalanced details")
 
 
+CARD_OPEN = re.compile(r'<details class="expander">\s*<summary>Model card <span class="expander-meta">(.*?)</span></summary>', re.S)
+
+
 def to_shared_expander(html: str) -> str:
     """Our r12 'more' folds and the plain 'About this step' folds become the
     shell's one expander (.xp), so every tab has a single expander style."""
@@ -266,6 +270,11 @@ def to_shared_expander(html: str) -> str:
         body = html[m.end():end.start()].strip("\n")
         title = re.sub(r"<[^>]+>", "", m.group(1)).strip() or "More detail"
         html = html[:m.start()] + site_nav.expander("list", title, _summarise(body), body) + html[end.end():]
+    m = CARD_OPEN.search(html)
+    if m:
+        end = _close(html, m.end())
+        body = html[m.end():end.start()].strip("\n")
+        html = html[:m.start()] + site_nav.expander("file-text", "Model card", m.group(1).strip(), body) + html[end.end():]
     while True:
         m = MORE_OPEN.search(html)
         if not m:
@@ -280,11 +289,51 @@ def to_shared_expander(html: str) -> str:
         html = html[:m.start()] + site_nav.expander("list", m.group(1), m.group(2), body) + html[end.end():]
 
 
+def _txt(x: str) -> str:
+    return html_lib.unescape(re.sub(r"<[^>]+>", "", x)).strip()
+
+
+def _about_name(body: str) -> tuple[str, str]:
+    """Name an 'About this step' fold after its own content: the step's section
+    title (or first sub-heading) and the next one or two sub-headings."""
+    pool = [_txt(x) for x in re.findall(r'meth-sec-title">(.*?)</div>', body)]
+    pool += [_txt(x) for x in re.findall(r"<h4[^>]*>(.*?)</h4>", body)]
+    pool += [_txt(x) for x in re.findall(r"<p><strong>(.*?)</strong>", body)]
+    if not pool:
+        return "", ""
+    title, rest, summ = pool[0].rstrip(".:"), pool[1:], ""
+    for item in rest:
+        cand = (summ + " · " if summ else "") + item.rstrip(".:")
+        if len(cand) > 60:
+            break
+        summ = cand
+    if not summ:
+        plain = [l.strip() for l in _txt(re.sub(r"<(svg|mjx-container|pre|table)\b.*?</\1>", "", body, flags=re.S)).split("\n") if l.strip()]
+        plain = [l for l in plain if l.rstrip(".:") != title]
+        if plain:
+            summ = plain[0] if len(plain[0]) <= 60 else plain[0][:57].rsplit(" ", 1)[0] + "…"
+    return title, summ
+
+
+ABOUT_XP = re.compile(r'(<span class="xp-t"><strong>)About this step(</strong><small>)(.*?)(</small>.*?<div class="xp-body">)(.*?)(\n  </div>\n</details>)', re.S)
+
+
+def name_about(html: str) -> str:
+    def sub(m: re.Match) -> str:
+        title, summ = _about_name(m.group(5))
+        if not title:
+            return m.group(0)
+        return m.group(1) + html_lib.escape(title, quote=False) + m.group(2) + html_lib.escape(summ, quote=False) + m.group(4) + m.group(5) + m.group(6)
+    return ABOUT_XP.sub(sub, html)
+
+
 def body(rel: str, source: str) -> str:
     out = signed(source)
     out = to_shared_expander(out)
     if "/methodology/" in rel or "/validation/" in rel or rel.endswith("code/index.html"):
         out = fold_steps(rel, out)
+    if "/methodology/" in rel:
+        out = name_about(out)
     out = OLD_CHIP_RE.sub('<span class="chip">', out)
     out = ROW_RE.sub(lambda m: f'<tr data-level="{LEVELS[m.group(2)]}">{m.group(1)}', out)
     out = VERDICT_CHIP_RE.sub(r"\1", out)
