@@ -982,8 +982,15 @@ def render_status(card: dict) -> str:
             "        </div>",
         ]
 
+    verdict = ""
+    if scored and len(naive) == scored:
+        closer = "smaller" if mae < naive_mae else ("larger" if mae > naive_mae else "the same")
+        verdict = (f'      <p class="fc-verdict">{icon("target")}<span><strong>So far:</strong> '
+                   f'{in68} of {scored} outturns fell inside the 68% band, and the average miss was '
+                   f'{mae:.2f}pp, {closer} than a no-change forecast ({naive_mae:.2f}pp).</span></p>')
     return "\n".join([
         asof,
+        *([verdict] if verdict else []),
         '      <div class="fc-tiles ab-card" aria-label="The record so far">',
         *tile("target", cover_value, "inside the 68% band", cover_sub, pips),
         *tile("ruler", mae_value, "mean absolute error", mae_sub, bars),
