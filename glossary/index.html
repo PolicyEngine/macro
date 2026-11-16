@@ -44,6 +44,7 @@
     </div>
   </section>
   <div class="gl-tools"><label class="gl-filter"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span class="visually-hidden">Filter terms</span><input type="search" placeholder="Filter 59 terms" data-gl-filter /></label></div>
+  <p class="gl-count" data-gl-count aria-live="polite"></p>
   <p class="gl-empty" data-gl-empty hidden>No term matches. <a href="/contact">Ask us to add one</a>.</p>
   <nav class="glossary-index" aria-label="Sections">
     <a href="#trust-and-checks">Trust and checks <span>17</span></a>
@@ -175,6 +176,9 @@
     var n = items.filter(function (d) { return !d.hidden; }).length;
     idx.hidden = !!q;
     empty.hidden = n > 0;
+    var end = document.querySelector(".gl-end"); if (end) end.hidden = n === 0;
+    var live = document.querySelector("[data-gl-count]");
+    if (live) live.textContent = q ? n + " of " + items.length + " terms" : "";
   });
 })();
 </script>

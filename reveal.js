@@ -60,16 +60,20 @@
     else io.observe(el);
   });
   /* catch-up: anything that is now at or above the viewport is shown */
-  var ticking = false;
-  window.addEventListener("scroll", function () {
-    if (ticking) return; ticking = true;
-    requestAnimationFrame(function () {
-      ticking = false;
-      var h = window.innerHeight;
-      targets.forEach(function (el) {
-        if (!el.classList.contains("in-view") && el.getBoundingClientRect().top < h) reveal(el, el.getBoundingClientRect().bottom > 0);
-      });
+  function catchUp() {
+    var h = window.innerHeight;
+    targets.forEach(function (el) {
+      if (el.classList.contains("in-view")) return;
+      var r = el.getBoundingClientRect();
+      if (r.top < h) reveal(el, r.bottom > 0);
     });
+  }
+  var timer = null;
+  window.addEventListener("scroll", function () {
+    /* synchronous catch-up, plus a timer fallback for throttled tabs where
+       animation frames are delayed: nothing is left faded after a jump */
+    catchUp();
+    clearTimeout(timer); timer = setTimeout(catchUp, 150);
   }, { passive: true });
   window.addEventListener("hashchange", function () {
     targets.forEach(function (el) { if (el.getBoundingClientRect().top < window.innerHeight) reveal(el, false); });
