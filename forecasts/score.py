@@ -804,6 +804,7 @@ _ICON_PATHS = {
     "file": '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/>',
     "history": '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
     "clock": '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    "equal": '<path d="M5 9h14"/><path d="M5 15h14"/>',
 }
 
 
@@ -1065,10 +1066,11 @@ def render_results(card: dict) -> str:
         return (f'<span class="fc-mbar" aria-hidden="true"><i class="{"is-ours" if ours else ""}" '
                 f'style="width:{v / top * 100:.0f}%"></i></span>')
 
-    head = ['<th scope="col">Target</th>', '<th scope="col" class="num">This round</th>']
+    head = ['<th scope="col">Target</th>',
+            f'<th scope="col" class="num">{icon("target", "fc-ic fc-th-ic")}This round</th>']
     if has_naive:
-        head.append('<th scope="col" class="num">No change</th>')
-    head += [f'<th scope="col" class="num">{esc(lbl)}</th>' for lbl in labels]
+        head.append(f'<th scope="col" class="num">{icon("equal", "fc-ic fc-th-ic")}No change</th>')
+    head += [f'<th scope="col" class="num">{icon("file", "fc-ic fc-th-ic")}{esc(lbl)}</th>' for lbl in labels]
     body += [
         '      <details class="fc-more" id="benchmarks">',
         f'        <summary>{icon("scale")}<span>Against the benchmarks <span class="fc-more-sub">absolute error on the same outturns</span></span>{icon("chev", "fc-ic fc-chev")}</summary>',

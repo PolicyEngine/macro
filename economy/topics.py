@@ -1671,15 +1671,7 @@ US_HOUSEHOLD = '{"state_code":"CA","county_fips":"06037"}'
 
 def uk_platform() -> str:
     """The /forecasts band: what the record is not, and where the routes live."""
-    return f"""    <div class="prose">
-      <p class="callout">
-        <strong>pe-microsim does not forecast, and this section does not
-        pretend it does.</strong> The forecast rows are
-        {model_link("boe-svar")}; the scoreboard above is what those rounds
-        have been worth so far. <a href="/models#score">See how a score is put together →</a>
-      </p>
-      <p><a href="/models#routes">The six routes and their commands →</a></p>
-    </div>"""
+    return f"""      <span><strong>pe-microsim does not forecast.</strong> Every row here is {model_link("boe-svar")}. <a href="/models#score">How a score is built</a></span>"""
 
 
 def uk_routes() -> str:
