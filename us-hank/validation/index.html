@@ -4,13 +4,13 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>US HANK validation — PolicyEngine Macro</title>
-<meta name="description" content="How far to trust us-hank: a replication gate against the published Econometrica 2021 results, the steady-state calibration check, and the model's known limits." />
+<meta name="description" content="How far to trust us-hank: a replication gate against the published Econometrica 2021 results, the solved-parameter check, and the model's known limits." />
 <link rel="canonical" href="https://policyengine-macro.vercel.app/us-hank/validation" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://policyengine-macro.vercel.app/us-hank/validation" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
 <meta property="og:title" content="US HANK validation — PolicyEngine Macro" />
-<meta property="og:description" content="A replication of the Auclert–Bardóczy–Rognlie–Straub (2021) two-asset HANK, its steady state checked against the paper — stylized US shocks with distributional output. Not a forecaster." />
+<meta property="og:description" content="A replication of the Auclert–Bardóczy–Rognlie–Straub (2021) two-asset HANK, its solved parameters checked against the paper — stylised US shocks with distributional output. Not a forecaster." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -69,7 +69,7 @@
   <div class="with-rail">
     <nav class="page-rail" aria-label="On this page">
       <p class="page-rail-title">On this page</p>
-      <a href="#trust" aria-current="location">Headline numbers</a>
+      <a href="#trust" aria-current="location">Scorecard</a>
       <a href="#solved">Solved parameters</a>
       <a href="#gated">What is gated</a>
       <a href="#caveats">Limits</a>
@@ -81,32 +81,21 @@
       <h2>Partial replication, not a forecast-accuracy claim</h2>
       <p class="section-intro">Solved parameters against the paper&rsquo;s Table B.III; the headline targets are inputs, not results.</p>
     </div>
-    <div class="stat-row">
-      <div class="stat">
-        <span class="stat-label">Solved parameters</span>
-        <span class="stat-value">6 of 7</span>
-        <span class="stat-sub">to the last published digit</span>
-        <span class="stat-foot"><a class="chip" href="#solved">Table B.III</a></span>
-      </div>
-      <div class="stat stat-neutral">
-        <span class="stat-label"><code>vphi</code> vs the paper</span>
-        <span class="stat-value">2.0733</span>
-        <span class="stat-sub">1.7135 &times; &mu;<sub>w</sub>&sup2; against 2.073: a convention difference</span>
-        <span class="stat-foot"><a class="chip" href="#solved">Resolved</a></span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Goods-market clearing</span>
-        <span class="stat-value">3.3e&minus;08</span>
-        <span class="stat-sub">untargeted, by Walras&rsquo; law</span>
-        <span class="stat-foot"><span class="chip">The untargeted check</span></span>
-      </div>
-      <div class="stat stat-neutral">
-        <span class="stat-label">IRF magnitudes</span>
-        <span class="stat-value">none</span>
-        <span class="stat-sub">published to match against</span>
-        <span class="stat-foot"><a class="chip chip-warn" href="#gated">Not validated</a></span>
-      </div>
-    </div>
+    <div class="table-scroll scorecard"><table data-stack="yes">
+        <caption>What was checked, against what, and the result</caption>
+        <thead><tr><th scope="col">Check</th><th scope="col">Against</th><th scope="col">Result</th><th scope="col">Verdict</th></tr></thead>
+        <tbody>
+          <tr data-result="pass"><th scope="row"><a href="#targets">Solved steady-state parameters</a></th><td>Auclert et al. (2021) Table B.III, gate under 5e&minus;4; <code>vphi</code> after &times; &mu;<sub>w</sub>&sup2;</td><td class="sc-num">7 of 7 within 4.2e&minus;4</td><td><span class="chip">pass</span></td></tr>
+          <tr data-result="pass"><th scope="row"><a href="#targets">Goods-market clearing (untargeted)</a></th><td>Walras&rsquo; law: should be zero</td><td class="sc-num">3.3e&minus;08</td><td><span class="chip">pass</span></td></tr>
+          <tr data-result="pass"><th scope="row"><a href="#gated">Impulse-response signs</a></th><td>Theory, three shock kinds, both directions; spending impact multiplier in (0, 1)</td><td class="sc-num">all gated by tests</td><td><span class="chip">pass</span></td></tr>
+          <tr data-result="none"><th scope="row"><a href="#gated">Impulse-response magnitudes</a></th><td>No published two-asset response to match; regression-pinned (25bp cut, &rho;&nbsp;0.61)</td><td class="sc-num">Y +0.49%, C +0.30%, I +1.70%</td><td><span class="chip">not assessed</span></td></tr>
+          <tr data-result="partial"><th scope="row"><a href="#first-order">First-order accuracy</a></th><td>The model&rsquo;s own nonlinear solve; 25bp cut within 4%, spending 1% of GDP is not</td><td class="sc-num">0.175 vs 0.251 / 0.125</td><td><span class="chip">partial</span></td></tr>
+          <tr data-result="weak"><th scope="row"><a href="#spending-sign">Spending multiplier (&rho;&nbsp;0.8)</a></th><td>No published benchmark; 0.376 on impact in the opt-in 0.20-MPC calibration</td><td class="sc-num">0.175 impact, &minus;0.015 over 20q</td><td><span class="chip">weak</span></td></tr>
+          <tr data-result="fail"><th scope="row"><a href="#htm-share">Hand-to-mouth share</a></th><td>About one third of US households (Kaplan, Violante and Weidner 2014)</td><td class="sc-num">0.537, of which 0.518 wealthy</td><td><span class="chip">fail</span></td></tr>
+          <tr data-result="fail"><th scope="row"><a href="#mpc-level">Quarterly MPC out of a rebate</a></th><td>0.15&ndash;0.25 in US rebate studies; $500 / $1,000 / $1,500 per household</td><td class="sc-num">0.104 / 0.091 / 0.083</td><td><span class="chip">fail</span></td></tr>
+        </tbody>
+      </table></div>
+    <h3 class="trust-sub">Evidence by dimension</h3>
     <!-- Levels and next gates: integration/src/policyengine_macro/capabilities.py MODEL_QUALITY["us-hank"]. -->
     <div class="prose">
     <div class="table-scroll trust-card"><table data-stack="yes">
@@ -161,7 +150,7 @@
 <p class="vc-notes">Six of seven agree to the last published digit directly; vphi solves to 1.7135 and matches after multiplying by μw² = 1.21, because Table B.III follows the working paper's wage-markup convention and this implementation the published appendix's (<a href="https://github.com/PolicyEngine/us-hank-model/pull/15">us-hank-model #15</a>).</p>
 <p class="vc-notes"><strong>Calibration inputs</strong>, held fixed through the solve, so their deviations are identities:<br />Constants equalling themselves: Output Y 1, Capital K 10, Real rate r 0.0125, Government spending G 0.2, Government debt Bg 2.8.<br />Solver targets: Total wealth A+B 14 hit to 2.7e-13, Liquid assets B 1.04 hit to 9.5e-14 — tolerances, not accuracies.<br />Market clearing: goods 3.3e-08 untargeted (Walras’ law), assets 3.1e-13 is the solver’s own target.</p>
 </div><!-- /vc-fig -->
-                <figcaption><strong>Calibration, not replication:</strong> only the rows the model solves for are the replication. Goods-market clearing is untargeted and holds only by Walras' law, which makes it the check that counts. Solved 2026-07-29 at production grids (n<sub>B</sub>=50, n<sub>A</sub>=70, n<sub>K</sub>=50), re-solved independently 2026-08-13.
+                <figcaption><strong>Calibration, not replication:</strong> only the rows the model solves for are the replication. Goods-market clearing is untargeted and holds only by Walras' law, which makes it the check that counts. Solved 2026-07-29 at production grids (n<sub>B</sub>=50, n<sub>A</sub>=70, n<sub>K</sub>=50), re-solved independently 2026-08-13; unchanged at the pinned commit 551a40d3.
 <p class="vc-src-line"><svg class="vc-src-ic" viewBox="0 0 24 24" width="14" height="14" style="width:14px;height:14px;flex:0 0 14px" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span style="min-width:0;flex:1">Source: US HANK replication</span></p>
 <details class="vc-src"><summary>Source details</summary>
 <p class="vc-source">Source: <code>papers/us-hank/figures/replication.json</code>.</p>
@@ -186,13 +175,13 @@
 
       <div class="meth-step" id="gated" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>What is gated, and what is not</h3></div>
-        <p class="mo-lead">Imposed inputs carry no information; signs and timing are gated, magnitudes are not.</p>
+        <p class="mo-lead">Imposed inputs carry no information; signs and timing are gated, magnitudes are only regression-pinned.</p>
         <details class="xp">
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
         <p class="kv-title">How to read each row</p>
-        <dl class="kv kv-text"><div><dt>Imposed</dt><dd>Y, K, r, G, Bg &mdash; identities</dd></div><div><dt>Solver-reached</dt><dd>total wealth, liquid assets &mdash; tolerances</dd></div><div><dt>Asset clearing</dt><dd>3.1e&minus;13, the solver&rsquo;s own target</dd></div><div><dt>IRF signs, timing</dt><dd>gated</dd></div><div><dt>IRF magnitudes</dt><dd>not gated</dd></div></dl>
-          <p>Magnitudes are not gated because the paper publishes no impulse response to match them against.</p>
+        <dl class="kv kv-text"><div><dt>Imposed</dt><dd>Y, K, r, G, Bg &mdash; identities</dd></div><div><dt>Solver-reached</dt><dd>total wealth, liquid assets &mdash; tolerances</dd></div><div><dt>Asset clearing</dt><dd>about 3e&minus;13, the solver&rsquo;s own target</dd></div><div><dt>IRF signs, timing</dt><dd>gated</dd></div><div><dt>IRF magnitudes</dt><dd>regression-pinned on this implementation; not validated against a published response</dd></div></dl>
+          <p>Magnitudes are regression-pinned on this implementation but not validated: the paper publishes no impulse response to match them against.</p>
           <p class="opt-note">Where this sits among other open HANK implementations: <a href="/reports/us-hank-open-source">the landscape report</a>.</p>
         
   </div>
@@ -217,32 +206,44 @@
             <td>No data, no estimation, no forecast origin: every result is an impulse response around the paper's calibrated steady state. Nothing in this suite forecasts the US.</td>
           </tr>
           <tr>
-            <th scope="row"><strong>Stylized instruments only</strong></th>
-            <td>Monetary, fiscal-spending and productivity shocks; the labor tax is <a class="gloss-link" href="/glossary#exogenous">endogenous</a>. No transfer or tax-rate instrument, so <code>score_reform</code> refuses <code>model="hank"</code>.</td>
+            <th scope="row"><strong>Stylised instruments only</strong></th>
+            <td>Monetary, fiscal-spending and productivity shocks; the labour tax is <a class="gloss-link" href="/glossary#exogenous">endogenous</a>. No transfer or tax-rate instrument, so <code>score_reform</code> refuses <code>model="hank"</code>.</td>
           </tr>
           <tr id="first-order">
             <th scope="row"><strong>First-order responses</strong></th>
-            <td>Hosted <a class="gloss-link" href="/glossary#irf">IRFs</a> are linear in shock size: no state dependence, no zero lower bound, and a rise mirrors a cut. The model itself is not linear: on the nonlinear transition, a spending rise of 1% of GDP (&rho;&nbsp;0.8) gives an impact multiplier of 0.251 and a cut gives &minus;0.125, against the first-order 0.175. At +2% of GDP the nonlinear solve does not converge. Parameter uncertainty is not quantified — the calibration is a single point.</td>
+            <td>Hosted <a class="gloss-link" href="/glossary#irf">IRFs</a> are linear in shock size: no state dependence, no zero lower bound, and a rise mirrors a cut. The model itself is not linear: on the nonlinear transition, a spending rise of 1% of GDP (&rho;&nbsp;0.8) gives an impact multiplier of 0.251; a cut of 1% of GDP lowers output by 0.125% (a multiplier of 0.125), against the first-order 0.175. A 25bp monetary cut is close to linear: 0.511 against 0.493. At +2% of GDP the nonlinear solve does not converge. Parameter uncertainty is not quantified — the calibration is a single point.</td>
           </tr>
           <tr id="mpc-level">
             <th scope="row"><strong>MPCs below the empirical range</strong></th>
             <td>The aggregate quarterly MPC is 0.058 out of the default windfall, 25% of mean quarterly post-tax labour income (about $2,400 per head or $6,200 per household). On a refined liquid grid, rebates of $500, $1,000 and $1,500 per household give 0.104, 0.091 and 0.083, far below the 0.15–0.25 that US rebate studies find. The grid explains little of the gap. The main cause is the illiquid account&rsquo;s adjustment cost: it is smooth and convex, with zero marginal cost at zero adjustment and no fixed or linear component, so a constrained household that holds illiquid wealth puts most of a rebate into that account. Auclert et al. (2021) report no MPC, so this is a property of the calibration, not a replication failure (<a href="https://github.com/PolicyEngine/us-hank-model/issues/6">us-hank-model #6</a>, <a href="https://github.com/PolicyEngine/us-hank-model/pull/7">PR #7</a>).</td>
           </tr>
+          <tr id="htm-share">
+            <th scope="row"><strong>Hand-to-mouth share too high</strong></th>
+            <td>About 54% of households (0.537) hold under the hand-to-mouth cutoff of liquid wealth, against about one third in Kaplan, Violante and Weidner (2014). Almost all of it (0.518) is wealthy hand-to-mouth, against about two thirds in the data. The share is high while the MPC is low: most of these households hold illiquid wealth. The paper reports no hand-to-mouth share, so this is this implementation&rsquo;s own statistic.</td>
+          </tr>
+          <tr id="peaks-on-impact">
+            <th scope="row"><strong>No hump-shaped responses</strong></th>
+            <td>After a monetary shock, output, consumption, investment and inflation all peak on impact; empirical monetary responses are usually delayed and hump-shaped. The model has no habits or information frictions to delay them.</td>
+          </tr>
+          <tr id="ex-post-r">
+            <th scope="row"><strong>The real rate is ex-post</strong></th>
+            <td>The reported <code>r</code> is the ex-post real return on bonds held into the quarter. On impact it moves only with the inflation surprise; the policy move shows from quarter&nbsp;1. For the 25bp cut (&rho;&nbsp;0.61) it falls 0.08pp on impact and 0.18pp in quarter&nbsp;1.</td>
+          </tr>
           <tr id="spending-sign">
             <th scope="row"><strong>Spending multiplier turns negative</strong></th>
-            <td>A spending rise of 1% of GDP (&rho;&nbsp;0.8) raises output by 0.175% on impact, but output is below baseline from quarter&nbsp;3 (impact is quarter&nbsp;0) while spending is still raised; the 20-quarter cumulative multiplier is &minus;0.015. The labour tax that finances the spending enters the union wage Phillips curve: a higher tax raises the wage unions set, which raises inflation, and the <a class="gloss-link" href="/glossary#taylor-rule">Taylor rule</a> answers with a higher real rate that crowds out investment and consumption. The household and government budget constraints hold along the path, so this is a property of the model, not a bug (<code>tests/test_spending_mechanism.py</code>; <a href="https://github.com/PolicyEngine/us-hank-model/issues/5">us-hank-model #5</a>). No published impulse response gates these numbers.</td>
+            <td>A spending rise of 1% of GDP (&rho;&nbsp;0.8) raises output by 0.175% on impact, but output is below baseline from quarter&nbsp;3 (impact is quarter&nbsp;0) while spending is still raised; the 20-quarter cumulative multiplier is &minus;0.015. The labour tax that finances the spending enters the union wage Phillips curve: a higher tax raises the wage unions set, which raises inflation, and the <a class="gloss-link" href="/glossary#taylor-rule">Taylor rule</a> answers with a higher real rate that crowds out investment and consumption. The household and government budget constraints hold along the path, so this is a property of the model, not a bug (<code>tests/test_spending_mechanism.py</code>; <a href="https://github.com/PolicyEngine/us-hank-model/issues/5">us-hank-model #5</a>). No published impulse response gates these numbers. It is a tax-financed multiplier, not comparable with deficit-financed ones. The sign depends on the MPC: in the opt-in 0.20-MPC calibration the multiplier is 0.376 on impact and 0.309 over 20 quarters (<a href="#variants">below</a>).</td>
           </tr>
           <tr id="hosted-persistence">
             <th scope="row"><strong>Persistence of a spending shock</strong></th>
             <td>The hosted <code>hank_shock</code> has no default &rho; for a spending shock: <code>persistence</code> must be given (monetary and productivity shocks default to 0.9). The model&rsquo;s README quotes &rho;&nbsp;0.8. For the same spending shock the impact multiplier is 0.075 at &rho;&nbsp;0.9 and 0.175 at &rho;&nbsp;0.8, and the 20-quarter cumulative multiplier is &minus;0.032 against &minus;0.015. Quote &rho; with any multiplier.</td>
           </tr>
           <tr id="variants">
-            <th scope="row"><strong>Higher-MPC calibrations</strong></th>
-            <td>Opt-in calibrations aimed at a higher MPC are under development and are not the published default: a discount-factor heterogeneity variant (<a href="https://github.com/PolicyEngine/us-hank-model/pull/9">PR #9</a>) and a median-wealth calibration (<a href="https://github.com/PolicyEngine/us-hank-model/pull/10">PR #10</a>); the options are discussed in <a href="https://github.com/PolicyEngine/us-hank-model/issues/8">us-hank-model #8</a>. No result on this site comes from them.</td>
+            <th scope="row"><strong>Opt-in calibrations</strong></th>
+            <td>Two opt-in calibrations ship in the model package (<code>us_hank.beta_het</code>) but are not the default and are not hosted. A discount-factor heterogeneity variant is calibrated to a 0.20 MPC out of $1,000: spending impact multiplier 0.376, 20-quarter cumulative 0.309 (&rho;&nbsp;0.8). A median-wealth sensitivity gives a $500 MPC of 0.126 and multipliers of 0.274 / 0.213 (<a href="https://github.com/PolicyEngine/us-hank-model/pull/9">PR #9</a>, <a href="https://github.com/PolicyEngine/us-hank-model/pull/10">PR #10</a>, <a href="https://github.com/PolicyEngine/us-hank-model/issues/8">#8</a>). No result on this site comes from them.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Approximate distributional output</strong></th>
-            <td>By-quartile consumption splits the aggregate response in proportion to steady-state MPCs — the MPC-heterogeneity channel, not household-level dynamics along the transition.</td>
+            <td>By-quartile consumption splits the aggregate response across total-wealth quartiles in proportion to steady-state MPCs — the MPC-heterogeneity channel, not household-level dynamics along the transition. The split is nearly flat: for the 25bp cut, 0.36% in the lowest quartile and 0.28% in the highest.</td>
           </tr>
           <tr>
             <th scope="row"><strong>Calibration, not vintage</strong></th>

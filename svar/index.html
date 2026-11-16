@@ -66,9 +66,9 @@
     </div>
   </nav>
   <section id="verdict" class="band band-result ov-verdict">
-    <div class="ov-verdict-line"><span class="ov-verdict-short">GDP matches the Bank; CPI falls short.</span>
-      <a class="ov-verdict-link" href="/svar/validation">Evidence <span aria-hidden="true">&rarr;</span></a>
-      <span class="ov-verdict-why">GDP decomposition consistent with the Bank of England&rsquo;s paper, CPI short of it; no forecast skill against a drifting random walk once the tests are adjusted together.</span></div>
+    <div class="ov-verdict-line"><span class="ov-verdict-short">GDP variance share consistent with the paper; no forecast skill.</span>
+      <a class="ov-verdict-link" href="#proof">Evidence <span aria-hidden="true">&rarr;</span></a>
+      <span class="ov-verdict-why">A variance-share comparison with the Bank of England&rsquo;s paper: global shocks&rsquo; share of GDP variance consistent with it, of CPI variance 8.5pp short; no forecast skill against a drifting random walk once the tests are adjusted together.</span></div>
   </section>
 
   <section id="fit" class="band ov-fit" aria-label="What it is good for and not for">
@@ -93,8 +93,8 @@
   </section>
 
   <section id="answers" class="band ov-example">
-    <div class="band-head" data-icon="calculator"><h2>What it returns</h2>
-      <p class="section-intro">The shocks behind 2026Q1, and the forecast made from them on 29 July 2026.</p></div>
+    <div class="band-head" data-icon="calculator"><h2>A worked example</h2>
+      <p class="section-intro">Run of 12 Aug 2026 on data through 2026Q1, and the forecast of 29 July 2026; the November round is on the <a href="/forecasts">forecast record</a>.</p></div>
     <div class="glance-switch scen-switch" role="tablist" aria-label="Worked example">
       <button type="button" role="tab" id="svar-scen-tab-0" aria-controls="svar-scen-0" aria-selected="true">Shocks, 2026Q1</button>
       <button type="button" role="tab" id="svar-scen-tab-1" aria-controls="svar-scen-1" aria-selected="false" tabindex="-1">Forecast</button>
@@ -102,7 +102,8 @@
     <div class="scen-panel" id="svar-scen-0" role="tabpanel" aria-labelledby="svar-scen-tab-0">
       <h3 class="scen-title">What hit the UK economy in 2026Q1</h3>
       <div class="stat-row stat-row-3"><div class="stat"><span class="stat-label">World demand: negative</span><span class="stat-value">71%</span><span class="stat-sub">posterior probability</span></div><div class="stat"><span class="stat-label">World energy: negative</span><span class="stat-value">90%</span><span class="stat-sub">posterior probability</span></div><div class="stat"><span class="stat-label">World supply: positive</span><span class="stat-value">87%</span><span class="stat-sub">posterior probability</span></div><div class="stat"><span class="stat-label">UK demand: positive</span><span class="stat-value">81%</span><span class="stat-sub">posterior probability</span></div><div class="stat"><span class="stat-label">UK supply: positive</span><span class="stat-value">71%</span><span class="stat-sub">posterior probability</span></div><div class="stat"><span class="stat-label">Monetary policy: expansionary</span><span class="stat-value">84%</span><span class="stat-sub">posterior probability</span></div></div>
-      <p class="scen-note">From <code>latest_shocks</code>: 6,000 draws, 430 accepted, ESS 198. How the shocks are named: <a href="/svar/methodology">methodology</a>.</p>
+      <p class="scen-note">Sign: positive = expansionary (raises GDP); energy negative = oil prices up.</p>
+      <p class="scen-note">From <code>latest_shocks</code>, run 12 Aug 2026: 6,000 draws, 430 accepted, ESS 198. Today&rsquo;s tool conditions on 2026Q2, so its readings differ. How the shocks are named: <a href="/svar/methodology">methodology</a>.</p>
     </div>
     <div class="scen-panel" id="svar-scen-1" role="tabpanel" aria-labelledby="svar-scen-tab-1">
       <h3 class="scen-title">GDP and CPI forecast with bands</h3>
@@ -148,8 +149,36 @@
 </figure>
 <!-- boe-current-outlook:end -->
         </div>
-      <p class="scen-note">The 12 November round, with data through 2026Q2, and every archived round scored against outturns: <a href="/forecasts">the forecast record</a>.</p>
+      <p class="scen-note">The 12 November round (data through 2026Q2; 6,000 draws, 455 accepted, ESS 181) puts CPI inflation at 3.0% in 2026Q3 (68% band 2.5&ndash;3.5), peaking at 3.6% in 2027Q1. That round, and every archived round scored against outturns: <a href="/forecasts">the forecast record</a>.</p>
     </div>
+  </section>
+
+  <section id="proof" class="band ov-proof">
+    <div class="band-head" data-icon="shield"><h2>How far to trust it</h2>
+      <p class="section-intro">Three checks, weakest included; each opens its evidence.</p></div>
+    <ul class="proof-list">
+      <li class="proof-row" data-result="pass"><a class="proof-link" href="/svar/validation#paper"><span class="proof-check">Global shocks&rsquo; share of UK GDP variance<small>Against Brignone and Piffer (2025): ~40%, 4 quarters</small></span><span class="proof-num">38.7% (68% band 24.0&ndash;53.1)</span><span class="chip">pass</span></a></li>
+      <li class="proof-row" data-result="weak"><a class="proof-link" href="/svar/validation#rolling"><span class="proof-check">Band coverage<small>UK CPI 90% band, 50 origins: holds 78% at one quarter, 54% at eight</small></span><span class="proof-num">78% &rarr; 54%</span><span class="chip">weak</span></a></li>
+      <li class="proof-row" data-result="fail"><a class="proof-link" href="/svar/validation#forecasters"><span class="proof-check">Point-forecast accuracy<small>Against a random walk with drift, 50 origins, 64 tests</small></span><span class="proof-num">0 of 64</span><span class="chip">fail</span></a></li>
+    </ul>
+    <p class="proof-more"><strong>The CPI path settles near 3%, not 2%,</strong> because the model has no inflation anchor; read it as recent trend, not an overshoot call (<a href="/svar/validation#no-anchor">limits</a>).</p>
+    <p class="proof-more"><a href="/svar/validation">Full scorecard and limits <span aria-hidden="true">&rarr;</span></a></p>
+  </section>
+
+  <section id="run" class="band ov-run">
+    <div class="band-head" data-icon="code"><h2>Run it</h2>
+      <p class="section-intro">The shock reading above, three ways, at the same 6,000 draws.</p></div>
+    <div class="glance-switch run-switch scen-switch" role="tablist" aria-label="Run it">
+      <button type="button" role="tab" id="run-tab-mcp" aria-controls="run-mcp" aria-selected="true">MCP prompt</button>
+      <button type="button" role="tab" id="run-tab-cli" aria-controls="run-cli" aria-selected="false" tabindex="-1">CLI</button>
+      <button type="button" role="tab" id="run-tab-py" aria-controls="run-py" aria-selected="false" tabindex="-1">Python</button>
+    </div>
+    <div class="scen-panel run-panel" id="run-mcp" role="tabpanel" aria-labelledby="run-tab-mcp"><p class="run-prompt">Using the BoE SVAR, which structural shocks hit the UK economy in the latest quarter, and how likely is each sign?<small>The hosted server calls <code>latest_shocks</code>; no install. <a href="/connect">Connect</a></small></p></div>
+    <div class="scen-panel run-panel" id="run-cli" role="tabpanel" aria-labelledby="run-tab-cli"><div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro shocks --draws 6000</code></pre></div></div>
+    <div class="scen-panel run-panel" id="run-py" role="tabpanel" aria-labelledby="run-tab-py"><div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> policyengine_macro <span class="kw">import</span> svar_latest_shocks
+shocks = svar_latest_shocks(draws=6000)
+<span class="kw">print</span>(shocks[<span class="kw">"shocks"</span>])</code></pre></div></div>
+    <p class="run-more"><a href="/svar/code">Setup, every lever and output <span aria-hidden="true">&rarr;</span></a></p>
   </section>
 
   <section id="pe-bridge" class="band ov-flow">
@@ -175,7 +204,7 @@
       <div><dt>Inputs</dt><dd>Eight packaged quarterly series, all public (ONS, Bank of England, FRED)</dd></div>
       <div><dt>Outputs</dt><dd>GDP and CPI forecasts with bands, identified shocks, decompositions, forecast revisions</dd></div>
       <div><dt>Horizon</dt><dd>Quarterly short-run forecast</dd></div>
-      <div><dt>Data</dt><dd>Sample 1992Q1&ndash;2025Q1 &middot; conditioning data through 2026Q1</dd></div>
+      <div><dt>Data</dt><dd>Sample 1992Q1&ndash;2025Q1 &middot; conditioning data through 2026Q2</dd></div>
       <div><dt>Uncertainty</dt><dd><a class="gloss-link" href="/glossary#prior-posterior">Posterior</a> 68% and 90% intervals, raw rather than calibrated to <a href="/svar/validation#rolling">measured coverage</a></dd></div>
       <div><dt>Access</dt><dd>Hosted forecast and latest shocks, CLI, Python</dd></div>
       <div><dt>Runtime</dt><dd>Minutes per estimation run</dd></div>
@@ -190,8 +219,8 @@
 
   <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
     <div class="chip-row">
-      <a class="chip chip-brand" href="/svar/methodology">Methodology</a>
-      <a class="chip chip-brand" href="/connect">Run it hosted</a>
+      <a class="chip chip-brand" href="/svar/methodology">Next: Methodology</a>
+      <a class="chip" href="/papers/boe-svar">The working paper</a>
       <a class="chip" href="/models#compare">Compare the models</a>
     </div>
   </nav>

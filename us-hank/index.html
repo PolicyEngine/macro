@@ -10,7 +10,7 @@
 <meta property="og:url" content="https://policyengine-macro.vercel.app/us-hank" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
 <meta property="og:title" content="us-hank — PolicyEngine Macro" />
-<meta property="og:description" content="A replication of the Auclert–Bardóczy–Rognlie–Straub (2021) two-asset HANK, its steady state checked against the paper — stylised US shocks with distributional output. Not a forecaster." />
+<meta property="og:description" content="A replication of the Auclert–Bardóczy–Rognlie–Straub (2021) two-asset HANK, its solved parameters checked against the paper — stylised US shocks with distributional output. Not a forecaster." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -68,7 +68,7 @@
   </nav>
   <section id="verdict" class="band band-result ov-verdict">
     <div class="ov-verdict-line"><span class="ov-verdict-short">Parameters match the paper; responses not validated.</span>
-      <a class="ov-verdict-link" href="/us-hank/validation">Evidence <span aria-hidden="true">&rarr;</span></a>
+      <a class="ov-verdict-link" href="#proof">Evidence <span aria-hidden="true">&rarr;</span></a>
       <span class="ov-verdict-why">Six of seven solved parameters match the paper, the seventh after a wage-markup conversion. Impulse-response magnitudes are not validated, and the headline targets are inputs, not results.</span></div>
   </section>
 
@@ -94,14 +94,55 @@
   </section>
 
   <section id="answers" class="band ov-example">
-    <div class="band-head" data-icon="calculator"><h2>What it returns</h2>
-      <p class="section-intro">Stylised shocks around a calibrated steady state, with the household distribution attached.</p></div>
-    <div class="card-grid ov-mini">
-      <div class="card"><h3>Monetary easing</h3><p>Raises output, consumption, investment and inflation.</p></div>
-      <div class="card"><h3>Tax-financed spending</h3><p>Raises output on impact only: the endogenous labour tax turns the response negative within a year (<a href="/us-hank/validation#spending-sign">why</a>).</p></div>
-      <div class="card"><h3>By household</h3><p>The aggregate consumption response is split across wealth positions in proportion to each group&rsquo;s MPC.</p></div>
+    <div class="band-head" data-icon="calculator"><h2>A worked example</h2>
+      <p class="section-intro">A 25bp cut in the quarterly Taylor-rule intercept (about 100bp annualised), &rho;&nbsp;0.61. Changes from steady state.</p></div>
+    <div class="scen-panel">
+      <h3 class="scen-title">Monetary easing: 25bp a quarter</h3>
+      <div class="stat-row stat-row-3">
+        <div class="stat"><span class="stat-label">Output, on impact</span><span class="stat-value is-gain">+0.49%</span><span class="stat-sub">nonlinear solve: +0.51%</span></div>
+        <div class="stat"><span class="stat-label">Consumption, on impact</span><span class="stat-value is-gain">+0.30%</span><span class="stat-sub">0.36% lowest to 0.28% highest wealth quartile</span></div>
+        <div class="stat"><span class="stat-label">Investment, on impact</span><span class="stat-value is-gain">+1.70%</span><span class="stat-sub">the largest of the three</span></div>
+      </div>
+      <ul class="scen-points">
+        <li>Quarterly inflation rises 0.08pp; the labour tax rate falls 0.63pp on impact as debt service drops</li>
+        <li>Output, consumption, investment and inflation peak on impact, with no hump (<a href="/us-hank/validation#peaks-on-impact">limit</a>)</li>
+        <li>The by-household split is imposed and nearly flat across total-wealth quartiles (<a href="/us-hank/validation#caveats">why</a>)</li>
+        <li>Regression values of this implementation, not a published result</li>
+      </ul>
     </div>
-    <p class="scen-note">Run it with <code>hank_shock</code> from any connected client. The by-household split is imposed, not solved, so its concentration among households with high MPCs and little liquid wealth follows from the method.</p>
+    <div class="card-grid ov-mini">
+      <div class="card"><h3>Tax-financed spending</h3><p>1% of GDP at &rho;&nbsp;0.8 raises output 0.175% on impact; output is below baseline from quarter&nbsp;3 while spending is still raised (<a href="/us-hank/validation#spending-sign">why</a>).</p></div>
+      <div class="card"><h3>Productivity</h3><p>Raises output and lowers inflation; a size of 0.01 is a 2.1% TFP rise, not 1% (<a href="/us-hank/code#code-3">units</a>).</p></div>
+    </div>
+  </section>
+
+  <section id="proof" class="band ov-proof">
+    <div class="band-head" data-icon="shield"><h2>How far to trust it</h2>
+      <p class="section-intro">Three checks, weakest included; each opens its evidence.</p></div>
+    <ul class="proof-list">
+      <li class="proof-row" data-result="pass"><a class="proof-link" href="/us-hank/validation#targets"><span class="proof-check">Solved steady-state parameters<small>Table B.III; <code>vphi</code> after a wage-markup conversion</small></span><span class="proof-num">7 of 7 within 4.2e&minus;4</span><span class="chip">pass</span></a></li>
+      <li class="proof-row" data-result="none"><a class="proof-link" href="/us-hank/validation#gated"><span class="proof-check">Impulse-response magnitudes<small>Regression-pinned; no published response to match</small></span><span class="proof-num">Y +0.49%, C +0.30%, I +1.70%</span><span class="chip">not assessed</span></a></li>
+      <li class="proof-row" data-result="fail"><a class="proof-link" href="/us-hank/validation#mpc-level"><span class="proof-check">Quarterly MPC out of a rebate<small>Against 0.15&ndash;0.25 in US rebate studies</small></span><span class="proof-num">0.104 / 0.091 / 0.083</span><span class="chip">fail</span></a></li>
+    </ul>
+    <p class="proof-more"><strong>Read signs and mechanisms, not magnitudes.</strong> The hand-to-mouth share is also off (<a href="/us-hank/validation#htm-share">0.537 against about one third</a>).</p>
+    <p class="proof-more"><a href="/us-hank/validation">Full scorecard and limits <span aria-hidden="true">&rarr;</span></a></p>
+  </section>
+
+  <section id="run" class="band ov-run">
+    <div class="band-head" data-icon="code"><h2>Run it</h2>
+      <p class="section-intro">The worked example above, three ways. State &rho;&nbsp;0.61: the hosted default is 0.9.</p></div>
+    <div class="glance-switch run-switch scen-switch" role="tablist" aria-label="Run it">
+      <button type="button" role="tab" id="run-tab-mcp" aria-controls="run-mcp" aria-selected="true">MCP prompt</button>
+      <button type="button" role="tab" id="run-tab-cli" aria-controls="run-cli" aria-selected="false" tabindex="-1">CLI</button>
+      <button type="button" role="tab" id="run-tab-py" aria-controls="run-py" aria-selected="false" tabindex="-1">Python</button>
+    </div>
+    <div class="scen-panel run-panel" id="run-mcp" role="tabpanel" aria-labelledby="run-tab-mcp"><p class="run-prompt">In the US HANK model, cut the quarterly Taylor-rule intercept by 25bp with persistence 0.61, and show output, consumption and investment with the split by wealth quartile.<small>The hosted server calls <code>hank_shock</code>; no install. <a href="/connect">Connect</a></small></p></div>
+    <div class="scen-panel run-panel" id="run-cli" role="tabpanel" aria-labelledby="run-tab-cli"><div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61 --distribution</code></pre></div></div>
+    <div class="scen-panel run-panel" id="run-py" role="tabpanel" aria-labelledby="run-tab-py"><div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> us_hank <span class="kw">import</span> model
+ss = model.solve_steady_state(); G = model.solve_jacobian(ss, T=<span class="kw">300</span>)
+irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0025</span>, persistence=<span class="kw">0.61</span>, ss=ss, G_jac=G)
+<span class="kw">print</span>(irf[<span class="kw">"Y"</span>][:<span class="kw">8</span>])</code></pre></div></div>
+    <p class="run-more"><a href="/us-hank/code">Setup, every lever and output <span aria-hidden="true">&rarr;</span></a></p>
   </section>
 
   <section id="pe-bridge" class="band ov-flow">
@@ -125,7 +166,7 @@
     <dl class="model-card">
       <div><dt>Answers</dt><dd>How a stylised US shock transmits through a household wealth distribution, and which households drive the response</dd></div>
       <div><dt>Inputs</dt><dd>A stylised shock: kind (monetary, fiscal spending, productivity), size, persistence</dd></div>
-      <div><dt>Outputs</dt><dd>GDP, consumption, investment, inflation, real rate; <a class="gloss-link" href="/glossary#mpc">MPCs</a> by liquid-wealth quartile (out of a windfall of 25% of mean quarterly post-tax labour income) and the <a class="gloss-link" href="/glossary#hand-to-mouth">hand-to-mouth</a> share</dd></div>
+      <div><dt>Outputs</dt><dd>GDP, consumption, investment, inflation, the ex-post real return; <a class="gloss-link" href="/glossary#mpc">MPCs</a> by liquid-wealth quartile (out of a windfall of 25% of mean quarterly post-tax labour income) and the <a class="gloss-link" href="/glossary#hand-to-mouth">hand-to-mouth</a> share</dd></div>
       <div><dt>Horizon</dt><dd>Quarterly impulse responses, typically 5 years, around a calibrated steady state</dd></div>
       <div><dt>Data</dt><dd>Auclert, Bard&oacute;czy, Rognlie and Straub (2021); no data vintage</dd></div>
       <div><dt>Uncertainty</dt><dd>None quantified: deterministic, first-order responses</dd></div>
@@ -142,8 +183,8 @@
 
   <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
     <div class="chip-row">
-      <a class="chip chip-brand" href="/us-hank/methodology">Methodology</a>
-      <a class="chip chip-brand" href="/connect">Run it hosted</a>
+      <a class="chip chip-brand" href="/us-hank/methodology">Next: Methodology</a>
+      <a class="chip" href="/reports/us-hank-open-source">The HANK survey</a>
       <a class="chip" href="/models#compare">Compare the models</a>
     </div>
   </nav>
@@ -165,5 +206,6 @@
 </footer>
 
 <script src="/reveal.js?v=4" defer></script>
+<script src="/scenarios.js" defer></script>
 </body>
 </html>

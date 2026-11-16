@@ -68,7 +68,7 @@
   <div class="with-rail">
     <nav class="page-rail" aria-label="On this page">
       <p class="page-rail-title">On this page</p>
-      <a href="#trust" aria-current="location">Headline numbers</a>
+      <a href="#trust" aria-current="location">Scorecard</a>
       <a href="#gates">Gates</a>
       <a href="#calibration">Calibration</a>
       <a href="#multiplier">Multiplier</a>
@@ -80,41 +80,30 @@
   <section class="band band-wide" id="trust">
     <div class="band-head" data-icon="shield">
       <h2>Partial replication; deltas only</h2>
-      <p class="section-intro">The macro block replicates the manual; no numeric v1.1 scenario results exist to check.</p>
+      <p class="section-intro">The macro block matches the manual within its gates; no numeric v1.1 scenario results exist to check.</p>
     </div>
-    <div class="stat-row">
-      <div class="stat stat-neutral">
-        <span class="stat-label">Baseline growth, 2025</span>
-        <span class="stat-value">far above</span>
-        <span class="stat-sub">the ONS outturn (<a href="#calibration">table</a>)</span>
-        <span class="stat-foot"><a class="chip chip-warn" href="#calibration">Deltas only, never levels</a></span>
-      </div>
-      <div class="stat stat-neutral">
-        <span class="stat-label">Emissions vs Table 4, 2040</span>
-        <span class="stat-value is-loss">&minus;23.3%</span>
-        <span class="stat-sub">pinned run below the manual</span>
-        <span class="stat-foot"><a class="chip chip-warn" href="#emissions">Open divergence</a></span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Green investment multiplier</span>
-        <span class="stat-value">2.30</span>
-        <span class="stat-sub">cumulative to 2040, per &pound; of power-sector spending; 1.78 per &pound; of all non-wage spending; includes a <a href="#alpha-pp">parameter mismatch</a></span>
-        <span class="stat-foot"><a class="chip" href="#multiplier">Not comparable</a></span>
-      </div>
-      <div class="stat stat-neutral">
-        <span class="stat-label">v1.1 scenario results</span>
-        <span class="stat-value">none</span>
-        <span class="stat-sub">published to replicate</span>
-        <span class="stat-foot"><a class="chip chip-warn" href="#ceiling">The ceiling</a></span>
-      </div>
-    </div>
+    <div class="table-scroll scorecard"><table data-stack="yes">
+        <caption>What was checked, against what, and the result</caption>
+        <thead><tr><th scope="col">Check</th><th scope="col">Against</th><th scope="col">Result</th><th scope="col">Verdict</th></tr></thead>
+        <tbody>
+          <tr data-result="partial"><th scope="row"><a href="#gates">Baseline macro block</a></th><td>Manual v1.1 Table&nbsp;4, 2025/2030/2040; population and labour force exact to 0.01m; 2025 growth &minus;0.30pp (gate &plusmn;0.31), 2040 unemployment &minus;0.19pp (gate &plusmn;0.2)</td><td class="sc-num">inside every gate; two by only 0.01pp</td><td><span class="chip">partial</span></td></tr>
+          <tr data-result="fail"><th scope="row"><a href="#emissions">Baseline emissions</a></th><td>Manual v1.1 Table&nbsp;4: 393 vs 407 (2025), 343 vs 382 (2030), 249 vs 324 (2040) MtCO2e</td><td class="sc-num">&minus;23.3% by 2040</td><td><span class="chip">fail</span></td></tr>
+          <tr data-result="fail"><th scope="row"><a href="#calibration">Baseline vs outturns</a></th><td>ONS 2025 growth; unemployment 4.39% vs 4.88%; 2024 emissions 401.5 vs 371 (DESNZ); levels never served</td><td class="sc-num">4.66% vs 1.31%</td><td><span class="chip">fail</span></td></tr>
+          <tr data-result="partial"><th scope="row"><a href="#sfc-breaks">Scenario design and consistency</a></th><td>Published switch sets for the 8 checked scenarios (10 tests); net lending sums to zero; 2 fossil-fuel-ban variants refused</td><td class="sc-num">28 of 30 files close</td><td><span class="chip">partial</span></td></tr>
+          <tr data-result="weak"><th scope="row"><a href="#ceiling">Scenario magnitudes</a></th><td>No published v1.1 results; FMM 2023 anchors are our own bands; the recorded &ldquo;1% of GDP&rdquo; is FMM&rsquo;s investment size, and no published GDP response is confirmed</td><td class="sc-num">GDP peak +0.92%, pinned</td><td><span class="chip">weak</span></td></tr>
+          <tr data-result="fail"><th scope="row"><a href="#alpha-pp">Baseline/policy parameter parity</a></th><td>Upstream run&rsquo;s own parameter files: &alpha;<sub>PP</sub> 0.2748 vs 0.2762; multiplier 2.30 &rarr; 2.08&ndash;2.25 without it</td><td class="sc-num">real GDP &minus;0.12% (2025), &minus;0.16% (2026)</td><td><span class="chip">fail</span></td></tr>
+          <tr data-result="weak"><th scope="row"><a href="#multiplier">Green-investment multiplier</a></th><td>No comparable published figure; 1.78 on all non-wage spending; back-loaded, impact ratio about 0.5</td><td class="sc-num">2.30 cumulative to 2040</td><td><span class="chip">weak</span></td></tr>
+          <tr data-result="fail"><th scope="row"><a href="#clean-room">Clean-room reimplementation</a></th><td>Upstream run as oracle; accounting matrices pass (milestone 1); multiplier 1.52 vs 2.30</td><td class="sc-num">GDP up to 44% below upstream by 2040</td><td><span class="chip">fail</span></td></tr>
+        </tbody>
+      </table></div>
+    <h3 class="trust-sub">Evidence by dimension</h3>
     <!-- Levels and next gates: integration/src/policyengine_macro/capabilities.py MODEL_QUALITY["define-uk"]. -->
-    <div class="prose">
+    <div class="prose trust-wrap">
     <div class="table-scroll trust-card"><table data-stack="yes">
       <caption>Evidence by dimension: the registry&rsquo;s categorical judgement, and what would change it</caption>
       <thead><tr><th scope="col">Dimension</th><th scope="col">Level</th><th scope="col">What would change it</th></tr></thead>
       <tbody>
-        <tr data-level="moderate"><th scope="row">Implementation fidelity</th><td><span class="chip">moderate</span></td><td>Section 3.3 and oracle check done (milestone 2)</td></tr>
+        <tr data-level="moderate"><th scope="row">Implementation fidelity</th><td><span class="chip">moderate</span></td><td>The clean-room model reproducing the upstream baseline (milestone 2, not passed)</td></tr>
         <tr data-level="na"><th scope="row">Predictive validation</th><td><span class="chip">not applicable</span></td><td>None: not a forecaster</td></tr>
         <tr data-level="na"><th scope="row">Identification</th><td><span class="chip">not applicable</span></td><td>None: deterministic scenario deltas</td></tr>
         <tr data-level="weak"><th scope="row">Policy counterfactuals</th><td><span class="chip">weak</span></td><td>Reopens if scenario tables are published</td></tr>
@@ -145,7 +134,7 @@
                   <tr>
                     <th scope="row">Manual Table&nbsp;4, macro block — growth, unemployment, population 16+, labour force, S1 baseline</th>
                     <td>population and labour force &plusmn;0.01m; growth &plusmn;0.31pp; unemployment &plusmn;0.2pp</td>
-                    <td><strong>PASS</strong> (2026-08-04) — but 2025 growth misses by &minus;0.30pp, clearing by 0.01pp on a gate set after the run</td>
+                    <td><strong>PASS</strong> (2026-08-04) — but 2025 growth misses by &minus;0.30pp (gate &plusmn;0.31, set after the run) and 2040 unemployment by &minus;0.19pp (gate &plusmn;0.2): both clear by 0.01pp</td>
                   </tr>
                   <tr>
                     <th scope="row">Manual Table&nbsp;4, total emissions, S1 baseline</th>
@@ -153,14 +142,14 @@
                     <td><strong>DIVERGENCE</strong> — pinned; see <a href="#emissions">below</a></td>
                   </tr>
                   <tr>
-                    <th scope="row">Scenario design — each cached scenario toggles exactly its published policy switches</th>
+                    <th scope="row">Scenario design — each of the 8 checked scenarios toggles exactly its published policy switches</th>
                     <td>exact flag set per scenario; <code>HOUSING_SUB_RATE=0.4</code> pinned</td>
                     <td><strong>PASS</strong> (2026-08-05, 10 tests)</td>
                   </tr>
                   <tr>
                     <th scope="row">FMM-2023 anchors — green public investment GDP peak; baseline 2030 emissions</th>
                     <td>wide (pre-1.0 vintage): GDP peak 0.7&ndash;1.3%; emissions 330&ndash;352 MtCO2e</td>
-                    <td><strong>PASS</strong> — peak +0.92% vs &asymp;+1% (includes the <a href="#alpha-pp">&alpha;<sub>PP</sub> mismatch</a>); 342.8 vs &ldquo;just under 350&rdquo;. Regression pins, not agreement tests: a band reaching 352 cannot test &ldquo;just under 350&rdquo;</td>
+                    <td><strong>PINNED, not a replication</strong> — peak +0.92% vs our own 0.7&ndash;1.3% band (includes the <a href="#alpha-pp">&alpha;<sub>PP</sub> mismatch</a>); the &ldquo;1% of GDP&rdquo; recorded from FMM 2023 is the size of the investment; no published GDP response is confirmed. Baseline 2030 emissions 342.8 vs &ldquo;just under 350&rdquo;; a band reaching 352 cannot test that</td>
                   </tr>
                   <tr>
                     <th scope="row">Published numeric scenario results for v1.1</th>
@@ -181,7 +170,7 @@
               </table></div>
         <div class="callout">
                 This adapter runs the authors' unmodified code at a pinned commit.
-                DEFINE-UK belongs to George, Dafermos, Nikolaidi and co-authors;
+                DEFINE-UK belongs to George and Dafermos (SOAS), building on the DEFINE model of Dafermos, Nikolaidi and Galanis;
                 nothing here is produced or endorsed by them, and no result is theirs.
               </div>
           <p>
@@ -252,7 +241,7 @@
           <ul>
             <li>The recomputed rows are committed as <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/validation/baseline_vs_external.csv">baseline_vs_external.csv</a>.</li>
             <li>The suite fails on any drift.</li>
-            <li>The annual-mean convention puts 2025 growth at the tile above.</li>
+            <li>The annual-mean convention puts 2025 growth at 4.66%.</li>
             <li>Table&nbsp;4 prints 4.96% for the same year.</li>
             <li>That is the same &minus;0.30pp anchoring gap as the Table&nbsp;4 gate above.</li>
           </ul>
@@ -277,11 +266,11 @@
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>The fiscal multiplier</h3></div>
         <p class="mo-lead">Cumulative to 2040, with an <a class="gloss-link" href="/glossary#exogenous">endogenous</a> denominator: not comparable to short-horizon figures.</p>
         <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>16 points</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>19 points</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
-        <p class="kv-title">Why it runs high</p>
-        <dl class="kv"><div><dt>Headline</dt><dd>2.30: cumulative &Delta;GDP over &Delta;SPEND_GVTPS, the spending the policy switch sets, to 2040</dd></div><div><dt>Secondary</dt><dd>1.78: over all non-wage spending (&Delta;SPEND_GVT)</dd></div><div><dt>Not comparable to</dt><dd>OBR &asymp;1.0, a short-horizon figure</dd></div><div><dt>Denominator change</dt><dd>77% government power-sector spending (<code>SPEND_GVTPS</code>)</dd></div><div><dt>Bias direction</dt><dd>not established</dd></div><div><dt>Parameter mismatch</dt><dd>included in both; without it about 2.08&ndash;2.25 and 1.73&ndash;1.75 (<a href="#alpha-pp">limits</a>)</dd></div><div><dt>Upstream summary</dt><dd>unusable, never quoted</dd></div></dl>
-          <p>The tile above is our own computation of the cumulative green-public-investment multiplier.</p>
+        <p class="kv-title">How to read it</p>
+        <dl class="kv"><div><dt>Headline</dt><dd>2.30: cumulative &Delta;GDP over &Delta;SPEND_GVTPS, the spending the policy switch sets, to 2040</dd></div><div><dt>Secondary</dt><dd>1.78: over all non-wage spending (&Delta;SPEND_GVT)</dd></div><div><dt>On gross spending</dt><dd>2.14: 209.9 over &pound;98.0bn, before the claw-back after 2035</dd></div><div><dt>Not comparable to</dt><dd>OBR &asymp;1.0, a short-horizon figure</dd></div><div><dt>Denominator change</dt><dd>77% government power-sector spending (<code>SPEND_GVTPS</code>)</dd></div><div><dt>Bias direction</dt><dd>not established</dd></div><div><dt>Parameter mismatch</dt><dd>included in both; without it about 2.08&ndash;2.25 and 1.73&ndash;1.75 (<a href="#alpha-pp">limits</a>)</dd></div><div><dt>Upstream summary</dt><dd>unusable, never quoted</dd></div></dl>
+          <p>The 2.30 is our own computation of the cumulative green-public-investment multiplier.</p>
           <ul>
             <li>Nominal cumulative ΔGDP of 209.9 over cumulative ΔSPEND_GVTPS of 91.2 gives 2.30 to 2040.</li>
             <li>ΔSPEND_GVTPS is the government power-sector spending the policy switch sets.</li>
@@ -289,11 +278,14 @@
             <li>1.78 was the headline until define-uk-model #16 was decided on 15 November 2026.</li>
             <li>It is <em>not</em> comparable to the OBR's &asymp;1.0, a short-horizon multiplier.</li>
             <li>Ours is cumulative to 2040, not short-horizon.</li>
-            <li>A demand-led <a class="gloss-link" href="/glossary#closure">closure</a> with Kaldor&ndash;Verdoorn productivity implies a ratio above 1 over that horizon.</li>
+            <li>The gain is back-loaded: real GDP is flat in 2027&ndash;28 while spending runs at about &pound;15bn a year.</li>
+            <li>Nominal GDP rises about &pound;0.5 per &pound; spent in 2027; real GDP peaks in 2034, as spending winds down.</li>
+            <li>It is a cumulative ratio, not an impact multiplier; the channel behind the late gain is not traced through the equations.</li>
+            <li>The 91.2 is net: gross spending is 98.0, less 6.8 clawed back after 2035. On gross spending the ratio is 2.14.</li>
             <li>The denominator mixes the policy impulse with endogenous items.</li>
             <li>In the cached run its cumulative change is 118.2.</li>
             <li>That is government power-sector spending +91.2, other consumption +21.1 and social benefits +8.0.</li>
-            <li>Government investment is &minus;2.3: green +17.0 offset by conventional &minus;19.3.</li>
+            <li>Government investment is &minus;2.3: green +17.0 offset by conventional &minus;19.3. The parts sum to 118.0; the 0.2 is rounding in the printed outputs.</li>
             <li>Social benefits rise, so the bias against an impulse-based multiplier has no established direction.</li>
             <li>An earlier statement that benefits fall and 1.78 is upper-leaning is withdrawn.</li>
             <li>The headline now uses the policy instrument alone as the impulse.</li>
@@ -367,7 +359,7 @@
           <p>
                 The one open divergence: the pinned upstream code runs
                 <em>below</em> the manual's published Table&nbsp;4 emissions by
-                &minus;3.5% in 2025 and &minus;10.2% in 2030, widening to 2040 (tile above).
+                &minus;3.5% in 2025 and &minus;10.2% in 2030, widening to &minus;23.3% in 2040.
               </p>
           <p>
                 Not an extraction error: the components
@@ -410,11 +402,13 @@
         <tbody>
           <tr><th scope="row"><strong>Deltas only, never levels</strong></th><td>The baseline sits far from official outturns, so levels are never served (<a href="#calibration">baseline against official numbers</a>).</td></tr>
           <tr><th scope="row"><strong>Emissions divergence</strong></th><td>The pinned upstream run sits below the manual&rsquo;s published emissions table, widening to 2040; pinned, raised with the authors (<a href="#emissions">the divergence</a>).</td></tr>
-          <tr><th scope="row"><strong>Multiplier runs high</strong></th><td>Our cumulative green-investment multiplier is not comparable to short-horizon published figures, and the direction of its denominator bias is not established (<a href="#multiplier">the multiplier</a>).</td></tr>
-          <tr id="alpha-pp"><th scope="row"><strong>Baseline and policy runs use different &alpha;<sub>PP</sub></strong></th><td>The upstream Baseline runs production&rsquo;s own-input coefficient alpha_PPLR at 0.2748; every policy run uses 0.2762 (printed in each run&rsquo;s <code>Parameters-sorted_*.csv</code>). No policy switch acts before 2027Q1, so the 2023&ndash;26 deltas are this parameter change alone, not policy effects; real GDP sits about &minus;0.16% of baseline in 2025&ndash;26. After 2026 the two cannot be separated, so the published numbers stand and the range below bounds the policy-only effect (the parameter effect stopping in 2027, or persisting at its 2026 level or share of baseline): headline multiplier 2.30 &rarr; about 2.08&ndash;2.25 (the secondary 1.78 &rarr; 1.73&ndash;1.75); green-investment GDP peak +0.92% &rarr; +0.92&ndash;1.08%; housing-regulation real GDP in 2035 &minus;2.3 &rarr; &minus;0.96 to &minus;2.3; fossil-fuel-ban real GDP in 2030 &minus;3.85 &rarr; &minus;2.65 to &minus;3.85; emissions deltas change by under 0.25%. Sized in <a href="https://github.com/PolicyEngine/define-uk-model/issues/20">define-uk-model #20</a>; the fix is not yet decided.</td></tr>
+          <tr><th scope="row"><strong>Multiplier not comparable</strong></th><td>Our cumulative green-investment multiplier is back-loaded and not comparable to short-horizon published figures, and the direction of its denominator bias is not established (<a href="#multiplier">the multiplier</a>).</td></tr>
+          <tr id="alpha-pp"><th scope="row"><strong>Baseline and policy runs use different &alpha;<sub>PP</sub></strong></th><td>The upstream Baseline runs production&rsquo;s own-input coefficient alpha_PPLR at 0.2748; every policy run uses 0.2762 (printed in each run&rsquo;s <code>Parameters-sorted_*.csv</code>). No policy switch acts before 2027Q1, so the 2023&ndash;26 deltas are this parameter change alone, not policy effects; real GDP sits &minus;0.12% below baseline in 2025 and &minus;0.16% in 2026 (after starting +0.26% above it in 2023). After 2026 the two cannot be separated, so the published numbers stand and the range below bounds the policy-only effect (the parameter effect stopping in 2027, or persisting at its 2026 level or share of baseline): headline multiplier 2.30 &rarr; about 2.08&ndash;2.25 (the secondary 1.78 &rarr; 1.73&ndash;1.75); green-investment GDP peak +0.92% &rarr; +0.92&ndash;1.08%; housing-regulation real GDP in 2035 &minus;2.3bn a quarter (&minus;0.27% of baseline) &rarr; &minus;0.96 to &minus;2.3; fossil-fuel-ban real GDP in 2030 &minus;3.85bn a quarter (&minus;0.50%) &rarr; &minus;2.65 to &minus;3.85; emissions deltas change by under 0.25%. Sized in <a href="https://github.com/PolicyEngine/define-uk-model/issues/20">define-uk-model #20</a>; the fix is not yet decided.</td></tr>
           <tr><th scope="row"><strong>Unlicensed upstream, never hosted</strong></th><td>The authors&rsquo; R code is fetched at a pinned commit and run locally; hosted tools return run instructions, never results.</td></tr>
           <tr id="clean-room"><th scope="row"><strong>The clean-room model solves the whole manual but does not reproduce it</strong></th><td>The clean-room Python registers every printed equation of the manual (&sect;3.1&ndash;&sect;3.4.7) and solves the whole model quarter by quarter (<a href="https://github.com/PolicyEngine/define-uk-model/pull/19">define-uk-model #19</a>, merged). It does not reproduce the upstream run. Baseline GDP falls up to 44% below it by 2040, mostly through equity-revaluation equations that are not yet diagnosed, so milestone 2 is not passed (<a href="https://github.com/PolicyEngine/define-uk-model/issues/17">#17</a>). Its own green public investment multiplier is about 1.52 (2.30 upstream on the same impulse). The Taylor rule&rsquo;s inflation input is inferred from the upstream outputs, because the manual prints no equation for it, and two power-sector profit rates are still read from the upstream run (<a href="https://github.com/PolicyEngine/define-uk-model/issues/24">#24</a>). That figure is a diagnostic, not a served result: every served number still comes from the cached upstream run. Where the upstream outputs follow a form that differs from the manual as printed, the model records the form the outputs follow, found from those outputs alone (<code>empirical.py</code>; <a href="/define/code#run-4">Code, step 4</a>).</td></tr>
           <tr id="sfc-breaks"><th scope="row"><strong>Two cached scenarios are not stock-flow consistent</strong></th><td>In the fossil-fuel ban with no forward guidance (2035Q3 and 2036Q1) and with unexpected enforcement (2033Q1), the power sector&rsquo;s revenue is valued at a different electricity price from the one buyers pay, so the sectors&rsquo; net lending does not sum to zero. The other 28 cached files close. The fault is in the upstream outputs. The adapter refuses these two scenarios and attaches a stock-flow check to every result (<a href="https://github.com/PolicyEngine/define-uk-model/pull/15">define-uk-model #15</a>, merged 6 Nov).</td></tr>
+          <tr id="emis-channel"><th scope="row"><strong>Emissions cuts come mostly from outside the power sector</strong></th><td>In green public investment, 23 of the 49 MtCO2e cut in 2030 and 46 of 54 in 2035 are non-electric emissions, while the electricity price falls sharply. That substitution response is untested, and no published v1.1 magnitude exists to check it.</td></tr>
+          <tr id="subsidy-gdp"><th scope="row"><strong>Subsidy scenarios lower GDP, unexplained</strong></th><td>Green power subsidy: real GDP &minus;0.67% in 2028; power-sector subsidy &minus;0.34%; both regulations plus subsidies &minus;0.72%. Net of the parameter mismatch the falls remain. How the subsidies are financed is not stated in the scenario descriptions, and the cause is not yet diagnosed.</td></tr>
           <tr><th scope="row"><strong>No uncertainty</strong></th><td>Deterministic deltas from one calibration, with no interval and no sensitivity sweep.</td></tr>
         </tbody>
       </table></div>

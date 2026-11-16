@@ -49,7 +49,7 @@
         <p class="lede">The shocks against the Fed&rsquo;s own solver, the multipliers, and the limits.</p>
         <ul class="mh-meta" aria-label="Model facts">
           <li class="mh-chip"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>US</li>
-          <li><a class="mh-chip mh-trust" href="/glossary#replicates"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Replicates</a></li>
+          <li><a class="mh-chip mh-trust" href="/glossary#replicates"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Replicates one published shock</a></li>
           <li class="mh-chip mh-hosted"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.5-9 6 6 0 0 1 11.5 1.5A3.8 3.8 0 0 1 17.5 18H7Z"/></svg>Hosted</li>
           <li class="mh-chip"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Quarterly</li>
         </ul>
@@ -68,7 +68,7 @@
   <div class="with-rail">
     <nav class="page-rail" aria-label="On this page">
       <p class="page-rail-title">On this page</p>
-      <a href="#trust" aria-current="location">Headline numbers</a>
+      <a href="#trust" aria-current="location">Scorecard</a>
       <a href="#trust-table">Solver match</a>
       <a href="#multipliers">Multipliers</a>
       <a href="#worked-shock">Worked shock</a>
@@ -80,31 +80,20 @@
     <div class="band-head" data-icon="shield">
       <h2>The baseline agreement is an identity; the shocks are the evidence</h2>
     </div>
-    <div class="stat-row stat-row-4">
-      <div class="stat stat-neutral">
-        <span class="stat-label">Tracking invariant</span>
-        <span class="stat-value">7.3e&#8722;12</span>
-        <span class="stat-sub">re-solving the baseline</span>
-        <span class="stat-foot"><a class="chip chip-warn" href="#trust-table">An identity, not evidence</a></span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Shock vs pyfrbus 1.0.0</span>
-        <span class="stat-value">1.4e&#8722;8</span>
-        <span class="stat-sub">100bp, 284 endos &times; 20 qtrs</span>
-        <span class="stat-foot"><span class="chip">CI gate 1e&minus;6</span></span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Shock vs pyfrbus 1.1.1</span>
-        <span class="stat-value">1.8e&#8722;8</span>
-        <span class="stat-sub">October 2026 LONGBASE vintage</span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">The Fed vs the Fed</span>
-        <span class="stat-value">1.3e&#8722;8</span>
-        <span class="stat-sub">pyfrbus 1.1.1 against 1.0.0</span>
-        <span class="stat-foot"><span class="chip">The yardstick</span></span>
-      </div>
-    </div>
+    <div class="table-scroll scorecard"><table data-stack="yes">
+        <caption>What was checked, against what, and the result</caption>
+        <thead><tr><th scope="col">Check</th><th scope="col">Against</th><th scope="col">Result</th><th scope="col">Verdict</th></tr></thead>
+        <tbody>
+          <tr data-result="pass"><th scope="row"><a href="#trust-table">Solver, 100bp funds-rate shock</a></th><td>Fed&rsquo;s pyfrbus 1.0.0 and 1.1.1, all 284 variables &times; 20 quarters; gate 1e&minus;6; the Fed&rsquo;s two releases differ by 1.4e&minus;8</td><td class="sc-num">1.4e&minus;8 and 1.8e&minus;8</td><td><span class="chip">pass</span></td></tr>
+          <tr data-result="pass"><th scope="row"><a href="#solver-table">Solver, three further scenarios</a></th><td>Fed&rsquo;s pyfrbus 1.0.0: federal purchases, personal tax rate, non-inertial Taylor rule; gate 1e&minus;6</td><td class="sc-num">9.5e&minus;9, 2.0e&minus;8, 1.9e&minus;8</td><td><span class="chip">pass</span></td></tr>
+          <tr data-result="partial"><th scope="row"><a href="#worked-shock">100bp shock, size of responses</a></th><td>Board&rsquo;s published run (Laforte 2018); core PCE &minus;0.034 vs &minus;0.0345pp and output gap &minus;0.50 vs &minus;0.486pp match; the unemployment peak depends on the baseline</td><td class="sc-num">unemployment +0.28 vs +0.219pp</td><td><span class="chip">partial</span></td></tr>
+          <tr data-result="partial"><th scope="row"><a href="#multipliers">Purchases multiplier, yr 1, Taylor rule</a></th><td>CBO converted range 0.45&ndash;1.82 (lower third); FRB-US in Coenen et al. &asymp;0.95 (0.2 below)</td><td class="sc-num">0.75</td><td><span class="chip">partial</span></td></tr>
+          <tr data-result="fail"><th scope="row"><a href="#multipliers">Transfers multiplier, yr 1</a></th><td>CBO derived range 0.36&ndash;1.52 (typical Fed); FRB-US in Coenen et al. &asymp;0.48; below both (model economics, not implementation)</td><td class="sc-num">0.28</td><td><span class="chip">fail</span></td></tr>
+          <tr data-result="weak"><th scope="row"><a href="#caveats">Baseline, first projected quarter</a></th><td>FRED outturns, 2026Q3; one quarter, and the Board&rsquo;s baseline, not ours</td><td class="sc-num">GDP growth &minus;1.23pp; core PCE +0.80pp</td><td><span class="chip">weak</span></td></tr>
+          <tr data-result="fail"><th scope="row"><a href="#caveats">Inflation effect of the 2022&ndash;23 hikes</a></th><td>FRBSF Economic Letter 2025-03, about 3pp; mean 2022&ndash;24 (model economics, not implementation)</td><td class="sc-num">&minus;0.12pp</td><td><span class="chip">fail</span></td></tr>
+          <tr data-result="construction"><th scope="row"><a href="#trust-table">Baseline re-solve (tracking invariant)</a></th><td>LONGBASE; holds for any input (9.0e&minus;9 on scrambled data), so not evidence</td><td class="sc-num">7.3e&minus;12</td><td><span class="chip">by construction</span></td></tr>
+        </tbody>
+      </table></div>
     <details class="xp">
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>Baseline caveat</strong><small>Matching is not being right</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
@@ -112,13 +101,14 @@
     
   </div>
 </details>
+    <h3 class="trust-sub">Evidence by dimension</h3>
     <!-- Levels and next gates: integration/src/policyengine_macro/capabilities.py MODEL_QUALITY["frb-us"]. -->
     <div class="prose">
     <div class="table-scroll trust-card"><table data-stack="yes">
       <caption>Evidence by dimension: the registry&rsquo;s categorical judgement, and what would change it</caption>
       <thead><tr><th scope="col">Dimension</th><th scope="col">Level</th><th scope="col">What would change it</th></tr></thead>
       <tbody>
-        <tr data-level="strong"><th scope="row">Implementation fidelity</th><td><span class="chip">strong</span></td><td>Like-for-like gates; the <a class="gloss-link" href="/glossary#expectations">MCE</a> path</td></tr>
+        <tr data-level="strong"><th scope="row">Implementation fidelity</th><td><span class="chip">strong</span></td><td>Like-for-like gates on further official demos and closures</td></tr>
         <tr data-level="na"><th scope="row">Predictive validation</th><td><span class="chip">not assessed</span></td><td>Vintage-preserving pseudo-out-of-sample evaluation</td></tr>
         <tr data-level="na"><th scope="row">Identification</th><td><span class="chip">not applicable</span></td><td>None: an equation model, not an identified VAR</td></tr>
         <tr data-level="moderate"><th scope="row">Policy counterfactuals</th><td><span class="chip">moderate</span></td><td>Model-consistent expectations in the hosted tools</td></tr>
@@ -139,9 +129,9 @@
       </p>
       <ul>
         <li>A dedicated CI job re-runs the Board's pyfrbus from source and gates against that fresh solution, not a committed CSV.</li>
-        <li>A weekly run repeats the suite across Python 3.10–3.12.</li>
-        <li>The multiplier comparisons are refreshed manually.</li>
-        <li>Full tables: <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md">VALIDATION.md</a> and the <a href="/papers/frb-us">working paper</a>.</li>
+        <li>A weekly run repeats the suite on Python 3.11 and 3.12.</li>
+        <li>The multipliers are re-gated weekly; the published comparators and this table are refreshed by hand.</li>
+        <li>Full tables: <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md">VALIDATION.md</a> and the <a href="/papers/frb-us">working paper</a> (the paper is on the April 2026 vintage).</li>
       </ul>
     </details>
     <details class="xp">
@@ -211,7 +201,7 @@
                 <figcaption>The top two rows are the tracking identity, <strong>not</strong> a ranking: they compare two implementations' round-off, not their fidelity to the Fed's economics.
 <p class="vc-src-line"><svg class="vc-src-ic" viewBox="0 0 24 24" width="14" height="14" style="width:14px;height:14px;flex:0 0 14px" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span style="min-width:0;flex:1">Source: FRB/US replication</span></p>
 <details class="vc-src"><summary>Source details</summary>
-<p class="vc-source">Source: papers/frb-us validation tables.</p>
+<p class="vc-source">Source: us-frb-model VALIDATION.md at 846eeb5c.</p>
 </details></figcaption>
               </figure>
         <details class="xp">
@@ -224,20 +214,25 @@
                   <tr>
                     <th scope="row"><strong>Tracking invariant</strong></th>
                     <td>Re-solving the baseline reproduces LONGBASE, 284 <a class="gloss-link" href="/glossary#exogenous">endogenous</a> variables over 2026Q1–2030Q4.</td>
-                    <td>Against a 1e&minus;8 gate (tile above), but <strong>an identity, not a comparison</strong>. <code>init_trac</code> sets each add-factor to minus that equation's residual at the input data, so the solve reproduces whatever it was tracked to, for any input: the model repository's <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/tests/test_tracking.py"><code>test_tracking_invariant_holds_for_arbitrary_data</code></a> passes at 9.0e&minus;9 on a scrambled baseline with every accounting identity destroyed. Read the row below, not this one, as evidence.</td>
+                    <td>Against a 1e&minus;8 gate, but <strong>an identity, not a comparison</strong>. <code>init_trac</code> sets each add-factor to minus that equation's residual at the input data, so the solve reproduces whatever it was tracked to, for any input: the model repository's <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/tests/test_tracking.py"><code>test_tracking_invariant_holds_for_arbitrary_data</code></a> passes at 9.0e&minus;9 on a scrambled baseline with every accounting identity destroyed. Read the row below, not this one, as evidence.</td>
                   </tr>
                   <tr>
                     <th scope="row"><strong>Cross-validation</strong></th>
                     <td>The same 100bp <code>rffintay_aerr</code> shock run in both implementations, all 284 variables &times; 20 quarters.</td>
                     <td>On the October 2026 LONGBASE our maximum absolute difference is 1.4e&minus;8 against pyfrbus 1.0.0 and 1.8e&minus;8 against 1.1.1; the two Fed releases differ from each other by 1.4e&minus;8, so ours are the same order of magnitude as the <a class="gloss-link" href="/glossary#release-gap">release-to-release gap</a>, and all are inside the 1e&minus;6 gate.</td>
                   </tr>
+                  <tr>
+                    <th scope="row"><strong>Three further scenarios</strong></th>
+                    <td>A +1% federal-purchases shock (<code>egfe_aerr</code>), a +2pp personal tax-rate shock (<code>trp_aerr</code>) and a +100bp shock under the non-inertial Taylor rule, against pyfrbus 1.0.0, all 284 variables &times; 20 quarters.</td>
+                    <td>Maximum absolute differences 9.5e&minus;9, 2.0e&minus;8 and 1.9e&minus;8, all inside the 1e&minus;6 gate.</td>
+                  </tr>
                 </tbody>
               </table></div>
-          <p>The Fed-vs-Fed tile frames the other three.</p>
+          <p>The Fed-vs-Fed comparison frames the others.</p>
           <ul>
             <li>The Board's two releases ship a <em>byte-identical</em> <code>model.xml</code> and LONGBASE, and differ only in how <a class="gloss-link" href="/glossary#gauss-seidel">Newton</a> reuses its LU factorisation.</li>
             <li>Yet they disagree by as much as this implementation disagrees with either, so agreement sits at the reference's own numerical noise, not at a chosen tolerance.</li>
-            <li>All three residuals concentrate in the same near-zero expectational-gap series (<code>wpsn</code>, <code>zgap05</code>).</li>
+            <li>All three residuals concentrate in the same series: the wage level <code>wpsn</code> in absolute terms, and near-zero gap terms (<code>dpadj</code>) in relative terms.</li>
           </ul>
         
   </div>
@@ -246,7 +241,7 @@
 
       <div class="meth-step" id="multipliers" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Fiscal multipliers</h3></div>
-        <p class="mo-lead">Purchases multipliers sit inside CBO&rsquo;s ranges and 0.2&ndash;0.3 below FRB-US in 2010: plausibility bands, not a test passed.</p>
+        <p class="mo-lead">Purchases multipliers sit inside CBO&rsquo;s ranges and 0.2&ndash;0.3 below FRB-US in 2010: plausibility bands, not a test passed. Transfers sit below every matched range.</p>
         <details class="xp">
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>table, 6 points</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
@@ -258,9 +253,9 @@
                   <tr><th scope="row">Gov. purchases, yr 2, inertial Taylor rule</th><td>0.66</td><td>CBO, Fed responding typically: 0.24&ndash;1.21 (converted)</td><td>inside the CBO range</td></tr>
                   <tr><th scope="row">Gov. purchases, yr 1, pegged funds rate</th><td>0.79</td><td>CBO, Fed response limited: 0.50&ndash;2.09 (converted)</td><td>inside, near the low end</td></tr>
                   <tr><th scope="row">Gov. purchases, yr 2, pegged funds rate</th><td>0.93</td><td>CBO, Fed response limited: 0.50&ndash;2.50 (converted); FRB-US in Coenen et al. Fig.&nbsp;25, 2-yr accommodation: &asymp;1.25</td><td>inside the CBO range, near the low end; about 0.3 <strong>below</strong> the 2010 FRB-US line</td></tr>
-                  <tr><th scope="row">Personal tax cut, yr 1</th><td>0.23</td><td>no matched published cell</td><td>reported for completeness</td></tr>
+                  <tr><th scope="row">Personal tax cut, yr 1</th><td>0.23</td><td>CBO, Fed not tightening: lower- and middle-income 0.3&ndash;1.5; higher-income 0.1&ndash;0.6</td><td>below the first row, inside the second; regimes differ (ours is under the Taylor rule)</td></tr>
                   <tr><th scope="row">Personal tax cut, yr 2</th><td>0.32</td><td>CBO, Fed not tightening: two-year cut for lower- and middle-income people 0.3&ndash;1.5; one-year cut for higher-income people 0.1&ndash;0.6. CBO publishes no central value</td><td>between the two rows; regimes differ (ours is under the Taylor rule)</td></tr>
-                  <tr><th scope="row">Transfers, yr 1</th><td>0.28&ndash;0.32</td><td>no matched published cell</td><td>depends on the regime: 0.28 under the inertial Taylor rule with the surplus rule on, 0.32 with the funds rate pegged and the fiscal rule off. FRB/US gives transfer recipients the same MPC as earners (hand-to-mouth share 0.31)</td></tr>
+                  <tr><th scope="row">Transfers, yr 1</th><td>0.28&ndash;0.32</td><td>CBO, Fed responding typically (derived): 0.36&ndash;1.52; CBO Table&nbsp;3, Fed not tightening: 0.4&ndash;2.1; FRB-US in Coenen et al. Fig.&nbsp;28: &asymp;0.48</td><td><strong>below</strong> all three (model economics, not implementation). Depends on the regime: 0.28 under the inertial Taylor rule with the surplus rule on, 0.32 with the funds rate pegged and the fiscal rule off. FRB/US gives transfer recipients the same MPC as earners (hand-to-mouth share 0.31)</td></tr>
                 </tbody>
               </table></div>
           <ul>
@@ -269,6 +264,8 @@
             <li>The tax-cut ranges are from CBO (Feb 2015, Table&nbsp;3), which assumes the Fed did not tighten.</li>
             <li>Coenen et al. (AEJ: Macroeconomics 2012) values are read from their charts (&plusmn;0.1) and cover the 2009&ndash;10 FRB-US, whose expectations mode they do not state.</li>
             <li>Ramey&rsquo;s survey range pools estimates across horizons and monetary regimes.</li>
+            <li>The cut/rise gap (0.93 vs 0.75) is an artefact of the model file adding growth in logs, not economics; CBO assumes symmetry.</li>
+            <li>Pegged purchases stay below 1 partly because the demo surplus rule raises the personal tax rate; with it off, the pegged yr-2 value is 1.04.</li>
             <li>Sources and the conversion: <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/docs/benchmarks.md">us-frb-model docs/benchmarks.md</a>.</li>
           </ul>
         
@@ -289,13 +286,13 @@
                 <tbody>
                   <tr><th scope="row">Funds rate, on impact</th><td><strong>+1.000pp</strong></td><td>+1.00pp by design — exact</td></tr>
                   <tr><th scope="row">Real GDP, trough (2027Q4)</th><td><strong>&minus;0.56%</strong></td><td>no published figure: the Board reports the <a class="gloss-link" href="/glossary#output-gap">output gap</a>, not GDP</td></tr>
-                  <tr><th scope="row">Unemployment, peak (2028Q1)</th><td><strong>+0.28pp</strong></td><td>+0.219pp, quarter&nbsp;8 (previous model +0.215pp)</td></tr>
+                  <tr><th scope="row">Unemployment, peak (2028Q1)</th><td><strong>+0.28pp</strong></td><td>+0.219pp, quarter&nbsp;8 (previous model +0.215pp). Ours is about a quarter higher; the peak depends on the baseline</td></tr>
                   <tr><th scope="row">Core inflation, trough</th><td><strong>&minus;0.034pp</strong>, quarter&nbsp;8</td><td>&minus;0.0345pp, quarter&nbsp;8 (previous model &minus;0.062pp). The &minus;0.08pp in the <a href="https://www.federalreserve.gov/econresdata/notes/feds-notes/2014/a-tool-for-macroeconomic-policy-analysis.html">2014 FEDS Note</a> describes the pre-2018 model; the Board attributes the smaller response to re-estimating the wage&ndash;price block through 2017</td></tr>
                   <tr><th scope="row">Output gap, trough</th><td><strong>&minus;0.50pp</strong></td><td>&minus;0.486pp, quarter&nbsp;8 (previous model &minus;0.459pp). The 2014 FEDS Note&rsquo;s &minus;0.4pp describes the pre-2018 model</td></tr>
                 </tbody>
               </table>
               </div>
-        <p class="forecast-note">The reference is the current (post-2018) model in <a href="https://www.federalreserve.gov/econres/notes/feds-notes/overview-of-the-changes-to-the-frb-us-model-2018-20181207.htm">Laforte (2018)</a>, FEDS Notes, doi:10.17016/2380-7172.2306, Figure&nbsp;2, VAR expectations. The exact cross-check is numerical: the same shock in the Board's own <code>pyfrbus</code> matches to the cross-validation tile above.</p>
+        <p class="forecast-note">The reference is the current (post-2018) model in <a href="https://www.federalreserve.gov/econres/notes/feds-notes/overview-of-the-changes-to-the-frb-us-model-2018-20181207.htm">Laforte (2018)</a>, FEDS Notes, doi:10.17016/2380-7172.2306, Figure&nbsp;2, VAR expectations. The exact cross-check is numerical: the same shock in the Board's own <code>pyfrbus</code> matches to the cross-validation result above (1.4e&minus;8).</p>
         
   </div>
 </details>
@@ -355,7 +352,7 @@
     <div class="chip-row">
       <a class="chip chip-brand" href="/frb-us/code">Use it</a>
       <a class="chip" href="/models#validation">Every model&rsquo;s verdict</a>
-      <a class="chip chip-brand" href="/papers/frb-us">The working paper</a>
+      <a class="chip chip-brand" href="/papers/frb-us">The working paper (April 2026 vintage)</a>
     </div>
   </nav>
     </div>

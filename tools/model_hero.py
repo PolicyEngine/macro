@@ -40,7 +40,7 @@ MODELS = {
     "pe": ("Tax-benefit microsimulation", "UK · US", ("Exact for rules", "exact-for-rules"), "hosted", "Annual"),
     "obr": ("Emulator of the OBR macroeconometric model", "UK", ("Anchored, not validated", "anchored-not-validated"), "hosted", "Quarterly"),
     "svar": ("Bank of England structural VAR", "UK", ("Partial replication", "partial-replication"), "hosted", "Quarterly"),
-    "frb-us": ("Fed FRB/US, rebuilt", "US", ("Replicates", "replicates"), "hosted", "Quarterly"),
+    "frb-us": ("Fed FRB/US, rebuilt", "US", ("Replicates one published shock", "replicates"), "hosted", "Quarterly"),
     "us-hank": ("Two-asset HANK", "US", ("Partial replication", "partial-replication"), "hosted", "Quarterly IRFs"),
     "olg": ("OG-UK overlapping generations", "UK", ("Calibrated", "calibrated-counterfactual"), "local", "Long-run steady state"),
     "define": ("DEFINE-UK ecological stock-flow", "UK", ("Partial replication", "partial-replication"), "local", "Annual to 2037"),
@@ -117,10 +117,10 @@ VERDICT_CHIP_RE = re.compile(r'(<p class="ov-verdict-line">)<a class="chip chip-
 # Overview verdicts: at most 8 words visible; the full evidence sentence
 # stays one click away in an expander, and the link goes to Validation.
 SHORT_VERDICT = {
-    "obr": "Scores fiscal changes; not a forecaster.",
+    "obr": "Scores income tax and NICs changes; not a forecaster.",
     "pe": "Exact for rules; costings static, no interval.",
-    "svar": "GDP matches the Bank; CPI falls short.",
-    "frb-us": "Solver matches pyfrbus; economics not tested.",
+    "svar": "GDP variance share consistent with the paper; no forecast skill.",
+    "frb-us": "Solver matches the Fed&rsquo;s code; economic checks weak.",
     "us-hank": "Parameters match the paper; responses not validated.",
     "olg": "Targets met by construction; no outcome benchmark.",
     "define": "Deltas only, never levels.",
@@ -148,10 +148,18 @@ def verdict(key: str, out: str) -> str:
 SIGNED_RE = re.compile(r'<span class="stat-value(?: is-(?:gain|loss))?">(\s*(&minus;|−|-|\+)[^<]*)</span>')
 
 
+# Tiles where "up" is not a gain (unemployment, prices, emissions) stay uncoloured.
+NEUTRAL_LABEL = re.compile(r"unemploy|inflation|\bPCE\b|\bCPI\b|emission|price", re.I)
+
+
 def signed(out: str) -> str:
     """Gains teal, losses amber; the printed sign stays (never colour alone)."""
-    return SIGNED_RE.sub(
-        lambda m: f'<span class="stat-value is-{"gain" if m.group(2) == "+" else "loss"}">{m.group(1)}</span>', out)
+    def sub(m: re.Match) -> str:
+        start = out.rfind('<div class="stat', 0, m.start())
+        if NEUTRAL_LABEL.search(re.sub(r"<[^>]+>", " ", out[start:m.start()] + out[m.end():m.end() + 300].split("</div>")[0])):
+            return f'<span class="stat-value">{m.group(1)}</span>'
+        return f'<span class="stat-value is-{"gain" if m.group(2) == "+" else "loss"}">{m.group(1)}</span>'
+    return SIGNED_RE.sub(sub, out)
 
 
 VOID_TAGS = {"br", "img", "input", "meta", "link", "hr", "wbr", "source", "col", "area", "base", "param", "track"}

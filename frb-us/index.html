@@ -49,7 +49,7 @@
         <p class="lede">Traces how a US funds-rate or fiscal shock moves output, unemployment and inflation, quarter by quarter.</p>
         <ul class="mh-meta" aria-label="Model facts">
           <li class="mh-chip"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>US</li>
-          <li><a class="mh-chip mh-trust" href="/glossary#replicates"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Replicates</a></li>
+          <li><a class="mh-chip mh-trust" href="/glossary#replicates"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Replicates one published shock</a></li>
           <li class="mh-chip mh-hosted"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.5-9 6 6 0 0 1 11.5 1.5A3.8 3.8 0 0 1 17.5 18H7Z"/></svg>Hosted</li>
           <li class="mh-chip"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Quarterly</li>
         </ul>
@@ -66,9 +66,9 @@
     </div>
   </nav>
   <section id="verdict" class="band band-result ov-verdict">
-    <div class="ov-verdict-line"><span class="ov-verdict-short">Solver matches pyfrbus; economics not tested.</span>
-      <a class="ov-verdict-link" href="/frb-us/validation">Evidence <span aria-hidden="true">&rarr;</span></a>
-      <span class="ov-verdict-why">Matches the Fed&rsquo;s pyfrbus on one 100bp funds-rate shock: a solver check, not a test of the economics. Its baseline equals the Board&rsquo;s by construction, and that baseline misses core inflation.</span></div>
+    <div class="ov-verdict-line"><span class="ov-verdict-short">Solver matches the Fed&rsquo;s code; economic checks weak.</span>
+      <a class="ov-verdict-link" href="#proof">Evidence <span aria-hidden="true">&rarr;</span></a>
+      <span class="ov-verdict-why">Matches the Fed&rsquo;s pyfrbus on one 100bp funds-rate shock: a solver check; the economic checks on the Validation tab are partial to weak. Its baseline equals the Board&rsquo;s by construction, and that baseline misses both GDP growth and core PCE in its first projected quarter (2026Q3).</span></div>
   </section>
 
   <section id="fit" class="band ov-fit" aria-label="What it is good for and not for">
@@ -93,11 +93,39 @@
   </section>
 
   <section id="answers" class="band ov-example">
-    <div class="band-head" data-icon="calculator"><h2>What it returns</h2>
-      <p class="section-intro">One command: a 100bp funds-rate tightening in 2026Q1, under the default inertial Taylor rule.</p></div>
-    <div class="stat-row"><div class="stat stat-us stat-neutral"><span class="stat-label">Shock applied</span><span class="stat-value is-gain">+1.0pp</span><span class="stat-sub">funds-rate rule error, 2026Q1</span></div><div class="stat stat-us"><span class="stat-label">2027 wage bill</span><span class="stat-value is-loss">&minus;0.65%</span><span class="stat-sub">compensation per hour plus hours</span></div></div>
-    <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code></pre></div>
-    <p class="scen-note">It returns the funds rate, real GDP, unemployment and core inflation, quarter by quarter. <a href="/frb-us/validation#worked-shock">See the responses against the Board&rsquo;s own simulation</a>.</p>
+    <div class="band-head" data-icon="calculator"><h2>A worked example</h2>
+      <p class="section-intro">The Fed raises the funds rate by one percentage point for one quarter (2026Q1), under the default inertial Taylor rule.</p></div>
+    <div class="stat-row stat-row-4"><div class="stat stat-us"><span class="stat-label">Real GDP, trough</span><span class="stat-value is-loss">&minus;0.56%</span><span class="stat-sub">2027Q4, against baseline</span></div><div class="stat stat-us"><span class="stat-label">Unemployment, peak</span><span class="stat-value">+0.28pp</span><span class="stat-sub">2028Q1</span></div><div class="stat stat-us"><span class="stat-label">Core PCE inflation, trough</span><span class="stat-value">&minus;0.034pp</span><span class="stat-sub">quarter 8</span></div><div class="stat stat-us"><span class="stat-label">2027 wage bill</span><span class="stat-value is-loss">&minus;0.65%</span><span class="stat-sub">compensation per hour plus hours</span></div></div>
+    <p class="scen-note">Real GDP falls 0.56% at its trough and unemployment rises 0.28pp at its peak, while core PCE falls 0.034pp at its trough; the Board&rsquo;s own run of the current model gives &minus;0.0345pp. <a href="/frb-us/validation#worked-shock">See the responses against the Board&rsquo;s own simulation</a>.</p>
+  </section>
+
+  <section id="proof" class="band ov-proof">
+    <div class="band-head" data-icon="shield"><h2>How far to trust it</h2>
+      <p class="section-intro">Three checks, weakest included; each opens its evidence.</p></div>
+    <ul class="proof-list">
+      <li class="proof-row" data-result="pass"><a class="proof-link" href="/frb-us/validation#trust-table"><span class="proof-check">Solver, 100bp funds-rate shock<small>Fed&rsquo;s pyfrbus 1.0.0 and 1.1.1; gate 1e&minus;6</small></span><span class="proof-num">1.4e&minus;8 and 1.8e&minus;8</span><span class="chip">pass</span></a></li>
+      <li class="proof-row" data-result="partial"><a class="proof-link" href="/frb-us/validation#worked-shock"><span class="proof-check">100bp shock, size of responses<small>Board&rsquo;s published run; core PCE and output gap match</small></span><span class="proof-num">unemployment +0.28 vs +0.219pp</span><span class="chip">partial</span></a></li>
+      <li class="proof-row" data-result="fail"><a class="proof-link" href="/frb-us/validation#caveats"><span class="proof-check">Inflation effect of the 2022&ndash;23 hikes<small>FRBSF Economic Letter 2025-03, about 3pp (model economics, not implementation)</small></span><span class="proof-num">&minus;0.12pp</span><span class="chip">fail</span></a></li>
+    </ul>
+    <p class="proof-more"><strong>Trust the solver, not the economics.</strong> The match shows the Board&rsquo;s equations are solved correctly, not that they are right (<a href="/frb-us/validation#caveats">all limits</a>).</p>
+    <p class="proof-more"><a href="/frb-us/validation">Full scorecard and limits <span aria-hidden="true">&rarr;</span></a></p>
+  </section>
+
+  <section id="run" class="band ov-run">
+    <div class="band-head" data-icon="code"><h2>Run it</h2>
+      <p class="section-intro">The worked example above, three ways: a 100bp funds-rate tightening for one quarter.</p></div>
+    <div class="glance-switch run-switch scen-switch" role="tablist" aria-label="Run it">
+      <button type="button" role="tab" id="run-tab-mcp" aria-controls="run-mcp" aria-selected="true">MCP prompt</button>
+      <button type="button" role="tab" id="run-tab-cli" aria-controls="run-cli" aria-selected="false" tabindex="-1">CLI</button>
+      <button type="button" role="tab" id="run-tab-py" aria-controls="run-py" aria-selected="false" tabindex="-1">Python</button>
+    </div>
+    <div class="scen-panel run-panel" id="run-mcp" role="tabpanel" aria-labelledby="run-tab-mcp"><p class="run-prompt">In FRB/US, raise the federal funds rate by 100bp for one quarter from 2026Q1 under the inertial Taylor rule, and show real GDP, unemployment and core PCE inflation each quarter.<small>The hosted server calls <code>frbus_shock</code>; no install. <a href="/connect">Connect</a></small></p></div>
+    <div class="scen-panel run-panel" id="run-cli" role="tabpanel" aria-labelledby="run-tab-cli"><div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code></pre></div></div>
+    <div class="scen-panel run-panel" id="run-py" role="tabpanel" aria-labelledby="run-tab-py"><div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> frbus <span class="kw">import</span> Frbus, load_data
+<span class="cm"># load LONGBASE, set the demo fiscal switches, init_trac: see /frb-us/code#code-5</span>
+with_adds.loc[start, <span class="kw">"rffintay_aerr"</span>] += 1
+sim = model.solve(start, end, with_adds)</code></pre></div></div>
+    <p class="run-more"><a href="/frb-us/code">Setup, every lever and output <span aria-hidden="true">&rarr;</span></a></p>
   </section>
 
   <section id="pe-bridge" class="band ov-flow">
@@ -138,8 +166,8 @@
 
   <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
     <div class="chip-row">
-      <a class="chip chip-brand" href="/frb-us/methodology">Methodology</a>
-      <a class="chip chip-brand" href="/connect">Run it hosted</a>
+      <a class="chip chip-brand" href="/frb-us/methodology">Next: Methodology</a>
+      <a class="chip" href="/papers/frb-us">The working paper</a>
       <a class="chip" href="/models#compare">Compare the models</a>
     </div>
   </nav>
@@ -161,5 +189,6 @@
 </footer>
 
 <script src="/reveal.js?v=4" defer></script>
+<script src="/scenarios.js" defer></script>
 </body>
 </html>

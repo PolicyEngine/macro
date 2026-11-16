@@ -33,7 +33,8 @@
 .doc main > .hero.mh > .hero-inner.mh-inner > .mh-body { width: auto; margin: 0; }
 .doc main > .hero.mh > .hero-inner.mh-inner > .mh-body { flex: 1 1 auto; min-width: 0; }
 .doc main > .hero.mh .mh-icon {
-  flex: 0 0 52px;
+  flex: 0 0 auto;
+  width: 52px;
   height: 52px;
   display: grid;
   place-items: center;
@@ -106,7 +107,7 @@
 @media (max-width: 560px) {
   .doc main > .hero.model-hero.mh { padding: 20px 16px 16px; }
   .doc main > .hero.mh > .hero-inner.mh-inner { gap: 12px; }
-  .doc main > .hero.mh .mh-icon { flex-basis: 40px; height: 40px; border-radius: 10px; }
+  .doc main > .hero.mh .mh-icon { width: 40px; height: 40px; border-radius: 10px; }
   .mh-icon svg { width: 22px; height: 22px; }
 }
 
@@ -874,3 +875,114 @@
 .doc main:has(> .hero.mh) .codeblock + .scen-note { margin-top: 12px; }
 .doc main:has(> .hero.mh) details.step-fold { border-top: 0; }
 .doc main:has(> .hero.mh) .scrolly-wrap + .xp { margin-top: 16px; }
+
+/* ===== Polish run (16–17 Nov): proof list, run tabs, validation scorecard ===== */
+/* result chips: one closed vocabulary, keyed on [data-result] (the registry trust card keeps [data-level]) */
+.doc main:has(> .hero.mh) [data-result] .chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border: 1px solid var(--hairline-strong);
+  border-radius: 999px; font-size: 11.5px; font-weight: 600; white-space: nowrap;
+  background: var(--surface-sunken); color: var(--text-body);
+}
+.doc main:has(> .hero.mh) [data-result] .chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.doc main:has(> .hero.mh) [data-result="pass"] .chip { background: var(--surface-tint); color: var(--teal-700); border-color: color-mix(in srgb, var(--primary) 30%, transparent); }
+.doc main:has(> .hero.mh) [data-result="weak"] .chip { background: var(--warn-bg); color: var(--warn-ink); border-color: var(--warn-line); }
+.doc main:has(> .hero.mh) [data-result="fail"] .chip { background: color-mix(in srgb, #DC2626 10%, var(--card)); color: #B91C1C; border-color: color-mix(in srgb, #DC2626 40%, transparent); }
+.doc main:has(> .hero.mh) [data-result="na"] .chip { background: none; color: var(--text-faint); border-color: var(--hairline); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .doc main:has(> .hero.mh) [data-result="fail"] .chip { color: #FCA5A5; }
+}
+:root[data-theme="dark"] .doc main:has(> .hero.mh) [data-result="fail"] .chip { color: #FCA5A5; }
+
+/* Overview: How far to trust it (3-row proof list) */
+.doc main:has(> .hero.mh) .proof-list { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--ab-border); border-radius: 12px; overflow: hidden; }
+.doc main:has(> .hero.mh) .proof-row { margin: 0; padding: 0; }
+.doc main:has(> .hero.mh) .proof-row::before { display: none; }
+.doc main:has(> .hero.mh) .proof-row + .proof-row { border-top: 1px solid var(--ab-border); }
+.doc main:has(> .hero.mh) .proof-link {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto 16px; align-items: center; gap: 16px;
+  padding: 14px 20px; color: inherit; text-decoration: none;
+}
+.doc main:has(> .hero.mh) .proof-link::after { content: "→"; color: var(--text-faint); transition: transform 150ms; }
+.doc main:has(> .hero.mh) .proof-link:hover { background: var(--ab-teal-50); }
+.doc main:has(> .hero.mh) .proof-link:hover::after { transform: translateX(3px); color: var(--ab-teal-700); }
+.doc main:has(> .hero.mh) .proof-link:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.doc main:has(> .hero.mh) .proof-check { color: var(--text-strong); font-size: var(--fs-ab-small, 14px); font-weight: 600; line-height: 1.35; }
+.doc main:has(> .hero.mh) .proof-check small { display: block; margin-top: 2px; color: var(--text-faint); font-size: var(--fs-ab-cap, 13px); font-weight: 400; }
+.doc main:has(> .hero.mh) .proof-num { color: var(--text-strong); font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.doc main:has(> .hero.mh) .proof-more, .doc main:has(> .hero.mh) .run-more { margin: 10px 0 0; font-size: var(--fs-ab-cap, 13px); }
+@media (max-width: 640px) {
+  .doc main:has(> .hero.mh) .proof-link { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; padding: 12px 14px; }
+  .doc main:has(> .hero.mh) .proof-link::after { display: none; }
+  .doc main:has(> .hero.mh) .proof-check { grid-column: 1 / -1; }
+}
+
+/* Overview: Run it (MCP / CLI / Python tabs on the shared scenario switch) */
+.doc main:has(> .hero.mh) .run-panel { margin-top: 12px; }
+.doc main:has(> .hero.mh) .run-panel > .codeblock { margin: 0; }
+.doc main:has(> .hero.mh) .run-prompt {
+  margin: 0; padding: 14px 18px; background: var(--card); border: 1px solid var(--ab-border); border-left: 3px solid var(--ab-teal-700);
+  border-radius: 10px; color: var(--text-strong); font-size: var(--fs-ab-small, 14px); line-height: 1.55;
+}
+.doc main:has(> .hero.mh) .run-prompt small { display: block; margin-top: 6px; color: var(--text-faint); font-size: var(--fs-ab-cap, 13px); }
+
+/* Validation: scorecard table, first under the heading */
+.doc main:has(> .hero.mh) .table-scroll.scorecard { margin: 0 0 16px; }
+.doc main:has(> .hero.mh) .scorecard th[scope="row"] a { color: var(--text-strong); font-weight: 600; text-decoration: none; }
+.doc main:has(> .hero.mh) .scorecard th[scope="row"] a:hover { color: var(--ab-teal-700); text-decoration: underline; }
+.doc main:has(> .hero.mh) .scorecard .sc-num { color: var(--text-strong); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.doc main:has(> .hero.mh) .scorecard td:last-child { white-space: nowrap; }
+.doc main:has(> .hero.mh) .trust-sub { margin: 20px 0 8px; color: var(--text-strong); font-size: var(--fs-ab-body, 16px); font-weight: 600; }
+
+/* Methodology: the step index reads as one connected strip */
+.doc main:has(> .hero.mh) .meth-map-list li { position: relative; }
+@media (min-width: 768px) {
+  .doc main:has(> .hero.mh) .meth-map-list li:not(:nth-child(3n)):not(:last-child)::after {
+    display: block; content: ""; position: absolute; top: 50%; right: -8px; width: 8px; height: 2px; background: var(--ab-teal-100);
+  }
+}
+.doc main:has(> .hero.mh) .meth-lead { max-width: 72ch; margin: 0 0 12px; color: var(--text-body); font-size: var(--fs-ab-body, 16px); line-height: 1.55; }
+.doc main:has(> .hero.mh) .proof-more { max-width: none; }
+/* r-polish Fable fixes */
+.doc main:has(> .hero.mh) [data-result="none"] .chip { background: none; color: var(--text-muted); border-style: dashed; }
+/* scorecard: fixed columns at desktop so labels never break mid-word */
+.doc main:has(> .hero.mh) .scorecard table { table-layout: fixed; width: 100%; }
+.doc main:has(> .hero.mh) .scorecard th, .doc main:has(> .hero.mh) .scorecard td { overflow-wrap: normal; word-break: normal; hyphens: none; vertical-align: top; }
+.doc main:has(> .hero.mh) .scorecard thead th:nth-child(1) { width: 24%; }
+.doc main:has(> .hero.mh) .scorecard thead th:nth-child(2) { width: 38%; }
+.doc main:has(> .hero.mh) .scorecard thead th:nth-child(3) { width: 22%; }
+.doc main:has(> .hero.mh) .scorecard thead th:nth-child(4) { width: 16%; }
+.doc main:has(> .hero.mh) .scorecard .sc-num { white-space: normal; }
+/* below 900px every scorecard row is a compact card (also between 640 and 900, where the shared stack does not apply) */
+@media (max-width: 900px) {
+  .doc main:has(> .hero.mh) .scorecard { overflow: visible; }
+  .doc main:has(> .hero.mh) .scorecard table, .doc main:has(> .hero.mh) .scorecard tbody { display: block; width: 100%; table-layout: auto; }
+  .doc main:has(> .hero.mh) .scorecard thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .doc main:has(> .hero.mh) .scorecard caption { display: block; text-align: left; }
+  .doc main:has(> .hero.mh) .scorecard tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: start; padding: 12px 16px; border-bottom: 1px solid var(--ab-border); }
+  .doc main:has(> .hero.mh) .scorecard tr:last-child { border-bottom: 0; }
+  .doc main:has(> .hero.mh) .scorecard tr > * { display: block; padding: 0 !important; margin: 0; border: 0 !important; background: none; width: auto; }
+  .doc main:has(> .hero.mh) .scorecard tr > :first-child { grid-column: 1; grid-row: 1; }
+  .doc main:has(> .hero.mh) .scorecard tr > td:last-child { grid-column: 2; grid-row: 1; }
+  .doc main:has(> .hero.mh) .scorecard tr > td.sc-num { grid-column: 1 / -1; grid-row: 2; }
+  .doc main:has(> .hero.mh) .scorecard tr > td:nth-child(2) { grid-column: 1 / -1; grid-row: 3; color: var(--text-muted); font-size: 13px; line-height: 1.45; }
+  .doc main:has(> .hero.mh) .scorecard td::before, .doc main:has(> .hero.mh) .scorecard th::before { display: none !important; }
+}
+/* code: readable tokens in light mode, visible copy button, long lines scroll */
+.doc main:has(> .hero.mh) .codeblock .kw { color: var(--ab-teal-700); font-weight: 600; }
+.doc main:has(> .hero.mh) .codeblock .cm { color: var(--text-muted); }
+.doc main:has(> .hero.mh) .codeblock .cb-copy { color: var(--text-body); border-color: var(--hairline-strong); }
+.doc main:has(> .hero.mh) .codeblock pre { overflow-x: auto; }
+@media (max-width: 640px) { .doc main:has(> .hero.mh) .codeblock:has(> .cb-copy) { padding-top: 36px; padding-right: 12px; } }
+/* run tabs: three equal columns, never 2 + 1 */
+.doc main:has(> .hero.mh) .run-switch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: min(100%, 420px); }
+/* notes: only a note attached under a card is a strip; a free note is plain muted text, full width */
+.doc main:has(> .hero.mh) :is(.scen-note, .ov-flow-note) { grid-column: 1 / -1; width: auto; }
+.doc main:has(> .hero.mh) :not(.stat-row, .vfig, figure.spark, .mo-figcard) + :is(.scen-note, .ov-flow-note),
+.doc main:has(> .hero.mh) :is(.scen-note, .ov-flow-note):first-child { padding: 0; background: none; border: 0; border-radius: 0; margin-top: 10px; }
+/* final Fable pass */
+.doc main:has(> .hero.mh) .band > p:is(.scen-note, .ov-flow-note, .proof-more, .run-more) { max-width: none; }
+.doc main:has(> .hero.mh) .scorecard td:last-child { padding-right: 16px; }
+@media (max-width: 640px) {
+  .doc main:has(> .hero.mh) .proof-num { white-space: normal; min-width: 0; font-size: 14px; }
+  .doc main:has(> .hero.mh) .proof-link { align-items: start; }
+}
