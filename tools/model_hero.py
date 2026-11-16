@@ -117,7 +117,7 @@ VERDICT_CHIP_RE = re.compile(r'(<p class="ov-verdict-line">)<a class="chip chip-
 # Overview verdicts: at most 8 words visible; the full evidence sentence
 # stays one click away in an expander, and the link goes to Validation.
 SHORT_VERDICT = {
-    "obr": "Scores fiscal changes; not a forecaster.",
+    "obr": "Scores income tax and NICs changes; not a forecaster.",
     "pe": "Exact for rules; costings static, no interval.",
     "svar": "GDP variance share consistent with the paper; no forecast skill.",
     "frb-us": "Solver matches the Fed&rsquo;s code; economic checks weak.",
