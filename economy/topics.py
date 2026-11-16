@@ -3222,7 +3222,7 @@ def page(topic: dict) -> str:
 </main>
 
 <footer class="foot foot-bar">
-  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <p class="footer-legal">© 2026 PolicyEngine</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
 {site_nav.FOOTER_LINKS}
   </nav>

@@ -21,79 +21,89 @@ from site_nav import icon, MODEL_ICONS  # noqa: E402
 PAGES = {"index.html": "/", "models/index.html": "/models"}
 OPEN, CLOSE = "<!-- joins-hub:begin -->", "<!-- joins-hub:end -->"
 
-# key, model id, href, name, flow, status, x%, y%, caption, panel (on /models)
-NODES = (
-    ("svar", "boe-svar", "/svar", "BoE SVAR", "in", "Experimental join", 12.5, 15,
-     "Its CPI path drives benefit-uprating incidence.", "incidence"),
-    ("frbus", "frb-us", "/frb-us", "FRB/US", "in", "Experimental join", 12.5, 38.3,
-     "Its wage and hours paths drive employment-income incidence.", "incidence"),
-    ("hank", "us-hank", "/us-hank", "US HANK", "in", "Experimental join", 12.5, 61.7,
-     "Its wage and labour responses drive employment-income incidence.", "incidence"),
-    ("define", "define-uk", "/define", "DEFINE-UK", "in", "Experimental join", 12.5, 85,
-     "Its scenario income deltas drive employment-income incidence.", "incidence"),
-    ("obr", "obr-macro", "/obr", "OBR emulator", "out", "Hosted join", 87.5, 27,
-     "A reform's static cost goes in as an add-factor; GDP feedback comes out. UK only.", "score"),
-    ("og", "psl-og", "/olg", "OG-UK", "back", "Local join · none published", 87.5, 73,
-     "Long-run wage and rate changes feed a second microsimulation run. None published.", "og-join"),
+# r13 framing (Vahid: "this platform should be hosting different macro models,
+# but have also microsim, how can it be helpful"): the six macro models are
+# the product; the microsimulation adds the household layer. Three use cases
+# say what the combination does, each read left to right with verbs on the
+# arrows, so nothing needs a legend or a hover.
+# Facts it encodes (keep them): every join starts or ends at the
+# microsimulation; no macro model feeds another; the OG-UK dynamic score is
+# local only, with none published; the four incidence joins are experimental.
+MACRO = (
+    ("obr-macro", "/obr", "OBR emulator", "UK fiscal scenarios"),
+    ("boe-svar", "/svar", "BoE SVAR", "UK shocks and forecasts"),
+    ("frb-us", "/frb-us", "FRB/US", "US monetary and fiscal shocks"),
+    ("us-hank", "/us-hank", "US HANK", "US shocks by household wealth"),
+    ("psl-og", "/olg", "OG-UK", "UK long run"),
+    ("define-uk", "/define", "DEFINE-UK", "UK climate scenarios"),
 )
-FLOWS = (
-    ("out", "Out: reform cost", "macro feedback"),
-    ("back", "Back: long-run wages", "dynamic score"),
-    ("in", "In: macro path", "who gains and loses"),
+# key, panel id on /models, icon, title, status, status class, flow steps.
+# A step is (kind, text): "in" a plain input, "m" the microsimulation,
+# "x" a macro model, "out" the result; "v" is the verb on the next arrow.
+USES = (
+    ("score", "score", "calculator", "Score a tax reform", "UK · hosted", "hosted",
+     (("in", "Reform"), ("v", "cost"), ("m", "Microsimulation"), ("v", "add-factor"),
+      ("x", "OBR emulator"), ("v", ""), ("out", "Cost + GDP feedback"))),
+    ("shock", "incidence", "users", "Who gains and loses from a macro shock", "UK + US · experimental", "exp",
+     (("x", "SVAR, FRB/US, HANK or DEFINE-UK"), ("v", "macro path"), ("m", "Microsimulation"),
+      ("v", ""), ("out", "Winners and losers"))),
+    ("long", "og-join", "hourglass", "Long-run dynamic score", "UK · local only, none published", "local",
+     (("x", "OG-UK"), ("v", "long-run wages"), ("m", "Microsimulation"), ("v", "second run"),
+      ("out", "Dynamic score"))),
 )
-DEFAULT = "No macro model feeds another. Hover or tap a model to see its link."
-
-W, H = 1000, 440
-CX, CY = 500, 220
+W, H = 0, 0  # kept for callers that import the old geometry names
 
 
-def _path(x, y, flow):
-    px, py = x / 100 * W, y / 100 * H
-    if flow == "in":   # node right edge -> centre left edge
-        sx, sy, ex, ey = px + 105, py, CX - 120, CY + (py - CY) * 0.18
-    elif flow == "out":  # centre right edge -> node left edge
-        sx, sy, ex, ey = CX + 120, CY - 18, px - 112, py
-    else:  # back: node left edge -> centre right edge
-        sx, sy, ex, ey = px - 105, py, CX + 124, CY + 18
-    mx = (sx + ex) / 2
-    return f"M{sx:.0f} {sy:.0f} C{mx:.0f} {sy:.0f} {mx:.0f} {ey:.0f} {ex:.0f} {ey:.0f}"
+def _flow(steps):
+    out = []
+    for kind, text in steps:
+        if kind == "v":
+            label = f"<small>{text}</small>" if text else ""
+            out.append(f'<span class="u-arrow" aria-hidden="true">{label}<i></i></span>')
+        elif kind == "m":
+            out.append(f'<span class="u-node u-micro">{icon(MODEL_ICONS["pe-microsim"], 14)}{text}</span>')
+        elif kind == "x":
+            out.append(f'<span class="u-node u-macro">{text}</span>')
+        elif kind == "out":
+            out.append(f'<span class="u-node u-out">{icon("check-circle", 14)}{text}</span>')
+        else:
+            out.append(f'<span class="u-node u-in">{text}</span>')
+    return "".join(out)
 
 
 def render(page: str) -> str:
     on_models = page == "models/index.html"
-    paths = "\n".join(
-        f'    <path class="hub-edge hub-{flow}" data-k="{k}" d="{_path(x, y, flow)}" marker-end="url(#hub-arrow-{flow})"/>'
-        for k, _m, _h, _n, flow, _s, x, y, _c, _p in NODES)
-    markers = "".join(
-        f'<marker id="hub-arrow-{f}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">'
-        f'<path class="hub-head hub-{f}" d="M0 0 10 5 0 10z"/></marker>' for f, _a, _b in FLOWS)
-    nodes = []
-    for k, mid, href, name, flow, status, x, y, cap, panel in NODES:
-        extra = f' data-panel="{panel}"' if on_models else ""
-        nodes.append(
-            f'  <li class="hub-node hub-{flow}" data-k="{k}" style="--x:{x}%;--y:{y}%">\n'
-            f'    <button type="button" class="hub-btn" data-k="{k}" data-cap="{cap}" data-href="{href}"{extra} aria-describedby="hub-cap">'
-            f'<span class="hub-ic">{icon(MODEL_ICONS[mid], 18)}</span>'
-            f'<span class="hub-txt"><strong>{name}</strong><span class="hub-chip hub-chip-{status.split()[0].lower()}">{status}</span></span></button>\n'
-            f'    <p class="hub-mcap">{cap}</p>\n  </li>')
-    legend = "".join(
-        f'<li class="hub-{f}"><span class="hub-swatch" aria-hidden="true"></span>{a} {icon("arrow-right", 12)} {b}</li>'
-        for f, a, b in FLOWS)
+    cards = "\n".join(
+        f'      <a class="mx" href="{href}"><span class="mx-ic">{icon(MODEL_ICONS[mid], 18)}</span>'
+        f'<span class="mx-t"><strong>{name}</strong><small>{job}</small></span></a>'
+        for mid, href, name, job in MACRO)
+    uses = []
+    for key, panel, ic, title, status, cls, steps in USES:
+        href = f"#{panel}" if on_models else f"/models#{panel}"
+        text = " → ".join(t for k, t in steps if k != "v")
+        uses.append(
+            f'      <li class="use use-{cls}"><a href="{href}">'
+            f'<span class="use-ic">{icon(ic, 18)}</span>'
+            f'<span class="use-main"><span class="use-head"><strong>{title}</strong><span class="use-chip">{status}</span></span>'
+            f'<span class="use-flow" role="img" aria-label="{text}">{_flow(steps)}</span></span>'
+            f'<span class="use-go" aria-hidden="true">{icon("arrow-right", 16)}</span></a></li>')
+    note_link = '' if on_models else ' <a href="/models#joins">How each link works</a>'
     return f'''{OPEN}
-<div class="hub" data-hub>
-  <ul class="hub-legend" aria-label="Flow types">{legend}</ul>
-  <div class="hub-stage">
-  <svg class="hub-svg" viewBox="0 0 {W} {H}" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-    <defs>{markers}</defs>
-{paths}
-  </svg>
-  <div class="hub-core" style="--x:50%;--y:50%"><a href="/pe">{icon(MODEL_ICONS["pe-microsim"], 22)}<span><strong>Microsimulation</strong><small>UK + US &middot; the core</small></span></a></div>
-  <ul class="hub-nodes">
-{chr(10).join(nodes)}
-  </ul>
+<div class="hub2" data-hub2>
+  <div class="hub2-tier hub2-macro">
+    <p class="hub2-label">{icon("models", 14)}Six macro models: the economy-wide answer</p>
+    <div class="mx-grid">
+{cards}
+    </div>
   </div>
-  <p class="hub-cap" id="hub-cap" aria-live="polite" data-default="{DEFAULT}">{icon("info", 16)}<span>{DEFAULT}</span></p>
-  <p class="hub-note"><strong>No US macro bridge:</strong> US reforms are scored statically.{'' if on_models else ' <a href="/models#joins">See every join</a>'}</p>
+  <ol class="hub2-uses" aria-label="What the microsimulation adds">
+{chr(10).join(uses)}
+  </ol>
+  <div class="hub2-tier hub2-micro">
+    <span class="hub2-micro-ic">{icon(MODEL_ICONS["pe-microsim"], 20)}</span>
+    <p><strong>PolicyEngine microsimulation adds the household layer</strong><span>Taxes, benefits and who gains or loses, for the UK and US. <a href="/pe">Open it</a></span></p>
+  </div>
+  <p class="hub2-note"><strong>No macro model feeds another.</strong> No US macro bridge: US reforms are scored statically.{note_link}</p>
 </div>
 {CLOSE}'''
 

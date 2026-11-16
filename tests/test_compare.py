@@ -112,7 +112,9 @@ def test_every_benchmark_is_sourced_or_says_none():
 
 def test_compare_tab_is_on_both_models_pages():
     models = (ROOT / "models" / "index.html").read_text()
-    assert 'href="/models/compare">Same question</a>' in models
+    # The footer no longer lists it (compact footer, r12); /models links it
+    # from the Compare section, which keeps the page reachable from the hub.
+    assert 'href="/models/compare"' in models.split('<footer', 1)[0]
     assert 'href="/models/compare" aria-current="page">Same question</a>' in PAGE
 
 
