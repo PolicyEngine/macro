@@ -627,11 +627,17 @@ def _card(heading: str, value: str, note: str, series: dict, period: str,
     tile face carries the reading and nothing else.
     """
     heading = TILE_LABELS.get(heading, heading)
+    # Display only: long published decimals (gilt yields) shown to 2 dp.
+    value = re.sub(r"(\d+\.\d{3,})%", lambda m: f"{float(m.group(1)):.2f}%", value)
     chip = ""
     if change:
         parts = change.split(" ")
         head = " ".join(parts[:2]) if len(parts) > 1 and parts[1] == "y/y" else parts[0]
-        arrow = "\u25b2" if head.startswith("+") else ("\u25bc" if head.startswith("\u2212") else "")
+        number = re.sub(r"[^0-9.]", "", head.split(" ")[0])
+        flat = bool(number) and float(number) == 0
+        arrow = "" if flat else ("\u25b2" if head.startswith("+") else ("\u25bc" if head.startswith("\u2212") else ""))
+        if flat:
+            head = "no change"
         chip = f'<span class="stat-chg" title="{esc(change)}">{arrow} {esc(head)}</span>'
     return f"""      <div class="stat tp-stat">
         <span class="stat-label"><span class="stat-ic" aria-hidden="true">{site_nav.icon("activity", 14)}</span>{heading}<details class="stat-meta"><summary aria-label="About this reading">{site_nav.icon("info", 14)}</summary><span class="stat-meta-pop">{esc(period)} · vintage {esc(series["vintage"])}<br>{note}<br><a href="{esc(series["url"])}">{esc(series["source"])} · {esc(series["cdid"])}</a></span></details></span>
