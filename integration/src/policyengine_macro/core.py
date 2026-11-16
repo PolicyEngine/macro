@@ -1025,7 +1025,10 @@ HANK_HEADLINE = {
     "C": "Aggregate consumption, % deviation from steady state",
     "I": "Investment, % deviation from steady state (two_asset only)",
     "pi": "Inflation (quarterly rate), pp deviation from steady state",
-    "r": "Real interest rate (quarterly rate), pp deviation from steady state",
+    "r": "Ex-post real return on liquid assets (quarterly rate), pp "
+         "deviation from steady state: r_t = (1 + i_{t-1})/(1 + pi_t) - 1, "
+         "so quarter 0 moves only with the inflation surprise and a policy "
+         "rate move shows from quarter 1 (not the ex-ante real rate)",
     "w": "Pre-tax real wage, % deviation from steady state",
     "N": "Labor, % deviation from steady state",
     # The financing. The DAG holds bond supply fixed, so a G shock is paid
@@ -1245,6 +1248,7 @@ def hank_shock(
 
     if include_distribution:
         _, _, _, distributional = _import_us_hank()
+        stats = distributional.summary(ss)
         result["distributional"] = {
             "note": (
                 "FIRST-ORDER APPROXIMATION from steady-state policies: the "
@@ -1254,15 +1258,34 @@ def hank_shock(
                 "household-level dynamics."
             ),
             "aggregate_quarterly_mpc_liquid": round(
-                float(distributional.aggregate_mpc(ss)), 4
+                float(stats["aggregate_quarterly_mpc_liquid"]), 4
             ),
             "mpc_by_liquid_quartile": {
                 k: round(float(v), 4)
-                for k, v in distributional.mpc_by_liquid_quartile(ss).items()
+                for k, v in stats["mpc_by_liquid_quartile"].items()
             },
+            # An MPC means nothing without the windfall it was measured
+            # out of (us-hank-model: "Quote the number with its windfall
+            # size, or not at all"), so the convention ships with it.
+            "mpc_windfall": _hank_mpc_windfall(stats),
             "hand_to_mouth_share": round(
-                float(distributional.hand_to_mouth_share(ss)), 4
+                float(stats["hand_to_mouth_share"]), 4
             ),
+            "hand_to_mouth_definition": {
+                "liquid_threshold_model_units": round(
+                    float(stats["hand_to_mouth_breakdown"]["threshold"]), 4
+                ),
+                "constrained_share_at_zero_liquid": round(
+                    float(stats["hand_to_mouth_breakdown"]["constrained_share"]), 4
+                ),
+                "note": (
+                    "Share with liquid assets below the threshold (model units, "
+                    "steady-state quarterly output = 1). Most of it is the atom "
+                    "of households holding exactly zero liquid assets "
+                    "(constrained_share_at_zero_liquid), so the count barely "
+                    "depends on the threshold."
+                ),
+            },
             "impact_consumption_response_pct_by_wealth_quartile": {
                 k: round(float(v), 4)
                 for k, v in distributional.consumption_response_by_wealth_quantile(
@@ -1271,6 +1294,34 @@ def hank_shock(
             },
         }
     return result
+
+
+# us-hank-model README (main) maps model units to dollars at 2025 US GDP per
+# household, about $58,000 a quarter (steady-state quarterly output Y = 1).
+HANK_USD_PER_MODEL_UNIT_PER_HOUSEHOLD = 58_000
+
+
+def _hank_mpc_windfall(stats: dict) -> dict:
+    """The windfall convention behind the reported MPCs, in words and dollars."""
+    frac = stats.get("mpc_windfall_frac_of_quarterly_income")
+    units = stats.get("mpc_windfall_model_units")
+    usd = (
+        None if units is None
+        else int(round(units * HANK_USD_PER_MODEL_UNIT_PER_HOUSEHOLD, -2))
+    )
+    return {
+        "frac_of_mean_quarterly_post_tax_labour_income": frac,
+        "model_units": None if units is None else round(float(units), 4),
+        "approx_usd_per_household": usd,
+        "note": (
+            "MPCs are measured out of this windfall. It is far larger than "
+            "the 2001 and 2008 US tax rebates ($300-900) that the empirical "
+            "MPC range of roughly 0.15-0.25 comes from, and the model's MPC "
+            "falls with windfall size, so do not compare it with that range. "
+            "Dollar figure: model units x about $58,000 (2025 US GDP per "
+            "household per quarter), as in the us-hank-model README."
+        ),
+    }
 
 
 def hank_summary() -> dict:
@@ -1312,13 +1363,21 @@ def hank_summary() -> dict:
         "solution_method": "first-order (linear) impulse responses via the "
                            "general-equilibrium sequence-space Jacobian "
                            f"(T={HANK_T}); responses scale exactly with the "
-                           "shock size",
+                           "shock size. The model itself is not linear at "
+                           "the sizes users run: for a 1%-of-GDP spending "
+                           "rise (persistence 0.8) its nonlinear transition "
+                           "gives an impact multiplier of about 0.25 against "
+                           "the linear 0.175, and a cut of the same size "
+                           "about 0.125",
         "runtime": "steady state ~13s and jacobian ~5s on first use per "
                    "variant, both cached in-process; IRFs are then instant",
         "validation": {
-            "suite": "the model repo's replication suite gates the steady-state "
-                     "calibration targets, market clearing, and shock-response "
-                     "signs/magnitudes against the published paper results",
+            "suite": "the model repo's replication suite gates the six "
+                     "steady-state parameters that match the paper's Table "
+                     "B.III, market clearing, and shock-response signs; IRF "
+                     "magnitudes are regression pins on this implementation, "
+                     "not checks against the paper, which publishes no "
+                     "comparable two-asset IRF figure",
             "note": "a replication gate, not a forecast-accuracy claim: no "
                     "predictive validation exists or is claimed for this model",
         },
