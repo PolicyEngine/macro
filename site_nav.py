@@ -392,10 +392,10 @@ _MODEL_LINKS = (
     ("/olg", "OG-UK"), ("/define", "DEFINE-UK"),
 )
 _FOOTER_COLUMNS = (
-    ("Product", (("/forecasts", "Forecasts"), ("/models", "Models"),
+    ("Site", (("/forecasts", "Forecasts"), ("/models", "Models"),
                  ("/connect", "Use"), ("/notes/releases", "Release notes"))),
     ("Models", _MODEL_LINKS),
-    ("Trust", (("/models#trust", "Where models fail"), ("/models/compare", "Same question"),
+    ("Evidence", (("/models#trust", "Where models fail"), ("/models/compare", "Same question"),
                ("/models#papers", "Papers"), ("/glossary", "Glossary"))),
     ("Project", (("https://policyengine.org", "PolicyEngine"),
                  ("https://github.com/PolicyEngine/macro", "GitHub"),
@@ -407,7 +407,7 @@ _FOOTER_COLUMNS = (
 def _footer_links() -> str:
     cols = [
         '    <div class="foot-brand">\n'
-        '      <a class="footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro</a>\n'
+        '      <a class="footer-policyengine" href="/"><img src="/assets/policyengine-mark.svg" alt="" width="20" height="20" />PolicyEngine Macro</a>\n'
         '      <p>Open economic models for UK and US policy, each labelled with how far it can be checked.</p>\n'
         '    </div>'
     ]
