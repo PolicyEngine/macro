@@ -270,23 +270,30 @@
       if (el) map.set(el, a);
     });
     var visible = new Set();
+    var first = Array.from(map.keys())[0];
+    function setCurrent(a) {
+      links.forEach(function (x) { if (x !== a) x.removeAttribute("aria-current"); });
+      a.setAttribute("aria-current", "location");
+      /* keep the active tab visible when the strip scrolls sideways */
+      var strip = a.parentElement;
+      if (strip && strip.scrollWidth > strip.clientWidth) {
+        strip.scrollTo({ left: a.offsetLeft - (strip.clientWidth - a.offsetWidth) / 2, behavior: "smooth" });
+      }
+    }
     function mark() {
-      var best = null, top = Infinity;
-      visible.forEach(function (el) { var t = el.getBoundingClientRect().top; if (t < top) { top = t; best = el; } });
-      if (!best) return;
-      links.forEach(function (a) { a.removeAttribute("aria-current"); });
-      map.get(best).setAttribute("aria-current", "location");
+      if (first && window.scrollY + 160 < first.getBoundingClientRect().top + window.scrollY) { setCurrent(map.get(first)); return; }
+      var best = null, top = -Infinity;
+      map.forEach(function (_a, el) { var t = el.getBoundingClientRect().top; if (t <= 160 && t > top) { top = t; best = el; } });
+      if (best) setCurrent(map.get(best));
     }
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) { if (e.isIntersecting) visible.add(e.target); else visible.delete(e.target); });
       mark();
-    }, { rootMargin: "-30% 0px -55% 0px" });
+    }, { rootMargin: "-150px 0px -40% 0px" });
+    window.addEventListener("scroll", function () { window.requestAnimationFrame(mark); }, { passive: true });
     map.forEach(function (_a, el) { io.observe(el); });
     links.forEach(function (a) {
-      a.addEventListener("click", function () {
-        links.forEach(function (x) { x.removeAttribute("aria-current"); });
-        a.setAttribute("aria-current", "location");
-      });
+      a.addEventListener("click", function () { setCurrent(a); });
     });
   });
 })();
