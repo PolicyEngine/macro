@@ -556,11 +556,10 @@ VS_OFFICIAL_SPECS = {
         "series": "UK real GDP, year-on-year growth, percent",
         "unit": "UK real GDP, % change on a year earlier",
         "source_note": (
-            "EFO path derived from the March 2026 EFO real-GDP level path stored "
-            "in <code>papers/obr-macro/figures/fig_anchored_data.csv</code>"
+            "OBR March 2026 EFO"
         ),
         "intro": (
-            "GDP growth from the {round_id} round — our median and bands "
+            "GDP growth from the {round_id} round: our median and bands "
             "beside the OBR's path."
         ),
     },
@@ -789,15 +788,39 @@ def scored_entries(card: dict) -> list[tuple[dict, dict]]:
     )
 
 
+_ICON_PATHS = {
+    "target": '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    "ruler": '<path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/>',
+    "layers": '<path d="m12 2 10 5-10 5L2 7l10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/>',
+    "info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+    "cpi": '<path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l8.59-8.59a1 1 0 0 0 0-1.41Z"/><path d="M7 7h.01"/>',
+    "gdp": '<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
+    "unemployment": '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    "inside": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/>',
+    "outside": '<circle cx="10" cy="12" r="7" stroke-dasharray="3 3"/><circle cx="21" cy="12" r="1.5" fill="currentColor"/>',
+    "scale": '<path d="M12 3v18"/><path d="M7 21h10"/><path d="M3 7h18"/><path d="m6 7-3 8a3 3 0 0 0 6 0Z"/><path d="m18 7-3 8a3 3 0 0 0 6 0Z"/>',
+    "chev": '<path d="m6 9 6 6 6-6"/>',
+    "file": '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/>',
+    "history": '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    "clock": '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    "equal": '<path d="M5 9h14"/><path d="M5 15h14"/>',
+}
+
+
+def icon(name: str, cls: str = "fc-ic") -> str:
+    return (f'<svg class="{cls}" viewBox="0 0 24 24" aria-hidden="true">'
+            f"{_ICON_PATHS[name]}</svg>")
+
+
 def render_status(card: dict) -> str:
     """The record in three tiles: band coverage, mean error against no change,
     and how much there is to go on.
 
     Every figure is an aggregate of the per-forecast values in scorecard.json
     (``in_68``/``in_90``, ``abs_error``, ``naive_abs_error``), computed here at
-    render time; scorecard.json itself is untouched. The third tile carries the
-    sample size and links to the limits, so the first two are never read as a
-    skill claim on their own (DESIGN.md §7.5).
+    render time; scorecard.json itself is untouched. A line under the tiles
+    says the sample is too small to show skill, so the first two are never
+    read as a skill claim on their own (DESIGN.md §7.5).
     """
     rounds = card["rounds"]
     pairs = scored_entries(card)
@@ -807,13 +830,12 @@ def render_status(card: dict) -> str:
     pending = card.get("pending_detail")
     fetched = store_last_fetched()
     if pending:
-        who = ", ".join(f"{VARIABLE_LABELS.get(v, v)}" for v in pending["variables"])
-        next_sub = f"next <span class=\"nowrap\">{esc(pending['period'])}</span>, {esc(who)}; store updated <span class=\"nowrap\">{esc(fetched)}</span>"
+        short = {"gdp": "GDP", "cpi": "CPI", "unemployment": "unemployment"}
+        who = ", ".join(short.get(v, v) for v in pending["variables"])
+        next_sub = f"Next: <span class=\"nowrap\">{esc(pending['period'])}</span> {esc(who)}."
     else:
-        next_sub = "every archived period has an outturn"
-    rounds_sub = (f"from {scored_rounds} of {rounds} archived round{'' if rounds == 1 else 's'}; {next_sub}"
-                  if scored and scored_rounds != rounds else
-                  f"from {rounds} archived round{'' if rounds == 1 else 's'}; {next_sub}")
+        next_sub = "Every archived period has an outturn."
+    pips = bars = ""
     if scored:
         in68 = sum(1 for e in entries if e["in_68"])
         in90 = sum(1 for e in entries if e["in_90"])
@@ -822,114 +844,143 @@ def render_status(card: dict) -> str:
         naive_vs = (", lower than the model's"
                     if sum(naive) < sum(e["abs_error"] for e in entries) else "")
         cover_value = f"{in68} of {scored}"
-        cover_sub = f"bands as archived; {in90} of {scored} inside the 90% band"
+        cover_sub = f"{in90} of {scored} inside 90%. Bands as archived."
         mae_value = f"{mae:.2f}pp"
-        mae_sub = (
-            f"no change: {sum(naive) / len(naive):.2f}pp over the same {scored} forecasts{naive_vs}; too few to show skill either way"
-            if len(naive) == scored else "no complete no-change baseline"
+        if len(naive) == scored:
+            naive_mae = sum(naive) / len(naive)
+            mae_sub = f"No-change forecast: {naive_mae:.2f}pp on the same {scored}."
+            top = max(mae, naive_mae)
+            bars = (
+                '          <div class="fc-bars" aria-hidden="true">'
+                f'<span class="fc-bar-l">This model {mae:.2f}pp</span><span class="fc-bar"><i class="fc-bar-ours" style="width:{mae / top * 100:.0f}%"></i></span>'
+                f'<span class="fc-bar-l">No-change baseline {naive_mae:.2f}pp</span><span class="fc-bar"><i class="fc-bar-naive" style="width:{naive_mae / top * 100:.0f}%"></i></span>'
+                "</div>"
+            )
+        else:
+            mae_sub = "No complete no-change baseline."
+        pips = (
+            f'          <span class="fc-pips" role="img" aria-label="{in68} inside the 68% band, {scored - in68} outside">'
+            + "".join(f'<i class="{"in" if e["in_68"] else "out"}"></i>' for e in entries)
+            + "</span>"
         )
     else:
-        cover_value, cover_sub = "—", "nothing scored yet"
-        mae_value, mae_sub = "—", "nothing scored yet"
+        cover_value, cover_sub = "—", "Nothing scored yet."
+        mae_value, mae_sub = "—", "Nothing scored yet."
     # Say plainly how current the record is (r5 usability test, #220): the date
     # is the newest outturn snapshot any scored forecast was read from.
     if scored:
         last = max(e["outturn_vintage"] for e in entries)
         asof = (f'      <p class="record-asof"><strong>Last scored <time datetime="{esc(last)}">'
-                f'{esc(long_date(last))}</time>.</strong> Outturns published after that date are '
-                'not in the record yet.</p>')
+                f'{esc(long_date(last))}</time>;</strong> data store updated '
+                f'<span class="nowrap">{esc(long_date(fetched))}</span>.</p>')
     else:
         asof = '      <p class="record-asof"><strong>Nothing scored yet.</strong></p>'
+
+    def tile(ic: str, value: str, label: str, sub: str, extra: str = "") -> list[str]:
+        return [
+            '        <div class="fc-tile">',
+            f'          <span class="fc-badge">{icon(ic)}</span>',
+            f'          <span class="fc-tile-v">{value}</span>',
+            f'          <span class="fc-tile-l">{label}</span>',
+            *([extra] if extra else []),
+            f'          <span class="fc-tile-s">{sub}</span>',
+            "        </div>",
+        ]
+
     return "\n".join([
         asof,
-        '      <div class="stat-row" aria-label="The record so far">',
-        '        <div class="stat">',
-        '          <span class="stat-label">Outturns inside the 68% band</span>',
-        f'          <span class="stat-value">{cover_value}</span>',
-        f'          <span class="stat-sub">{cover_sub}</span>',
-        '          <span class="stat-foot"><a class="chip" href="#record">The record</a></span>',
-        "        </div>",
-        '        <div class="stat">',
-        '          <span class="stat-label">Mean absolute error</span>',
-        f'          <span class="stat-value">{mae_value}</span>',
-        f'          <span class="stat-sub">{mae_sub}</span>',
-        '          <span class="stat-foot"><a class="chip" href="#benchmarks">Against the benchmarks</a></span>',
-        "        </div>",
-        '        <div class="stat stat-neutral">',
-        f"          <span class=\"stat-label\">Forecast{'' if scored == 1 else 's'} scored</span>",
-        f'          <span class="stat-value">{scored}</span>',
-        f'          <span class="stat-sub">{rounds_sub}</span>',
-        '          <span class="stat-foot"><a class="chip" href="#limits">Too few to show skill</a></span>',
-        "        </div>",
+        '      <div class="fc-tiles ab-card" aria-label="The record so far">',
+        *tile("target", cover_value, "inside the 68% band", cover_sub, pips),
+        *tile("ruler", mae_value, "mean absolute error", mae_sub, bars),
+        *tile("layers", f"{scored_rounds} of {rounds}", f"round{'' if rounds == 1 else 's'} scored",
+              next_sub),
+        *([f'        <p class="fc-callout">{icon("info")}<span>{scored} score{' is' if scored == 1 else 's are'} '
+           'too few to show skill either way. <a href="#limits">Limits</a></span></p>']
+          if scored < 20 else []),
         "      </div>",
     ])
 
 
-def render_rounds(card: dict) -> str:
-    """The archive: one row per round, flat (no card inside the section card).
+def _gap_days(a: str, b: str) -> int:
+    import datetime as _dt
+    return (_dt.date.fromisoformat(b) - _dt.date.fromisoformat(a)).days
 
-    Below 640 px reveal.js stacks each row into a labelled block.
+
+def render_rounds(card: dict) -> str:
+    """The archive as a timeline: one node per round, oldest first.
+
+    Below 640 px the rail turns vertical. Every value is the same as the old
+    table's: round, model, data edge, archived date, periods, scored, files.
     """
-    rows = [
-        '      <div class="table-scroll">',
-        '        <table class="round-table" data-stack="yes">',
-        "          <caption>Every archived round, oldest first.</caption>",
-        "          <thead><tr>"
-        '<th scope="col">Round</th>'
-        '<th scope="col">Model</th>'
-        '<th scope="col">Data edge</th>'
-        '<th scope="col">Archived</th>'
-        '<th scope="col" class="num">Periods</th>'
-        '<th scope="col" class="num">Scored</th>'
-        '<th scope="col">Files</th>'
-        "</tr></thead>",
-        "          <tbody>",
-    ]
-    for detail in card["detail"]:
+    details = card["detail"]
+    items = ['      <ol class="fc-timeline" aria-label="Every archived round, oldest first">']
+    for i, detail in enumerate(details):
         href = f"https://github.com/PolicyEngine/macro/commits/main/{detail['path']}"
         archived = (detail.get("archived_utc") or "")[:10] or "—"
-        rows.append(
-            "          <tr>"
-            f'<th scope="row"><span class="mono">{esc(detail["round_id"])}</span></th>'
-            f"<td>{model_html(detail)}</td>"
-            f'<td class="mono">{esc(detail["data_edge"])}</td>'
-            f'<td class="mono">{esc(archived)}</td>'
-            f'<td class="num">{detail["periods_forecast"]}</td>'
-            f'<td class="num">{len(detail["entries"])}</td>'
-            f'<td class="rt-files"><a href="/{esc(detail["path"])}" download>'
+        n = len(detail["entries"])
+        gap = ""
+        if i:
+            days = _gap_days(details[i - 1]["round_id"], detail["round_id"])
+            gap = f'<span class="fc-gap">{days} day{"" if days == 1 else "s"} later</span>'
+        state = "is-scored" if n else "is-open"
+        flag = ' is-retro' if i == 0 else ""
+        items.append(
+            f'        <li class="fc-node {state}{flag}">{gap}'
+            '<span class="fc-dot" aria-hidden="true"></span>'
+            '<div class="fc-node-card">'
+            f'<p class="fc-node-h"><span class="fc-node-date">{esc(detail["round_id"])}</span>'
+            + ('<span class="fc-chip-open">Open</span>' if not n else "")
+            + (' <a class="fc-retro-mark" href="#retro" title="Archived retroactively; see the note below">Retroactive</a>' if i == 0 else "")
+            + "</p>"
+            f'<p class="fc-node-model">{model_html(detail)}</p>'
+            '<dl class="fc-mini">'
+            f'<div><dt>Data edge</dt><dd>{esc(detail["data_edge"])}</dd></div>'
+            f'<div><dt>Periods</dt><dd>{detail["periods_forecast"]}</dd></div>'
+            f'<div><dt>Scored</dt><dd>{n}</dd></div>'
+            "</dl>"
+            f'<p class="fc-node-arch">{icon("clock")}Archived {esc(archived)}</p>'
+            f'<p class="fc-node-files"><a href="/{esc(detail["path"])}" download>{icon("file")}'
             f'<code>{esc(Path(detail["path"]).name)}</code></a>'
-            f' · <a href="{href}">history</a></td>'
-            "</tr>"
+            f'<a href="{href}">{icon("history")}history</a></p>'
+            "</div></li>"
         )
-    rows += ["          </tbody>", "        </table>", "      </div>"]
-    return "\n".join(rows)
+    items.append("      </ol>")
+    return "\n".join(items)
 
 
 def _strip(e: dict) -> str:
-    """Where the outturn fell against the archived bands, on the row's own scale.
+    """Where the outturn fell, on the row's own 90% band.
 
-    Decoration for the eye only (aria-hidden): every value it places is in the
-    row's cells, so the strip states no number of its own.
+    Each strip is normalised so its 90% band runs from 18% to 82% of the
+    width; that makes "where the outturn landed" comparable across variables
+    whose bands differ by an order of magnitude. Positions clamp to 3–97%.
+    The values are printed as HTML labels; the shapes are aria-hidden.
     """
-    values = [e["lo90"], e["hi90"], e["outturn"], e["forecast"]]
-    lo, hi = min(values), max(values)
-    pad = max(hi - lo, 0.1) * 0.08
-    lo, hi = lo - pad, hi + pad
+    lo, hi = e["lo90"], e["hi90"]
+    span_ = max(hi - lo, 1e-9)
 
-    def pos(v: float) -> str:
-        return f"{(v - lo) / (hi - lo) * 100:.1f}%"
+    def p(v: float) -> float:
+        return max(3.0, min(97.0, 18 + 64 * (v - lo) / span_))
 
-    def span(cls: str, a: float, b: float) -> str:
-        return (f'<span class="sb-{cls}" style="left:{pos(a)};'
-                f'width:calc({pos(b)} - {pos(a)})"></span>')
-
+    med, out = p(e["forecast"]), p(e["outturn"])
+    out_below = abs(med - out) < 16
+    # Edge labels sit under the 90% band ends (18% and 82%); drop one only
+    # when the outturn label is also below and would collide with it.
+    show_lo = not (out_below and abs(out - 18) < 12)
+    show_hi = not (out_below and abs(out - 82) < 12)
     return (
-        '<div class="sb-strip" aria-hidden="true">'
-        + span("b90", e["lo90"], e["hi90"])
-        + span("b68", e["lo68"], e["hi68"])
-        + f'<span class="sb-med" style="left:{pos(e["forecast"])}"></span>'
-        + f'<span class="sb-out" style="left:{pos(e["outturn"])}"></span>'
-        + "</div>"
+        '<div class="fc-strip">'
+        '<span class="fc-track" aria-hidden="true"></span>'
+        f'<span class="fc-b90" aria-hidden="true" style="left:{p(lo):.1f}%;width:{p(hi) - p(lo):.1f}%"></span>'
+        f'<span class="fc-b68" aria-hidden="true" style="left:{p(e["lo68"]):.1f}%;width:{p(e["hi68"]) - p(e["lo68"]):.1f}%"></span>'
+        f'<span class="fc-conn" aria-hidden="true" style="left:{min(med, out):.1f}%;width:{abs(med - out):.1f}%"></span>'
+        f'<span class="fc-med" aria-hidden="true" style="left:{med:.1f}%"></span>'
+        f'<span class="fc-out" aria-hidden="true" style="left:{out:.1f}%"></span>'
+        f'<span aria-hidden="true" class="fc-lab fc-lab-med" style="left:{med:.1f}%">{e["forecast"]:.2f}%</span>'
+        f'<span aria-hidden="true" class="fc-lab fc-lab-out{" is-below" if out_below else ""}" style="left:{out:.1f}%">{e["outturn"]:.2f}%</span>'
+        + (f'<span aria-hidden="true" class="fc-lab fc-lab-lo" style="left:18%">{lo:.2f}</span>' if show_lo else "")
+        + (f'<span aria-hidden="true" class="fc-lab fc-lab-hi" style="left:82%">{hi:.2f}</span>' if show_hi else "")
+        +         "</div>"
     )
 
 
@@ -947,59 +998,55 @@ def _target(e: dict) -> str:
 def render_results(card: dict) -> str:
     """The scoreboard: the home of every scored number (DESIGN.md §7.0).
 
-    Two tables in the forecast-evaluation layout: the record (one row per
-    scored forecast: median, band, outturn, signed error, where the outturn
-    fell) and the benchmark grid (the same outturn against the no-change
-    forecast and each published path, absolute errors side by side). Every
-    figure is read from scorecard.json; nothing is ranked or highlighted.
-    Absent entirely until something is scored.
+    The record is one row per scored forecast: target and round, a band strip
+    (90% and 68% bands as archived, median, outturn, all labelled), the
+    signed error and where the outturn fell. The benchmark grid (the same
+    outturn against the no-change forecast and each published path) sits in
+    an expander under it. Every figure is read from scorecard.json; nothing
+    is ranked or highlighted. Absent entirely until something is scored.
     """
     rows = scored_entries(card)
     if not rows:
         return "      <!-- nothing scored yet -->"
 
     body = [
-        '      <h3 class="sb-h" id="record">The record</h3>',
-        '      <div class="table-scroll">',
-        '        <table class="scoreboard" data-stack="yes">',
-        "          <caption>Every scored forecast. Forecast is the archived median; "
-        "errors are forecast minus outturn, in percentage points.</caption>",
-        "          <thead><tr>"
-        '<th scope="col">Target</th>'
-        '<th scope="col">Round</th>'
-        '<th scope="col" class="num">Forecast</th>'
-        '<th scope="col" class="num">Outturn</th>'
-        '<th scope="col" class="num">Error</th>'
-        '<th scope="col">Where the outturn fell</th>'
-        "</tr></thead>",
-        "          <tbody>",
+        f'      <h3 class="sb-h" id="record">{icon("layers", "fc-ic fc-th-ic")}The record</h3>',
+        '      <ul class="fc-legend" aria-hidden="true">'
+        '<li><span class="fc-sw fc-sw-90"></span>90% band</li>'
+        '<li><span class="fc-sw fc-sw-68"></span>68% band</li>'
+        '<li><span class="fc-sw fc-sw-med"></span>median</li>'
+        '<li><span class="fc-sw fc-sw-out"></span>outturn</li>'
+        f'<li class="fc-legend-note">{icon("info", "fc-ic fc-th-ic")}Each strip spans its own 90% band.</li></ul>',
+        '      <div class="fc-board ab-card" role="table" aria-label="Every scored forecast: archived median and bands, outturn, error">',
+        f'        <div class="fc-row fc-head" role="row"><span role="columnheader">{icon("target", "fc-ic fc-th-ic")}Target and round</span>'
+        f'<span role="columnheader">{icon("gdp", "fc-ic fc-th-ic")}Median, bands and outturn</span>'
+        f'<span role="columnheader">{icon("ruler", "fc-ic fc-th-ic")}Error</span><span role="columnheader">{icon("inside", "fc-ic fc-th-ic")}Where it fell</span></div>',
     ]
+    first_round = card["detail"][0]["round_id"] if card["detail"] else None
     for detail, e in rows:
+        retro = ('<a class="fc-retro-mark" href="#retro" title="Archived retroactively; see the archive" '
+                 '>Retroactive</a>'
+                 if detail["round_id"] == first_round else "")
         vfile = vintage_file(e.get("outturn_series") or "", e["outturn_vintage"] or "")
-        outturn = f"{e['outturn']:.2f}%"
-        if vfile:
-            outturn += (f'<br><a class="mono sb-sub" href="{vfile}">vintage '
-                        f'{esc(e["outturn_vintage"])}</a>')
+        vint = (f'<a class="fc-vint" href="{vfile}">vintage {esc(e["outturn_vintage"])}</a>'
+                if vfile else "")
+        band = _band_label(e)
+        inside = e["in_68"] or e["in_90"]
+        badge_cls = "fc-in" if e["in_68"] else ("fc-mid" if e["in_90"] else "fc-out-b")
         body.append(
-            "          <tr>"
-            f'<th scope="row">{_target(e)}</th>'
-            f'<td><a class="mono" href="/{esc(detail["path"])}">{esc(detail["round_id"])}</a>'
-            f'<br><span class="sb-sub">{model_html(detail)}</span></td>'
-            f'<td class="num">{e["forecast"]:.2f}%<br><span class="sb-sub">68%: '
-            f'{e["lo68"]:.2f}–{e["hi68"]:.2f}</span></td>'
-            f'<td class="num">{outturn}</td>'
-            f'<td class="num"><strong>{signed(e["error"])}</strong></td>'
-            f'<td>{_strip(e)}<span class="sb-band">{esc(_band_label(e))}</span></td>'
-            "</tr>"
+            '        <div class="fc-row" role="row">'
+            f'<div class="fc-tgt" role="rowheader"><span class="fc-var">{icon(e["variable"] if e["variable"] in _ICON_PATHS else "target")}</span>'
+            f'<span><strong>{_target(e)}</strong>'
+            f'<span class="fc-round-line"><a class="fc-round" href="#rounds">{esc(detail["round_id"])} · {esc(MODEL_DISPLAY.get(detail["model"], (detail.get("label", detail["model"]), None))[0].replace("BoE SVAR unemployment satellite", "unemployment satellite"))}</a>{retro}</span></span></div>'
+            f'<div role="cell"><span class="visually-hidden">Median {e["forecast"]:.2f}%, 68% band '
+            f'{e["lo68"]:.2f}–{e["hi68"]:.2f}, 90% band {e["lo90"]:.2f}–{e["hi90"]:.2f}, outturn {e["outturn"]:.2f}%.</span>'
+            f"{_strip(e)}</div>"
+            f'<div role="cell" class="fc-err"><span class="fc-err-chip">{signed(e["error"])}</span></div>'
+            f'<div role="cell" class="fc-where"><span class="fc-badge2 {badge_cls}">{icon("inside" if inside else "outside")}{esc(band[0].upper() + band[1:])}</span>{vint}</div>'
+            "</div>"
         )
-    body += ["          </tbody>", "        </table>", "      </div>"]
-    body.append(
-        '      <ul class="vc-legend sb-legend" aria-hidden="true">'
-        '<li><span class="vc-sw sw-band90"></span>90% band, as archived</li>'
-        '<li><span class="vc-sw sw-band68"></span>68% band</li>'
-        '<li><span class="vc-sw ln-s1"></span>forecast median</li>'
-        '<li><span class="vc-sw sw-dot-out"></span>outturn</li></ul>'
-    )
+    body.append("      </div>")
+    body.append('      <p class="fc-cap">Error is the archived median minus the outturn, in percentage points: positive means the forecast ran high.</p>')
 
     # Benchmark grid: one column per published path that scores anything,
     # in the order the scorecard lists them (earliest fixed first).
@@ -1009,25 +1056,39 @@ def render_results(card: dict) -> str:
             if b["label"] not in labels:
                 labels.append(b["label"])
     has_naive = any(e.get("naive_rw") is not None for _, e in rows)
-    head = ['<th scope="col">Target</th>', '<th scope="col" class="num">This round</th>']
+    errs = [e["abs_error"] for _, e in rows]
+    errs += [e["naive_abs_error"] for _, e in rows if e.get("naive_abs_error") is not None]
+    errs += [b["abs_error"] for _, e in rows for b in e.get("benchmarks", [])]
+    top = max(errs) or 1.0
+
+    def bar(v: float, ours: bool = False) -> str:
+        return (f'<span class="fc-mbar" aria-hidden="true"><i class="{"is-ours" if ours else ""}" '
+                f'style="width:{v / top * 100:.0f}%"></i></span>')
+
+    head = ['<th scope="col">Target</th>',
+            f'<th scope="col" class="num">{icon("target", "fc-ic fc-th-ic")}This round</th>']
     if has_naive:
-        head.append('<th scope="col" class="num">No change</th>')
-    head += [f'<th scope="col" class="num">{esc(lbl)}</th>' for lbl in labels]
+        head.append(f'<th scope="col" class="num">{icon("equal", "fc-ic fc-th-ic")}No change</th>')
+    head += [f'<th scope="col" class="num">{icon("file", "fc-ic fc-th-ic")}{esc(lbl)}</th>' for lbl in labels]
     body += [
-        '      <h3 class="sb-h" id="benchmarks">Against the benchmarks</h3>',
+        '      <details class="fc-more" id="benchmarks">',
+        f'        <summary>{icon("scale")}<span>Against the benchmarks <span class="fc-more-sub">absolute error on the same outturns</span></span>{icon("chev", "fc-ic fc-chev")}</summary>',
+        '        <div class="fc-more-body">',
         '      <div class="table-scroll">',
         '        <table class="scoreboard sb-grid" data-stack="yes">',
         "          <caption>Absolute error against the same outturn, in percentage "
-        "points; the benchmark's own value beneath it.</caption>",
+        "points; each benchmark's own value beneath. The BoE MPR (February), OBR EFO "
+        "(March) and SEF (April 2026) were fixed before these July rounds, on less data: "
+        "they show where views differed, not a test of skill.</caption>",
         "          <thead><tr>" + "".join(head) + "</tr></thead>",
         "          <tbody>",
     ]
     for _, e in rows:
         cells = [f'<th scope="row">{_target(e)}</th>',
-                 f'<td class="num"><strong>{e["abs_error"]:.2f}</strong></td>']
+                 f'<td class="num"><strong>{e["abs_error"]:.2f}</strong>{bar(e["abs_error"], True)}</td>']
         if has_naive:
             cells.append(
-                f'<td class="num">{e["naive_abs_error"]:.2f}<br>'
+                f'<td class="num">{e["naive_abs_error"]:.2f}{bar(e["naive_abs_error"])}'
                 f'<span class="sb-sub">{e["naive_rw"]:.2f}%</span></td>'
                 if e.get("naive_rw") is not None else '<td class="num">—</td>'
             )
@@ -1039,7 +1100,7 @@ def render_results(card: dict) -> str:
             for lbl in labels:
                 b = by_label.get(lbl)
                 cells.append(
-                    f'<td class="num">{b["abs_error"]:.2f}<br>'
+                    f'<td class="num">{b["abs_error"]:.2f}{bar(b["abs_error"])}'
                     f'<span class="sb-sub">{b["value"]:.2f}%</span></td>'
                     if b else '<td class="num">—</td>'
                 )
@@ -1050,22 +1111,11 @@ def render_results(card: dict) -> str:
     if has_naive:
         notes.append(
             "No change is the naive baseline: "
-            + esc(NAIVE_NOTE.split(": ", 1)[1]) + " This is the driftless walk; against a walk with "
-            "drift the CPI advantage largely evaporates (see the limits below)."
+            + esc(NAIVE_NOTE.split(": ", 1)[1]) + " This is the driftless walk; the "
+            '<a href="#limits">limits</a> say what happens against a walk with drift.'
         )
-    if labels:
-        notes.append(
-            "Published paths were fixed earlier, on less data: the BoE MPR in "
-            "February, the OBR EFO in March and the Bank's survey of external "
-            "forecasters (SEF) in April 2026, against July rounds. They show where views "
-            "differed, not who forecasts better."
-        )
-    if notes:
-        body.append(
-            '      <details class="about">\n        <summary>About the benchmarks</summary>\n'
-            + "".join(f"        <p>{n}</p>\n" for n in notes)
-            + "      </details>"
-        )
+    body += [f"        <p>{n}</p>" for n in notes]
+    body += ["        </div>", "      </details>"]
     return "\n".join(body)
 
 

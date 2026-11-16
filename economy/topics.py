@@ -64,9 +64,9 @@ ECONOMY_PAGE = ROOT / "economy" / "index.html"
 US_TOPICS_DIR = ROOT / "economy" / "us" / "topics"
 US_PAGE = ROOT / "economy" / "us" / "index.html"
 FORECASTS_PAGE = ROOT / "forecasts" / "index.html"
-# The UK routes table lives on /models/combine (ui-home gave it a home there
+# The UK routes table lives on /models#joins (ui-home gave it a home there
 # in #204); /forecasts keeps the callout and links to it, so it appears once.
-MODELS_COMBINE_PAGE = ROOT / "models" / "combine" / "index.html"
+MODELS_COMBINE_PAGE = ROOT / "models" / "index.html"
 US_FORECASTS_PAGE = ROOT / "forecasts" / "us" / "index.html"
 SITEMAP = ROOT / "sitemap.xml"
 SITE = "https://policyengine-macro.vercel.app"
@@ -615,18 +615,31 @@ def satellite_has_no_surface() -> bool:
 
 # --------------------------------------------------------------- page pieces
 
-def _card(heading: str, value: str, note: str, series: dict, period: str) -> str:
-    """A stat tile (DESIGN.md §4.2): this page is the home of the reading."""
-    return f"""      <div class="stat">
-        <span class="stat-label">{heading}</span>
+TILE_LABELS = {"Monthly gross value added index": "Monthly GVA index"}
+
+
+def _card(heading: str, value: str, note: str, series: dict, period: str,
+          change: str = "") -> str:
+    """A stat tile (DESIGN.md §4.2): value, label, change chip and period.
+
+    Vintage, units and the source code sit in a small info popover, so the
+    tile face carries the reading and nothing else.
+    """
+    heading = TILE_LABELS.get(heading, heading)
+    chip = ""
+    if change:
+        parts = change.split(" ")
+        head = " ".join(parts[:2]) if len(parts) > 1 and parts[1] == "y/y" else parts[0]
+        arrow = "\u25b2" if head.startswith("+") else ("\u25bc" if head.startswith("\u2212") else "")
+        chip = f'<span class="stat-chg" title="{esc(change)}">{arrow} {esc(head)}</span>'
+    return f"""      <div class="stat tp-stat">
+        <span class="stat-label"><span class="stat-ic" aria-hidden="true">{site_nav.icon("activity", 14)}</span>{heading}<details class="stat-meta"><summary aria-label="About this reading">{site_nav.icon("info", 14)}</summary><span class="stat-meta-pop">{esc(period)} · vintage {esc(series["vintage"])}<br>{note}<br><a href="{esc(series["url"])}">{esc(series["source"])} · {esc(series["cdid"])}</a></span></details></span>
         <span class="stat-value">{value}</span>
-        <span class="stat-sub">{esc(period)} &middot; vintage {esc(series["vintage"])}</span>
-        <span class="stat-note">{note}</span>
-        <span class="stat-foot"><a class="chip" href="{esc(series["url"])}">{esc(series["source"])} &middot; {esc(series["cdid"])}</a></span>
+        <span class="stat-sub">{esc(period)} &middot; {chip or "latest"}</span>
       </div>"""
 
 
-def stat_card(series: dict, kind: str | None = None) -> str:
+def stat_card(series: dict, kind: str | None = None, change: str = "") -> str:
     """One reading, as the snapshot stores it — or explicitly derived from it.
 
     The ONS publishes CPI and the unemployment rate as rates, so a UK card can
@@ -640,9 +653,10 @@ def stat_card(series: dict, kind: str | None = None) -> str:
         return _card(
             esc(label(series)),
             esc(display(series, now["value"])),
-            f'stored as {esc(stored(now["value"]))} &middot; {esc(series["units"])}',
+            esc(series["units"]),
             series,
             now["period"],
+            change,
         )
     now, before, unmatched = latest_year_on_year(series)
     change = 100 * (now["value"] / before["value"] - 1)
@@ -745,11 +759,26 @@ def movement(name: str) -> str:
     return f"{esc(label(series))} {change} against {against}"
 
 
+def _change_of(name: str) -> str:
+    """The signed change movement() computes, without the series label."""
+    if name not in MOVEMENT:
+        return ""
+    text = movement(name)
+    lab = esc(label(load(name))) + " "
+    rest = text[len(lab):] if text.startswith(lab) else ""
+    head, _, tail = rest.partition(" ")
+    if "year-on-year rate" in tail:
+        head += " y/y"
+    elif tail.startswith("thousand"):
+        head += "k"
+        tail = tail[len("thousand"):].lstrip()
+    return f"{head} {tail}".strip()
+
+
 def movement_note(names: tuple[str, ...]) -> str:
     joined = "; ".join(movement(name) for name in names)
     return (
-        '    <p class="economy-method">How those readings have moved, derived '
-        f"from the same stored observations rather than typed in: {joined}.</p>"
+        f'    <p class="economy-method">Change: {joined}.</p>'
     )
 
 
@@ -762,11 +791,16 @@ def stands(cards: tuple[tuple[str, str | None], ...], note: str,
     distinct series the topic reads, which is what the movement note and the
     provenance table are keyed on.
     """
-    rendered = "\n".join(stat_card(load(name), kind) for name, kind in cards)
+    rendered = "\n".join(stat_card(load(name), kind, _change_of(name)) for name, kind in cards)
+    measured = (
+        '    <details class="about tg-info"><summary>How these are measured</summary>'
+        f'<p class="economy-method">{note}</p></details>'
+        if note else ""
+    )
     return f"""    <div class="stat-row">
 {rendered}
     </div>
-    <p class="economy-method">{note}</p>
+{measured}
 {movement_note(names)}"""
 
 
@@ -798,7 +832,7 @@ def data_layer(names: tuple[str, ...], closing: str) -> str:
     return f"""    <div class="prose">
       <div class="table-scroll">
         <table>
-          <caption>Every value on this page is read from the vintage file linked here, not from a live call.</caption>
+          <caption>Each value is read from the vintage file linked here.</caption>
           <thead><tr><th scope="col">Series</th><th scope="col">Publisher</th><th scope="col">Coverage</th><th scope="col">Snapshots</th><th scope="col">This vintage</th><th scope="col">Next release</th></tr></thead>
           <tbody>
 {data_rows(names)}
@@ -806,7 +840,7 @@ def data_layer(names: tuple[str, ...], closing: str) -> str:
         </table>
       </div>
       <p class="chooser-note">{closing}</p>
-      <p class="chooser-note">The snapshot files are append-only and never edited, so a number published here can be reproduced against the data as it stood — <a href="/economy#data">browse the store, its release calendar, and the as-of recipe →</a></p>
+      <p class="chooser-note">Snapshots are append-only, so every number here is reproducible. <a href="/economy#data">Data store →</a></p>
     </div>"""
 
 
@@ -846,9 +880,29 @@ def cannot(model_id: str) -> str:
     return listed([esc(item) for item in MODELS[model_id]["cannot_answer"]])
 
 
+TERM_LABELS = {"uk": "UK", "us": "US", "gdp": "GDP", "cpi": "CPI"}
+
+SHORT_NAMES = {
+    "pe-microsim": "PolicyEngine microsimulation", "obr-macro": "OBR emulator",
+    "boe-svar": "BoE SVAR", "frb-us": "FRB/US", "us-hank": "US HANK",
+    "og-uk": "OG-UK", "psl-og": "OG-UK", "define-uk": "DEFINE-UK",
+}
+
+
+def term_label(item: str) -> str:
+    """A registry value as readers see it: no underscores, no raw codes."""
+    return TERM_LABELS.get(item.lower(), item.replace("_", " "))
+
+
+def level_label(item: str) -> str:
+    """A validation level as a heading word: not_assessed -> Not assessed."""
+    text = term_label(item)
+    return text[:1].upper() + text[1:]
+
+
 def registry_terms(items: list[str]) -> str:
-    """Registry field values are machine identifiers; show them as such."""
-    return ", ".join(f'<span class="mono">{esc(item)}</span>' for item in items)
+    """Registry field values, rendered as plain words through one label map."""
+    return ", ".join(esc(term_label(item)) for item in items)
 
 
 BAND_ICONS = {"stands": "chart", "model": "layers", "run": "code", "data": "database"}
@@ -930,17 +984,15 @@ def growth_model() -> str:
             "</tr>"
         )
     return f"""    <div class="prose">
-      <p>
-        One model in the suite forecasts UK output: <a href="/svar">BoE SVAR</a>,
-        the {esc(model["display_name"])}. The round generated
-        {esc(forecast["generated"])} conditions on data through
-        {esc(forecast["data_edge"])}; its path, from {esc(facts["period"])}, is
-        in the chart below, after the last two years of ONS outturns.
-      </p>
+      <p class="model-chips"><a class="mchip" href="/svar">{site_nav.icon("activity", 14)}BoE SVAR</a><span class="mchip-t">forecasts UK GDP · round {esc(forecast["generated"])} · data to {esc(forecast["data_edge"])}</span></p>
       <figure class="vchart-figure">
 {path_chart("topic-gdp-path", "gdp", "UK real GDP", "% change on a year earlier", open_rows[:5], forecast["generated"], history=yoy(facts["gdp"], 4)[-8:], vintage=facts["gdp"]["vintage"], history_note="ABMI, growth derived from the stored level,")}
       </figure>
-      <details class="about">
+      <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Predictive validation: {esc(level_label(quality["level"]))}.</strong>
+        {esc(verdict_line(quality["evidence"]))}
+        <a href="/svar/validation">Validation →</a>
+      </p>
+      <details class="about tg-limits">
         <summary>Its limits</summary>
 {limits_list([
         f"Status: {esc(model['status'])}.",
@@ -949,7 +1001,7 @@ def growth_model() -> str:
         f"Estimated on {esc(model['estimation_sample'])} but conditioned on {esc(model['data_edge'])} data, so the estimation sample stops well short of the quarters being forecast.",
     ])}
       </details>
-      <details class="about">
+      <details class="about tg-table">
         <summary>Quarter by quarter</summary>
       <div class="table-scroll">
         <table>
@@ -961,16 +1013,7 @@ def growth_model() -> str:
         </table>
       </div>
       </details>
-      <p class="callout">
-        <strong>Predictive validation: {esc(quality["level"])}.</strong>
-        {esc(verdict_line(quality["evidence"]))}
-        <a href="/svar/validation">Read the validation page →</a>
-      </p>
-      <p class="chooser-note">
-        Every round is archived before the outturn exists, and scored against
-        the outturn as published, with the snapshot it was read from recorded
-        — <a href="/forecasts#scored">see the scoreboard →</a>
-      </p>
+      <p class="link-row">{site_nav.icon("check-circle", 16)}<a href="/forecasts#scored">Every round is archived before its outturn and scored: see the scoreboard</a></p>
     </div>"""
 
 
@@ -1052,17 +1095,16 @@ def inflation_model() -> str:
         else "Its median stays below 3% across the archived horizon."
     )
     return f"""    <div class="prose">
-      <p>
-        <a href="/svar">BoE SVAR</a> — the {esc(model["display_name"])} — forecasts
-        headline CPI. The chart joins the last two years of ONS outturns to
-        the round generated {esc(facts["forecast"]["generated"])}, from
-        {esc(facts["period"])}, the first quarter without a published outturn.
-        {reaches}
-      </p>
+      <p class="model-chips"><a class="mchip" href="/svar">{site_nav.icon("activity", 14)}BoE SVAR</a><span class="mchip-t">forecasts UK CPI · round {esc(facts["forecast"]["generated"])} · path from {esc(facts["period"])}</span></p>
+      <p class="model-note">{reaches}</p>
       <figure class="vchart-figure">
 {path_chart("topic-cpi-path", "cpi", "UK CPI", "% change on a year earlier", open_rows[:5], facts["forecast"]["generated"], history=facts["cpi"]["observations"][-8:], vintage=facts["cpi"]["vintage"], history_note="D7G7,")}
       </figure>
-      <details class="about">
+      <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Predictive validation: {esc(level_label(quality["level"]))}.</strong>
+        {esc(verdict_line(quality["evidence"]))}
+        <a href="/svar/validation">Validation →</a>
+      </p>
+      <details class="about tg-limits">
         <summary>Its limits</summary>
 {limits_list([
         f"Status: {esc(model['status'])}.",
@@ -1071,7 +1113,7 @@ def inflation_model() -> str:
         f"Uncertainty is {esc(model['uncertainty'])}; the sample ends {esc(model['estimation_sample'].split('-')[-1])} while the conditioning data run to {esc(model['data_edge'])}.",
     ])}
       </details>
-      <details class="about">
+      <details class="about tg-table">
         <summary>Quarter by quarter</summary>
       <div class="table-scroll">
         <table>
@@ -1083,11 +1125,6 @@ def inflation_model() -> str:
         </table>
       </div>
       </details>
-      <p class="callout">
-        <strong>Predictive validation: {esc(quality["level"])}.</strong>
-        {esc(verdict_line(quality["evidence"]))}
-        <a href="/svar/validation">Read the validation page →</a>
-      </p>
     </div>"""
 
 
@@ -1165,7 +1202,7 @@ def jobs_table(facts: dict) -> str:
             f"<td>{v['lo90']:.2f}%–{v['hi90']:.2f}%</td>"
             "</tr>"
         )
-    return f"""      <details class="about">
+    return f"""      <details class="about tg-table">
         <summary>Quarter by quarter</summary>
       <div class="table-scroll">
         <table>
@@ -1206,6 +1243,8 @@ def jobs_model() -> str:
         else "The satellite is exposed in the run surface below."
     )
     return f"""    <div class="prose">
+      <p class="model-chips"><a class="mchip" href="/svar">{site_nav.icon("activity", 14)}BoE SVAR satellite</a><span class="mchip-t">maps the GDP forecast onto UK unemployment</span></p>
+      <details class="about tg-layers"><summary>How the satellite works</summary>
       <p>
         The labour market is covered by a satellite, not a model of its own: the
         BoE SVAR unemployment satellite maps the <a href="/svar">BoE SVAR</a> GDP
@@ -1216,6 +1255,7 @@ def jobs_model() -> str:
         {esc(facts["period"])} at {facts["values"]["median"]:.1f}%, 68%
         {band_text(facts["values"])}.
       </p>
+      </details>
       <figure class="vchart-figure">
 {jobs_chart(facts)}
       </figure>
@@ -1281,28 +1321,18 @@ def rates_model() -> str:
     og = MODELS["og-uk"]
     frbus = MODELS["frb-us"]
     return f"""    <div class="prose">
-      <p>
-        <strong>No model in this suite forecasts Bank Rate or gilt yields.</strong>
-        This page does not present that gap as coverage. What the registry
-        says:
-      </p>
+      <p class="model-chips"><span class="mchip mchip-none">{site_nav.icon("x-circle", 14)}No forecast</span><span class="mchip-t">No model in this suite forecasts Bank Rate or gilt yields.</span></p>
+      <details class="about tg-layers"><summary>What each model covers instead</summary>
 {limits_list([
         f"<a href=\"/svar\">BoE SVAR</a> outputs {registry_terms(svar['outputs'])} — no interest-rate path is among them.",
-        f"<a href=\"/pe\">pe-microsim</a> lists {esc(microsim['cannot_answer'][2])} in its own cannot-answer field.",
+        f"<a href=\"/pe\">PolicyEngine microsimulation</a> lists {esc(microsim['cannot_answer'][2])} in its own cannot-answer field.",
         f"<a href=\"/olg\">{site_name('og-uk')}</a> does report an interest rate, but only as part of a {esc(og['horizon'].split(';')[0])}, and it cannot answer a {esc(og['cannot_answer'][0])}. A long-run comparative static is not a market view.",
-        f"<a href=\"/frb-us\">frb-us</a> produces a {esc(frbus['outputs'][-1])}, for the {esc(', '.join(frbus['geography']).upper())} only.",
+        f"<a href=\"/frb-us\">FRB/US</a> produces a {esc(frbus['outputs'][-1])}, for the {esc(', '.join(frbus['geography']).upper())} only.",
     ])}
-      <p>
-        So the numbers above stand alone: observed Bank of England data, dated
-        and archived, with no forecast beside them. They still do work here —
-        they are the market backdrop the other topics are read against, and the
-        conditioning environment any future rate model would have to beat.
-      </p>
+      </details>
       <p class="callout">
-        This is the one topic where the useful output is a refusal. If you need
-        a rate forecast, the suite does not have one; the
-        <a href="/models">model directory</a> shows what it does have, and
-        <a href="/models#validation">the evidence page</a> shows how well.
+        The numbers above stand alone: observed data with no forecast beside them.
+        <a href="/models">See what the models do cover →</a>
       </p>
     </div>"""
 
@@ -1371,35 +1401,17 @@ def public_finances_model() -> str:
     predictive = model["quality"]["predictive_validation"]
     counterfactual = model["quality"]["policy_counterfactual_validity"]
     return f"""    <div class="prose">
-      <p>
-        The <a href="/obr">OBR emulator</a> — the {esc(model["display_name"])} —
-        is the model closest to this topic, and the first thing to say about it
-        is what it is not. Its question types in the registry are
-        {registry_terms(model["question_types"])}: <strong>forecast is not among
-        them</strong>. It answers "what would this shock do to the
-        {esc(model["data_vintage"])}", never "what will borrowing be".
-      </p>
-{limits_list([
-        f"Outputs: {registry_terms(model['outputs'])}. Neither number above is one of them.",
-        f"It cannot answer {(cannot('obr-macro'))}. The second of those is decisive here: the emulator cannot report borrowing at all.",
-        f"Status: {esc(model['status'])}. Uncertainty: {esc(model['uncertainty'])}.",
-        f"Baseline: {esc(model['data_vintage'])}, so every scenario is a deviation from that vintage, not from today's outturn.",
+{icon_items([
+        ("landmark", '<strong><a href="/obr">OBR emulator</a>: shock questions, not forecasts.</strong>'),
+        ("list", f"Outputs: {registry_terms(model['outputs'])}; not borrowing or debt."),
+        ("x-circle", "No reform incidence or borrowing."),
+        ("clock", f"Baseline: {esc(model['data_vintage'])}; scenarios are deviations from it."),
     ])}
-      <p class="callout">
-        <strong>Predictive validation: {esc(predictive["level"])}.</strong>
-        {esc(verdict_line(predictive["evidence"]))}
-        <strong>Policy counterfactuals: {esc(counterfactual["level"])}.</strong>
-        {esc(verdict_line(counterfactual["evidence"]))}
-        <a href="/obr/validation">Read the validation page →</a>
+      <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Predictive validation: {esc(level_label(predictive["level"]))}.</strong>
+        <strong>Policy counterfactuals: {esc(level_label(counterfactual["level"]))}.</strong>
+        <a href="/obr/validation">Validation →</a>
       </p>
-      <p>
-        So the borrowing and debt figures above are outturns with no model path
-        beside them. What the emulator adds is the counterfactual: run a
-        spending or corporation-tax change through it and read the GDP,
-        consumption and investment response — then take the fiscal arithmetic
-        from <a href="/economy/topics/reform">tax and benefit reform</a>, which
-        is where the costing actually lives.
-      </p>
+      <p class="link-row">{site_nav.icon("scale", 16)}<a href="/economy/topics/reform">Costing lives on tax and benefit reform</a></p>
     </div>"""
 
 
@@ -1440,7 +1452,7 @@ def reform_capability_card(title: str, value: str, note: str, facts: list[tuple[
         for name, text in facts
     )
     return f"""        <article class="economy-stat">
-          <p class="economy-stat-label mono">{esc(title.upper())}</p>
+          <p class="economy-stat-label">{esc(SHORT_NAMES.get(title.split(" ")[0], title))}{esc(" bridge" if title.endswith(" bridge") else "")}</p>
           <p class="economy-stat-value">{esc(value)}</p>
           <p class="economy-stat-change">{esc(note)}</p>
           <dl>
@@ -1476,13 +1488,10 @@ def reform_stands() -> str:
     return f"""    <div class="economy-grid">
 {cards}
     </div>
-    <p class="economy-method">
-      This is the one topic with no official series behind it, so there is no
-      vintage to date: what stands is a capability, and the cards above are read
-      straight out of the committed capability registry rather than written by
-      hand. A reform is one <span class="mono">{{parameter_path: value}}</span>
-      dictionary, and the same dictionary is accepted by every route below.
-    </p>"""
+{icon_items([
+        ("info", "Capabilities, not data: no official series here."),
+        ("code", "One reform dictionary works on every route below."),
+    ])}"""
 
 
 def reform_model() -> str:
@@ -1491,7 +1500,7 @@ def reform_model() -> str:
     dynamic = MODELS["og+microsim"]
     return f"""    <div class="prose">
       <p>
-        <a href="/pe">pe-microsim</a> is the scorer: it applies the reform to
+        <a href="/pe">PolicyEngine microsimulation</a> is the scorer: it applies the reform to
         household microdata and reports {registry_terms(microsim["outputs"])}.
         Its registry status: {esc(microsim["status"])}. The limit is structural, and it is the
         reason this topic needs a bridge at all:
@@ -1557,10 +1566,7 @@ def reform_data() -> str:
         the macro side of any score is judged against, and the dated snapshots
         that make a past score reproducible.
       </p>
-      <p class="chooser-note">
-        Dated, immutable JSON snapshots of every series this site reads —
-        <a href="/economy#data">browse the store, its release calendar, and the as-of recipe →</a>
-      </p>
+      <p class="link-row">{site_nav.icon("database", 16)}<a href="/economy#data">Data store: every dated snapshot</a></p>
     </div>"""
 
 
@@ -1587,7 +1593,7 @@ MODEL_PAGES = {
 
 
 def model_link(model_id: str) -> str:
-    return f'<a href="{MODEL_PAGES[model_id]}">{esc(site_name(model_id))}</a>'
+    return f'<a href="{MODEL_PAGES[model_id]}">{esc(SHORT_NAMES.get(model_id, site_name(model_id)))}</a>'
 
 
 def only_household_member() -> str:
@@ -1671,19 +1677,11 @@ US_HOUSEHOLD = '{"state_code":"CA","county_fips":"06037"}'
 
 def uk_platform() -> str:
     """The /forecasts band: what the record is not, and where the routes live."""
-    return f"""    <div class="prose">
-      <p class="callout">
-        <strong>pe-microsim does not forecast, and this section does not
-        pretend it does.</strong> The forecast rows are
-        {model_link("boe-svar")}; the scoreboard above is what those rounds
-        have been worth so far. <a href="/models/combine#score">See how a score is put together →</a>
-      </p>
-      <p><a href="/models/combine#routes">The six routes and their commands →</a></p>
-    </div>"""
+    return f"""      <span><strong>Every row here is {model_link("boe-svar")};</strong> the microsimulation does not forecast. <a href="/models#score">How a score is built</a></span>"""
 
 
 def uk_routes() -> str:
-    """/models/combine#routes: the six things the platform can produce for the UK."""
+    """/models#routes: the six things the platform can produce for the UK."""
     microsim = MODELS["pe-microsim"]
     svar = MODELS["boe-svar"]
     rows = [
@@ -1818,10 +1816,11 @@ def us_platform() -> str:
         ),
     ]
     return f"""    <div class="prose">
-      <p>
-        Four routes, each built on {model_link("pe-microsim")}; the household
-        rows are the UK commands with <span class="mono">--country us</span>.
-      </p>
+{limits_list([
+        "<strong>No reform with macro feedback.</strong> "
+        f'{model_link("frb-us")} and {model_link("us-hank")} do not take PolicyEngine '
+        "reforms; no mapping exists from a US statutory reform to a US macro model.",
+    ])}
       <details class="about route-details">
         <summary>The routes, with the command for each</summary>
       <div class="table-scroll">
@@ -1844,21 +1843,6 @@ def us_platform() -> str:
           {registry_terms(microsim["outputs"])} over a {esc(microsim["horizon"])}.
         </p>
       </details>
-      <p>
-        Two UK rows are missing here; both absences are the registry's, not an oversight:
-      </p>
-{limits_list([
-        "<strong>No reform with a macro second round.</strong> Both US "
-        f'members — {model_link("frb-us")} and {model_link("us-hank")} — record '
-        f'{registry_terms([registry_cannot("frb-us", "policyengine")])} in '
-        "their own cannot-answer field, and us-hank adds "
-        f'{registry_terms([registry_cannot("us-hank", "detailed tax")])}. No '
-        "mapping exists from a US statutory reform to a US macro model, and "
-        "none is invented here.",
-        f"<strong>No forecast.</strong> {no_us_forecaster()} A section called "
-        "Forecasts showing a US path anyway would claim a forecast no model "
-        "here makes.",
-    ])}
       <details class="about">
         <summary>The bridge that does exist, and the MCP routes</summary>
         <p>
@@ -1873,7 +1857,6 @@ def us_platform() -> str:
           {tool("population_reform_impact")}, {tool("frbus_shock_incidence")} and
           {tool("hank_shock_incidence")}; {tool("recommend_model")} refuses a US
           reform needing macro feedback, which is the correct answer.
-          <a href="/connect">Connect a client →</a>
         </p>
       </details>
     </div>"""
@@ -1941,7 +1924,7 @@ def no_us_forecaster() -> str:
     return (
         "No model in this suite forecasts the US economy. The only member "
         'whose question types include <span class="mono">forecast</span> is '
-        f'<a href="/svar">{listed(forecasters("uk"))}</a>, and its geography '
+        f'<a href="/svar">{listed([SHORT_NAMES.get(m, m) for m in forecasters("uk")])}</a>, and its geography '
         "is UK-only."
     )
 
@@ -1957,17 +1940,8 @@ def us_hub_forecast_note() -> str:
     """
     frbus = MODELS["frb-us"]["quality"]["predictive_validation"]
     hank = MODELS["us-hank"]["quality"]["predictive_validation"]
-    return f"""      <p>
-        <strong>{no_us_forecaster()}</strong> Both US members are shock models
-        and the registry says so in their own words:
-        <a href="/frb-us">frb-us</a> records predictive validation
-        {registry_terms([frbus["level"]])} —
-        &ldquo;{esc(frbus["evidence"])}&rdquo; — and
-        <a href="/us-hank">us-hank</a> records
-        {registry_terms([hank["level"]])}. Where a model view exists at all it
-        is on the topic page that reads the series, in the same breath as the
-        limits that qualify it.
-      </p>"""
+    no_us_forecaster()  # raises if a US forecaster enters the registry
+    return f"""      <p class="fc-note-row">{site_nav.icon("x-circle", 16)}<span><strong>No US forecast:</strong> only <a href="/svar">BoE SVAR</a> forecasts, and it is UK-only. <a href="/frb-us">FRB/US</a> predictive validation is {registry_terms([frbus["level"]])}; <a href="/us-hank">US HANK</a>, {registry_terms([hank["level"]])}.</span></p>"""
 
 
 def us_model_limits(extra: list[str] | None = None) -> str:
@@ -1976,15 +1950,13 @@ def us_model_limits(extra: list[str] | None = None) -> str:
     frbus_quality = frbus["quality"]["predictive_validation"]
     hank_quality = hank["quality"]["predictive_validation"]
     return limits_list([
-        f'<a href="/frb-us">frb-us</a> answers '
-        f'{registry_terms(frbus["question_types"])} and nothing else. Its '
-        f'predictive validation is {registry_terms([frbus_quality["level"]])} '
-        f'— &ldquo;{esc(frbus_quality["evidence"])}&rdquo;',
-        f'<a href="/us-hank">us-hank</a> answers '
-        f'{registry_terms(hank["question_types"])}, and the first thing it '
-        f'cannot answer is {esc(hank["cannot_answer"][0])}. Its predictive '
-        f'validation is {registry_terms([hank_quality["level"]])} — '
-        f'&ldquo;{esc(hank_quality["evidence"])}&rdquo;',
+        f'<a href="/frb-us">FRB/US</a> answers '
+        f'{registry_terms(frbus["question_types"])} only; predictive validation '
+        f'{registry_terms([frbus_quality["level"]])} (its baseline is illustrative, not a Fed forecast).',
+        f'<a href="/us-hank">US HANK</a> answers '
+        f'{registry_terms(hank["question_types"])}; it cannot answer '
+        f'{esc(hank["cannot_answer"][0])}. Predictive validation '
+        f'{registry_terms([hank_quality["level"]])}: it makes no predictive claims.',
     ] + (extra or []))
 
 
@@ -2019,7 +1991,7 @@ def longbase_layer(column: str, last_observed: str) -> str:
         )
     return f"""      <div class="table-scroll">
         <table>
-          <caption>FRB/US April 2026 LONGBASE, {esc(description)}. This is the conditioning baseline that frb-us shock experiments deviate from; it is not scored on <a href="/forecasts">the forecast record</a>.</caption>
+          <caption>FRB/US April 2026 LONGBASE, {esc(description)}. This is the conditioning baseline that FRB/US shock experiments deviate from; it is not scored on <a href="/forecasts">the forecast record</a>.</caption>
           <thead><tr><th scope="col">Quarter</th><th scope="col">Baseline</th><th scope="col">Status against the outturn</th><th scope="col">Uncertainty</th></tr></thead>
           <tbody>
 {chr(10).join(rows)}
@@ -2030,9 +2002,9 @@ def longbase_layer(column: str, last_observed: str) -> str:
 
 LONGBASE_LABEL = "FRB/US LONGBASE baseline (Fed staff, April 2026 vintage)"
 LONGBASE_SOURCE = (
-    'FRB/US LONGBASE, <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/'
-    'papers/frb-us/figures/longbase_baseline_yoy.csv">longbase_baseline_yoy.csv</a>, '
-    "extracted 2026-07-29 from LONGBASE.TXT; no bands, because none are published"
+    '<a href="https://github.com/PolicyEngine/macro/blob/main/'
+    'papers/frb-us/figures/longbase_baseline_yoy.csv">FRB/US LONGBASE</a> '
+    "(extracted 2026-07-29); no bands"
 )
 
 
@@ -2196,13 +2168,13 @@ def us_baseline_chart(chart_id: str, name: str, unit: str, column: str,
     return us_path_chart(
         chart_id, name, unit,
         [("vc-out-line", f"Outturn, FRED snapshot {esc(series['vintage'])}", outturns)],
-        baseline=baseline, zero=column != "unemployment_pct", source=source,
+        baseline=baseline, zero=False, source=source,
         notes=gap_note(outturns) + ["Baseline quarters are drawn at their middle month."]
         if "Q" not in outturns[0]["period"] else gap_note(outturns))
 
 
 def longbase_expander(column: str, last_observed: str) -> str:
-    return f"""      <details class="about">
+    return f"""      <details class="about tg-table">
         <summary>Quarter by quarter</summary>
 {longbase_layer(column, last_observed)}
       </details>"""
@@ -2221,9 +2193,7 @@ def us_run_note() -> str:
 
 
 US_DATA_CLOSING = (
-    "FRED supplies no announced next-release date through this site's "
-    "fetcher, so the column says so rather than guessing a schedule from the "
-    "publisher's calendar."
+    "FRED gives no next-release date."
 )
 
 
@@ -2264,40 +2234,38 @@ def us_growth_note() -> str:
     )
 
 
+def icon_items(items: list[tuple[str, str]]) -> str:
+    """One-line facts, each with an icon: the topic pages' model view."""
+    rows = "\n".join(
+        f'        <li><span class="ii-ic" aria-hidden="true">{site_nav.icon(icon, 16)}</span><span>{text}</span></li>'
+        for icon, text in items
+    )
+    return f'      <ul class="icon-items">\n{rows}\n      </ul>'
+
+
+def us_model_items(extra: list[tuple[str, str]] | None = None) -> str:
+    """The shared US lines: no forecaster, and what each US model is."""
+    no_us_forecaster()  # raises if a US forecaster enters the registry
+    frbus = MODELS["frb-us"]["quality"]["predictive_validation"]["level"]
+    hank = MODELS["us-hank"]["quality"]["predictive_validation"]["level"]
+    return icon_items([
+        ("x-circle", "<strong>No US forecaster in the suite.</strong>"),
+        ("building", f'<a href="/frb-us">FRB/US</a>: shock responses under a declared policy rule · {esc(level_label(frbus))}'),
+        ("users", f'<a href="/us-hank">US HANK</a>: shock responses around a steady state · {esc(level_label(hank))}'),
+    ] + (extra or []))
+
+
 def us_growth_model() -> str:
     facts = us_growth_facts()
     frbus = MODELS["frb-us"]
     return f"""    <div class="prose">
-      <p>
-        <strong>{no_us_forecaster()}</strong> What the two US models do
-        instead is trace deviations from a fixed baseline, and the registry is
-        specific about how far that goes:
-      </p>
-{us_model_limits([
-        f'frb-us outputs {registry_terms(frbus["outputs"])} — as responses to a '
-        f'reviewed shock under a declared policy rule, over a {esc(frbus["horizon"])} '
-        'horizon.',
-    ])}
-      <p>
-        The baseline those deviations are measured from is the Federal Reserve staff-style
-        conditioning path packaged with the model, extracted from
-        <span class="mono">LONGBASE.TXT</span>, and it carries no bands because
-        none exist:
-      </p>
+{us_model_items([("forecasts", "Baseline: FRB/US LONGBASE (Fed staff, April 2026), with no bands.")])}
       <figure class="vchart-figure">
 {us_baseline_chart("us-topic-gdp-path", "US real GDP", "% change on a year earlier", "gdp_yoy_pct", facts["gdp"], yoy(facts["gdp"], 4)[-8:], ", growth derived from the stored level")}
       </figure>
 {longbase_expander("gdp_yoy_pct", facts["now"]["period"])}
-      <p class="callout">
-        <strong>Predictive validation: {registry_terms([frbus["quality"]["predictive_validation"]["level"]])}.</strong>
-        {esc(frbus["quality"]["predictive_validation"]["evidence"])}
-        <a href="/frb-us/validation">Read the validation page →</a>
-      </p>
-      <p class="chooser-note">
-        The UK growth topic carries a model forecast with 68% and 90% ranges
-        because boe-svar produces one and it is scored before the outturn
-        exists. This page has no such layer —
-        <a href="/economy/topics/growth">see the UK page for the contrast →</a>
+      <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Not a forecast.</strong>
+        LONGBASE is an illustrative Fed baseline. <a href="/frb-us/validation">Validation →</a>
       </p>
     </div>"""
 
@@ -2373,11 +2341,15 @@ def us_inflation_note() -> str:
 def us_inflation_model() -> str:
     facts = us_inflation_facts()
     hank = MODELS["us-hank"]
+    no_us_forecaster()  # raises if a US forecaster enters the registry
     return f"""    <div class="prose">
-      <p>
-        <strong>{no_us_forecaster()}</strong> Both US models report a price
-        response, and neither reports a price <em>path</em>:
-      </p>
+      <p class="model-chips"><span class="mchip mchip-none">{site_nav.icon("x-circle", 14)}No forecast</span><a class="mchip" href="/frb-us">{site_nav.icon("building", 14)}FRB/US baseline</a><span class="mchip-t">the CPI path FRB/US shocks deviate from; not a forecast</span></p>
+      <figure class="vchart-figure">
+{us_baseline_chart("us-topic-cpi-path", "US CPI inflation", "% change on a year earlier", "cpi_yoy_pct", facts["cpi"], yoy(facts["cpi"], 12)[-24:], ", inflation derived from the stored index")}
+      </figure>
+{longbase_expander("cpi_yoy_pct", facts["now"]["period"])}
+      <details class="about tg-layers"><summary>Why there is no US price path</summary>
+      <p>Only <a href="/svar">BoE SVAR</a> forecasts, and it is UK-only. Both US models report a price response, and neither reports a price <em>path</em>:</p>
 {us_model_limits([
         f'us-hank outputs {registry_terms(hank["outputs"])} as '
         f'{esc(hank["horizon"])} around a calibrated steady state, with '
@@ -2385,24 +2357,10 @@ def us_inflation_model() -> str:
         "Neither model is scored against an inflation outturn anywhere on this "
         "site, because neither produces one to score.",
     ])}
-      <p>
-        The conditioning baseline the frb-us experiments deviate from does
-        carry a CPI path, and it is shown for the same reason as on the growth
-        page, with the same caveat:
-      </p>
-      <figure class="vchart-figure">
-{us_baseline_chart("us-topic-cpi-path", "US CPI inflation", "% change on a year earlier", "cpi_yoy_pct", facts["cpi"], yoy(facts["cpi"], 12)[-24:], ", inflation derived from the stored index")}
-      </figure>
-{longbase_expander("cpi_yoy_pct", facts["now"]["period"])}
-      <p class="callout">
-        <strong>No core CPI.</strong> The UK inflation topic carries core CPI
-        beside the headline because the ONS series DKO8 is in the store. There
-        is no US core series in the store at all: adding one means adding
-        CPILFESL to the FRED table in
-        <span class="mono">data/fetch.py</span> and letting the append-only
-        fetcher accumulate vintages for it. Until that happens this page shows
-        headline only, and says so rather than leaving the gap to be noticed.
-      </p>
+      </details>
+      <details class="about tg-info"><summary>No core CPI</summary>
+      <p>There is no US core series in the store, so this page shows headline CPI only. Adding one means adding CPILFESL to the FRED table in <span class="mono">data/fetch.py</span> and letting vintages accumulate.</p>
+      </details>
     </div>"""
 
 
@@ -2449,45 +2407,17 @@ def registry_output(model_id: str, needle: str) -> str:
 
 def us_jobs_model() -> str:
     unemployment = load("us_unemployment_rate")
-    frbus = MODELS["frb-us"]
-    hank = MODELS["us-hank"]
     return f"""    <div class="prose">
-      <p>
-        <strong>{no_us_forecaster()}</strong> The labor market is also where
-        the two US models differ most from each other, and the difference is
-        worth stating plainly:
-      </p>
-{us_model_limits([
-        f'frb-us does list {registry_terms([registry_output("frb-us", "unemploy")])} among its '
-        "outputs — but as a deviation from the conditioning baseline under a "
-        "declared policy rule, not a level anyone should read as a projection.",
-        f'us-hank outputs {registry_terms(hank["outputs"])}. There is no labor '
-        "market variable in that list at all: it reports no unemployment rate "
-        "and no employment level, so on this topic it has nothing to say.",
-        "Neither model reports payroll employment, so the second series above "
-        "has no model view of any kind beside it.",
+{us_model_items([
+        ("list", "FRB/US gives unemployment only as a deviation from its baseline."),
+        ("x-circle", "US HANK has no labor-market output; neither model covers payrolls."),
+        ("forecasts", "Baseline: the LONGBASE unemployment path, with no bands."),
     ])}
-      <p>
-        The unemployment path in the conditioning baseline is the one model
-        artifact covering this topic, and it is a baseline rather than a view:
-      </p>
       <figure class="vchart-figure">
 {us_baseline_chart("us-topic-unemployment-path", "US unemployment rate", "%", "unemployment_pct", unemployment, unemployment["observations"][-24:])}
       </figure>
 {longbase_expander("unemployment_pct", latest(unemployment)["period"])}
-      <p class="chooser-note">
-        The UK jobs topic has a satellite that maps the boe-svar GDP forecast
-        onto the unemployment rate through a fitted Okun relation, and archives
-        every round before the outturn exists. Nothing equivalent exists for
-        the US, because the forecast it would map does not exist —
-        <a href="/economy/topics/jobs">see the UK page →</a>
-      </p>
-      <p class="chooser-note">
-        The UK page also carries vacancies and average weekly earnings as
-        outturns. Neither has a US counterpart in this store: no JOLTS openings
-        series and no earnings series is tracked, so this page is two series
-        where the UK page is three.
-      </p>
+      <p class="link-row">{site_nav.icon("database", 16)}<span>No US vacancies or earnings series in the store.</span></p>
     </div>"""
 
 
@@ -2544,51 +2474,19 @@ def us_rates_chart() -> str:
 
 
 def us_rates_model() -> str:
-    frbus = MODELS["frb-us"]
-    hank = MODELS["us-hank"]
     microsim = MODELS["pe-microsim"]
     return f"""    <div class="prose">
-      <p>
-        <strong>No model in this suite forecasts the federal funds rate or the
-        Treasury curve.</strong> This page does not present that gap as
-        coverage. What the registry says:
-      </p>
-{limits_list([
-        f'<a href="/frb-us">frb-us</a> does list a '
-        f'{esc(registry_output("frb-us", "federal funds"))} among its outputs — but its question '
-        f'types are {registry_terms(frbus["question_types"])}, so that rate is '
-        "a reaction-function response to a shock under a declared policy rule, "
-        "computed as a deviation from a fixed baseline. It is not a rate view.",
-        f'<a href="/us-hank">us-hank</a> reports a '
-        f'{registry_terms([registry_output("us-hank", "real_rate")])} — the '
-        "model-consistent real rate implied by its own calibrated steady "
-        f'state, as {esc(hank["horizon"])}. That is not a market yield, and '
-        f'the model cannot answer {esc(hank["cannot_answer"][0])}.',
-        f'<a href="/pe">pe-microsim</a> lists {esc(microsim["cannot_answer"][2])} '
-        "in its own cannot-answer field.",
-        "Nothing in the suite models the Treasury term structure at any "
-        "maturity. There is no US counterpart to the gilt curve on the UK page "
-        "because there is no US model that would read one.",
+{icon_items([
+        ("x-circle", "<strong>No model forecasts the funds rate or Treasury yields.</strong>"),
+        ("building", '<a href="/frb-us">FRB/US</a>: the funds rate only as a policy-rule response to a shock.'),
+        ("users", '<a href="/us-hank">US HANK</a>: a model-consistent real rate, not a market yield.'),
+        ("calculator", f'<a href="/pe">Microsimulation</a>: cannot answer {esc(microsim["cannot_answer"][2])}.'),
+        ("table", "No model of the Treasury curve at any maturity."),
     ])}
-      <p>
-        So the chart shows outturns only: observed Federal Reserve data,
-        dated and archived, with no model path beside them, because the
-        committed LONGBASE extract carries no interest-rate column. They still
-        do work here — they are the market backdrop the other US topics are
-        read against, and the conditioning environment any future rate model
-        would have to beat.
-      </p>
       <figure class="vchart-figure">
 {us_rates_chart()}
       </figure>
-      <p class="callout">
-        This is the one US topic where the useful output is a refusal, and it
-        is the same refusal the <a href="/economy/topics/rates">UK rates and
-        gilts page</a> reaches for Bank Rate and gilt yields. If you need a
-        rate forecast, the suite does not have one; the
-        <a href="/models">model directory</a> shows what it does have, and
-        <a href="/models#validation">the evidence page</a> shows how well.
-      </p>
+      <p class="link-row">{site_nav.icon("models", 16)}<a href="/models">Outturns only. See what the models cover</a></p>
     </div>"""
 
 
@@ -2681,59 +2579,24 @@ def us_reform_stands() -> str:
     return f"""    <div class="economy-grid">
 {cards}
     </div>
-    <p class="economy-method">
-      This is the one topic with no official series behind it, so there is no
-      vintage to date: what stands is a capability, and the cards above are
-      read straight out of the committed capability registry rather than
-      written by hand. pe-microsim is the only member covering both countries —
-      the two US macro models are shock models, and the last row of each of
-      their cards is the reason this page stops where it does.
-    </p>"""
+{icon_items([
+        ("info", "Capabilities, not data: no official series here."),
+        ("x-circle", "Microsimulation covers UK and US; the US macro models take shocks, not reforms."),
+    ])}"""
 
 
 def us_reform_model() -> str:
     microsim = MODELS["pe-microsim"]
     obr = MODELS["obr-macro"]
-    dynamic = MODELS["og+microsim"]
     return f"""    <div class="prose">
-      <p>
-        <a href="/pe">pe-microsim</a> is the scorer, and for the US it is the
-        whole of it: it applies the reform to household microdata and reports
-        {registry_terms(microsim["outputs"])}. Its registry
-        status: {esc(microsim["status"])}.
-      </p>
-      <p>
-        The limit is the same structural one the UK page describes — a static
-        costing has no macro feedback in it — but the US answer to it is
-        different, and worse:
-      </p>
-{limits_list([
-        f"pe-microsim cannot answer {(cannot('pe-microsim'))}. A US costing "
-        "from it is a static costing.",
-        f'On the UK side that gap is bridged: <a href="/obr">obr-macro</a> '
-        f'supplies macro feedback through a reviewed reform translation, and '
-        f'<a href="/olg">{site_name("og+microsim")}</a> adds '
-        f'{esc(dynamic["model_class"])}. Both are '
-        f'{registry_terms(obr["geography"])}-only.',
-        "<strong>There is no US equivalent of either.</strong> Both US models "
-        f'record {esc(registry_cannot("frb-us", "policyengine"))} in their own '
-        "cannot-answer field, and us-hank adds "
-        f'{esc(registry_cannot("us-hank", "detailed tax"))}. No mapping exists '
-        "from a US statutory reform to a US macro model, and none is invented "
-        "here.",
+{icon_items([
+        ("calculator", f'<a href="/pe">Microsimulation</a> scores the reform: {registry_terms(microsim["outputs"])}.'),
+        ("alert", "A static costing: no macro feedback."),
+        ("landmark", f'The UK bridges that gap (OBR emulator, OG-UK + microsimulation); both {registry_terms(obr["geography"])}-only.'),
+        ("x-circle", "No US bridge: the US macro models do not take PolicyEngine reforms."),
+        ("activity", "Incidence runs the other way: a macro shock pushed through households."),
     ])}
-      <p>
-        One bridge does exist, and it runs the other way. The incidence
-        commands take a <em>macro shock</em>, not a reform, and push its
-        earnings consequences through the microsimulation — so the suite can
-        answer &ldquo;who bears this shock&rdquo; for the US, and cannot answer
-        &ldquo;what would this reform do to output&rdquo;.
-      </p>
-      <p class="chooser-note">
-        Reform scoring is the one place where the macro models and the
-        household model meet — <a href="/models#score">see how a score is put
-        together →</a>
-      </p>
+      <p class="link-row">{site_nav.icon("scale", 16)}<a href="/models#score">How a score is put together</a></p>
     </div>"""
 
 
@@ -2783,10 +2646,7 @@ def us_reform_data() -> str:
         this site has no US public-finances topic to carry the other half of a
         costing.
       </p>
-      <p class="chooser-note">
-        Dated, immutable JSON snapshots of every series this site reads —
-        <a href="/economy#data">browse the store, its release calendar, and the as-of recipe →</a>
-      </p>
+      <p class="link-row">{site_nav.icon("database", 16)}<a href="/economy#data">Data store: every dated snapshot</a></p>
     </div>"""
 
 
@@ -2817,16 +2677,13 @@ UK_TOPICS = [
         "series": ("uk_cpi_yoy", "uk_core_cpi_yoy"),
         "hook": inflation_hook,
         "stands_note": (
-            "Both series are published by the ONS as year-on-year rates, so the "
-            "values above are the published rates themselves, not a "
-            "transformation applied here."
+            ""
         ),
         "model": inflation_model,
         "run": inflation_run,
         "data_note": (
             "Headline CPI is stored quarterly and core CPI monthly, so the two "
-            "observation periods above do not line up — that is the data, not a "
-            "presentation choice."
+            "observation periods above do not line up."
         ),
     },
     {
@@ -2854,7 +2711,7 @@ UK_TOPICS = [
         "slug": "rates",
         "title": "Rates and gilts",
         "eyebrow": "UK topic · policy rate and the gilt curve",
-        "heading": "What do rates say — and what can these models say about them?",
+        "heading": "What do rates say, and what can these models say about them?",
         "series_phrase": "official Bank Rate and the 5-, 10- and 20-year nominal par gilt yields",
         "series": ("uk_bank_rate", "uk_gilt_5y", "uk_gilt_10y", "uk_gilt_20y"),
         "hook": rates_hook,
@@ -2866,8 +2723,7 @@ UK_TOPICS = [
         "model": rates_model,
         "run": rates_run,
         "data_note": (
-            "The Bank publishes no announced next-release date for these "
-            "series, so the column says so rather than guessing a schedule."
+            "The Bank publishes no next-release date for these series."
         ),
     },
     {
@@ -2893,7 +2749,7 @@ UK_TOPICS = [
         # the sub-tab label: the full title cut the strip at 1440 px (#220 item 6)
         "tab": "Tax and benefits",
         "eyebrow": "UK topic · scoring a policy change",
-        "heading": "What would a reform do — and how far can the models follow it?",
+        "heading": "What would a reform do, and how far can the models follow it?",
         "series": (),
         "hook": reform_hook,
         "stands": reform_stands,
@@ -2940,7 +2796,7 @@ US_TOPICS = [
         "slug": "inflation",
         "title": "Inflation",
         "eyebrow": "US topic · prices",
-        "heading": "Where are US prices now — and what is missing from this page?",
+        "heading": "Where are US prices now?",
         "series": ("us_cpi",),
         "cards": (("us_cpi", "yoy"), ("us_cpi", None)),
         "hook": us_inflation_hook,
@@ -2984,7 +2840,7 @@ US_TOPICS = [
         "slug": "rates",
         "title": "Rates and Treasuries",
         "eyebrow": "US topic · policy rate and the Treasury curve",
-        "heading": "What do US rates say — and what can these models say about them?",
+        "heading": "What do US rates say, and what can these models say about them?",
         "series": ("us_federal_funds_rate", "us_treasury_10y"),
         "hook": us_rates_hook,
         "stands_note": (
@@ -2997,8 +2853,7 @@ US_TOPICS = [
         "run": us_rates_run,
         "data_note": (
             "One monthly series and one daily series, so the two observation "
-            "dates above never line up — that is the data, not a presentation "
-            "choice. " + US_DATA_CLOSING
+            "dates above never line up. " + US_DATA_CLOSING
         ),
     },
     {
@@ -3007,7 +2862,7 @@ US_TOPICS = [
         # the sub-tab label: the full title cut the strip at 1440 px (#220 item 6)
         "tab": "Tax and benefits",
         "eyebrow": "US topic · scoring a policy change",
-        "heading": "What would a US reform do — and how far can the models follow it?",
+        "heading": "What would a US reform do, and how far can the models follow it?",
         "series": (),
         "hook": us_reform_hook,
         "stands": us_reform_stands,
@@ -3079,42 +2934,50 @@ def subnav(country: str, current: str | None) -> str:
     ancestor, not the current URL, so it takes ``aria-current="true"``.
     """
     entry = COUNTRIES[country]
-    scope = []
-    for code, other in COUNTRIES.items():
-        target = scope_target(code, current)
-        if code == country:
-            state = "page" if target == _self_url(country, current) else "true"
-        else:
-            state = None
-        attr = f' aria-current="{state}"' if state else ""
-        scope.append(
-            f'        <a class="model-tabs-link"{attr} '
-            f'href="{target}">{other["label"]}</a>'
-        )
-    overview_attr = ' aria-current="page"' if current is None else ""
+    # r14 (Vahid: grouped UK/US pairs were "confusing how to choose"): two
+    # independent controls. Left, section tabs: Forecasts · Data · Topics ▾.
+    # Right, one UK | US toggle that switches the country for the page open
+    # (scope_target picks the counterpart); a topic with no US page shows US
+    # disabled rather than jumping somewhere else.
+    TOPIC_ICONS = {"growth": "forecasts", "inflation": "activity", "jobs": "users",
+                   "rates": "landmark", "public-finances": "scale", "reform": "calculator"}
+    fc_attr = ' aria-current="page"' if current is None else ""
     data_attr = ' aria-current="page"' if current == "data" else ""
-    links = [
-        f'        <a class="model-tabs-link"{overview_attr} '
-        # "Track record", not "Overview": the hub is the scored record,
-        # and a forecaster's reader looks for the record by that name.
-        f'href="{entry["hub"]}">Track record</a>',
-        f'        <a class="model-tabs-link"{data_attr} '
-        f'href="{entry["data"]}">Data</a>',
-    ]
+    topic_links, current_title = [], None
     for topic in topics_for(country):
+        title = esc(topic.get("tab", topic["title"]))
         attr = ' aria-current="page"' if topic["slug"] == current else ""
-        links.append(
-            f'        <a class="model-tabs-link"{attr} '
-            f'href="{topic_url(topic)}">{esc(topic.get("tab", topic["title"]))}</a>'
-        )
-    return f"""  <nav class="economy-subnav" aria-label="Forecasts">
+        if attr:
+            current_title = title
+        topic_links.append(
+            f'          <a class="model-tabs-link"{attr} href="{topic_url(topic)}">'
+            f'{site_nav.icon(TOPIC_ICONS.get(topic["slug"], "book-open"), 16)}{title}</a>')
+    btn_attr = ' aria-current="true"' if current_title else ""
+    btn_label = current_title or "Topics"
+    toggle = []
+    for code, other in COUNTRIES.items():
+        is_topic = current not in (None, "data")
+        has_page = (not is_topic) or (code, current) in TOPIC_BY_SLUG
+        if code == country:
+            toggle.append(f'      <span class="cc-tog is-on" aria-current="true">{other["label"]}</span>')
+        elif has_page:
+            toggle.append(f'      <a class="cc-tog" href="{scope_target(code, current)}">{other["label"]}</a>')
+        else:
+            toggle.append(f'      <span class="cc-tog is-off" aria-disabled="true" title="No {other["label"]} page for this topic">{other["label"]}</span>')
+    return f"""  <nav class="economy-subnav sn3" aria-label="Forecasts and data">
     <div class="economy-subnav-row">
-      <div class="economy-subnav-scope">
-        <span class="economy-subnav-label mono">Forecasts</span>
-{chr(10).join(scope)}
+      <div class="sn-tabs">
+        <a class="model-tabs-link"{fc_attr} href="{entry["hub"]}">{site_nav.icon("forecasts", 16)}Forecasts</a>
+        <a class="model-tabs-link"{data_attr} href="{entry["data"]}">{site_nav.icon("database", 16)}Data</a>
+        <div class="sn-menu" data-sn-menu>
+          <button type="button" class="model-tabs-link sn-menu-btn" aria-expanded="false"{btn_attr}>{site_nav.icon("book-open", 16)}{btn_label}<span class="sn-chev" aria-hidden="true"></span></button>
+          <div class="sn-pop" role="group" aria-label="Topics">
+{chr(10).join(topic_links)}
+          </div>
+        </div>
       </div>
-      <div class="economy-topics">
-{chr(10).join(links)}
+      <div class="sn-country" role="group" aria-label="Country">
+{chr(10).join(toggle)}
       </div>
     </div>
   </nav>"""
@@ -3160,10 +3023,24 @@ def topic_where_next(topic: dict) -> str:
     entry = COUNTRIES[topic["country"]]
     cards = [
         (entry["hub"], "chart", "Forecasts", "The record, open rounds and how they score"),
-        ("/economy#data", "data", "The data store", "Every vintage behind these numbers"),
         (entry["data"], "list", f'{entry["label"]} data', "Every topic and series in one place"),
     ]
     return site_nav.where_next(cards)
+
+
+SHORT_LEDES = {
+    ("uk", "growth"): "UK output now, and the model's near-term path.",
+    ("uk", "inflation"): "UK CPI and core CPI now, and the model's path.",
+    ("uk", "jobs"): "UK unemployment, pay and vacancies, as last published.",
+    ("uk", "rates"): "Bank Rate and gilt yields, as last published.",
+    ("uk", "public-finances"): "UK borrowing as published, and what the models add.",
+    ("uk", "reform"): "What a UK tax or benefit reform does, and how far models follow.",
+    ("us", "growth"): "US output now, and what the US models can say.",
+    ("us", "inflation"): "US CPI as published, with no US forecast beside it.",
+    ("us", "jobs"): "US unemployment and payrolls, as last published.",
+    ("us", "rates"): "The fed funds rate and Treasury yields, as last published.",
+    ("us", "reform"): "What a US reform does, and how far models follow.",
+}
 
 
 def page(topic: dict) -> str:
@@ -3182,6 +3059,18 @@ def page(topic: dict) -> str:
         if "data" in topic
         else data_layer(topic["series"], topic["data_note"])
     )
+    moved = re.search(r'\s*<p class="economy-method">Change: (.*?)\.</p>', stands_body, re.S)
+    stands_main = stands_body.replace(moved.group(0), "") if moved else stands_body
+    xp_moved = ""
+    if moved:
+        rows = "".join(
+            f"<li>{part.strip()}</li>" for part in moved.group(1).split(";") if part.strip()
+        )
+        xp_moved = site_nav.expander(
+            "activity", "How it moved", "Change since the previous reading.",
+            f'<ul class="xp-list">{rows}</ul>',
+        )
+    short = SHORT_LEDES.get((topic["country"], slug))
     head = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -3204,6 +3093,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=12" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -3213,30 +3103,40 @@ def page(topic: dict) -> str:
   <section class="hero model-hero">
     <div class="hero-inner">
       <h1 class="page-title">{esc(topic["country"].upper())} {esc(topic["title"][0].lower() + topic["title"][1:])}</h1>
-      <p class="lede">{esc(topic["heading"])} {topic_lede(topic)}</p>
+      <p class="lede">{esc(short) if short else esc(topic["heading"])}</p>
     </div>
   </section>
 
 {subnav(topic["country"], slug)}
 
-{band("stands", "01", "where it stands", "The numbers, as the snapshot stores them.", stands_body)}
+{band("stands", "01", "where it stands", "Latest readings from the stored snapshot.", stands_main)}
 
 {band("model", "02", "what the models see", "The model view, with its limits beside it.", topic["model"](), alt=True)}
 
-{band("run", "03", "run it yourself", "Every number above is a command away.", topic["run"]())}
+  <section class="band xp-stack" aria-label="More detail">
+{xp_moved}
+{site_nav.expander("terminal", "Run it yourself", "The commands and MCP tools behind this page.", topic["run"](), id_="run")}
+{site_nav.expander("database", "Data and sources", "Series, coverage and the append-only snapshot files.", data_body, id_="data")}
+  </section>
 
-{band("data", "04", "the data behind it", "Source, coverage, and the immutable file.", data_body, alt=True)}
-
-{topic_where_next(topic)}
+  <section class="band tp-next" aria-labelledby="next-h">
+    <h2 id="next-h"><span class="tp-h-ic" aria-hidden="true">{site_nav.icon("arrow-right", 16)}</span>Read next</h2>
+    <p class="tp-chips">
+      <a href="{COUNTRIES[topic["country"]]["hub"]}">{site_nav.icon("forecasts", 16)}Track record</a>
+      <a href="{COUNTRIES[topic["country"]]["data"]}">{site_nav.icon("list", 16)}{COUNTRIES[topic["country"]]["label"]} data</a>
+      <a href="/connect">{site_nav.icon("use", 16)}Run the models</a>
+    </p>
+  </section>
 </main>
 
 <footer class="foot foot-bar">
-  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <p class="footer-legal">© 2026 PolicyEngine</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
 {site_nav.FOOTER_LINKS}
   </nav>
 </footer>
-<script src="/reveal.js?v=2" defer></script>
+<script src="/reveal.js?v=4" defer></script>
+{site_nav.SUBNAV_TAG}
 </body>
 </html>
 """
@@ -3283,19 +3183,7 @@ def us_public_finance_gap() -> str:
             "finances a US topic page or narrow US_FISCAL_HINTS"
         )
     obr = MODELS["obr-macro"]
-    return f"""      <p class="callout">
-        <strong>Five topics here, six on the UK side.</strong> The missing one
-        is public finances, and it is missing for a reason worth stating: the
-        vintage store holds no US fiscal series — no federal balance, no
-        debt-to-GDP — so that page would open with no number, no observation
-        period and no vintage. Nor is there a model to put beside one:
-        <a href="/obr">obr-macro</a> is
-        {registry_terms(obr["geography"])}-only, and neither US model reports a
-        fiscal balance among its outputs. Filling it needs two things in this
-        order — the FRED series added to the append-only fetcher so vintages
-        accumulate, and a US model that answers a fiscal question. Until then
-        the tab is absent rather than empty.
-      </p>"""
+    return f"""      <p class="fc-note-row">{site_nav.icon("database", 16)}<span><strong>No public finances tab:</strong> no US fiscal series or model.</span></p>"""
 
 
 def sitemap_block() -> str:

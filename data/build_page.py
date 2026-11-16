@@ -428,14 +428,10 @@ def render_fragment() -> str:
     calendar_count = len(upcoming())
     return f"""{BEGIN}
     <div class="prose">
-      <p>
-        Every series this site reads is archived as dated snapshots, never
-        edited or deleted: {series_count} series, {snapshot_count} snapshots
-        since {earliest}.
-      </p>
+      <p class="store-chips"><span>{series_count} series</span><span>{snapshot_count} snapshots</span><span>since {earliest}</span></p>
       <div class="table-scroll">
         <table id="series-table" class="series-table">
-          <caption>Values come from the committed snapshot, not a live call. Expand a row for its snapshot history and store path.</caption>
+          <caption>Expand a row for its snapshot history and store path.</caption>
           <thead>
             <tr>
               <th scope="col">Series</th>

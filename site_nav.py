@@ -22,7 +22,7 @@ STYLESHEET = re.compile(r'href="/style\.css(?:\?v=[0-9]+)?"')
 # changes in a way a cached copy would render wrongly; ``render`` writes it
 # into every page and the generators read it from here (economy/topics.py,
 # notes/generate_release_notes.py), so no page can be left on an old copy.
-STYLE_VERSION = 25
+STYLE_VERSION = 33
 STYLE_HREF = f"/style.css?v={STYLE_VERSION}"
 
 # Inter (latin) is the body face on every page, but the browser only finds the
@@ -39,37 +39,84 @@ FONT_PRELOAD = (
 )
 
 DESTINATIONS = (
-    ("home", "/", "Home", "nav-mobile"),
-    # Forecasts sits second, ahead of Models (r2 IA): the scored, vintage-
-    # controlled record is what a visitor cannot get anywhere else, and the
-    # homepage tells the story in the same order (what it is, why trust it,
-    # the record, which model, how to use it).
-    # Economy was folded into Forecasts: one tab for everything the platform
-    # produces and the data it is produced from. /economy and /economy/us keep
-    # their URLs — ~200 generated release notes, the homepage and the models
-    # hub link to them in prose — but they are Forecasts pages now, and
-    # ``section`` and ``CRUMB_PARENTS`` below are what make that true.
-    ("forecasts", "/forecasts", "Forecasts", "nav-mobile"),
-    ("models", "/models", "Models", "nav-mobile"),
-    ("use", "/connect", "Use", "nav-mobile nav-start"),
+    # Shell v3 (redesign r12): a product header. The brand is the way home,
+    # so there is no Home tab; the three sections follow in reading order:
+    # the scored record, the models, then how to run them.
+    # Home leads the tab bar (Vahid, 16 Nov), as well as the brand linking home.
+    ("home", "/", "Home", "nav-tab"),
+    ("forecasts", "/forecasts", "Forecasts", "nav-tab"),
+    ("models", "/models", "Models", "nav-tab"),
+    ("use", "/connect", "Use", "nav-tab"),
 )
 
-# One 24px stroke icon per view (DESIGN.md §3.1). Decorative: the label is
-# the link text, so every icon is aria-hidden and the tab still reads
-# "Forecasts" to a screen reader and to site_contract's ">Forecasts</a>".
-VIEW_ICONS = {
-    "home": '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/>',
-    "models": '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 16.5 9 5 9-5"/>',
-    "forecasts": '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/>',
-    "use": '<path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/>',
+# ---------------------------------------------------------------------------
+# The one icon system (redesign r12): Lucide (ISC licence) 24px stroke paths,
+# inlined so no page loads an icon font or a sprite. Every icon on the site —
+# nav, tabs, headings, cards, stat tiles, CTAs, callouts — comes from here.
+# Generators import ``icon``; hand-kept pages paste its output. Decorative by
+# default (aria-hidden): the visible label carries the meaning.
+ICONS = {
+    "home": '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    "forecasts": '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/>',
+    "models": '<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+    "use": '<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>',
+    "github": '<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/>',
+    "arrow-right": '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+    "arrow-up-right": '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
+    "calculator": '<rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>',
+    "landmark": '<line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/>',
+    "activity": '<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>',
+    "building": '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
+    "users": '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    "hourglass": '<path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/>',
+    "leaf": '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>',
+    "shield-check": '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+    "target": '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    "network": '<rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>',
+    "table": '<path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/>',
+    "book-open": '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+    "file-text": '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+    "terminal": '<polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/>',
+    "code": '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+    "mail": '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+    "alert": '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    "info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+    "check": '<path d="M20 6 9 17l-5-5"/>',
+    "check-circle": '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+    "x-circle": '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>',
+    "clock": '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    "archive": '<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+    "database": '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+    "search": '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    "globe": '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+    "sparkles": '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>',
+    "bug": '<path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/>',
+    "git-merge": '<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/>',
+    "list": '<path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/>',
+    "tag": '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
+    "scale": '<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+}
+# Legacy name: generators written before r12 import VIEW_ICONS.
+VIEW_ICONS = {key: ICONS[key] for key in ("home", "models", "forecasts", "use")}
+
+# Model id -> icon, so every surface shows the same mark for a model.
+MODEL_ICONS = {
+    "pe-microsim": "calculator",
+    "obr-macro": "landmark",
+    "boe-svar": "activity",
+    "frb-us": "building",
+    "us-hank": "users",
+    "psl-og": "hourglass",
+    "define-uk": "leaf",
 }
 
 
-def icon(key: str) -> str:
+def icon(key: str, size: int = 16, cls: str = "i") -> str:
+    """One inline Lucide icon. ``cls`` sizes and colours it through style.css."""
     return (
-        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" '
+        f'<svg class="{cls}" viewBox="0 0 24 24" width="{size}" height="{size}" fill="none" '
         'stroke="currentColor" stroke-width="1.75" stroke-linecap="round" '
-        f'stroke-linejoin="round" aria-hidden="true">{VIEW_ICONS[key]}</svg>'
+        f'stroke-linejoin="round" aria-hidden="true">{ICONS[key]}</svg>'
     )
 
 MODEL_ROOTS = {"models", "obr", "svar", "frb-us", "us-hank", "olg", "pe", "define"}
@@ -99,10 +146,6 @@ PAGE_NAMES = {
     "/economy/us/topics/rates": "Rates and Treasuries",
     "/economy/us/topics/reform": "Tax and benefit reform",
     "/models": "Models",
-    "/models/side-by-side": "Side by side",
-    "/models/combine": "Combine",
-    "/models/validation": "Validation",
-    "/models/papers": "Papers",
     "/models/compare": "Same question",
     "/obr": "OBR emulator",
     "/svar": "BoE SVAR",
@@ -198,46 +241,50 @@ CRUMB_PARENTS = {
 # each former section is its own tab, so its row is generated like the
 # model rows and a new /models/* page joins it by being listed here.
 SUBTABS = {
+    # r12: /models is one page; side-by-side, combine, validation and papers
+    # are sections of it. The row survives only on /models/compare, as a way
+    # back plus its own tab (the "/models#choose" href never equals a URL, so
+    # /models itself carries no row).
     "models": ("Models pages", (
-        ("/models", "Which model"), ("/models/compare", "Same question"),
-        ("/models/side-by-side", "Side by side"),
-        ("/models/combine", "Combine"), ("/models/validation", "Validation"),
-        ("/models/papers", "Papers"))),
+        ("/models#choose", "All models"), ("/models/compare", "Same question"))),
     "obr": ("OBR emulator pages", (
         ("/obr", "Overview"), ("/obr/methodology", "Methodology"),
-        ("/obr/validation", "Validation"), ("/obr/code", "Code"),
-        ("/papers/obr-macro", "Paper"))),
+        ("/obr/validation", "Validation"), ("/obr/code", "Use it"))),
     "svar": ("BoE SVAR pages", (
         ("/svar", "Overview"), ("/svar/methodology", "Methodology"),
-        ("/svar/validation", "Validation"), ("/svar/code", "Code"),
-        ("/papers/boe-svar", "Paper"))),
+        ("/svar/validation", "Validation"), ("/svar/code", "Use it"))),
     "frb-us": ("FRB/US pages", (
         ("/frb-us", "Overview"), ("/frb-us/methodology", "Methodology"),
-        ("/frb-us/validation", "Validation"), ("/frb-us/code", "Code"),
-        ("/papers/frb-us", "Paper"))),
+        ("/frb-us/validation", "Validation"), ("/frb-us/code", "Use it"))),
     "us-hank": ("US HANK pages", (
         ("/us-hank", "Overview"), ("/us-hank/methodology", "Methodology"),
-        ("/us-hank/validation", "Validation"), ("/us-hank/code", "Code"),
+        ("/us-hank/validation", "Validation"), ("/us-hank/code", "Use it"),
         # us-hank has no paper; its fifth tab is a survey of other HANK models,
         # so it is labelled as such rather than as a page about this model.
         ("/reports/us-hank-open-source", "HANK survey"))),
     "olg": ("OG-UK pages", (
         ("/olg", "Overview"), ("/olg/methodology", "Methodology"),
-        ("/olg/validation", "Validation"), ("/olg/code", "Code"),
-        ("/papers/psl-og", "Paper"))),
+        ("/olg/validation", "Validation"), ("/olg/code", "Use it"))),
     "pe": ("PolicyEngine microsim pages", (
         ("/pe", "Overview"), ("/pe/methodology", "Methodology"),
-        ("/pe/validation", "Validation"), ("/pe/code", "Code"),
-        ("/papers/pe-microsim", "Paper"))),
+        ("/pe/validation", "Validation"), ("/pe/code", "Use it"))),
     "define": ("DEFINE-UK pages", (
         ("/define", "Overview"), ("/define/methodology", "Methodology"),
-        ("/define/validation", "Validation"), ("/define/code", "Code"),
-        ("/papers/define-uk", "Paper"))),
+        ("/define/validation", "Validation"), ("/define/code", "Use it"))),
 }
-# Pages that belong to a model's row without being one of its five URLs:
-# the replication report is read as DEFINE-UK's Paper tab, so on that page
-# the Paper tab points at the report itself and is the chosen one.
-SUBTAB_EXTRA = {"/reports/define-uk-replication": ("define", "Paper")}
+# Pages that belong to a model's row without being one of its URLs. r12:
+# the Paper tab folded into Methodology (Fable 5.2), so each paper (and
+# DEFINE-UK's replication report) shows the row with Methodology chosen; the
+# chosen tab still links back to the Methodology page itself.
+SUBTAB_EXTRA = {
+    "/papers/obr-macro": ("obr", "Methodology"),
+    "/papers/boe-svar": ("svar", "Methodology"),
+    "/papers/frb-us": ("frb-us", "Methodology"),
+    "/papers/psl-og": ("olg", "Methodology"),
+    "/papers/pe-microsim": ("pe", "Methodology"),
+    "/papers/define-uk": ("define", "Methodology"),
+    "/reports/define-uk-replication": ("define", "Methodology"),
+}
 SUBTAB_ROW = re.compile(r'<nav class="model-tabs" aria-label="[^"]* pages">.*?</nav>', re.DOTALL)
 
 
@@ -260,7 +307,10 @@ def subtabs(url: str) -> str | None:
     aria, tabs = SUBTABS[key]
     rows = []
     for href, label in tabs:
-        if label == chosen:
+        if label == chosen and url in SUBTAB_EXTRA:
+            # a page filed under this tab: highlight it, keep the route back
+            rows.append(f'      <a class="model-tabs-link" href="{href}" aria-current="true">{label}</a>')
+        elif label == chosen:
             href = url
             rows.append(f'      <a class="model-tabs-link" href="{href}" aria-current="page">{label}</a>')
         else:
@@ -277,6 +327,11 @@ def subtabs(url: str) -> str | None:
 # script; the inline copies it replaced must not come back.
 STEPPER_TAG = '<script src="/stepper.js" defer></script>'
 INLINE_STEPPER = re.compile(r"<script>(?:(?!</script>).)*?(?:\.meth-step|\.page-rail)", re.DOTALL)
+
+
+# Section sub-nav script (r12): folds the topic links into a "Topics" menu on
+# narrow screens. Added to every page carrying .economy-subnav.
+SUBNAV_TAG = '<script src="/assets/subnav.js" defer></script>'
 
 
 def needs_stepper(source: str) -> bool:
@@ -322,48 +377,63 @@ def crumb_chain(url: str) -> list[str]:
 
 
 def crumbs(path: Path) -> str:
-    """One-line pathway under the header: Home / Section / Page."""
-    url = page_url(path)
-    if url == "/":
-        return ""
-    parts = ['    <a href="/">Home</a>']
-    chain = crumb_chain(url)
-    for ancestor in chain[:-1]:
-        label = PAGE_NAMES.get(ancestor, ancestor.strip("/").title())
-        parts.append(f'    <a href="{ancestor}">{label}</a>')
-    # Leaf: current page, not a link. Dated note slugs render as their date.
-    leaf = PAGE_NAMES.get(url)
-    if leaf is None:
-        slug = url.rsplit("/", 1)[-1]
-        m = re.match(r"(\d{4})-(\d{2})-(\d{2})", slug)
-        if m:
-            import calendar
+    """Retired in r12: the header tab says which section a page is in and the
+    page title says where; the extra pathway bar is gone sitewide. Kept as a
+    function so generators that call it keep working."""
+    return ""
 
-            leaf = (
-                f"{int(m.group(3))} "
-                f"{calendar.month_name[int(m.group(2))]} {m.group(1)}"
-            )
-        else:
-            leaf = slug
-    parts.append(f'    <span aria-current="page">{leaf}</span>')
-    inner = "\n".join(parts)
+
+GITHUB = (
+    '    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub">'
+    + icon("github", 18) + "</a>"
+)
+NAV_CTA = (
+    '    <a class="nav-cta" href="/connect">Run a model' + icon("arrow-right", 14) + "</a>"
+)
+
+# Footer (r12): four short columns and a legal row. Contact lives here, never
+# in the header tabs (site_contract.check_economy_navigation).
+_MODEL_LINKS = (
+    ("/pe", "PolicyEngine microsimulation"), ("/obr", "OBR emulator"),
+    ("/svar", "BoE SVAR"), ("/frb-us", "FRB/US"), ("/us-hank", "US HANK"),
+    ("/olg", "OG-UK"), ("/define", "DEFINE-UK"),
+)
+_FOOTER_COLUMNS = (
+    ("Site", (("/forecasts", "Forecasts"), ("/models", "Models"),
+                 ("/connect", "Use"), ("/notes/releases", "Release notes"))),
+    ("Models", _MODEL_LINKS),
+    ("Evidence", (("/models#trust", "Where models fail"), ("/models/compare", "Same question"),
+               ("/models#papers", "Papers"), ("/glossary", "Glossary"))),
+    ("Project", (("https://policyengine.org", "PolicyEngine"),
+                 ("https://github.com/PolicyEngine/macro", "GitHub"),
+                 ("https://github.com/PolicyEngine/macro/issues", "Report an issue"),
+                 ("/contact", "Contact"))),
+)
+
+
+_FOOTER_MAIN = (
+    ("/forecasts", "Forecasts", "forecasts"), ("/models", "Models", "models"),
+    ("/connect", "Use", "use"), ("/glossary", "Glossary", "book-open"),
+    ("https://github.com/PolicyEngine/macro", "GitHub", "github"), ("/contact", "Contact", "mail"),
+)
+
+
+def _footer_links() -> str:
+    """Compact footer (Vahid, 16 Nov: "much less height, keep only mains"):
+    the wordmark and one row of main links. Model pages, papers, release
+    notes and issues are reachable from Models, Use and GitHub."""
+    items = "\n".join(
+        f'      <a class="footer-text" href="{href}">{icon(key, 15)}{label}</a>'
+        for href, label, key in _FOOTER_MAIN
+    )
     return (
-        '<nav class="crumbs mono" aria-label="You are here">\n'
-        f"{inner}\n"
-        "</nav>\n\n"
+        '    <a class="footer-policyengine" href="/" aria-label="PolicyEngine Macro home">'
+        '<img src="/assets/policyengine-white.png" alt="" width="96" height="20" /><span>Macro</span></a>\n'
+        f'    <div class="foot-main">\n{items}\n    </div>'
     )
 
-GITHUB = """    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>"""
-# The footer stays one small row (#133 dropped the four-column directory and
-# kept PolicyEngine, GitHub and Contact): the views live in the header tabs,
-# not here. r5 added two utility links a reader looks for in a footer: the
-# glossary of the site's trust terms and where to report a wrong number. Contact lives here, never in the header tabs
-# (site_contract.check_economy_navigation).
-FOOTER_LINKS = """    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
-    <a class="footer-text" href="/glossary">Glossary</a>
-    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
-    <a class="footer-text" href="https://github.com/PolicyEngine/macro/issues">Report an issue</a>
-    <a class="footer-text" href="/contact">Contact</a>"""
+
+FOOTER_LINKS = _footer_links()
 
 
 def section(path: Path) -> str | None:
@@ -407,31 +477,45 @@ def header(path: Path) -> str:
         else:
             current_attr = ""
         links.append(
-            f"    <a{class_attr} href=\"{href}\"{current_attr}>{icon(key)}{label}</a>"
+            f"    <a{class_attr} href=\"{href}\"{current_attr}>{icon(key, 18)}{label}</a>"
         )
-    links.append(GITHUB)
     return """<header class="nav">
   <a class="brand" href="/" aria-label="PolicyEngine Macro home">
-    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="26" height="26" /><span class="brand-name">PolicyEngine Macro</span>
+    <img class="brand-logo" src="/assets/policyengine-white.png" alt="" width="115" height="24" /><span class="brand-name">Macro</span>
   </a>
   <nav class="nav-links" aria-label="Primary">
 %s
   </nav>
+  <div class="nav-end">%s</div>
 </header>
 
-%s""" % ("\n".join(links), crumbs(path))
+""" % ("\n".join(links), "")
+
+
+def expander(icon_key: str, title: str, summary: str, body: str, open_: bool = False, id_: str = "") -> str:
+    """The one shared expander (r12): icon, title, one-line summary, chevron.
+
+    A native <details>, so it works with no script and is keyboard and
+    screen-reader accessible; style.css section 13 animates the open where the
+    browser supports ::details-content. ``body`` is trusted HTML.
+    """
+    attrs = (" open" if open_ else "") + (f' id="{id_}"' if id_ else "")
+    return (
+        f'<details class="xp"{attrs}>\n'
+        f'  <summary><span class="xp-ic">{icon(icon_key, 16)}</span>'
+        f'<span class="xp-t"><strong>{title}</strong><small>{summary}</small></span>'
+        '<span class="xp-chev" aria-hidden="true"></span></summary>\n'
+        f'  <div class="xp-body">\n{body}\n  </div>\n</details>'
+    )
 
 
 # "Where next" row (DESIGN.md §4.7, §8): the last card on generated pages.
 # Icons are 24 px Lucide-style strokes, decorative.
 CARD_ICONS = {
-    "chart": '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/>',
-    "data": '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
-    "topic": '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
-    "list": '<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>',
-    "model": '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 16.5 9 5 9-5"/>',
-    "plug": VIEW_ICONS["use"],
-    "target": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+    # Aliases onto the one icon set, so "where next" cards match the shell.
+    "chart": ICONS["forecasts"], "data": ICONS["database"], "topic": ICONS["book-open"],
+    "list": ICONS["list"], "model": ICONS["models"], "plug": ICONS["use"],
+    "target": ICONS["target"],
 }
 
 
@@ -536,6 +620,8 @@ def render(path: Path, source: str | None = None) -> str:
         updated = SUBTAB_ROW.sub(lambda _m: row, updated, count=1)
     if INLINE_STEPPER.search(updated):
         raise ValueError(f"inline StepPanel/rail script in {path.relative_to(ROOT)}: use {STEPPER_TAG}")
+    if 'class="economy-subnav"' in updated and SUBNAV_TAG not in updated:
+        updated = updated.replace("</body>", f"{SUBNAV_TAG}\n</body>", 1)
     if needs_stepper(updated) and STEPPER_TAG not in updated:
         updated = updated.replace("</body>", f"{STEPPER_TAG}\n</body>", 1)
     return updated

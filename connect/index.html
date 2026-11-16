@@ -20,426 +20,133 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=25" />
-<style>
-/* ---------- connect page ---------- */
-.connect-hero .hero-inner { display: block; }
-.connect-hero .lede { margin-left: 0; margin-right: 0; }
-.connect-panel {
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 0 clamp(20px, 5vw, 56px) clamp(80px, 10vw, 130px);
-}
-.connect-panel + .band { border-top: 1px solid var(--hairline); }
-.panel-card {
-  border: 1px solid var(--hairline);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--background, #fff) 72%, transparent);
-  backdrop-filter: blur(6px);
-  padding: clamp(20px, 3vw, 36px);
-}
-.panel-bars { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; margin-bottom: 30px; }
-.seg { display: inline-flex; gap: 4px; border: 1px solid var(--hairline); border-radius: 4px; padding: 4px; }
-.seg button {
-  font-family: var(--mono);
-  font-size: var(--fs-small);
-  padding: 8px 16px;
-  border: 0;
-  border-radius: 3px;
-  background: transparent;
-  color: var(--text-faint);
-  cursor: pointer;
-}
-.seg button[aria-selected="true"] { background: var(--surface-tint); color: var(--primary); font-weight: 600; }
-.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: clamp(18px, 3vw, 36px); }
-.step { min-width: 0; }
-.step .meth-step-num { margin-bottom: 14px; }
-.step .step-h { font-size: var(--fs-h4); font-weight: 600; margin: 0 0 10px; letter-spacing: 0; }
-.step p { font-size: var(--fs-body-sm); line-height: 1.6; color: var(--text-faint); margin: 0 0 14px; }
-.copyblock {
-  background: color-mix(in srgb, #2a7f7a 5%, var(--background, #fff));
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid var(--hairline);
-  border-radius: 4px;
-  padding: 10px 12px;
-  font-family: var(--mono);
-  font-size: var(--fs-mono);
-  overflow: hidden;
-  white-space: pre;
-}
-.copyblock[hidden] { display: none; }
-.copyblock code { display: block; flex: 1; min-width: 0; overflow-x: auto; }
-.copyblock button {
-  border: 0; background: none; cursor: pointer; color: var(--text-faint);
-  font-family: var(--mono); font-size: var(--fs-label); flex-shrink: 0;
-}
-.copyblock button:hover { color: var(--text, #111); }
-.panel-foot { margin-top: 28px; font-size: var(--fs-small); }
-.pane[hidden] { display: none; }
-.steps[hidden] { display: none; }
-.status-note {
-  font-family: var(--mono); font-size: var(--fs-label); color: var(--primary);
-  letter-spacing: var(--ls-label); text-transform: uppercase; margin-bottom: 20px;
-}
-.status-note.soon {
-  display: inline-block;
-  color: var(--text-faint);
-  border: 1px solid var(--hairline);
-  border-radius: 999px;
-  padding: 4px 12px;
-  margin-bottom: 14px;
-}
-.soon-hint {
-  font-size: var(--fs-body-sm); line-height: 1.6; color: var(--text-faint);
-  max-width: 60ch; margin: 0 0 26px;
-}
-.soon-hint a { color: var(--text, #111); }
-.seg button .soon-dot {
-  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--primary); margin-left: 7px; vertical-align: middle;
-}
-.steps.dimmed { opacity: 0.55; }
-/* Every model stays visible: no horizontal tab scrolling. */
-.model-seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); max-width: 100%; margin: 6px 0 12px; border: 0; padding: 0; gap: 6px; }
-.model-seg button { min-width: 0; min-height: 0; border: 1px solid var(--hairline); border-radius: 6px; padding: 8px 11px; text-align: left; transition: all 0.15s ease; }
-.model-seg button strong,
-.model-seg button span { display: block; }
-.model-seg button strong { color: inherit; font-family: var(--mono); font-size: var(--fs-small); font-weight: 600; }
-.model-seg button span { margin-top: 4px; color: var(--text-faint); font-size: 11px; line-height: 1.35; }
-.model-seg button:hover { color: var(--text, #111); border-color: var(--text, #111); }
-.model-seg button[aria-selected="true"] { background: var(--surface-tint); color: var(--primary); border-color: var(--primary); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 18%, transparent); }
-.model-seg button[aria-selected="true"] span { color: var(--text-muted); }
-.panel-divider { border: 0; border-top: 1px solid var(--hairline); margin: 30px 0; }
-.model-pane[hidden] { display: none; }
-
-/* ---------- code section ---------- */
-.moves {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px; margin: 26px 0 22px;
-}
-.move {
-  border: 1px solid var(--hairline); border-radius: 6px; padding: 14px 16px;
-  display: flex; flex-direction: column; gap: 4px;
-}
-.move-n {
-  font-family: var(--mono); font-size: var(--fs-label); color: var(--primary);
-  letter-spacing: 0.1em;
-}
-.move b { font-size: var(--fs-body-sm); letter-spacing: -0.01em; }
-.move span.d { font-size: var(--fs-small); color: var(--text-faint); line-height: 1.45; }
-.code-window {
-  border: 1px solid var(--hairline); border-radius: 8px; overflow: hidden;
-  margin: 22px 0; background: color-mix(in srgb, #2a7f7a 5%, var(--background, #fff));
-  backdrop-filter: blur(6px);
-}
-.cw-bar {
-  display: flex; align-items: center; gap: 10px; padding: 9px 14px;
-  border-bottom: 1px solid var(--hairline);
-}
-.cw-dots { display: inline-flex; gap: 6px; }
-.cw-dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--hairline); }
-.cw-name { font-family: var(--mono); font-size: var(--fs-label); color: var(--text-faint); }
-.cw-copy {
-  margin-left: auto; border: 0; background: none; cursor: pointer;
-  font-family: var(--mono); font-size: var(--fs-label); color: var(--text-faint);
-}
-.cw-copy:hover { color: var(--text, #111); }
-.code-window pre { margin: 0; padding: 18px 20px; overflow-x: auto; }
-.code-window code { font-family: var(--mono); font-size: var(--fs-mono); line-height: 1.7; white-space: pre; }
-.cw-out .cw-bar { color: var(--primary); }
-.cw-out pre { color: var(--text-faint); }
-.out-val { color: var(--text, #111); }
-.dials {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px; margin: 24px 0;
-}
-.dial { border: 1px solid var(--hairline); border-radius: 6px; padding: 16px 18px; }
-.dial-name {
-  display: inline-block; font-family: var(--mono); font-size: var(--fs-label);
-  color: var(--text, #111); border: 1px solid var(--hairline);
-  border-radius: 4px; padding: 3px 9px; margin-bottom: 10px;
-}
-.dial p { font-size: var(--fs-small); line-height: 1.55; color: var(--text-faint); margin: 0; }
-.dial p code { font-size: var(--fs-code-inline); }
-.charts { display: grid; grid-template-columns: 1fr; gap: 20px; margin: 24px 0; }
-@media (min-width: 860px) { .charts { grid-template-columns: 1fr 1fr; } }
-.chart-card { border: 1px solid var(--hairline); border-radius: 8px; padding: 18px 20px; }
-.chart-card h3 { font-size: var(--fs-body-sm); margin: 0 0 3px; }
-.chart-card .chart-sub { font-family: var(--mono); font-size: var(--fs-label); color: var(--text-faint); margin: 0 0 14px; }
-.legend { display: flex; gap: 18px; margin-top: 12px; font-family: var(--mono); font-size: var(--fs-label); color: var(--text-faint); }
-.legend span { display: inline-flex; align-items: center; gap: 7px; }
-.legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
-.chart-note { font-size: var(--fs-small); color: var(--text-faint); margin: 4px 0 0; }
-
-.connect-steps { margin-top: 24px; }
-.compact-more { margin-top: 18px; }
-.compact-more .copyblock { margin-top: 14px; }
-.command-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 18px;
-}
-.command-grid > div {
-  min-width: 0;
-  padding: 16px 18px 18px;
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-}
-.command-grid .copyblock { margin-top: 10px; }
-.command-grid .copyblock code { font-size: var(--fs-small); line-height: 1.55; }
-.model-picker { margin-top: var(--s-5); }
-.compact-pane {
-  min-height: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  column-gap: 14px;
-  padding: 16px clamp(16px, 3vw, 24px);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-}
-.compact-pane h3 { margin: 0; font-family: var(--display); font-size: var(--fs-h3); font-weight: 500; }
-.compact-pane p { flex-basis: 100%; max-width: 58ch; margin: 6px 0 0; color: var(--text-muted); line-height: 1.6; }
-.compact-pane .btn { margin-top: 14px; }
-@media (max-width: 760px) {
-  .command-grid { grid-template-columns: 1fr; }
-  .compact-pane { min-height: 0; }
-}
-.connect-notes {
-  max-width: none;
-  margin: 26px 0 0;
-  border-top: 1px solid var(--hairline);
-  padding-top: 14px;
-}
-.connect-notes .vmet-notes-key { min-width: 7ch; }
-.prompt-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
-.prompt-card {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
-  margin: 0;
-  padding: 10px 14px;
-  border: 1px solid var(--hairline);
-  border-radius: 8px;
-  background: var(--surface-card);
-}
-.prompt-card:hover { border-color: var(--primary); }
-.prompt-tool {
-  font-family: var(--mono); font-size: var(--fs-label); font-weight: 600;
-  color: var(--primary); border: 1px solid var(--hairline);
-  border-radius: 4px; padding: 2px 8px; white-space: nowrap;
-}
-.prompt-card > code {
-  font-family: inherit; font-size: var(--fs-small);
-  color: var(--text-muted); line-height: 1.5; white-space: normal;
-}
-.prompt-card button {
-  border: 0; background: none; cursor: pointer; color: var(--text-faint);
-  font-family: var(--mono); font-size: var(--fs-label);
-}
-.prompt-card button:hover { color: var(--text, #111); }
-@media (max-width: 560px) {
-  .prompt-card { grid-template-columns: auto auto; }
-  .prompt-card > code { grid-column: 1 / -1; }
-  .prompt-card button { justify-self: end; }
-}
-/* route cards: the page's shape, up front */
-.compact-more > summary { font-family: var(--mono); font-size: var(--fs-label); text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); }
-.prompt-block { margin-top: 22px; }
-/* phase 2: the MCP block is step 1 of the routes StepPanel */
-.meth-step .seg { margin-bottom: var(--s-4); }
-.connect-steps .step-num { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; margin-bottom: 10px; border-radius: 50%; background: var(--surface-tint); color: var(--teal-700); font-size: var(--fs-small); font-weight: 700; }
-/* r2: Python code windows, the tools table, prompt note */
-.code-window .cw-name code { font-size: var(--fs-label); background: none; padding: 0; }
-.code-window code { font-size: var(--fs-small); }
-.prompt-note { margin: 12px 0 0; font-size: var(--fs-small); color: var(--text-muted); line-height: 1.55; }
-.tool-table { width: 100%; border-collapse: collapse; font-size: var(--fs-body-sm); }
-.tool-table th, .tool-table td { padding: 10px 14px 10px 0; border-bottom: 1px solid var(--hairline); text-align: left; vertical-align: top; }
-.tool-table thead th { color: var(--text-muted); font: 600 var(--fs-small)/1.3 var(--body, inherit); }
-.tool-table tbody th { white-space: nowrap; font-weight: 600; }
-.tool-table td:nth-child(2) { min-width: 18rem; }
-.tool-table td:nth-child(2) code { display: inline-block; margin: 0 6px 4px 0; font-size: var(--fs-small); }
-.tool-table td:nth-child(3) { min-width: 14rem; color: var(--text-body); }
-#tools .chooser-note, #limits .connect-notes { margin-top: var(--s-4); }
-/* r5: one column of three numbered steps; copy rows instead of nested cards */
-.run-step { padding: var(--s-5) 0; border-top: 1px solid var(--hairline); }
-.band-head + .run-step { border-top: 0; padding-top: 0; }
-.run-step-h { display: flex; align-items: center; gap: var(--s-3); margin: 0 0 var(--s-2); font-size: var(--fs-h3); }
-.run-num { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px; background: var(--surface-tint); color: var(--teal-700); font-size: var(--fs-body-sm); font-weight: 600; }
-.run-lead { margin: 0 0 var(--s-4); color: var(--text-muted); max-width: 70ch; }
-.run-list { margin: 0; padding: 0; list-style: none; counter-reset: run; display: grid; gap: var(--s-5); }
-.run-list > li { counter-increment: run; position: relative; padding-left: 40px; min-width: 0; }
-.run-list > li::before { content: counter(run); position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--surface-tint); color: var(--teal-700); font-size: var(--fs-small); font-weight: 700; display: flex; align-items: center; justify-content: center; }
-.run-li-h { margin: 2px 0 var(--s-3); color: var(--text-strong); font-weight: 600; }
-.run-sub { margin: var(--s-3) 0 var(--s-2); color: var(--text-muted); font-size: var(--fs-body-sm); }
-.run-sub-h { margin: var(--s-5) 0 0; font-size: var(--fs-body); }
-.client-panel p { margin: var(--s-3) 0 0; max-width: 70ch; }
-.client-panel .copyblock, .run-step .copyblock { margin: 0; }
-#seg-client { margin-inline: 0; }
-.copyblock { background: var(--surface-sunken); border-radius: var(--radius); }
-.copyblock code { font-family: var(--code); font-size: var(--fs-small); }
-.copyblock button, .cmd-list button { min-height: 32px; padding: 4px 10px; border: 1px solid var(--hairline-strong); border-radius: 6px; background: var(--surface-card); color: var(--teal-700); font: 600 var(--fs-small)/1 var(--body, inherit); cursor: pointer; }
-.copyblock button:hover, .cmd-list button:hover { border-color: var(--primary); background: var(--surface-tint); }
-.copy-url code { font-size: var(--fs-body-sm); }
-.cmd-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--hairline); }
-.cmd-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: var(--s-2) var(--s-4); padding: var(--s-3) 0; border-bottom: 1px solid var(--hairline); }
-.cmd-text { font-family: var(--body, inherit); font-size: var(--fs-body-sm); color: var(--text-body); background: none; padding: 0; white-space: normal; }
-.cmd-note { grid-column: 1 / -1; font-size: var(--fs-small); color: var(--text-muted); }
-.cmd-tool { color: var(--text-faint); font-size: var(--fs-small); white-space: nowrap; }
-.cmd-list-cli { margin-top: var(--s-4); }
-.cmd-list-cli li { grid-template-columns: 12rem minmax(0, 1fr) auto; }
-.cmd-label { color: var(--text-strong); font-size: var(--fs-body-sm); font-weight: 600; }
-.cmd-list-cli .cmd-text { font-family: var(--code); font-size: var(--fs-small); overflow-wrap: anywhere; }
-.run-facts { margin: var(--s-5) 0 var(--s-3); }
-.band .kv.kv-text.limits-kv, .band .kv.kv-text.run-facts { grid-template-columns: 10rem minmax(0, 1fr); }
-@media (max-width: 600px) { .band .kv.kv-text.limits-kv, .band .kv.kv-text.run-facts { grid-template-columns: minmax(0, 1fr); } }
-.code-window code, .code-window pre code { font-family: var(--code); }
-.setup-list { margin: var(--s-3) 0 0; padding: 0; list-style: none; border-top: 1px solid var(--hairline); }
-.setup-list li { display: grid; grid-template-columns: 15rem 6rem minmax(0, 1fr); gap: var(--s-2) var(--s-4); align-items: baseline; padding: var(--s-3) 0; border-bottom: 1px solid var(--hairline); font-size: var(--fs-body-sm); }
-.setup-list a { font-weight: 600; }
-.setup-list .tag { justify-self: start; }
-.setup-what { color: var(--text-body); line-height: 1.55; }
-@media (max-width: 760px) {
-  .cmd-list li, .cmd-list-cli li { grid-template-columns: minmax(0, 1fr) auto; }
-  .cmd-list li .cmd-text { grid-column: 1 / -1; grid-row: 1; }
-  .cmd-list-cli .cmd-label { grid-column: 1; grid-row: 1; }
-  .cmd-list-cli button { grid-column: 2; grid-row: 1; }
-  .cmd-list-cli li .cmd-text { grid-column: 1 / -1; grid-row: 2; }
-  .setup-list li { grid-template-columns: minmax(0, 1fr) auto; }
-  .setup-what { grid-column: 1 / -1; }
-  .run-list > li { padding-left: 0; }
-  .run-list > li::before { width: 24px; height: 24px; }
-  .run-li-h { padding-left: 34px; min-height: 24px; }
-}
-</style>
+<link rel="stylesheet" href="/style.css?v=33" />
+<link rel="stylesheet" href="/connect/connect.css?v=16" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
 
 <header class="nav">
   <a class="brand" href="/" aria-label="PolicyEngine Macro home">
-    <img class="brand-logo" src="/assets/policyengine-mark.svg" alt="" width="26" height="26" /><span class="brand-name">PolicyEngine Macro</span>
+    <img class="brand-logo" src="/assets/policyengine-white.png" alt="" width="115" height="24" /><span class="brand-name">Macro</span>
   </a>
   <nav class="nav-links" aria-label="Primary">
-    <a class="nav-mobile" href="/"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>Home</a>
-    <a class="nav-mobile" href="/forecasts"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg>Forecasts</a>
-    <a class="nav-mobile" href="/models"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 16.5 9 5 9-5"/></svg>Models</a>
-    <a class="nav-mobile nav-start" href="/connect" aria-current="page"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg>Use</a>
-    <a class="nav-gh" href="https://github.com/PolicyEngine/macro" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2c-.9 .9 -1.3 2 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></svg></a>
+    <a class="nav-tab" href="/"><svg class="i" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</a>
+    <a class="nav-tab" href="/forecasts"><svg class="i" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>Forecasts</a>
+    <a class="nav-tab" href="/models"><svg class="i" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>Models</a>
+    <a class="nav-tab" href="/connect" aria-current="page"><svg class="i" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></svg>Use</a>
   </nav>
+  <div class="nav-end"></div>
 </header>
 
-<nav class="crumbs mono" aria-label="You are here">
-    <a href="/">Home</a>
-    <span aria-current="page">Use</span>
-</nav>
-
-<main id="top">
+<main id="top" class="use-page">
 <section class="hero connect-hero">
 <div class="hero-inner">
-<h1 class="reveal page-title" style="--d:1;">Use the models</h1>
-<p class="lede reveal" style="--d:2;">
-One hosted MCP server, one CLI and one Python package over the same
-tools. Hosted use needs no install, no account and no API key.
-</p>
+<h1 class="page-title">Use the models</h1>
+<p class="lede">The same tools three ways: MCP, CLI and Python. The hosted MCP server needs no install, account or key.</p>
 </div>
 </section>
 
-<nav class="model-tabs" aria-label="Ways to run the models">
-<div class="model-tabs-row">
-<a class="model-tabs-link" href="#connect">MCP</a>
-<a class="model-tabs-link" href="#cli">CLI</a>
-<a class="model-tabs-link" href="#code">Python</a>
-<a class="model-tabs-link" href="#tools">Tools</a>
-<a class="model-tabs-link" href="#limits">Limits</a>
-</div>
-</nav>
-<section id="routes" class="band">
-<div class="band-head" data-icon="play">
-<h2>Three ways to run them</h2>
-<p class="section-intro">MCP first, then the CLI, then Python; the CLI and Python also run the local-only members.</p>
+<section class="ab-card ab-sec use-card" id="start" aria-label="Ways to run the models">
+<div class="use-tabs" role="tablist" aria-label="Ways to run the models" id="use-tabs">
+<button class="use-tab" role="tab" id="tab-mcp" data-tab="mcp" aria-controls="connect" aria-selected="true" tabindex="0"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></svg><span><span class="use-tab-t">MCP</span><span class="use-tab-sub">Ask in plain language</span></span></button>
+<button class="use-tab" role="tab" id="tab-cli" data-tab="cli" aria-controls="cli" aria-selected="false" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg><span><span class="use-tab-t">CLI</span><span class="use-tab-sub">Run from a shell</span></span></button>
+<button class="use-tab" role="tab" id="tab-python" data-tab="python" aria-controls="code" aria-selected="false" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg><span><span class="use-tab-t">Python</span><span class="use-tab-sub">Script it, hosted or local</span></span></button>
 </div>
 
-<div class="run-step" id="connect">
-<h3 class="run-step-h"><span class="run-num" aria-hidden="true">1</span>Hosted: connect an AI client over MCP</h3>
-<p class="run-lead">Add one URL to an MCP client, then ask in plain language.</p>
-<ol class="run-list">
-<li>
-<p class="run-li-h">Copy the server URL</p>
-<div class="copyblock copy-url"><code>https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" data-copy>copy</button></div>
-</li>
-<li>
-<p class="run-li-h">Add it to your client</p>
-<div class="seg" role="tablist" aria-label="Client" id="seg-client">
-<button id="client-tab-claude" role="tab" data-client="claude" aria-selected="true" aria-controls="client-panel-claude" tabindex="0"><img src="/assets/claude-mark.svg" alt="" width="22" height="22" /><span>Claude</span></button>
-<button id="client-tab-chatgpt" role="tab" data-client="chatgpt" aria-selected="false" aria-controls="client-panel-chatgpt" tabindex="-1"><img src="/assets/chatgpt-mark.svg" alt="" width="22" height="22" /><span>ChatGPT</span></button>
-<button id="client-tab-other" role="tab" data-client="other" aria-selected="false" aria-controls="client-panel-other" tabindex="-1"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8Z"/><path d="M12 18v4"/></svg><span>Other clients</span></button>
+<div class="use-panel" id="connect" role="tabpanel" aria-labelledby="tab-mcp" tabindex="0">
+<div class="use-step">
+<span class="use-step-n" aria-hidden="true">1</span>
+<div class="use-step-body">
+<h2 class="use-step-h"><span class="step-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>Copy the server URL</h2>
+<div class="cfield cfield-lg"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><code>https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" class="copy-btn" data-copy aria-label="Copy the server URL"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></div>
 </div>
-<div class="client-panel" id="client-panel-claude" role="tabpanel" aria-labelledby="client-tab-claude" data-for="claude">
-<p>On claude.ai or in the Claude Desktop app, open Settings → Connectors, choose “Add custom connector”, and paste the URL.</p>
-<p class="run-sub">In a terminal, with Claude Code:</p>
-<div class="copyblock"><code>claude mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" data-copy>copy</button></div>
 </div>
-<div class="client-panel" id="client-panel-chatgpt" role="tabpanel" aria-labelledby="client-tab-chatgpt" data-for="chatgpt" hidden>
-<p>On an eligible ChatGPT web plan, enable Developer mode in Settings → Apps → Advanced Settings, create a custom app, and paste the URL. Workspace admins may need to grant access.</p>
-<p class="run-sub">For Codex CLI, register the same MCP endpoint:</p>
-<div class="copyblock"><code>codex mcp add policyengine-macro --url https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" data-copy>copy</button></div>
+<div class="use-step">
+<span class="use-step-n" aria-hidden="true">2</span>
+<div class="use-step-body">
+<h2 class="use-step-h"><span class="step-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></svg></span>Add it to your client</h2>
+<div class="seg2" role="tablist" aria-label="Client" id="seg-client">
+<button id="client-tab-claude" role="tab" data-seg="claude" aria-selected="true" aria-controls="client-panel-claude" tabindex="0"><img src="/assets/claude-mark.svg" alt="" width="18" height="18" />Claude</button>
+<button id="client-tab-chatgpt" role="tab" data-seg="chatgpt" aria-selected="false" aria-controls="client-panel-chatgpt" tabindex="-1"><img src="/assets/chatgpt-mark.svg" alt="" width="18" height="18" />ChatGPT</button>
+<button id="client-tab-other" role="tab" data-seg="other" aria-selected="false" aria-controls="client-panel-other" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></svg><span>Other<span class="seg-long"> clients</span></span></button>
 </div>
-<div class="client-panel" id="client-panel-other" role="tabpanel" aria-labelledby="client-tab-other" data-for="other" hidden>
-<p>Add the URL as a remote (HTTP) MCP server — Gemini CLI, Cursor, VS Code, Windsurf, Mistral Le Chat, and any other MCP-capable client. Look for “MCP servers” or “connectors” in its settings.</p>
-<p class="run-sub">For the Gemini CLI, register the same MCP endpoint:</p>
-<div class="copyblock"><code>gemini mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" data-copy>copy</button></div>
+<div class="seg-panel" id="client-panel-claude" data-for="claude" role="tabpanel" aria-labelledby="client-tab-claude">
+<p class="use-p">Settings → Connectors → Add custom connector → paste the URL. Some plans gate this.</p>
+<p class="use-sub"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg>Claude Code</p>
+<div class="cfield"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg><code>claude mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" class="copy-btn" data-copy aria-label="Copy the Claude Code command"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></div>
 </div>
-</li>
-<li>
-<p class="run-li-h">Ask a policy question</p>
-<ul class="cmd-list">
-<li><code class="cmd-text">How much tax would a single 35-year-old earning $50,000 pay in Los Angeles County, California?</code><span class="cmd-tool mono">calculate_household</span><button type="button" data-copy>copy</button></li>
-<li><code class="cmd-text">Score raising the UK basic rate of income tax to 21p.</code><span class="cmd-tool mono">start_job · score_reform</span><button type="button" data-copy>copy</button></li>
-<li><code class="cmd-text">What is the UK GDP and inflation outlook for the next four quarters?</code><span class="cmd-tool mono">forecast_uk</span><button type="button" data-copy>copy</button><span class="cmd-note">boe-svar: <a href="/svar/validation#forecasters">no forecast skill against a drifting random walk</a></span></li>
-<li><code class="cmd-text">What happens to US GDP and unemployment if the Fed raises rates by 100 basis points?</code><span class="cmd-tool mono">frbus_shock</span><button type="button" data-copy>copy</button></li>
-<li><code class="cmd-text">How does a 25 basis point cut in the quarterly US policy rate (about 100bp annualised) change consumption across wealth quartiles?</code><span class="cmd-tool mono">hank_shock</span><button type="button" data-copy>copy</button></li>
+<div class="seg-panel" id="client-panel-chatgpt" data-for="chatgpt" role="tabpanel" aria-labelledby="client-tab-chatgpt" hidden>
+<p class="use-p">Needs an eligible ChatGPT web plan: Settings → Apps → Advanced Settings → Developer mode → new custom app with the URL. Admins may need to grant access.</p>
+<p class="use-sub"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg>For Codex CLI</p>
+<div class="cfield"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg><code>codex mcp add policyengine-macro --url https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" class="copy-btn" data-copy aria-label="Copy the Codex CLI command"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></div>
+</div>
+<div class="seg-panel" id="client-panel-other" data-for="other" role="tabpanel" aria-labelledby="client-tab-other" hidden>
+<p class="use-p">Add it as a remote HTTP MCP server in Gemini CLI, Cursor, VS Code, Windsurf, Le Chat or any MCP client.</p>
+<p class="use-sub"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg>Gemini CLI</p>
+<div class="cfield"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg><code>gemini mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp</code><button type="button" class="copy-btn" data-copy aria-label="Copy the Gemini CLI command"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></div>
+</div>
+</div>
+</div>
+<div class="use-step">
+<span class="use-step-n" aria-hidden="true">3</span>
+<div class="use-step-body">
+<h2 class="use-step-h"><span class="step-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span>Ask a policy question</h2>
+<ul class="prompt-grid">
+<li class="prompt-item"><button type="button" class="prompt-chip" data-copy-text><span class="prompt-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg></span><span class="prompt-q">How much tax would a single 35-year-old earning $50,000 pay in Los Angeles County, California?</span><span class="prompt-foot"><span class="tool-chip"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>calculate_household</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></li>
+<li class="prompt-item"><button type="button" class="prompt-chip" data-copy-text><span class="prompt-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"/><path d="M7 21h10"/><path d="M3 7h18"/><path d="m6 7-3 8a3 3 0 0 0 6 0Z"/><path d="m18 7-3 8a3 3 0 0 0 6 0Z"/></svg></span><span class="prompt-q">Score raising the UK basic rate of income tax to 21p.</span><span class="prompt-foot"><span class="tool-chip is-job"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>start_job · score_reform</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></li>
+<li class="prompt-item"><button type="button" class="prompt-chip" data-copy-text><span class="prompt-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg></span><span class="prompt-q">What is the UK GDP and inflation outlook for the next four <span class="nowrap">quarters?<sup class="fn-mark" aria-hidden="true">*</sup></span></span><span class="prompt-foot"><span class="tool-chip"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>forecast_uk</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></li>
+<li class="prompt-item"><button type="button" class="prompt-chip" data-copy-text><span class="prompt-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 22h18"/><path d="M6 18v-7"/><path d="M10 18v-7"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="m12 2 8 5H4z"/></svg></span><span class="prompt-q">What happens to US GDP and unemployment if the Fed raises rates by 100 basis points?</span><span class="prompt-foot"><span class="tool-chip"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>frbus_shock</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></li>
+<li class="prompt-item"><button type="button" class="prompt-chip" data-copy-text><span class="prompt-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="prompt-q">How does a 25 basis point cut in the quarterly US policy rate (about 100bp annualised) change consumption across wealth quartiles?</span><span class="prompt-foot"><span class="tool-chip"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>hank_shock</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button></li>
 </ul>
-<p class="prompt-note">A reform score outlasts one HTTP request, so the client runs it as a job (<code>start_job</code>, then <code>get_job_result</code> until it is done); the tool descriptions tell it to. See <a href="#limits">limits</a>.</p>
-</li>
-</ol>
-<dl class="kv kv-text run-facts">
-<div><dt>Transport</dt><dd>Remote HTTP MCP (streamable HTTP)</dd></div>
-<div><dt>Auth</dt><dd>None: no account, no API key</dd></div>
-<div><dt>Slow tools</dt><dd><code>start_job</code> → <code>get_job_result</code></dd></div>
-<div><dt>Limits</dt><dd><a href="#limits">Ceiling, concurrency, cold starts</a></dd></div>
-</dl>
-<details class="about">
-<summary>Run the same server on your own machine</summary>
-<p>To run the same server on your own machine over stdio (no request ceiling; local-only tools run where their packages are installed), install the package as in step 2, then:</p>
-<div class="copyblock"><code>claude mcp add policyengine-macro -- python -m policyengine_macro.mcp_server</code><button type="button" data-copy>copy</button></div>
+<p class="use-note" id="prompt-note"><sup>*</sup> <a href="/svar/validation#forecasters">BoE SVAR: no forecast skill against a drifting random walk</a></p>
+<p class="use-note">Click a prompt to copy it. <a href="#tools">Every tool →</a></p>
+</div>
+</div>
+<details class="use-more">
+<summary><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2 20h20"/></svg>Run the same server on your machine (stdio)<svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+<div class="use-more-body">
+<p>No request ceiling; local-only tools run where installed. After the <a href="#cli">CLI install</a>:</p>
+<div class="cfield"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg><code>claude mcp add policyengine-macro -- python -m policyengine_macro.mcp_server</code><button type="button" class="copy-btn" data-copy aria-label="Copy the local server command"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></div>
+</div>
 </details>
 </div>
 
-<div class="run-step" id="cli">
-<h3 class="run-step-h"><span class="run-num" aria-hidden="true">2</span>Terminal: the shared CLI</h3>
-<p class="run-lead">Install once, check what is importable, then run a model command. Add <code>--json</code> to any command for machine-readable output.</p>
-<div class="copyblock copy-url"><code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code><button type="button" data-copy>copy</button></div>
-<ul class="cmd-list cmd-list-cli">
-<li><span class="cmd-label">Which models run here</span><code class="cmd-text">pe-macro model-status</code><button type="button" data-copy>copy</button></li>
-<li><span class="cmd-label">Household calculation</span><code class="cmd-text">pe-macro household --country us --people '[{"age":35,"employment_income":50000}]' --household '{"state_code":"CA","county_fips":"06037"}'</code><button type="button" data-copy>copy</button></li>
-<li><span class="cmd-label">Score a UK reform</span><code class="cmd-text">pe-macro score --country uk --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --model obr</code><button type="button" data-copy>copy</button></li>
-<li><span class="cmd-label">UK forecast</span><code class="cmd-text">pe-macro forecast</code><button type="button" data-copy>copy</button></li>
-<li><span class="cmd-label">US rate shock</span><code class="cmd-text">pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code><button type="button" data-copy>copy</button></li>
-<li><span class="cmd-label">US HANK shock</span><code class="cmd-text">pe-macro hank-shock --kind monetary --size -0.0025</code><button type="button" data-copy>copy</button></li>
+<div class="use-panel" id="cli" role="tabpanel" aria-labelledby="tab-cli" tabindex="0" hidden>
+<div class="use-step">
+<span class="use-step-n" aria-hidden="true">1</span>
+<div class="use-step-body">
+<h2 class="use-step-h"><span class="step-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>Install once</h2>
+<div class="cfield cfield-lg"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code><button type="button" class="copy-btn" data-copy aria-label="Copy the install command"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></div>
+</div>
+</div>
+<div class="use-step">
+<span class="use-step-n" aria-hidden="true">2</span>
+<div class="use-step-body">
+<h2 class="use-step-h"><span class="step-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg></span>Run a command</h2>
+<ul class="cmd-rows">
+<li class="cmd-row"><span class="cmd-row-l"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 10 5-10 5L2 7l10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>Which models run here</span><code>pe-macro model-status</code><button type="button" class="copy-btn" data-copy><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></li>
+<li class="cmd-row"><span class="cmd-row-l"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Household calculation</span><code>pe-macro household --country us --people '[{"age":35,"employment_income":50000}]' --household '{"state_code":"CA","county_fips":"06037"}'</code><button type="button" class="copy-btn" data-copy><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></li>
+<li class="cmd-row"><span class="cmd-row-l"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"/><path d="M7 21h10"/><path d="M3 7h18"/><path d="m6 7-3 8a3 3 0 0 0 6 0Z"/><path d="m18 7-3 8a3 3 0 0 0 6 0Z"/></svg>Score a UK reform</span><code>pe-macro score --country uk --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --model obr</code><button type="button" class="copy-btn" data-copy><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></li>
+<li class="cmd-row"><span class="cmd-row-l"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg>UK forecast</span><code>pe-macro forecast</code><button type="button" class="copy-btn" data-copy><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></li>
+<li class="cmd-row"><span class="cmd-row-l"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>US rate shock</span><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code><button type="button" class="copy-btn" data-copy><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></li>
+<li class="cmd-row"><span class="cmd-row-l"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>US HANK shock</span><code>pe-macro hank-shock --kind monetary --size -0.0025</code><button type="button" class="copy-btn" data-copy><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></li>
 </ul>
-<p class="chooser-note">Shock units differ by lever and model: run <code>pe-macro variables</code>, <code>pe-macro frbus-variables</code> or <code>pe-macro hank-summary</code> first. <a href="https://github.com/PolicyEngine/macro/tree/main/integration#cli">Every CLI command →</a> · How the micro-to-macro scoring pipeline works: <a href="/models/combine#score">score a reform</a>.</p>
+<p class="use-note">Add <code>--json</code> to any command for machine-readable output.</p>
+<p class="use-note">Shock units differ by lever and model: run <code>pe-macro variables</code>, <code>pe-macro frbus-variables</code> or <code>pe-macro hank-summary</code> first. <a href="https://github.com/PolicyEngine/macro/tree/main/integration#cli">Every CLI command on GitHub →</a></p>
+</div>
+</div>
 </div>
 
-<div class="run-step" id="code">
-<h3 class="run-step-h"><span class="run-num" aria-hidden="true">3</span>Python: hosted or local</h3>
-<p class="run-lead">Call the hosted server from a script with the MCP client, or import the adapters and run locally.</p>
-<div class="code-window">
-<div class="cw-bar"><span class="cw-name">hosted.py · <code>pip install "mcp&gt;=1,&lt;2"</code></span><button class="cw-copy" data-copy>copy</button></div>
+<div class="use-panel" id="code" role="tabpanel" aria-labelledby="tab-python" tabindex="0" hidden>
+<div class="seg2" role="tablist" aria-label="Where Python runs" id="seg-py">
+<button id="py-tab-hosted" role="tab" data-seg="hosted" aria-selected="true" aria-controls="py-panel-hosted" tabindex="0"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>Hosted</button>
+<button id="py-tab-local" role="tab" data-seg="local" aria-selected="false" aria-controls="py-panel-local" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2 20h20"/></svg>Local</button>
+</div>
+<div class="seg-panel" id="py-panel-hosted" role="tabpanel" aria-labelledby="py-tab-hosted">
+<div class="codewin">
+<div class="cfield"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><code>pip install "mcp&gt;=1,&lt;2"</code><button type="button" class="copy-btn" data-copy aria-label="Copy the install command"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></div>
+<div class="codewin-bar"><span class="codewin-name">hosted.py</span><button type="button" class="copy-btn" data-copy-pre aria-label="Copy hosted.py"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></div>
 <pre><code>import asyncio, json
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
@@ -455,7 +162,14 @@ async def call(tool, args=None):
         raise RuntimeError(res.content[0].text)
     return json.loads(res.content[0].text)
 
-async def run_job(tool, args):
+forecast = asyncio.run(call("forecast_uk", {"horizons": 4}))</code></pre>
+</div>
+<details class="use-more">
+<summary><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2h4"/><path d="m12 14 3-3"/><circle cx="12" cy="14" r="8"/></svg>Polling helper for slow tools<svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+<div class="use-more-body">
+<div class="codewin">
+<div class="codewin-bar"><span class="codewin-name">add to hosted.py</span><button type="button" class="copy-btn" data-copy-pre aria-label="Copy the polling helper"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></div>
+<pre><code>async def run_job(tool, args):
     """Slow tools: start a job, then poll until it is done."""
     job = await call("start_job", {"tool": tool, "arguments": args})
     while True:
@@ -463,15 +177,18 @@ async def run_job(tool, args):
         if r["status"] == "done":
             return r["result"]
 
-forecast = asyncio.run(call("forecast_uk", {"horizons": 4}))
 score = asyncio.run(run_job("score_reform", {
     "country": "uk", "model": "obr",
     "reform": {"gov.hmrc.income_tax.rates.uk[0].rate": 0.21},
     "years": 2,  # each scored year adds a microsimulation run; 2 keeps the job short
 }))</code></pre>
 </div>
-<div class="code-window">
-<div class="cw-bar"><span class="cw-name">local.py · after the step 2 install</span><button class="cw-copy" data-copy>copy</button></div>
+</div>
+</details>
+</div>
+<div class="seg-panel" id="py-panel-local" role="tabpanel" aria-labelledby="py-tab-local" hidden>
+<div class="codewin">
+<div class="codewin-bar"><span class="codewin-name">local.py · after the CLI install</span><button type="button" class="copy-btn" data-copy-pre aria-label="Copy local.py"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></div>
 <pre><code>from policyengine_macro import core
 
 forecast = core.svar_forecast(horizons=4)
@@ -483,174 +200,222 @@ household = core.pe_household(
     household={"state_code": "CA", "county_fips": "06037"},
 )</code></pre>
 </div>
-<h4 class="run-sub-h">Set up one model</h4>
-<p class="run-sub">Each model&rsquo;s own package, pins and reproduction steps are on its Code tab.</p>
-<ul class="setup-list">
-<li><a href="/pe/code#run">PolicyEngine microsimulation</a><span class="tag tag-hosted">hosted</span><span class="setup-what">Taxes, benefits, net income and reform effects, household by household — PolicyEngine&rsquo;s own engine, and the usual starting point. It cannot answer GDP, inflation, interest rates or macro feedback; the macro models below add those.</span></li>
-<li><a href="/obr/code#run">OBR emulator</a><span class="tag tag-hosted">hosted</span><span class="setup-what">Trace tax and spending changes against the OBR baseline.</span></li>
-<li><a href="/svar/code#run">BoE SVAR</a><span class="tag tag-hosted">hosted</span><span class="setup-what">Forecast GDP and inflation or explain what moved them.</span></li>
-<li><a href="/frb-us/code#run">FRB/US</a><span class="tag tag-hosted">hosted</span><span class="setup-what">Run FRB/US <a class="gloss-link" href="/glossary#irf">impulse responses</a> under a chosen policy rule.</span></li>
-<li><a href="/us-hank/code#run">US HANK</a><span class="tag tag-hosted">hosted</span><span class="setup-what">Run stylized HANK shocks with <a class="gloss-link" href="/glossary#mpc">MPC</a> and <a class="gloss-link" href="/glossary#hand-to-mouth">hand-to-mouth</a> detail.</span></li>
-<li><a href="/olg/code#run">OG-UK</a><span class="tag tag-local">local</span><span class="setup-what">Model work, saving, capital, and public finances over decades.</span></li>
-<li><a href="/olg/code#run">OG-UK + microsimulation<span class="visually-hidden"> (dynamic scoring setup)</span></a><span class="tag tag-local">local only</span><span class="setup-what">Experimental, UK only: an OG-UK steady-state solve feeds long-run wage changes back into a second microsimulation run. Local only, and until <a href="https://github.com/PSLmodels/OG-UK/issues/68">OG-UK#68</a> the solve needs its own environment — run <code>pe-macro og-score --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --json &gt; og.json</code> there, then <code>pe-macro dynamic-score --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --og-payload og.json</code> &mdash; both steps need the same <code>--reform</code>.</span></li>
-<li><a href="/define/code#run">DEFINE-UK</a><span class="tag tag-local">local only</span><span class="setup-what">Experimental: <code>pip install git+https://github.com/PolicyEngine/define-uk-model</code> fetches the pinned upstream at runtime. That upstream is unlicensed and is never hosted, so scenario deltas come from a cached local run — a fresh one needs local R.</span></li>
-</ul>
+</div>
 </div>
 </section>
 
-<section id="tools" class="band band-wide">
-<div class="band-head" data-icon="code">
-<h2>What each model can do hosted</h2>
-<p class="section-intro">Every MCP tool, by model; the CLI and <code>core</code> expose the same adapters.</p>
-</div>
-<div class="table-scroll">
-<table class="tool-table">
-<thead><tr><th scope="col">Model</th><th scope="col">Tools</th><th scope="col">Hosted</th></tr></thead>
+<section class="ab-sec" id="tools">
+<div class="sh"><span class="sh-icon" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><h2>What runs where</h2><p>Every MCP tool, by model. The CLI and <code>core</code> expose the same adapters.</p></div>
+<p class="cap-legend"><span><span class="tool-chip is-job"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>tool</span> runs as a job when slow or cold</span><span><span class="tool-chip is-local"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2 20h20"/></svg>tool</span> runs only on your machine</span></p>
+<div class="table-scroll ab-card">
+<table class="cap-grid">
+<caption class="visually-hidden">MCP tools by model, split into hosted and local-only</caption>
+<thead><tr><th scope="col"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 10 5-10 5L2 7l10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>Model</th><th scope="col"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Tools</th></tr></thead>
 <tbody>
-<tr><th scope="row"><a href="/pe/code#run">PolicyEngine microsimulation</a> <span class="model-id mono">pe-microsim</span></th><td><code>calculate_household</code> <code>household_reform_impact</code> <code>list_reform_parameters</code> <code>population_reform_impact</code></td><td>yes; a cold population run can pass the request ceiling, so run it as job <code>pe_population_impact</code></td></tr>
-<tr><th scope="row"><a href="/obr/code#run">OBR emulator</a> <span class="model-id mono">obr-macro</span></th><td><code>score_reform</code> <code>obr_shock</code> <code>list_reform_variables</code></td><td>yes; <code>score_reform</code> only as a job, <code>obr_shock</code> as a job when cold</td></tr>
-<tr><th scope="row"><a href="/svar/code#run">BoE SVAR</a> <span class="model-id mono">boe-svar</span></th><td><code>forecast_uk</code> <code>latest_shocks</code> <code>model_summary</code> <code>svar_inflation_incidence</code></td><td>yes; the first estimation in a fresh container takes a couple of minutes</td></tr>
-<tr><th scope="row"><a href="/frb-us/code#run">FRB/US</a> <span class="model-id mono">frb-us</span></th><td><code>frbus_shock</code> <code>frbus_list_variables</code> <code>frbus_summary</code> <code>frbus_shock_incidence</code></td><td>yes; <code>frbus_shock</code> as a job when cold</td></tr>
-<tr><th scope="row"><a href="/us-hank/code#run">US HANK</a> <span class="model-id mono">us-hank</span></th><td><code>hank_shock</code> <code>hank_summary</code> <code>hank_shock_incidence</code></td><td>yes; <code>hank_shock</code> as a job when cold</td></tr>
-<tr><th scope="row"><a href="/olg/code#run">OG-UK</a> <span class="model-id mono">psl-og, og+microsim</span></th><td><code>dynamic_reform_impact</code>, and <code>score_reform</code> with <code>model='og'</code></td><td>no: local only</td></tr>
-<tr><th scope="row"><a href="/define/code#run">DEFINE-UK</a> <span class="model-id mono">define-uk</span></th><td><code>define_list_scenarios</code> <code>define_scenario</code> <code>define_scenario_incidence</code></td><td>no for scenarios (hosted calls return run instructions); the incidence tool runs hosted on a locally produced <code>define_payload</code></td></tr>
-<tr><th scope="row">Routing and reports</th><td><code>list_model_capabilities</code> <code>get_model_status</code> <code>recommend_model</code> <code>format_score_report</code></td><td>yes</td></tr>
-<tr><th scope="row">Jobs</th><td><code>start_job</code> <code>get_job_result</code></td><td>hosted only; locally, call the tool directly</td></tr>
+<tr><th scope="row"><span class="cap-mic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg></span><a href="/pe/code#run">PolicyEngine microsimulation</a><span class="cap-id">pe-microsim</span></th><td data-label="Tools"><span class="chips"><span class="tool-chip">calculate_household</span><span class="tool-chip">household_reform_impact</span><span class="tool-chip">list_reform_parameters</span><span class="tool-chip is-job" title="A cold run can pass the request ceiling: run it as job pe_population_impact">population_reform_impact</span></span></td></tr>
+<tr><th scope="row"><span class="cap-mic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M3 22h18"/><path d="M6 18v-7"/><path d="M10 18v-7"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="m12 2 8 5H4z"/></svg></span><a href="/obr/code#run">OBR emulator</a><span class="cap-id">obr-macro</span></th><td data-label="Tools"><span class="chips"><span class="tool-chip is-job" title="Only as a job">score_reform</span><span class="tool-chip is-job" title="As a job when cold">obr_shock</span><span class="tool-chip">list_reform_variables</span></span></td></tr>
+<tr><th scope="row"><span class="cap-mic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span><a href="/svar/code#run">BoE SVAR</a><span class="cap-id">boe-svar</span></th><td data-label="Tools"><span class="chips"><span class="tool-chip">forecast_uk</span><span class="tool-chip">latest_shocks</span><span class="tool-chip">model_summary</span><span class="tool-chip">svar_inflation_incidence</span></span></td></tr>
+<tr><th scope="row"><span class="cap-mic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></svg></span><a href="/frb-us/code#run">FRB/US</a><span class="cap-id">frb-us</span></th><td data-label="Tools"><span class="chips"><span class="tool-chip is-job" title="As a job when cold">frbus_shock</span><span class="tool-chip">frbus_list_variables</span><span class="tool-chip">frbus_summary</span><span class="tool-chip">frbus_shock_incidence</span></span></td></tr>
+<tr><th scope="row"><span class="cap-mic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><a href="/us-hank/code#run">US HANK</a><span class="cap-id">us-hank</span></th><td data-label="Tools"><span class="chips"><span class="tool-chip is-job" title="As a job when cold">hank_shock</span><span class="tool-chip">hank_summary</span><span class="tool-chip">hank_shock_incidence</span></span></td></tr>
+<tr><th scope="row"><span class="cap-mic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.17a2 2 0 0 0-.59-1.42L12 12l-4.41 4.41A2 2 0 0 0 7 17.83V22"/><path d="M7 2v4.17a2 2 0 0 0 .59 1.42L12 12l4.41-4.41A2 2 0 0 0 17 6.17V2"/></svg></span><a href="/olg/code#run">OG-UK</a><span class="cap-id">psl-og, og+microsim</span></th><td data-label="Tools"><span class="chips"><span class="tool-chip is-local">dynamic_reform_impact</span><span class="tool-chip is-local">score_reform model='og'</span></span></td></tr>
+<tr><th scope="row"><span class="cap-mic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></span><a href="/define/code#run">DEFINE-UK</a><span class="cap-id">define-uk</span></th><td data-label="Tools"><span class="chips"><span class="tool-chip" title="Runs hosted on a locally produced define_payload">define_scenario_incidence</span><span class="tool-chip is-local">define_list_scenarios</span><span class="tool-chip is-local">define_scenario</span></span></td></tr>
+<tr><th scope="row"><span class="cap-mic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Routing and reports</th><td data-label="Tools"><span class="chips"><span class="tool-chip">list_model_capabilities</span><span class="tool-chip">get_model_status</span><span class="tool-chip">recommend_model</span><span class="tool-chip">format_score_report</span></span></td></tr>
+<tr><th scope="row"><span class="cap-mic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2h4"/><path d="m12 14 3-3"/><circle cx="12" cy="14" r="8"/></svg></span>Jobs</th><td data-label="Tools"><span class="chips"><span class="tool-chip">start_job</span><span class="tool-chip">get_job_result</span></span></td></tr>
 </tbody>
 </table>
 </div>
-<p class="chooser-note">Incidence tools (<code>*_incidence</code>) are experimental: a macro path laid onto households, not a reform score. Each model&rsquo;s limits are on its Validation tab. Tool names are a fixed contract (<a href="https://github.com/PolicyEngine/macro/blob/main/integration/tests/tool_surface.py"><code>tool_surface.py</code></a>), so renaming one is a reviewed, breaking change.</p>
-</section>
-
-<section id="limits" class="band band-wide">
-<div class="band-head" data-icon="alert">
-<h2>Access, limits and cold starts</h2>
-<p class="section-intro">No account or key; slow calls run as jobs.</p>
+<details class="use-more">
+<summary><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>Notes on incidence and local models<svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+<div class="use-more-body">
+<ul>
+<li>Incidence tools (<code>*_incidence</code>) are experimental: a macro path laid onto households, not a reform score.</li>
+<li>DEFINE-UK scenarios are never hosted (the upstream is unlicensed): hosted calls return run instructions, and the incidence tool runs hosted on a locally produced <code>define_payload</code>. <code>pip install git+https://github.com/PolicyEngine/define-uk-model</code> fetches the pinned upstream at runtime; scenario deltas come from a cached local run, and a fresh one needs local R.</li>
+<li>OG-UK + microsimulation is experimental and UK only: an OG-UK steady-state solve feeds long-run wage changes back into a second microsimulation run. Until <a href="https://github.com/PSLmodels/OG-UK/issues/68">OG-UK#68</a> the solve needs its own environment: run <code>pe-macro og-score --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --json &gt; og.json</code> there, then <code>pe-macro dynamic-score --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' --og-payload og.json</code>; both steps need the same <code>--reform</code>.</li>
+<li>Tool names are a fixed contract (<a href="https://github.com/PolicyEngine/macro/blob/main/integration/tests/tool_surface.py"><code>tool_surface.py</code></a>), so renaming one is a reviewed, breaking change.</li>
+</ul>
 </div>
-<dl class="kv kv-text limits-kv">
-<div><dt>Auth</dt><dd>None. No account, no API key. Some clients gate custom connectors by plan.</dd></div>
-<div><dt>Ceiling</dt><dd>The hosting transport abandons any HTTP request after 150 seconds. <code>start_job</code> hands a slow call to a worker with a 30-minute budget and returns a job id; poll <code>get_job_result</code>.</dd></div>
-<div><dt>Concurrency</dt><dd>At most three containers at once, as a spend cap; the server scales to zero when idle.</dd></div>
-<div><dt>Cold start</dt><dd>A container stays warm for five minutes after the last request. In a fresh one the first PolicyEngine call pays a ~20&nbsp;s model import, and the first UK forecast a couple of minutes of estimation. Warm calls are fast.</dd></div>
-<div><dt>UK microdata</dt><dd>Only a <em>local</em> UK population or reform score needs <code>HUGGING_FACE_TOKEN</code> (private <code>policyengine-uk-data-private</code>). Hosted calls need nothing.</dd></div>
-<div><dt>Local only</dt><dd><code>model='og'</code>, <code>dynamic_reform_impact</code> (tens of minutes) and the DEFINE-UK scenarios (unlicensed upstream). Called hosted they return run instructions or an import error, not results: use the CLI or local Python.</dd></div>
-<div><dt>Results</dt><dd>Every <code>score_reform</code> result carries a common <code>score</code> block: model class, horizon, provenance, units and time basis, assumptions, caveats and a comparability label. Results from different model classes are complementary, not to be averaged or ranked.</dd></div>
-</dl>
-<details class="about">
-<summary>About jobs and polling</summary>
-<p><code>get_job_result</code> blocks at most 60 seconds per call; keep polls short. A poll that errors is not a failed job: call again with the same id. Job names are the adapter names: <code>score_reform</code>, <code>obr_shock</code>, <code>frbus_shock</code>, <code>hank_shock</code>, <code>pe_population_impact</code>, <code>dynamic_population_reform_impact</code>.</p>
 </details>
 </section>
 
-<section class="band where-next" id="where-next">
-<div class="band-head" data-icon="link"><h2>Keep reading</h2></div>
-<div class="entry-grid">
-<a class="entry-card" href="/models">
-<span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 16.5 9 5 9-5"/></svg></span>
-<h3>Pick a model</h3>
-<p>Seven models, and how far to trust each</p>
-<span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-</a>
-<a class="entry-card" href="/models/combine#score">
-<span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="12" r="3"/><path d="M9 12h6"/></svg></span>
-<h3>Score a reform end to end</h3>
-<p>Microsimulation, then macro feedback</p>
-<span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-</a>
-<a class="entry-card" href="/forecasts">
-<span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg></span>
-<h3>Forecasts on the record</h3>
-<p>Rounds, bands and scores</p>
-<span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>
-</a>
+<section class="ab-sec" id="limits">
+<div class="sh"><span class="sh-icon" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></span><h2>Limits and cold starts</h2><p>Free, with a spend cap.</p></div>
+<div class="stat-grid ab-card">
+<div class="stat-tile"><span class="h-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2h4"/><path d="m12 14 3-3"/><circle cx="12" cy="14" r="8"/></svg></span><span class="stat-num">150 s</span><span class="use-stat-label">request ceiling</span><p class="stat-note">Longer calls run as 30-minute jobs.</p></div>
+<div class="stat-tile"><span class="h-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 10 5-10 5L2 7l10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg></span><span class="stat-num">3</span><span class="use-stat-label">containers at once</span><p class="stat-note">Scales to zero when idle.</p></div>
+<div class="stat-tile"><span class="h-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg></span><span class="stat-num">5 min</span><span class="use-stat-label">warm after the last request</span><p class="stat-note">Cold: ~20&nbsp;s import; UK forecast: minutes.</p></div>
 </div>
+<details class="use-more">
+<summary><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>Limits in detail<svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+<div class="use-more-body">
+<ul>
+<li>The hosting transport drops any request after 150 seconds. <code>start_job</code> hands a slow call to a worker with a 30-minute budget and returns a job id; poll <code>get_job_result</code>. <code>score_reform</code> always runs as a job; <code>obr_shock</code>, <code>frbus_shock</code>, <code>hank_shock</code> and a cold population run (<code>pe_population_impact</code>) when cold. Locally, call the tool directly.</li>
+<li><code>get_job_result</code> blocks at most 60 seconds per call; keep polls short. A poll that errors is not a failed job: call again with the same id. Job names are the adapter names: <code>score_reform</code>, <code>obr_shock</code>, <code>frbus_shock</code>, <code>hank_shock</code>, <code>pe_population_impact</code>, <code>dynamic_population_reform_impact</code>.</li>
+<li>A container stays warm five minutes after the last request. In a fresh one the first PolicyEngine call pays a ~20&nbsp;s import and the first UK forecast a couple of minutes of estimation.</li>
+<li>Only a <em>local</em> UK population or reform score needs <code>HUGGING_FACE_TOKEN</code> (private <code>policyengine-uk-data-private</code>).</li>
+<li>Local only: <code>model='og'</code>, <code>dynamic_reform_impact</code> (tens of minutes) and the DEFINE-UK scenarios. Called hosted they return run instructions or an import error.</li>
+<li>Every <code>score_reform</code> result carries a <code>score</code> block: model class, horizon, provenance, units and time basis, assumptions, caveats and a comparability label. Scores from different model classes are complementary: never average or rank them.</li>
+</ul>
+</div>
+</details>
 </section>
 
+<section class="ab-sec" id="source">
+<div class="sh"><span class="sh-icon"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></span><h2>Source code</h2><p>Every model is open source. Read, run or fork it.</p></div>
+<div class="pp-list repo-list">
+  <a class="pp-row repo-row" href="https://github.com/PolicyEngine/macro">
+    <svg class="i pp-ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+    <span class="pp-body"><span class="pp-title">macro<span class="repo-owner">PolicyEngine</span></span><span class="pp-desc">This site, the MCP server, the CLI and the Python package</span></span>
+    <svg class="i pp-go" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+  </a>
+  <a class="pp-row repo-row" href="https://github.com/PolicyEngine/policyengine-uk">
+    <svg class="i pp-ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+    <span class="pp-body"><span class="pp-title">policyengine-uk<span class="repo-owner">PolicyEngine</span></span><span class="pp-desc">UK tax-benefit rules: the microsimulation, UK side</span></span>
+    <svg class="i pp-go" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+  </a>
+  <a class="pp-row repo-row" href="https://github.com/PolicyEngine/policyengine-us">
+    <svg class="i pp-ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+    <span class="pp-body"><span class="pp-title">policyengine-us<span class="repo-owner">PolicyEngine</span></span><span class="pp-desc">US tax-benefit rules: the microsimulation, US side</span></span>
+    <svg class="i pp-go" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+  </a>
+  <a class="pp-row repo-row" href="https://github.com/PolicyEngine/obr-macroeconomic-model">
+    <svg class="i pp-ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>
+    <span class="pp-body"><span class="pp-title">obr-macroeconomic-model<span class="repo-owner">PolicyEngine</span></span><span class="pp-desc">OBR emulator: the transpiled OBR model</span></span>
+    <svg class="i pp-go" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+  </a>
+  <a class="pp-row repo-row" href="https://github.com/PolicyEngine/boe-var-model">
+    <svg class="i pp-ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>
+    <span class="pp-body"><span class="pp-title">boe-var-model<span class="repo-owner">PolicyEngine</span></span><span class="pp-desc">BoE SVAR: the Bayesian structural VAR</span></span>
+    <svg class="i pp-go" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+  </a>
+  <a class="pp-row repo-row" href="https://github.com/PolicyEngine/us-frb-model">
+    <svg class="i pp-ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+    <span class="pp-body"><span class="pp-title">us-frb-model<span class="repo-owner">PolicyEngine</span></span><span class="pp-desc">FRB/US: the parsed Federal Reserve model</span></span>
+    <svg class="i pp-go" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+  </a>
+  <a class="pp-row repo-row" href="https://github.com/PolicyEngine/us-hank-model">
+    <svg class="i pp-ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span class="pp-body"><span class="pp-title">us-hank-model<span class="repo-owner">PolicyEngine</span></span><span class="pp-desc">US HANK: the two-asset HANK replication</span></span>
+    <svg class="i pp-go" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+  </a>
+  <a class="pp-row repo-row" href="https://github.com/PolicyEngine/og-model-dashboard">
+    <svg class="i pp-ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
+    <span class="pp-body"><span class="pp-title">og-model-dashboard<span class="repo-owner">PolicyEngine</span></span><span class="pp-desc">OG-UK runs and dashboard</span></span>
+    <svg class="i pp-go" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+  </a>
+  <a class="pp-row repo-row" href="https://github.com/PSLmodels/OG-UK">
+    <svg class="i pp-ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
+    <span class="pp-body"><span class="pp-title">OG-UK<span class="repo-owner">PSLmodels</span></span><span class="pp-desc">OG-UK model (PSLmodels)</span></span>
+    <svg class="i pp-go" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+  </a>
+  <a class="pp-row repo-row" href="https://github.com/PolicyEngine/define-uk-model">
+    <svg class="i pp-ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+    <span class="pp-body"><span class="pp-title">define-uk-model<span class="repo-owner">PolicyEngine</span></span><span class="pp-desc">DEFINE-UK wrapper at a pinned commit</span></span>
+    <svg class="i pp-go" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+  </a>
+  <a class="pp-row repo-row repo-issue" href="https://github.com/PolicyEngine/macro/issues/new">
+    <svg class="i pp-ic" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+    <span class="pp-body"><span class="pp-title">Report an issue</span><span class="pp-desc">A wrong number or a bug: name the page and the figure</span></span>
+    <svg class="i pp-go" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+  </a>
+</div>
+</section>
+<section class="ab-sec next-row" id="where-next" aria-label="Next">
+<p><span class="h-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>Not sure which model fits? Each model page lists its package, pins and limits.</p>
+<a class="next-btn" href="/models"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/></svg>Pick a model <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+</section>
 </main>
 
 <footer class="foot foot-bar">
-  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <p class="footer-legal">© 2026 PolicyEngine</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
-    <a class="footer-text footer-policyengine" href="https://policyengine.org"><img src="/assets/policyengine-mark.svg" alt="" width="17" height="17" />PolicyEngine</a>
-    <a class="footer-text" href="/glossary">Glossary</a>
-    <a class="footer-text" href="https://github.com/PolicyEngine/macro">GitHub</a>
-    <a class="footer-text" href="https://github.com/PolicyEngine/macro/issues">Report an issue</a>
-    <a class="footer-text" href="/contact">Contact</a>
+    <a class="footer-policyengine" href="/" aria-label="PolicyEngine Macro home"><img src="/assets/policyengine-white.png" alt="" width="96" height="20" /><span>Macro</span></a>
+    <div class="foot-main">
+      <a class="footer-text" href="/forecasts"><svg class="i" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>Forecasts</a>
+      <a class="footer-text" href="/models"><svg class="i" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>Models</a>
+      <a class="footer-text" href="/connect"><svg class="i" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></svg>Use</a>
+      <a class="footer-text" href="/glossary"><svg class="i" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>Glossary</a>
+      <a class="footer-text" href="https://github.com/PolicyEngine/macro"><svg class="i" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>GitHub</a>
+      <a class="footer-text" href="/contact"><svg class="i" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>Contact</a>
+    </div>
   </nav>
 </footer>
 
-<script src="/reveal.js?v=2" defer></script>
+<script src="/reveal.js?v=4" defer></script>
 <script>
 (function () {
   "use strict";
-  var client = document.getElementById("seg-client");
-
-  function select(seg, btn) {
-    seg.querySelectorAll("button").forEach(function (b) {
-      b.setAttribute("aria-selected", String(b === btn));
-      b.tabIndex = b === btn ? 0 : -1;
-    });
-  }
-
-  function bindTabs(seg, apply) {
-    function activate(btn, moveFocus) {
-      select(seg, btn);
-      apply(btn);
-      if (moveFocus) btn.focus();
+  // Roving-tabindex tablist: click or arrow keys select; apply() shows the panel.
+  function bindTabs(list, apply) {
+    var tabs = Array.from(list.querySelectorAll('[role="tab"]'));
+    function select(btn, focus) {
+      tabs.forEach(function (b) {
+        var on = b === btn;
+        b.setAttribute("aria-selected", String(on));
+        b.tabIndex = on ? 0 : -1;
+        var panel = document.getElementById(b.getAttribute("aria-controls"));
+        if (panel) panel.hidden = !on;
+      });
+      if (focus) btn.focus();
+      if (apply) apply(btn);
     }
-    seg.addEventListener("click", function (e) {
-      var btn = e.target.closest('[role="tab"]'); if (!btn) return;
-      activate(btn, false);
+    list.addEventListener("click", function (e) {
+      var btn = e.target.closest('[role="tab"]');
+      if (btn) select(btn, false);
     });
-    seg.addEventListener("keydown", function (e) {
-      var tabs = Array.from(seg.querySelectorAll('[role="tab"]'));
-      var index = tabs.indexOf(e.target.closest('[role="tab"]'));
-      if (index < 0) return;
-      var next = index;
-      if (e.key === "ArrowRight") next = (index + 1) % tabs.length;
-      else if (e.key === "ArrowLeft") next = (index - 1 + tabs.length) % tabs.length;
-      else if (e.key === "Home") next = 0;
-      else if (e.key === "End") next = tabs.length - 1;
-      else return;
+    list.addEventListener("keydown", function (e) {
+      var i = tabs.indexOf(e.target.closest('[role="tab"]'));
+      if (i < 0) return;
+      var n = { ArrowRight: (i + 1) % tabs.length, ArrowLeft: (i - 1 + tabs.length) % tabs.length,
+                Home: 0, End: tabs.length - 1 }[e.key];
+      if (n === undefined) return;
       e.preventDefault();
-      activate(tabs[next], true);
+      select(tabs[n], true);
     });
+    return select;
   }
 
-  function currentClient() {
-    return client.querySelector('[aria-selected="true"]').dataset.client;
-  }
-  function applyClient() {
-    var c = currentClient();
-    document.querySelectorAll("[data-for]").forEach(function (s) {
-      s.hidden = s.dataset.for !== c;
-    });
-  }
-
-  bindTabs(client, function () {
-    applyClient();
+  var main = document.getElementById("use-tabs");
+  var HASH = { mcp: "mcp", connect: "mcp", start: "mcp", cli: "cli", python: "python", code: "python" };
+  var selectMain = bindTabs(main, function (btn) {
+    if (history.replaceState) history.replaceState(null, "", "#" + btn.dataset.tab);
   });
-
-
-})();
-</script>
-<script>
-(function () {
-  var links = Array.from(document.querySelectorAll('.model-tabs-link[href^="#"]'));
-  function update() {
-    var offset = window.innerHeight * 0.33, active = links[0] || null;
-    links.forEach(function (l) {
-      var el = document.getElementById(l.getAttribute("href").slice(1));
-      if (el && el.getBoundingClientRect().top < offset) active = l;
-    });
-    links.forEach(function (l) {
-      if (l === active) l.setAttribute("aria-current", "location");
-      else l.removeAttribute("aria-current");
-    });
+  function fromHash() {
+    var key = HASH[location.hash.slice(1)];
+    if (!key) return;
+    selectMain(main.querySelector('[data-tab="' + key + '"]'), false);
+    document.getElementById("start").scrollIntoView();
   }
-  window.addEventListener("scroll", update, { passive: true });
-  window.addEventListener("resize", update, { passive: true });
-  update();
+  fromHash();
+  window.addEventListener("hashchange", fromHash);
+  // Client tabs switch every view tagged with data-for (the setup panel today).
+  bindTabs(document.getElementById("seg-client"), function (btn) {
+    document.querySelectorAll("[data-for]").forEach(function (view) {
+      view.hidden = view.dataset.for !== btn.dataset.seg;
+    });
+  });
+  bindTabs(document.getElementById("seg-py"));
+
+  // Copy buttons. data-copy copies the sibling <code>; data-copy-pre the
+  // window's <pre>; data-copy-text the prompt text.
+  function flash(btn) {
+    btn.classList.add("is-done");
+    var label = btn.querySelector("span:not(.prompt-q):not(.prompt-foot):not(.tool-chip)");
+    var old = label && label.textContent;
+    if (label && old === "Copy") label.textContent = "Copied";
+    setTimeout(function () {
+      btn.classList.remove("is-done");
+      if (label && old === "Copy") label.textContent = old;
+    }, 1500);
+  }
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-copy],[data-copy-pre],[data-copy-text]");
+    if (!btn || !navigator.clipboard) return;
+    var text;
+    if (btn.hasAttribute("data-copy-text")) text = btn.querySelector(".prompt-q").textContent;
+    else if (btn.hasAttribute("data-copy-pre")) text = btn.closest(".codewin").querySelector("pre").textContent;
+    else text = btn.parentElement.querySelector("code").textContent;
+    navigator.clipboard.writeText(text).then(function () { flash(btn); });
+  });
 })();
 </script>
 <script src="/stepper.js" defer></script>

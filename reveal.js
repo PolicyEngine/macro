@@ -193,8 +193,9 @@
 // without each page marking them by hand.
 (function () {
   "use strict";
-  var NUM = /^[\s(]*[+\-−±~≈]?\s*[£$€]?\s*\d[\d,]*(\.\d+)?\s*(%|pp|bp|bn|m|k|x|×)?[\s)]*$/i;
-  document.querySelectorAll("main .band table").forEach(function (table) {
+  var ONE = "[+\\-−±~≈]?\\s*[£$€]?\\s*\\d[\\d,]*(\\.\\d+)?\\s*(%|pp|bp|bn|m|k|x|×)?";
+  var NUM = new RegExp("^[\\s(]*" + ONE + "(\\s*[–\\-—to]+\\s*" + ONE + ")?[\\s)]*[*†‡¹²³]*$", "i");
+  document.querySelectorAll("main table:not(.sb-grid):not(.cap-grid)").forEach(function (table) {
     var rows = Array.from(table.tBodies).reduce(function (all, body) {
       return all.concat(Array.from(body.rows));
     }, []);
@@ -203,11 +204,96 @@
     for (var c = 1; c < width; c++) {
       var cells = rows.map(function (r) { return r.cells[c]; }).filter(Boolean);
       var filled = cells.filter(function (cell) { return cell.textContent.trim() && cell.textContent.trim() !== "—"; });
-      if (!filled.length || !filled.every(function (cell) { return NUM.test(cell.textContent.trim()); })) continue;
+      if (!filled.length) continue;
+      var hits = filled.filter(function (cell) { return NUM.test(cell.textContent.trim()); }).length;
+      if (hits / filled.length < 0.6) continue;
       cells.forEach(function (cell) { cell.classList.add("num"); });
       if (table.tHead) Array.from(table.tHead.rows).forEach(function (r) {
         if (r.cells.length === width && r.cells[c]) r.cells[c].classList.add("num");
       });
     }
+  });
+})();
+
+/* Shared table component (r12, style.css §15). Every .table-scroll table
+   gets: data-label on each cell so phones can show it as stacked cards,
+   and an edge fade while the table scrolls sideways. Tables with merged
+   cells or more than six columns keep scrolling instead of stacking. */
+(function () {
+  "use strict";
+  var SKIP = ".sb-grid, .cap-grid, .vc-table, .vc-narrow-table";
+  document.querySelectorAll(".table-scroll").forEach(function (box) {
+    var table = box.querySelector(":scope > table");
+    if (!table || table.matches(SKIP)) return;
+    box.classList.add("tbl");
+    var head = table.tHead && table.tHead.rows[table.tHead.rows.length - 1];
+    var labels = head ? Array.from(head.cells).map(function (c) { return c.textContent.trim(); }) : [];
+    var merged = table.querySelector("[colspan]:not([colspan='1']), [rowspan]:not([rowspan='1'])");
+    var own = table.matches(".t-stack") || box.matches(".has-t-stack, .mo-tablecard");
+    if (labels.length && labels.length <= 6 && !merged && !own) {
+      table.classList.add("tbl-stack");
+      Array.from(table.tBodies).forEach(function (body) {
+        Array.from(body.rows).forEach(function (row) {
+          Array.from(row.cells).forEach(function (cell, i) {
+            if (labels[i] && !cell.hasAttribute("data-label")) cell.setAttribute("data-label", labels[i]);
+          });
+        });
+      });
+    }
+    function edge() {
+      var more = box.scrollWidth - box.clientWidth > 2;
+      box.classList.toggle("is-scroll", more);
+      box.classList.toggle("at-end", !more || box.scrollLeft + box.clientWidth >= box.scrollWidth - 2);
+    }
+    edge();
+    box.addEventListener("scroll", edge, { passive: true });
+    window.addEventListener("resize", edge);
+  });
+})();
+
+/* In-page sub-nav scroll-spy (r14): any nav made of same-page links
+   (/models sub-nav, "on this page" rails, data-spy navs) marks the link for
+   the section in view with aria-current, so the teal underline follows the
+   scroll; clicks scroll smoothly with the sticky-header offset (CSS
+   scroll-margin-top). */
+(function () {
+  "use strict";
+  if (!("IntersectionObserver" in window)) return;
+  var navs = Array.from(document.querySelectorAll(".mp-subnav, .page-rail, [data-spy]")).filter(function (nav) {
+    return nav.querySelectorAll('a[href^="#"]').length >= 2;
+  });
+  navs.forEach(function (nav) {
+    var links = Array.from(nav.querySelectorAll('a[href^="#"]'));
+    var map = new Map();
+    links.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) map.set(el, a);
+    });
+    var visible = new Set();
+    var first = Array.from(map.keys())[0];
+    function setCurrent(a) {
+      links.forEach(function (x) { if (x !== a) x.removeAttribute("aria-current"); });
+      a.setAttribute("aria-current", "location");
+      /* keep the active tab visible when the strip scrolls sideways */
+      var strip = a.parentElement;
+      if (strip && strip.scrollWidth > strip.clientWidth) {
+        strip.scrollTo({ left: a.offsetLeft - (strip.clientWidth - a.offsetWidth) / 2, behavior: "smooth" });
+      }
+    }
+    function mark() {
+      if (first && window.scrollY + 160 < first.getBoundingClientRect().top + window.scrollY) { setCurrent(map.get(first)); return; }
+      var best = null, top = -Infinity;
+      map.forEach(function (_a, el) { var t = el.getBoundingClientRect().top; if (t <= 160 && t > top) { top = t; best = el; } });
+      if (best) setCurrent(map.get(best));
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) visible.add(e.target); else visible.delete(e.target); });
+      mark();
+    }, { rootMargin: "-150px 0px -40% 0px" });
+    window.addEventListener("scroll", function () { window.requestAnimationFrame(mark); }, { passive: true });
+    map.forEach(function (_a, el) { io.observe(el); });
+    links.forEach(function (a) {
+      a.addEventListener("click", function () { setCurrent(a); });
+    });
   });
 })();

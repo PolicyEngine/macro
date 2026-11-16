@@ -578,11 +578,11 @@ def page(data: dict) -> str:
 
 {glossary_links(body(data), GLOSSARY_LINKS)}
 <footer class="foot foot-bar">
-  <p class="footer-legal">© 2026 PolicyEngine. All rights reserved.</p>
+  <p class="footer-legal">© 2026 PolicyEngine</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
   </nav>
 </footer>
-<script src="/reveal.js?v=2" defer></script>
+<script src="/reveal.js?v=4" defer></script>
 {SCRIPT}
 </body>
 </html>
