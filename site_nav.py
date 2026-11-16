@@ -486,12 +486,10 @@ def header(path: Path) -> str:
   <nav class="nav-links" aria-label="Primary">
 %s
   </nav>
-  <div class="nav-end">
-%s
-  </div>
+  <div class="nav-end">%s</div>
 </header>
 
-""" % ("\n".join(links), "" if page_href == "/connect" else NAV_CTA)
+""" % ("\n".join(links), "")
 
 
 def expander(icon_key: str, title: str, summary: str, body: str, open_: bool = False, id_: str = "") -> str:

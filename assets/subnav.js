@@ -5,7 +5,7 @@
    once at every width. Without script, everything is inline and the row
    wraps. site_nav.render adds this file to pages with .economy-subnav. */
 (function () {
-  var nav = document.querySelector(".economy-subnav.sn2");
+  var nav = document.querySelector(".economy-subnav.sn3, .economy-subnav.sn2");
   if (!nav) return;
   nav.classList.add("js");
   var toggles = Array.from(nav.querySelectorAll(".sn-group-btn, .sn-menu-btn"));

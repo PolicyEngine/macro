@@ -250,3 +250,43 @@
     window.addEventListener("resize", edge);
   });
 })();
+
+/* In-page sub-nav scroll-spy (r14): any nav made of same-page links
+   (/models sub-nav, "on this page" rails, data-spy navs) marks the link for
+   the section in view with aria-current, so the teal underline follows the
+   scroll; clicks scroll smoothly with the sticky-header offset (CSS
+   scroll-margin-top). */
+(function () {
+  "use strict";
+  if (!("IntersectionObserver" in window)) return;
+  var navs = Array.from(document.querySelectorAll(".mp-subnav, .page-rail, [data-spy]")).filter(function (nav) {
+    return nav.querySelectorAll('a[href^="#"]').length >= 2;
+  });
+  navs.forEach(function (nav) {
+    var links = Array.from(nav.querySelectorAll('a[href^="#"]'));
+    var map = new Map();
+    links.forEach(function (a) {
+      var el = document.getElementById(decodeURIComponent(a.getAttribute("href").slice(1)));
+      if (el) map.set(el, a);
+    });
+    var visible = new Set();
+    function mark() {
+      var best = null, top = Infinity;
+      visible.forEach(function (el) { var t = el.getBoundingClientRect().top; if (t < top) { top = t; best = el; } });
+      if (!best) return;
+      links.forEach(function (a) { a.removeAttribute("aria-current"); });
+      map.get(best).setAttribute("aria-current", "location");
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) visible.add(e.target); else visible.delete(e.target); });
+      mark();
+    }, { rootMargin: "-30% 0px -55% 0px" });
+    map.forEach(function (_a, el) { io.observe(el); });
+    links.forEach(function (a) {
+      a.addEventListener("click", function () {
+        links.forEach(function (x) { x.removeAttribute("aria-current"); });
+        a.setAttribute("aria-current", "location");
+      });
+    });
+  });
+})();
