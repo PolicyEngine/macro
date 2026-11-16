@@ -939,6 +939,11 @@ def growth_model() -> str:
       <figure class="vchart-figure">
 {path_chart("topic-gdp-path", "gdp", "UK real GDP", "% change on a year earlier", open_rows[:5], forecast["generated"], history=yoy(facts["gdp"], 4)[-8:], vintage=facts["gdp"]["vintage"], history_note="ABMI, growth derived from the stored level,")}
       </figure>
+      <p class="callout">
+        <strong>Predictive validation: {esc(quality["level"])}.</strong>
+        {esc(verdict_line(quality["evidence"]))}
+        <a href="/svar/validation">Read the validation page →</a>
+      </p>
       <details class="about">
         <summary>Its limits</summary>
 {limits_list([
@@ -960,11 +965,6 @@ def growth_model() -> str:
         </table>
       </div>
       </details>
-      <p class="callout">
-        <strong>Predictive validation: {esc(quality["level"])}.</strong>
-        {esc(verdict_line(quality["evidence"]))}
-        <a href="/svar/validation">Read the validation page →</a>
-      </p>
       <p class="chooser-note">
         Every round is archived before the outturn exists, and scored against
         the outturn as published, with the snapshot it was read from recorded
@@ -1061,6 +1061,11 @@ def inflation_model() -> str:
       <figure class="vchart-figure">
 {path_chart("topic-cpi-path", "cpi", "UK CPI", "% change on a year earlier", open_rows[:5], facts["forecast"]["generated"], history=facts["cpi"]["observations"][-8:], vintage=facts["cpi"]["vintage"], history_note="D7G7,")}
       </figure>
+      <p class="callout">
+        <strong>Predictive validation: {esc(quality["level"])}.</strong>
+        {esc(verdict_line(quality["evidence"]))}
+        <a href="/svar/validation">Read the validation page →</a>
+      </p>
       <details class="about">
         <summary>Its limits</summary>
 {limits_list([
@@ -1082,11 +1087,6 @@ def inflation_model() -> str:
         </table>
       </div>
       </details>
-      <p class="callout">
-        <strong>Predictive validation: {esc(quality["level"])}.</strong>
-        {esc(verdict_line(quality["evidence"]))}
-        <a href="/svar/validation">Read the validation page →</a>
-      </p>
     </div>"""
 
 
