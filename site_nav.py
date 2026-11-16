@@ -327,6 +327,11 @@ STEPPER_TAG = '<script src="/stepper.js" defer></script>'
 INLINE_STEPPER = re.compile(r"<script>(?:(?!</script>).)*?(?:\.meth-step|\.page-rail)", re.DOTALL)
 
 
+# Section sub-nav script (r12): folds the topic links into a "Topics" menu on
+# narrow screens. Added to every page carrying .economy-subnav.
+SUBNAV_TAG = '<script src="/assets/subnav.js" defer></script>'
+
+
 def needs_stepper(source: str) -> bool:
     return 'class="scrolly-wrap' in source or 'class="page-rail' in source
 
@@ -613,6 +618,8 @@ def render(path: Path, source: str | None = None) -> str:
         updated = SUBTAB_ROW.sub(lambda _m: row, updated, count=1)
     if INLINE_STEPPER.search(updated):
         raise ValueError(f"inline StepPanel/rail script in {path.relative_to(ROOT)}: use {STEPPER_TAG}")
+    if 'class="economy-subnav"' in updated and SUBNAV_TAG not in updated:
+        updated = updated.replace("</body>", f"{SUBNAV_TAG}\n</body>", 1)
     if needs_stepper(updated) and STEPPER_TAG not in updated:
         updated = updated.replace("</body>", f"{STEPPER_TAG}\n</body>", 1)
     return updated

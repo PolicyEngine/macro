@@ -3230,6 +3230,7 @@ def page(topic: dict) -> str:
   </nav>
 </footer>
 <script src="/reveal.js?v=2" defer></script>
+{site_nav.SUBNAV_TAG}
 </body>
 </html>
 """

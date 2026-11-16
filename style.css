@@ -7399,3 +7399,35 @@ main > .lp-section:last-child { margin-bottom: 80px; }
 .jn-panel .meth-inline { display: block; margin-top: 16px; }
 .jn-panel .meth-sec-title { text-transform: none; }
 .jn-panel .meth-sec-title::first-letter { text-transform: uppercase; }
+
+/* =====================================================================
+   14. Section sub-nav (r12): h1, lede, then the sub-nav; topics fold into a
+   "Topics" menu at 820px and below (assets/subnav.js), with a scroll cue.
+   ===================================================================== */
+.doc main:has(> .economy-subnav) > .hero > .hero-inner > .lede { order: 2; }
+.doc main:has(> .hero) > .economy-subnav { order: 3; margin-top: 16px; }
+.topics-menu { display: contents; }
+.topics-btn { display: none; }
+.topics-pop { display: contents; }
+@media (max-width: 820px) {
+  .topics-menu { display: inline-flex; position: relative; flex: 0 0 auto; }
+  .topics-btn { display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; font: inherit; cursor: pointer; }
+  .topics-chev { display: inline-block; width: 6px; height: 6px; margin-left: 4px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-2px); }
+  .topics-menu.open .topics-chev { transform: rotate(-135deg) translateY(-2px); }
+  .topics-pop {
+    display: none; position: fixed; z-index: 1200; min-width: 220px; padding: 6px;
+    background: var(--card); border: 1px solid var(--ab-border); border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(17, 24, 39, .12);
+  }
+  .topics-pop.open { display: grid; }
+  body > .topics-pop a { color: var(--text-body); font-size: var(--fs-ab-small); font-weight: 500; text-decoration: none; }
+  body > .topics-pop a:hover { background: var(--ab-inset); }
+  .topics-pop a { display: flex !important; height: 40px; padding: 0 12px !important; border-radius: 8px; align-items: center; }
+  .topics-pop a::after { display: none !important; }
+  .topics-pop a[aria-current] { background: var(--ab-teal-50); }
+  .economy-subnav-row {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    padding-right: 32px;
+  }
+}
