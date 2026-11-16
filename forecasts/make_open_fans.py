@@ -117,12 +117,9 @@ def render() -> str:
 
     return "\n".join(
         [
-            '      <p class="chart-intro">Unemployment, from the '
-            f"{src.parent.name} BoE SVAR unemployment satellite round — no "
-            "official quarterly path to overlay, so the fan stands "
-            "alone. Bands are raw model quantiles: the satellite has no "
-            "coverage evaluation of its own, so no re-calibration is "
-            "applied.</p>",
+            '      <p class="chart-intro">Unemployment, satellite round '
+            f"{src.parent.name}: no official path to overlay; raw bands (no "
+            "coverage evaluation).</p>",
             '      <figure class="vchart-figure">',
             chartkit.figure("\n".join([
                 f'<svg class="vchart" data-chart="{CHART_ID}" '

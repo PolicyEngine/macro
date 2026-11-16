@@ -615,6 +615,9 @@ def satellite_has_no_surface() -> bool:
 
 # --------------------------------------------------------------- page pieces
 
+TILE_LABELS = {"Monthly gross value added index": "Monthly GVA index"}
+
+
 def _card(heading: str, value: str, note: str, series: dict, period: str,
           change: str = "") -> str:
     """A stat tile (DESIGN.md §4.2): value, label, change chip and period.
@@ -622,6 +625,7 @@ def _card(heading: str, value: str, note: str, series: dict, period: str,
     Vintage, units and the source code sit in a small info popover, so the
     tile face carries the reading and nothing else.
     """
+    heading = TILE_LABELS.get(heading, heading)
     chip = ""
     if change:
         parts = change.split(" ")
@@ -2164,7 +2168,7 @@ def us_baseline_chart(chart_id: str, name: str, unit: str, column: str,
     return us_path_chart(
         chart_id, name, unit,
         [("vc-out-line", f"Outturn, FRED snapshot {esc(series['vintage'])}", outturns)],
-        baseline=baseline, zero=column != "unemployment_pct", source=source,
+        baseline=baseline, zero=False, source=source,
         notes=gap_note(outturns) + ["Baseline quarters are drawn at their middle month."]
         if "Q" not in outturns[0]["period"] else gap_note(outturns))
 
@@ -3089,7 +3093,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
-<link rel="stylesheet" href="/economy/topic-page.css?v=9" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=11" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
