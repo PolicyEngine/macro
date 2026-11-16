@@ -54,24 +54,39 @@ USES = (
 W, H = 0, 0  # kept for callers that import the old geometry names
 
 
+def _chip(kind, text):
+    if kind == "m":
+        return f'<span class="u-node u-micro">{icon(MODEL_ICONS["pe-microsim"], 14)}{text}</span>'
+    if kind in ("x", "x2"):
+        return f'<span class="u-node u-macro">{text.split("|")[0]}</span>'
+    if kind == "out":
+        return f'<span class="u-node u-out">{icon("check-circle", 14)}{text}</span>'
+    return f'<span class="u-node u-in">{text}</span>'
+
+
 def _flow(steps):
-    out = []
+    """Chips joined by connectors. Each connector travels with the chip after
+    it (one .u-seg), so a narrow row wraps at a connector, never mid-chip."""
+    out, verb = [], None
     for kind, text in steps:
         if kind == "v":
-            label = f"<small>{text}</small>" if text else ""
-            out.append(f'<span class="u-arrow" aria-hidden="true">{label}<i></i></span>')
-        elif kind == "m":
-            out.append(f'<span class="u-node u-micro">{icon(MODEL_ICONS["pe-microsim"], 14)}{text}</span>')
-        elif kind == "x":
-            out.append(f'<span class="u-node u-macro">{text}</span>')
-        elif kind == "x2":
-            head, sub = text.split("|")
-            out.append(f'<span class="u-node u-macro u-multi"><span>{head}</span><small>{sub}</small></span>')
-        elif kind == "out":
-            out.append(f'<span class="u-node u-out">{icon("check-circle", 14)}{text}</span>')
+            verb = text
+            continue
+        chip = _chip(kind, text)
+        if verb is None:
+            out.append(chip)
         else:
-            out.append(f'<span class="u-node u-in">{text}</span>')
+            out.append(f'<span class="u-seg"><span class="u-arrow" aria-hidden="true">'
+                       f'<small>{verb}</small><i></i></span>{chip}</span>')
+        verb = None
     return "".join(out)
+
+
+def _sub(steps):
+    for kind, text in steps:
+        if kind == "x2":
+            return f'<span class="use-sub">{text.split("|")[1]}</span>'
+    return ""
 
 
 def render(page: str) -> str:
@@ -88,7 +103,7 @@ def render(page: str) -> str:
             f'      <li class="use use-{cls}"><a href="{href}">'
             f'<span class="use-ic">{icon(ic, 18)}</span>'
             f'<span class="use-main"><span class="use-head"><strong>{title}</strong><span class="use-chip">{status}</span></span>'
-            f'<span class="use-flow" role="img" aria-label="{text}">{_flow(steps)}</span></span>'
+            f'<span class="use-flow" role="img" aria-label="{text}">{_flow(steps)}</span>{_sub(steps)}</span>'
             f'<span class="use-go" aria-hidden="true">{icon("arrow-right", 16)}</span></a></li>')
     macro_tier = (
         '<div class="hub2-tier hub2-macro">\n'
