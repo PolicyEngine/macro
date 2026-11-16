@@ -1119,6 +1119,67 @@ def render_results(card: dict) -> str:
     return "\n".join(body)
 
 
+_LUCIDE = {
+    "target": '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    "alert": '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    "archive": '<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+    "check": '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+    "info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+}
+_WORDS = ("zero one two three four five six seven eight nine ten eleven twelve "
+          "thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty").split()
+
+
+def _lucide(name: str, size: int, cls: str = "i", hidden: bool = False) -> str:
+    return (f'<svg{" hidden" if hidden else ""} class="{cls}" viewBox="0 0 24 24" width="{size}" height="{size}" '
+            'fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" '
+            f'stroke-linejoin="round" aria-hidden="true">{_LUCIDE[name]}</svg>')
+
+
+def _word(n: int) -> str:
+    return _WORDS[n] if 0 <= n < len(_WORDS) else str(n)
+
+
+def render_home_record(card: dict) -> str:
+    """The home page's record strip (index.html), from the same aggregates as
+    the /forecasts scoreboard, so the two can never disagree. The closing line
+    keeps the small-sample warning next to the counts (DESIGN.md §7.5)."""
+    pairs = scored_entries(card)
+    entries = [e for _, e in pairs]
+    scored = len(entries)
+    rounds = card["rounds"]
+    scored_rounds = len({d["round_id"] for d, _ in pairs})
+    in68 = sum(1 for e in entries if e["in_68"])
+    short = {"gdp": "GDP", "cpi": "CPI", "unemployment": "Unemployment"}
+
+    def who(d: dict) -> str:
+        m = str(d.get("model", ""))
+        if m.startswith("boe-svar"):
+            return "BoE SVAR"
+        return "BoE SVAR satellite" if m == "okun-unemployment" else esc(m)
+
+    misses = [f"{short.get(e['variable'], esc(e['variable']))} ({who(d)})"
+              for d, e in pairs if not e["in_90"]]
+    miss_note = "; ".join(dict.fromkeys(misses)) if misses else "None so far"
+    foot = (f"{_word(scored).capitalize()} forecast{'' if scored == 1 else 's'}, "
+            f"{_word(scored_rounds)} round{'' if scored_rounds == 1 else 's'}: not a track record.")
+    return "\n".join([
+        '        <dl class="lp-stats">',
+        f'          <div class="lp-stat"><dt>{_lucide("target", 14)}Inside the 68% band</dt><dd>'
+        f'<span class="lp-stat-v">{in68}<small> of {scored}</small></span>'
+        f'<span class="lp-stat-note">Expected: about {round(0.68 * scored)} of {scored}</span>'
+        f'{_lucide("check", 18, "i lp-ok", hidden=True)}</dd></div>',
+        f'          <div class="lp-stat"><dt>{_lucide("alert", 14)}Outside the 90% band</dt><dd>'
+        f'<span class="lp-stat-v">{len(misses)}</span><span class="lp-stat-note">{miss_note}</span></dd></div>',
+        f'          <div class="lp-stat"><dt>{_lucide("archive", 14)}Rounds scored</dt><dd>'
+        f'<span class="lp-stat-v">{scored_rounds}<small> of {rounds}</small></span>'
+        '<span class="lp-stat-note">Against outturn, a naive baseline and the OBR</span></dd></div>',
+        "        </dl>",
+        f'        <p class="lp-score-foot">{_lucide("info", 16)}<span><strong>{foot}</strong> '
+        '<a href="/forecasts#scored">See every score &rarr;</a></span></p>',
+    ])
+
+
 def render_page(html: str, card: dict) -> str:
     """Inject the generated blocks between their markers.
 
@@ -1145,6 +1206,16 @@ def render_page(html: str, card: dict) -> str:
     return html
 
 
+HOME = ROOT / "index.html"
+
+
+def render_home(html: str, card: dict) -> str:
+    pattern = re.compile(r"(<!-- home-record:begin -->\n).*?(<!-- home-record:end -->)", re.DOTALL)
+    if not pattern.search(html):
+        raise SystemExit(f"{HOME}: marker home-record not found")
+    return pattern.sub(lambda m: m.group(1) + render_home_record(card) + "\n" + m.group(2), html, count=1)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument(
@@ -1156,6 +1227,8 @@ def main() -> int:
     rendered = json.dumps(fresh, indent=2) + "\n"
     page_now = PAGE.read_text()
     page_fresh = render_page(page_now, fresh)
+    home_now = HOME.read_text()
+    home_fresh = render_home(home_now, fresh)
 
     if args.check:
         stale = []
@@ -1165,6 +1238,8 @@ def main() -> int:
             stale.append("scorecard.json is stale")
         if page_now != page_fresh:
             stale.append("forecasts/index.html is stale")
+        if home_now != home_fresh:
+            stale.append("index.html record strip is stale")
         if stale:
             for item in stale:
                 print(f"FAIL {item} — run forecasts/score.py", file=sys.stderr)
@@ -1176,6 +1251,9 @@ def main() -> int:
     if page_now != page_fresh:
         PAGE.write_text(page_fresh)
         print(f"updated {PAGE.relative_to(ROOT)}")
+    if home_now != home_fresh:
+        HOME.write_text(home_fresh)
+        print(f"updated {HOME.relative_to(ROOT)}")
     print(f"wrote {SCORECARD.relative_to(ROOT)} — {fresh['status']}")
     if fresh["next_period_to_score"]:
         print(f"next period to score: {fresh['next_period_to_score']}")
