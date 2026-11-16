@@ -556,8 +556,7 @@ VS_OFFICIAL_SPECS = {
         "series": "UK real GDP, year-on-year growth, percent",
         "unit": "UK real GDP, % change on a year earlier",
         "source_note": (
-            "EFO path derived from the March 2026 EFO real-GDP level path stored "
-            "in <code>papers/obr-macro/figures/fig_anchored_data.csv</code>"
+            "OBR March 2026 EFO"
         ),
         "intro": (
             "GDP growth from the {round_id} round: our median and bands "
@@ -845,11 +844,11 @@ def render_status(card: dict) -> str:
         naive_vs = (", lower than the model's"
                     if sum(naive) < sum(e["abs_error"] for e in entries) else "")
         cover_value = f"{in68} of {scored}"
-        cover_sub = f"{in90} of {scored} in the 90% band; as archived."
+        cover_sub = f"{in90} of {scored} inside 90%. Bands as archived."
         mae_value = f"{mae:.2f}pp"
         if len(naive) == scored:
             naive_mae = sum(naive) / len(naive)
-            mae_sub = f"No change: {naive_mae:.2f}pp{' (lower)' if naive_vs else ''}, same {scored}."
+            mae_sub = f"No-change forecast: {naive_mae:.2f}pp on the same {scored}."
             top = max(mae, naive_mae)
             bars = (
                 '          <div class="fc-bars" aria-hidden="true">'
@@ -872,8 +871,8 @@ def render_status(card: dict) -> str:
     if scored:
         last = max(e["outturn_vintage"] for e in entries)
         asof = (f'      <p class="record-asof"><strong>Last scored <time datetime="{esc(last)}">'
-                f'{esc(long_date(last))}</time>.</strong> Later outturns are not in yet. '
-                f'Store updated <span class="nowrap">{esc(fetched)}</span>.</p>')
+                f'{esc(long_date(last))}</time>;</strong> data store updated '
+                f'<span class="nowrap">{esc(long_date(fetched))}</span>.</p>')
     else:
         asof = '      <p class="record-asof"><strong>Nothing scored yet.</strong></p>'
 
@@ -895,10 +894,10 @@ def render_status(card: dict) -> str:
         *tile("ruler", mae_value, "mean absolute error", mae_sub, bars),
         *tile("layers", f"{scored_rounds} of {rounds}", f"round{'' if rounds == 1 else 's'} scored",
               next_sub),
-        "      </div>",
-        *([f'      <p class="fc-callout">{icon("info")}<span>{scored} score{' is' if scored == 1 else 's are'} '
+        *([f'        <p class="fc-callout">{icon("info")}<span>{scored} score{' is' if scored == 1 else 's are'} '
            'too few to show skill either way. <a href="#limits">Limits</a></span></p>']
           if scored < 20 else []),
+        "      </div>",
     ])
 
 
@@ -1017,7 +1016,7 @@ def render_results(card: dict) -> str:
         '<li><span class="fc-sw fc-sw-68"></span>68% band</li>'
         '<li><span class="fc-sw fc-sw-med"></span>median</li>'
         '<li><span class="fc-sw fc-sw-out"></span>outturn</li>'
-        '<li class="fc-legend-note">Each strip is scaled to its own 90% band, whose ends are labelled; bands as archived.</li></ul>',
+        '<li class="fc-legend-note">Each strip spans its own 90% band.</li></ul>',
         '      <div class="fc-board ab-card" role="table" aria-label="Every scored forecast: archived median and bands, outturn, error">',
         f'        <div class="fc-row fc-head" role="row"><span role="columnheader">{icon("target", "fc-ic fc-th-ic")}Target and round</span>'
         f'<span role="columnheader">{icon("gdp", "fc-ic fc-th-ic")}Median, bands and outturn</span>'
@@ -1038,7 +1037,7 @@ def render_results(card: dict) -> str:
             '        <div class="fc-row" role="row">'
             f'<div class="fc-tgt" role="rowheader"><span class="fc-var">{icon(e["variable"] if e["variable"] in _ICON_PATHS else "target")}</span>'
             f'<span><strong>{_target(e)}</strong>'
-            f'<span class="fc-round-line"><a class="fc-round" href="/{esc(detail["path"])}">{esc(detail["round_id"])} · {esc(MODEL_DISPLAY.get(detail["model"], (detail.get("label", detail["model"]), None))[0])}</a>{retro}</span></span></div>'
+            f'<span class="fc-round-line"><a class="fc-round" href="#rounds">{esc(detail["round_id"])} · {esc(MODEL_DISPLAY.get(detail["model"], (detail.get("label", detail["model"]), None))[0].replace("BoE SVAR unemployment satellite", "unemployment satellite"))}</a>{retro}</span></span></div>'
             f'<div role="cell"><span class="visually-hidden">Median {e["forecast"]:.2f}%, 68% band '
             f'{e["lo68"]:.2f}–{e["hi68"]:.2f}, 90% band {e["lo90"]:.2f}–{e["hi90"]:.2f}, outturn {e["outturn"]:.2f}%.</span>'
             f"{_strip(e)}</div>"
@@ -1078,9 +1077,9 @@ def render_results(card: dict) -> str:
         '      <div class="table-scroll">',
         '        <table class="scoreboard sb-grid" data-stack="yes">',
         "          <caption>Absolute error against the same outturn, in percentage "
-        "points; the benchmark's own value beneath it. The BoE, OBR and SEF paths were "
-        "fixed three to five months before these rounds, on less data, so the gaps are "
-        "not a test of skill.</caption>",
+        "points; each benchmark's own value beneath. The BoE MPR (February), OBR EFO "
+        "(March) and SEF (April 2026) were fixed before these July rounds, on less data: "
+        "they show where views differed, not a test of skill.</caption>",
         "          <thead><tr>" + "".join(head) + "</tr></thead>",
         "          <tbody>",
     ]
@@ -1114,13 +1113,6 @@ def render_results(card: dict) -> str:
             "No change is the naive baseline: "
             + esc(NAIVE_NOTE.split(": ", 1)[1]) + " This is the driftless walk; the "
             '<a href="#limits">limits</a> say what happens against a walk with drift.'
-        )
-    if labels:
-        notes.append(
-            "Published paths were fixed earlier, on less data: the BoE MPR in "
-            "February, the OBR EFO in March and the Bank's survey of external "
-            "forecasters (SEF) in April 2026, against July rounds. They show where views "
-            "differed, not who forecasts better."
         )
     body += [f"        <p>{n}</p>" for n in notes]
     body += ["        </div>", "      </details>"]
