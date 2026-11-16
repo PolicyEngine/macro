@@ -437,6 +437,50 @@ def test_obr_shock_carries_the_lever_caveat_in_the_payload():
     assert "0.6" in levers["CGG"]["caveat"], "CGG caveat omits the OBR published figure"
 
 
+def test_obr_bank_rate_and_household_levers_are_listed_with_caveats():
+    """R and HHDI_ADDFACTOR are the two levers the site's worked examples and
+    drift canaries use, yet the variable list named only CGG, TCPRO and CGIPS,
+    so an MCP caller could neither discover them nor read their caveats
+    (polish run, 16 Nov 2026)."""
+    from policyengine_macro import core
+
+    levers = {v["var"]: v for v in core.obr_list_variables()}
+    assert "3-5 times" in levers["R"]["caveat"]
+    assert "pp" in levers["R"]["units"]
+    assert "current_price" in levers["HHDI_ADDFACTOR"]["caveat"]
+    assert "positive = household income falls" in levers["HHDI_ADDFACTOR"]["units"]
+
+
+def test_obr_shock_carries_the_household_ratio_on_both_bases(monkeypatch):
+    """The household rows are real GDP but the shock is current-price
+    revenue; the payload must carry the model's current-price ratio, the
+    one comparable with the OBR's 0.3, not leave callers to form the real one."""
+    import pandas as pd
+    from policyengine_macro import core
+
+    def fake_run_reform(**kw):
+        df = pd.DataFrame({
+            "period": ["2025Q1", "2025Q2"], "delta_gdp_bn": [-0.15, -0.21],
+            "pct_gdp": [-0.02, -0.03], "delta_cons_m": [-150.0, -210.0],
+            "delta_if_m": [0.0, 0.0],
+        })
+        df.attrs.update(
+            gdp_per_revenue_current_price=[0.0987, 0.1405],
+            gdp_per_revenue_real=[0.0929, 0.1310],
+            gdp_per_revenue_basis_note="compare the current-price ratio",
+            solver_converged=True, solver_nonconverged_periods=[],
+        )
+        return df
+
+    monkeypatch.setattr(core, "_import_obr", lambda: fake_run_reform)
+    monkeypatch.setattr(core, "_obr_window_end", lambda periods: "2025Q2")
+    out = core.obr_shock("HHDI_ADDFACTOR", 1637.5, periods=2)
+    assert out["gdp_per_revenue_current_price"] == [0.0987, 0.1405]
+    assert out["gdp_per_revenue_real"] == [0.0929, 0.131]
+    assert "current-price" in out["gdp_per_revenue_basis_note"]
+    assert "current_price" in out["caveat"]
+
+
 def test_cli_help_header_names_every_subcommand():
     # The header said "the OBR emulator and the UK SVAR model" long after
     # FRB/US, HANK, OG-UK, DEFINE-UK and the microsim joined (issue #225).
