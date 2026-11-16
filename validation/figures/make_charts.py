@@ -205,8 +205,9 @@ def chart_obr_anchored():
         f"published October 2026 EFO, {quarters[0]} to {quarters[-1]}. Real GDP ranges from "
         f"{min(gdp):+.2f}% to {max(gdp):+.2f}% (mean absolute percentage error {mape_g:.2f}%); "
         f"consumption from {min(cons):+.2f}% to {max(cons):+.2f}% (mean absolute percentage error "
-        f"{mape_c:.2f}%). Continuous integration hard-fails the build if either mean absolute "
-        f"deviation reaches 1%; it does not test single quarters{over_note}."
+        f"{mape_c:.2f}%). Continuous integration pins each mean absolute percentage error to "
+        f"within 25% of its measured value, so a drift in either direction fails; it does not "
+        f"test single quarters{over_note}."
     )
     y_top, y_bot = ymap(1.5), ymap(-0.3)
     out = svg_open(x1 - x0 + 12, y_bot - y_top + 12, "obr-anchored",
@@ -1200,7 +1201,7 @@ def chart_hank_targets():
     parts = [
         '<div class="vc-fig vc-tablefig" data-chart="hank-targets">',
         '<div class="table-scroll"><table class="vc-table">',
-        "<caption>US HANK: internally solved parameters vs Auclert et al. (2021) Table B.III</caption>",
+        "<caption>US HANK: internally solved parameters vs <a href=\"https://doi.org/10.3982/ECTA17434\">Auclert et al. (2021)</a> Table B.III</caption>",
         '<thead><tr><th scope="col">parameter</th><th scope="col">solved</th>'
         '<th scope="col" class="num">published</th><th scope="col" class="num">ours</th>'
         '<th scope="col" class="num">|diff|</th></tr></thead>',
