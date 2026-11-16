@@ -494,8 +494,8 @@ VS_OFFICIAL_SPECS = {
             "<code>papers/obr-macro/figures/efo_march_2026_cpi.csv</code>"
         ),
         "intro": (
-            "Same round, CPI: the model sees stickier inflation than the "
-            "EFO — partly because a VAR estimated through the 2021–23 "
+            "Same round, CPI: the model projects inflation staying higher "
+            "than the EFO — partly because a VAR estimated through the 2021–23 "
             "surge mean-reverts toward a higher sample mean."
         ),
     },
@@ -719,7 +719,9 @@ def render_status(card: dict) -> str:
     skill claim on their own (DESIGN.md §7.5).
     """
     rounds = card["rounds"]
-    entries = [e for _, e in scored_entries(card)]
+    pairs = scored_entries(card)
+    entries = [e for _, e in pairs]
+    scored_rounds = len({d["round_id"] for d, _ in pairs})
     scored = len(entries)
     pending = card.get("pending_detail")
     fetched = store_last_fetched()
@@ -728,7 +730,9 @@ def render_status(card: dict) -> str:
         next_sub = f"next <span class=\"nowrap\">{esc(pending['period'])}</span>, {esc(who)}; store updated <span class=\"nowrap\">{esc(fetched)}</span>"
     else:
         next_sub = "every archived period has an outturn"
-    rounds_sub = f"from {rounds} archived round{'' if rounds == 1 else 's'}; {next_sub}"
+    rounds_sub = (f"from {scored_rounds} of {rounds} archived round{'' if rounds == 1 else 's'}; {next_sub}"
+                  if scored and scored_rounds != rounds else
+                  f"from {rounds} archived round{'' if rounds == 1 else 's'}; {next_sub}")
     if scored:
         in68 = sum(1 for e in entries if e["in_68"])
         in90 = sum(1 for e in entries if e["in_90"])

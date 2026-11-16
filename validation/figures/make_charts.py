@@ -203,8 +203,8 @@ def chart_obr_anchored():
     desc = (
         f"Line chart. Quarterly percentage deviation of the anchored emulator from the "
         f"published March 2026 EFO, {quarters[0]} to {quarters[-1]}. Real GDP ranges from "
-        f"{min(gdp):+.2f}% to {max(gdp):+.2f}% (mean absolute deviation {mape_g:.2f}%); "
-        f"consumption from {min(cons):+.2f}% to {max(cons):+.2f}% (mean absolute deviation "
+        f"{min(gdp):+.2f}% to {max(gdp):+.2f}% (mean absolute percentage error {mape_g:.2f}%); "
+        f"consumption from {min(cons):+.2f}% to {max(cons):+.2f}% (mean absolute percentage error "
         f"{mape_c:.2f}%). Continuous integration hard-fails the build if either mean absolute "
         f"deviation reaches 1%; it does not test single quarters{over_note}."
     )
@@ -500,10 +500,10 @@ def chart_obr_freerun():
         f"Line chart of quarterly real GDP levels in billions of pounds, {quarters[0]} to "
         f"{quarters[-1]}. The published March 2026 EFO path rises from {efo[0]:.1f} to "
         f"{efo[-1]:.1f}. The anchored emulator tracks it closely, running "
-        f"from {anchored[0]:.1f} to {anchored[-1]:.1f} (mean absolute deviation {mad_a:.2f} per "
+        f"from {anchored[0]:.1f} to {anchored[-1]:.1f} (mean absolute percentage error {mad_a:.2f} per "
         f"cent, recomputed here from the plotted series). The free-running emulator, de-seeded "
         f"and with no add-factors, contracts from {freerun[0]:.1f} to {freerun[-1]:.1f} — a gap "
-        f"that widens to {gap:.0f} billion pounds, {mad_f:.2f} per cent mean absolute deviation "
+        f"that widens to {gap:.0f} billion pounds, {mad_f:.2f} per cent mean absolute percentage error "
         f"over the horizon. Free-running and EFO paths from "
         f"papers/obr-macro/figures/fig_free_running_data.csv; anchored path from "
         f"papers/obr-macro/figures/fig_anchored_data.csv. Coordinates: value v in billions maps "
@@ -542,9 +542,9 @@ def chart_obr_freerun():
     # apart and both rise into the edge, so a label below either one would sit
     # on the line.
     return chartkit.figure("\n".join(out), unit="Real GDP, £bn per quarter", legend=[
-        ("ln-s1", f"anchored ({mad_a:.2f}% MAD)"),
+        ("ln-s1", f"anchored ({mad_a:.2f}% MAPE)"),
         ("ln-s2", "EFO March 2026"),
-        ("ln-s3", f"free-running ({mad_f:.2f}% MAD)"),
+        ("ln-s3", f"free-running ({mad_f:.2f}% MAPE)"),
     ])
 
 

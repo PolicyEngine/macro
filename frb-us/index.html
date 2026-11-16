@@ -20,7 +20,7 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=24" />
+<link rel="stylesheet" href="/style.css?v=25" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -41,7 +41,7 @@
 <nav class="crumbs mono" aria-label="You are here">
     <a href="/">Home</a>
     <a href="/models">Models</a>
-    <span aria-current="page">FRB-US</span>
+    <span aria-current="page">FRB/US</span>
 </nav>
 
 <main id="top">
@@ -53,7 +53,7 @@
     </div>
   </section>
 
-  <nav class="model-tabs" aria-label="FRB-US pages">
+  <nav class="model-tabs" aria-label="FRB/US pages">
     <div class="model-tabs-row">
       <a class="model-tabs-link" href="/frb-us" aria-current="page">Overview</a>
       <a class="model-tabs-link" href="/frb-us/methodology">Methodology</a>
@@ -64,7 +64,7 @@
   </nav>
   <section id="verdict" class="band band-result ov-verdict">
     <p class="ov-verdict-line"><a class="chip chip-brand" href="/glossary#replicates">Replicates</a>
-      <span>Matches the Fed&rsquo;s pyfrbus on one 100bp funds-rate shock: a solver check, not a test of the economics. Baseline agreement is an identity, and the baseline misses core inflation.</span>
+      <span>Matches the Fed&rsquo;s pyfrbus on one 100bp funds-rate shock: a solver check, not a test of the economics. Its baseline equals the Board&rsquo;s by construction, and that baseline misses core inflation.</span>
       <a class="ov-verdict-link" href="/frb-us/validation">How far to trust it <span aria-hidden="true">&rarr;</span></a></p>
   </section>
 
@@ -92,9 +92,9 @@
   <section id="answers" class="band ov-example">
     <div class="band-head" data-icon="calculator"><h2>What it returns</h2>
       <p class="section-intro">One command: a 100bp funds-rate tightening in 2026Q1, under the default inertial Taylor rule.</p></div>
-    <div class="stat-row"><div class="stat stat-us stat-neutral"><span class="stat-label">Shock</span><span class="stat-value">+1.0pp</span><span class="stat-sub">funds-rate rule error, 2026Q1</span></div><div class="stat stat-us"><span class="stat-label">2027 wage bill</span><span class="stat-value">&minus;0.65%</span><span class="stat-sub">compensation per hour plus hours</span></div></div>
+    <div class="stat-row"><div class="stat stat-us stat-neutral"><span class="stat-label">Shock applied</span><span class="stat-value">+1.0pp</span><span class="stat-sub">funds-rate rule error, 2026Q1</span></div><div class="stat stat-us"><span class="stat-label">2027 wage bill</span><span class="stat-value">&minus;0.65%</span><span class="stat-sub">compensation per hour plus hours</span></div></div>
     <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code></pre></div>
-    <p class="scen-note">It returns the funds rate, real GDP, unemployment and core inflation, quarter by quarter. The full response, set against the Board&rsquo;s documented simulation properties, and the fiscal multipliers are on <a href="/frb-us/validation#worked-shock">Validation</a>.</p>
+    <p class="scen-note">It returns the funds rate, real GDP, unemployment and core inflation, quarter by quarter. <a href="/frb-us/validation#worked-shock">See the GDP, unemployment and inflation response</a>, set against the Board&rsquo;s documented simulation properties, with the fiscal multipliers.</p>
   </section>
 
   <section id="pe-bridge" class="band ov-flow">
@@ -108,7 +108,7 @@
           <span class="pl-node pl-node-out"><strong>Who bears it</strong></span>
         </div>
     <p class="ov-flow-note"><code>frbus_shock_incidence</code> scales US employment income with the wage and hours deviations, so federal and state taxes, SNAP and the EITC show who bears it (<a href="/models#compose">every join in the suite</a>).</p>
-    <p class="callout callout-warn"><strong>Uniform scaling is an experimental illustration:</strong> real incidence concentrates in job losers. The join runs one way; <code>score_reform</code> refuses <code>model="frbus"</code>.</p>
+    <p class="callout callout-warn"><strong>Uniform scaling is an experimental illustration:</strong> real incidence concentrates in job losers.</p>
   </section>
 
   <section id="card" class="band ov-spec">
@@ -123,7 +123,7 @@
       <div><dt>Uncertainty</dt><dd>Not comprehensive: the hosted shock returns one deterministic path</dd></div>
       <div><dt>Access</dt><dd>Hosted raw shocks, CLI, Python package (<a href="/frb-us/code">Code</a>)</dd></div>
       <div><dt>Runtime</dt><dd>About 3 seconds cold, well under a second warm</dd></div>
-      <div class="model-card-wide"><dt>Joins the microsimulation</dt><dd>Wage and hours paths scale US employment income (<a href="#pe-bridge">step 3</a>, experimental)</dd></div>
+      <div class="model-card-wide"><dt>Joins the microsimulation</dt><dd>Wage and hours paths scale US employment income (<a href="#pe-bridge">the join above</a>, experimental)</dd></div>
       <div class="model-card-wide"><dt>Status</dt><dd>Replicates the Fed's pyfrbus on one 100bp funds-rate shock, within the gap between pyfrbus 1.0.0 and 1.1.1; a solver check, not a test of the economics</dd></div>
       <div class="model-card-wide"><dt>Cannot answer</dt><dd>PolicyEngine reforms; <a class="gloss-link" href="/glossary#expectations">model-consistent</a> expectations, so no forward guidance; anything about the UK</dd></div>
     </dl>

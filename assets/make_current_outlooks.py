@@ -127,8 +127,9 @@ def boe_chart() -> str:
         chartkit.figure("\n".join(out), legend=[
             ("ln-s1", "median"), ("sw-band68", "68% band"), ("sw-band90", "90% band"),
         ], unit="UK real GDP, % change on a year earlier",
-            notes=[f"Current forecast from {data['data_edge']}."]),
-        f"<figcaption>Bands are the model&rsquo;s raw posterior quantiles, not rescaled to measured coverage &mdash; the calibrated version is on the <a href='/forecasts'>forecast record</a>. Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through {data['data_edge']}; forecast begins {data['forecast_start']}. Estimated on {data['estimation_sample'].replace('-', '&ndash;')}; {data['draws']:,} posterior draws, {data['accepted']} accepted; five stochastic paths per accepted draw. Source and provenance: <code>papers/boe-svar/figures/current_forecast.json</code>.</figcaption>",
+            notes=[f"Forecast made {data['generated']} from data through {data['data_edge']}."]),
+        f"<figcaption>Bands are raw posterior quantiles, not rescaled to measured coverage; the calibrated version is on the <a href='/forecasts'>forecast record</a>."
+        f"<details class=\"expander\"><summary>Run details</summary><p>Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through {data['data_edge']}; forecast begins {data['forecast_start']}. Estimated on {data['estimation_sample'].replace('-', '&ndash;')}; {data['draws']:,} posterior draws, {data['accepted']} accepted; five stochastic paths per accepted draw. A separate run from the shock probabilities, so the draw counts differ. Source and provenance: <code>papers/boe-svar/figures/current_forecast.json</code>.</p></details></figcaption>",
         "</figure>",
     ])
 

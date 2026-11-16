@@ -56,9 +56,9 @@ def expected():
         devs = [pct(r[f"{col}_model"], r[f"{col}_efo"]) for r in a.values()]
         claims.append(f"{fmt_signed(min(devs))} to {fmt_signed(max(devs))}")
         mad = sum(abs(d) for d in devs) / len(devs)
-        claims.append(f"mean absolute deviation {mad:.2f}%")
+        claims.append(f"mean absolute percentage error {mad:.2f}%")
     fr_devs = [abs(pct(r["GDPM_model"], r["GDPM_efo"])) for r in fr.values()]
-    claims.append(f"{sum(fr_devs) / len(fr_devs):.2f} per cent mean absolute deviation")
+    claims.append(f"{sum(fr_devs) / len(fr_devs):.2f} per cent mean absolute percentage error")
     claims.append(
         f"contracts from {fr[lo]['GDPM_model'] / 1000:.1f} to {fr[hi]['GDPM_model'] / 1000:.1f}"
     )

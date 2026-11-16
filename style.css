@@ -6048,7 +6048,7 @@ section[data-q][hidden] { display: none; }
 .stat-row-4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
 .scen-note { max-width: 75ch; margin: var(--s-3) 0 0; color: var(--text-body); font-size: var(--fs-body-sm); }
 .scen-note .chip { margin-right: 6px; vertical-align: 1px; }
-.spark { margin: 0; max-width: 560px; }
+.spark { margin: 0; }
 .spark svg { display: block; width: 100%; height: 64px; }
 .spark-bar { fill: var(--primary); }
 .spark-bar.spark-neg { fill: var(--teal-500); }
@@ -6087,3 +6087,16 @@ section[data-q][hidden] { display: none; }
 }
 .scen-switch button { min-height: 44px; }
 .scen-switch button[aria-selected="true"] { box-shadow: inset 0 0 0 1.5px var(--primary); }
+
+/* r11 (Fable demo pass): sparkline and its note side by side on wide screens,
+   so neither fills only the left half; the three-tile row keeps no orphan. */
+@media (min-width: 900px) {
+  .scen-panel:has(> .spark) { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); column-gap: var(--s-5); align-items: start; }
+  .scen-panel:has(> .spark) > .scen-title,
+  .scen-panel:has(> .spark) > .stat-row { grid-column: 1 / -1; }
+  .scen-panel:has(> .spark) > .scen-note { margin-top: 0; }
+}
+@media (max-width: 639px) {
+  .scen-panel .stat-row > .stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+.ov-spec details.expander { border-top: 0; }

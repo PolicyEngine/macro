@@ -20,7 +20,7 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=24" />
+<link rel="stylesheet" href="/style.css?v=25" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -91,14 +91,14 @@
 
   <section id="answers" class="band ov-example">
     <div class="band-head" data-icon="calculator"><h2>What it returns</h2>
-      <p class="section-intro">The latest round: the shocks behind 2026Q1 and the forecast that follows.</p></div>
+      <p class="section-intro">The shocks behind 2026Q1 and the forecast made from it on 29 July 2026. The 12 November round, with data through 2026Q2, is on the <a href="/forecasts">forecast record</a>.</p></div>
     <div class="glance-switch scen-switch" role="tablist" aria-label="Worked example">
-      <button type="button" role="tab" id="svar-scen-tab-0" aria-controls="svar-scen-0" aria-selected="true">Latest shocks</button>
+      <button type="button" role="tab" id="svar-scen-tab-0" aria-controls="svar-scen-0" aria-selected="true">Shocks, 2026Q1</button>
       <button type="button" role="tab" id="svar-scen-tab-1" aria-controls="svar-scen-1" aria-selected="false" tabindex="-1">Forecast</button>
     </div>
     <div class="scen-panel" id="svar-scen-0" role="tabpanel" aria-labelledby="svar-scen-tab-0">
       <h3 class="scen-title">What hit the UK economy in 2026Q1</h3>
-      <div class="stat-row stat-row-3"><div class="stat"><span class="stat-label">World demand</span><span class="stat-value">0.71</span><span class="stat-sub">probability it was negative</span></div><div class="stat"><span class="stat-label">World energy</span><span class="stat-value">0.90</span><span class="stat-sub">probability it was negative</span></div><div class="stat"><span class="stat-label">World supply</span><span class="stat-value">0.87</span><span class="stat-sub">probability it was positive</span></div><div class="stat"><span class="stat-label">UK demand</span><span class="stat-value">0.81</span><span class="stat-sub">probability it was positive</span></div><div class="stat"><span class="stat-label">UK supply</span><span class="stat-value">0.71</span><span class="stat-sub">probability it was positive</span></div><div class="stat"><span class="stat-label">Monetary policy</span><span class="stat-value">0.84</span><span class="stat-sub">probability it was expansionary</span></div></div>
+      <div class="stat-row stat-row-3"><div class="stat"><span class="stat-label">World demand: negative</span><span class="stat-value">71%</span><span class="stat-sub">posterior probability</span></div><div class="stat"><span class="stat-label">World energy: negative</span><span class="stat-value">90%</span><span class="stat-sub">posterior probability</span></div><div class="stat"><span class="stat-label">World supply: positive</span><span class="stat-value">87%</span><span class="stat-sub">posterior probability</span></div><div class="stat"><span class="stat-label">UK demand: positive</span><span class="stat-value">81%</span><span class="stat-sub">posterior probability</span></div><div class="stat"><span class="stat-label">UK supply: positive</span><span class="stat-value">71%</span><span class="stat-sub">posterior probability</span></div><div class="stat"><span class="stat-label">Monetary policy: expansionary</span><span class="stat-value">84%</span><span class="stat-sub">posterior probability</span></div></div>
       <p class="scen-note">The posterior probability that each named shock hitting the latest quarter had the sign shown (<code>latest_shocks</code>; 6,000 draws, 430 accepted, ESS 198). How each shock propagates: <a href="/svar/methodology">methodology</a>.</p>
     </div>
     <div class="scen-panel" id="svar-scen-1" role="tabpanel" aria-labelledby="svar-scen-tab-1">
@@ -139,9 +139,9 @@
 <li><span class="vc-sw sw-band68" aria-hidden="true"></span>68% band</li>
 <li><span class="vc-sw sw-band90" aria-hidden="true"></span>90% band</li>
 </ul>
-<p class="vc-notes">Current forecast from 2026Q1.</p>
+<p class="vc-notes">Forecast made 2026-07-29 from data through 2026Q1.</p>
 </div><!-- /vc-fig -->
-<figcaption>Bands are the model&rsquo;s raw posterior quantiles, not rescaled to measured coverage &mdash; the calibrated version is on the <a href='/forecasts'>forecast record</a>. Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through 2026Q1; forecast begins 2026Q2. Estimated on 1992Q1&ndash;2025Q1; 5,600 posterior draws, 385 accepted; five stochastic paths per accepted draw. Source and provenance: <code>papers/boe-svar/figures/current_forecast.json</code>.</figcaption>
+<figcaption>Bands are raw posterior quantiles, not rescaled to measured coverage; the calibrated version is on the <a href='/forecasts'>forecast record</a>.<details class="expander"><summary>Run details</summary><p>Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through 2026Q1; forecast begins 2026Q2. Estimated on 1992Q1&ndash;2025Q1; 5,600 posterior draws, 385 accepted; five stochastic paths per accepted draw. A separate run from the shock probabilities, so the draw counts differ. Source and provenance: <code>papers/boe-svar/figures/current_forecast.json</code>.</p></details></figcaption>
 </figure>
 <!-- boe-current-outlook:end -->
         </div>
@@ -175,6 +175,7 @@
       <div><dt>Uncertainty</dt><dd><a class="gloss-link" href="/glossary#prior-posterior">Posterior</a> 68% and 90% intervals, raw rather than calibrated to <a href="/svar/validation#rolling">measured coverage</a></dd></div>
       <div><dt>Access</dt><dd>Hosted forecast and latest shocks, CLI, Python</dd></div>
       <div><dt>Runtime</dt><dd>Minutes per estimation run</dd></div>
+      <div class="model-card-wide"><dt>Joins the microsimulation</dt><dd>The median CPI path prices benefit uprating (<a href="#pe-bridge">the join above</a>, experimental)</dd></div>
       <div class="model-card-wide"><dt>Status</dt><dd>Partial replication of Brignone and Piffer (2025): GDP decomposition consistent with the paper; CPI global-shock share about 8pp short; no forecast skill against a drifting random walk</dd></div>
       <div class="model-card-wide"><dt>Cannot answer</dt><dd>The effect of a statutory policy reform: <code>score_reform</code> does not accept it (<a href="/svar/validation#caveats">limits</a>)</dd></div>
     </dl>
