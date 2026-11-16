@@ -337,7 +337,8 @@ def frbus_summary() -> dict:
     No solve, so effectively instant once the model package is loaded (the
     very first FRB/US call in a fresh container pays a ~3s import of frbus and
     its scipy/sympy stack): what the model is (284 endogenous equations, April
-    2026 LONGBASE vintage, VAR expectations — MCE is not implemented), the
+    2026 LONGBASE vintage, VAR expectations — the package's opt-in MCE is not
+    exposed by the hosted tools), the
     available monetary policy rules, and how the implementation was validated
     against the Federal Reserve's own pyfrbus: the tracking invariant holds to
     5.6e-17 and the 100bp monetary shock matches pyfrbus 1.0.0 to 6.0e-9
@@ -391,14 +392,18 @@ def hank_shock(
             no-capital variant: monetary/productivity only, no investment
             series).
         include_distribution: two_asset only — add steady-state MPC by
-            liquid-wealth quartile, the hand-to-mouth share, and the impact
+            liquid-wealth quartile (with the windfall it is measured out of:
+            25% of mean quarterly post-tax labour income, about $6,000 per
+            household, far above rebate sizes), the hand-to-mouth share
+            (with its threshold and zero-liquid atom), and the impact
             consumption response by total-wealth quartile (first-order
             approximation from steady-state policies: the MPC-heterogeneity
             channel only, not full household-level dynamics).
         name: Optional label for the experiment.
 
     Returns per-quarter rows (Y, C, I in % deviation from steady state; pi
-    and r in pp deviations of quarterly rates; plus the shock path), a
+    and r in pp deviations of quarterly rates, where r is the ex-post real
+    return, so its quarter 0 is the inflation surprise; plus the shock path), a
     `peaks` block, and `series_meaning`. First call per variant pays the
     steady-state (~13s) and jacobian (~5s) solves; both are cached, so warm
     calls are effectively instant.
@@ -607,9 +612,11 @@ def forecast_uk(
 
     Args:
         horizons: Forecast horizon in quarters (1-40; default 12 = 3 years).
-        draws: Posterior draws (default 2000: ~135 accepted draws, ESS ~65,
-            a couple of minutes on first call; ~3500 draws reaches ESS >= 100;
-            500 is faster but yields ~35 accepted, ESS ~14, and a warning).
+        draws: Posterior draws (default 2000: ~159 accepted draws, ESS ~49,
+            a couple of minutes on first call, with a weak-inference warning;
+            3500 gives ~264 accepted, ESS ~92, still just under 100; 6000
+            gives 455 accepted, ESS ~181, as used for archived rounds; 500
+            is faster but yields ~34 accepted, ESS ~15).
             Must be between 50 and 10,000. Results are cached in-process, so
             repeated calls with the same
             (horizons, draws) are instant.

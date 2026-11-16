@@ -827,7 +827,7 @@ def frbus_shock(
         "horizon": horizon,
         "policy_rule": policy_rule,
         "policy_rule_description": FRBUS_POLICY_RULES[policy_rule]["description"],
-        "expectations": "VAR (backward-looking); MCE is not implemented",
+        "expectations": "VAR (backward-looking); this tool does not expose the package's opt-in MCE",
         "series_meaning": {v: modes[v][1] for v in wanted},
         "results": rows,
         "peaks": peaks,
@@ -868,8 +868,11 @@ def frbus_summary() -> dict:
                          "period by a damped Newton method with an analytic "
                          "sparse Jacobian (xtol=1e-8)",
         "data_vintage": "April 2026 LONGBASE",
-        "expectations": "VAR (backward-looking) only; MCE (model-consistent "
-                        "expectations) raises NotImplementedError",
+        "expectations": "VAR (backward-looking) in every hosted tool. The "
+                        "pinned package also supports opt-in MCE (model-"
+                        "consistent expectations, Frbus(path, mce=...), "
+                        "gated against the Board's pyfrbus at < 1e-6), but "
+                        "no hosted tool exposes them",
         "default_window": f"{FRBUS_DEFAULT_START} + {FRBUS_DEFAULT_HORIZON} quarters",
         "policy_rules": [
             {"rule": k, "description": v["description"],
@@ -1021,7 +1024,10 @@ HANK_HEADLINE = {
     "C": "Aggregate consumption, % deviation from steady state",
     "I": "Investment, % deviation from steady state (two_asset only)",
     "pi": "Inflation (quarterly rate), pp deviation from steady state",
-    "r": "Real interest rate (quarterly rate), pp deviation from steady state",
+    "r": "Ex-post real return on liquid assets (quarterly rate), pp "
+         "deviation from steady state: r_t = (1 + i_{t-1})/(1 + pi_t) - 1, "
+         "so quarter 0 moves only with the inflation surprise and a policy "
+         "rate move shows from quarter 1 (not the ex-ante real rate)",
     "w": "Pre-tax real wage, % deviation from steady state",
     "N": "Labor, % deviation from steady state",
     # The financing. The DAG holds bond supply fixed, so a G shock is paid
@@ -1241,6 +1247,7 @@ def hank_shock(
 
     if include_distribution:
         _, _, _, distributional = _import_us_hank()
+        stats = distributional.summary(ss)
         result["distributional"] = {
             "note": (
                 "FIRST-ORDER APPROXIMATION from steady-state policies: the "
@@ -1250,15 +1257,34 @@ def hank_shock(
                 "household-level dynamics."
             ),
             "aggregate_quarterly_mpc_liquid": round(
-                float(distributional.aggregate_mpc(ss)), 4
+                float(stats["aggregate_quarterly_mpc_liquid"]), 4
             ),
             "mpc_by_liquid_quartile": {
                 k: round(float(v), 4)
-                for k, v in distributional.mpc_by_liquid_quartile(ss).items()
+                for k, v in stats["mpc_by_liquid_quartile"].items()
             },
+            # An MPC means nothing without the windfall it was measured
+            # out of (us-hank-model: "Quote the number with its windfall
+            # size, or not at all"), so the convention ships with it.
+            "mpc_windfall": _hank_mpc_windfall(stats),
             "hand_to_mouth_share": round(
-                float(distributional.hand_to_mouth_share(ss)), 4
+                float(stats["hand_to_mouth_share"]), 4
             ),
+            "hand_to_mouth_definition": {
+                "liquid_threshold_model_units": round(
+                    float(stats["hand_to_mouth_breakdown"]["threshold"]), 4
+                ),
+                "constrained_share_at_zero_liquid": round(
+                    float(stats["hand_to_mouth_breakdown"]["constrained_share"]), 4
+                ),
+                "note": (
+                    "Share with liquid assets below the threshold (model units, "
+                    "steady-state quarterly output = 1). Most of it is the atom "
+                    "of households holding exactly zero liquid assets "
+                    "(constrained_share_at_zero_liquid), so the count barely "
+                    "depends on the threshold."
+                ),
+            },
             "impact_consumption_response_pct_by_wealth_quartile": {
                 k: round(float(v), 4)
                 for k, v in distributional.consumption_response_by_wealth_quantile(
@@ -1267,6 +1293,34 @@ def hank_shock(
             },
         }
     return result
+
+
+# us-hank-model README (main) maps model units to dollars at 2025 US GDP per
+# household, about $58,000 a quarter (steady-state quarterly output Y = 1).
+HANK_USD_PER_MODEL_UNIT_PER_HOUSEHOLD = 58_000
+
+
+def _hank_mpc_windfall(stats: dict) -> dict:
+    """The windfall convention behind the reported MPCs, in words and dollars."""
+    frac = stats.get("mpc_windfall_frac_of_quarterly_income")
+    units = stats.get("mpc_windfall_model_units")
+    usd = (
+        None if units is None
+        else int(round(units * HANK_USD_PER_MODEL_UNIT_PER_HOUSEHOLD, -2))
+    )
+    return {
+        "frac_of_mean_quarterly_post_tax_labour_income": frac,
+        "model_units": None if units is None else round(float(units), 4),
+        "approx_usd_per_household": usd,
+        "note": (
+            "MPCs are measured out of this windfall. It is far larger than "
+            "the 2001 and 2008 US tax rebates ($300-900) that the empirical "
+            "MPC range of roughly 0.15-0.25 comes from, and the model's MPC "
+            "falls with windfall size, so do not compare it with that range. "
+            "Dollar figure: model units x about $58,000 (2025 US GDP per "
+            "household per quarter), as in the us-hank-model README."
+        ),
+    }
 
 
 def hank_summary() -> dict:
@@ -1308,13 +1362,21 @@ def hank_summary() -> dict:
         "solution_method": "first-order (linear) impulse responses via the "
                            "general-equilibrium sequence-space Jacobian "
                            f"(T={HANK_T}); responses scale exactly with the "
-                           "shock size",
+                           "shock size. The model itself is not linear at "
+                           "the sizes users run: for a 1%-of-GDP spending "
+                           "rise (persistence 0.8) its nonlinear transition "
+                           "gives an impact multiplier of about 0.25 against "
+                           "the linear 0.175, and a cut of the same size "
+                           "about 0.125",
         "runtime": "steady state ~13s and jacobian ~5s on first use per "
                    "variant, both cached in-process; IRFs are then instant",
         "validation": {
-            "suite": "the model repo's replication suite gates the steady-state "
-                     "calibration targets, market clearing, and shock-response "
-                     "signs/magnitudes against the published paper results",
+            "suite": "the model repo's replication suite gates the six "
+                     "steady-state parameters that match the paper's Table "
+                     "B.III, market clearing, and shock-response signs; IRF "
+                     "magnitudes are regression pins on this implementation, "
+                     "not checks against the paper, which publishes no "
+                     "comparable two-asset IRF figure",
             "note": "a replication gate, not a forecast-accuracy claim: no "
                     "predictive validation exists or is claimed for this model",
         },
@@ -1368,14 +1430,14 @@ _SVAR_EST_START = "1992Q1"
 _SVAR_EST_END = "2025Q1"
 
 # Default posterior draws for hosted calls. Re-measured on the 1992Q1-2025Q1
-# estimation sample (seed 0), since the longer sample tightens the posterior
-# and lowers the sign-restriction acceptance rate: draws=500 -> 35 accepted,
-# ESS 13.6; 1000 -> 69, ESS 31.5; 2000 -> 135, ESS 65.3; 3500 -> 233,
-# ESS 101.4. Acceptance is ~6.8% and ESS ~3.3% of draws (was ~8% and ~3% on
-# the old 2023Q2 sample), so 2000 remains the smallest default that clears
-# the 100-accepted-draws reliability threshold -- 1000 would not (69).
-# Full ESS >= 100 still needs ~3500 draws; a `warnings` entry flags the
-# residual ESS shortfall honestly instead of hiding it. First-call runtime is
+# estimation sample with the 2026Q2 dataset pinned since #233 (seed 0, six
+# Covid dummies): draws=500 -> 34 accepted, ESS 15.0; 1000 -> 80, ESS 40.6;
+# 2000 -> 159, ESS 48.7; 3500 -> 264, ESS 91.5; 6000 -> 455, ESS 181.4 (the
+# hosted round of 12 Nov 2026). The 2026Q1 dataset gave 135 / ESS 65.3 at
+# 2000. 2000 remains the smallest default that clears the 100-accepted-draws
+# threshold -- 1000 would not (80). ESS is not proportional to draws, so ESS
+# >= 100 needs somewhat more than 3500; a `warnings` entry flags the
+# shortfall honestly instead of hiding it. First-call runtime is
 # a couple of minutes end to end and results are cached in-process.
 _SVAR_DEFAULT_DRAWS = 2000
 _SVAR_MIN_DRAWS = 50
@@ -4358,7 +4420,7 @@ def svar_summary() -> dict:
         "provenance": _provenance(
             model_id="boe-svar",
             distribution="boe_var",
-            data_vintage="estimation through 2025Q1; conditioning data through 2026Q1",
+            data_vintage="estimation through 2025Q1; conditioning data through 2026Q2",
             baseline="committed replication and forecast artefacts",
         ),
     }
