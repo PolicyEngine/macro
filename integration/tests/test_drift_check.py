@@ -37,9 +37,9 @@ def _obr_response(gdp_m, revision, model_id="obr-macro", url=OBR_URL):
 
 
 # Bank Rate +1 x12, quarter-by-quarter ΔGDP (£m). NEW is the current pin
-# (obr 6fbbe06, measured 15 Nov 2026, every quarter converged); OLD is the
-# previous pin e4d7faa, which the canaries must now reject.
-NEW_PIN_PATH = [-129, -356, -381, -405, -429, -448, -466, -480, -494, -505, -514, -522]
+# (obr 2965e82d, October 2026 EFO, every quarter converged); OLD is the
+# earlier pin e4d7faa, which the canaries must reject.
+NEW_PIN_PATH = [-128, -356, -381, -406, -431, -449, -464, -475, -484, -491, -497, -503]
 OLD_PIN_PATH = [-121, -200, -300, -431, -460, -470, -480, -482, -470, -450, -430, -416]
 
 
@@ -216,7 +216,7 @@ def test_bank_rate_canary_matches_the_page():
     c = CANARIES["obr_bank_rate_100bp"]
     line = int(dc.quoted_location(c).rsplit(":", 1)[1])
     text = (REPO / c["quoted_at"]).read_text().splitlines()[line - 1]
-    for figure in ("£129m", "£405m", "£480m", "£522m"):
+    for figure in ("£128m", "£406m", "£475m", "£503m"):
         assert figure in text
 
 
@@ -266,7 +266,7 @@ def test_local_checks_replace_hosted_checks_for_local_rows():
 def test_household_ratio_sign_matches_a_tax_rise():
     """The add-factor carries revenue raised: GDP falls, the ratio is positive."""
     c = CANARIES["obr_household_ratio_q12"]
-    resp = _obr_response([-300] * 11 + [-0.330 * 1615.75], PINS["OBR_REVISION"])
+    resp = _obr_response([-300] * 11 + [-0.330 * 1637.5], PINS["OBR_REVISION"])
     row = dc.evaluate(c, resp, REGISTRY, PINS)
     assert row["status"] == "pass", row["failures"]
     assert row["observed"]["gdp_per_revenue_q12"] == pytest.approx(0.330, abs=1e-6)

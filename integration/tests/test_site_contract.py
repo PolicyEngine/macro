@@ -106,8 +106,8 @@ def test_current_obr_outlook_uses_latest_official_efo_window():
     assert rows[0]["quarter"] == "2026Q1"
     assert rows[-1]["quarter"] == "2031Q1"
     page = _read("obr/index.html") + _read("obr/validation/index.html")
-    assert "March 2026 EFO" in page
-    assert "March 2026 detailed forecast tables on 7 October 2026" in page
+    assert "October 2026 EFO" in page
+    assert "October 2026 detailed forecast tables at obr-macroeconomic-model" in page
 
 
 def test_frozen_validation_vintages_are_not_relabelled_as_current_forecasts():
@@ -120,8 +120,8 @@ def test_frozen_validation_vintages_are_not_relabelled_as_current_forecasts():
 
 def test_validation_and_paper_landings_lead_with_current_uk_vintages():
     validation = _read("obr/validation/index.html")
-    assert "anchored baseline vs March 2026 EFO" in validation
-    assert "Current March 2026 EFO baseline" in validation
+    assert "anchored baseline vs October 2026 EFO" in validation
+    assert "Current October 2026 EFO baseline" in validation
     assert "anchored baseline vs November 2025 EFO" not in validation
 
     obr_paper = _read("papers/obr-macro/index.html")

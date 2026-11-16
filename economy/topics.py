@@ -1991,7 +1991,7 @@ def longbase_layer(column: str, last_observed: str) -> str:
         )
     return f"""      <div class="table-scroll">
         <table>
-          <caption>FRB/US April 2026 LONGBASE, {esc(description)}. This is the conditioning baseline that FRB/US shock experiments deviate from; it is not scored on <a href="/forecasts">the forecast record</a>.</caption>
+          <caption>FRB/US October 2026 LONGBASE, {esc(description)}. This is the conditioning baseline that FRB/US shock experiments deviate from; it is not scored on <a href="/forecasts">the forecast record</a>.</caption>
           <thead><tr><th scope="col">Quarter</th><th scope="col">Baseline</th><th scope="col">Status against the outturn</th><th scope="col">Uncertainty</th></tr></thead>
           <tbody>
 {chr(10).join(rows)}
@@ -2000,7 +2000,7 @@ def longbase_layer(column: str, last_observed: str) -> str:
       </div>"""
 
 
-LONGBASE_LABEL = "FRB/US LONGBASE baseline (Fed staff, April 2026 vintage)"
+LONGBASE_LABEL = "FRB/US LONGBASE baseline (Fed staff, October 2026 vintage)"
 LONGBASE_SOURCE = (
     '<a href="https://github.com/PolicyEngine/macro/blob/main/'
     'papers/frb-us/figures/longbase_baseline_yoy.csv">FRB/US LONGBASE</a> '
@@ -2035,7 +2035,7 @@ def us_path_chart(chart_id: str, name: str, unit: str,
     ``baseline`` is [(quarter, value)] dicts from the committed LONGBASE CSV,
     drawn dashed (``vc-s2``: published by someone else) over its own quarters
     only. It is never joined to the last outturn, unlike the UK fans: the UK
-    median is conditioned on that outturn, while LONGBASE is a fixed April 2026
+    median is conditioned on that outturn, while LONGBASE is a fixed October 2026
     vintage, so where an outturn now exists for a baseline quarter the gap
     between the two is the information. A gap in a stored monthly series (the
     missing 2025-10, say) breaks the line rather than being bridged.
@@ -2259,7 +2259,7 @@ def us_growth_model() -> str:
     facts = us_growth_facts()
     frbus = MODELS["frb-us"]
     return f"""    <div class="prose">
-{us_model_items([("forecasts", "Baseline: FRB/US LONGBASE (Fed staff, April 2026), with no bands.")])}
+{us_model_items([("forecasts", "Baseline: FRB/US LONGBASE (Fed staff, October 2026), with no bands.")])}
       <figure class="vchart-figure">
 {us_baseline_chart("us-topic-gdp-path", "US real GDP", "% change on a year earlier", "gdp_yoy_pct", facts["gdp"], yoy(facts["gdp"], 4)[-8:], ", growth derived from the stored level")}
       </figure>

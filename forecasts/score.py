@@ -385,7 +385,9 @@ def build() -> dict:
 
 # ------------------------------------------------- model vs official forecast
 
-EFO_CSV = ROOT / "papers" / "obr-macro" / "figures" / "fig_anchored_data.csv"
+# Frozen March 2026 EFO GDP levels: papers/obr-macro/figures/fig_anchored_data.csv now
+# follows the emulator's current anchor (October 2026), so the March benchmark keeps its own copy.
+EFO_CSV = HERE / "official" / "obr_efo_mar_2026_gdp_levels.csv"
 EFO_CPI_CSV = ROOT / "papers" / "obr-macro" / "figures" / "efo_march_2026_cpi.csv"
 def _latest_svar_round() -> Path:
     """Newest dated round with a boe-svar artifact, for the §03 display.
@@ -416,8 +418,9 @@ def efo_gdp_yoy() -> dict[str, float]:
 
     levels: dict[str, float] = {}
     with EFO_CSV.open() as fh:
-        for row in csv.DictReader(fh):
-            levels[row[""]] = float(row["GDPM_efo"])
+        body = [line for line in fh if not line.startswith("#")]
+    for row in csv.DictReader(body):
+        levels[row["quarter"]] = float(row["gdpm_efo_m"])
     return {
         period: (levels[period] / levels[_quarter_shift(period, 4)] - 1.0) * 100.0
         for period in levels

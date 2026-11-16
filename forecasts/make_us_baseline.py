@@ -7,7 +7,7 @@ Run:  python3 forecasts/make_us_baseline.py          # rewrite forecasts/us/inde
 Same contract as forecasts/score.py and forecasts/make_open_fans.py: the page
 is committed, the table between the ``us-longbase-baseline`` markers is
 generated from the committed CSV, and --check fails if they drift apart. The
-CSV is the Fed's April 2026 LONGBASE conditioning baseline extracted by the
+CSV is the Fed's October 2026 LONGBASE conditioning baseline extracted by the
 frb-us adapter — not a PolicyEngine forecast, no uncertainty bands, never
 scored.
 """
@@ -45,10 +45,10 @@ def render() -> str:
     )
     return "\n".join(
         [
-            "      <p class=\"fc-table-cap\">FRB/US April 2026 LONGBASE. Not a PolicyEngine "
+            "      <p class=\"fc-table-cap\">FRB/US October 2026 LONGBASE. Not a PolicyEngine "
             "forecast; no bands; never scored.</p>",
             "      <div class=\"table-scroll\">",
-            "        <table aria-label=\"FRB/US April 2026 LONGBASE baseline\">",
+            "        <table aria-label=\"FRB/US October 2026 LONGBASE baseline\">",
             "          <thead><tr><th scope=\"col\">Quarter</th>"
             "<th scope=\"col\">GDP y/y</th>"
             "<th scope=\"col\">CPI y/y</th>"

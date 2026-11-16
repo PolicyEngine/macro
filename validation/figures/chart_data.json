@@ -40,7 +40,7 @@
   ]
  },
  "obr_computed_share": {
-  "source": "docs/calibration_scorecard.md in the PolicyEngine/obr-macroeconomic-model repository, as of commit cde7302 (PR #41, which recovered eight ONS series a TLS failure had dropped; 355 series); earlier figures here predated that recovery and, before them, the OSHH ONS anchor (PR #22)",
+  "source": "docs/calibration_scorecard.md in the PolicyEngine/obr-macroeconomic-model repository at commit 2965e82d (PR #69, re-anchored to the October 2026 EFO; default nominal-GDP-pin closure, CI run 43866052221). Earlier figures here were the March 2026 vintage under the published closure, before the receipts identities (#56) and the ended EU payments (#62)",
   "total": 21,
   "computed": 11,
   "passthrough": 10,
@@ -49,18 +49,20 @@
   "grades": [
    {
     "key": "fair",
-    "label": "fair",
-    "count": 5,
+    "label": "fair or good",
+    "count": 7,
     "series": 1,
     "in_band": true,
     "examples": [
-     "real GDP 4.32 per cent",
-     "consumption 7.22 per cent",
-     "household income 6.18 per cent",
-     "real household income 5.94 per cent",
-     "trade balance 0.69 per cent of GDP"
+     "real GDP 4.25 per cent",
+     "consumption 7.24 per cent",
+     "business investment 7.34 per cent",
+     "household income 4.30 per cent",
+     "real household income 4.52 per cent",
+     "the current account 0.91 per cent of GDP",
+     "trade balance 0.41 per cent of GDP"
     ],
-    "source": "calibration_scorecard.md, free-running MAPE column"
+    "source": "calibration_scorecard.md at 2965e82d, default closure column"
    },
    {
     "key": "identity",
@@ -81,60 +83,48 @@
     "series": 3,
     "in_band": false,
     "examples": [
-     "business investment 15.28 per cent",
-     "the unemployment rate 1.01 percentage points",
-     "RPI inflation 1.71 percentage points"
+     "company profits 12.32 per cent",
+     "the unemployment rate 1.17 percentage points",
+     "RPI inflation 2.32 percentage points"
     ],
-    "source": "calibration_scorecard.md, variables outside band but within an order of magnitude"
-   },
-   {
-    "key": "off",
-    "label": "off",
-    "count": 2,
-    "series": 3,
-    "in_band": false,
-    "examples": [
-     "company profits 82.77 per cent",
-     "the current account 3.02 per cent of GDP"
-    ],
-    "source": "calibration_scorecard.md, worst two computed variables"
+    "source": "calibration_scorecard.md at 2965e82d, computed variables outside band"
    }
   ]
  },
  "frbus_residuals": {
-  "source": "papers/frb-us/sections/validation.tex, Tables tab:tracking and tab:refnoise",
+  "source": "us-frb-model VALIDATION.md at 846eeb5c (October 2026 LONGBASE, rerun 16 Nov 2026): Test 1 tracking table and the pyfrbus 1.1.1 cross-check table. The paper (papers/frb-us/sections/validation.tex) reports the April 2026 vintage",
   "_series_comment": "series is the row's KIND of comparison, not a decoration: 1 = ours against the Fed's implementation under shock (the evidence), 2 = the Fed's own two releases against each other (the reference-noise yardstick our rows are judged against), 3 = a tracking identity that re-solves to its own input and therefore cannot fail. Series 3 was previously 1 on the first row, which painted the row the page calls 'not evidence' in the accent colour.",
   "rows": [
    {
     "label": "ours vs LONGBASE \u2014 tracking identity, not evidence",
-    "value": 5.6e-17,
+    "value": 7.3e-12,
     "series": 3,
-    "source": "validation.tex tab:tracking, max abs error",
-    "note": "init_trac defines add-factors as minus the residuals at the input data, so re-solving reproduces it up to float64 for ANY input \u2014 verified: the same test passes at 6.7e-9 on randomly scrambled data. Shown for completeness; it measures arithmetic, not economics."
+    "source": "VALIDATION.md Test 1, max abs error",
+    "note": "init_trac defines add-factors as minus the residuals at the input data, so re-solving reproduces it up to float64 for ANY input \u2014 verified: the same test passes at 9.0e-9 on randomly scrambled data. Shown for completeness; it measures arithmetic, not economics."
    },
    {
     "label": "pyfrbus 1.1.1 vs LONGBASE \u2014 tracking identity",
-    "value": 1.1e-08,
+    "value": 1.9e-08,
     "series": 3,
-    "source": "validation.tex subsec:refnoise prose"
+    "source": "VALIDATION.md, pyfrbus 1.1.1 tracking"
    },
    {
     "label": "ours vs pyfrbus 1.0.0 (shock)",
-    "value": 6e-09,
+    "value": 1.4e-08,
     "series": 1,
-    "source": "validation.tex tab:refnoise row 1"
+    "source": "VALIDATION.md cross-check table row 1"
    },
    {
     "label": "ours vs pyfrbus 1.1.1 (shock)",
-    "value": 1.4e-08,
+    "value": 1.8e-08,
     "series": 1,
-    "source": "validation.tex tab:refnoise row 2"
+    "source": "VALIDATION.md cross-check table row 2"
    },
    {
     "label": "pyfrbus 1.1.1 vs 1.0.0 \u2014 the Fed\u2019s own releases",
-    "value": 1.3e-08,
+    "value": 1.4e-08,
     "series": 2,
-    "source": "validation.tex tab:refnoise row 3"
+    "source": "VALIDATION.md cross-check table row 3"
    }
   ]
  },

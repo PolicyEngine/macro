@@ -274,7 +274,7 @@ def frbus_shock(
     """Shock one FRB/US variable and return the US impulse responses — the
     US counterpart of obr_shock, using the Federal Reserve Board's FRB/US
     model (VAR/backward-looking expectations, 284 endogenous equations,
-    April 2026 LONGBASE vintage).
+    October 2026 LONGBASE vintage).
 
     Solves an add-factored baseline that reproduces LONGBASE to machine
     precision, then the same model with the shock applied, and returns
@@ -345,12 +345,12 @@ def frbus_summary() -> dict:
 
     No solve, so effectively instant once the model package is loaded (the
     very first FRB/US call in a fresh container pays a ~3s import of frbus and
-    its scipy/sympy stack): what the model is (284 endogenous equations, April
+    its scipy/sympy stack): what the model is (284 endogenous equations, October
     2026 LONGBASE vintage, VAR expectations — the package's opt-in MCE is not
     exposed by the hosted tools), the
     available monetary policy rules, and how the implementation was validated
     against the Federal Reserve's own pyfrbus: the tracking invariant holds to
-    5.6e-17 and the 100bp monetary shock matches pyfrbus 1.0.0 to 6.0e-9
+    7.3e-12 and the 100bp monetary shock matches pyfrbus 1.0.0 to 1.4e-8
     across all 284 variables. Also states plainly that FRB/US has NO
     PolicyEngine-reform bridge and that frbus_shock is the supported entry
     point.
@@ -586,7 +586,7 @@ def svar_inflation_incidence(
         draws: SVAR posterior draws (50-10,000; default 2000). The first
             call estimates the SVAR — a couple of minutes cold, like
             forecast_uk; results are cached in-process.
-        reference: 'obr' (default) — the March 2026 EFO CPI path packaged
+        reference: 'obr' (default) — the October 2026 EFO CPI path packaged
             with obr_macro — or 'target' — a flat 2.0%.
         dataset: Optional microdata dataset name override.
 

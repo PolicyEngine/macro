@@ -139,9 +139,9 @@ OBR_VARIABLES = [
         "description": "Real government consumption",
         "units": "£m per quarter (e.g. 1250 = £5bn/year increase)",
         "investment_closure": False,
-        # Measured at obr 6fbbe06 (nominal-GDP pin, every quarter
-        # converged): +1250/qtr moves GDP +1.267bn in the first quarter,
-        # rising to +1.311bn by the twelfth -- an impact multiplier of 1.01
+        # Measured at obr 2965e82d (October 2026 EFO, nominal-GDP pin, every
+        # quarter converged): +1250/qtr moves GDP +1.267bn in the first
+        # quarter, rising to +1.310bn by the twelfth -- an impact multiplier of 1.01
         # rising to 1.05. Most of it is the GDP identity; the small rise is
         # induced spending. Under the published closure (pin e4d7faa) it was
         # exactly 1.0000 and flat. Either way it is far above the OBR's
@@ -184,11 +184,11 @@ OBR_VARIABLES = [
         "description": "Nominal central government investment (feeds real GGI via the GGIPS/GGIDEF chain)",
         "units": "£m nominal per quarter (e.g. 3000 ≈ £2.5bn real per quarter)",
         "investment_closure": False,
-        # Measured at obr 6fbbe06 (nominal-GDP pin, every quarter converged,
-        # obr CI run 43779573540): delta_IF is exactly 0.0 because IF has no
+        # Measured at obr 2965e82d (October 2026 EFO, nominal-GDP pin, every
+        # quarter converged; obr results/site_figures.json): delta_IF is exactly 0.0 because IF has no
         # live equation; business investment (IBUSX) is the residual of
         # IBUS = IF - GGI - ... (l.84) and falls by exactly -delta GGI
-        # (+1500/qtr: -1,407 at q4); GDP falls only by the induced consumption
+        # (+1500/qtr over 8 quarters from 2026Q1: -1,408 at q4); GDP falls only by the induced consumption
         # (-3.8 at q4). Against the OBR's published 1.0 the channel is absent.
         "caveat": (
             "this channel does not transmit: total fixed investment (IF) has "
@@ -314,8 +314,8 @@ def obr_shock(
         "provenance": _provenance(
             model_id="obr-macro",
             distribution="obr-macro-model",
-            data_vintage="March 2026 EFO",
-            baseline="March 2026 EFO anchored baseline",
+            data_vintage="October 2026 EFO",
+            baseline="October 2026 EFO anchored baseline",
         ),
         "var": var,
         "shock": float(shock),
@@ -649,8 +649,8 @@ def _frbus_baseline(policy_rule: str, start, end):
     "Exactly" is the point and also the whole content of it: init_trac sets
     each add-factor to minus that equation's residual at the input data, so
     the baseline solve is algebraically the identity on whatever it was
-    tracked to. The 5.6e-17 residual is a software check, not evidence about
-    the economy -- the same gate passes at 6.7e-9 on randomly scrambled data.
+    tracked to. The 7.3e-12 residual is a software check, not evidence about
+    the economy -- the same gate passes at 9.0e-9 on randomly scrambled data.
     What it buys us here is the thing that matters: every reported number is a
     deviation from THAT baseline, so the shock is the only thing moving.
     """
@@ -828,8 +828,8 @@ def frbus_shock(
         "provenance": _provenance(
             model_id="frb-us",
             distribution="frbus",
-            data_vintage="April 2026 LONGBASE",
-            baseline="Federal Reserve April 2026 LONGBASE",
+            data_vintage="October 2026 LONGBASE",
+            baseline="Federal Reserve October 2026 LONGBASE",
         ),
         "var": var,
         "shock": float(shock),
@@ -886,7 +886,7 @@ def frbus_summary() -> dict:
         "equation_note": "284 endogenous variables solved simultaneously per "
                          "period by a damped Newton method with an analytic "
                          "sparse Jacobian (xtol=1e-8)",
-        "data_vintage": "April 2026 LONGBASE",
+        "data_vintage": "October 2026 LONGBASE",
         "expectations": "VAR (backward-looking) in every hosted tool. The "
                         "pinned package also supports opt-in MCE (model-"
                         "consistent expectations, Frbus(path, mce=...), "
@@ -902,7 +902,7 @@ def frbus_summary() -> dict:
             "tracking_invariant": {
                 "metric": "max abs error, all 284 endogenous variables x 20 "
                           "quarters, baseline solve vs LONGBASE after init_trac",
-                "value": 5.6e-17,
+                "value": 7.3e-12,
                 "gate": 1e-8,
                 # Served alongside the number because a consumer reading
                 # validation off this payload would otherwise take the
@@ -915,7 +915,7 @@ def frbus_summary() -> dict:
                     "input data, so the solve is algebraically the identity "
                     "on whatever it was tracked to -- for any input. The "
                     "model repo gates the demonstration: the same check "
-                    "passes at 6.7e-9 on a baseline whose every series has "
+                    "passes at 9.0e-9 on a baseline whose every series has "
                     "been scrambled by a random factor, with every "
                     "accounting identity destroyed. It gates the software. "
                     "Read vs_vendor_pyfrbus and monetary_tightening_properties "
@@ -926,12 +926,14 @@ def frbus_summary() -> dict:
             "vs_vendor_pyfrbus": {
                 "metric": "max abs difference vs the Fed's pyfrbus 1.0.0 on the "
                           "100bp rffintay_aerr experiment, all endos x 20 quarters",
-                "value": 6.0e-9,
+                "value": 1.4e-8,
                 "gate": 1e-6,
-                "note": "pyfrbus 1.1.1 differs from pyfrbus 1.0.0 by 1.3e-8 — "
-                        "the Fed's own two releases differ from each other by "
-                        "as much as this implementation differs from either, so "
-                        "the residual is solver tolerance, not semantics",
+                "note": "pyfrbus 1.1.1 differs from pyfrbus 1.0.0 by 1.4e-8 and "
+                        "this implementation differs from 1.1.1 by 1.8e-8 — "
+                        "the same order of magnitude as the Fed's own two "
+                        "releases differ from each other, and all far inside "
+                        "the 1e-6 gate, so the residual is solver tolerance, "
+                        "not semantics",
             },
             "monetary_tightening_properties": {
                 "shock": "100bp rffintay_aerr, 2026Q1, inertial Taylor rule",
@@ -960,7 +962,7 @@ def frbus_summary() -> dict:
     out["provenance"] = _provenance(
         model_id="frb-us",
         distribution="frbus",
-        data_vintage="April 2026 LONGBASE",
+        data_vintage="October 2026 LONGBASE",
         baseline="Federal Reserve LONGBASE tracking baseline",
     )
     return out
@@ -3380,12 +3382,12 @@ def obr_score_reform(
         result_type="scenario",
         country="uk",
         reform=dict(reform),
-        baseline="OBR Economic and Fiscal Outlook, March 2026",
+        baseline="OBR Economic and Fiscal Outlook, October 2026",
         provenance=_provenance(
             model_id="obr-macro",
             distribution="obr-macro-model",
-            data_vintage="March 2026 EFO",
-            baseline="March 2026 EFO anchored baseline",
+            data_vintage="October 2026 EFO",
+            baseline="October 2026 EFO anchored baseline",
         ),
         horizon=f"quarterly window {start}..{end}",
         quantities={
@@ -3397,7 +3399,7 @@ def obr_score_reform(
                 time_basis=f"cumulative quarterly {start}..{end}",
                 price_basis="real",
                 geography="uk",
-                baseline_definition="March 2026 EFO anchored baseline",
+                baseline_definition="October 2026 EFO anchored baseline",
                 uncertainty="not estimated",
             ),
             "consumption": ScoreQuantity(
@@ -3410,7 +3412,7 @@ def obr_score_reform(
                 time_basis=f"cumulative quarterly {start}..{end}",
                 price_basis="real",
                 geography="uk",
-                baseline_definition="March 2026 EFO anchored baseline",
+                baseline_definition="October 2026 EFO anchored baseline",
                 uncertainty="not estimated",
             ),
             "investment": ScoreQuantity(
@@ -3423,7 +3425,7 @@ def obr_score_reform(
                 time_basis=f"cumulative quarterly {start}..{end}",
                 price_basis="real",
                 geography="uk",
-                baseline_definition="March 2026 EFO anchored baseline",
+                baseline_definition="October 2026 EFO anchored baseline",
                 uncertainty="not estimated",
             ),
             "revenue": ScoreQuantity(
@@ -3885,7 +3887,7 @@ def frbus_shock_incidence(
         ),
         data_vintage=(
             f"PolicyEngine dataset {micro.get('dataset', dataset or 'default')}; "
-            "FRB/US April 2026 LONGBASE"
+            "FRB/US October 2026 LONGBASE"
         ),
         horizon=f"annual {year}, transition-quarter average deviations",
         basis_suffix=(
@@ -4064,7 +4066,7 @@ _SVAR_INCIDENCE_REFERENCES = ("obr", "target")
 def _obr_efo_cpi_annual(year: int) -> float:
     """Annual mean of the OBR EFO YoY CPI inflation path (CPIGR) for a year.
 
-    Reads the March 2026 EFO economy tables packaged with the obr_macro
+    Reads the October 2026 EFO economy tables packaged with the obr_macro
     distribution. Raises with the reference='target' fallback named when the
     package or the year is unavailable.
     """
@@ -4109,7 +4111,7 @@ def svar_inflation_incidence(
     value in force then — and scores it with the UK population microsim
     for ``year+1``.
 
-    ``reference``: 'obr' (default) compares against the March 2026 EFO CPI
+    ``reference``: 'obr' (default) compares against the October 2026 EFO CPI
     path packaged with obr_macro; 'target' against a flat 2.0%. The gap is
     an annual-average approximation of the statutory September-CPI
     reference month (stated in caveats).
@@ -4124,7 +4126,7 @@ def svar_inflation_incidence(
     if reference not in _SVAR_INCIDENCE_REFERENCES:
         raise ValueError(
             f"reference must be one of {_SVAR_INCIDENCE_REFERENCES}, got "
-            f"{reference!r}: 'obr' is the March 2026 EFO CPI path, "
+            f"{reference!r}: 'obr' is the October 2026 EFO CPI path, "
             "'target' a flat 2.0%."
         )
 
@@ -4144,7 +4146,7 @@ def svar_inflation_incidence(
 
     if reference == "obr":
         ref_cpi = _obr_efo_cpi_annual(year)
-        ref_desc = ("OBR March 2026 EFO CPI inflation path (CPIGR, annual "
+        ref_desc = ("OBR October 2026 EFO CPI inflation path (CPIGR, annual "
                     f"mean of the {year} quarters)")
     else:
         ref_cpi = 2.0
