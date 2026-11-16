@@ -1215,8 +1215,6 @@ _LUCIDE = {
     "check": '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
     "info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
 }
-_WORDS = ("zero one two three four five six seven eight nine ten eleven twelve "
-          "thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty").split()
 
 
 def _lucide(name: str, size: int, cls: str = "i", hidden: bool = False) -> str:
@@ -1225,47 +1223,90 @@ def _lucide(name: str, size: int, cls: str = "i", hidden: bool = False) -> str:
             f'stroke-linejoin="round" aria-hidden="true">{_LUCIDE[name]}</svg>')
 
 
-def _word(n: int) -> str:
-    return _WORDS[n] if 0 <= n < len(_WORDS) else str(n)
-
-
 def render_home_record(card: dict) -> str:
-    """The home page's record strip (index.html), from the same aggregates as
-    the /forecasts scoreboard, so the two can never disagree. The closing line
-    keeps the small-sample warning next to the counts (DESIGN.md §7.5)."""
+    """The home page's record card (index.html), from the same scorecard as
+    the /forecasts scoreboard, so the two can never disagree: a dot per scored
+    forecast, grouped by target quarter, coloured by where the outturn fell.
+    "Expected" is the nominal coverage of the 68% band times the count. The
+    small-sample warning stays beside the counts (DESIGN.md §7.5)."""
     pairs = scored_entries(card)
-    entries = [e for _, e in pairs]
-    scored = len(entries)
-    rounds = card["rounds"]
-    scored_rounds = len({d["round_id"] for d, _ in pairs})
-    in68 = sum(1 for e in entries if e["in_68"])
-    short = {"gdp": "GDP", "cpi": "CPI", "unemployment": "Unemployment"}
+    scored = len(pairs)
+    rounds = len({d["round_id"] for d, _ in pairs})
+    in68 = sum(1 for _, e in pairs if e["in_68"])
+    expected = round(0.68 * scored)
+    name = {"gdp": "GDP", "cpi": "CPI", "unemployment": "Unemployment"}
+    months = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
 
     def who(d: dict) -> str:
         m = str(d.get("model", ""))
-        if m.startswith("boe-svar"):
-            return "BoE SVAR"
-        return "BoE SVAR satellite" if m == "okun-unemployment" else esc(m)
+        return ", BoE SVAR satellite" if m == "okun-unemployment" else ""
 
-    misses = [f"{short.get(e['variable'], esc(e['variable']))} ({who(d)})"
-              for d, e in pairs if not e["in_90"]]
-    miss_note = "; ".join(dict.fromkeys(misses)) if misses else "None so far"
-    foot = (f"{_word(scored).capitalize()} forecast{'' if scored == 1 else 's'}, "
-            f"{_word(scored_rounds)} round{'' if scored_rounds == 1 else 's'}: not a track record.")
+    def day(round_id: str) -> str:
+        y, mo, dd = round_id[:10].split("-")
+        return f"{int(dd)} {months[int(mo) - 1]}"
+
+    def where(e: dict) -> tuple[str, str]:
+        if e["in_68"]:
+            return "lp-rdot-68", "Inside the 68% band."
+        if e["in_90"]:
+            return "lp-rdot-90", "Inside the 90% band."
+        return "lp-rdot-out", "Outside the 90% band."
+
+    periods = sorted({e["period"] for _, e in pairs})
+    groups = []
+    for g, period in enumerate(periods, 1):
+        items = []
+        for d, e in pairs:
+            if e["period"] != period:
+                continue
+            cls, verdict = where(e)
+            text = esc(f"{name.get(e['variable'], e['variable'])}{who(d)}, {day(d['round_id'])} forecast: "
+                       f"{e['forecast']:.2f} vs outturn {e['outturn']:.2f}. {verdict}")
+            items.append(f'<li><span class="lp-rdot {cls}" aria-hidden="true" title="{text}"></span>'
+                         f'<span class="visually-hidden">{text}</span></li>')
+        groups.append(
+            f'          <div class="lp-dotgroup"><span class="lp-dotgroup-l mono" id="rec-g{g}">{period}</span>'
+            f'<ol aria-labelledby="rec-g{g}">{"".join(items)}</ol></div>'
+        )
+    misses = list(dict.fromkeys(f"{name.get(e['variable'], e['variable'])}{who(d)}"
+                                for d, e in pairs if not e["in_90"]))
+    order = [v for v in ("cpi", "gdp", "unemployment") if any(e["variable"] == v for _, e in pairs)]
+    subjects = ", ".join(name[v] if v != "unemployment" else "unemployment" for v in order)
+    if periods and periods[0][:4] == periods[-1][:4]:
+        span = (f'<span class="mono">{periods[0]}</span>&ndash;<span class="mono">{periods[-1][4:]}</span>'
+                if len(periods) > 1 else f'<span class="mono">{periods[0]}</span>')
+    elif periods:
+        span = f'<span class="mono">{periods[0]}</span>&ndash;<span class="mono">{periods[-1]}</span>'
+    else:
+        span = ""
+    plural = lambda n, w: f"{n} {w}{'' if n == 1 else 's'}"
     return "\n".join([
-        '        <dl class="lp-stats">',
-        f'          <div class="lp-stat"><dt>{_lucide("target", 14)}Inside the 68% band</dt><dd>'
-        f'<span class="lp-stat-v">{in68}<small> of {scored}</small></span>'
-        f'<span class="lp-stat-note">Expected: about {round(0.68 * scored)} of {scored}</span>'
-        f'{_lucide("check", 18, "i lp-ok", hidden=True)}</dd></div>',
-        f'          <div class="lp-stat"><dt>{_lucide("alert", 14)}Outside the 90% band</dt><dd>'
-        f'<span class="lp-stat-v">{len(misses)}</span><span class="lp-stat-note">{miss_note}</span></dd></div>',
-        f'          <div class="lp-stat"><dt>{_lucide("archive", 14)}Rounds scored</dt><dd>'
-        f'<span class="lp-stat-v">{scored_rounds}<small> of {rounds}</small></span>'
-        '<span class="lp-stat-note">Against outturn, a naive baseline and the OBR</span></dd></div>',
-        "        </dl>",
-        f'        <p class="lp-score-foot">{_lucide("info", 16)}<span><strong>{foot}</strong> '
-        '<a href="/forecasts#scored">See every score &rarr;</a></span></p>',
+        '        <div class="lp-score-head">',
+        f'          <span class="icon-tile">{_lucide("target", 20)}</span>',
+        '          <div class="lp-score-title">',
+        '            <h2 id="record-h">Forecast record</h2>',
+        f'            <p>UK &middot; {subjects} &middot; {span}</p>',
+        "          </div>",
+        "        </div>",
+        '        <div class="lp-rec">',
+        '          <div class="lp-rec-viz">',
+        '          <div class="lp-dots">',
+        *groups,
+        "          </div>",
+        '          <ul class="lp-dotkey">',
+        '            <li><span class="lp-rdot lp-rdot-68" aria-hidden="true"></span>Inside 68%</li>',
+        '            <li><span class="lp-rdot lp-rdot-90" aria-hidden="true"></span>Inside 90%</li>',
+        f'            <li><span class="lp-rdot lp-rdot-out" aria-hidden="true"></span>Outside 90%: {esc("; ".join(misses)) if misses else "none"}</li>',
+        "          </ul>",
+        "          </div>",
+        '          <dl class="lp-recstats">',
+        f'            <div><dt>inside the 68% band &middot; expected &asymp;{expected}</dt><dd>{in68}<small> of {scored}</small></dd></div>',
+        f'            <div><dt>{"round" if rounds == 1 else "rounds"} scored</dt><dd>{rounds}</dd></div>',
+        "          </dl>",
+        "        </div>",
+        f'        <p class="lp-score-foot"><span class="chip chip-warn">{_lucide("alert", 14)}Too few to show skill</span>'
+        f'<span>{plural(scored, "forecast")} over {plural(rounds, "round")}.</span>'
+        '<a href="/forecasts#scored">See every score &rarr;</a></p>',
     ])
 
 
