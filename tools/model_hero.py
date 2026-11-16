@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=3" />'
+CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=4" />'
 CSS_RE = re.compile(r'<link rel="stylesheet" href="/models/model-pages\.css(?:\?v=\d+)?" />\n?')
 
 # Tabler-style 24px stroke icons.
