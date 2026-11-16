@@ -297,3 +297,32 @@
     });
   });
 })();
+
+/* Table status cells (r15): a cell whose whole text is a status word becomes
+   a small chip with an icon, so status reads at a glance. Long tables get a
+   sticky header (a capped-height scroller, so the header can stick inside
+   it). Text is unchanged; only presentation is added. */
+(function () {
+  "use strict";
+  var TAIL = "(\\s*\\([^)]*\\)|,\\s*[^,]{1,24})?$";
+  var STATUS = [
+    [new RegExp("^(yes|pass|passes|hosted|live|exact|replicates)" + TAIL, "i"), "ok"],
+    [new RegExp("^(no|fail|fails|none)" + TAIL, "i"), "no"],
+    [new RegExp("^(local|local only|experimental|partial|partial replication|weak|moderate|imposed|anchored)" + TAIL, "i"), "warn"]
+  ];
+  document.querySelectorAll(".table-scroll.tbl > table").forEach(function (table) {
+    Array.from(table.querySelectorAll("tbody td")).forEach(function (td) {
+      if (td.children.length || td.classList.contains("num")) return;
+      var t = td.textContent.trim();
+      if (!t || t.length > 28) return;
+      for (var i = 0; i < STATUS.length; i++) {
+        if (STATUS[i][0].test(t)) {
+          td.innerHTML = '<span class="st st-' + STATUS[i][1] + '">' + td.innerHTML + "</span>";
+          break;
+        }
+      }
+    });
+    var rows = table.tBodies.length ? table.tBodies[0].rows.length : 0;
+    if (rows > 14 && table.tHead) table.parentElement.classList.add("tbl-long");
+  });
+})();

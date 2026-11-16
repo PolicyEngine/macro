@@ -8225,3 +8225,86 @@ main :is(.where-next .chip-row > a, .tp-next .tp-chips > a, .where-next .entry-g
 .lp-recstats dt { font-size: var(--fs-ab-cap); color: var(--text-muted); }
 .lp-score-foot { flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3); }
 .lp-score-foot a { margin-left: 0; }
+
+/* =====================================================================
+   29. Bare icons (Vahid: "icons shouldn't have box color background").
+   Every icon container sitewide drops its tinted tile, circle or box; the
+   icon shows bare in the accent (or muted) colour at one of three sizes:
+   16px inline/list, 18px section heading, 22px card. Containers keep a
+   fixed width so text alignment does not move.
+   ===================================================================== */
+:is(.icon-tile, .icon-badge, .sh-icon, .xp-ic, .qc-ic, .uc-ic, .mx-ic, .use-ic, .hub-ic, .hub2-micro-ic,
+    #compare .row-ico, .row-ico, .h-ic, .step-ic, .prompt-ic, .cap-mic, .fc-h-ic, .fc-li-ic, .fc-badge, .fc-th-ic,
+    .tp-h-ic, .ii-ic, .stat-ic, .limits-ic, .mh-icon, .use-page .h-ic, .lp-score-head .icon-tile,
+    .lp-model .icon-tile, .mc-card .icon-tile, .ct-card .icon-tile, .pp-ic) {
+  background: none !important; box-shadow: none !important; border: 0 !important; border-radius: 0 !important;
+  padding: 0 !important; color: var(--ab-teal-700);
+}
+/* sizes */
+.sh-icon { width: 20px !important; height: 28px !important; place-items: center start; }
+.sh-icon svg { width: 18px !important; height: 18px !important; }
+:is(.icon-tile, .qc-ic, .uc-ic, .mx-ic, .use-ic, .hub2-micro-ic, .mh-icon, .lp-model .icon-tile, .mc-card .icon-tile, .ct-card .icon-tile) { width: 24px !important; height: 24px !important; }
+:is(.icon-tile, .qc-ic, .uc-ic, .mx-ic, .use-ic, .hub2-micro-ic, .mh-icon) svg { width: 22px !important; height: 22px !important; }
+:is(.xp-ic, .h-ic, .step-ic, .prompt-ic, .fc-h-ic, .fc-li-ic, .tp-h-ic, .ii-ic, .limits-ic, .hub-ic, .row-ico, #compare .row-ico) { width: 18px !important; height: 18px !important; }
+:is(.xp-ic, .h-ic, .step-ic, .prompt-ic, .fc-h-ic, .fc-li-ic, .tp-h-ic, .ii-ic, .limits-ic, .hub-ic, .row-ico, #compare .row-ico) svg { width: 16px !important; height: 16px !important; }
+/* tone: status-coloured containers keep their hue on the glyph */
+.uc-ic { color: var(--u) !important; }
+.use-ic { color: var(--u) !important; }
+.qc[aria-pressed="true"] .qc-ic { background: none !important; color: var(--ab-teal-700) !important; }
+.hub2-micro-ic { color: #FFFFFF !important; }
+.lp-points svg { padding: 0 !important; background: none !important; width: 18px !important; height: 18px !important; box-sizing: border-box; }
+/* disclosures: drop the circle behind the list glyph; keep the glyph */
+main details:is(.about, .expander, .more):not(.xp) > summary::before { width: 18px; height: 18px; border-radius: 0; background-color: transparent; box-shadow: none; background-size: 16px; }
+/* alignment that assumed a 32px circle */
+.xp-body { padding-left: 50px; }
+@media (max-width: 640px) { .xp-body { padding-left: 14px; } }
+.sh { column-gap: 10px; }
+.vf-dot { background: var(--card); }
+
+/* =====================================================================
+   30. Tables, second pass (Vahid: "nicer tables"): quieter frame, muted
+   12px header, steadier row rhythm, zebra + hover, status chips with
+   icons, sticky header on long tables, cards at 375.
+   ===================================================================== */
+main .table-scroll.tbl, main .table-scroll:has(> table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table)) {
+  border-color: #EEF0F3; border-radius: 12px;
+}
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) { font-size: 13.5px; line-height: 1.5; font-variant-numeric: tabular-nums lining-nums; }
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) :is(th, td) { padding: 13px 16px; border-bottom-color: #F1F3F5; }
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) thead th {
+  padding-block: 10px; background: #FAFBFC; border-bottom: 1px solid #EEF0F3;
+  color: #6B7280; font-size: 12px; font-weight: 600; text-transform: none; letter-spacing: 0;
+}
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) tbody tr:nth-child(even) > * { background: #FCFCFD; }
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) tbody tr:hover > * { background: color-mix(in srgb, var(--primary) 5%, var(--card)); }
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) tbody th { font-weight: 600; color: var(--text-strong); }
+main .table-scroll > table :is(th, td).num { text-align: right; font-feature-settings: "tnum" 1, "lnum" 1; }
+@media (prefers-color-scheme: dark) {
+  main .table-scroll.tbl, main .table-scroll:has(> table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table)) { border-color: var(--border); }
+  main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) thead th { background: color-mix(in srgb, var(--card) 80%, var(--background)); color: var(--text-muted); border-bottom-color: var(--border); }
+  main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) tbody tr:nth-child(even) > * { background: color-mix(in srgb, var(--card) 92%, var(--background)); }
+  main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) :is(th, td) { border-bottom-color: var(--border); }
+}
+/* status chips */
+.st { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 9px 0 7px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; width: 12px; height: 12px; background: currentColor;
+  -webkit-mask: var(--st-ic) center / contain no-repeat; mask: var(--st-ic) center / contain no-repeat; }
+.st-ok { color: var(--ab-teal-700); background: color-mix(in srgb, var(--ab-gain) 12%, transparent);
+  --st-ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E"); }
+.st-no { color: #6B7280; background: #F3F4F6;
+  --st-ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18'/%3E%3Cpath d='m6 6 12 12'/%3E%3C/svg%3E"); }
+.st-warn { color: #92400E; background: color-mix(in srgb, var(--ab-loss) 12%, transparent);
+  --st-ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 8v4'/%3E%3Cpath d='M12 16h.01'/%3E%3C/svg%3E"); }
+@media (prefers-color-scheme: dark) { .st-warn { color: #FCD34D; } .st-no { background: color-mix(in srgb, var(--card) 70%, var(--background)); color: var(--text-muted); } }
+/* long tables: header sticks inside a capped scroller */
+@media (min-width: 561px) {
+  main .table-scroll.tbl-long { max-height: min(75vh, 720px); overflow: auto; }
+  main .table-scroll.tbl-long > table thead th { position: sticky; top: 0; z-index: 2; }
+  main .table-scroll.tbl-long.is-scroll > table thead th:first-child { z-index: 3; }
+}
+/* phones: stacked cards keep the quieter frame */
+@media (max-width: 560px) {
+  main .table-scroll > table.tbl-stack tbody tr { border-color: #EEF0F3; padding: 12px 14px; }
+  main .table-scroll > table.tbl-stack tbody tr:nth-child(even) > * { background: none; }
+  main .table-scroll > table.tbl-stack tbody tr > [data-label]:not(:first-child) { border-top-color: #F1F3F5; }
+}
