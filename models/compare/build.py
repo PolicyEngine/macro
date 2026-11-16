@@ -386,8 +386,11 @@ def multiples(data: dict, q: dict) -> str:
     return (
         '<figure class="cmp-sm-wrap">'
         f'<figcaption><strong>How the response unfolds, quarter by quarter.</strong> '
-        "The paths behind the peaks and timing in the table; each panel has its own scale. "
-        f'Source: <a href="{REPO_BLOB}/results.json">results.json</a>, hosted runs of 6 Nov 2026.</figcaption>'
+        "The paths behind the peaks and timing in the table; each panel has its own scale."
+        # One visible line, no disclosure: this section's caveats stay unfolded.
+        + f'<p class="vc-src-line">{chartkit._INFO_ICON}<span>Source: Hosted runs, 6 Nov 2026 · '
+        f'<a href="{REPO_BLOB}/results.json">results.json</a></span></p>'
+        + "</figcaption>"
         f'<div class="cmp-sm-grid">{"".join(figs)}</div>{note}</figure>'
     )
 

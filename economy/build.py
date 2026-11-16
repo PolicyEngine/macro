@@ -225,7 +225,7 @@ def line_chart(
     # (DESIGN.md §7.0). The two gridlines mark the window's range.
     return f"""      <figure class="economy-figure">
         <figcaption><strong>{title}</strong><span>{description}</span></figcaption>
-{chartkit.figure(svg, source=f'<a href="{url}">{source} →</a>')}
+{chartkit.figure(svg, source=f'<a href="{url}">{source} →</a>', source_short=source.split(' · ')[0])}
       </figure>"""
 
 

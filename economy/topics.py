@@ -501,8 +501,9 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
                         'papers/boe-svar/figures/current_forecast.json">current_forecast.json</a>')
     if hist:
         source = f"ONS, {history_note} snapshot {esc(vintage)}; " + source
+    short = (("ONS · " if hist else "") + f"{esc(model)} round, {chartkit.short_date(generated)}")
     return chartkit.figure(svg, legend=legend, unit=f"{name}, {unit}", source=source,
-                           y_gutter=True)
+                           source_short=short, y_gutter=True)
 
 
 def band_text(values: dict) -> str:
@@ -626,11 +627,17 @@ def _card(heading: str, value: str, note: str, series: dict, period: str,
     tile face carries the reading and nothing else.
     """
     heading = TILE_LABELS.get(heading, heading)
+    # Display only: long published decimals (gilt yields) shown to 2 dp.
+    value = re.sub(r"(\d+\.\d{3,})%", lambda m: f"{float(m.group(1)):.2f}%", value)
     chip = ""
     if change:
         parts = change.split(" ")
         head = " ".join(parts[:2]) if len(parts) > 1 and parts[1] == "y/y" else parts[0]
-        arrow = "\u25b2" if head.startswith("+") else ("\u25bc" if head.startswith("\u2212") else "")
+        number = re.sub(r"[^0-9.]", "", head.split(" ")[0])
+        flat = bool(number) and float(number) == 0
+        arrow = "" if flat else ("\u25b2" if head.startswith("+") else ("\u25bc" if head.startswith("\u2212") else ""))
+        if flat:
+            head = "no change"
         chip = f'<span class="stat-chg" title="{esc(change)}">{arrow} {esc(head)}</span>'
     return f"""      <div class="stat tp-stat">
         <span class="stat-label"><span class="stat-ic" aria-hidden="true">{site_nav.icon("activity", 14)}</span>{heading}<details class="stat-meta"><summary aria-label="About this reading">{site_nav.icon("info", 14)}</summary><span class="stat-meta-pop">{esc(period)} · vintage {esc(series["vintage"])}<br>{note}<br><a href="{esc(series["url"])}">{esc(series["source"])} · {esc(series["cdid"])}</a></span></details></span>
@@ -2027,7 +2034,7 @@ def us_path_chart(chart_id: str, name: str, unit: str,
                   lines: list[tuple[str, str, list[dict]]],
                   baseline: list[dict] | None = None,
                   zero: bool = True, source: str = "",
-                  notes: list[str] | None = None) -> str:
+                  notes: list[str] | None = None, source_short: str = "") -> str:
     """Outturn lines from the FRED snapshot, and the LONGBASE path if one exists.
 
     ``lines`` is (css class, legend label, observations) for each outturn
@@ -2135,7 +2142,7 @@ def us_path_chart(chart_id: str, name: str, unit: str,
     if baseline:
         legend.append(("ln-s2", LONGBASE_LABEL))
     return chartkit.figure(svg, legend=legend, unit=f"{name}, {unit}", source=source,
-                           notes=notes, y_gutter=True)
+                           source_short=source_short or None, notes=notes, y_gutter=True)
 
 
 def missing_months(obs: list[dict]) -> list[str]:
@@ -2159,6 +2166,9 @@ def gap_note(obs: list[dict]) -> list[str]:
             "stored series, so the line breaks there."]
 
 
+FRED_PUBLISHER = {"GDPC1": "BEA", "CPIAUCSL": "BLS", "UNRATE": "BLS", "PAYEMS": "BLS"}
+
+
 def us_baseline_chart(chart_id: str, name: str, unit: str, column: str,
                       series: dict, outturns: list[dict], derived: str = "") -> str:
     """One US topic chart: a FRED outturn line plus the LONGBASE path."""
@@ -2169,6 +2179,7 @@ def us_baseline_chart(chart_id: str, name: str, unit: str, column: str,
         chart_id, name, unit,
         [("vc-out-line", f"Outturn, FRED snapshot {esc(series['vintage'])}", outturns)],
         baseline=baseline, zero=False, source=source,
+        source_short=f"{FRED_PUBLISHER.get(series['cdid'], 'FRED')} via FRED · FRB/US LONGBASE, 29 Jul 2026",
         notes=gap_note(outturns) + ["Baseline quarters are drawn at their middle month."]
         if "Q" not in outturns[0]["period"] else gap_note(outturns))
 
@@ -2470,7 +2481,8 @@ def us_rates_chart() -> str:
         "us-topic-rates", "US policy rate and 10-year Treasury yield", "%",
         [("vc-out-line", f"Effective federal funds rate, monthly, snapshot {esc(funds['vintage'])}", monthly),
          ("vc-s3", f"10-year Treasury yield, daily, snapshot {esc(ten['vintage'])}", daily)],
-        zero=False, source=source, notes=gap_note(monthly))
+        zero=False, source=source, notes=gap_note(monthly),
+        source_short="Federal Reserve via FRED")
 
 
 def us_rates_model() -> str:
@@ -3093,7 +3105,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
-<link rel="stylesheet" href="/economy/topic-page.css?v=12" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=14" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -3102,7 +3114,7 @@ def page(topic: dict) -> str:
     body = f"""<main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <h1 class="page-title">{esc(topic["country"].upper())} {esc(topic["title"][0].lower() + topic["title"][1:])}</h1>
+      <h1 class="page-title tp-h1">{topic_icon(slug, 24)}{esc(topic["country"].upper())} {esc(topic["title"][0].lower() + topic["title"][1:])}</h1>
       <p class="lede">{esc(short) if short else esc(topic["heading"])}</p>
     </div>
   </section>
@@ -3146,17 +3158,36 @@ def page(topic: dict) -> str:
 
 # --------------------------------------------------- economy page + sitemap
 
+TOPIC_ICONS = {
+    "growth": '<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
+    "inflation": '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
+    "jobs": '<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>',
+    "rates": '<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+    "public-finances": '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+    "reform": '<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+}
+
+
+def topic_icon(slug: str, size: int = 20) -> str:
+    """The one icon for a topic, wherever it appears (bare, accent colour)."""
+    return (f'<svg class="tp-icon" viewBox="0 0 24 24" width="{size}" height="{size}" fill="none" '
+            'stroke="currentColor" stroke-width="1.75" stroke-linecap="round" '
+            f'stroke-linejoin="round" aria-hidden="true">{TOPIC_ICONS.get(slug, TOPIC_ICONS["growth"])}</svg>')
+
+
 def directory_block(country: str) -> str:
-    """The hub's topic list: each row is the topic's question and a link.
+    """The hub's topic cards: icon, short name, the question as a subtitle.
 
     The readings are not restated here; they live on the topic page.
     """
     rows = []
     for topic in topics_for(country):
         rows.append(
-            f'        <a href="{topic_url(topic)}">'
-            f'<span>{esc(topic["heading"])}</span>'
-            f'<strong>{esc(topic["title"])}</strong></a>'
+            f'        <a class="tp-card" href="{topic_url(topic)}">{topic_icon(topic["slug"], 22)}'
+            f'<span class="tp-card-t"><strong>{esc(topic.get("tab", topic["title"]))}</strong>'
+            f'<small>{esc(topic["heading"])}</small></span>'
+            '<svg class="tp-chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" '
+            'stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>'
         )
     return "\n".join(rows)
 

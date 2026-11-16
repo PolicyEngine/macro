@@ -776,7 +776,10 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
         ("sw-band90", "90% band (re-calibrated)"),
         ("ln-s2", efo_name),
         *([("sw-dot-out", "ONS outturn")] if dots else []),
-    ], unit=spec["unit"], y_gutter=True, source=(
+    ], unit=spec["unit"], y_gutter=True,
+       source_short=(f"BoE SVAR round, {chartkit.short_date(SVAR_ROUND.parent.name)} · {efo_name}"
+                     + (" · ONS" if dots else "")),
+       source=(
         f'archived round <a class="mono" href="/forecasts/rounds/{SVAR_ROUND.parent.name}/'
         f'{SVAR_ROUND.name}">{SVAR_ROUND.parent.name}/{SVAR_ROUND.name}</a>; '
         + source_note
@@ -893,6 +896,8 @@ _ICON_PATHS = {
     "file": '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/>',
     "history": '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
     "clock": '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    "activity": '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+    "calendar": '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
     "equal": '<path d="M5 9h14"/><path d="M5 15h14"/>',
 }
 
@@ -938,7 +943,7 @@ def render_status(card: dict) -> str:
         mae_value = f"{mae:.2f}pp"
         if len(naive) == scored:
             naive_mae = sum(naive) / len(naive)
-            mae_sub = f"No-change forecast: {naive_mae:.2f}pp on the same {scored}."
+            mae_sub = f"Same {scored} forecasts, both measured against the outturn."
             top = max(mae, naive_mae)
             bars = (
                 '          <div class="fc-bars" aria-hidden="true">'
@@ -969,24 +974,32 @@ def render_status(card: dict) -> str:
     def tile(ic: str, value: str, label: str, sub: str, extra: str = "") -> list[str]:
         return [
             '        <div class="fc-tile">',
-            f'          <span class="fc-badge">{icon(ic)}</span>',
+            f'          <span class="fc-tile-l">{icon(ic)}{label}</span>',
             f'          <span class="fc-tile-v">{value}</span>',
-            f'          <span class="fc-tile-l">{label}</span>',
             *([extra] if extra else []),
             f'          <span class="fc-tile-s">{sub}</span>',
             "        </div>",
         ]
 
+    verdict = ""
+    if scored and len(naive) == scored:
+        closer = "smaller" if mae < naive_mae else ("larger" if mae > naive_mae else "the same")
+        first = card["detail"][0]["round_id"] if card["detail"] else None
+        retro = sum(1 for d, _ in pairs if d["round_id"] == first)
+        retro_note = f", {retro} of them retroactive" if retro else ""
+        verdict = (f'      <p class="fc-verdict">{icon("target")}<span><strong>So far:</strong> '
+                   f'{in68} of {scored} outturns fell inside the 68% band, and the average miss was '
+                   f'{mae:.2f}pp, {closer} than a no-change forecast ({naive_mae:.2f}pp), on the same '
+                   f'{scored}{retro_note}. Too few to show skill: <a href="#limits">limits</a>.</span></p>')
     return "\n".join([
         asof,
+        *([verdict] if verdict else []),
         '      <div class="fc-tiles ab-card" aria-label="The record so far">',
-        *tile("target", cover_value, "inside the 68% band", cover_sub, pips),
-        *tile("ruler", mae_value, "mean absolute error", mae_sub, bars),
-        *tile("layers", f"{scored_rounds} of {rounds}", f"round{'' if rounds == 1 else 's'} scored",
+        *tile("target", cover_value, "Inside the 68% band", cover_sub, pips),
+        *tile("ruler", mae_value, "Mean absolute error", mae_sub, bars),
+        *tile("layers", f"{scored_rounds} of {rounds}", f"Round{'' if rounds == 1 else 's'} scored",
               next_sub),
-        *([f'        <p class="fc-callout">{icon("info")}<span>{scored} score{' is' if scored == 1 else 's are'} '
-           'too few to show skill either way. <a href="#limits">Limits</a></span></p>']
-          if scored < 20 else []),
+        *([] if verdict else [f'        <p class="fc-callout">{icon("info")}<span>{scored} scores are too few to show skill either way. <a href="#limits">Limits</a></span></p>']),
         "      </div>",
     ])
 
@@ -1013,26 +1026,31 @@ def render_rounds(card: dict) -> str:
             days = _gap_days(details[i - 1]["round_id"], detail["round_id"])
             gap = f'<span class="fc-gap">{days} day{"" if days == 1 else "s"} later</span>'
         state = "is-scored" if n else "is-open"
-        flag = ' is-retro' if i == 0 else ""
+        flag = " is-retro" if i == 0 else ""
+        name = MODEL_DISPLAY.get(detail["model"], (detail.get("label", detail["model"]), None))[0]
+        chips = []
+        if i == 0:
+            chips.append('<a class="fc-chip fc-chip-retro" href="#retro" title="Archived retroactively; see the note below">Retroactive</a>')
+        chips.append(f'<span class="fc-chip fc-chip-scored">Scored {n}</span>' if n
+                     else '<span class="fc-chip fc-chip-open">Open</span>')
         items.append(
             f'        <li class="fc-node {state}{flag}">{gap}'
             '<span class="fc-dot" aria-hidden="true"></span>'
             '<div class="fc-node-card">'
-            f'<p class="fc-node-h"><span class="fc-node-date">{esc(detail["round_id"])}</span>'
-            + ('<span class="fc-chip-open">Open</span>' if not n else "")
-            + (' <a class="fc-retro-mark" href="#retro" title="Archived retroactively; see the note below">Retroactive</a>' if i == 0 else "")
-            + "</p>"
-            f'<p class="fc-node-model">{model_html(detail)}</p>'
+            '<div class="fc-node-head"><div>'
+            f'<p class="fc-node-date"><time datetime="{esc(detail["round_id"])}">{esc(chartkit.short_date(detail["round_id"]))}</time></p>'
+            f'<p class="fc-node-model" title="{esc(name)}">{icon("activity")}<span>{esc(name)}</span></p>'
+            f'</div><div class="fc-node-chips">{"".join(chips)}</div></div>'
             '<dl class="fc-mini">'
             f'<div><dt>Data edge</dt><dd>{esc(detail["data_edge"])}</dd></div>'
             f'<div><dt>Periods</dt><dd>{detail["periods_forecast"]}</dd></div>'
             f'<div><dt>Scored</dt><dd>{n}</dd></div>'
             "</dl>"
-            f'<p class="fc-node-arch">{icon("clock")}Archived {esc(archived)}</p>'
-            f'<p class="fc-node-files"><a href="/{esc(detail["path"])}" download>{icon("file")}'
-            f'<code>{esc(Path(detail["path"]).name)}</code></a>'
-            f'<a href="{href}">{icon("history")}history</a></p>'
-            "</div></li>"
+            '<div class="fc-node-foot">'
+            f'<span class="fc-node-arch">{icon("calendar")}Archived {esc(chartkit.short_date(archived))}</span>'
+            f'<span class="fc-node-links"><a href="/{esc(detail["path"])}" download title="{esc(Path(detail["path"]).name)}">{icon("file")}Round file</a>'
+            f'<a href="{href}" title="Git history of this round file">{icon("history")}History</a></span>'
+            "</div></div></li>"
         )
     items.append("      </ol>")
     return "\n".join(items)

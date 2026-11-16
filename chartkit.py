@@ -50,6 +50,8 @@ from __future__ import annotations
 
 import re
 
+import re
+
 END = "<!-- /vc-fig -->"
 _TEXT = re.compile(r"<text\b([^>]*)>(.*?)</text>", re.DOTALL)
 _ATTR = re.compile(r'([\w:-]+)="([^"]*)"')
@@ -150,6 +152,55 @@ def swatch(kind: str) -> str:
     return f'<span class="vc-sw {kind}" aria-hidden="true"></span>'
 
 
+_MONTHS = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
+_INFO_ICON = ('<svg class="vc-src-ic" viewBox="0 0 24 24" width="14" height="14" '
+              'style="width:14px;height:14px;flex:0 0 14px" aria-hidden="true" fill="none" '
+              'stroke="currentColor" stroke-width="1.75" stroke-linecap="round" '
+              'stroke-linejoin="round"><circle cx="12" cy="12" r="10"/>'
+              '<path d="M12 16v-4"/><path d="M12 8h.01"/></svg>')
+
+
+def short_date(iso: str) -> str:
+    """'2026-11-12' -> '12 Nov 2026'; anything else is returned unchanged."""
+    m = re.fullmatch(r"(\d{4})-(\d{2})-(\d{2})", iso.strip())
+    if not m:
+        return iso
+    return f"{int(m.group(3))} {_MONTHS[int(m.group(2)) - 1]} {m.group(1)}"
+
+
+def short_source(source: str) -> str:
+    """Publishers and dates only, derived from a full source line.
+
+    Each ";"-separated part keeps its first comma clause, with tags, file
+    names and paths dropped and ISO dates written out. The full line is kept
+    verbatim in the "Source details" expander, so nothing is lost.
+    """
+    text = re.sub(r"<[^>]+>", "", source)
+    parts = []
+    for part in text.split(";"):
+        clause = part.split(",")[0].split(":")[0]
+        words = [w for w in clause.split()
+                 if not ("/" in w and ("." in w or w.count("/") > 1)) and not re.search(r"\.(json|csv|txt|TXT|py)$", w)
+                 and w not in ("→", "from", "stored", "in")]
+        clause = re.sub(r"\d{4}-\d{2}-\d{2}", lambda m: short_date(m.group(0)), " ".join(words)).strip()
+        if clause and clause.lower() not in ("archived round", "outturns the data store"):
+            parts.append(clause)
+    return " · ".join(parts) or "see details"
+
+
+def source_block(source: str, short: str | None = None) -> str:
+    """One short muted source line, then the full provenance behind a toggle.
+
+    The full line is printed exactly as before (``<p class="vc-source">Source:
+    …</p>``) inside the expander, so provenance checks that match it still do.
+    """
+    return (
+        f'<p class="vc-src-line">{_INFO_ICON}<span style="min-width:0;flex:1">Source: {short or short_source(source)}</span></p>\n'
+        '<details class="vc-src"><summary>Source details</summary>\n'
+        f'<p class="vc-source">Source: {source}</p>\n</details>'
+    )
+
+
 def figure(
     svg: str,
     *,
@@ -162,6 +213,7 @@ def figure(
     unit: str | None = None,
     keep_ratio: bool = False,
     source: str | None = None,
+    source_short: str | None = None,
     y_gutter: bool = False,
 ) -> str:
     """Turn a builder's SVG string into the readable block described above.
@@ -270,6 +322,6 @@ def figure(
     if lines:
         parts.append('<p class="vc-notes">' + "<br />".join(lines) + "</p>")
     if source:
-        parts.append(f'<p class="vc-source">Source: {source}</p>')
+        parts.append(source_block(source, source_short))
     parts.append(f"</div>{END}")
     return "\n".join(parts)
