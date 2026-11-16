@@ -424,3 +424,10 @@
 .doc main:has(> .hero.mh) .stat-row { margin-bottom: 20px; }
 .doc main:has(> .hero.mh) .limits + .limits,
 .doc main:has(> .hero.mh) * + .limits { margin-top: 12px; }
+/* any four-tile row lays out 4 across (2x2 on phones), never 3 + 1 */
+@media (min-width: 900px) {
+  .doc main:has(> .hero.mh) .stat-row:has(> .stat:nth-child(4):last-child) { grid-template-columns: repeat(4, 1fr); display: grid; }
+}
+@media (max-width: 899px) {
+  .doc main:has(> .hero.mh) .stat-row:has(> .stat:nth-child(4):last-child) { grid-template-columns: 1fr 1fr; display: grid; }
+}
