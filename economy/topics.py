@@ -1938,17 +1938,8 @@ def us_hub_forecast_note() -> str:
     """
     frbus = MODELS["frb-us"]["quality"]["predictive_validation"]
     hank = MODELS["us-hank"]["quality"]["predictive_validation"]
-    return f"""      <p>
-        <strong>{no_us_forecaster()}</strong> Both US members are shock models
-        and the registry says so in their own words:
-        <a href="/frb-us">frb-us</a> records predictive validation
-        {registry_terms([frbus["level"]])} —
-        &ldquo;{esc(frbus["evidence"])}&rdquo; — and
-        <a href="/us-hank">us-hank</a> records
-        {registry_terms([hank["level"]])}. Where a model view exists at all it
-        is on the topic page that reads the series, in the same breath as the
-        limits that qualify it.
-      </p>"""
+    no_us_forecaster()  # raises if a US forecaster enters the registry
+    return f"""      <p class="fc-note-row"><span><strong>No US forecast:</strong> only <a href="/svar">boe-svar</a> forecasts, and it is UK-only. <a href="/frb-us">frb-us</a> predictive validation is {registry_terms([frbus["level"]])} (&ldquo;{esc(frbus["evidence"])}&rdquo;); <a href="/us-hank">us-hank</a> is {registry_terms([hank["level"]])}.</span></p>"""
 
 
 def us_model_limits(extra: list[str] | None = None) -> str:
@@ -3259,19 +3250,7 @@ def us_public_finance_gap() -> str:
             "finances a US topic page or narrow US_FISCAL_HINTS"
         )
     obr = MODELS["obr-macro"]
-    return f"""      <p class="callout">
-        <strong>Five topics here, six on the UK side.</strong> The missing one
-        is public finances, and it is missing for a reason worth stating: the
-        vintage store holds no US fiscal series — no federal balance, no
-        debt-to-GDP — so that page would open with no number, no observation
-        period and no vintage. Nor is there a model to put beside one:
-        <a href="/obr">obr-macro</a> is
-        {registry_terms(obr["geography"])}-only, and neither US model reports a
-        fiscal balance among its outputs. Filling it needs two things in this
-        order — the FRED series added to the append-only fetcher so vintages
-        accumulate, and a US model that answers a fiscal question. Until then
-        the tab is absent rather than empty.
-      </p>"""
+    return f"""      <p class="fc-note-row"><span><strong>No public finances tab:</strong> the store holds no US fiscal series, and no US model reports a fiscal balance (<a href="/obr">obr-macro</a> is {registry_terms(obr["geography"])}-only).</span></p>"""
 
 
 def sitemap_block() -> str:
