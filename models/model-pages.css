@@ -547,3 +547,169 @@
 }
 .doc main:has(> .hero.mh) .vmet-notes { margin-inline: 0; }
 .doc main:has(> .hero.mh) .paper-result { font: 13.5px/1.55 var(--body); }
+
+/* =====================================================================
+   Autumn Budget 2026 dashboard spec (review-nov16/autumn-budget-design-spec.md)
+   Sections are bare on the canvas: icon circle + h2 + one grey line.
+   Cards only for charts, stat-tile rows and expanders. Gains teal, losses
+   amber, sign always printed. 48px between sections, 20px between cards.
+   ===================================================================== */
+.doc main:has(> .hero.mh) {
+  --ab-gain: #319795;
+  --ab-loss: #D97706;
+  --ab-loss-ink: #B45309;      /* 5.0:1 on white, for text */
+  --ab-none: #9CA3AF;
+  --ab-inset: var(--gray-50);
+}
+@media (prefers-color-scheme: dark) {
+  .doc main:has(> .hero.mh) { --ab-loss: #F59E0B; --ab-loss-ink: #FBBF24; --ab-gain: #38B2AC; --ab-inset: #141A26; }
+}
+
+/* 1. no section card: drop the painted surface behind every band */
+.doc main:has(> .hero.mh) .band:has(> .band-head:first-child):not(.band .band):not(.glance-band)::after,
+.doc main:has(> .hero.mh) .band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child::after { content: none; }
+.doc main:has(> .hero.mh) .band:has(> .band-head:first-child):not(.band .band):not(.glance-band) {
+  margin-top: 48px;
+  padding: 0;
+  overflow: visible;
+  border-radius: 0;
+}
+.doc main:has(> .hero.mh) .band:has(> .band-head:first-child):not(.band .band):not(.glance-band) > .band-head:first-child {
+  margin: 0 0 20px;
+}
+.doc main:has(> .hero.mh) .band-head .section-intro,
+.doc main:has(> .hero.mh) .band-head > p { font-size: 15px; color: var(--gray-500); }
+.doc main:has(> .hero.mh) .band-head > h2 { font-size: 20px; font-weight: 600; color: var(--gray-800); }
+.doc main:has(> .hero.mh) .band > .prose,
+.doc main:has(> .hero.mh) .band > p { max-width: 72ch; }
+
+/* 2. the card: charts, stat-tile rows, expanders, tables-as-figures */
+.doc main:has(> .hero.mh) .stat-row,
+.doc main:has(> .hero.mh) figure.spark,
+.doc main:has(> .hero.mh) .vfig,
+.doc main:has(> .hero.mh) .mo-figcard,
+.doc main:has(> .hero.mh) .band > details.expander,
+.doc main:has(> .hero.mh) .scrolly-steps > .meth-step,
+.doc main:has(> .hero.mh) .scrolly-code > .meth-step {
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+/* 3. stat-tile row: one card, tiles separated by space, value first */
+.doc main:has(> .hero.mh) .stat-row { display: grid; gap: 24px; padding: 24px; margin: 0 0 20px; }
+.doc main:has(> .hero.mh) .stat-row .stat {
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  min-width: 0;
+}
+.doc main:has(> .hero.mh) .stat-row .stat-value { order: -1; font-size: 28px; line-height: 1.2; font-weight: 700; color: var(--text-strong); font-variant-numeric: tabular-nums; }
+.doc main:has(> .hero.mh) .stat-row .stat-label { margin-top: 4px; font-size: 14px; color: var(--gray-600); min-height: 0; }
+.doc main:has(> .hero.mh) .stat-row .stat-sub { font-size: 13px; font-weight: 600; color: var(--gray-500); }
+.doc main:has(> .hero.mh) .stat-row .stat-neutral { padding: 12px 14px; margin: -12px -14px; border-radius: 10px; border: 1px dashed var(--hairline-strong); }
+.doc main:has(> .hero.mh) .stat-row .stat-neutral:has(a.chip-warn) { background: color-mix(in srgb, var(--ab-loss) 8%, var(--card)); border: 1px solid color-mix(in srgb, var(--ab-loss) 35%, transparent); }
+.doc main:has(> .hero.mh) .stat-value.is-gain { color: var(--ab-gain); }
+.doc main:has(> .hero.mh) .stat-value.is-loss { color: var(--ab-loss-ink); }
+@media (max-width: 768px) { .doc main:has(> .hero.mh) .stat-row { padding: 16px; gap: 16px; } }
+
+/* 4. charts: teal gains, amber losses, rounded bars, dashed baseline */
+.doc main:has(> .hero.mh) figure.spark { padding: 20px 24px 14px; margin: 0; }
+.doc main:has(> .hero.mh) .spark-bar { rx: 3px; }
+.doc main:has(> .hero.mh) .spark-neg { fill: var(--ab-loss); }
+.doc main:has(> .hero.mh) .spark-pos { fill: var(--ab-gain); }
+.doc main:has(> .hero.mh) .spark-zero { stroke: var(--gray-400); stroke-dasharray: 6 4; }
+.doc main:has(> .hero.mh) .spark-axis { font-size: 12px; color: var(--gray-500); }
+.doc main:has(> .hero.mh) .scen-panel { gap: 20px; }
+
+/* 5. measure cards: limits (amber accent) and levers (teal accent) */
+.doc main:has(> .hero.mh) .limits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  border: 0;
+  background: none;
+  overflow: visible;
+  border-radius: 0;
+}
+.doc main:has(> .hero.mh) .limits > details.expander,
+.doc main:has(> .hero.mh) .limits > details.expander:first-child {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--surface-card);
+  box-shadow: 0 1px 2px rgba(17, 24, 39, .04);
+}
+.doc main:has(> .hero.mh) .limits > details.expander::before,
+.doc main:has(> .hero.mh) .dial-cards > *::before,
+.doc main:has(> .hero.mh) .fit-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--accent, var(--ab-loss));
+}
+.doc main:has(> .hero.mh) .limits > details.expander > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 20px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+.doc main:has(> .hero.mh) .limits > details.expander > summary::before {
+  content: "";
+  flex: 0 0 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ab-loss) 16%, var(--card)) center / 16px no-repeat
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B45309' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E");
+}
+.doc main:has(> .hero.mh) .limits > details.expander[open] { background: var(--surface-card); grid-column: 1 / -1; }
+.doc main:has(> .hero.mh) .limits > details.expander[open] > :not(summary) { padding: 0 20px 18px 64px; font-size: 15px; }
+@media (max-width: 1024px) { .doc main:has(> .hero.mh) .limits { grid-template-columns: minmax(0, 1fr); } }
+.doc main:has(> .hero.mh) .dial-cards { gap: 20px; }
+.doc main:has(> .hero.mh) .dial-cards > * {
+  --accent: var(--ab-gain);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--surface-card);
+  box-shadow: 0 1px 2px rgba(17, 24, 39, .04);
+  transition: box-shadow 200ms, transform 200ms;
+}
+.doc main:has(> .hero.mh) .dial-cards > *:hover { box-shadow: 0 6px 18px rgba(17, 24, 39, .08); transform: translateY(-2px); }
+.doc main:has(> .hero.mh) .fit-card { position: relative; overflow: hidden; }
+.doc main:has(> .hero.mh) .fit-yes { --accent: var(--ab-gain); }
+.doc main:has(> .hero.mh) .fit-no { --accent: var(--ab-none); }
+
+/* 6. bullets: 6px squares in the accent colour (measure-card points) */
+.doc main:has(> .hero.mh) .prose ul > li::before,
+.doc main:has(> .hero.mh) .meth-step ul > li::before,
+.doc main:has(> .hero.mh) .expander ul > li::before,
+.doc main:has(> .hero.mh) .scen-points > li::before {
+  -webkit-mask: none;
+          mask: none;
+  width: 6px;
+  height: 6px;
+  top: .62em;
+  left: 4px;
+  border-radius: 1px;
+  background: var(--primary);
+}
+.doc main:has(> .hero.mh) .prose ul > li,
+.doc main:has(> .hero.mh) .meth-step ul > li,
+.doc main:has(> .hero.mh) .expander ul > li,
+.doc main:has(> .hero.mh) .scen-points > li { padding-left: 18px; }
+.doc main:has(> .hero.mh) .limits ul > li::before { background: var(--ab-loss); }
+
+/* 7. tables: no cell borders, 1px row underline, numbers tabular */
+.doc main:has(> .hero.mh) .band table td,
+.doc main:has(> .hero.mh) .band table th { border-left: 0; border-right: 0; font-variant-numeric: tabular-nums; }
+.doc main:has(> .hero.mh) .band table tbody tr { border-bottom: 1px solid var(--gray-100); }
+.doc main:has(> .hero.mh) .band table thead th { font-size: 12px; font-weight: 500; color: var(--gray-500); }

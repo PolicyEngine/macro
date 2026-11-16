@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=9" />'
+CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=10" />'
 CSS_RE = re.compile(r'<link rel="stylesheet" href="/models/model-pages\.css(?:\?v=\d+)?" />\n?')
 
 sys.path.insert(0, str(ROOT))
@@ -137,8 +137,18 @@ def verdict(key: str, out: str) -> str:
     return VERDICT_RE.sub(repl, out, count=1)
 
 
+SIGNED_RE = re.compile(r'<span class="stat-value(?: is-(?:gain|loss))?">(\s*(&minus;|−|-|\+)[^<]*)</span>')
+
+
+def signed(out: str) -> str:
+    """Gains teal, losses amber; the printed sign stays (never colour alone)."""
+    return SIGNED_RE.sub(
+        lambda m: f'<span class="stat-value is-{"gain" if m.group(2) == "+" else "loss"}">{m.group(1)}</span>', out)
+
+
 def body(rel: str, source: str) -> str:
-    out = LEVEL_RE.sub(lambda m: f'<span class="chip" data-level="{LEVELS[m.group(1)]}">{m.group(1)}</span>', source)
+    out = signed(source)
+    out = LEVEL_RE.sub(lambda m: f'<span class="chip" data-level="{LEVELS[m.group(1)]}">{m.group(1)}</span>', out)
     out = VERDICT_CHIP_RE.sub(r"\1", out)
     if rel == f"{PAGES[rel]}/index.html":
         out = verdict(PAGES[rel], out)
