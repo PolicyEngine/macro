@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=16" />'
+CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=18" />'
 CSS_RE = re.compile(r'<link rel="stylesheet" href="/models/model-pages\.css(?:\?v=\d+)?" />\n?')
 
 sys.path.insert(0, str(ROOT))
@@ -149,8 +149,98 @@ def signed(out: str) -> str:
         lambda m: f'<span class="stat-value is-{"gain" if m.group(2) == "+" else "loss"}">{m.group(1)}</span>', out)
 
 
+VOID_TAGS = {"br", "img", "input", "meta", "link", "hr", "wbr", "source", "col", "area", "base", "param", "track"}
+TAG_RE = re.compile(r"<(/?)([a-zA-Z][\w:-]*)([^>]*?)(/?)>")
+
+
+def _children(html: str, start: int) -> tuple[list[tuple[int, int, str]], int, int]:
+    """Top-level child element spans of the element whose open tag starts at start.
+    Returns (children [(s, e, open_tag)], content_start, close_tag_start)."""
+    m = TAG_RE.match(html, start)
+    pos, depth, kids, cur = m.end(), 0, [], None
+    content_start = pos
+    for t in TAG_RE.finditer(html, pos):
+        closing, name, selfclose = t.group(1), t.group(2).lower(), t.group(4)
+        if name in VOID_TAGS or selfclose:
+            if depth == 0:
+                kids.append((t.start(), t.end(), t.group(0)))
+            continue
+        if not closing:
+            if depth == 0:
+                cur = (t.start(), t.group(0))
+            depth += 1
+        else:
+            if depth == 0:
+                return kids, content_start, t.start()
+            depth -= 1
+            if depth == 0:
+                kids.append((cur[0], t.end(), cur[1]))
+    raise ValueError("unbalanced")
+
+
+def _summarise(chunk: str) -> str:
+    parts = []
+    n_tab = chunk.count("<table")
+    n_fig = len(re.findall(r'<figure|class="vfig', chunk))
+    n_code = chunk.count('class="codeblock"')
+    n_list = len(re.findall(r"<li\b", chunk))
+    n_p = len(re.findall(r"<p\b", chunk))
+    if n_tab: parts.append("table" if n_tab == 1 else f"{n_tab} tables")
+    if n_fig: parts.append("chart" if n_fig == 1 else f"{n_fig} charts")
+    if n_code: parts.append("code" if n_code == 1 else f"{n_code} snippets")
+    if n_list: parts.append(f"{n_list} points")
+    elif n_p: parts.append("notes")
+    return ", ".join(parts) if parts else "notes"
+
+
+def fold_steps(rel: str, html: str) -> str:
+    """Headline only by default: in each open step keep the head, the lead
+    line and one visual; supporting detail goes behind one expander."""
+    code_page = rel.endswith("code/index.html")
+    out, i = [], 0
+    for m in re.finditer(r'<div class="meth-step"(?: id="[^"]*")? data-step="\d+">', html):
+        if m.start() < i:
+            continue
+        kids, cs, ce = _children(html, m.start())
+        keep, rest = [], []
+        lead = visual = False
+        for k in kids:
+            frag = html[k[0]:k[1]]
+            tag = k[2]
+            if "meth-step-head" in tag or 'class="more' in tag:
+                keep.append(k); continue
+            if not lead and tag.startswith("<p"):
+                keep.append(k); lead = True; continue
+            if code_page and 'class="codeblock"' in tag:
+                keep.append(k); continue
+            if not visual and (tag.startswith("<figure") or "vfig" in tag or "pipeline" in tag or "meth-map" in tag):
+                keep.append(k); visual = True; continue
+            rest.append(k)
+        details = [k for k in rest if html[k[0]:k[1]].lstrip().startswith("<details")]
+        loose = [k for k in rest if k not in details]
+        if not loose:
+            continue  # already headline + expanders
+        loose_html = "\n        ".join(html[k[0]:k[1]] for k in loose)
+        parts = [html[k[0]:k[1]] for k in keep]
+        if len(details) == 1:
+            d = html[details[0][0]:details[0][1]]
+            sm = re.search(r"</summary>", d)
+            d = d[:sm.end()] + "\n        " + loose_html + d[sm.end():]
+            parts.append(d)
+        else:
+            parts.append(
+                f'<details class="more"><summary><span class="more-title">More detail</span>'
+                f'<span class="more-sub">{_summarise(loose_html)}</span></summary>\n        {loose_html}\n        </details>')
+            parts += [html[k[0]:k[1]] for k in details]
+        out.append(html[i:cs]); out.append("\n        " + "\n        ".join(parts) + "\n      "); i = ce
+    out.append(html[i:])
+    return "".join(out)
+
+
 def body(rel: str, source: str) -> str:
     out = signed(source)
+    if "/methodology/" in rel or "/validation/" in rel or rel.endswith("code/index.html"):
+        out = fold_steps(rel, out)
     out = OLD_CHIP_RE.sub('<span class="chip">', out)
     out = ROW_RE.sub(lambda m: f'<tr data-level="{LEVELS[m.group(2)]}">{m.group(1)}', out)
     out = VERDICT_CHIP_RE.sub(r"\1", out)

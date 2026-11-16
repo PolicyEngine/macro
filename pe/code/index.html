@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=27" />
-<link rel="stylesheet" href="/models/model-pages.css?v=16" />
+<link rel="stylesheet" href="/models/model-pages.css?v=18" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -79,6 +79,17 @@
       <div class="meth-step" id="code-route" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Pick a route: hosted MCP, CLI, or Python</h3></div>
         <p>The quickest route is the <a href="/connect">hosted MCP server</a>: five tools, each with a <code>pe-macro</code> CLI mirror. The UK microdata credential is provisioned server-side.</p>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="cm"># one UK household, current law</span>
+pe-macro household --country uk \
+  --people '[{"age":35,"employment_income":50000}]'
+
+<span class="cm"># a reform (basic rate to 21p), scored over the population</span>
+pe-macro population-impact --country uk \
+  --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}'
+
+pe-macro parameters   <span class="cm"># the levers you can write reforms against</span></code></pre></div>
+        <details class="about">
+          <summary>About this step</summary>
         <div class="table-scroll mo-tablecard"><table>
           <caption>The five tools and their CLI mirrors</caption>
           <thead><tr><th scope="col">MCP tool</th><th scope="col">CLI mirror</th></tr></thead>
@@ -96,17 +107,6 @@
           <code>model="obr"</code> (<a href="/obr/code">OBR emulator code</a>).
         </div>
         <p class="kv-title">CLI mirrors</p>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="cm"># one UK household, current law</span>
-pe-macro household --country uk \
-  --people '[{"age":35,"employment_income":50000}]'
-
-<span class="cm"># a reform (basic rate to 21p), scored over the population</span>
-pe-macro population-impact --country uk \
-  --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}'
-
-pe-macro parameters   <span class="cm"># the levers you can write reforms against</span></code></pre></div>
-        <details class="about">
-          <summary>About this step</summary>
           <p>The third route is the Python package, <code>import policyengine as pe</code>, used in the steps below.</p>
         </details>
       </div>
@@ -155,11 +155,6 @@ us = pe.us.calculate_household(
       <div class="meth-step" id="code-population" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Score a whole population</h3></div>
         <p>The same package runs whole representative datasets (the enhanced UK Family Resources Survey, the US CPS) and aggregates any variable by decile, entity or demographic. For the full budgetary, decile, poverty and regional breakdown use <code>pe.uk.economic_impact_analysis</code> (hosted: <code>population_reform_impact</code>).</p>
-        <div class="callout">
-          UK population microdata is gated. To run UK population examples locally, set
-          <code>HUGGING_FACE_TOKEN</code> from an account with access to
-          <code>policyengine/policyengine-uk-data</code>.
-        </div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">import</span> policyengine <span class="kw">as</span> pe
 <span class="kw">from</span> policyengine.core <span class="kw">import</span> Simulation
 <span class="kw">from</span> policyengine.outputs.aggregate <span class="kw">import</span> Aggregate, AggregateType
@@ -176,6 +171,11 @@ agg.run()
 <span class="kw">print</span>(f<span class="kw">"Total UC spending: £{agg.result / 1e9:.1f}bn"</span>)</code></pre></div>
         <details class="about">
           <summary>About this step</summary>
+        <div class="callout">
+          UK population microdata is gated. To run UK population examples locally, set
+          <code>HUGGING_FACE_TOKEN</code> from an account with access to
+          <code>policyengine/policyengine-uk-data</code>.
+        </div>
           <h4>Reproduce the headline costing</h4>
           <p>One test re-runs the <a href="/pe/validation">validation tab</a>&rsquo;s 1p basic-rate figure. It needs the microdata token: <code>HUGGING_FACE_TOKEN=&hellip; pytest integration/tests/test_population.py --runslow -k basic_rate</code>.</p>
         </details>

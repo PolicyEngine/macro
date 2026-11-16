@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=27" />
-<link rel="stylesheet" href="/models/model-pages.css?v=16" />
+<link rel="stylesheet" href="/models/model-pages.css?v=18" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -83,9 +83,11 @@
       <div class="meth-step" id="run-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Hosted MCP tools</h3></div>
         <p>The quickest route is the <a href="/connect">hosted MCP server</a>: no install, no credentials.</p>
-<details class="about"><summary>What each tool returns</summary><p><code>forecast_uk</code> (YoY GDP-growth and CPI-inflation fan charts with 68%/90% bands), <code>latest_shocks</code> (<a class="gloss-link" href="/glossary#prior-posterior">posterior</a> sign probabilities of each identified shock in the latest quarter), <code>model_summary</code> (headline replication results — instant, no estimation), and the experimental <code>svar_inflation_incidence</code> (the CPI gap priced through benefit uprating in the microsimulation).</p></details>
+        <details class="more"><summary><span class="more-title">More detail</span><span class="more-sub">notes</span></summary>
         <p class="kv-title">Hosted tools</p>
         <dl class="kv"><div><dt>Forecast</dt><dd><code>forecast_uk(horizons=12, draws=2000)</code></dd></div><div><dt>Shocks</dt><dd><code>latest_shocks(draws=2000)</code></dd></div><div><dt>Headlines</dt><dd><code>model_summary()</code>, instant</dd></div><div><dt>Incidence</dt><dd><code>svar_inflation_incidence(year=2027)</code>, experimental</dd></div></dl>
+        </details>
+        <details class="about"><summary>What each tool returns</summary><p><code>forecast_uk</code> (YoY GDP-growth and CPI-inflation fan charts with 68%/90% bands), <code>latest_shocks</code> (<a class="gloss-link" href="/glossary#prior-posterior">posterior</a> sign probabilities of each identified shock in the latest quarter), <code>model_summary</code> (headline replication results — instant, no estimation), and the experimental <code>svar_inflation_incidence</code> (the CPI gap priced through benefit uprating in the microsimulation).</p></details>
         <details class="about">
           <summary>About this step</summary>
           <h4>Draws and runtime</h4>
@@ -96,17 +98,18 @@
       <div class="meth-step" id="run-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>CLI mirrors</h3></div>
         <p>The CLI mirrors the four MCP tools one for one: same outputs, no MCP client required.</p>
-        <p class="kv-title">CLI commands</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro forecast --horizons 12 --draws 2000   <span class="cm"># fan charts</span>
 pe-macro shocks                                <span class="cm"># latest-quarter shocks</span>
 pe-macro summary                               <span class="cm"># replication headlines</span>
 pe-macro svar-inflation-incidence --year 2027  <span class="cm"># experimental; needs HUGGING_FACE_TOKEN</span></code></pre></div>
+        <details class="more"><summary><span class="more-title">More detail</span><span class="more-sub">notes</span></summary>
+        <p class="kv-title">CLI commands</p>
+        </details>
       </div>
 
       <div class="meth-step" id="run-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Install locally</h3></div>
         <p>The package installs straight from GitHub with the prepared quarterly dataset inside, so <code>boe_var.data.load_data()</code> works immediately.</p>
-        <p class="kv-title">Install</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> policyengine_macro <span class="kw">import</span> svar_forecast, svar_latest_shocks
 
@@ -114,6 +117,7 @@ fc = svar_forecast(horizons=12, draws=2000)   <span class="cm"># median + 68%/90
 shocks = svar_latest_shocks(draws=2000)</code></pre></div>
         <details class="about">
           <summary>About this step</summary>
+        <p class="kv-title">Install</p>
           <h4>All inputs are public</h4>
           <p>Every input series is public: ONS (CPI, CPI energy, real GDP), Bank of England (Bank Rate, sterling ERI), and FRED (oil, exchange rates, world components).</p>
           <h4>Or through the suite, from Python</h4>
@@ -124,7 +128,6 @@ shocks = svar_latest_shocks(draws=2000)</code></pre></div>
       <div class="meth-step" id="run-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Development runner scripts</h3></div>
         <p>For development: clone the repository to rebuild the dataset or regenerate the paper outputs.</p>
-        <p class="kv-title">Runner scripts</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>python scripts/download_data.py     <span class="cm"># reassemble the public data</span>
 
 <span class="cm"># the paper's core outputs: IRFs, FEVDs, shocks, historical decompositions</span>
@@ -135,6 +138,7 @@ python scripts/run_replication.py
 python scripts/run_forecast_revision.py</code></pre></div>
         <details class="about">
           <summary>About this step</summary>
+        <p class="kv-title">Runner scripts</p>
           <h4>What lands where</h4>
           <p class="opt-note">Outputs land in <code>results/</code>: the replication figures (fig2–fig6), the forecast figures (fig1, fig7–fig9) and two summary reports. Runtime scales with draw count; the importance weights are the expensive part, one numerical Jacobian per accepted draw.</p>
         </details>
