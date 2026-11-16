@@ -41,3 +41,10 @@ def test_optional_model_dependencies_use_deployment_revisions():
     pyproject = (INTEGRATION / "pyproject.toml").read_text()
     for revision in _modal_pins().values():
         assert f"@{revision}" in pyproject
+
+
+def test_modal_app_hard_codes_no_home_directory():
+    """The CI image must not bake a developer's home directory into paths
+    that hosted tools return (frbus_summary and model_summary 'source')."""
+    text = (INTEGRATION / "modal_app.py").read_text()
+    assert not re.search(r"/(Users|home)/[A-Za-z0-9_.-]+", text)
