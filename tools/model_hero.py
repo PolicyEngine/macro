@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=18" />'
+CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=21" />'
 CSS_RE = re.compile(r'<link rel="stylesheet" href="/models/model-pages\.css(?:\?v=\d+)?" />\n?')
 
 sys.path.insert(0, str(ROOT))
@@ -130,7 +130,11 @@ VERDICT_RE = re.compile(
     re.S)
 
 
+WHY_RE = re.compile(r'<details class="ov-verdict-more"><summary>Why</summary><p>(.*?)</p></details>', re.S)
+
+
 def verdict(key: str, out: str) -> str:
+    out = WHY_RE.sub(r'<span class="ov-verdict-why">\1</span>', out)
     def repl(m: re.Match) -> str:
         return (
             f'<div class="ov-verdict-line"><span class="ov-verdict-short">{SHORT_VERDICT[key]}</span>\n'
@@ -207,7 +211,7 @@ def fold_steps(rel: str, html: str) -> str:
         for k in kids:
             frag = html[k[0]:k[1]]
             tag = k[2]
-            if "meth-step-head" in tag or 'class="more' in tag:
+            if "meth-step-head" in tag or 'class="more' in tag or 'class="xp' in tag:
                 keep.append(k); continue
             if not lead and tag.startswith("<p"):
                 keep.append(k); lead = True; continue
@@ -228,17 +232,57 @@ def fold_steps(rel: str, html: str) -> str:
             d = d[:sm.end()] + "\n        " + loose_html + d[sm.end():]
             parts.append(d)
         else:
-            parts.append(
-                f'<details class="more"><summary><span class="more-title">More detail</span>'
-                f'<span class="more-sub">{_summarise(loose_html)}</span></summary>\n        {loose_html}\n        </details>')
+            parts.append(site_nav.expander("list", "More detail", _summarise(loose_html), loose_html))
             parts += [html[k[0]:k[1]] for k in details]
         out.append(html[i:cs]); out.append("\n        " + "\n        ".join(parts) + "\n      "); i = ce
     out.append(html[i:])
     return "".join(out)
 
 
+MORE_OPEN = re.compile(r'<details class="more"><summary><span class="more-title">(.*?)</span><span class="more-sub">(.*?)</span></summary>', re.S)
+DETAILS_TAG = re.compile(r"<(/?)details\b[^>]*>")
+
+
+ABOUT_OPEN = re.compile(r'<details class="about"(?: id="[^"]*")?>\s*<summary(?: [^>]*)?>(.*?)</summary>', re.S)
+
+
+def _close(html: str, start: int):
+    depth = 1
+    for t in DETAILS_TAG.finditer(html, start):
+        depth += -1 if t.group(1) else 1
+        if depth == 0:
+            return t
+    raise ValueError("unbalanced details")
+
+
+def to_shared_expander(html: str) -> str:
+    """Our r12 'more' folds and the plain 'About this step' folds become the
+    shell's one expander (.xp), so every tab has a single expander style."""
+    while True:
+        m = ABOUT_OPEN.search(html)
+        if not m:
+            break
+        end = _close(html, m.end())
+        body = html[m.end():end.start()].strip("\n")
+        title = re.sub(r"<[^>]+>", "", m.group(1)).strip() or "More detail"
+        html = html[:m.start()] + site_nav.expander("list", title, _summarise(body), body) + html[end.end():]
+    while True:
+        m = MORE_OPEN.search(html)
+        if not m:
+            return html
+        depth, end = 1, None
+        for t in DETAILS_TAG.finditer(html, m.end()):
+            depth += -1 if t.group(1) else 1
+            if depth == 0:
+                end = t
+                break
+        body = html[m.end():end.start()].strip("\n")
+        html = html[:m.start()] + site_nav.expander("list", m.group(1), m.group(2), body) + html[end.end():]
+
+
 def body(rel: str, source: str) -> str:
     out = signed(source)
+    out = to_shared_expander(out)
     if "/methodology/" in rel or "/validation/" in rel or rel.endswith("code/index.html"):
         out = fold_steps(rel, out)
     out = OLD_CHIP_RE.sub('<span class="chip">', out)
