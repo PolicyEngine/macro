@@ -45,11 +45,10 @@ def render() -> str:
     )
     return "\n".join(
         [
+            "      <p class=\"fc-table-cap\">FRB/US April 2026 LONGBASE. Not a PolicyEngine "
+            "forecast; no bands; never scored.</p>",
             "      <div class=\"table-scroll\">",
-            "        <table>",
-            "          <caption>FRB/US April 2026 LONGBASE conditioning "
-            "baseline — the Fed-style path frb-us shocks deviate from. Not a "
-            "PolicyEngine forecast; no bands; never scored.</caption>",
+            "        <table aria-label=\"FRB/US April 2026 LONGBASE baseline\">",
             "          <thead><tr><th scope=\"col\">Quarter</th>"
             "<th scope=\"col\">Real GDP, y/y</th>"
             "<th scope=\"col\">CPI, y/y</th>"
