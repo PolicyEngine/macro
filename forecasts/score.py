@@ -1141,6 +1141,8 @@ def render_results(card: dict) -> str:
         band = _band_label(e)
         inside = e["in_68"] or e["in_90"]
         badge_cls = "fc-in" if e["in_68"] else ("fc-mid" if e["in_90"] else "fc-out-b")
+        note = ('<a class="fc-row-note" href="#limits">Satellite band understates uncertainty</a>'
+                if e["variable"] == "unemployment" else "")
         body.append(
             '        <div class="fc-row" role="row">'
             f'<div class="fc-tgt" role="rowheader"><span class="fc-var">{icon(e["variable"] if e["variable"] in _ICON_PATHS else "target")}</span>'
@@ -1150,7 +1152,7 @@ def render_results(card: dict) -> str:
             f'{e["lo68"]:.2f}–{e["hi68"]:.2f}, 90% band {e["lo90"]:.2f}–{e["hi90"]:.2f}, outturn {e["outturn"]:.2f}%.</span>'
             f"{_strip(e)}</div>"
             f'<div role="cell" class="fc-err"><span class="fc-err-chip">{signed(e["error"])}</span></div>'
-            f'<div role="cell" class="fc-where"><span class="fc-badge2 {badge_cls}">{icon("inside" if inside else "outside")}{esc(band[0].upper() + band[1:])}</span>{vint}</div>'
+            f'<div role="cell" class="fc-where"><span class="fc-badge2 {badge_cls}">{icon("inside" if inside else "outside")}{esc(band[0].upper() + band[1:])}</span>{vint}{note}</div>'
             "</div>"
         )
     body.append("      </div>")
