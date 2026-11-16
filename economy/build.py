@@ -237,7 +237,7 @@ def uk_figures() -> str:
         (
             line_chart(
                 "UK real GDP growth",
-                "Year-on-year percent, latest 20 quarters.",
+                "Year-on-year percent.",
                 gdp_growth(gdp),
                 "%",
                 f"ONS · {gdp['cdid']}",
@@ -245,7 +245,7 @@ def uk_figures() -> str:
             ),
             line_chart(
                 "UK CPI inflation",
-                "Year-on-year percent, latest 20 quarters.",
+                "Year-on-year percent.",
                 cpi["observations"],
                 "%",
                 f"ONS · {cpi['cdid']}",
@@ -253,7 +253,7 @@ def uk_figures() -> str:
             ),
             line_chart(
                 "UK unemployment",
-                "Percent of the labour force, latest 20 quarters.",
+                "Percent of the labour force.",
                 unemployment["observations"],
                 "%",
                 f"ONS · {unemployment['cdid']}",
@@ -271,7 +271,7 @@ def us_figures() -> str:
         (
             line_chart(
                 "US real GDP growth",
-                "Year-on-year percent, latest 20 quarters.",
+                "Year-on-year percent.",
                 gdp_growth(gdp),
                 "%",
                 "BEA via FRED · GDPC1",
@@ -279,7 +279,7 @@ def us_figures() -> str:
             ),
             line_chart(
                 "US CPI inflation",
-                "Year-on-year percent, latest 20 months.",
+                "Year-on-year percent.",
                 yoy_growth(cpi, 12),
                 "%",
                 "BLS via FRED · CPIAUCSL",
@@ -287,7 +287,7 @@ def us_figures() -> str:
             ),
             line_chart(
                 "US unemployment",
-                "Percent of the labor force, latest 20 months.",
+                "Percent of the labor force.",
                 unemployment["observations"],
                 "%",
                 "BLS via FRED · UNRATE",

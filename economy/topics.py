@@ -1809,6 +1809,15 @@ def us_platform() -> str:
         ),
     ]
     return f"""    <div class="prose">
+      <p>
+        Two things the UK side has and the US does not:
+      </p>
+{limits_list([
+        "<strong>No reform with macro feedback.</strong> "
+        f'{model_link("frb-us")} and {model_link("us-hank")} do not take PolicyEngine '
+        "reforms; no mapping exists from a US statutory reform to a US macro model.",
+        f'<strong>No forecast.</strong> Only {model_link("boe-svar")} forecasts, and it is UK-only.',
+    ])}
       <details class="about route-details">
         <summary>The routes, with the command for each</summary>
       <div class="table-scroll">
@@ -1831,15 +1840,6 @@ def us_platform() -> str:
           {registry_terms(microsim["outputs"])} over a {esc(microsim["horizon"])}.
         </p>
       </details>
-      <p>
-        Two UK rows have no US equivalent:
-      </p>
-{limits_list([
-        "<strong>No reform with macro feedback.</strong> "
-        f'{model_link("frb-us")} and {model_link("us-hank")} do not take PolicyEngine '
-        "reforms; no mapping exists from a US statutory reform to a US macro model.",
-        f'<strong>No forecast.</strong> Only {model_link("boe-svar")} forecasts, and it is UK-only.',
-    ])}
       <details class="about">
         <summary>The bridge that does exist, and the MCP routes</summary>
         <p>
@@ -1854,7 +1854,6 @@ def us_platform() -> str:
           {tool("population_reform_impact")}, {tool("frbus_shock_incidence")} and
           {tool("hank_shock_incidence")}; {tool("recommend_model")} refuses a US
           reform needing macro feedback, which is the correct answer.
-          <a href="/connect">Connect a client →</a>
         </p>
       </details>
     </div>"""
@@ -2823,7 +2822,7 @@ UK_TOPICS = [
         "slug": "rates",
         "title": "Rates and gilts",
         "eyebrow": "UK topic · policy rate and the gilt curve",
-        "heading": "What do rates say — and what can these models say about them?",
+        "heading": "What do rates say, and what can these models say about them?",
         "series_phrase": "official Bank Rate and the 5-, 10- and 20-year nominal par gilt yields",
         "series": ("uk_bank_rate", "uk_gilt_5y", "uk_gilt_10y", "uk_gilt_20y"),
         "hook": rates_hook,
@@ -2862,7 +2861,7 @@ UK_TOPICS = [
         # the sub-tab label: the full title cut the strip at 1440 px (#220 item 6)
         "tab": "Tax and benefits",
         "eyebrow": "UK topic · scoring a policy change",
-        "heading": "What would a reform do — and how far can the models follow it?",
+        "heading": "What would a reform do, and how far can the models follow it?",
         "series": (),
         "hook": reform_hook,
         "stands": reform_stands,
@@ -2909,7 +2908,7 @@ US_TOPICS = [
         "slug": "inflation",
         "title": "Inflation",
         "eyebrow": "US topic · prices",
-        "heading": "Where are US prices now — and what is missing from this page?",
+        "heading": "Where are US prices now, and what is missing from this page?",
         "series": ("us_cpi",),
         "cards": (("us_cpi", "yoy"), ("us_cpi", None)),
         "hook": us_inflation_hook,
@@ -2953,7 +2952,7 @@ US_TOPICS = [
         "slug": "rates",
         "title": "Rates and Treasuries",
         "eyebrow": "US topic · policy rate and the Treasury curve",
-        "heading": "What do US rates say — and what can these models say about them?",
+        "heading": "What do US rates say, and what can these models say about them?",
         "series": ("us_federal_funds_rate", "us_treasury_10y"),
         "hook": us_rates_hook,
         "stands_note": (
@@ -2975,7 +2974,7 @@ US_TOPICS = [
         # the sub-tab label: the full title cut the strip at 1440 px (#220 item 6)
         "tab": "Tax and benefits",
         "eyebrow": "US topic · scoring a policy change",
-        "heading": "What would a US reform do — and how far can the models follow it?",
+        "heading": "What would a US reform do, and how far can the models follow it?",
         "series": (),
         "hook": us_reform_hook,
         "stands": us_reform_stands,

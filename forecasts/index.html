@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="/style.css?v=27" />
-<link rel="stylesheet" href="/forecasts/forecasts.css?v=14" />
+<link rel="stylesheet" href="/forecasts/forecasts.css?v=15" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -486,7 +486,7 @@
   </section>
 
   <section class="ab-sec" id="where-next">
-    <div class="sh"><span class="sh-icon" aria-hidden="true"><svg class="fc-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></span><h2>Read next</h2><p>Release notes read each release against its vintage: interpretation, not evidence of skill.</p></div>
+    <div class="sh"><span class="sh-icon" aria-hidden="true"><svg class="fc-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><h2>Read next</h2><p>Release notes read each release against its vintage: interpretation, not evidence of skill.</p></div>
     <div class="fc-notes ab-card" id="notes">
       <a href="/notes/2026-07-25-cpi-2026q2"><span class="fc-li-ic"><svg class="fc-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l8.59-8.59a1 1 0 0 0 0-1.41Z"/><path d="M7 7h.01"/></svg></span><span>CPI fell to 2.8%. The model’s median path turns back up.</span><strong>25 July 2026</strong></a>
 <!-- generated-release-notes:begin -->
@@ -656,7 +656,15 @@
       select((target + tabs.length) % tabs.length, true);
     });
   });
+  // The dot note only applies to fans that draw outturn dots.
+  var dotNote = section.querySelector(".forecast-note");
+  tabs.forEach(function (entry) {
+    entry.tab.addEventListener("click", function () {
+      if (dotNote) dotNote.hidden = entry.tab.textContent.trim() === "GDP";
+    });
+  });
   select(0);
+  if (dotNote) dotNote.hidden = tabs[0].tab.textContent.trim() === "GDP";
 })();
 </script>
 <script src="/stepper.js" defer></script>

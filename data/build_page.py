@@ -435,7 +435,7 @@ def render_fragment() -> str:
       </p>
       <div class="table-scroll">
         <table id="series-table" class="series-table">
-          <caption>Values come from the committed snapshot, not a live call. Expand a row for its snapshot history and store path.</caption>
+          <caption>Expand a row for its snapshot history and store path.</caption>
           <thead>
             <tr>
               <th scope="col">Series</th>
