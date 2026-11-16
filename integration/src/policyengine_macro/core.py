@@ -188,7 +188,7 @@ OBR_VARIABLES = [
         # quarter converged; obr results/site_figures.json): delta_IF is exactly 0.0 because IF has no
         # live equation; business investment (IBUSX) is the residual of
         # IBUS = IF - GGI - ... (l.84) and falls by exactly -delta GGI
-        # (+1500/qtr: -1,394 at q4); GDP falls only by the induced consumption
+        # (+1500/qtr over 8 quarters from 2026Q1: -1,408 at q4); GDP falls only by the induced consumption
         # (-3.8 at q4). Against the OBR's published 1.0 the channel is absent.
         "caveat": (
             "this channel does not transmit: total fixed investment (IF) has "
