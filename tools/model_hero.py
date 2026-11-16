@@ -302,7 +302,11 @@ def stamp(rel: str, source: str) -> str:
     out = source[: m.start()] + hero(rel, m.group(0)) + source[m.end():]
     out = body(rel, out)
     out = CSS_RE.sub("", out)
-    out = re.sub(r'(<link rel="stylesheet" href="/style\.css[^"]*" />)', r"\1\n" + CSS_LINK, out, count=1)
+    # After the shell stylesheet and, on methodology tabs, after the MathJax
+    # sheet that tools/prerender_math.py pins directly under style.css.
+    anchor = (r'(<link rel="stylesheet" href="/vendor/mathjax/chtml\.css[^"]*" />)'
+              if "/vendor/mathjax/chtml.css" in out else r'(<link rel="stylesheet" href="/style\.css[^"]*" />)')
+    out = re.sub(anchor, r"\1\n" + CSS_LINK, out, count=1)
     return out
 
 
