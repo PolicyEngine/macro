@@ -3044,42 +3044,55 @@ def subnav(country: str, current: str | None) -> str:
     ancestor, not the current URL, so it takes ``aria-current="true"``.
     """
     entry = COUNTRIES[country]
-    scope = []
+    # r13 (Vahid: "make it better, group them?"): two labelled groups.
+    # Forecasts = the two country records; Data = this country's data hub and
+    # a Topics menu. "Track record" is gone: it was the same URL as the
+    # country's Forecasts link. assets/subnav.js turns each group into a
+    # dropdown at 820px and below, and the Topics list into a menu when wide.
+    fc = []
     for code, other in COUNTRIES.items():
-        target = scope_target(code, current)
-        if code == country:
-            state = "page" if target == _self_url(country, current) else "true"
-        else:
-            state = None
-        attr = f' aria-current="{state}"' if state else ""
-        scope.append(
-            f'        <a class="model-tabs-link"{attr} '
-            f'href="{target}">{other["label"]}</a>'
-        )
-    overview_attr = ' aria-current="page"' if current is None else ""
-    data_attr = ' aria-current="page"' if current == "data" else ""
-    links = [
-        f'        <a class="model-tabs-link"{overview_attr} '
-        # "Track record", not "Overview": the hub is the scored record,
-        # and a forecaster's reader looks for the record by that name.
-        f'href="{entry["hub"]}">Track record</a>',
-        f'        <a class="model-tabs-link"{data_attr} '
-        f'href="{entry["data"]}">Data</a>',
-    ]
+        here = current is None and code == country
+        attr = ' aria-current="page"' if here else ""
+        fc.append(f'        <a class="model-tabs-link"{attr} href="{other["hub"]}">{other["label"]}</a>')
+    dl = []
+    for code, other in COUNTRIES.items():
+        here = current == "data" and code == country
+        attr = ' aria-current="page"' if here else ""
+        dl.append(f'          <a class="model-tabs-link"{attr} href="{other["data"]}">{other["label"]}</a>')
+    topic_links = []
+    current_title = None
     for topic in topics_for(country):
+        title = esc(topic.get("tab", topic["title"]))
         attr = ' aria-current="page"' if topic["slug"] == current else ""
-        links.append(
-            f'        <a class="model-tabs-link"{attr} '
-            f'href="{topic_url(topic)}">{esc(topic.get("tab", topic["title"]))}</a>'
-        )
-    return f"""  <nav class="economy-subnav" aria-label="Forecasts">
+        if attr:
+            current_title = title
+        topic_links.append(f'          <a class="model-tabs-link"{attr} href="{topic_url(topic)}">{title}</a>')
+    btn_attr = ' aria-current="true"' if current_title else ""
+    btn_label = f"Topics: {current_title}" if current_title else "Topics"
+    fc_open = "Forecasts" + (f": {entry['label']}" if current is None else "")
+    data_open = "Data" + (f": {entry['label']}" if current == "data" else (f": {current_title}" if current_title else ""))
+    return f"""  <nav class="economy-subnav sn2" aria-label="Forecasts and data">
     <div class="economy-subnav-row">
-      <div class="economy-subnav-scope">
-        <span class="economy-subnav-label mono">Forecasts</span>
-{chr(10).join(scope)}
+      <div class="sn-group" data-sn-group>
+        <button type="button" class="model-tabs-link sn-group-btn" aria-expanded="false"{' aria-current="true"' if current is None else ''}>{site_nav.icon("forecasts", 16)}{fc_open}<span class="sn-chev" aria-hidden="true"></span></button>
+        <span class="sn-label">{site_nav.icon("forecasts", 14)}Forecasts</span>
+        <div class="sn-items">
+{chr(10).join(fc)}
+        </div>
       </div>
-      <div class="economy-topics">
-{chr(10).join(links)}
+      <span class="sn-div" aria-hidden="true"></span>
+      <div class="sn-group" data-sn-group>
+        <button type="button" class="model-tabs-link sn-group-btn" aria-expanded="false"{' aria-current="true"' if current is not None else ''}>{site_nav.icon("database", 16)}{data_open}<span class="sn-chev" aria-hidden="true"></span></button>
+        <span class="sn-label">{site_nav.icon("database", 14)}Data</span>
+        <div class="sn-items">
+{chr(10).join(dl)}
+          <div class="sn-menu" data-sn-menu>
+            <button type="button" class="model-tabs-link sn-menu-btn" aria-expanded="false"{btn_attr}>{btn_label}<span class="sn-chev" aria-hidden="true"></span></button>
+            <div class="sn-pop" role="group" aria-label="Topics">
+{chr(10).join(topic_links)}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </nav>"""

@@ -42,13 +42,13 @@ MACRO = (
 # "x" a macro model, "out" the result; "v" is the verb on the next arrow.
 USES = (
     ("score", "score", "calculator", "Score a tax reform", "UK · hosted", "hosted",
-     (("in", "Reform"), ("v", "cost"), ("m", "Microsimulation"), ("v", "add-factor"),
-      ("x", "OBR emulator"), ("v", ""), ("out", "Cost + GDP feedback"))),
+     (("in", "Reform"), ("v", "is costed by"), ("m", "Microsimulation"), ("v", "sends the cost to"),
+      ("x", "OBR emulator"), ("v", "returns"), ("out", "Cost + GDP feedback"))),
     ("shock", "incidence", "users", "Who gains and loses from a macro shock", "UK + US · experimental", "exp",
-     (("x", "SVAR, FRB/US, HANK or DEFINE-UK"), ("v", "macro path"), ("m", "Microsimulation"),
-      ("v", ""), ("out", "Winners and losers"))),
+     (("x2", "Any shock model|BoE SVAR · FRB/US · US HANK · DEFINE-UK"), ("v", "sends its macro path to"),
+      ("m", "Microsimulation"), ("v", "shows"), ("out", "Winners and losers"))),
     ("long", "og-join", "hourglass", "Long-run dynamic score", "UK · local only, none published", "local",
-     (("x", "OG-UK"), ("v", "long-run wages"), ("m", "Microsimulation"), ("v", "second run"),
+     (("x", "OG-UK"), ("v", "sends long-run wages to"), ("m", "Microsimulation"), ("v", "re-scores"),
       ("out", "Dynamic score"))),
 )
 W, H = 0, 0  # kept for callers that import the old geometry names
@@ -64,6 +64,9 @@ def _flow(steps):
             out.append(f'<span class="u-node u-micro">{icon(MODEL_ICONS["pe-microsim"], 14)}{text}</span>')
         elif kind == "x":
             out.append(f'<span class="u-node u-macro">{text}</span>')
+        elif kind == "x2":
+            head, sub = text.split("|")
+            out.append(f'<span class="u-node u-macro u-multi"><span>{head}</span><small>{sub}</small></span>')
         elif kind == "out":
             out.append(f'<span class="u-node u-out">{icon("check-circle", 14)}{text}</span>')
         else:
@@ -80,28 +83,28 @@ def render(page: str) -> str:
     uses = []
     for key, panel, ic, title, status, cls, steps in USES:
         href = f"#{panel}" if on_models else f"/models#{panel}"
-        text = " → ".join(t for k, t in steps if k != "v")
+        text = " → ".join(t.split("|")[0] for k, t in steps if k != "v")
         uses.append(
             f'      <li class="use use-{cls}"><a href="{href}">'
             f'<span class="use-ic">{icon(ic, 18)}</span>'
             f'<span class="use-main"><span class="use-head"><strong>{title}</strong><span class="use-chip">{status}</span></span>'
             f'<span class="use-flow" role="img" aria-label="{text}">{_flow(steps)}</span></span>'
             f'<span class="use-go" aria-hidden="true">{icon("arrow-right", 16)}</span></a></li>')
-    note_link = '' if on_models else ' <a href="/models#joins">How each link works</a>'
+    macro_tier = (
+        '<div class="hub2-tier hub2-macro">\n'
+        f'    <p class="hub2-label">{icon("models", 14)}Six macro models: the economy-wide answer</p>\n'
+        f'    <div class="mx-grid">\n{cards}\n    </div>\n  </div>'
+    ) if on_models else ""
+    note_link = '' if on_models else ' <a href="/models#joins">See how each link works</a>'
     return f'''{OPEN}
 <div class="hub2" data-hub2>
-  <div class="hub2-tier hub2-macro">
-    <p class="hub2-label">{icon("models", 14)}Six macro models: the economy-wide answer</p>
-    <div class="mx-grid">
-{cards}
-    </div>
-  </div>
+  {macro_tier}
   <ol class="hub2-uses" aria-label="What the microsimulation adds">
 {chr(10).join(uses)}
   </ol>
   <div class="hub2-tier hub2-micro">
     <span class="hub2-micro-ic">{icon(MODEL_ICONS["pe-microsim"], 20)}</span>
-    <p><strong>PolicyEngine microsimulation adds the household layer</strong><span>Taxes, benefits and who gains or loses, for the UK and US. <a href="/pe">Open it</a></span></p>
+    <p><strong>The household layer: PolicyEngine microsimulation</strong><span>Every household&rsquo;s taxes and benefits, UK and US. <a href="/pe">Open the microsimulation</a></span></p>
   </div>
   <p class="hub2-note"><strong>No macro model feeds another.</strong> No US macro bridge: US reforms are scored statically.{note_link}</p>
 </div>
