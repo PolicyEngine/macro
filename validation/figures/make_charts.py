@@ -1074,7 +1074,8 @@ def chart_svar_coverage():
                 for lv in (68, 90)
             ) +
             f". The 68 per cent band covers {series[68][0]:.0%} at one quarter, just above "
-            f"nominal, and falls below nominal from horizon two onward to {series[68][-1]:.0%} "
+            f"nominal, and falls below nominal from horizon "
+            f"{next(i + 1 for i, v in enumerate(series[68]) if v < 0.68)} onward to {series[68][-1]:.0%} "
             f"at eight; the 90 per cent band under-covers at every horizon, from "
             f"{series[90][0]:.0%} down to {series[90][-1]:.0%}. The mean hides how bad the "
             f"worst variable is: the lowest cell in the grid is {worst_var} at the "

@@ -104,7 +104,7 @@
       <div class="stat stat-neutral">
         <span class="stat-label">Free-running, real GDP</span>
         <span class="stat-value">4.32%</span>
-        <span class="stat-sub">published closure; a closure artifact, not OBR error</span>
+        <span class="stat-sub">earlier run (4.12% at the pin); a closure artifact, not OBR error</span>
         <span class="stat-foot"><a class="chip chip-warn" href="#val-freerun">Weak, 6 of 11 in band</a></span>
       </div>
     </div>
@@ -340,7 +340,7 @@
       </div>
       <div class="meth-step meth-fold" data-step="2">
         <details class="expander step-fold" id="val-freerun">
-          <summary><span class="meth-step-num mono">3</span><span class="step-fold-text"><h3>Free-running</h3><span class="step-fold-result">Published closure: 6 of the 11 computed lines in band, worst company profits 82.77%. Under the pin: 7 of 11, profits 18.04%; the full re-run is pending</span></span></summary>
+          <summary><span class="meth-step-num mono">3</span><span class="step-fold-text"><h3>Free-running</h3><span class="step-fold-result">This page&rsquo;s run, published closure: 6 of the 11 computed lines in band, worst company profits 82.77%. Re-measured at the pin: 8 of 11, profits 12.45%; the charts are not yet re-run</span></span></summary>
         <p class="mo-lead">What the emulator does with GDP made endogenous and no add-factors.</p>
       <div class="prose">
       <figure class="vfig">
@@ -451,7 +451,7 @@
       </details>
     </div>
         <p class="kv-title">The free-running scorecard</p>
-        <dl class="kv kv-text"><div><dt>Computed</dt><dd>11 of 21 headline variables; the other 10 are passthrough</dd></div><div><dt>In band</dt><dd>6 of the 11, and one of those is a trivial identity</dd></div><div><dt>Worst</dt><dd>company profits 82.77%</dd></div><div><dt>Under the pin</dt><dd>7 of 11 in band, profits 18.04%; full scorecard not yet re-run</dd></div><div><dt>Current account</dt><dd>3.02% of GDP</dd></div></dl>
+        <dl class="kv kv-text"><div><dt>Computed</dt><dd>11 of 21 headline variables; the other 10 are passthrough</dd></div><div><dt>In band</dt><dd>6 of the 11, and one of those is a trivial identity</dd></div><div><dt>Worst</dt><dd>company profits 82.77%</dd></div><div><dt>Re-measured at the pin</dt><dd>8 of 11 in band under the default (profits 12.45%, real GDP 4.12%); 6 of 11 under the published closure (profits 43.64%), per the <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/6fbbe0609071618ef03dde23f1f50a9d665d4298/docs/calibration_scorecard.md">scorecard at <code>6fbbe06</code></a>; this page&rsquo;s charts are not yet re-run</dd></div><div><dt>Current account</dt><dd>3.02% of GDP</dd></div></dl>
               </details>
       </div>
       </div>
@@ -511,6 +511,9 @@
         0.6</a></strong> for day-to-day public services and welfare spending. A spending shock lands straight in the GDP identity, so &pound;5bn in returns about &pound;5bn of GDP (<a href="/obr#answers">figures</a>).</p>
     <h3 class="limits-h">Channels that do not transmit</h3>
     <div class="limits">
+      <details class="expander limit" id="vat"><summary>VAT barely reaches GDP</summary>
+        <p>A 1pp VAT rise (&pound;2.2bn a quarter on <code>VREC</code>) moves receipts and borrowing one for one, but GDP by only 0.026 per pound raised after a year and 0.044 after three, against the OBR&rsquo;s published 0.35. CPI is exogenous in the OBR&rsquo;s listing, so the model cannot pass VAT into prices; the tax lands on company profits, and only the withdrawals that follow profits reach households. Only income tax and NICs transmit through household income (the OBR&rsquo;s demo run of 15 Nov 2026, every quarter converged, <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/pull/67">obr-macroeconomic-model #67</a>).</p>
+      </details>
       <details class="expander limit"><summary>Government investment does not transmit</summary>
         <p><code>CGIPS</code> does not transmit, in two separate ways. Total fixed investment (<code>IF</code>) moves <strong>exactly zero</strong> at any shock size, because <code>IF</code> has no live equation in the published listing — the chain never reaches the GDP identity. Business investment (<code>IBUSX</code>) does move, but only as an offset: it is the residual of the identity <code>IF = IBUS + GGI + …</code>, and with <code>IF</code> held fixed a rise in <code>CGIPS</code> (through <code>GGI</code>) pushes it down about one-for-one &mdash; mean responses of −£1.47bn for a £1.5bn-per-quarter shock and −£5.94bn for £6bn (98% and 99% of the shock). The £3bn run (−£0.83bn) is solver residue. These three runs predate the nominal-GDP pin: under the published closure every quarter stopped on the solver&rsquo;s stall break, unconverged (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/70ee8f0c788ce9414c465441f581ebb5f385299e/results/site_figures.json"><code>results/site_figures.json</code></a>), and they have not yet been re-run under the pin. The zero for <code>IF</code> does not depend on the solver: it has no equation. That offset is accounting, not a multiplier, and must never be quoted as one. The OBR&rsquo;s published multiplier for capital spending is 1.0. Capital spending should not be scored on this model.</p>
       </details>
@@ -548,7 +551,7 @@
         <p>The hosted service pins this model at <code>6fbbe06</code>: the nominal-GDP pin is the default (obr-macroeconomic-model #54&ndash;#58), the ended EU budget payments are held at zero (#65) and the household-tax ratio is reported on both bases (#66), so hosted <code>obr_shock</code> and <code>score_reform(model="obr")</code> results converge in every quarter and are scored around the anchored baseline, like the figures on these pages. The default window still differs from the <a href="/obr#answers">worked example</a>: <code>score_reform</code> scores five years from 2026Q2 to 2031Q1, while the example is a 12-quarter run from 2025Q1. A hosted <code>score_reform</code> takes over ten minutes on the default window, most of it the five yearly microsimulation costings; run it through <code>start_job</code>, or pass <code>years=1</code> or <code>2</code> (<a href="https://github.com/PolicyEngine/macro/issues/243">macro #243</a>).</p>
       </details>
       <details class="expander limit" id="nominal-gdp"><summary>Nominal GDP needs the pin to converge</summary>
-        <p>The investment deflator (<code>PIF</code>) and nominal GDP (<code>GDPMPS</code>) are set by one identity written twice in the listing (lines 337 and 688), so the published closure pins neither down: <code>PIF</code> drifts, nominal GDP follows it, and company profits (<code>FYCPR</code>), a residual, follow nominal GDP (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/issues/42">obr-macroeconomic-model #42</a>). Under that closure no quarter converges. The nominal-GDP pin restores the OBR&rsquo;s own line 690; it is the default, used by the hosted tools and the Overview figures, and every quarter converges. The free-running scorecard on this page has not yet been re-run under the pin, so its figures, including the 82.77% profits error, still come from the published closure; under the pin the profits error was 18.04% with 7 of 11 computed lines in band (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/pull/52">obr-macroeconomic-model #52</a>).</p>
+        <p>The investment deflator (<code>PIF</code>) and nominal GDP (<code>GDPMPS</code>) are set by one identity written twice in the listing (lines 337 and 688), so the published closure pins neither down: <code>PIF</code> drifts, nominal GDP follows it, and company profits (<code>FYCPR</code>), a residual, follow nominal GDP (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/issues/42">obr-macroeconomic-model #42</a>). Under that closure no quarter converges. The nominal-GDP pin restores the OBR&rsquo;s own line 690; it is the default, used by the hosted tools and the Overview figures, and every quarter converges. The free-running scorecard on this page has not yet been re-run under the pin, so its figures, including the 82.77% profits error, still come from the published closure; the pin&rsquo;s own <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/6fbbe0609071618ef03dde23f1f50a9d665d4298/docs/calibration_scorecard.md">scorecard at <code>6fbbe06</code></a>, re-measured on 15 Nov 2026 after later fixes (including ending EU budget payments), gives 12.45% with 8 of 11 computed lines in band, and 43.64% with 6 of 11 under the published closure (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/pull/52">obr-macroeconomic-model #52</a>).</p>
       </details>
       <details class="expander limit"><summary>Vintage</summary>
         <p>October 2025 equation listing, March 2026 EFO, current-vintage ONS series. Where the ONS has revised history the identities don't close exactly; that slack lands in the add-factors.</p>
