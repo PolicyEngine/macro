@@ -1078,8 +1078,9 @@ def render_results(card: dict) -> str:
         '        <table class="scoreboard sb-grid" data-stack="yes">',
         "          <caption>Absolute error against the same outturn, in percentage "
         "points; each benchmark's own value beneath. The BoE MPR (February), OBR EFO "
-        "(March) and SEF (April 2026) were fixed before these July rounds, on less data: "
-        "they show where views differed, not a test of skill.</caption>",
+        "(March) and SEF (April 2026) were fixed before the rounds scored here, on less data: "
+        "they show where views differed, not a test of skill. The October 2026 EFO and "
+        "November 2026 MPR are not included: their quarterly paths are not yet stored.</caption>",
         "          <thead><tr>" + "".join(head) + "</tr></thead>",
         "          <tbody>",
     ]
