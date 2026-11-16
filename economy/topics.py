@@ -1400,22 +1400,14 @@ def public_finances_model() -> str:
 {icon_items([
         ("landmark", '<strong><a href="/obr">OBR emulator</a>: shock questions, not forecasts.</strong>'),
         ("list", f"Outputs: {registry_terms(model['outputs'])}; not borrowing or debt."),
-        ("x-circle", f"Cannot answer {(cannot('obr-macro'))}."),
-        ("info", f"Status: {esc(model['status'])}. Uncertainty: {esc(model['uncertainty'])}."),
+        ("x-circle", "No reform incidence or borrowing."),
         ("clock", f"Baseline: {esc(model['data_vintage'])}; scenarios are deviations from it."),
     ])}
       <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Predictive validation: {esc(level_label(predictive["level"]))}.</strong>
         <strong>Policy counterfactuals: {esc(level_label(counterfactual["level"]))}.</strong>
         <a href="/obr/validation">Validation →</a>
       </p>
-      <p>
-        So the borrowing and debt figures above are outturns with no model path
-        beside them. What the emulator adds is the counterfactual: run a
-        spending or corporation-tax change through it and read the GDP,
-        consumption and investment response — then take the fiscal arithmetic
-        from <a href="/economy/topics/reform">tax and benefit reform</a>, which
-        is where the costing actually lives.
-      </p>
+      <p class="link-row">{site_nav.icon("scale", 16)}<a href="/economy/topics/reform">Costing lives on tax and benefit reform</a></p>
     </div>"""
 
 
@@ -1456,7 +1448,7 @@ def reform_capability_card(title: str, value: str, note: str, facts: list[tuple[
         for name, text in facts
     )
     return f"""        <article class="economy-stat">
-          <p class="economy-stat-label mono">{esc(title.upper())}</p>
+          <p class="economy-stat-label">{esc(SHORT_NAMES.get(title.split(" ")[0], title))}{esc(" bridge" if title.endswith(" bridge") else "")}</p>
           <p class="economy-stat-value">{esc(value)}</p>
           <p class="economy-stat-change">{esc(note)}</p>
           <dl>
@@ -1492,13 +1484,10 @@ def reform_stands() -> str:
     return f"""    <div class="economy-grid">
 {cards}
     </div>
-    <p class="economy-method">
-      This is the one topic with no official series behind it, so there is no
-      vintage to date: what stands is a capability, and the cards above are read
-      straight out of the committed capability registry rather than written by
-      hand. A reform is one <span class="mono">{{parameter_path: value}}</span>
-      dictionary, and the same dictionary is accepted by every route below.
-    </p>"""
+{icon_items([
+        ("info", "Capabilities, not data: no official series here."),
+        ("code", "One reform dictionary works on every route below."),
+    ])}"""
 
 
 def reform_model() -> str:
@@ -2586,14 +2575,10 @@ def us_reform_stands() -> str:
     return f"""    <div class="economy-grid">
 {cards}
     </div>
-    <p class="economy-method">
-      This is the one topic with no official series behind it, so there is no
-      vintage to date: what stands is a capability, and the cards above are
-      read straight out of the committed capability registry rather than
-      written by hand. pe-microsim is the only member covering both countries —
-      the two US macro models are shock models, and the last row of each of
-      their cards is the reason this page stops where it does.
-    </p>"""
+{icon_items([
+        ("info", "Capabilities, not data: no official series here."),
+        ("x-circle", "Microsimulation covers UK and US; the US macro models take shocks, not reforms."),
+    ])}"""
 
 
 def us_reform_model() -> str:
@@ -3109,7 +3094,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
-<link rel="stylesheet" href="/economy/topic-page.css?v=8" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=9" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -3199,7 +3184,7 @@ def us_public_finance_gap() -> str:
             "finances a US topic page or narrow US_FISCAL_HINTS"
         )
     obr = MODELS["obr-macro"]
-    return f"""      <p class="fc-note-row">{site_nav.icon("database", 16)}<span><strong>No public finances tab:</strong> the store holds no US fiscal series, and no US model reports a fiscal balance (<a href="/obr">OBR emulator</a> is {registry_terms(obr["geography"])}-only).</span></p>"""
+    return f"""      <p class="fc-note-row">{site_nav.icon("database", 16)}<span><strong>No public finances tab:</strong> no US fiscal series or model.</span></p>"""
 
 
 def sitemap_block() -> str:
