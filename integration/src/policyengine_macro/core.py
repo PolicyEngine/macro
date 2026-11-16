@@ -183,11 +183,12 @@ OBR_VARIABLES = [
         "description": "Nominal central government investment (feeds real GGI via the GGIPS/GGIDEF chain)",
         "units": "£m nominal per quarter (e.g. 3000 ≈ £2.5bn real per quarter)",
         "investment_closure": False,
-        # Measured before the nominal-GDP pin (obr results/site_figures.json at
-        # 70ee8f0): delta_IF is exactly 0.0 in every quarter because IF has no
+        # Measured at obr 6fbbe06 (nominal-GDP pin, every quarter converged,
+        # obr CI run 43779573540): delta_IF is exactly 0.0 because IF has no
         # live equation; business investment (IBUSX) is the residual of
-        # IF = IBUS + GGI + ... and falls about one for one with the shock.
-        # Against the OBR's published 1.0 the channel is absent, not weak.
+        # IBUS = IF - GGI - ... (l.84) and falls by exactly -delta GGI
+        # (+1500/qtr: -1,407 at q4); GDP falls only by the induced consumption
+        # (-3.8 at q4). Against the OBR's published 1.0 the channel is absent.
         "caveat": (
             "this channel does not transmit: total fixed investment (IF) has "
             "no live equation and moves exactly zero, business investment "
