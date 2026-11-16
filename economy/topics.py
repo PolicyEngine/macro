@@ -3187,7 +3187,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
-<link rel="stylesheet" href="/economy/topic-page.css?v=1" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=2" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -3211,6 +3211,15 @@ def page(topic: dict) -> str:
 {xp_moved}
 {site_nav.expander("terminal", "Run it yourself", "The commands and MCP tools behind this page.", topic["run"](), id_="run")}
 {site_nav.expander("database", "Data and sources", "Series, coverage and the append-only snapshot files.", data_body, id_="data")}
+  </section>
+
+  <section class="band tp-next" aria-labelledby="next-h">
+    <h2 id="next-h">Read next</h2>
+    <ul>
+      <li><a href="{COUNTRIES[topic["country"]]["hub"]}">{site_nav.icon("forecasts", 16)}Forecasts: the record and open rounds</a></li>
+      <li><a href="{COUNTRIES[topic["country"]]["data"]}">{site_nav.icon("list", 16)}{COUNTRIES[topic["country"]]["label"]} data: every topic and series</a></li>
+      <li><a href="/connect">{site_nav.icon("use", 16)}Run these models yourself</a></li>
+    </ul>
   </section>
 </main>
 

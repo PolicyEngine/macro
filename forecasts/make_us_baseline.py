@@ -50,9 +50,9 @@ def render() -> str:
             "      <div class=\"table-scroll\">",
             "        <table aria-label=\"FRB/US April 2026 LONGBASE baseline\">",
             "          <thead><tr><th scope=\"col\">Quarter</th>"
-            "<th scope=\"col\">Real GDP, y/y</th>"
-            "<th scope=\"col\">CPI, y/y</th>"
-            "<th scope=\"col\">Unemployment</th></tr></thead>",
+            "<th scope=\"col\">GDP y/y</th>"
+            "<th scope=\"col\">CPI y/y</th>"
+            "<th scope=\"col\">Unemp.</th></tr></thead>",
             "          <tbody>",
             body,
             "          </tbody>",
