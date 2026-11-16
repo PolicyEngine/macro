@@ -485,6 +485,23 @@ def header(path: Path) -> str:
 """ % ("\n".join(links), GITHUB, NAV_CTA)
 
 
+def expander(icon_key: str, title: str, summary: str, body: str, open_: bool = False, id_: str = "") -> str:
+    """The one shared expander (r12): icon, title, one-line summary, chevron.
+
+    A native <details>, so it works with no script and is keyboard and
+    screen-reader accessible; style.css section 13 animates the open where the
+    browser supports ::details-content. ``body`` is trusted HTML.
+    """
+    attrs = (" open" if open_ else "") + (f' id="{id_}"' if id_ else "")
+    return (
+        f'<details class="xp"{attrs}>\n'
+        f'  <summary><span class="xp-ic">{icon(icon_key, 16)}</span>'
+        f'<span class="xp-t"><strong>{title}</strong><small>{summary}</small></span>'
+        '<span class="xp-chev" aria-hidden="true"></span></summary>\n'
+        f'  <div class="xp-body">\n{body}\n  </div>\n</details>'
+    )
+
+
 # "Where next" row (DESIGN.md §4.7, §8): the last card on generated pages.
 # Icons are 24 px Lucide-style strokes, decorative.
 CARD_ICONS = {

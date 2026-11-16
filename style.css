@@ -7284,3 +7284,41 @@ main > .lp-section:last-child { margin-bottom: 80px; }
 .ct .contact-socials a { width: auto; height: auto; display: inline; color: var(--link); border: 0; }
 .ct .contact-socials a:hover { background: none; text-decoration: underline; }
 .foot.foot-bar { padding-inline: max(var(--page-pad), calc((100% - var(--shell-max)) / 2 + var(--page-pad))); }
+
+/* =====================================================================
+   13. Expander (r12): the one shared "more info" component.
+   Markup (site_nav.expander builds it):
+   <details class="xp"><summary><span class="xp-ic">ICON</span>
+     <span class="xp-t"><strong>Title</strong><small>One-line summary</small></span>
+     <span class="xp-chev" aria-hidden="true"></span></summary>
+     <div class="xp-body">…</div></details>
+   Native <details>: no script, keyboard and screen-reader accessible.
+   Stack several with .xp-group (they share one card, divided by rules).
+   ===================================================================== */
+.xp { background: var(--card); border: 1px solid var(--ab-border); border-radius: 12px; interpolate-size: allow-keywords; }
+.xp + .xp { margin-top: 12px; }
+.xp > summary {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  padding: 14px 20px; cursor: pointer; list-style: none; border-radius: 12px;
+}
+.xp > summary::-webkit-details-marker { display: none; }
+.xp > summary:hover .xp-t strong { color: var(--ab-teal-700); }
+.xp > summary:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.xp-ic { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--ab-teal-50); box-shadow: inset 0 0 0 1px var(--ab-teal-100); color: var(--ab-teal-700); }
+.xp-ic svg { width: 16px; height: 16px; }
+.xp-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.xp-t strong { color: var(--text-strong); font-size: var(--fs-ab-body); font-weight: 600; transition: color 150ms; }
+.xp-t small { color: var(--text-faint); font-size: var(--fs-ab-cap); line-height: 1.4; }
+.xp-chev { width: 9px; height: 9px; margin-right: 4px; border-right: 2px solid var(--text-faint); border-bottom: 2px solid var(--text-faint); transform: rotate(45deg) translateY(-2px); transition: transform 200ms var(--ease); }
+.xp[open] > summary .xp-chev { transform: rotate(-135deg) translateY(-2px); }
+.xp-body { padding: 4px 20px 20px 64px; font-size: var(--fs-ab-small); line-height: 1.6; color: var(--text-body); }
+.xp-body > :first-child { margin-top: 0; }
+.xp-body p { margin: 0 0 10px; }
+.xp-body .table-scroll { margin-left: -44px; }
+.xp::details-content { block-size: 0; overflow: hidden; transition: block-size 220ms var(--ease), content-visibility 220ms allow-discrete; }
+.xp[open]::details-content { block-size: auto; }
+@media (prefers-reduced-motion: reduce) { .xp::details-content, .xp-chev { transition: none; } }
+@media (max-width: 640px) { .xp > summary { padding: 12px 14px; } .xp-body { padding: 4px 14px 16px; } .xp-body .table-scroll { margin-left: 0; } }
+.xp-group { background: var(--card); border: 1px solid var(--ab-border); border-radius: 12px; }
+.xp-group > .xp { border: 0; border-radius: 0; background: none; margin: 0; }
+.xp-group > .xp + .xp { border-top: 1px solid var(--ab-border); }
