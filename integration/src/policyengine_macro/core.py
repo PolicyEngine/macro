@@ -2435,10 +2435,12 @@ def pe_household_impact(
 # (UK: enhanced FRS, ~125MB download from a private HuggingFace repo the
 # first time — set HUGGING_FACE_TOKEN; US: policyengine's certified default,
 # Populace US 2024, a public CPS-based build). Measured on
-# the UK 2026 enhanced FRS (53,508 households): ~6s per simulation run,
-# ~1.8GB peak RSS, ~92MB derived per-year .h5 on disk. The baseline
-# simulation is cached in-process per (country, year, dataset), so repeat
-# reform scores only pay one ~6s reform run.
+# the UK 2026 enhanced FRS (53,508 households) under policyengine 4.x: ~6s
+# per simulation run, ~1.8GB peak RSS, ~92MB derived per-year .h5 on disk.
+# Under policyengine 6.11.1 a hosted call takes two to three minutes (15 Nov
+# 2026), part of it a second run of each simulation that _pe_register_run
+# now avoids. The baseline simulation is cached in-process per (country,
+# year, dataset), so repeat reform scores only pay the reform run.
 
 PE_POP_DEFAULT_DATASET = {"uk": "enhanced_frs_2023_24", "us": None}
 
@@ -2496,6 +2498,30 @@ def _pe_pop_dataset(pe, country: str, year: int, dataset: str | None):
     )
 
 
+def _pe_register_run(sim) -> None:
+    """Tell policyengine a simulation has already been run.
+
+    ``calculate_decile_impacts`` calls ``Simulation.ensure()`` on the
+    simulations it is given. ``ensure()`` looks only in policyengine's own
+    in-process cache and then for a saved output file; a simulation finished
+    with ``run()`` is in neither, so it is run a second time and its ~27 MB
+    output is written beside the input dataset (on the hosted server, the
+    shared Modal volume, under a random name that is never read again).
+    Registering the finished run makes ``ensure()`` reuse it: one run per
+    simulation and no file written. Pinned to policyengine 6.11.1's
+    ``policyengine.core.simulation._cache``; if that name moves, this does
+    nothing and behaviour falls back to the old double run.
+    """
+    try:
+        from policyengine.core import simulation as _pe_simulation
+    except ImportError:
+        return
+    cache = getattr(_pe_simulation, "_cache", None)
+    if cache is None or getattr(sim, "output_dataset", None) is None:
+        return
+    cache.add(sim.storage_id, sim)
+
+
 def _pe_pop_baseline(country: str, year: int, dataset: str | None):
     """Dataset + baseline simulation, cached in-process."""
     key = (country, int(year), dataset)
@@ -2511,6 +2537,7 @@ def _pe_pop_baseline(country: str, year: int, dataset: str | None):
         extra_variables=_pe_pop_extra_variables(country),
     )
     sim.run()
+    _pe_register_run(sim)
     _PE_POP_BASELINE_CACHE[key] = (ds, sim)
     return ds, sim
 
@@ -2659,6 +2686,7 @@ def pe_population_impact(
         **ref_kwargs,
     )
     ref.run()
+    _pe_register_run(ref)
 
     outcomes = _pe_pop_outcomes(country, base, ref)
     budget_bn = outcomes["budgetary_impact_bn"]
@@ -2733,6 +2761,7 @@ def _pe_population_incidence(
         **kwargs,
     )
     shocked.run()
+    _pe_register_run(shocked)
 
     outcomes = _pe_pop_outcomes(country, base, shocked)
     budget_bn = outcomes["budgetary_impact_bn"]
