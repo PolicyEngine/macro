@@ -65,6 +65,60 @@ class EdgeGateTests(unittest.TestCase):
                 mock.patch("builtins.print"):
             self.assertEqual(nowcast.main(), 0)
 
+    def test_cli_skips_when_the_open_round_pr_already_holds_this_edge(self):
+        # PR #238: main's rounds end at 2026Q1, the hosted data at 2026Q2, and
+        # an unmerged 2026Q2 round sits on the PR branch. Regenerating it
+        # replaced round 2026-11-11 with an identical round 2026-11-12.
+        argv = ["nowcast.py", "--edge-gate", "--pending-ref", "origin/forecasts/nowcast-round"]
+        with mock.patch("sys.argv", argv), \
+                mock.patch.object(nowcast, "hosted_data_edge", return_value="2026Q2"), \
+                mock.patch.object(nowcast, "archived_data_edges", return_value={"2026Q1"}), \
+                mock.patch.object(nowcast, "pending_data_edges", return_value={"2026Q2"}), \
+                mock.patch.object(nowcast, "fetch_forecast") as fetch, \
+                mock.patch("builtins.print") as out:
+            self.assertEqual(nowcast.main(), 1)
+            fetch.assert_not_called()
+        self.assertIn("already waiting", out.call_args[0][0])
+
+    def test_cli_proceeds_when_the_hosted_edge_is_newer_than_the_pending_round(self):
+        argv = ["nowcast.py", "--edge-gate", "--pending-ref", "origin/forecasts/nowcast-round"]
+        with mock.patch("sys.argv", argv), \
+                mock.patch.object(nowcast, "hosted_data_edge", return_value="2026Q3"), \
+                mock.patch.object(nowcast, "archived_data_edges", return_value={"2026Q1"}), \
+                mock.patch.object(nowcast, "pending_data_edges", return_value={"2026Q2"}), \
+                mock.patch("builtins.print"):
+            self.assertEqual(nowcast.main(), 0)
+
+    def test_pending_edges_are_read_from_the_ref(self):
+        files = {
+            "forecasts/rounds/2026-07-29/boe-svar.json": '{"information_set": {"data_edge": "2026Q1"}}',
+            "forecasts/rounds/2026-11-12/boe-svar.json": '{"information_set": {"data_edge": "2026Q2"}}',
+            "forecasts/rounds/2026-07-28/okun-unemployment.json": '{"information_set": {"data_edge": "2025Q4"}}',
+        }
+
+        def fake_git(*args):
+            if args[0] == "ls-tree":
+                return "\n".join(files)
+            if args[0] == "show":
+                return files[args[1].split(":", 1)[1]]
+            return None
+
+        with mock.patch.object(nowcast, "git", side_effect=fake_git):
+            self.assertEqual(nowcast.pending_data_edges("origin/x"), {"2026Q1", "2026Q2"})
+
+    def test_an_unreadable_ref_adds_no_edges(self):
+        # No open PR, or the branch was not fetched: the gate must behave as
+        # it did before, never block.
+        with mock.patch.object(nowcast, "git", return_value=None):
+            self.assertEqual(nowcast.pending_data_edges("origin/missing"), set())
+        argv = ["nowcast.py", "--edge-gate", "--pending-ref", "origin/missing"]
+        with mock.patch("sys.argv", argv), \
+                mock.patch.object(nowcast, "hosted_data_edge", return_value="2026Q2"), \
+                mock.patch.object(nowcast, "archived_data_edges", return_value={"2026Q1"}), \
+                mock.patch.object(nowcast, "git", return_value=None), \
+                mock.patch("builtins.print"):
+            self.assertEqual(nowcast.main(), 0)
+
 
 if __name__ == "__main__":
     unittest.main()
