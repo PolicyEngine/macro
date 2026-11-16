@@ -612,7 +612,6 @@
 
 /* 4. charts: teal gains, amber losses, rounded bars, dashed baseline */
 .doc main:has(> .hero.mh) figure.spark { padding: 20px 24px 14px; margin: 0; }
-.doc main:has(> .hero.mh) .spark-bar { rx: 3px; }
 .doc main:has(> .hero.mh) .spark-neg { fill: var(--ab-loss); }
 .doc main:has(> .hero.mh) .spark-pos { fill: var(--ab-gain); }
 .doc main:has(> .hero.mh) .spark-zero { stroke: var(--gray-400); stroke-dasharray: 6 4; }
@@ -710,3 +709,20 @@
 .doc main:has(> .hero.mh) .band table thead th { font-size: 12px; font-weight: 500; color: var(--gray-500); }
 /* long inline identifiers wrap on phones instead of pushing the page wide */
 .doc main:has(> .hero.mh) :not(pre) > code { overflow-wrap: anywhere; }
+
+/* ---- Fable spec review: step cards padded, model card single-level, static cards flat ---- */
+.doc main:has(> .hero.mh) :is(.scrolly-steps, .scrolly-code) > .meth-step { --mp: 24px; margin: 0 0 20px; }
+.doc main:has(> .hero.mh) :is(.scrolly-steps, .scrolly-code) > .meth-step:last-child { margin-bottom: 0; }
+.doc main:has(> .hero.mh) :is(.scrolly-steps, .scrolly-code) > .meth-step:not(.meth-fold) { padding: var(--mp) var(--mp) var(--mp) calc(var(--mp) + 52px); }
+.doc main:has(> .hero.mh) :is(.scrolly-steps, .scrolly-code) > .meth-step:not(.meth-fold)::before { left: calc(var(--mp) + 17px); top: calc(var(--mp) + 40px); bottom: var(--mp); }
+.doc main:has(> .hero.mh) :is(.scrolly-steps, .scrolly-code) > .meth-step.meth-fold { padding: 0 20px; }
+@media (max-width: 768px) { .doc main:has(> .hero.mh) :is(.scrolly-steps, .scrolly-code) > .meth-step { --mp: 16px; } }
+@media (max-width: 480px) {
+  .doc main:has(> .hero.mh) :is(.scrolly-steps, .scrolly-code) > .meth-step:not(.meth-fold) { padding: 16px; }
+  .doc main:has(> .hero.mh) :is(.scrolly-steps, .scrolly-code) > .meth-step.meth-fold { padding: 0 16px; }
+}
+.doc main:has(> .hero.mh) .band.ov-spec { margin-top: 20px; padding: 0; background: none; border: 0; box-shadow: none; }
+.doc main:has(> .hero.mh) .band.ov-spec > details.expander { margin: 0; padding: 0 24px; }
+@media (max-width: 768px) { .doc main:has(> .hero.mh) .band.ov-spec > details.expander { padding: 0 16px; } }
+.doc main:has(> .hero.mh) .limits > details.expander,
+.doc main:has(> .hero.mh) .limits > details.expander:first-child { box-shadow: none; }
