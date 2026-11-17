@@ -342,7 +342,7 @@
 /* Shared table component (r12, style.css §15). Every .table-scroll table
    gets: data-label on each cell so phones can show it as stacked cards,
    and an edge fade while the table scrolls sideways. Tables with merged
-   cells or more than eight columns keep scrolling instead of stacking. */
+   body cells or more than ten columns keep scrolling instead of stacking. */
 (function () {
   "use strict";
   var SKIP = ".sb-grid, .cap-grid, .vc-table, .vc-narrow-table";
@@ -350,11 +350,34 @@
     var table = box.querySelector(":scope > table");
     if (!table || table.matches(SKIP)) return;
     box.classList.add("tbl");
-    var head = table.tHead && table.tHead.rows[table.tHead.rows.length - 1];
-    var labels = head ? Array.from(head.cells).map(function (c) { return c.textContent.trim(); }) : [];
-    var merged = table.querySelector("[colspan]:not([colspan='1']), [rowspan]:not([rowspan='1'])");
-    var own = table.matches(".t-stack") || box.matches(".has-t-stack, .mo-tablecard");
-    if (labels.length && labels.length <= 8 && !merged && !own) {
+    /* column labels from every header row, so a merged two-row header still
+       labels each stacked cell ("Group · column") */
+    var labels = [];
+    if (table.tHead) {
+      var grid = [];
+      Array.from(table.tHead.rows).forEach(function (row, r) {
+        grid[r] = grid[r] || [];
+        var c = 0;
+        Array.from(row.cells).forEach(function (cell) {
+          while (grid[r][c] !== undefined) c++;
+          var cs = cell.colSpan || 1, rs = cell.rowSpan || 1, t = cell.textContent.trim();
+          for (var dr = 0; dr < rs; dr++) for (var dc = 0; dc < cs; dc++) {
+            grid[r + dr] = grid[r + dr] || [];
+            grid[r + dr][c + dc] = t;
+          }
+          c += cs;
+        });
+      });
+      var ncol = Math.max.apply(null, grid.map(function (g) { return g.length; }));
+      for (var j = 0; j < ncol; j++) {
+        var parts = [];
+        grid.forEach(function (g) { if (g[j] && parts.indexOf(g[j]) < 0) parts.push(g[j]); });
+        labels.push(parts.join(" · "));
+      }
+    }
+    var merged = Array.from(table.tBodies).some(function (b) { return b.querySelector("[colspan]:not([colspan='1']), [rowspan]:not([rowspan='1'])"); });
+    var own = table.matches(".t-stack") || box.matches(".has-t-stack");
+    if (labels.length && labels.length <= 10 && !merged && !own) {
       table.classList.add("tbl-stack");
       Array.from(table.tBodies).forEach(function (body) {
         Array.from(body.rows).forEach(function (row) {
