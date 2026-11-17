@@ -94,9 +94,9 @@
 
   <section id="answers" class="band ov-example">
     <div class="band-head" data-icon="calculator"><h2>A worked example</h2>
-      <p class="section-intro">The Fed raises the funds rate by one percentage point for one quarter (2026Q1), under the default inertial Taylor rule.</p></div>
-    <div class="stat-row stat-row-4"><div class="stat stat-us"><span class="stat-label">Real GDP, trough</span><span class="stat-value is-loss">&minus;0.56%</span><span class="stat-sub">2027Q4, against baseline</span></div><div class="stat stat-us"><span class="stat-label">Unemployment, peak</span><span class="stat-value">+0.28pp</span><span class="stat-sub">2028Q1</span></div><div class="stat stat-us"><span class="stat-label">Core PCE inflation, trough</span><span class="stat-value">&minus;0.034pp</span><span class="stat-sub">quarter 8</span></div><div class="stat stat-us"><span class="stat-label">2027 wage bill</span><span class="stat-value is-loss">&minus;0.65%</span><span class="stat-sub">compensation per hour plus hours</span></div></div>
-    <p class="scen-note">Real GDP falls 0.56% at its trough and unemployment rises 0.28pp at its peak, while core PCE falls 0.034pp at its trough; the Board&rsquo;s own run of the current model gives &minus;0.0345pp. <a href="/frb-us/validation#worked-shock">See the responses against the Board&rsquo;s own simulation</a>.</p>
+      <p class="section-intro">The Fed raises the funds rate by one percentage point for one quarter (2026Q3, the first projected quarter of the October 2026 LONGBASE), under the default inertial Taylor rule.</p></div>
+    <div class="stat-row stat-row-4"><div class="stat stat-us"><span class="stat-label">Real GDP, trough</span><span class="stat-value is-loss">&minus;0.55%</span><span class="stat-sub">2028Q2, against baseline</span></div><div class="stat stat-us"><span class="stat-label">Unemployment, peak</span><span class="stat-value">+0.28pp</span><span class="stat-sub">2028Q3</span></div><div class="stat stat-us"><span class="stat-label">Core PCE inflation, trough</span><span class="stat-value">&minus;0.034pp</span><span class="stat-sub">2028Q2 (quarter 8)</span></div><div class="stat stat-us"><span class="stat-label">2027 wage bill</span><span class="stat-value is-loss">&minus;0.51%</span><span class="stat-sub">compensation per hour plus hours</span></div></div>
+    <p class="scen-note">Real GDP falls 0.55% at its trough and unemployment rises 0.28pp at its peak, while core PCE falls 0.034pp at its trough. The Board&rsquo;s own published run, from a different start quarter, gives &minus;0.0345pp for a 100bp shock. <a href="/frb-us/validation#worked-shock">See the responses against the Board&rsquo;s own simulation</a>.</p>
   </section>
 
   <section id="proof" class="band ov-proof">
@@ -119,9 +119,10 @@
       <button type="button" role="tab" id="run-tab-cli" aria-controls="run-cli" aria-selected="false" tabindex="-1">CLI</button>
       <button type="button" role="tab" id="run-tab-py" aria-controls="run-py" aria-selected="false" tabindex="-1">Python</button>
     </div>
-    <div class="scen-panel run-panel" id="run-mcp" role="tabpanel" aria-labelledby="run-tab-mcp"><p class="run-prompt">In FRB/US, raise the federal funds rate by 100bp for one quarter from 2026Q1 under the inertial Taylor rule, and show real GDP, unemployment and core PCE inflation each quarter.<small>The hosted server calls <code>frbus_shock</code>; no install. <a href="/connect">Connect</a></small></p></div>
-    <div class="scen-panel run-panel" id="run-cli" role="tabpanel" aria-labelledby="run-tab-cli"><div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0</code></pre></div></div>
+    <div class="scen-panel run-panel" id="run-mcp" role="tabpanel" aria-labelledby="run-tab-mcp"><p class="run-prompt">In FRB/US, raise the federal funds rate by 100bp for one quarter from 2026Q3 under the inertial Taylor rule, and show real GDP, unemployment and core PCE inflation each quarter.<small>The hosted server calls <code>frbus_shock</code>; no install. <a href="/connect">Connect</a></small></p></div>
+    <div class="scen-panel run-panel" id="run-cli" role="tabpanel" aria-labelledby="run-tab-cli"><div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro frbus-shock --var rffintay_aerr --shock 1.0 --start 2026Q3</code></pre></div></div>
     <div class="scen-panel run-panel" id="run-py" role="tabpanel" aria-labelledby="run-tab-py"><div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> frbus <span class="kw">import</span> Frbus, load_data
+start, end = pd.Period(<span class="kw">"2026Q3"</span>), pd.Period(<span class="kw">"2031Q2"</span>)
 <span class="cm"># load LONGBASE, set the demo fiscal switches, init_trac: see /frb-us/code#code-5</span>
 with_adds.loc[start, <span class="kw">"rffintay_aerr"</span>] += 1
 sim = model.solve(start, end, with_adds)</code></pre></div></div>
@@ -154,7 +155,7 @@ sim = model.solve(start, end, with_adds)</code></pre></div></div>
       <div><dt>Data</dt><dd>The Board&rsquo;s <code>model.xml</code> and October 2026 LONGBASE</dd></div>
       <div><dt>Uncertainty</dt><dd>Not comprehensive: the hosted shock returns one deterministic path</dd></div>
       <div><dt>Access</dt><dd>Hosted raw shocks, CLI, Python package (<a href="/frb-us/code">Code</a>)</dd></div>
-      <div><dt>Runtime</dt><dd>About 3 seconds cold, well under a second warm</dd></div>
+      <div><dt>Runtime</dt><dd>Seconds to minutes per scenario</dd></div>
       <div class="model-card-wide"><dt>Joins the microsimulation</dt><dd>Wage and hours paths scale US employment income (<a href="#pe-bridge">the join above</a>, experimental)</dd></div>
       <div class="model-card-wide"><dt>Status</dt><dd>Replicates the Fed's pyfrbus (1.0.0 and 1.1.1) on one 100bp funds-rate shock, within a 1e-6 tolerance; a solver check, not a test of the economics</dd></div>
       <div class="model-card-wide"><dt>Cannot answer</dt><dd>PolicyEngine reforms; <a class="gloss-link" href="/glossary#expectations">model-consistent</a> expectations, so no forward guidance; anything about the UK</dd></div>

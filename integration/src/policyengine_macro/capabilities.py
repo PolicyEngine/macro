@@ -202,7 +202,7 @@ MODELS = {
         "uncertainty": "none quantified; deterministic scenario deltas from one calibration",
         "status": (
             "partial replication of the DEFINE-UK manual: baseline macro "
-            "block matches Table 4 except 2025 growth; scenario deltas gated on the pinned "
+            "block matches Table 4 inside every gate, two by only 0.01pp; scenario deltas gated on the pinned "
             "oracle run, the published scenario definitions, and two paper "
             "anchors (no numeric v1.1 scenario results are published); "
             "experimental; unlicensed upstream is never hosted, so hosted "
