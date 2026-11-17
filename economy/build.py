@@ -228,8 +228,8 @@ def line_chart(
     # (the BoE's target is CPI; the Fed's 2% goal is for PCE, so US CPI has none).
     pts = [(row["period"], row["value"]) for row in values]
     spec = chartkit.plot_spec(
-        [chartkit.plot_line(pts, title, "var(--series-ours)", unit=units),
-         chartkit.plot_last(last["period"], last["value"], "var(--series-ours)", unit=units)],
+        [chartkit.plot_line(pts, title, "var(--series-outturn)", unit=units),
+         chartkit.plot_last(last["period"], last["value"], "var(--series-outturn)", unit=units)],
         unit=units, height=220, zero=low + padding < 0 < high - padding or "growth" in title.lower(),
         target=2.0 if title == "UK CPI inflation" else None, target_label="2% target",
         x_span=(first["period"], last["period"]),

@@ -505,10 +505,12 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
     short = (("ONS · " if hist else "") + f"{esc(model)} round, {chartkit.short_date(generated)}")
     # Interactive version: the same bands, median and outturns, read from the
     # same rows; hover shows every series at a quarter.
+    jump = [(hist[-1]["period"], hist[-1]["value"], hist[-1]["value"])] if hist else []
     traces = [
-        *chartkit.plot_band([(p, v["lo90"], v["hi90"]) for (p, _), v in zip(open_rows, vals)],
+        # The bands open from the last outturn, where the median starts.
+        *chartkit.plot_band(jump + [(p, v["lo90"], v["hi90"]) for (p, _), v in zip(open_rows, vals)],
                             "90% band", "var(--band-90)"),
-        *chartkit.plot_band([(p, v["lo68"], v["hi68"]) for (p, _), v in zip(open_rows, vals)],
+        *chartkit.plot_band(jump + [(p, v["lo68"], v["hi68"]) for (p, _), v in zip(open_rows, vals)],
                             "68% band", "var(--band-68)"),
     ]
     if hist:
@@ -522,6 +524,9 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
         + [(p, v["median"]) for (p, _), v in zip(open_rows, vals)],
         f"{model} median", "var(--series-ours)", digits=2)
     traces.append(med)
+    if hist:   # the jump-off outturn, emphasised and labelled
+        traces.append(chartkit.plot_last(hist[-1]["period"], hist[-1]["value"], "var(--series-outturn)", digits=1,
+                                         position="top left"))
     for t in traces:   # unified hover: the quarter heads the box, one line per series
         if t.get("name") and "band" not in t["name"]:
             t["hovertemplate"] = f"{t['name']}: %{{y:.2f}}%<extra></extra>"
@@ -2124,10 +2129,13 @@ def us_path_chart(chart_id: str, name: str, unit: str,
                     month_index(o["period"]) - month_index(pts[-1][0]) > 1:
                 pts.append((None, None))
             pts.append((o["period"], o["value"]))
-        color = "var(--series-outturn)" if cls == "vc-out-line" else "var(--text-muted)"
+        color = "var(--series-outturn)" if cls == "vc-out-line" else "var(--chart-2)"
         name_ = re.sub(r"<[^>]+>", "", html.unescape(label)).split(",")[0]
-        traces.append(chartkit.plot_line(pts, name_, color, width=2, unit=suffix, digits=2))
-        traces.append(chartkit.plot_last(obs[-1]["period"], obs[-1]["value"], color, unit=suffix, digits=2))
+        dp = 2 if "rates" in chart_id else 1
+        traces.append(chartkit.plot_line(pts, name_, color, width=2.25 if cls == "vc-out-line" else 1.75,
+                                         unit=suffix, digits=dp))
+        traces.append(chartkit.plot_last(obs[-1]["period"], obs[-1]["value"], color, unit=suffix, digits=dp,
+                                         position="bottom left" if baseline else "middle right"))
     if baseline:
         base = chartkit.plot_line([(b["period"], b["value"]) for b in baseline], "LONGBASE baseline",
                                   "var(--series-official)", dash="dash", width=2, unit=suffix, digits=2)

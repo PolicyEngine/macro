@@ -424,10 +424,11 @@ def plot_band(rows: list[tuple[str, float, float]], name: str, color: str,
     return [low, high]
 
 
-def plot_last(period: str, value: float, color: str, unit: str = "%", digits: int = 1) -> dict:
+def plot_last(period: str, value: float, color: str, unit: str = "%", digits: int = 1,
+              position: str = "middle right") -> dict:
     """The emphasised last point, labelled with its value and period."""
     return {"type": "scatter", "mode": "markers+text", "x": [period_date(period)], "y": [_r(value)],
-            "text": [f"{value:.{digits}f}{unit}"], "textposition": "top left", "cliponaxis": False,
+            "text": [f"{value:.{digits}f}{unit}"], "textposition": position, "cliponaxis": False,
             "textfont": {"color": "var(--text-strong)", "size": 12},
             "marker": {"color": color, "size": 9, "line": {"color": "var(--surface-card)", "width": 2}},
             "customdata": [period], "showlegend": False,
@@ -465,7 +466,8 @@ def plot_spec(traces: list[dict], *, unit: str = "%", height: int = 260,
     axis = {"fixedrange": True, "showline": False, "zeroline": False,
             "tickfont": {"size": 11, "color": "var(--text-muted)"}}
     layout = {
-        "height": height, "margin": {"l": 44, "r": 14, "t": 18, "b": 30},
+        "height": height,
+        "margin": {"l": 44, "r": 52 if any(t.get("textposition") for t in traces) else 14, "t": 18, "b": 30},
         "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)",
         "font": {"family": "Inter, system-ui, sans-serif", "size": 12, "color": "var(--text-body)"},
         "showlegend": False, "dragmode": False, "hovermode": hovermode,
@@ -477,7 +479,7 @@ def plot_spec(traces: list[dict], *, unit: str = "%", height: int = 260,
                   "tickformat": "%Y", "tickangle": 0, "ticklabelmode": "instant",
                   **({"range": _date_span(*x_span)} if x_span else {})},
         "yaxis": {**axis, "showgrid": True, "gridcolor": "var(--chart-grid)", "ticksuffix": unit,
-                  "nticks": 5, **({"range": [_r(y_range[0]), _r(y_range[1])]} if y_range else {})},
+                  "nticks": 6, **({"range": [_r(y_range[0]), _r(y_range[1])]} if y_range else {})},
         "shapes": shapes, "annotations": notes, "transition": {"duration": 0},
     }
     return {"data": traces, "layout": layout}
