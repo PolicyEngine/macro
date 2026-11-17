@@ -125,6 +125,7 @@ def topic_url(topic: dict) -> str:
 
 sys.path.insert(0, str(ROOT))
 import site_nav  # noqa: E402  (canonical header/crumbs/footer renderer)
+import chartkit  # noqa: E402  (charts; attach_table folds a data table into a chart footer)
 
 
 def _module(name: str, path: Path):
@@ -993,7 +994,16 @@ def growth_model() -> str:
     return f"""    <div class="prose">
       <p class="model-chips"><a class="mchip" href="/svar">{site_nav.icon("activity", 14)}BoE SVAR</a><span class="mchip-t">forecasts UK GDP · round {esc(forecast["generated"])} · data to {esc(forecast["data_edge"])}</span></p>
       <figure class="vchart-figure">
-{path_chart("topic-gdp-path", "gdp", "UK real GDP", "% change on a year earlier", open_rows[:5], forecast["generated"], history=yoy(facts["gdp"], 4)[-8:], vintage=facts["gdp"]["vintage"], history_note="ABMI, growth derived from the stored level,")}
+{chartkit.attach_table(path_chart("topic-gdp-path", "gdp", "UK real GDP", "% change on a year earlier", open_rows[:5], forecast["generated"], history=yoy(facts["gdp"], 4)[-8:], vintage=facts["gdp"]["vintage"], history_note="ABMI, growth derived from the stored level,"), f"""      <div class="table-scroll">
+        <table>
+          <caption>BoE SVAR year-on-year real GDP growth: median and predictive ranges, from the archived round. Bands are raw model quantiles; the fans on the <a href="/forecasts#open">track record</a> are re-calibrated to measured coverage.</caption>
+          <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68%</th><th scope="col">90%</th></tr></thead>
+          <tbody>
+{chr(10).join(rows)}
+          </tbody>
+        </table>
+      </div>
+""")}
       </figure>
       <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Predictive validation: {esc(level_label(quality["level"]))}.</strong>
         {esc(verdict_line(quality["evidence"]))}
@@ -1007,18 +1017,6 @@ def growth_model() -> str:
         f"Uncertainty is {esc(model['uncertainty'])}, which under-cover in back-testing (<a href=\"/svar/validation#rolling\">coverage study</a>).",
         f"Estimated on {esc(model['estimation_sample'])} but conditioned on {esc(model['data_edge'])} data, so the estimation sample stops well short of the quarters being forecast.",
     ])}
-      </details>
-      <details class="about tg-table">
-        <summary>Quarter by quarter</summary>
-      <div class="table-scroll">
-        <table>
-          <caption>BoE SVAR year-on-year real GDP growth: median and predictive ranges, from the archived round. Bands are raw model quantiles; the fans on the <a href="/forecasts#open">track record</a> are re-calibrated to measured coverage.</caption>
-          <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68%</th><th scope="col">90%</th></tr></thead>
-          <tbody>
-{chr(10).join(rows)}
-          </tbody>
-        </table>
-      </div>
       </details>
       <p class="link-row">{site_nav.icon("check-circle", 16)}<a href="/forecasts#scored">Every round is archived before its outturn and scored: see the scoreboard</a></p>
     </div>"""
@@ -1109,7 +1107,16 @@ def inflation_model() -> str:
       <p class="model-chips"><a class="mchip" href="/svar">{site_nav.icon("activity", 14)}BoE SVAR</a><span class="mchip-t">forecasts UK CPI · round {esc(facts["forecast"]["generated"])} · path from {esc(facts["period"])}</span></p>
       <p class="model-note">{reaches}</p>
       <figure class="vchart-figure">
-{path_chart("topic-cpi-path", "cpi", "UK CPI", "% change on a year earlier", open_rows[:5], facts["forecast"]["generated"], history=facts["cpi"]["observations"][-8:], vintage=facts["cpi"]["vintage"], history_note="D7G7,")}
+{chartkit.attach_table(path_chart("topic-cpi-path", "cpi", "UK CPI", "% change on a year earlier", open_rows[:5], facts["forecast"]["generated"], history=facts["cpi"]["observations"][-8:], vintage=facts["cpi"]["vintage"], history_note="D7G7,"), f"""      <div class="table-scroll">
+        <table>
+          <caption>BoE SVAR year-on-year CPI inflation: median and predictive ranges, from the archived round. Bands are raw model quantiles; the fans on the <a href="/forecasts#open">track record</a> are re-calibrated to measured coverage.</caption>
+          <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68%</th><th scope="col">90%</th></tr></thead>
+          <tbody>
+{chr(10).join(rows)}
+          </tbody>
+        </table>
+      </div>
+""")}
       </figure>
       <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Predictive validation: {esc(level_label(quality["level"]))}.</strong>
         {esc(verdict_line(quality["evidence"]))}
@@ -1123,18 +1130,6 @@ def inflation_model() -> str:
         "It forecasts headline CPI only. Core CPI is shown above as an outturn; no model in this suite forecasts it.",
         f"Uncertainty is {esc(model['uncertainty'])}; the sample ends {esc(model['estimation_sample'].split('-')[-1])} while the conditioning data run to {esc(model['data_edge'])}.",
     ])}
-      </details>
-      <details class="about tg-table">
-        <summary>Quarter by quarter</summary>
-      <div class="table-scroll">
-        <table>
-          <caption>BoE SVAR year-on-year CPI inflation: median and predictive ranges, from the archived round. Bands are raw model quantiles; the fans on the <a href="/forecasts#open">track record</a> are re-calibrated to measured coverage.</caption>
-          <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68%</th><th scope="col">90%</th></tr></thead>
-          <tbody>
-{chr(10).join(rows)}
-          </tbody>
-        </table>
-      </div>
       </details>
     </div>"""
 
@@ -1268,7 +1263,7 @@ def jobs_model() -> str:
       </p>
       </details>
       <figure class="vchart-figure">
-{jobs_chart(facts)}
+{chartkit.attach_table(jobs_chart(facts), jobs_table(facts))}
       </figure>
       <details class="about">
         <summary>The round states its own limits, and they are strict</summary>
@@ -1281,7 +1276,6 @@ def jobs_model() -> str:
         {esc(model["description"])}
       </p>
       </details>
-{jobs_table(facts)}
       <p class="callout">{registry}
         <a href="/forecasts">See the archived rounds →</a>
       </p>
@@ -2135,12 +2129,6 @@ def us_baseline_chart(chart_id: str, name: str, unit: str, column: str,
         if "Q" not in outturns[0]["period"] else gap_note(outturns))
 
 
-def longbase_expander(column: str, last_observed: str) -> str:
-    return f"""      <details class="about tg-table">
-        <summary>Quarter by quarter</summary>
-{longbase_layer(column, last_observed)}
-      </details>"""
-
 
 def us_run_note() -> str:
     return f"""      <p>
@@ -2223,9 +2211,8 @@ def us_growth_model() -> str:
     return f"""    <div class="prose">
 {us_model_items([("forecasts", "Baseline: FRB/US LONGBASE (Fed staff, October 2026), with no bands.")])}
       <figure class="vchart-figure">
-{us_baseline_chart("us-topic-gdp-path", "US real GDP", "% change on a year earlier", "gdp_yoy_pct", facts["gdp"], yoy(facts["gdp"], 4)[-8:], ", growth derived from the stored level")}
+{chartkit.attach_table(us_baseline_chart("us-topic-gdp-path", "US real GDP", "% change on a year earlier", "gdp_yoy_pct", facts["gdp"], yoy(facts["gdp"], 4)[-8:], ", growth derived from the stored level"), longbase_layer("gdp_yoy_pct", facts["now"]["period"]))}
       </figure>
-{longbase_expander("gdp_yoy_pct", facts["now"]["period"])}
       <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Not a forecast.</strong>
         LONGBASE is an illustrative Fed baseline. <a href="/frb-us/validation">Validation →</a>
       </p>
@@ -2307,9 +2294,8 @@ def us_inflation_model() -> str:
     return f"""    <div class="prose">
       <p class="model-chips"><span class="mchip mchip-none">{site_nav.icon("x-circle", 14)}No forecast</span><a class="mchip" href="/frb-us">{site_nav.icon("building", 14)}FRB/US baseline</a><span class="mchip-t">the CPI path FRB/US shocks deviate from; not a forecast</span></p>
       <figure class="vchart-figure">
-{us_baseline_chart("us-topic-cpi-path", "US CPI inflation", "% change on a year earlier", "cpi_yoy_pct", facts["cpi"], yoy(facts["cpi"], 12)[-24:], ", inflation derived from the stored index")}
+{chartkit.attach_table(us_baseline_chart("us-topic-cpi-path", "US CPI inflation", "% change on a year earlier", "cpi_yoy_pct", facts["cpi"], yoy(facts["cpi"], 12)[-24:], ", inflation derived from the stored index"), longbase_layer("cpi_yoy_pct", facts["now"]["period"]))}
       </figure>
-{longbase_expander("cpi_yoy_pct", facts["now"]["period"])}
       <details class="about tg-layers"><summary>Why there is no US price path</summary>
       <p>Only <a href="/svar">BoE SVAR</a> forecasts, and it is UK-only. Both US models report a price response, and neither reports a price <em>path</em>:</p>
 {us_model_limits([
@@ -2376,9 +2362,8 @@ def us_jobs_model() -> str:
         ("forecasts", "Baseline: the LONGBASE unemployment path, with no bands."),
     ])}
       <figure class="vchart-figure">
-{us_baseline_chart("us-topic-unemployment-path", "US unemployment rate", "%", "unemployment_pct", unemployment, unemployment["observations"][-24:])}
+{chartkit.attach_table(us_baseline_chart("us-topic-unemployment-path", "US unemployment rate", "%", "unemployment_pct", unemployment, unemployment["observations"][-24:]), longbase_layer("unemployment_pct", latest(unemployment)["period"]))}
       </figure>
-{longbase_expander("unemployment_pct", latest(unemployment)["period"])}
       <p class="link-row">{site_nav.icon("database", 16)}<span>No US vacancies or earnings series in the store.</span></p>
     </div>"""
 
@@ -3030,7 +3015,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
-<link rel="stylesheet" href="/economy/topic-page.css?v=17" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=18" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>

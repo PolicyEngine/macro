@@ -789,10 +789,9 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
         '      <p class="chart-intro">'
         f'{spec["intro"].format(round_id=SVAR_ROUND.parent.name)}</p>',
         '      <figure class="vchart-figure">',
-        block,
-        # Inside the figure: the page's chart-tab script moves each figure
-        # into its tab panel, and the numbers must travel with their fan.
-        vs_official_table(variable, rows),
+        # The numbers sit in the chart's own footer ("Details"), so they
+        # travel with their fan when the chart-tab script moves the figure.
+        chartkit.attach_table(block, vs_official_table(variable, rows)),
         "      </figure>",
     ])
 

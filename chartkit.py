@@ -201,6 +201,39 @@ def source_block(source: str, short: str | None = None) -> str:
     )
 
 
+_DETAILS_WRAP = re.compile(r"^\s*<details[^>]*>\s*<summary>.*?</summary>\s*(.*?)\s*</details>\s*$", re.S)
+_SRC_FOOT = re.compile(
+    r'(<p class="vc-src-line">.*?</p>)\n<details class="vc-src"><summary>Source details</summary>\n'
+    r'(<p class="vc-source">.*?</p>)\n</details>', re.S)
+
+
+def attach_table(fig: str, table: str, label: str = "Numbers by quarter") -> str:
+    """Fold a chart's data table into its source footer.
+
+    A chart with both a "Source details" disclosure and a separate data-table
+    expander gets one footer row instead: the short source line on the left
+    and one "Details" disclosure on the right, opening to two sections, the
+    numbers and the full sources. ``table`` is the table markup, or a whole
+    ``<details>`` expander, whose wrapper and summary are dropped. The full
+    ``<p class="vc-source">Source: …</p>`` line is kept verbatim.
+    """
+    m = _DETAILS_WRAP.match(table)
+    inner = m.group(1) if m else table.strip()
+    foot = _SRC_FOOT.search(fig)
+    if not foot:
+        raise ValueError("attach_table() needs a figure() block with a source")
+    merged = (
+        '<div class="vc-foot">\n'
+        f"{foot.group(1)}\n"
+        '<details class="vc-src vc-more"><summary>Details</summary>\n'
+        '<div class="vc-more-body">\n'
+        f'<section class="vc-more-sec"><p class="vc-more-h">{label}</p>\n{inner}\n</section>\n'
+        f'<section class="vc-more-sec"><p class="vc-more-h">Sources</p>\n{foot.group(2)}\n</section>\n'
+        "</div>\n</details>\n</div>"
+    )
+    return fig[:foot.start()] + merged + fig[foot.end():]
+
+
 def figure(
     svg: str,
     *,
