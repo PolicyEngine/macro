@@ -1284,8 +1284,14 @@ def render_results(card: dict) -> str:
             for lbl in labels:
                 b = by_label.get(lbl)
                 bv = shown(b["value"], e["outturn"]) if b else None
+                # The October EFO's 2026Q3 GDP equals the no-change value to 2 dp;
+                # the macro session checked the quarter labels against EFO Table 2.3.
+                same = (b and lbl == OBR_OCT_LABEL and e.get("naive_rw") is not None
+                        and round(b["value"], 2) == round(e["naive_rw"], 2))
+                tip = (f' title="Coincides with the {esc(detail["data_edge"])} outturn (the no-change value); '
+                       'quarter alignment checked against EFO Table 2.3"' if same else "")
                 cells.append(
-                    f'<td class="num">{bv:.2f}{bar(bv)}'
+                    f'<td class="num"{tip}>{bv:.2f}{bar(bv)}'
                     f'<span class="sb-sub">{b["value"]:.2f}%</span></td>'
                     if b else '<td class="num">—</td>'
                 )
