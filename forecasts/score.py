@@ -868,6 +868,29 @@ def vintage_file(series: str, vintage: str) -> str | None:
     return None
 
 
+def release_day_timing(detail: dict, e: dict) -> str:
+    """'archived 05:13 UTC, before the 07:00 release' when a round was archived
+    on the morning its outturn was published (ONS releases at 07:00 UK time).
+
+    Read from the round's archived_utc and the outturn snapshot's own
+    release_updated stamp; empty for any other round."""
+    stamp = detail.get("archived_utc") or ""
+    path = vintage_file(e.get("outturn_series") or "", e.get("outturn_vintage") or "")
+    if not stamp or not path:
+        return ""
+    released = (json.loads((ROOT / path.lstrip("/")).read_text()).get("release_updated") or "")[:10]
+    if released != stamp[:10]:
+        return ""
+    import datetime as _dt
+    day = _dt.date.fromisoformat(released)
+    # 07:00 UK time is 07:00 UTC in winter (GMT) and 06:00 UTC in summer (BST).
+    bst = _dt.date(day.year, 3, 25) <= day <= _dt.date(day.year, 10, 25)
+    release_utc = "06:00" if bst else "07:00"
+    if stamp[11:16] >= release_utc:
+        return ""
+    return f"archived {stamp[11:16]} UTC, before the 07:00 release"
+
+
 def long_date(iso: str) -> str:
     """'2026-08-26' -> '26 Aug 2026': the one date format used sitewide."""
     import datetime as _dt
@@ -992,7 +1015,10 @@ def render_status(card: dict) -> str:
     pips = (f'          <span class="fc-tile-x fc-pips" role="img" aria-label="{st["exante_in68"]} of {st["exante"]} '
             'live forecasts inside the 68% band">'
             + "".join(f'<i class="{"in" if e["in_68"] else "out"}"></i>' for e in ex) + "</span>")
-    tiles = tile("target", "Live forecasts in range",
+    def n(k: int) -> str:
+        return f'<span class="fc-tile-n" title="Forecasts counted">n={k}</span>'
+
+    tiles = tile("target", f'Live forecasts in range{n(st["exante"])}',
                  f'{st["exante_in68"]} of {st["exante"]}',
                  f'+{st["retro"]} retroactive · {scored} forecasts, {st["outturns"]} outturns', pips)
     if st["naive_mae"] is not None:
@@ -1002,13 +1028,19 @@ def render_status(card: dict) -> str:
                 f'<span class="fc-bar-l">Model</span><span class="fc-bar"><i class="fc-bar-ours" style="width:{st["mae"] / top * 100:.0f}%"></i></span>'
                 f'<span class="fc-bar-l">No change</span><span class="fc-bar"><i class="fc-bar-naive" style="width:{st["naive_mae"] / top * 100:.0f}%"></i></span>'
                 "</span>")
-        tiles += tile("ruler", "Average miss", f'{st["mae"]:.2f}pp',
+        tiles += tile("ruler", f"Average miss{n(scored)}", f'{st["mae"]:.2f}pp',
                       f'No change: {st["naive_mae"]:.2f}pp · lower is better', bars)
     sign = "\u2212" if st["bias"] < 0 else "+"
     runs = (f'Ran low on {st["low"]} of {scored}' if st["bias"] < 0
             else f'Ran high on {scored - st["low"]} of {scored}')
-    tiles += tile("scale", "Bias", f'{sign}{abs(st["bias"]):.2f}pp', runs)
-    tiles += tile("layers", "Rounds scored", f"{scored_rounds}", next_sub)
+    tiles += tile("scale", f"Bias{n(scored)}", f'{sign}{abs(st["bias"]):.2f}pp', runs)
+    # The next quarter to score fills the tile's visual row, so the tile is
+    # not half empty; the sub-line counts the rounds still open.
+    nxt = (f'          <span class="fc-tile-x fc-next">{icon("calendar")}<span>{next_sub}</span></span>')
+    open_n = rounds - scored_rounds
+    tiles += tile("layers", "Rounds scored", f"{scored_rounds} of {rounds}",
+                  "Each archived round has at least one score" if not open_n
+                  else f"{open_n} round{'s' if open_n != 1 else ''} still waiting", nxt)
     chip = (f'      <p class="fc-skill"><span class="fc-skill-chip">{icon("alert")}Too few to show skill</span>'
             '<a href="#limits">Limits</a></p>')
     return "\n".join([
@@ -1162,15 +1194,17 @@ def render_results(card: dict) -> str:
         y, q = int(e["period"][:4]), int(e["period"][-1])
         q_end = f"{y}-{3 * q:02d}-{[31, 30, 30, 31][q - 1]}"
         back = detail["round_id"] > q_end
-        horizon = (f'<span class="fc-h" title="Quarters after the round\'s data edge">h{h}</span>'
-                   + ('<span class="fc-h fc-h-back" title="The quarter had already ended when the round was archived">backcast</span>' if back else ""))
+        horizon = (f'<a class="fc-h" href="/glossary#horizon" title="Quarters after the round\'s data edge">h{h}</a>'
+                   + ('<a class="fc-h fc-h-back" href="/glossary#backcast" title="The quarter had already ended when the round was archived">backcast</a>' if back else ""))
         note = ('<a class="fc-row-note" href="#limits">Satellite band understates uncertainty</a>'
                 if e["variable"] == "unemployment" else "")
         body.append(
             '        <div class="fc-row" role="row">'
             f'<div class="fc-tgt" role="rowheader"><span class="fc-var">{icon(e["variable"] if e["variable"] in _ICON_PATHS else "target")}</span>'
             f'<span><strong>{_target(e)}</strong>'
-            f'<span class="fc-round-line"><a class="fc-round" href="#rounds">{esc(detail["round_id"])} · {esc(MODEL_DISPLAY.get(detail["model"], (detail.get("label", detail["model"]), None))[0].replace("BoE SVAR unemployment satellite", "unemployment satellite"))}</a>{retro}{horizon}</span></span></div>'
+            f'<span class="fc-round-line"><a class="fc-round" href="#rounds">{esc(detail["round_id"])} · {esc(MODEL_DISPLAY.get(detail["model"], (detail.get("label", detail["model"]), None))[0].replace("BoE SVAR unemployment satellite", "unemployment satellite"))}</a>{retro}{horizon}</span>'
+            + (f'<span class="fc-timing">{esc(timing)}</span>' if (timing := release_day_timing(detail, e)) else "")
+            + '</span></div>'
             f'<div role="cell"><span class="visually-hidden">Median {e["forecast"]:.2f}%, 68% band '
             f'{e["lo68"]:.2f}–{e["hi68"]:.2f}, 90% band {e["lo90"]:.2f}–{e["hi90"]:.2f}, outturn {e["outturn"]:.2f}%.</span>'
             f"{_strip(e)}</div>"
@@ -1222,14 +1256,25 @@ def render_results(card: dict) -> str:
         "          <thead><tr>" + "".join(head) + "</tr></thead>",
         "          <tbody>",
     ]
-    for _, e in rows:
-        cells = [f'<th scope="row">{_target(e)}</th>',
-                 f'<td class="num"><strong>{e["abs_error"]:.2f}</strong>{bar(e["abs_error"], True)}</td>']
+    # Errors are shown from the same two-decimal values the record rows show
+    # (forecast and outturn rounded once, then differenced), so a row reads
+    # 0.23 here when the record reads −0.23pp. Stored values are untouched.
+    def shown(a: float, b: float) -> float:
+        return abs(round(a, 2) - round(b, 2))
+
+    targets = [(e["period"], e["variable"]) for _, e in rows]
+    for detail, e in rows:
+        dup = targets.count((e["period"], e["variable"])) > 1
+        when = (f'<span class="sb-sub">round {esc(detail["round_id"])}</span>' if dup else "")
+        own = shown(e["forecast"], e["outturn"])
+        cells = [f'<th scope="row">{_target(e)}{when}</th>',
+                 f'<td class="num"><strong>{own:.2f}</strong>{bar(own, True)}</td>']
         if has_naive:
+            nv = shown(e["naive_rw"], e["outturn"]) if e.get("naive_rw") is not None else None
             cells.append(
-                f'<td class="num">{e["naive_abs_error"]:.2f}{bar(e["naive_abs_error"])}'
+                f'<td class="num">{nv:.2f}{bar(nv)}'
                 f'<span class="sb-sub">{e["naive_rw"]:.2f}%</span></td>'
-                if e.get("naive_rw") is not None else '<td class="num">—</td>'
+                if nv is not None else '<td class="num">—</td>'
             )
         by_label = {b["label"]: b for b in e.get("benchmarks", [])}
         if labels and not by_label:
@@ -1238,8 +1283,9 @@ def render_results(card: dict) -> str:
         else:
             for lbl in labels:
                 b = by_label.get(lbl)
+                bv = shown(b["value"], e["outturn"]) if b else None
                 cells.append(
-                    f'<td class="num">{b["abs_error"]:.2f}{bar(b["abs_error"])}'
+                    f'<td class="num">{bv:.2f}{bar(bv)}'
                     f'<span class="sb-sub">{b["value"]:.2f}%</span></td>'
                     if b else '<td class="num">—</td>'
                 )
