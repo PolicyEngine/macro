@@ -175,7 +175,7 @@ models:
 
 ## The site
 
-A static site in the [populace.dev](https://populace.dev) design language — no
+A static site in the [microcosm.institute](https://microcosm.institute) design language — no
 build step.
 
 ```bash
