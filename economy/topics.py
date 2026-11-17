@@ -821,7 +821,7 @@ def data_rows(names: tuple[str, ...]) -> str:
         first, last = entry["coverage"]
         vintage = series["vintage"]
         file_url = f"/data/vintages/{dirs[name]}/{name}/{vintage}.json"
-        announced = " ".join((series.get("next_release") or "").split())
+        announced = site_nav.short_date(" ".join((series.get("next_release") or "").split()))
         rows.append(
             "          <tr>"
             f'<th scope="row">{esc(label(series))}</th>'

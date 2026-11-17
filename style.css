@@ -8888,3 +8888,32 @@ header.nav > .rv-progress { position: absolute !important; left: 0; right: 0; to
 .btn { gap: 8px; }
 /* Read next / where-next removed sitewide (Vahid); out-of-scope pe/olg pages keep the markup, hidden here */
 .where-next, .tp-next { display: none !important; }
+
+/* =====================================================================
+   44. One flow / stepper component (Vahid: "consolidate all boxes and formats").
+   Every stepper uses the same node and connector as the use-case flow (§41):
+   a 24px circle, outlined teal (white fill), the end node filled teal, joined by a
+   2px teal-tinted line with no arrowheads and no mint fills. Orientation follows
+   the space (horizontal pipeline, vertical list, archive timeline).
+   ===================================================================== */
+:root { --node: 24px; --node-ring: inset 0 0 0 1.5px color-mix(in srgb, var(--ab-teal-700) 45%, var(--ab-border)); --node-line: color-mix(in srgb, var(--ab-teal-700) 25%, var(--ab-border)); }
+/* pipeline (Models joins, model-page "With the microsimulation") */
+.pipeline { justify-content: flex-start !important; }
+.pipeline .pl-node::before { width: var(--node) !important; height: var(--node) !important; margin-bottom: 8px; background: var(--card) !important; box-shadow: var(--node-ring) !important; color: var(--ab-teal-700) !important; font-size: 12px !important; }
+.pipeline .pl-node:last-child::before { background: var(--ab-teal-700) !important; color: #FFFFFF !important; box-shadow: none !important; }
+.pipeline .pl-arrow { flex: 0 1 96px !important; height: 2px; margin-top: 11px !important; background: var(--node-line) !important; }
+.pipeline .pl-arrow::after { display: none !important; }
+@media (max-width: 819px) { .pipeline .pl-arrow { width: 2px !important; height: 16px !important; margin: 4px 0 4px 11px !important; flex: none !important; } .pipeline .pl-node .mono, .pipeline .pl-node small { padding-left: 36px !important; } }
+/* Use page numbered steps */
+.use-step-n { width: var(--node) !important; height: var(--node) !important; background: var(--card) !important; box-shadow: var(--node-ring); color: var(--ab-teal-700) !important; font-size: 12px !important; font-weight: 700; margin-top: 2px; }
+.use-step { grid-template-columns: var(--node) minmax(0, 1fr) !important; column-gap: 12px !important; position: relative; }
+.use-step:has(+ .use-step)::after { content: ""; position: absolute; left: 11px; top: 30px; bottom: -24px; width: 2px; background: var(--node-line); }
+@media (max-width: 640px) { .use-step:has(+ .use-step)::after { display: none; } }
+/* Forecasts archive timeline */
+.fc-timeline::before { background: var(--node-line) !important; top: 35px !important; }
+.fc-dot { width: var(--node) !important; height: var(--node) !important; background: var(--ab-teal-700) !important; box-shadow: 0 0 0 3px var(--surface-card) !important; }
+.fc-node.is-open .fc-dot { background: var(--card) !important; box-shadow: var(--node-ring), 0 0 0 3px var(--surface-card) !important; }
+.fc-node.is-retro .fc-dot { background: var(--card) !important; box-shadow: inset 0 0 0 1.5px var(--ab-loss), 0 0 0 3px var(--surface-card) !important; }
+.fc-gap { height: 22px; display: inline-flex; align-items: center; padding: 0 9px !important; border: 0 !important; background: var(--surface-sunken) !important; font-size: 11.5px !important; font-weight: 600; color: var(--text-muted) !important; }
+@media (max-width: 640px) { .fc-timeline::before { left: 11px !important; top: 12px !important; } .fc-timeline { padding-left: 36px !important; } }
+@media (prefers-color-scheme: dark) { .pipeline .pl-node:last-child::before, .fc-dot { background: var(--hub-core-dark) !important; } }

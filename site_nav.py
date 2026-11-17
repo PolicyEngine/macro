@@ -22,7 +22,7 @@ STYLESHEET = re.compile(r'href="/style\.css(?:\?v=[0-9]+)?"')
 # changes in a way a cached copy would render wrongly; ``render`` writes it
 # into every page and the generators read it from here (economy/topics.py,
 # notes/generate_release_notes.py), so no page can be left on an old copy.
-STYLE_VERSION = 43
+STYLE_VERSION = 44
 STYLE_HREF = f"/style.css?v={STYLE_VERSION}"
 
 # Inter (latin) is the body face on every page, but the browser only finds the
@@ -137,6 +137,19 @@ def flag(code: str) -> str:
     body, box = FLAGS[code]
     return (f'<svg class="flag" viewBox="{box}" width="16" height="11" '
             f'preserveAspectRatio="none" aria-hidden="true">{body}</svg>')
+
+
+_LONG_MONTHS = {"January": "Jan", "February": "Feb", "March": "Mar", "April": "Apr", "June": "Jun",
+                "July": "Jul", "August": "Aug", "September": "Sep", "October": "Oct",
+                "November": "Nov", "December": "Dec"}
+
+
+def short_date(text: str) -> str:
+    """'19 August 2026' -> '19 Aug 2026': the one date format used sitewide.
+    Leaves any other text unchanged (an ONS string can carry a time or a note)."""
+    import re as _re
+    return _re.sub(r"\b(\d{1,2}) (January|February|March|April|June|July|August|September|October|November|December) (\d{4})\b",
+                   lambda m: f"{m.group(1)} {_LONG_MONTHS[m.group(2)]} {m.group(3)}", text)
 
 
 MODEL_ROOTS = {"models", "obr", "svar", "frb-us", "us-hank", "olg", "pe", "define"}

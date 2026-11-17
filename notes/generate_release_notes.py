@@ -176,7 +176,7 @@ def digest_rows(items: list[dict], vintage: str) -> list[str]:
     for series in items:
         now = series["observations"][-1]
         topic_url, topic_title = topic_home(series)
-        next_release = " ".join((series.get("next_release") or "not announced").split())
+        next_release = site_nav.short_date(" ".join((series.get("next_release") or "not announced").split()))
         rows.append(
             f'          <tr id="{series["series"]}">'
             f'<th scope="row">{html.escape(_label(series))}'
