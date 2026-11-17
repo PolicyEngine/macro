@@ -503,8 +503,35 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
     if hist:
         source = f"ONS, {history_note} snapshot {esc(vintage)}; " + source
     short = (("ONS · " if hist else "") + f"{esc(model)} round, {chartkit.short_date(generated)}")
-    return chartkit.figure(svg, legend=legend, unit=f"{name}, {unit}", source=source,
-                           source_short=short, y_gutter=True)
+    # Interactive version: the same bands, median and outturns, read from the
+    # same rows; hover shows every series at a quarter.
+    traces = [
+        *chartkit.plot_band([(p, v["lo90"], v["hi90"]) for (p, _), v in zip(open_rows, vals)],
+                            "90% band", "var(--band-90)"),
+        *chartkit.plot_band([(p, v["lo68"], v["hi68"]) for (p, _), v in zip(open_rows, vals)],
+                            "68% band", "var(--band-68)"),
+    ]
+    if hist:
+        out = chartkit.plot_line([(h["period"], h["value"]) for h in hist], "ONS outturn",
+                                 "var(--series-outturn)", width=2, digits=2)
+        out["mode"] = "lines+markers"
+        out["marker"]["size"] = 5
+        traces.append(out)
+    med = chartkit.plot_line(
+        ([(hist[-1]["period"], hist[-1]["value"])] if hist else [])
+        + [(p, v["median"]) for (p, _), v in zip(open_rows, vals)],
+        f"{model} median", "var(--series-ours)", digits=2)
+    traces.append(med)
+    for t in traces:   # unified hover: the quarter heads the box, one line per series
+        if t.get("name") and "band" not in t["name"]:
+            t["hovertemplate"] = f"{t['name']}: %{{y:.2f}}%<extra></extra>"
+    spec = chartkit.plot_spec(traces, unit="%", height=300, zero=zero and lo < 0 < hi,
+                              target=2.0 if variable == "cpi" else None, target_label="2% target",
+                              edge=hist[-1]["period"] if hist else None, y_range=(lo, hi),
+                              x_span=(labels[0], labels[-1]), hovermode="x unified")
+    return chartkit.attach_plot(
+        chartkit.figure(svg, legend=legend, unit=f"{name}, {unit}", source=source,
+                        source_short=short, y_gutter=True), spec)
 
 
 def band_text(values: dict) -> str:
@@ -2086,8 +2113,35 @@ def us_path_chart(chart_id: str, name: str, unit: str,
     legend = [("ln-out" if cls == "vc-out-line" else "ln-s3", label) for cls, label, _ in lines]
     if baseline:
         legend.append(("ln-s2", LONGBASE_LABEL))
-    return chartkit.figure(svg, legend=legend, unit=f"{name}, {unit}", source=source,
-                           source_short=source_short or None, notes=notes, y_gutter=True)
+    # Interactive version: the same lines, gaps kept as breaks, the LONGBASE
+    # path dashed with its quarter dots.
+    suffix = "%" if "%" in unit else ""
+    traces = []
+    for cls, label, obs in lines:
+        pts: list = []
+        for o in obs:
+            if pts and pts[-1][0] and "Q" not in o["period"] and len(o["period"]) == 7 and \
+                    month_index(o["period"]) - month_index(pts[-1][0]) > 1:
+                pts.append((None, None))
+            pts.append((o["period"], o["value"]))
+        color = "var(--series-outturn)" if cls == "vc-out-line" else "var(--text-muted)"
+        name_ = re.sub(r"<[^>]+>", "", html.unescape(label)).split(",")[0]
+        traces.append(chartkit.plot_line(pts, name_, color, width=2, unit=suffix, digits=2))
+        traces.append(chartkit.plot_last(obs[-1]["period"], obs[-1]["value"], color, unit=suffix, digits=2))
+    if baseline:
+        base = chartkit.plot_line([(b["period"], b["value"]) for b in baseline], "LONGBASE baseline",
+                                  "var(--series-official)", dash="dash", width=2, unit=suffix, digits=2)
+        base["mode"] = "lines+markers"
+        base["marker"]["size"] = 5
+        traces.append(base)
+    first_p = min((o["period"] for _, _, obs in lines for o in obs), key=month_index)
+    last_p = max([o["period"] for _, _, obs in lines for o in obs]
+                 + [b["period"] for b in (baseline or [])], key=month_index)
+    spec = chartkit.plot_spec(traces, unit=suffix, height=300, zero=zero and lo < 0 < hi,
+                              y_range=(lo, hi), x_span=(first_p, last_p))
+    return chartkit.attach_plot(
+        chartkit.figure(svg, legend=legend, unit=f"{name}, {unit}", source=source,
+                        source_short=source_short or None, notes=notes, y_gutter=True), spec)
 
 
 def missing_months(obs: list[dict]) -> list[str]:
@@ -3063,6 +3117,9 @@ def page(topic: dict) -> str:
 </html>
 """
     path = COUNTRIES[topic["country"]]["dir"] / slug / "index.html"
+    if "pe-plot-json" in body:   # plotly.js only on pages with an interactive chart
+        body = body.replace('<script src="/reveal.js?v=7" defer></script>\n',
+                            '<script src="/reveal.js?v=7" defer></script>\n' + chartkit.plot_scripts() + "\n", 1)
     return head + site_nav.header(path) + body
 
 
