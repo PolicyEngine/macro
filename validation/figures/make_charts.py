@@ -205,8 +205,9 @@ def chart_obr_anchored():
         f"published October 2026 EFO, {quarters[0]} to {quarters[-1]}. Real GDP ranges from "
         f"{min(gdp):+.2f}% to {max(gdp):+.2f}% (mean absolute percentage error {mape_g:.2f}%); "
         f"consumption from {min(cons):+.2f}% to {max(cons):+.2f}% (mean absolute percentage error "
-        f"{mape_c:.2f}%). Continuous integration hard-fails the build if either mean absolute "
-        f"deviation reaches 1%; it does not test single quarters{over_note}."
+        f"{mape_c:.2f}%). Continuous integration pins each mean absolute percentage error to "
+        f"within 25% of its measured value, so a drift in either direction fails; it does not "
+        f"test single quarters{over_note}."
     )
     y_top, y_bot = ymap(1.5), ymap(-0.3)
     out = svg_open(x1 - x0 + 12, y_bot - y_top + 12, "obr-anchored",
@@ -649,7 +650,7 @@ def chart_svar_fan():
         f"{rmse['cpi']:.2f} on CPI. GDP "
         f"medians run {med_g} per cent over the evaluated quarters against outturns of {out_g}; "
         f"CPI medians {med_c} against outturns of {out_c}. A dashed rule in each panel marks "
-        f"{quarters[n_out - 1]}, the last quarter with an outturn: the six quarters to its right "
+        f"{quarters[n_out - 1]}, the last quarter scored (the test was not re-scored on the 2026Q2 refresh): the six quarters to its right "
         f"are forecast with nothing yet to check them against, so the fit shown covers seven of "
         f"the thirteen quarters plotted. This run is {meta['n_draws']:,} posterior draws at seed "
         f"{meta['seed']}, {meta['accepted_forecast']} of which were accepted by the sign "
@@ -720,9 +721,9 @@ def chart_svar_fan():
     out.append("</svg>")
     return chartkit.figure("\n".join(out), legend=[
         ("ln-s1", "median forecast"), ("sw-band", "68% band"), ("sw-dot-out", "ONS outturn"),
-        ("ln-edge", f"last quarter with an outturn ({quarters[n_out - 1]})"),
-    ], unit="% change on a year earlier", notes=[f"Each panel starts at the frozen 2024Q2 edge; the "
-              f"{npts - n_out} quarters right of the dashed rule are not evaluated."])
+        ("ln-edge", f"last quarter scored ({quarters[n_out - 1]})"),
+    ], unit="% change on a year earlier", notes=[f"Each panel starts at the frozen 2024Q2 edge; scored through {quarters[n_out - 1]} and not "
+              f"re-scored on the 2026Q2 refresh; the {npts - n_out} quarters right of the dashed rule are not evaluated."])
 
 
 def chart_obr_computed_share():
@@ -1200,7 +1201,7 @@ def chart_hank_targets():
     parts = [
         '<div class="vc-fig vc-tablefig" data-chart="hank-targets">',
         '<div class="table-scroll"><table class="vc-table">',
-        "<caption>US HANK: internally solved parameters vs Auclert et al. (2021) Table B.III</caption>",
+        "<caption>US HANK: internally solved parameters vs <a href=\"https://doi.org/10.3982/ECTA17434\">Auclert et al. (2021)</a> Table B.III</caption>",
         '<thead><tr><th scope="col">parameter</th><th scope="col">solved</th>'
         '<th scope="col" class="num">published</th><th scope="col" class="num">ours</th>'
         '<th scope="col" class="num">|diff|</th></tr></thead>',

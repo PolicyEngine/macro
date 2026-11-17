@@ -10,7 +10,7 @@
 <meta property="og:url" content="https://policyengine-macro.vercel.app/us-hank" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
 <meta property="og:title" content="us-hank — PolicyEngine Macro" />
-<meta property="og:description" content="A replication of the Auclert–Bardóczy–Rognlie–Straub (2021) two-asset HANK, its steady state checked against the paper — stylised US shocks with distributional output. Not a forecaster." />
+<meta property="og:description" content="A replication of the Auclert–Bardóczy–Rognlie–Straub (2021) two-asset HANK, its solved parameters checked against the paper — stylised US shocks with distributional output. Not a forecaster." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -20,16 +20,16 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=34" />
-<link rel="stylesheet" href="/models/model-pages.css?v=22" />
+<link rel="stylesheet" href="/style.css?v=48" />
+<link rel="stylesheet" href="/models/model-pages.css?v=23" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
 
 <header class="nav">
-  <a class="brand" href="/" aria-label="PolicyEngine Macro home">
-    <img class="brand-logo" src="/assets/policyengine-white.png" alt="" width="115" height="24" /><span class="brand-name">Macro</span>
-  </a>
+  <div class="brand">
+    <a class="brand-home" href="/" aria-label="PolicyEngine Macro home"><img class="brand-logo" src="/assets/policyengine-white.png" alt="PolicyEngine" width="115" height="24" /></a><span class="brand-name">Macro</span>
+  </div>
   <nav class="nav-links" aria-label="Primary">
     <a class="nav-tab" href="/"><svg class="i" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</a>
     <a class="nav-tab" href="/forecasts"><svg class="i" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>Forecasts</a>
@@ -68,7 +68,7 @@
   </nav>
   <section id="verdict" class="band band-result ov-verdict">
     <div class="ov-verdict-line"><span class="ov-verdict-short">Parameters match the paper; responses not validated.</span>
-      <a class="ov-verdict-link" href="/us-hank/validation">Evidence <span aria-hidden="true">&rarr;</span></a>
+      <a class="ov-verdict-link" href="#proof">Evidence <span aria-hidden="true">&rarr;</span></a>
       <span class="ov-verdict-why">Six of seven solved parameters match the paper, the seventh after a wage-markup conversion. Impulse-response magnitudes are not validated, and the headline targets are inputs, not results.</span></div>
   </section>
 
@@ -94,14 +94,55 @@
   </section>
 
   <section id="answers" class="band ov-example">
-    <div class="band-head" data-icon="calculator"><h2>What it returns</h2>
-      <p class="section-intro">Stylised shocks around a calibrated steady state, with the household distribution attached.</p></div>
-    <div class="card-grid ov-mini">
-      <div class="card"><h3>Monetary easing</h3><p>Raises output, consumption, investment and inflation.</p></div>
-      <div class="card"><h3>Tax-financed spending</h3><p>Raises output on impact only: the endogenous labour tax turns the response negative within a year (<a href="/us-hank/validation#spending-sign">why</a>).</p></div>
-      <div class="card"><h3>By household</h3><p>The aggregate consumption response is split across wealth positions in proportion to each group&rsquo;s MPC.</p></div>
+    <div class="band-head" data-icon="calculator"><h2>A worked example</h2>
+      <p class="section-intro">A cut of 25bp quarterly (&asymp;100bp annualised) in the Taylor-rule intercept, &rho;&nbsp;0.61. Changes from steady state.</p></div>
+    <div class="scen-panel">
+      <h3 class="scen-title">Monetary easing: 25bp quarterly (&asymp;100bp annualised)</h3>
+      <div class="stat-row stat-row-3">
+        <div class="stat"><span class="stat-label">Output, on impact</span><span class="stat-value is-gain">+0.49%</span><span class="stat-sub">nonlinear solve: +0.51%</span></div>
+        <div class="stat"><span class="stat-label">Consumption, on impact</span><span class="stat-value is-gain">+0.30%</span><span class="stat-sub">0.36% lowest to 0.28% highest wealth quartile</span></div>
+        <div class="stat"><span class="stat-label">Investment, on impact</span><span class="stat-value is-gain">+1.70%</span><span class="stat-sub">the largest of the three</span></div>
+      </div>
+      <ul class="scen-points">
+        <li>Quarterly inflation rises 0.08pp; the labour tax rate falls 0.63pp on impact as debt service drops</li>
+        <li>Output, consumption, investment and inflation peak on impact, with no hump (<a href="/us-hank/validation#peaks-on-impact">limit</a>)</li>
+        <li>The by-household split is imposed and nearly flat across total-wealth quartiles (<a href="/us-hank/validation#caveats">why</a>)</li>
+        <li>Regression values of this implementation, not a published result (<a href="https://github.com/PolicyEngine/us-hank-model/blob/551a40d38aae13220b8faad8fc1f48780697b7ed/tests/test_scenarios.py">pinned test</a>)</li>
+      </ul>
     </div>
-    <p class="scen-note">Run it with <code>hank_shock</code> from any connected client. The by-household split is imposed, not solved, so its concentration among households with high MPCs and little liquid wealth follows from the method.</p>
+    <div class="card-grid ov-mini">
+      <div class="card"><h3><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg> Tax-financed spending</h3><p>1% of GDP at &rho;&nbsp;0.8 raises output 0.175% on impact; output is below baseline from quarter&nbsp;3 while spending is still raised (<a href="/us-hank/validation#spending-sign">why</a>).</p></div>
+      <div class="card"><h3><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg> Productivity</h3><p>Raises output and lowers inflation; a size of 0.01 is a 2.1% TFP rise, not 1% (<a href="/us-hank/code#code-3">units</a>).</p></div>
+    </div>
+  </section>
+
+  <section id="proof" class="band ov-proof">
+    <div class="band-head" data-icon="shield"><h2>How far to trust it</h2>
+      <p class="section-intro">Three checks, weakest included; each opens its evidence.</p></div>
+    <ul class="proof-list">
+      <li class="proof-row" data-result="pass"><a class="proof-link" href="/us-hank/validation#targets"><span class="proof-check">Solved steady-state parameters<small>Table B.III, largest gap 4.2e&minus;4; <code>vphi</code> after a wage-markup conversion</small></span><span class="proof-num">6 of 7 direct, 1 after conversion</span><span class="chip">pass</span></a></li>
+      <li class="proof-row" data-result="none"><a class="proof-link" href="/us-hank/validation#gated"><span class="proof-check">Impulse-response magnitudes<small>Regression-pinned; no published response to match</small></span><span class="proof-num">Y +0.49%, C +0.30%, I +1.70%</span><span class="chip">not assessed</span></a></li>
+      <li class="proof-row" data-result="fail"><a class="proof-link" href="/us-hank/validation#mpc-level"><span class="proof-check">Quarterly MPC out of a rebate<small>Against 0.15&ndash;0.25 in US rebate studies</small></span><span class="proof-num">0.104 / 0.091 / 0.083</span><span class="chip">fail</span></a></li>
+    </ul>
+    <p class="proof-more"><strong>Read signs and mechanisms, not magnitudes.</strong> The hand-to-mouth share is also off (<a href="/us-hank/validation#htm-share">0.537 against about one third</a>).</p>
+    <p class="proof-more"><a href="/us-hank/validation">Full scorecard and limits <span aria-hidden="true">&rarr;</span></a></p>
+  </section>
+
+  <section id="run" class="band ov-run">
+    <div class="band-head" data-icon="code"><h2>Run it</h2>
+      <p class="section-intro">The worked example above, three ways. State &rho;&nbsp;0.61: the hosted default is 0.9.</p></div>
+    <div class="glance-switch run-switch scen-switch" role="tablist" aria-label="Run it">
+      <button type="button" role="tab" id="run-tab-mcp" aria-controls="run-mcp" aria-selected="true">MCP prompt</button>
+      <button type="button" role="tab" id="run-tab-cli" aria-controls="run-cli" aria-selected="false" tabindex="-1">CLI</button>
+      <button type="button" role="tab" id="run-tab-py" aria-controls="run-py" aria-selected="false" tabindex="-1">Python</button>
+    </div>
+    <div class="scen-panel run-panel" id="run-mcp" role="tabpanel" aria-labelledby="run-tab-mcp"><p class="run-prompt">In the US HANK model, cut the Taylor-rule intercept by 25bp quarterly (&asymp;100bp annualised) with persistence 0.61, and show output, consumption and investment with the split by wealth quartile.<small>The hosted server calls <code>hank_shock</code>; no install. <a href="/connect">Connect</a></small></p></div>
+    <div class="scen-panel run-panel" id="run-cli" role="tabpanel" aria-labelledby="run-tab-cli"><div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61 --distribution</code></pre></div></div>
+    <div class="scen-panel run-panel" id="run-py" role="tabpanel" aria-labelledby="run-tab-py"><div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> us_hank <span class="kw">import</span> model
+ss = model.solve_steady_state(); G = model.solve_jacobian(ss, T=<span class="kw">300</span>)
+irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0025</span>, persistence=<span class="kw">0.61</span>, ss=ss, G_jac=G)
+<span class="kw">print</span>(irf[<span class="kw">"Y"</span>][:<span class="kw">8</span>])</code></pre></div></div>
+    <p class="run-more"><a href="/us-hank/code">Setup, every lever and output <span aria-hidden="true">&rarr;</span></a></p>
   </section>
 
   <section id="pe-bridge" class="band ov-flow">
@@ -125,7 +166,7 @@
     <dl class="model-card">
       <div><dt>Answers</dt><dd>How a stylised US shock transmits through a household wealth distribution, and which households drive the response</dd></div>
       <div><dt>Inputs</dt><dd>A stylised shock: kind (monetary, fiscal spending, productivity), size, persistence</dd></div>
-      <div><dt>Outputs</dt><dd>GDP, consumption, investment, inflation, real rate; <a class="gloss-link" href="/glossary#mpc">MPCs</a> by liquid-wealth quartile (out of a windfall of 25% of mean quarterly post-tax labour income) and the <a class="gloss-link" href="/glossary#hand-to-mouth">hand-to-mouth</a> share</dd></div>
+      <div><dt>Outputs</dt><dd>GDP, consumption, investment, inflation, the ex-post real return; <a class="gloss-link" href="/glossary#mpc">MPCs</a> by liquid-wealth quartile (out of a windfall of 25% of mean quarterly post-tax labour income) and the <a class="gloss-link" href="/glossary#hand-to-mouth">hand-to-mouth</a> share</dd></div>
       <div><dt>Horizon</dt><dd>Quarterly impulse responses, typically 5 years, around a calibrated steady state</dd></div>
       <div><dt>Data</dt><dd>Auclert, Bard&oacute;czy, Rognlie and Straub (2021); no data vintage</dd></div>
       <div><dt>Uncertainty</dt><dd>None quantified: deterministic, first-order responses</dd></div>
@@ -140,19 +181,12 @@
 </details>
   </section>
 
-  <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
-    <div class="chip-row">
-      <a class="chip chip-brand" href="/us-hank/methodology">Methodology</a>
-      <a class="chip chip-brand" href="/connect">Run it hosted</a>
-      <a class="chip" href="/models#compare">Compare the models</a>
-    </div>
-  </nav>
 </main>
 
 <footer class="foot foot-bar">
   <p class="footer-legal">© 2026 PolicyEngine</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
-    <a class="footer-policyengine" href="/" aria-label="PolicyEngine Macro home"><img src="/assets/policyengine-white.png" alt="" width="96" height="20" /><span>Macro</span></a>
+    <div class="footer-policyengine"><a class="brand-home" href="/" aria-label="PolicyEngine Macro home"><img src="/assets/policyengine-white.png" alt="PolicyEngine" width="96" height="20" /></a><span>Macro</span></div>
     <div class="foot-main">
       <a class="footer-text" href="/forecasts"><svg class="i" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>Forecasts</a>
       <a class="footer-text" href="/models"><svg class="i" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>Models</a>
@@ -164,6 +198,7 @@
   </nav>
 </footer>
 
-<script src="/reveal.js?v=4" defer></script>
+<script src="/reveal.js?v=9" defer></script>
+<script src="/scenarios.js" defer></script>
 </body>
 </html>

@@ -223,9 +223,23 @@ def line_chart(
     ])
     # The latest reading is not restated here: it lives on the topic page
     # (DESIGN.md §7.0). The two gridlines mark the window's range.
+    # Interactive version: the same 20 points, hover for date and value, the
+    # last point labelled, a 0 line on growth and the 2% target on UK CPI
+    # (the BoE's target is CPI; the Fed's 2% goal is for PCE, so US CPI has none).
+    pts = [(row["period"], row["value"]) for row in values]
+    spec = chartkit.plot_spec(
+        [chartkit.plot_line(pts, title, "var(--series-outturn)", unit=units),
+         chartkit.plot_last(last["period"], last["value"], "var(--series-outturn)", unit=units)],
+        unit=units, height=220, zero=low + padding < 0 < high - padding or "growth" in title.lower(),
+        target=2.0 if title == "UK CPI inflation" else None, target_label="2% target",
+        x_span=(first["period"], last["period"]),
+    )
+    fig = chartkit.attach_plot(
+        chartkit.figure(svg, source=f'<a href="{url}">{source} →</a>', source_short=source.split(' · ')[0]),
+        spec)
     return f"""      <figure class="economy-figure">
         <figcaption><strong>{title}</strong><span>{description}</span></figcaption>
-{chartkit.figure(svg, source=f'<a href="{url}">{source} →</a>')}
+{fig}
       </figure>"""
 
 

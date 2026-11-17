@@ -46,7 +46,7 @@ USES = (
       ("landmark", "OBR emulator", "adds GDP feedback"),
       ("check-circle", "Cost + GDP feedback", "UK only"))),
     ("shock", "incidence", "users", "Who gains and loses from a shock", "Experimental", "exp",
-     (("activity", "A shock model", "BoE SVAR · FRB/US · US HANK · DEFINE-UK"),
+     (("activity", "A macro model's path", "BoE SVAR · FRB/US · US HANK · DEFINE-UK"),
       ("calculator", "Microsimulation", "splits it by household"),
       ("check-circle", "Winners and losers", "UK + US"))),
     ("long", "og-join", "hourglass", "Long-run dynamic score", "Local only", "local",
@@ -108,23 +108,23 @@ def render(page: str) -> str:
         flow = " → ".join(n for _i, n, _v in nodes)
         uses.append(
             f'      <li class="uc uc-{cls}"><a href="{href}">'
-            f'<span class="uc-head"><span class="uc-ic">{icon(ic, 20)}</span><span class="uc-tt"><strong class="uc-title">{title}</strong><span class="uc-chip">{status}</span></span></span>'
+            f'<span class="uc-head"><span class="uc-ic">{icon(ic, 20)}</span><strong class="uc-title">{title}</strong>'
+            f'<span class="uc-chip">{status}</span></span>'
             f'<ol class="vf" aria-label="{flow}">{steps}</ol>'
-            f'<span class="uc-go">Details {icon("arrow-right", 14)}</span></a></li>')
+            f'<span class="uc-foot"><span class="uc-go">Details {icon("arrow-right", 14)}</span></span></a></li>')
     macro_tier = (
         '<div class="hub2-tier hub2-macro">\n'
         f'    <p class="hub2-label">{icon("models", 14)}Six macro models: the economy-wide answer</p>\n'
         f'    <div class="mx-grid">\n{cards}\n    </div>\n  </div>'
     ) if False else ""
-    note_link = '' if on_models else ' <a href="/models#joins">See how each link works</a>'
+    note_link = '' if on_models else f'<a class="hub2-foot-go" href="/models#joins">How each link works {icon("arrow-right", 14)}</a>'
     return f'''{OPEN}
 <div class="hub2" data-hub2>
   {macro_tier}
   <ol class="hub2-uses uc-grid" aria-label="What the microsimulation adds">
 {chr(10).join(uses)}
   </ol>
-  <a class="hh-strip" href="/pe">{icon(MODEL_ICONS["pe-microsim"], 16)}<span><strong>The household layer:</strong> PolicyEngine microsimulation, every household&rsquo;s taxes and benefits, UK and US</span>{icon("arrow-right", 14)}</a>
-  <p class="hub2-note">{icon("info", 14)}<span>No macro model feeds another. No US macro bridge: US reforms are scored statically.{note_link}</span></p>
+  <p class="hub2-foot">{icon("info", 16)}<span>Every route ends in the household layer, <a href="/pe">PolicyEngine microsimulation</a> (UK and US). No macro model feeds another, and there is no US macro bridge, so US reforms are scored statically.</span>{note_link}</p>
 </div>
 {CLOSE}'''
 

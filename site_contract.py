@@ -246,6 +246,9 @@ def check_fragment_anchors() -> None:
     }
 
     def resolve(target: str) -> Path | None:
+        # A query string selects state on the same page (/models?q=cost),
+        # not a different file.
+        target = target.split("?", 1)[0]
         candidate = ROOT / target.strip("/")
         if candidate.suffix == ".html":
             return candidate if candidate in ids else None

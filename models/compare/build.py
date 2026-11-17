@@ -386,8 +386,11 @@ def multiples(data: dict, q: dict) -> str:
     return (
         '<figure class="cmp-sm-wrap">'
         f'<figcaption><strong>How the response unfolds, quarter by quarter.</strong> '
-        "The paths behind the peaks and timing in the table; each panel has its own scale. "
-        f'Source: <a href="{REPO_BLOB}/results.json">results.json</a>, hosted runs of 6 Nov 2026.</figcaption>'
+        "The paths behind the peaks and timing in the table; each panel has its own scale."
+        # One visible line, no disclosure: this section's caveats stay unfolded.
+        + f'<p class="vc-src-line">{chartkit._INFO_ICON}<span>Source: each row&rsquo;s stored path (FRB/US local run of 16 Nov 2026 at 846eeb5c; US HANK hosted run of 6 Nov 2026, identical at 551a40d) · '
+        f'<a href="{REPO_BLOB}/results.json">results.json</a></span></p>'
+        + "</figcaption>"
         f'<div class="cmp-sm-grid">{"".join(figs)}</div>{note}</figure>'
     )
 
@@ -455,16 +458,11 @@ def body(data: dict) -> str:
         for i, q in enumerate(data["questions"])
     )
     sections = "\n".join(question(data, q, i == 0) for i, q in enumerate(data["questions"]))
-    cards = site_nav.where_next([
-        ("/models#choose", "list", "Which model answers your question", "Pick a model by question and country"),
-        ("/models#validation", "target", "How each model is checked", "The evidence behind every model"),
-        (data["issue"], "data", "The battery and its method", "macro #213, with every call"),
-    ])
     return f"""<main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
       <h1 class="reveal page-title" style="--d:1">{TITLE}</h1>
-      <p class="lede reveal" style="--d:2">Six questions put to every macro model on {esc("6 Nov 2026")}, each answer next to a sourced benchmark where one exists. A model that cannot answer says why.</p>
+      <p class="lede reveal" style="--d:2">Six questions put to every macro model, first on {esc("6 Nov 2026")}, with the OBR emulator and FRB/US rows re-run on {esc("16 Nov 2026")} at the current pins; each answer next to a sourced benchmark where one exists. A model that cannot answer says why.</p>
     </div>
   </section>
   <nav class="model-tabs" aria-label="Models pages">
@@ -474,12 +472,11 @@ def body(data: dict) -> str:
     <div class="band-head" data-icon="list"><h2>Pick a question</h2>
       <p class="section-intro">Models are in the hub order, not ranked. The sourced benchmark sits in the first row; each model row gives its peak effects and a verdict, and Details holds the run, full units and caveats.</p></div>
     <div class="router-row cmp-chips" role="group" aria-label="Question">{chips}</div>
-    <p class="callout callout-warn"><strong>The OBR emulator rows predate its current pin.</strong> They were run on 6 Nov 2026 at <code>e4d7faa</code>, under the published closure, where no quarter of the solve converged; that is where the &ldquo;solver residue&rdquo;, &ldquo;1.00, flat&rdquo; and 0.34 readings come from. At model pin <code>2965e82d</code> (October 2026 EFO), which the hosted service moves to on its next deploy, every quarter converges and the spending multiplier is about 1.01 rising to 1.05; the current figures are on the <a href="/obr#answers">OBR Overview</a>. The rows have not yet been re-run at that pin.</p>
+    <p class="callout"><strong>Run at the current model pins.</strong> The OBR emulator rate, spending and tax rows were re-run locally on 16 Nov 2026 at <code>2965e82d</code> (October 2026 EFO), where every quarter converges; its energy row is an earlier committed output. The FRB/US rows were re-run at <code>846eeb5c</code> (October 2026 LONGBASE), with shocks from 2026Q3, the first quarter after LONGBASE history. The US HANK rows, run at <code>19a8e5e</code>, reproduce identically at the current <code>551a40d</code>. BoE SVAR and DEFINE-UK rows are committed model-repo outputs. Each row&rsquo;s Details give its exact call.</p>
     <details class="about cmp-howto"><summary>How to read the verdicts</summary>
       <p>Each verdict starts with one of six words: plausible, off, questionable, unresolved, not tested or no instrument; some add a qualifier (such as &ldquo;off, sign right&rdquo;), and each carries its reason and the open issue. These words grade one experiment; each model&rsquo;s overall standing uses the <a class="gloss-link" href="/glossary#verification-class">status vocabulary</a> on its model card. Results file version {esc(data["version"])}; <a href="{REPO_BLOB}/run_battery.py">how it is checked and regenerated</a>.</p></details>
   </section>
 {sections}
-{cards}
 </main>"""
 
 
@@ -582,7 +579,7 @@ def page(data: dict) -> str:
   <nav class="footer-links" aria-label="PolicyEngine links">
   </nav>
 </footer>
-<script src="/reveal.js?v=4" defer></script>
+<script src="/reveal.js?v=9" defer></script>
 {SCRIPT}
 </body>
 </html>

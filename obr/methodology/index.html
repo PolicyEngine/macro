@@ -20,17 +20,17 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=34" />
+<link rel="stylesheet" href="/style.css?v=48" />
 <link rel="stylesheet" href="/vendor/mathjax/chtml.css?v=4036f841f9" />
-<link rel="stylesheet" href="/models/model-pages.css?v=22" />
+<link rel="stylesheet" href="/models/model-pages.css?v=23" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
 
 <header class="nav">
-  <a class="brand" href="/" aria-label="PolicyEngine Macro home">
-    <img class="brand-logo" src="/assets/policyengine-white.png" alt="" width="115" height="24" /><span class="brand-name">Macro</span>
-  </a>
+  <div class="brand">
+    <a class="brand-home" href="/" aria-label="PolicyEngine Macro home"><img class="brand-logo" src="/assets/policyengine-white.png" alt="PolicyEngine" width="115" height="24" /></a><span class="brand-name">Macro</span>
+  </div>
   <nav class="nav-links" aria-label="Primary">
     <a class="nav-tab" href="/"><svg class="i" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</a>
     <a class="nav-tab" href="/forecasts"><svg class="i" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>Forecasts</a>
@@ -88,13 +88,7 @@
       <div class="scrolly-steps">
       <div class="meth-step" id="meth-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Transpile the published listing</h3></div>
-        <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>What gets translated</strong><small>EViews source rewritten as Python</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
-  <div class="xp-body">
-        <p>The OBR publishes its equation listing as EViews source, which few can run. The transpiler rewrites every line (<code>dlog()</code>, <code>@elem</code>, lags like <code>X(-1)</code>, error-correction terms) as an equivalent Python expression.</p>
-        
-  </div>
-</details>
+        <p class="meth-lead">The OBR publishes its equation listing as EViews source, which few can run.</p>
         <figure class="step-diagram" data-title="EViews listing to Python" tabindex="0" role="button" aria-label="Expand diagram: EViews listing to Python">
           <svg viewBox="0 0 580 190" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-s1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -116,13 +110,15 @@
             <text x="485" y="105" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--text-muted)">indexed array reads</text>
             <text x="485" y="122" text-anchor="middle" font-family="var(--body)" font-size="11" fill="var(--text-faint)">compiled once per solve</text>
             <text x="485" y="140" text-anchor="middle" font-family="var(--body)" font-size="11" fill="var(--text-faint)">no licence needed</text>
-            <text x="290" y="178" text-anchor="middle" font-family="var(--body)" font-size="11" fill="var(--text-faint)">the published listing in open code — 372 parse, ~79 skipped at solve</text>
+            <text x="290" y="178" text-anchor="middle" font-family="var(--body)" font-size="11" fill="var(--text-faint)">the published listing in open code — 372 parse, 82 dropped at solve, 290 solved</text>
           </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
         <details class="xp">
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>Translation rules and output</strong><small>dlog and lags in Python; what the listing yields</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
+        <p>The transpiler rewrites every line (<code>dlog()</code>, <code>@elem</code>, lags like <code>X(-1)</code>, error-correction terms) as an equivalent Python expression.</p>
+
         <div class="meth-inline">
         <div class="meth-sec-title">Translation</div>
         <div class="meth-eq"><div class="meth-eq-label">Growth rates</div><div class="meth-eq-body"><mjx-container data-tex="\mathrm{dlog}(X) \;\rightarrow\; \log X_t - \log X_{t-1}" data-mjx="e6ffa3a0a288fd03" class="MathJax" jax="CHTML" style="font-size: 123.6%; position: relative;"><mjx-math class=" MJX-TEX" aria-hidden="true"><mjx-TeXAtom texclass="ORD"><mjx-mi class="mjx-n"><mjx-c class="mjx-c64"></mjx-c><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c67"></mjx-c></mjx-mi></mjx-TeXAtom><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44B TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mi class="mjx-n" space="4"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c67"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44B TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.024em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mi class="mjx-n" space="3"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c67"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44B TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.024em;"><mjx-TeXAtom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-TeXAtom></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow data-mjx-texclass="ORD"><mi data-mjx-auto-op="false">dlog</mi></mrow><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mo stretchy="false">→</mo><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mi>log</mi><mo data-mjx-texclass="NONE">⁡</mo><msub><mi>X</mi><mi>t</mi></msub><mo>−</mo><mi>log</mi><mo data-mjx-texclass="NONE">⁡</mo><msub><mi>X</mi><mrow data-mjx-texclass="ORD"><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub></math></mjx-assistive-mml></mjx-container></div></div>
@@ -131,7 +127,7 @@
           <h4>What comes out</h4>
           <p>The published listing in open code, not a complete working copy of the OBR&rsquo;s model.</p>
           <ul>
-            <li>All 372 equations parse; about 79 are skipped at solve time because their inputs are not published.</li>
+            <li>All 372 equations parse; 82 are dropped at solve time because their inputs are not published, so about 290 are solved.</li>
             <li>Some headline variables pass through at their published values rather than being computed.</li>
             <li>Business investment uses an equation the OBR had commented out of its listing, reconstructed here.</li>
           </ul>
@@ -142,13 +138,7 @@
 
       <div class="meth-step" id="meth-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Initialise from official data</h3></div>
-        <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>Where the data comes from</strong><small>OBR forecast tables plus an ONS snapshot</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
-  <div class="xp-body">
-        <p>History loads from the OBR's detailed forecast tables. The listing references 261 <a class="gloss-link" href="/glossary#exogenous">endogenous</a> variables the outlook does not print; <strong>199 have ONS series codes</strong>, supplied by a vendored 355-series ONS snapshot.</p>
-        
-  </div>
-</details>
+        <p class="meth-lead">History loads from the OBR's detailed forecast tables.</p>
         <figure class="step-diagram" data-title="Initial data sources" tabindex="0" role="button" aria-label="Expand diagram: Initial data sources">
           <svg viewBox="0 0 580 195" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-s2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -170,6 +160,8 @@
         <details class="xp">
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>Data sources and why they matter</strong><small>What each source fills in, and its vintage</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
+        <p>The listing references 261 <a class="gloss-link" href="/glossary#exogenous">endogenous</a> variables the outlook does not print; <strong>199 have ONS series codes</strong>, supplied by a vendored 355-series ONS snapshot.</p>
+
         <div class="meth-inline">
         <div class="meth-sec-title">Data sources</div>
         <div class="meth-eq"><div class="meth-eq-label">Forecast tables</div><div class="meth-eq-body">OBR detailed forecast tables, October 2026 EFO</div></div>
@@ -184,12 +176,7 @@
 
       <div class="meth-step" id="meth-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Solve by Gauss–Seidel iteration</h3></div>
-        <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>How the solve works</strong><small>Simultaneous within a quarter, then in sequence</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
-  <div class="xp-body">
-        <p>The equations depend on each other, so each quarter is solved simultaneously, then the quarters in sequence.</p>
-  </div>
-</details>
+        <p class="meth-lead">The equations depend on each other, so each quarter is solved simultaneously, then the quarters in sequence.</p>
         <figure class="step-diagram" data-title="Gauss–Seidel solve" tabindex="0" role="button" aria-label="Expand diagram: Gauss–Seidel solve">
           <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-s3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -224,7 +211,7 @@
         <div class="meth-eq"><div class="meth-eq-label">Across quarters</div><div class="meth-eq-body">sequential forward solve</div></div>
         </div>
           <h4>Runtime</h4>
-          <p>A twelve-quarter anchored solve takes roughly <strong>30–40 seconds</strong> single-threaded; a reform run is two such solves.</p>
+          <p>Locally, a twelve-quarter anchored solve takes roughly <strong>30–40 seconds</strong> single-threaded (hosted runs take one to five minutes); a reform run is two such solves.</p>
         
   </div>
 </details>
@@ -232,13 +219,7 @@
 
       <div class="meth-step" id="meth-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Anchor to the published EFO</h3></div>
-        <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>What anchoring means</strong><small>Add-factors fitted to reproduce the EFO</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
-  <div class="xp-body">
-        <p>Add-factors, the residuals that reconcile each behavioural equation to data, are set so the baseline reproduces the published EFO. The OBR anchors the same way; these values are fitted here, not the OBR's own.</p>
-        
-  </div>
-</details>
+        <p class="meth-lead">Add-factors, the residuals that reconcile each behavioural equation to data, are set so the baseline reproduces the published EFO.</p>
         <figure class="step-diagram has-phone-alt" data-title="Anchoring with add-factors" tabindex="0" role="button" aria-label="Expand diagram: Anchoring with add-factors">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-s4" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -286,6 +267,8 @@
         <details class="xp">
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>Held add-factors and horizon limits</strong><small>How far the anchored path can be trusted</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
+        <p>The OBR anchors the same way; these values are fitted here, not the OBR's own.</p>
+
         <div class="meth-inline">
         <div class="meth-sec-title">Anchoring</div>
         <div class="meth-eq"><div class="meth-eq-label">Add-factor window</div><div class="meth-eq-body">fit 2024Q1–2025Q4, hold constant, project to 2027Q4</div></div>
@@ -331,7 +314,10 @@
 <li><span class="vc-sw ln-s2s" aria-hidden="true"></span>Real GDP</li>
 <li><span class="vc-sw ln-s3" aria-hidden="true"></span>Household consumption</li>
 </ul>
+<p class="vc-src-line"><svg class="vc-src-ic" viewBox="0 0 24 24" width="14" height="14" style="width:14px;height:14px;flex:0 0 14px" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span style="min-width:0;flex:1">Source: OBR October 2026 EFO</span></p>
+<details class="vc-src"><summary>Source details</summary>
 <p class="vc-source">Source: <a class="mono" href="https://github.com/PolicyEngine/macro/blob/main/papers/obr-macro/figures/current_outlook.csv">papers/obr-macro/figures/current_outlook.csv</a></p>
+</details>
 </div><!-- /vc-fig -->
 </figure>
 <!-- obr-current-outlook:end -->
@@ -348,13 +334,7 @@
 
       <div class="meth-step" id="meth-5" data-step="4">
         <div class="meth-step-head"><span class="meth-step-num mono">5</span><h3>Swap the closure, shock, compare</h3></div>
-        <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>Why swap the closure</strong><small>So GDP can respond to a shock</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
-  <div class="xp-body">
-        <p>In the OBR file GDP (<code>GDPM</code>) is an exogenous input and inventories (<code>DINV</code>) are the residual that closes the expenditure identity. The emulator swaps the two so output can respond.</p>
-        
-  </div>
-</details>
+        <p class="meth-lead">In the OBR file GDP (<code>GDPM</code>) is an exogenous input and inventories (<code>DINV</code>) are the residual that closes the expenditure identity.</p>
         <figure class="step-diagram" data-title="Closure swap and shock" tabindex="0" role="button" aria-label="Expand diagram: Closure swap and shock">
           <svg viewBox="0 0 580 210" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-s5" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -381,6 +361,8 @@
         <details class="xp">
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>The closure swap and the identical baseline</strong><small>Why a policy effect is a difference of two solves</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
+        <p>The emulator swaps the two so output can respond.</p>
+
         <div class="meth-inline">
         <div class="meth-sec-title">Closure and shock</div>
         <div class="meth-eq"><div class="meth-eq-label">Closure swap</div><div class="meth-eq-body"><code>DINV</code> equation removed and held at EFO; GDP identity added, <code>GDPM</code> endogenous</div></div>
@@ -397,12 +379,7 @@
 
       <div class="meth-step" id="meth-6" data-step="5">
         <div class="meth-step-head"><span class="meth-step-num mono">6</span><h3>Score a costed reform through the microsimulation bridge</h3></div>
-        <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>What the bridge does</strong><small>From a statutory reform to GDP</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
-  <div class="xp-body">
-        <p>The join from a statutory reform to GDP: the microsimulation costs the reform, and the emulator computes the second round.</p>
-  </div>
-</details>
+        <p class="meth-lead">The join from a statutory reform to GDP: the microsimulation costs the reform, and the emulator computes the second round.</p>
         <figure class="step-diagram" data-title="The static-costing bridge" tabindex="0" role="button" aria-label="Expand diagram: The static-costing bridge">
           <svg viewBox="0 0 580 200" width="580" style="max-width:100%;height:auto;">
             <defs><marker id="arr-s6" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0, 7 2.5, 0 5" fill="var(--primary)"/></marker></defs>
@@ -528,19 +505,12 @@
     </div>
   </div>
 
-  <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
-    <div class="chip-row">
-      <a class="chip chip-brand" href="/obr/validation">How far to trust it</a>
-      <a class="chip" href="/models#compare">Compare the models</a>
-      <a class="chip chip-brand" href="/papers/obr-macro">Read the paper</a>
-    </div>
-  </nav>
 </main>
 
 <footer class="foot foot-bar">
   <p class="footer-legal">© 2026 PolicyEngine</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
-    <a class="footer-policyengine" href="/" aria-label="PolicyEngine Macro home"><img src="/assets/policyengine-white.png" alt="" width="96" height="20" /><span>Macro</span></a>
+    <div class="footer-policyengine"><a class="brand-home" href="/" aria-label="PolicyEngine Macro home"><img src="/assets/policyengine-white.png" alt="PolicyEngine" width="96" height="20" /></a><span>Macro</span></div>
     <div class="foot-main">
       <a class="footer-text" href="/forecasts"><svg class="i" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>Forecasts</a>
       <a class="footer-text" href="/models"><svg class="i" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>Models</a>
@@ -552,7 +522,7 @@
   </nav>
 </footer>
 
-<script src="/reveal.js?v=4" defer></script>
+<script src="/reveal.js?v=9" defer></script>
 <script>
 // Diagram zoom: clicking a step diagram opens it enlarged in a modal.
 (function () {

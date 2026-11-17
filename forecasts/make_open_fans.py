@@ -121,6 +121,7 @@ def render() -> str:
             f"{src.parent.name}: no official path to overlay; raw bands (no "
             "coverage evaluation).</p>",
             '      <figure class="vchart-figure">',
+            chartkit.attach_plot(
             chartkit.figure("\n".join([
                 f'<svg class="vchart" data-chart="{CHART_ID}" '
                 f'viewBox="{left - 4} {top - 4} {plot_w + 8} {plot_h + 8}" role="img" '
@@ -142,10 +143,13 @@ def render() -> str:
                 ("sw-band90", "90% band (raw)"),
                 *([("sw-dot-out", "ONS outturn")] if dots else []),
             ], unit="UK unemployment rate, %", y_gutter=True,
+               source_short=f"BoE SVAR unemployment satellite, {chartkit.short_date(src.parent.name)} · ONS",
                source=(f'archived round <a class="mono" href="/forecasts/rounds/'
                        f'{src.parent.name}/{src.name}">{src.parent.name}/{src.name}</a>'
                        + ('; outturn, ONS series MGSX from the <a href="/economy#data">data store</a>'
                           if dots else ""))),
+                chartkit.fan_plot(rows, median_name="BoE SVAR unemployment satellite median", band_note="(raw)",
+                                  dots=[(rows[i]["period"], v) for i, v in dots], y_range=(lo, hi))),
             "      </figure>",
         ]
     )

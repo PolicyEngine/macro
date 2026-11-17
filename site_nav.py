@@ -22,7 +22,7 @@ STYLESHEET = re.compile(r'href="/style\.css(?:\?v=[0-9]+)?"')
 # changes in a way a cached copy would render wrongly; ``render`` writes it
 # into every page and the generators read it from here (economy/topics.py,
 # notes/generate_release_notes.py), so no page can be left on an old copy.
-STYLE_VERSION = 34
+STYLE_VERSION = 48
 STYLE_HREF = f"/style.css?v={STYLE_VERSION}"
 
 # Inter (latin) is the body face on every page, but the browser only finds the
@@ -118,6 +118,39 @@ def icon(key: str, size: int = 16, cls: str = "i") -> str:
         'stroke="currentColor" stroke-width="1.75" stroke-linecap="round" '
         f'stroke-linejoin="round" aria-hidden="true">{ICONS[key]}</svg>'
     )
+
+# Small flag marks for the UK | US segmented control (style.css "Country switch").
+FLAGS = {
+    "uk": ('<rect width="60" height="30" fill="#012169"/>'
+           '<path d="M0 0l60 30M60 0L0 30" stroke="#FFF" stroke-width="6"/>'
+           '<path d="M0 0l60 30M60 0L0 30" stroke="#C8102E" stroke-width="2"/>'
+           '<path d="M30 0v30M0 15h60" stroke="#FFF" stroke-width="10"/>'
+           '<path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/>', "0 0 60 30"),
+    "us": ('<rect width="19" height="13" fill="#B22234"/>'
+           '<path d="M0 1.5h19M0 3.5h19M0 5.5h19M0 7.5h19M0 9.5h19M0 11.5h19" stroke="#FFF" stroke-width="1"/>'
+           '<rect width="8" height="7" fill="#3C3B6E"/>', "0 0 19 13"),
+}
+
+
+def flag(code: str) -> str:
+    """A 16x11 flag mark for a country segment (decorative; the label carries the name)."""
+    body, box = FLAGS[code]
+    return (f'<svg class="flag" viewBox="{box}" width="16" height="11" '
+            f'preserveAspectRatio="none" aria-hidden="true">{body}</svg>')
+
+
+_LONG_MONTHS = {"January": "Jan", "February": "Feb", "March": "Mar", "April": "Apr", "June": "Jun",
+                "July": "Jul", "August": "Aug", "September": "Sep", "October": "Oct",
+                "November": "Nov", "December": "Dec"}
+
+
+def short_date(text: str) -> str:
+    """'19 August 2026' -> '19 Aug 2026': the one date format used sitewide.
+    Leaves any other text unchanged (an ONS string can carry a time or a note)."""
+    import re as _re
+    return _re.sub(r"\b(\d{1,2}) (January|February|March|April|June|July|August|September|October|November|December) (\d{4})\b",
+                   lambda m: f"{m.group(1)} {_LONG_MONTHS[m.group(2)]} {m.group(3)}", text)
+
 
 MODEL_ROOTS = {"models", "obr", "svar", "frb-us", "us-hank", "olg", "pe", "define"}
 EVIDENCE_ROOTS = {"papers", "reports"}
@@ -427,8 +460,8 @@ def _footer_links() -> str:
         for href, label, key in _FOOTER_MAIN
     )
     return (
-        '    <a class="footer-policyengine" href="/" aria-label="PolicyEngine Macro home">'
-        '<img src="/assets/policyengine-white.png" alt="" width="96" height="20" /><span>Macro</span></a>\n'
+        '    <div class="footer-policyengine"><a class="brand-home" href="/" aria-label="PolicyEngine Macro home">'
+        '<img src="/assets/policyengine-white.png" alt="PolicyEngine" width="96" height="20" /></a><span>Macro</span></div>\n'
         f'    <div class="foot-main">\n{items}\n    </div>'
     )
 
@@ -480,9 +513,9 @@ def header(path: Path) -> str:
             f"    <a{class_attr} href=\"{href}\"{current_attr}>{icon(key, 18)}{label}</a>"
         )
     return """<header class="nav">
-  <a class="brand" href="/" aria-label="PolicyEngine Macro home">
-    <img class="brand-logo" src="/assets/policyengine-white.png" alt="" width="115" height="24" /><span class="brand-name">Macro</span>
-  </a>
+  <div class="brand">
+    <a class="brand-home" href="/" aria-label="PolicyEngine Macro home"><img class="brand-logo" src="/assets/policyengine-white.png" alt="PolicyEngine" width="115" height="24" /></a><span class="brand-name">Macro</span>
+  </div>
   <nav class="nav-links" aria-label="Primary">
 %s
   </nav>
@@ -517,28 +550,6 @@ CARD_ICONS = {
     "list": ICONS["list"], "model": ICONS["models"], "plug": ICONS["use"],
     "target": ICONS["target"],
 }
-
-
-def where_next(cards: list[tuple[str, str, str, str]], indent: str = "  ") -> str:
-    """A "where next" card: (href, icon key, title, one line) per entry card."""
-    rows = []
-    for href, key, title, line in cards:
-        rows.append(
-            f'{indent}    <a class="entry-card" href="{href}">\n'
-            f'{indent}      <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" '
-            'fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" '
-            f'stroke-linejoin="round">{CARD_ICONS[key]}</svg></span>\n'
-            f"{indent}      <h3>{title}</h3>\n"
-            f"{indent}      <p>{line}</p>\n"
-            f'{indent}      <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>\n'
-            f"{indent}    </a>"
-        )
-    return (
-        f'{indent}<section class="band where-next" id="where-next">\n'
-        f'{indent}  <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>\n'
-        f'{indent}  <div class="entry-grid">\n' + "\n".join(rows) + "\n"
-        f"{indent}  </div>\n{indent}</section>"
-    )
 
 
 # Standalone documents allowed to ship without the global nav header.

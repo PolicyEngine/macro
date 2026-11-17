@@ -176,7 +176,7 @@ def digest_rows(items: list[dict], vintage: str) -> list[str]:
     for series in items:
         now = series["observations"][-1]
         topic_url, topic_title = topic_home(series)
-        next_release = " ".join((series.get("next_release") or "not announced").split())
+        next_release = site_nav.short_date(" ".join((series.get("next_release") or "not announced").split()))
         rows.append(
             f'          <tr id="{series["series"]}">'
             f'<th scope="row">{html.escape(_label(series))}'
@@ -204,7 +204,7 @@ def digest_page(vintage: str) -> str:
     /notes/releases/<date>-<series> redirects to /notes/releases/<date>#<series>.
     """
     items = sorted(snapshots(vintage), key=lambda s: (s["series"][:3] != "uk_", _label(s)))
-    day = datetime.strptime(vintage, "%Y-%m-%d").strftime("%-d %B %Y")
+    day = datetime.strptime(vintage, "%Y-%m-%d").strftime("%-d %b %Y")
     canonical = f"https://policyengine-macro.vercel.app/notes/releases/{vintage}"
     new = sum(1 for s in items if "new observation" in what_is_new(s, vintage))
     uk = [s for s in items if s["series"].startswith("uk_")]
@@ -228,11 +228,6 @@ def digest_page(vintage: str) -> str:
           </tbody>
         </table>
     </div>""")
-    where = site_nav.where_next([
-        ("/notes/releases", "list", "All release digests", "Every stored date, newest first"),
-        ("/economy#data", "data", "The data store", "Every stored vintage of every series"),
-        ("/forecasts#scored", "chart", "The forecast record", "Rounds scored against outturns like these"),
-    ])
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -264,14 +259,13 @@ def digest_page(vintage: str) -> str:
 {chr(10).join(tables)}
     </div>
   </section>
-{where}
 </main>
 <footer class="foot foot-bar">
   <p class="footer-legal">© 2026 PolicyEngine</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
   </nav>
 </footer>
-<script src="/reveal.js?v=4" defer></script>
+<script src="/reveal.js?v=9" defer></script>
 </body>
 </html>
 """
@@ -312,7 +306,7 @@ def rebuild_indexes() -> None:
         items = snapshots(vintage)
         kinds = [what_is_new(s, vintage) for s in items]
         new = sum(1 for k in kinds if "new observation" in k)
-        day = datetime.strptime(vintage, "%Y-%m-%d").strftime("%-d %B %Y")
+        day = datetime.strptime(vintage, "%Y-%m-%d").strftime("%-d %b %Y")
         index_rows.append(
             f'        <a href="/notes/releases/{vintage}"><span>{day}: {len(items)} '
             f"series, {new} with a new observation</span>"
@@ -324,8 +318,8 @@ def rebuild_indexes() -> None:
         )
     latest = pages[0].parent.name if pages else ""
     summary_row = (
-        f'        <a href="/notes/releases"><span>{len(pages)} automated release '
-        f"digests, newest first</span><strong>latest {latest}</strong></a>"
+        f'        <a href="/notes/releases"><span class="fc-li-ic"><svg class="fc-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg></span><span>{len(pages)} automated release '
+        f"digests, newest first</span><strong>Release digests</strong></a>"
     )
     marker_replace(NOTES_INDEX, "generated-release-notes", summary_row)
     marker_replace(RELEASES_INDEX, "generated-release-notes", "\n".join(index_rows))

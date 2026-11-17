@@ -1,37 +1,160 @@
-// A restrained, one-time reveal for section-level content. The hero and
-// navigation paint immediately; only content reached by scrolling moves.
+// Scroll reveal (r15 polish): a subtle fade and 8px rise as blocks enter,
+// a short stagger inside card grids, and a gentle count-up on stat values.
+// Progressive enhancement: nothing is hidden unless this script runs and
+// motion is allowed (html.rv-on); anything above the viewport — after an
+// anchor jump or a fast scroll — is shown at once, so no block is ever left
+// faded; print and reduced motion show everything at rest.
 (function () {
   "use strict";
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const targets = document.querySelectorAll(
-    "main .band > *, main .model-evidence-links-top"
-  );
-  targets.forEach(function (el) { el.classList.add("scroll-reveal"); });
-  if (reduce || !("IntersectionObserver" in window)) {
-    targets.forEach(function (el) { el.classList.add("in-view"); });
-    return;
-  }
-  const io = new IntersectionObserver(
-    function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting) {
-          e.target.classList.add("in-view");
-          io.unobserve(e.target);
-        }
-      });
-    },
-    { threshold: 0.08, rootMargin: "0px 0px -7% 0px" }
-  );
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var BLOCKS = "main .band > *, main .model-evidence-links-top, main section > .lp-wrap > *, main .ab-sec > *, main .gl-sec > *, main .fc-body > section > *";
+  var GRIDS = "main :is(.mc-grid, .uc-grid, .qc-grid, .stat-row, .stat-grid, .fc-tiles, .ct-grid, .pp-list, .tr-list, .lp-models)";
+  var targets = Array.from(document.querySelectorAll(BLOCKS));
+  document.querySelectorAll(GRIDS).forEach(function (grid) {
+    Array.from(grid.children).forEach(function (child, i) {
+      child.style.setProperty("--rv-d", Math.min(i, 7) * 85 + "ms");
+      child.classList.add("rv-card");
+      targets.push(child);
+    });
+  });
+  targets = targets.filter(function (el, i, all) { return all.indexOf(el) === i && !el.closest(".hero, .lp-hero, .mp-hero, [data-no-reveal]"); });
+  var HEADS = ".sh, .band-head";
   targets.forEach(function (el) {
-    if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
-      el.classList.add("in-view", "reveal-initial");
-    } else if (el.offsetHeight > window.innerHeight * 0.7) {
-      // Tall blocks (long walkthroughs, scrollytelling wrappers) may never
-      // reach the 8% intersection threshold — show them without animation.
-      el.classList.add("in-view", "reveal-initial");
-    } else {
-      io.observe(el);
+    el.classList.add("scroll-reveal");
+    if (el.matches(HEADS)) el.classList.add("rv-head");
+  });
+  function showAll() { targets.forEach(function (el) { el.classList.add("in-view", "reveal-initial"); }); }
+  window.addEventListener("beforeprint", showAll);
+  if (reduce || !("IntersectionObserver" in window)) { showAll(); return; }
+  document.documentElement.classList.add("rv-on");
+
+  var COUNT = ".stat-value, .stat-num, .fc-tile-v, .lp-stat-v";
+  function countUp(root) {
+    root.querySelectorAll(COUNT).forEach(function (el) {
+      if (el.dataset.counted || el.children.length) return;
+      var text = el.textContent;
+      var m = text.match(/^(\s*[^\d\-−]*)(-|−)?(\d+(?:\.\d+)?)(.*)$/s);
+      if (!m) return;
+      var end = parseFloat(m[3]); if (!isFinite(end) || end === 0) return;
+      var decimals = (m[3].split(".")[1] || "").length;
+      if (!decimals && end >= 1900 && end <= 2100) return;   /* years and quarters do not count */
+      el.dataset.counted = "1";
+      var start = null, dur = 900;
+      function step(ts) {
+        if (start === null) start = ts;
+        var t = Math.min(1, (ts - start) / dur), e = 1 - Math.pow(1 - t, 3);
+        el.textContent = m[1] + (m[2] || "") + (end * e).toFixed(decimals) + m[4];
+        if (t < 1) requestAnimationFrame(step); else el.textContent = text;
+      }
+      requestAnimationFrame(step);
+    });
+  }
+  /* charts: lines draw in, bands fade up after the line, bars grow from the
+     baseline, dots pop in one by one. Web Animations only: the resting state is
+     always the visible one, so nothing can be left hidden. */
+  var EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+  function chartSvgs(root) {
+    return Array.from(root.querySelectorAll("svg:not(.i):not(.flag)")).filter(function (svg) {
+      var vb = svg.viewBox && svg.viewBox.baseVal;
+      return vb && vb.width >= 200 && !svg.closest("[data-no-reveal]") && !svg.dataset.drawn;
+    });
+  }
+  function drawCharts(root, delay) {
+    if (!Element.prototype.animate) return;
+    delay = delay || 0;
+    chartSvgs(root).forEach(function (svg) {
+      svg.dataset.drawn = "1";
+      var vbw = svg.viewBox.baseVal.width, lineEnd = delay;
+      svg.querySelectorAll("path, polyline").forEach(function (p) {
+        var cs = getComputedStyle(p);
+        if (cs.fill !== "none" || cs.stroke === "none" || parseFloat(cs.strokeWidth) < 1.4) return;
+        if (cs.strokeDasharray && cs.strokeDasharray !== "none") return;
+        var len = 0; try { len = p.getTotalLength(); } catch (e) { return; }
+        if (len < 60) return;
+        p.style.strokeDasharray = len;
+        var a = p.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
+          { duration: 1100, delay: delay, easing: EASE, fill: "backwards" });
+        lineEnd = Math.max(lineEnd, delay + 700);
+        a.onfinish = a.oncancel = function () { p.style.strokeDasharray = ""; };
+      });
+      svg.querySelectorAll("path").forEach(function (p) {
+        var cs = getComputedStyle(p);
+        if (cs.fill === "none" || parseFloat(cs.fillOpacity) >= 1 && parseFloat(cs.opacity) >= 1) return;
+        p.animate([{ opacity: 0 }, { opacity: cs.opacity }], { duration: 700, delay: lineEnd - 300, easing: "ease-out", fill: "backwards" });
+      });
+      var bars = Array.from(svg.querySelectorAll("rect")).filter(function (r) {
+        var w = r.width.baseVal.value, h = r.height.baseVal.value;
+        return h > 2 && w > 1 && w < vbw * 0.5 && getComputedStyle(r).fill !== "none";
+      });
+      bars.forEach(function (r, i) {
+        r.style.transformBox = "fill-box"; r.style.transformOrigin = "50% 100%";
+        r.animate([{ transform: "scaleY(0)" }, { transform: "scaleY(1)" }],
+          { duration: 750, delay: delay + Math.min(i, 12) * 40, easing: EASE, fill: "backwards" });
+      });
+      var dots = Array.from(svg.querySelectorAll("circle")).filter(function (c) { return c.r.baseVal.value <= 7; });
+      dots.forEach(function (c, i) {
+        c.style.transformBox = "fill-box"; c.style.transformOrigin = "50% 50%";
+        c.animate([{ transform: "scale(0)", opacity: 0 }, { transform: "scale(1.25)", opacity: 1, offset: 0.7 }, { transform: "scale(1)", opacity: 1 }],
+          { duration: 420, delay: lineEnd - 200 + Math.min(i, 16) * 70, easing: "ease-out", fill: "backwards" });
+      });
+    });
+    root.querySelectorAll(".fc-pips").forEach(function (row) {
+      Array.from(row.children).forEach(function (d, i) {
+        d.animate([{ transform: getComputedStyle(d).transform === "none" ? "scale(0)" : getComputedStyle(d).transform + " scale(0)", opacity: 0 }, { opacity: 1 }],
+          { duration: 360, delay: delay + 200 + Math.min(i, 16) * 70, easing: "ease-out", fill: "backwards" });
+      });
+    });
+  }
+  function reveal(el, animate) {
+    if (el.classList.contains("in-view")) return;
+    if (!animate) el.classList.add("reveal-initial");
+    el.classList.add("in-view");
+    if (animate) {
+      countUp(el);
+      drawCharts(el, 250 + (parseInt(el.style.getPropertyValue("--rv-d"), 10) || 0));
     }
+    /* once in place, hand the transform back to hover styles with no stagger delay */
+    setTimeout(function () { el.classList.add("rv-done"); }, animate ? 1300 : 0);
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) { reveal(e.target, true); io.unobserve(e.target); } });
+  }, { threshold: 0.06, rootMargin: "0px 0px -6% 0px" });
+  var vh = window.innerHeight;
+  targets.forEach(function (el) {
+    var r = el.getBoundingClientRect();
+    if (r.top < vh * 0.94 || r.height > vh * 0.8) reveal(el, false);
+    else if (r.top < vh) reveal(el, true);   /* peeking in at the bottom edge: animate in now */
+    else io.observe(el);
+  });
+  /* charts already on screen at load (the home fan) draw in once; not after an anchor jump */
+  if (!location.hash) {
+    Array.from(document.querySelectorAll("main svg:not(.i):not(.flag)")).forEach(function (svg) {
+      if (svg.getBoundingClientRect().top < vh * 0.9) drawCharts(svg.parentElement, 200);
+    });
+  }
+  /* catch-up: blocks scrolled past are shown at once; blocks entering the viewport
+     animate, unless the scroll was a jump (anchor, Home/End, scrollbar drag) */
+  var lastY = window.scrollY;
+  function catchUp(jump) {
+    var h = window.innerHeight;
+    targets.forEach(function (el) {
+      if (el.classList.contains("in-view")) return;
+      var r = el.getBoundingClientRect();
+      if (r.bottom < 0) reveal(el, false);
+      else if (r.top < h * 0.94) reveal(el, !jump);
+    });
+  }
+  var timer = null;
+  window.addEventListener("scroll", function () {
+    /* synchronous catch-up, plus a timer fallback for throttled tabs where
+       animation frames are delayed: nothing is left faded after a jump */
+    var dy = Math.abs(window.scrollY - lastY);
+    lastY = window.scrollY;
+    catchUp(dy > window.innerHeight * 1.2);
+    clearTimeout(timer); timer = setTimeout(function () { catchUp(false); }, 150);
+  }, { passive: true });
+  window.addEventListener("hashchange", function () {
+    targets.forEach(function (el) { if (el.getBoundingClientRect().top < window.innerHeight) reveal(el, false); });
   });
 })();
 
@@ -48,6 +171,7 @@
   }
   window.addEventListener("resize", set, { passive: true });
   window.addEventListener("load", set);
+  if (window.ResizeObserver) new ResizeObserver(set).observe(nav);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(set);
   set();
 })();
@@ -218,7 +342,7 @@
 /* Shared table component (r12, style.css §15). Every .table-scroll table
    gets: data-label on each cell so phones can show it as stacked cards,
    and an edge fade while the table scrolls sideways. Tables with merged
-   cells or more than six columns keep scrolling instead of stacking. */
+   body cells or more than ten columns keep scrolling instead of stacking. */
 (function () {
   "use strict";
   var SKIP = ".sb-grid, .cap-grid, .vc-table, .vc-narrow-table";
@@ -226,11 +350,34 @@
     var table = box.querySelector(":scope > table");
     if (!table || table.matches(SKIP)) return;
     box.classList.add("tbl");
-    var head = table.tHead && table.tHead.rows[table.tHead.rows.length - 1];
-    var labels = head ? Array.from(head.cells).map(function (c) { return c.textContent.trim(); }) : [];
-    var merged = table.querySelector("[colspan]:not([colspan='1']), [rowspan]:not([rowspan='1'])");
-    var own = table.matches(".t-stack") || box.matches(".has-t-stack, .mo-tablecard");
-    if (labels.length && labels.length <= 6 && !merged && !own) {
+    /* column labels from every header row, so a merged two-row header still
+       labels each stacked cell ("Group · column") */
+    var labels = [];
+    if (table.tHead) {
+      var grid = [];
+      Array.from(table.tHead.rows).forEach(function (row, r) {
+        grid[r] = grid[r] || [];
+        var c = 0;
+        Array.from(row.cells).forEach(function (cell) {
+          while (grid[r][c] !== undefined) c++;
+          var cs = cell.colSpan || 1, rs = cell.rowSpan || 1, t = cell.textContent.trim();
+          for (var dr = 0; dr < rs; dr++) for (var dc = 0; dc < cs; dc++) {
+            grid[r + dr] = grid[r + dr] || [];
+            grid[r + dr][c + dc] = t;
+          }
+          c += cs;
+        });
+      });
+      var ncol = Math.max.apply(null, grid.map(function (g) { return g.length; }));
+      for (var j = 0; j < ncol; j++) {
+        var parts = [];
+        grid.forEach(function (g) { if (g[j] && parts.indexOf(g[j]) < 0) parts.push(g[j]); });
+        labels.push(parts.join(" · "));
+      }
+    }
+    var merged = Array.from(table.tBodies).some(function (b) { return b.querySelector("[colspan]:not([colspan='1']), [rowspan]:not([rowspan='1'])"); });
+    var own = table.matches(".t-stack") || box.matches(".has-t-stack");
+    if (labels.length && labels.length <= 10 && !merged && !own) {
       table.classList.add("tbl-stack");
       Array.from(table.tBodies).forEach(function (body) {
         Array.from(body.rows).forEach(function (row) {
@@ -296,4 +443,145 @@
       a.addEventListener("click", function () { setCurrent(a); });
     });
   });
+})();
+
+/* Table status cells (r15): a cell whose whole text is a status word becomes
+   a small chip with an icon, so status reads at a glance. Long tables get a
+   sticky header (a capped-height scroller, so the header can stick inside
+   it). Text is unchanged; only presentation is added. */
+(function () {
+  "use strict";
+  var TAIL = "(\\s*\\([^)]*\\)|,\\s*[^,]{1,24})?$";
+  var STATUS = [
+    [new RegExp("^(yes|pass|passes|hosted|live|exact|replicates)" + TAIL, "i"), "ok"],
+    [new RegExp("^(no|fail|fails|none)" + TAIL, "i"), "no"],
+    [new RegExp("^(local|local only|experimental|partial|partial replication|weak|moderate|imposed|anchored)" + TAIL, "i"), "warn"]
+  ];
+  document.querySelectorAll(".table-scroll.tbl > table").forEach(function (table) {
+    Array.from(table.querySelectorAll("tbody td")).forEach(function (td) {
+      if (td.children.length || td.classList.contains("num")) return;
+      var t = td.textContent.trim();
+      if (!t || t.length > 28) return;
+      for (var i = 0; i < STATUS.length; i++) {
+        if (STATUS[i][0].test(t)) {
+          td.innerHTML = '<span class="st st-' + STATUS[i][1] + '">' + td.innerHTML + "</span>";
+          break;
+        }
+      }
+    });
+    var rows = table.tBodies.length ? table.tBodies[0].rows.length : 0;
+    if (rows > 14 && table.tHead) table.parentElement.classList.add("tbl-long");
+  });
+})();
+
+/* Disclosure icons (r15): a details.about/.expander/.more summary with no
+   icon of its own gets a real one chosen from its words, so the old generic
+   fallback glyph never shows. Bare icon, no tile. */
+(function () {
+  "use strict";
+  var P = {
+    calendar: '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
+    code: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+    history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+    table: '<path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/>',
+    shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+    book: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+    info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>'
+  };
+  var RULES = [
+    [/^\s*why\b|what (it|this) is/i, "info"],
+    [/as it was|published on|vintage|history|archive|snapshot/i, "history"],
+    [/release|calendar|announc|schedule|date/i, "calendar"],
+    [/endpoint|file format|api|command|code|run it|cli|python|mcp|install/i, "code"],
+    [/limit|caveat|warning|known issue|fails?|not\b/i, "alert"],
+    [/evidence|validat|check|test|grade|trust/i, "shield"],
+    [/table|figures|numbers|by dimension|full/i, "table"],
+    [/data|series|source|store/i, "database"],
+    [/method|how|paper|read|equation|about/i, "book"]
+  ];
+  document.querySelectorAll("details:is(.about, .expander, .more):not(.xp) > summary").forEach(function (s) {
+    if (s.querySelector("svg")) return;
+    var text = s.textContent, key = "info";
+    for (var i = 0; i < RULES.length; i++) { if (RULES[i][0].test(text)) { key = RULES[i][1]; break; } }
+    var span = document.createElement("span");
+    span.className = "sum-ic"; span.setAttribute("aria-hidden", "true");
+    span.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">' + P[key] + "</svg>";
+    s.insertBefore(span, s.firstChild);
+    s.classList.add("has-ic");
+  });
+})();
+
+/* Country switch (.seg): one sliding indicator under the active segment.
+   Without this script the active segment carries its own fill (style.css §39). */
+(function () {
+  var segs = document.querySelectorAll(".seg");
+  if (!segs.length) return;
+  var ACTIVE = '.is-on, [aria-pressed="true"]';
+  function place(seg, target, animate) {
+    var on = target || seg.querySelector(ACTIVE);
+    var ind = seg.querySelector(".seg-ind");
+    if (!ind) return;
+    if (!on || !on.offsetWidth) { ind.style.opacity = "0"; return; }
+    ind.style.opacity = "1";
+    if (!animate) seg.classList.add("seg-still");
+    seg.style.setProperty("--seg-x", on.offsetLeft + "px");
+    seg.style.setProperty("--seg-w", on.offsetWidth + "px");
+    if (!animate) { void ind.offsetWidth; seg.classList.remove("seg-still"); }
+  }
+  Array.prototype.forEach.call(segs, function (seg) {
+    var ind = document.createElement("span");
+    ind.className = "seg-ind";
+    ind.setAttribute("aria-hidden", "true");
+    seg.insertBefore(ind, seg.firstChild);
+    seg._segHome = seg.querySelector(".is-on");
+    place(seg, null, false);
+    seg.classList.add("has-ind");
+    if (window.MutationObserver) {
+      new MutationObserver(function (list) {
+        for (var i = 0; i < list.length; i++) if (list[i].target !== seg && list[i].target !== ind) { place(seg, null, true); return; }
+      }).observe(seg, { subtree: true, attributes: true, attributeFilter: ["aria-pressed", "class"] });
+    }
+    /* a country link navigates: slide to it first so the switch reads as one control */
+    seg.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest("a.cc-tog");
+      if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+      var cur = seg.querySelector(".is-on");
+      if (cur && cur !== a) { cur.classList.remove("is-on"); a.classList.add("is-on"); }
+    });
+  });
+  function all() { Array.prototype.forEach.call(segs, function (s) { place(s, null, false); }); }
+  window.addEventListener("resize", all);
+  /* back from a country link (bfcache): put the current country back */
+  window.addEventListener("pageshow", function () {
+    Array.prototype.forEach.call(segs, function (s) {
+      var home = s._segHome, cur = s.querySelector(".is-on");
+      if (home && cur && cur !== home) { cur.classList.remove("is-on"); home.classList.add("is-on"); }
+    });
+    all();
+  });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(all);
+})();
+
+/* Thin teal reading-progress bar under the sticky header (style.css §40). */
+(function () {
+  var nav = document.querySelector("header.nav");
+  if (!nav || !document.querySelector("main")) return;
+  var bar = document.createElement("div");
+  bar.className = "rv-progress";
+  bar.setAttribute("aria-hidden", "true");
+  nav.appendChild(bar);   /* inside the header, on its bottom edge: never over the tabs */
+  var ticking = false;
+  function update() {
+    ticking = false;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var p = max > 120 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    bar.style.transform = "scaleX(" + p.toFixed(4) + ")";
+    bar.classList.toggle("is-on", p > 0.002);
+  }
+  function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  update();
 })();

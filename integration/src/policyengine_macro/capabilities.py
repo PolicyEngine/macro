@@ -47,7 +47,7 @@ MODELS = {
         ],
         "horizon": "one policy year under long-run steady-state assumptions",
         "access": ["CLI", "Python"],
-        "runtime": "two OG steady-state solves (baseline cached; >10 min cold) + one microsim run",
+        "runtime": "two OG steady-state solves (baseline cached; tens of minutes, not formally timed) + one microsim run",
         "uncertainty": "none quantified; steady-state comparative statics",
         "status": (
             "experimental; local-only (oguk excluded from the hosted image), "
@@ -93,7 +93,7 @@ MODELS = {
         "status": (
             "partial replication of Brignone and Piffer (2025): GDP "
             "decomposition consistent with the paper; CPI global-shock share "
-            "about 8pp short; no forecast skill against a drifting random walk"
+            "about 8.5pp short; no forecast skill against a drifting random walk"
         ),
         "estimation_sample": "1992Q1-2025Q1",
         "data_edge": "2026Q2",
@@ -111,7 +111,7 @@ MODELS = {
         "cannot_answer": ["PolicyEngine reforms", "model-consistent-expectations scenarios"],
         "horizon": "quarterly",
         "access": ["hosted raw shocks", "CLI with editable model checkout", "Python"],
-        "runtime": "seconds to minutes",
+        "runtime": "about 3 seconds cold; under a second warm",
         "uncertainty": "not comprehensive",
         "status": (
             "replicates the Fed's pyfrbus (1.0.0 and 1.1.1) on one 100bp "
@@ -202,7 +202,7 @@ MODELS = {
         "uncertainty": "none quantified; deterministic scenario deltas from one calibration",
         "status": (
             "partial replication of the DEFINE-UK manual: baseline macro "
-            "block matches Table 4 except 2025 growth; scenario deltas gated on the pinned "
+            "block matches Table 4 inside every gate, two by only 0.01pp; scenario deltas gated on the pinned "
             "oracle run, the published scenario definitions, and two paper "
             "anchors (no numeric v1.1 scenario results are published); "
             "experimental; unlicensed upstream is never hosted, so hosted "
@@ -359,7 +359,8 @@ MODEL_QUALITY = {
         "policy_counterfactual_validity": _quality(
             "moderate",
             "Selected monetary and fiscal multipliers lie in published ranges, but "
-            "only VAR expectations are supported.",
+            "the hosted tools expose only VAR expectations; the pinned package's "
+            "cross-validated model-consistent expectations are not yet exposed.",
             "Expose the package's cross-validated model-consistent expectations "
             "in the hosted tools before "
             "forward-guidance or permanent-policy use.",
@@ -751,6 +752,17 @@ def _no_model_warning(question_type: str, country: str, needs_distribution: bool
     )
 
 
+# Tools that feed a macro model's path into the microsimulation. Experimental,
+# so recommend() never lists their models as candidates for a distributional
+# question; it only names the tools in the no-model warning.
+EXPERIMENTAL_INCIDENCE_TOOLS = {
+    "frb-us": "frbus_shock_incidence",
+    "us-hank": "hank_shock_incidence",
+    "boe-svar": "svar_inflation_incidence",
+    "define-uk": "define_scenario_incidence",
+}
+
+
 def recommend(
     question_type: str,
     country: str = "uk",
@@ -781,6 +793,22 @@ def recommend(
         if needs_distribution and model_id not in ("pe-microsim", "og+microsim"):
             continue
         candidates.append(model_id)
+    warning = None if candidates else _no_model_warning(
+        question_type, country, needs_distribution
+    )
+    if needs_distribution and not candidates:
+        tools = [
+            EXPERIMENTAL_INCIDENCE_TOOLS[model_id]
+            for model_id, model in MODELS.items()
+            if model_id in EXPERIMENTAL_INCIDENCE_TOOLS
+            and country in model["geography"]
+            and question_type in model["question_types"]
+        ]
+        if tools:
+            warning += (
+                f" Experimental, not a recommendation: {', '.join(tools)} feed "
+                "this model's macro path into the microsimulation."
+            )
     return {
         "question_type": question_type,
         "country": country,
@@ -788,8 +816,6 @@ def recommend(
         "horizon": horizon,
         "primary_model": candidates[0] if candidates else None,
         "candidate_models": candidates,
-        "warning": None if candidates else _no_model_warning(
-            question_type, country, needs_distribution
-        ),
+        "warning": warning,
         "details": [get_status(model_id) for model_id in candidates],
     }

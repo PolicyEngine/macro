@@ -65,6 +65,13 @@ RECIPE_SERIES = "uk_cpi_yoy"
 RECIPE_DATE = "2026-07-25"
 
 
+def _short(text: str) -> str:
+    import re
+    months = {"January": "Jan", "February": "Feb", "March": "Mar", "April": "Apr", "June": "Jun", "July": "Jul",
+              "August": "Aug", "September": "Sep", "October": "Oct", "November": "Nov", "December": "Dec"}
+    return re.sub(r"\b(\d{1,2}) (" + "|".join(months) + r") (\d{4})\b", lambda m: f"{m.group(1)} {months[m.group(2)]} {m.group(3)}", text)
+
+
 def manifest() -> dict:
     return json.loads((STORE / "MANIFEST.json").read_text(encoding="utf-8"))
 
@@ -98,6 +105,47 @@ def display_url(url: str) -> str:
     if "ons.gov.uk/" in url and url.endswith("/data"):
         return url[: -len("/data")]
     return url
+
+
+def unit_short(series: dict) -> str:
+    """The unit beside a latest value: '%' for rates, else the first clause."""
+    units = str(series.get("units", "")).split(",")[0].strip()
+    if not units:
+        return ""
+    if units.lower().startswith("percent"):
+        return "%"
+    return f' <span class="unit">{esc(units)}</span>'
+
+
+# Releases already published but not yet in the store (the store only grows
+# through data/fetch.py; nothing here edits a vintage).
+STALE_NOTES = {
+    # name: (the published period not yet in the store, note). The note
+    # disappears by itself once a vintage carrying that period is fetched.
+    "uk_business_investment": ("2026Q3", "2026Q3 first estimate published 12 Nov 2026, not yet ingested"),
+}
+
+
+def stale_note(name: str, latest_period: str) -> str:
+    entry = STALE_NOTES.get(name)
+    return entry[1] if entry and latest_period < entry[0] else ""
+
+
+def value_with_unit(value: float, series: dict, name: str = "") -> str:
+    """A latest value with its unit placed as readers expect: '£757.0 per
+    week', '£83,534m', '4.0%'. The stored number is not rounded."""
+    units = str(series.get("units", "")).split(",")[0].strip()
+    if name == "uk_public_sector_net_borrowing" or series.get("cdid") == "J5II":
+        if units.startswith("£m") and value < 0:
+            return f"£{-value / 1000:,.1f}bn borrowed"
+    text = f"{int(value):,}" if float(value).is_integer() and units.startswith("£m") else fmt_value(value)
+    if units.lower().startswith("percent"):
+        return f"{text}%"
+    if units.startswith("£m"):
+        return f"£{text}m"
+    if units.startswith("£ "):
+        return f"£{text} {esc(units[2:])}"
+    return text + unit_short(series)
 
 
 def fmt_value(value: float) -> str:
@@ -150,6 +198,79 @@ def topic_home(name: str) -> tuple[str, str] | None:
     return _TOPIC_HOMES.get(name)
 
 
+_TOPICS_MODULE = None
+
+
+def _topics():
+    """economy/topics.py, loaded once (topic homes and the topic icon set)."""
+    global _TOPICS_MODULE
+    if _TOPICS_MODULE is None:
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("economy_topics", ROOT / "economy" / "topics.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _TOPICS_MODULE = module
+    return _TOPICS_MODULE
+
+
+# Small Lucide icons used only in the catalogue.
+_ICON = {
+    "calendar": '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
+    "clock": '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    "layers": '<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+    "chev": '<path d="m6 9 6 6 6-6"/>',
+    "landmark": '<line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/>',
+    "chart": '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+    "database": '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+    "alert": '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+}
+
+
+def ic(name: str, size: int = 14, cls: str = "ds-ic") -> str:
+    return (f'<svg class="{cls}" viewBox="0 0 24 24" width="{size}" height="{size}" fill="none" '
+            'stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" '
+            f'aria-hidden="true">{_ICON[name]}</svg>')
+
+
+# Catalogue groups, in reading order: (topic slug for the icon, heading).
+GROUPS = [
+    ("inflation", "Prices"),
+    ("growth", "Growth"),
+    ("jobs", "Jobs"),
+    ("rates", "Rates"),
+    ("public-finances", "Public finances"),
+]
+GROUP_OF = {
+    "uk_cpi_yoy": "inflation", "uk_core_cpi_yoy": "inflation", "us_cpi": "inflation",
+    "uk_gdp_cvm": "growth", "uk_monthly_gva": "growth", "uk_business_investment": "growth", "us_real_gdp": "growth",
+    "uk_unemployment_rate": "jobs", "uk_vacancies": "jobs", "uk_average_weekly_earnings": "jobs",
+    "us_unemployment_rate": "jobs", "us_payroll_employment": "jobs",
+    "uk_bank_rate": "rates", "uk_gilt_5y": "rates", "uk_gilt_10y": "rates", "uk_gilt_20y": "rates",
+    "us_federal_funds_rate": "rates", "us_treasury_10y": "rates",
+    "uk_public_sector_net_borrowing": "public-finances", "uk_public_sector_net_debt_gdp": "public-finances",
+}
+PUBLISHER_ICON = {"ONS": "chart", "Bank of England": "landmark", "FRED": "database"}
+
+
+def group_of(name: str) -> str:
+    """The catalogue group a series sits in; a new series must be placed."""
+    if name not in GROUP_OF:
+        raise KeyError(f"{name}: add it to data/build_page.py GROUP_OF")
+    return GROUP_OF[name]
+
+
+def period_label(period: str) -> str:
+    """One date format: 'Aug 2026', '13 Nov 2026', '2026Q3'."""
+    months = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
+    parts = period.split("-")
+    if len(parts) == 3:
+        return f"{int(parts[2])} {months[int(parts[1]) - 1]} {parts[0]}"
+    if len(parts) == 2:
+        return f"{months[int(parts[1]) - 1]} {parts[0]}"
+    return period
+
+
 def catalogue_rows() -> str:
     """One <tbody> per series: a scannable row plus an expandable detail row.
 
@@ -165,8 +286,21 @@ def catalogue_rows() -> str:
     index = manifest()["series"]
     dirs = source_dirs()
     groups = []
-    for position, name in enumerate(sorted(index)):
+    order = [n for slug, _ in GROUPS for n in sorted(index) if group_of(n) == slug]
+    last_group = None
+    for position, name in enumerate(order):
         entry = index[name]
+        slug = group_of(name)
+        if slug != last_group:
+            heading = dict(GROUPS)[slug]
+            count = sum(1 for n in order if group_of(n) == slug)
+            groups.append(
+                f'            <tbody class="series-cat" data-cat="{slug}">\n'
+                f'              <tr><th scope="rowgroup" colspan="5">{_topics().topic_icon(slug, 16)}'
+                f'<span>{heading}</span><span class="series-cat-n">{count}</span></th></tr>\n'
+                f"            </tbody>"
+            )
+            last_group = slug
         series = load(name)
         now = series["observations"][-1]
         first, last = entry["coverage"]
@@ -189,7 +323,8 @@ def catalogue_rows() -> str:
             ("Observations", f"{len(series['observations']):,}"),
             ("Store path", f'<span class="mono">{esc(source_dir)}/{esc(name)}</span>'),
             ("Released", esc(released[:10]) if released else "not supplied by the source"),
-            ("Next release", esc(next_release) if next_release else "not announced"),
+            ("Next release", esc(_short(next_release)) if next_release else "not announced"),
+            *([("Note", esc(stale_note(name, now["period"])))] if stale_note(name, now["period"]) else []),
             ("Official source",
              f'<a href="{esc(display_url(series["url"]))}">'
              f'{esc(series["source"])} · {esc(series["cdid"])}</a>'),
@@ -198,8 +333,11 @@ def catalogue_rows() -> str:
             f"                  <div><dt>{label}</dt><dd>{value}</dd></div>"
             for label, value in facts
         )
+        note = stale_note(name, now["period"])
+        freq = series["frequency"]
+        publisher = series["source"]
         groups.append(
-            f'            <tbody class="series-group" data-index="{position}">\n'
+            f'            <tbody class="series-group" data-index="{position}" data-cat="{slug}">\n'
             f'              <tr class="series-row">\n'
             f'                <th scope="row">\n'
             f'                  <button type="button" class="series-toggle"'
@@ -207,11 +345,13 @@ def catalogue_rows() -> str:
             f'<span class="series-name">{esc(public_label(series))}</span>'
             f'<span class="mono">{esc(name)}</span></button>\n'
             f"                </th>\n"
-            f'                <td>{esc(series["source"])}</td>\n'
-            f'                <td>{esc(series["frequency"])}</td>\n'
-            f'                <td class="num">{fmt_value(now["value"])} '
-            f'<span class="mono">{esc(now["period"])}</span></td>\n'
-            f'                <td class="num">{len(vintages)}</td>\n'
+            f'                <td class="ds-src"><span class="ds-chip ds-pub">{ic(PUBLISHER_ICON.get(publisher, "database"))}{esc(publisher)}</span></td>\n'
+            f'                <td class="ds-freq"><span class="ds-chip">{ic("clock" if freq == "daily" else "calendar")}{esc(freq)}</span></td>\n'
+            f'                <td class="num ds-latest"><strong class="ds-val">{value_with_unit(now["value"], series, name)}</strong>'
+            f'<span class="ds-date">{esc(period_label(now["period"]))}</span>'
+            + (f'<span class="ds-stale" title="{esc(note)}">{ic("alert", 12)}{esc(STALE_NOTES[name][0])} not yet ingested</span>' if note else "")
+            + "</td>\n"
+            f'                <td class="num ds-snaps"><span title="{len(vintages)} snapshots">{ic("layers")}{len(vintages)}</span></td>\n'
             f"              </tr>\n"
             f'              <tr class="series-detail-row" id="{esc(detail_id)}">\n'
             f'                <td colspan="5">\n'
@@ -262,7 +402,7 @@ def calendar_rows() -> str:
     for when, name, series in upcoming():
         rows.append(
             "          <tr>"
-            f'<th scope="row">{when.strftime("%d %B %Y")}</th>'
+            f'<th scope="row">{when.strftime("%-d %b %Y")}</th>'
             f"<td>{esc(public_label(series))}</td>"
             f'<td><span class="mono">{esc(name)}</span></td>'
             f'<td><a href="{esc(display_url(series["url"]))}">'
@@ -430,8 +570,8 @@ def render_fragment() -> str:
     <div class="prose">
       <p class="store-chips"><span>{series_count} series</span><span>{snapshot_count} snapshots</span><span>since {earliest}</span></p>
       <div class="table-scroll">
-        <table id="series-table" class="series-table">
-          <caption>Expand a row for its snapshot history and store path.</caption>
+        <table id="series-table" class="series-table ds-table">
+          <caption><span class="ds-hint">{ic("chev")}Expand a row for its snapshot history and store path.</span></caption>
           <thead>
             <tr>
               <th scope="col">Series</th>

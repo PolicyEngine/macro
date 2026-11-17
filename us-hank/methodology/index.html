@@ -10,7 +10,7 @@
 <meta property="og:url" content="https://policyengine-macro.vercel.app/us-hank/methodology" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
 <meta property="og:title" content="US HANK methodology — PolicyEngine Macro" />
-<meta property="og:description" content="A replication of the Auclert–Bardóczy–Rognlie–Straub (2021) two-asset HANK, its steady state checked against the paper — stylized US shocks with distributional output. Not a forecaster." />
+<meta property="og:description" content="A replication of the Auclert–Bardóczy–Rognlie–Straub (2021) two-asset HANK, its solved parameters checked against the paper — stylised US shocks with distributional output. Not a forecaster." />
 <meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -20,17 +20,17 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=34" />
+<link rel="stylesheet" href="/style.css?v=48" />
 <link rel="stylesheet" href="/vendor/mathjax/chtml.css?v=4036f841f9" />
-<link rel="stylesheet" href="/models/model-pages.css?v=22" />
+<link rel="stylesheet" href="/models/model-pages.css?v=23" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
 
 <header class="nav">
-  <a class="brand" href="/" aria-label="PolicyEngine Macro home">
-    <img class="brand-logo" src="/assets/policyengine-white.png" alt="" width="115" height="24" /><span class="brand-name">Macro</span>
-  </a>
+  <div class="brand">
+    <a class="brand-home" href="/" aria-label="PolicyEngine Macro home"><img class="brand-logo" src="/assets/policyengine-white.png" alt="PolicyEngine" width="115" height="24" /></a><span class="brand-name">Macro</span>
+  </div>
   <nav class="nav-links" aria-label="Primary">
     <a class="nav-tab" href="/"><svg class="i" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</a>
     <a class="nav-tab" href="/forecasts"><svg class="i" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>Forecasts</a>
@@ -80,7 +80,7 @@
         <li><a href="#meth-1"><span class="meth-map-num mono">1</span><span class="meth-map-t">Heterogeneous agents, two assets</span></a></li>
         <li><a href="#meth-2"><span class="meth-map-num mono">2</span><span class="meth-map-t">Calibrate and solve the steady state</span></a></li>
         <li><a href="#meth-3"><span class="meth-map-num mono">3</span><span class="meth-map-t">Differentiate: the sequence-space Jacobian</span></a></li>
-        <li><a href="#meth-4"><span class="meth-map-num mono">4</span><span class="meth-map-t">Shock: three instruments, endogenous labor tax</span></a></li>
+        <li><a href="#meth-4"><span class="meth-map-num mono">4</span><span class="meth-map-t">Shock: three instruments, endogenous labour tax</span></a></li>
         <li><a href="#meth-5"><span class="meth-map-num mono">5</span><span class="meth-map-t">Distribute — within first-order limits</span></a></li>
       </ol>
     </figure>
@@ -118,14 +118,14 @@
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>Households differ</strong><small>Production grids, not demo grids</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
         <p class="kv-title">Household structure</p>
-        <dl class="kv kv-text"><div><dt>Assets</dt><dd>liquid + illiquid, per household</dd></div><div><dt>Grids</dt><dd>50 liquid × 70 illiquid × 50 capital points</dd></div><div><dt>Variants</dt><dd><code>two_asset</code> (default) · <code>one_asset</code> (no capital)</dd></div></dl>
+        <dl class="kv kv-text"><div><dt>Assets</dt><dd>liquid + illiquid, per household</dd></div><div><dt>Grids</dt><dd>50 liquid × 70 illiquid points, 3 income states (plus a 50-point auxiliary solver grid)</dd></div><div><dt>Variants</dt><dd><code>two_asset</code> (default) · <code>one_asset</code> (no capital)</dd></div></dl>
           <h4>Households differ</h4>
           <p>Households differ in <strong>liquid and illiquid wealth</strong>, so their marginal propensities to consume differ, and the model carries that whole distribution through the general-equilibrium response — the thing a representative-agent model cannot say.</p>
           <h4>Production grids, not demo grids</h4>
           <p>The model runs at the paper's <strong>production grid sizes</strong> (above), not the packaged demo grids.</p>
           <ul>
             <li>It is a <strong>VAR-free, sequence-space HANK</strong> model throughout, with no estimated reduced form and no expectations shortcut.</li>
-            <li>A fast one-asset textbook variant is solved on the toolkit notebook&rsquo;s grid, as in the paper&rsquo;s Table&nbsp;B.II: 7 income states × 500 asset points. Before us-hank-model #13 it used the 2 × 10 demo grid.</li>
+            <li>A fast one-asset textbook variant is solved on the toolkit notebook&rsquo;s grid: 7 income states × 500 asset points. Before us-hank-model #13 it used the 2 × 10 demo grid.</li>
             <li>The <a href="/us-hank/code#code-3">Use it tab</a> says what it drops.</li>
           </ul>
         
@@ -150,23 +150,23 @@
                 <text x="323" y="70" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--primary)" font-weight="700">match targets</text>
                 <text x="323" y="90" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-muted)">the paper's</text>
                 <text x="323" y="106" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-muted)">asset-market targets,</text>
-                <text x="323" y="122" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-muted)">checked value by value</text>
+                <text x="323" y="122" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-muted)">parameters checked</text>
                 <line x1="415" y1="90" x2="446" y2="90" stroke="var(--primary)" stroke-width="2" marker-end="url(#arr-s2)"/>
                 <rect x="451" y="45" width="115" height="90" rx="10" fill="var(--primary)"/>
                 <text x="508" y="76" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="#fff" font-weight="700">steady state</text>
-                <text x="508" y="96" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">~13 s, once,</text>
+                <text x="508" y="96" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">~10 s, once,</text>
                 <text x="508" y="112" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="rgba(255,255,255,0.85)">cached</text>
                 <text x="290" y="165" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-faint)">at the paper's production grids — no data vintage to refresh</text>
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
         <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>Checked value by value</strong><small>Steady-state solve</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>Solved parameters checked against the paper</strong><small>Steady-state solve</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
         <p class="kv-title">Steady-state solve</p>
-        <dl class="kv"><div><dt>Calibrated</dt><dd>discounting + portfolio-adjustment costs</dd></div><div><dt>Targets</dt><dd>the paper's asset-market targets</dd></div><div><dt>Cost</dt><dd>~13 s, computed once, cached</dd></div></dl>
-          <h4>Checked value by value</h4>
-          <p>The hosted steady state is set against the paper's published calibration targets, value by value, on the <a href="/us-hank/validation#targets">validation page</a>. The parameterisation is the published paper's throughout — there is no data vintage to refresh.</p>
+        <dl class="kv"><div><dt>Calibrated</dt><dd>discounting + portfolio-adjustment costs</dd></div><div><dt>Targets</dt><dd>the paper's asset-market targets</dd></div><div><dt>Cost</dt><dd>~10 s, computed once, cached</dd></div></dl>
+          <h4>Solved parameters checked against the paper</h4>
+          <p>The seven parameters the model solves for are compared with the paper's Table B.III on the <a href="/us-hank/validation#targets">validation page</a>; the calibration targets themselves are inputs. The parameterisation is the published paper's throughout — there is no data vintage to refresh.</p>
         
   </div>
 </details>
@@ -199,7 +199,7 @@
                   <rect x="255" y="150" width="35" height="35" fill="var(--primary)" opacity="0.25"/>
                 </g>
                 <text x="220" y="205" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-muted)">GE Jacobian</text>
-                <text x="220" y="220" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-faint)">T &#215; T &#183; ~5 s, cached</text>
+                <text x="220" y="220" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-faint)">T &#215; T &#183; ~3 s, cached</text>
                 <text x="318" y="120" text-anchor="middle" font-family="Roboto, sans-serif" font-size="18" fill="var(--text-faint)">&#215;</text>
                 <rect x="345" y="45" width="34" height="140" rx="4" fill="#fff" stroke="var(--primary)" stroke-width="2"/>
                 <line x1="345" y1="80" x2="379" y2="80" stroke="var(--primary)" stroke-width="1" opacity="0.4"/>
@@ -240,7 +240,7 @@
             <text x="40" y="192" text-anchor="middle" font-family="var(--body)" font-size="12" fill="var(--text-muted)">path</text>
             <text x="40" y="207" text-anchor="middle" font-family="var(--body)" font-size="11" fill="var(--text-faint)">T &#215; 1</text>
             <text x="155" y="178" text-anchor="middle" font-family="var(--body)" font-size="12" fill="var(--text-muted)">GE Jacobian</text>
-            <text x="155" y="192" text-anchor="middle" font-family="var(--body)" font-size="11" fill="var(--text-faint)">T &#215; T &#183; ~5 s, cached</text>
+            <text x="155" y="192" text-anchor="middle" font-family="var(--body)" font-size="11" fill="var(--text-faint)">T &#215; T &#183; ~3 s, cached</text>
             <text x="270" y="178" text-anchor="middle" font-family="var(--body)" font-size="12" fill="var(--text-muted)">shock</text>
             <text x="270" y="192" text-anchor="middle" font-family="var(--body)" font-size="12" fill="var(--text-muted)">path</text>
             <text x="270" y="207" text-anchor="middle" font-family="var(--body)" font-size="11" fill="var(--text-faint)">T &#215; 1</text>
@@ -255,7 +255,7 @@
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>Instant IRFs</strong><small>Jacobian</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
         <p class="kv-title">Jacobian</p>
-        <dl class="kv kv-text"><div><dt>Object</dt><dd><mjx-container data-tex="T \times T" data-mjx="d669dbf98a20e550" class="MathJax" jax="CHTML" style="font-size: 123.6%; position: relative;"><mjx-math class=" MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-cD7"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>T</mi><mo>×</mo><mi>T</mi></math></mjx-assistive-mml></mjx-container> map: exogenous path &rarr; outcome path</dd></div><div><dt>Horizon</dt><dd><mjx-container data-tex="T = 300" data-mjx="ea9afd8145b40996" class="MathJax" jax="CHTML" style="font-size: 123.6%; position: relative;"><mjx-math class=" MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c33"></mjx-c><mjx-c class="mjx-c30"></mjx-c><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>T</mi><mo>=</mo><mn>300</mn></math></mjx-assistive-mml></mjx-container> quarters</dd></div><div><dt>Cost</dt><dd>~5 s, cached alongside the steady state</dd></div></dl>
+        <dl class="kv kv-text"><div><dt>Object</dt><dd><mjx-container data-tex="T \times T" data-mjx="d669dbf98a20e550" class="MathJax" jax="CHTML" style="font-size: 123.6%; position: relative;"><mjx-math class=" MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-cD7"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>T</mi><mo>×</mo><mi>T</mi></math></mjx-assistive-mml></mjx-container> map: exogenous path &rarr; outcome path</dd></div><div><dt>Horizon</dt><dd><mjx-container data-tex="T = 300" data-mjx="ea9afd8145b40996" class="MathJax" jax="CHTML" style="font-size: 123.6%; position: relative;"><mjx-math class=" MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c33"></mjx-c><mjx-c class="mjx-c30"></mjx-c><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>T</mi><mo>=</mo><mn>300</mn></math></mjx-assistive-mml></mjx-container> quarters</dd></div><div><dt>Cost</dt><dd>~3 s, cached alongside the steady state</dd></div></dl>
           <h4>Instant IRFs</h4>
           <p>With both caches warm, an impulse response is a <strong>matrix–vector product</strong>, effectively instant. The first call per variant pays the steady-state and Jacobian solves; every later call reuses them.</p>
         
@@ -264,7 +264,7 @@
       </div>
 
       <div class="meth-step" id="meth-4" data-step="3">
-        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Shock: three instruments, endogenous labor tax</h3></div>
+        <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Shock: three instruments, endogenous labour tax</h3></div>
         <p>A shock is an AR(1) path, <mjx-container data-tex="\varepsilon_t = \text{size} \times \rho^t" data-mjx="df299e975486dfec" class="MathJax" jax="CHTML" style="font-size: 123.6%; position: relative;"><mjx-math class=" MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D700 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mtext class="mjx-n" space="4"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c7A"></mjx-c><mjx-c class="mjx-c65"></mjx-c></mjx-mtext><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-cD7"></mjx-c></mjx-mo><mjx-msup space="3"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70C TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.363em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>ε</mi><mi>t</mi></msub><mo>=</mo><mtext>size</mtext><mo>×</mo><msup><mi>ρ</mi><mi>t</mi></msup></math></mjx-assistive-mml></mjx-container>, on one of three instruments: the Taylor-rule intercept (<code>monetary</code>), real government spending (<code>fiscal_spending</code>), or TFP (<code>productivity</code>).</p>
         <figure class="step-diagram" data-title="AR(1) shock path" tabindex="0" role="button" aria-label="Expand diagram: AR(1) shock path">
           <svg viewBox="0 0 580 220" width="580" style="max-width:100%;height:auto;">
@@ -289,18 +289,18 @@
                 <text x="470" y="98" text-anchor="middle" font-family="Roboto Mono, monospace" font-size="11" fill="var(--text-muted)">&#183; productivity</text>
                 <line x1="470" y1="122" x2="470" y2="145" stroke="var(--primary)" stroke-width="1.5" marker-end="url(#arr-s4)"/>
                 <rect x="360" y="150" width="220" height="55" rx="10" fill="var(--surface-tint)" stroke="var(--primary)" stroke-width="1.5" stroke-dasharray="5 3"/>
-                <text x="470" y="172" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--primary)" font-weight="700">endogenous labor tax</text>
+                <text x="470" y="172" text-anchor="middle" font-family="Roboto, sans-serif" font-size="12" fill="var(--primary)" font-weight="700">endogenous labour tax</text>
                 <text x="470" y="190" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="var(--text-muted)">balances the budget each period</text>
               </svg>
           <figcaption class="expand-hint mono">click to expand</figcaption>
         </figure>
         <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>The design point that matters</strong><small>The labor tax is endogenous</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>The design point that matters</strong><small>The labour tax is endogenous</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
         <p class="kv-title">Shocks</p>
-        <dl class="kv kv-text"><div><dt>Path</dt><dd><mjx-container data-tex="\varepsilon_t = \text{size} \times \rho^t" data-mjx="df299e975486dfec" class="MathJax" jax="CHTML" style="font-size: 123.6%; position: relative;"><mjx-math class=" MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D700 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mtext class="mjx-n" space="4"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c7A"></mjx-c><mjx-c class="mjx-c65"></mjx-c></mjx-mtext><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-cD7"></mjx-c></mjx-mo><mjx-msup space="3"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70C TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.363em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>ε</mi><mi>t</mi></msub><mo>=</mo><mtext>size</mtext><mo>×</mo><msup><mi>ρ</mi><mi>t</mi></msup></math></mjx-assistive-mml></mjx-container> (AR(1))</dd></div><div><dt>Instruments</dt><dd><code>monetary</code> · <code>fiscal_spending</code> · <code>productivity</code></dd></div><div><dt>Fiscal <a class="gloss-link" href="/glossary#closure">closure</a></dt><dd>labor tax balances the budget each period</dd></div></dl>
+        <dl class="kv kv-text"><div><dt>Path</dt><dd><mjx-container data-tex="\varepsilon_t = \text{size} \times \rho^t" data-mjx="df299e975486dfec" class="MathJax" jax="CHTML" style="font-size: 123.6%; position: relative;"><mjx-math class=" MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D700 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mtext class="mjx-n" space="4"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c7A"></mjx-c><mjx-c class="mjx-c65"></mjx-c></mjx-mtext><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-cD7"></mjx-c></mjx-mo><mjx-msup space="3"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70C TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.363em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>ε</mi><mi>t</mi></msub><mo>=</mo><mtext>size</mtext><mo>×</mo><msup><mi>ρ</mi><mi>t</mi></msup></math></mjx-assistive-mml></mjx-container> (AR(1))</dd></div><div><dt>Instruments</dt><dd><code>monetary</code> · <code>fiscal_spending</code> · <code>productivity</code></dd></div><div><dt>Fiscal <a class="gloss-link" href="/glossary#closure">closure</a></dt><dd>labour tax balances the budget each period</dd></div></dl>
           <h4>The design point that matters</h4>
-          <p><strong>The labor tax is endogenous.</strong> The fiscal block balances the government budget each period.</p>
+          <p><strong>The labour tax is endogenous.</strong> The fiscal block balances the government budget each period.</p>
           <ul>
             <li>So a spending shock is implicitly tax-financed, and there is <em>no</em> exogenous transfer or tax-rate instrument to shock.</li>
             <li>Requests for one are refused with that explanation, not answered with an invented mapping.</li>
@@ -375,19 +375,12 @@
     </div>
   </div>
 
-  <nav class="band where-next ov-next" id="where-next" aria-label="Where next">
-    <div class="chip-row">
-      <a class="chip chip-brand" href="/us-hank/validation">Validation</a>
-      <a class="chip" href="/models#compare">Compare the models</a>
-      <a class="chip chip-brand" href="/reports/us-hank-open-source">The landscape report</a>
-    </div>
-  </nav>
 </main>
 
 <footer class="foot foot-bar">
   <p class="footer-legal">© 2026 PolicyEngine</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
-    <a class="footer-policyengine" href="/" aria-label="PolicyEngine Macro home"><img src="/assets/policyengine-white.png" alt="" width="96" height="20" /><span>Macro</span></a>
+    <div class="footer-policyengine"><a class="brand-home" href="/" aria-label="PolicyEngine Macro home"><img src="/assets/policyengine-white.png" alt="PolicyEngine" width="96" height="20" /></a><span>Macro</span></div>
     <div class="foot-main">
       <a class="footer-text" href="/forecasts"><svg class="i" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>Forecasts</a>
       <a class="footer-text" href="/models"><svg class="i" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>Models</a>
@@ -399,7 +392,7 @@
   </nav>
 </footer>
 
-<script src="/reveal.js?v=4" defer></script>
+<script src="/reveal.js?v=9" defer></script>
 <script>
 // Diagram zoom: clicking a step diagram opens it enlarged in a modal.
 (function () {

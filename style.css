@@ -8225,3 +8225,797 @@ main :is(.where-next .chip-row > a, .tp-next .tp-chips > a, .where-next .entry-g
 .lp-recstats dt { font-size: var(--fs-ab-cap); color: var(--text-muted); }
 .lp-score-foot { flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3); }
 .lp-score-foot a { margin-left: 0; }
+
+/* =====================================================================
+   29. Bare icons (Vahid: "icons shouldn't have box color background").
+   Every icon container sitewide drops its tinted tile, circle or box; the
+   icon shows bare in the accent (or muted) colour at one of three sizes:
+   16px inline/list, 18px section heading, 22px card. Containers keep a
+   fixed width so text alignment does not move.
+   ===================================================================== */
+:is(.icon-tile, .icon-badge, .sh-icon, .xp-ic, .qc-ic, .uc-ic, .mx-ic, .use-ic, .hub-ic, .hub2-micro-ic,
+    #compare .row-ico, .row-ico, .h-ic, .step-ic, .prompt-ic, .cap-mic, .fc-h-ic, .fc-li-ic, .fc-badge, .fc-th-ic,
+    .tp-h-ic, .ii-ic, .stat-ic, .limits-ic, .mh-icon, .use-page .h-ic, .lp-score-head .icon-tile,
+    .lp-model .icon-tile, .mc-card .icon-tile, .ct-card .icon-tile, .pp-ic) {
+  background: none !important; box-shadow: none !important; border: 0 !important; border-radius: 0 !important;
+  padding: 0 !important; color: var(--ab-teal-700);
+}
+/* sizes */
+.sh-icon { width: 20px !important; height: 28px !important; place-items: center start; }
+.sh-icon svg { width: 18px !important; height: 18px !important; }
+:is(.icon-tile, .qc-ic, .uc-ic, .mx-ic, .use-ic, .hub2-micro-ic, .mh-icon, .lp-model .icon-tile, .mc-card .icon-tile, .ct-card .icon-tile) { width: 24px !important; height: 24px !important; }
+:is(.icon-tile, .qc-ic, .uc-ic, .mx-ic, .use-ic, .hub2-micro-ic, .mh-icon) svg { width: 22px !important; height: 22px !important; }
+:is(.xp-ic, .h-ic, .step-ic, .prompt-ic, .fc-h-ic, .fc-li-ic, .tp-h-ic, .ii-ic, .limits-ic, .hub-ic, .row-ico, #compare .row-ico) { width: 18px !important; height: 18px !important; }
+:is(.xp-ic, .h-ic, .step-ic, .prompt-ic, .fc-h-ic, .fc-li-ic, .tp-h-ic, .ii-ic, .limits-ic, .hub-ic, .row-ico, #compare .row-ico) svg { width: 16px !important; height: 16px !important; }
+/* tone: status-coloured containers keep their hue on the glyph */
+.uc-ic { color: var(--u) !important; }
+.use-ic { color: var(--u) !important; }
+.qc[aria-pressed="true"] .qc-ic { background: none !important; color: var(--ab-teal-700) !important; }
+.hub2-micro-ic { color: #FFFFFF !important; }
+.lp-points svg { padding: 0 !important; background: none !important; width: 18px !important; height: 18px !important; box-sizing: border-box; }
+/* disclosures: drop the circle behind the list glyph; keep the glyph */
+main details:is(.about, .expander, .more):not(.xp) > summary::before { width: 18px; height: 18px; border-radius: 0; background-color: transparent; box-shadow: none; background-size: 16px; }
+/* alignment that assumed a 32px circle */
+.xp-body { padding-left: 50px; }
+@media (max-width: 640px) { .xp-body { padding-left: 14px; } }
+.sh { column-gap: 10px; }
+.vf-dot { background: var(--card); }
+
+/* =====================================================================
+   30. Tables, second pass (Vahid: "nicer tables"): quieter frame, muted
+   12px header, steadier row rhythm, zebra + hover, status chips with
+   icons, sticky header on long tables, cards at 375.
+   ===================================================================== */
+main .table-scroll.tbl, main .table-scroll:has(> table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table)) {
+  border-color: #EEF0F3; border-radius: 12px;
+}
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) { font-size: 13.5px; line-height: 1.5; font-variant-numeric: tabular-nums lining-nums; }
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) :is(th, td) { padding: 13px 16px; border-bottom-color: #F1F3F5; }
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) thead th {
+  padding-block: 10px; background: #FAFBFC; border-bottom: 1px solid #EEF0F3;
+  color: #6B7280; font-size: 12px; font-weight: 600; text-transform: none; letter-spacing: 0;
+}
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) tbody tr:nth-child(even) > * { background: #FCFCFD; }
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) tbody tr:hover > * { background: color-mix(in srgb, var(--primary) 5%, var(--card)); }
+main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) tbody th { font-weight: 600; color: var(--text-strong); }
+main .table-scroll > table :is(th, td).num { text-align: right; font-feature-settings: "tnum" 1, "lnum" 1; }
+@media (prefers-color-scheme: dark) {
+  main .table-scroll.tbl, main .table-scroll:has(> table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table)) { border-color: var(--border); }
+  main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) thead th { background: color-mix(in srgb, var(--card) 80%, var(--background)); color: var(--text-muted); border-bottom-color: var(--border); }
+  main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) tbody tr:nth-child(even) > * { background: color-mix(in srgb, var(--card) 92%, var(--background)); }
+  main .table-scroll > table:not(.sb-grid, .cap-grid, .vc-table, .vc-narrow-table) :is(th, td) { border-bottom-color: var(--border); }
+}
+/* status chips */
+.st { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 9px 0 7px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; width: 12px; height: 12px; background: currentColor;
+  -webkit-mask: var(--st-ic) center / contain no-repeat; mask: var(--st-ic) center / contain no-repeat; }
+.st-ok { color: var(--ab-teal-700); background: color-mix(in srgb, var(--ab-gain) 12%, transparent);
+  --st-ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E"); }
+.st-no { color: #6B7280; background: #F3F4F6;
+  --st-ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18'/%3E%3Cpath d='m6 6 12 12'/%3E%3C/svg%3E"); }
+.st-warn { color: #92400E; background: color-mix(in srgb, var(--ab-loss) 12%, transparent);
+  --st-ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 8v4'/%3E%3Cpath d='M12 16h.01'/%3E%3C/svg%3E"); }
+@media (prefers-color-scheme: dark) { .st-warn { color: #FCD34D; } .st-no { background: color-mix(in srgb, var(--card) 70%, var(--background)); color: var(--text-muted); } }
+/* long tables: header sticks inside a capped scroller */
+@media (min-width: 561px) {
+  main .table-scroll.tbl-long { max-height: min(75vh, 720px); overflow: auto; }
+  main .table-scroll.tbl-long > table thead th { position: sticky; top: 0; z-index: 2; }
+  main .table-scroll.tbl-long.is-scroll > table thead th:first-child { z-index: 3; }
+}
+/* phones: stacked cards keep the quieter frame */
+@media (max-width: 560px) {
+  main .table-scroll > table.tbl-stack tbody tr { border-color: #EEF0F3; padding: 12px 14px; }
+  main .table-scroll > table.tbl-stack tbody tr:nth-child(even) > * { background: none; }
+  main .table-scroll > table.tbl-stack tbody tr > [data-label]:not(:first-child) { border-top-color: #F1F3F5; }
+}
+
+/* =====================================================================
+   31. Disclosure icons, grouped accordions, compact "Read next" (r15)
+   ===================================================================== */
+/* no generic fallback glyph: the summary carries a real icon (reveal.js) */
+main details:is(.about, .expander, .more):not(.xp) > summary::before { content: none !important; display: none !important; }
+.sum-ic { display: inline-grid; place-items: center; flex: 0 0 auto; width: 18px; height: 18px; color: var(--ab-teal-700); }
+.sum-ic svg { width: 16px; height: 16px; }
+/* adjacent expanders render as one accordion card with hairline rows */
+main :is(details.xp, details.about, details.expander, details.more):has(+ :is(details.xp, details.about, details.expander, details.more)) {
+  margin-bottom: 0 !important; border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;
+}
+main :is(details.xp, details.about, details.expander, details.more) + :is(details.xp, details.about, details.expander, details.more) {
+  margin-top: 0 !important; border-top: 1px solid #F1F3F5 !important; border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;
+}
+main :is(details.xp, details.about, details.expander, details.more) + :is(details.xp, details.about, details.expander, details.more):not(:has(+ :is(details.xp, details.about, details.expander, details.more))) {
+  border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  main :is(details.xp, details.about, details.expander, details.more) + :is(details.xp, details.about, details.expander, details.more) { border-top-color: var(--border) !important; }
+}
+/* "Read next": one compact row of link chips everywhere */
+main :is(.where-next .chip-row, .tp-next .tp-chips, .where-next .entry-grid, #where-next .fc-notes) {
+  display: flex !important; flex-wrap: wrap; gap: 8px; grid-template-columns: none; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important;
+}
+main :is(.where-next .chip-row > a, .tp-next .tp-chips > a, .where-next .entry-grid > a, .next-row .next-btn, #where-next .fc-notes > a) {
+  display: inline-flex !important; flex: 0 0 auto; align-items: center; gap: 8px; min-height: 0 !important; height: 36px !important;
+  padding: 0 32px 0 12px !important; border: 1px solid var(--ab-border) !important; border-radius: 999px !important;
+  background: var(--card) !important; color: var(--text-strong) !important; font-size: 13px !important; font-weight: 600; text-decoration: none; white-space: nowrap; transform: none !important;
+}
+main :is(.where-next .chip-row > a, .tp-next .tp-chips > a, .where-next .entry-grid > a, .next-row .next-btn, #where-next .fc-notes > a)::after {
+  content: "" !important; position: absolute; right: 12px; top: 50%; width: 13px; height: 13px; transform: translateY(-50%); background: var(--ab-teal-700);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+#where-next .fc-notes > a { position: relative; }
+#where-next .fc-notes > a > span:not(.fc-li-ic) { display: none; }
+#where-next .fc-notes > a > strong { font-weight: 600; }
+main .where-next .entry-grid > a p { display: none; }
+main .where-next .entry-grid > a h3 { font-size: 13px; }
+main :is(.where-next, .tp-next, #where-next) .sh > p { display: none; }
+
+/* =====================================================================
+   32. Scroll reveal (r15 polish). Hidden only when reveal.js opts in
+   (html.rv-on); 200ms fade + 8px rise; grid children stagger via --rv-d.
+   Without JS, with reduced motion, and in print, everything is at rest.
+   ===================================================================== */
+.scroll-reveal { opacity: 1; transform: none; transition: none; }
+.rv-on .scroll-reveal { opacity: 0; transform: translateY(8px); transition: opacity 220ms ease-out, transform 220ms ease-out; transition-delay: var(--rv-d, 0ms); }
+.rv-on .scroll-reveal.in-view { opacity: 1; transform: none; }
+.rv-on .scroll-reveal.reveal-initial { transition: none; }
+@media (prefers-reduced-motion: reduce) { .rv-on .scroll-reveal { opacity: 1 !important; transform: none !important; } }
+@media print { .scroll-reveal, .rv-on .scroll-reveal { opacity: 1 !important; transform: none !important; } }
+
+/* Home trust ladder: strongest check first, models link to their evidence */
+.tl { margin-top: 20px; padding: 18px 20px; background: var(--card); border: 1px solid var(--ab-border); border-radius: 12px; }
+.tl-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 12px; }
+.tl-head h3 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: var(--fs-ab-h3); color: var(--text-strong); }
+.tl-head h3 svg { color: var(--ab-teal-700); }
+.tl-head span { color: var(--text-faint); font-size: var(--fs-ab-cap); }
+.tl-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.tl-rung { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1.4fr); align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid #F1F3F5; }
+.tl-rung:first-child { border-top: 0; }
+.tl-step { display: grid; place-items: center; color: var(--tl); }
+.tl-gain { --tl: var(--ab-gain); } .tl-mid { --tl: #64748B; } .tl-loss { --tl: var(--ab-loss); }
+.tl-what { display: flex; flex-direction: column; min-width: 0; }
+.tl-what strong { color: var(--text-strong); font-size: var(--fs-ab-small); }
+.tl-what small { color: var(--text-faint); font-size: var(--fs-ab-cap); }
+.tl-models { display: flex; flex-wrap: wrap; gap: 6px; }
+.tl-model { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--ab-border); border-radius: 999px; color: var(--text-body); font-size: var(--fs-ab-cap); font-weight: 600; text-decoration: none; }
+.tl-model svg:first-child { color: var(--ab-teal-700); }
+.tl-model svg:last-child { color: var(--text-faint); }
+.tl-model:hover { border-color: var(--ab-teal-700); color: var(--ab-teal-700); }
+.tl-foot { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid #F1F3F5; color: var(--text-muted); font-size: var(--fs-ab-cap); }
+.tl-foot a { margin-left: 6px; font-weight: 600; }
+@media (max-width: 720px) { .tl-rung { grid-template-columns: 24px minmax(0, 1fr); } .tl-models { grid-column: 2; } }
+@media (prefers-color-scheme: dark) { .tl-rung, .tl-foot { border-color: var(--border); } }
+
+/* =====================================================================
+   33. Fable review of #270: last boxed icons, one table header, zebra
+   that reads as one band, scoreboard and wide tables.
+   ===================================================================== */
+/* 1. bare icons: forecast variable glyph and flow dots */
+.fc-var { background: none !important; border-radius: 0 !important; box-shadow: none !important; }
+.fc-var svg, .fc-var .fc-ic { width: 18px; height: 18px; color: var(--ab-teal-700); }
+.vf-dot, .vf-micro .vf-dot, .vf-out .vf-dot { background: var(--card) !important; box-shadow: none !important; color: var(--ab-teal-700) !important; }
+.vf-micro .vf-dot svg { color: var(--ab-teal-700); }
+.pp-ic, .pp-row .pp-ic, .repo-row .pp-ic { width: 18px !important; height: 18px !important; }
+/* 4. one header and a visible zebra on every shared table */
+main .table-scroll > table:not(.vc-table, .vc-narrow-table) thead th,
+main table.compare-models th, main table.cap-grid thead th, main table.scoreboard thead th {
+  font-size: 12px !important; font-weight: 500 !important; color: #6B7280 !important; letter-spacing: 0 !important; text-transform: none !important;
+}
+main .table-scroll > table:not(.vc-table, .vc-narrow-table) tbody tr > * { background: transparent !important; }
+main .table-scroll > table:not(.vc-table, .vc-narrow-table) tbody tr:nth-child(even) > * { background: #F9FAFB !important; }
+main .table-scroll > table:not(.vc-table, .vc-narrow-table) tbody tr:hover > * { background: color-mix(in srgb, var(--primary) 6%, var(--card)) !important; }
+@media (max-width: 1100px) { main .table-scroll.is-scroll > table tbody tr > :first-child { background: var(--card) !important; } main .table-scroll.is-scroll > table tbody tr:nth-child(even) > :first-child { background: #F9FAFB !important; } }
+@media (prefers-color-scheme: dark) {
+  main .table-scroll > table:not(.vc-table, .vc-narrow-table) thead th { color: var(--text-muted) !important; }
+  main .table-scroll > table:not(.vc-table, .vc-narrow-table) tbody tr:nth-child(even) > * { background: color-mix(in srgb, var(--card) 90%, var(--background)) !important; }
+}
+@media (max-width: 560px) { main .table-scroll > table.tbl-stack tbody tr > *, main .table-scroll > table.tbl-stack tbody tr:nth-child(even) > * { background: none !important; } }
+/* 3. scoreboard: wrap headers, dividers, left target column, scroll cue */
+main table.scoreboard thead th { white-space: normal !important; min-width: 92px; vertical-align: bottom; line-height: 1.3; }
+main table.scoreboard :is(th, td) { border-bottom: 1px solid #F1F3F5; }
+main table.scoreboard :is(th, td):first-child { text-align: left !important; }
+main :has(> table.scoreboard) { overflow-x: auto; }
+main table.scoreboard td small, main table.scoreboard td .fc-note, main table.scoreboard td .sb-note { display: block; margin-top: 2px; }
+/* 5. wide tables: first column stays one line and sticks while scrolling */
+main .table-scroll.is-scroll > table tbody tr > :first-child { white-space: nowrap; min-width: 140px; }
+main .table-scroll > table thead th[colspan] { text-align: center; }
+/* 6. yes/no in the compare table as chips, like Hosted / Local */
+#compare .yn { height: 24px; padding: 0 9px 0 7px; border-radius: 999px; font-size: 12px; }
+#compare .yn-yes { background: color-mix(in srgb, var(--ab-gain) 12%, transparent); }
+#compare .yn-no { background: #F3F4F6; }
+@media (prefers-color-scheme: dark) { #compare .yn-no { background: color-mix(in srgb, var(--card) 70%, var(--background)); } }
+
+/* =====================================================================
+   34. First-impression pass (Fable, Home + Models)
+   ===================================================================== */
+.lp-sub { margin: 12px 0 0; max-width: 52ch; color: var(--text-muted); font-size: var(--fs-ab-lead); line-height: 1.55; }
+.hq-label { margin: 20px 0 8px; color: var(--text-faint); font-size: var(--fs-ab-micro); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.hq-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; max-width: 480px; }
+.hq { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border: 1px solid var(--ab-border); border-radius: 10px; background: var(--card); color: var(--text-strong); font-size: var(--fs-ab-small); font-weight: 600; text-decoration: none; transition: border-color 150ms, box-shadow 150ms; }
+.hq svg { color: var(--ab-teal-700); flex: 0 0 auto; }
+.hq:hover { border-color: var(--ab-teal-700); box-shadow: var(--shadow-raised); }
+.lp-fan-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; margin: 0 0 10px; }
+.lp-ex { color: var(--text-muted); font-size: var(--fs-ab-cap); font-weight: 600; }
+@media (max-width: 960px) { .lp-hero-grid { display: flex; flex-direction: column; } .hq-grid { max-width: none; } }
+/* home cards carry the job; trust lives in the ladder below */
+.home-models[data-no-trust] .mc-verdict { display: none; }
+/* chooser result: the failure line, right under the chip */
+.mc-fail { display: flex; align-items: flex-start; gap: 6px; color: #92400E; font-size: var(--fs-ab-cap); line-height: 1.4; }
+.mc-fail svg { flex: 0 0 auto; margin-top: 2px; color: var(--ab-loss); }
+@media (prefers-color-scheme: dark) { .mc-fail { color: #FCD34D; } }
+.home-models .mc-fail { display: none; }
+/* /models joins: the three cards are the tabs */
+.mp .jn-tabs { display: none !important; }
+.mp .jn { grid-template-columns: 1fr !important; }
+.mc-empty [data-empty-alt] a { font-weight: 600; }
+/* mobile targets */
+@media (max-width: 720px) { .tl-model { min-height: 44px; } .hq { min-height: 44px; } }
+.tn-inline { display: block; margin-top: 3px; color: var(--text-faint); font-size: 11.5px; font-weight: 500; white-space: nowrap; }
+/* phones: Home model cards as compact rows (icon, name, country) */
+@media (max-width: 600px) {
+  .home-models.mc-grid { gap: 8px; }
+  .home-models .mc-card { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; grid-template-areas: "ic name pill" "ic q q"; column-gap: 12px; row-gap: 2px; align-items: center; padding: 12px 14px; }
+  .home-models .mc-card::before { display: none; }
+  .home-models .mc-card .mc-top { display: contents; }
+  .home-models .mc-card .icon-tile { grid-area: ic; }
+  .home-models .mc-card .lp-pill { grid-area: pill; }
+  .home-models .mc-card .mc-name { grid-area: name; font-size: 14px; }
+  .home-models .mc-card .mc-q { grid-area: q; font-size: 12.5px; -webkit-line-clamp: 1; }
+  .home-models .mc-card .mc-go, .home-models .mc-card .mc-verdict { display: none; }
+}
+@media (max-width: 600px) { .home-models .mc-card .mc-q { -webkit-line-clamp: 2; } }
+
+/* =====================================================================
+   35. Fable shell / glossary / contact fixes (r15)
+   ===================================================================== */
+@media (max-width: 720px) { .nav { --nav-h: 82px; height: 82px; row-gap: 0; } }
+@media (max-width: 400px) { .nav-links { gap: 2px; } .nav-links a { padding: 0 8px !important; } }
+.brand { width: fit-content; display: inline-flex; }
+@media (max-width: 480px) {
+  .sn3 .economy-subnav-row { flex-wrap: wrap; row-gap: 0; }
+  .sn3 .sn-country { order: -1; width: 100%; justify-content: flex-start; margin: 6px 0 2px; background: none; border: 0; padding: 0; }
+  .sn3 .sn-tabs { width: 100%; }
+}
+.gl-more { margin-right: 12px; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
+.gl-page dl.glossary dd > a { display: block; margin-top: 4px; }
+.gl-end[hidden] { display: none; }
+.gl-count { width: 100%; max-width: var(--shell-max); box-sizing: border-box; margin: 8px auto 0; padding-inline: var(--page-pad); color: var(--text-faint); font-size: var(--fs-ab-cap); }
+.gl-count:empty { display: none; }
+@media (max-width: 640px) { .gl-page .glossary-index { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; -webkit-mask-image: linear-gradient(to right, #000 85%, transparent); mask-image: linear-gradient(to right, #000 85%, transparent); } }
+.ct .contact-socials a { min-width: 44px; min-height: 44px; display: inline-flex !important; align-items: center; }
+.ct-card::before, .ct-card.ct-primary::before { background: var(--ab-border) !important; height: 1px !important; }
+
+/* ---------- 14. Chart sources: one short line, full provenance on demand ----------
+   chartkit.source_block() writes .vc-src-line (publishers and dates) and a
+   compact .vc-src disclosure holding the full .vc-source line unchanged. */
+.vc-src-line { display: flex; align-items: center; gap: 6px; margin: 8px 0 0; font-size: var(--fs-ab-cap, 13px); line-height: 1.4; color: var(--text-faint); }
+.vc-src-ic { width: 14px; height: 14px; flex: none; color: var(--text-faint); }
+details.vc-src { margin: 2px 0 0 20px; font-size: var(--fs-ab-cap, 13px); }
+details.vc-src > summary { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; list-style: none; color: var(--link); font-weight: 500; }
+details.vc-src > summary::-webkit-details-marker { display: none; }
+details.vc-src > summary::after { content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .15s; }
+details.vc-src[open] > summary::after { transform: rotate(-135deg) translateY(-1px); }
+details.vc-src > .vc-source { margin: 6px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--surface-sunken); color: var(--text-muted); font-size: var(--fs-ab-cap, 13px); line-height: 1.5; overflow-wrap: anywhere; }
+figcaption .vc-src-line, caption .vc-src-line { font-weight: 400; }
+caption details.vc-src { text-align: left; }
+
+/* =====================================================================
+   36. Pre-fold Fable review (shared parts)
+   ===================================================================== */
+/* /models/compare stacked cards: no clipping at 375 */
+@media (max-width: 640px) {
+  main .cmp-scroll.has-t-stack { overflow-x: visible !important; }
+  main .cmp-table tr { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; }
+  main .cmp-table td, main .cmp-table th { min-width: 0 !important; overflow-wrap: anywhere; }
+}
+/* the forecast-record miss is a diamond everywhere (Home legend = /forecasts pips) */
+.fc-pips i.out { border-radius: 1px !important; transform: rotate(45deg) scale(.85); }
+/* Forecasts sub-nav at phone width: one sticky row (tabs + toggle), labels only */
+@media (max-width: 480px) {
+  .sn3 .economy-subnav-row { flex-wrap: nowrap !important; }
+  .sn3 .sn-country { order: 0 !important; width: auto !important; margin: 0 !important; background: var(--ab-inset) !important; border: 1px solid var(--ab-border) !important; padding: 3px !important; }
+  .sn3 .sn-tabs { width: auto !important; min-width: 0; }
+  .sn-tabs .model-tabs-link svg { display: none !important; }
+  .sn-tabs .model-tabs-link { padding: 0 7px !important; font-size: 13px; }
+  .cc-tog { min-width: 38px; padding: 0 8px; height: 30px; }
+}
+/* compare page: lede clears the tab row */
+main .cmp-intro, main .model-tabs + .lede, main .model-tabs + p { margin-top: 16px; }
+
+/* =====================================================================
+   37. Session 2's shared asks: rail under the sticky tabs, bare
+   section-heading icons on model pages, sub-tab scroll fade at 375.
+   ===================================================================== */
+main .page-rail { top: calc(var(--nav-h) + 60px) !important; }
+main .band-head[data-icon]::before, main .band-head::before {
+  background-color: transparent !important; box-shadow: none !important; border-radius: 0 !important;
+  width: 20px !important; height: 20px !important; background-size: 18px !important;
+}
+@media (prefers-color-scheme: dark) { main .band-head[data-icon]::before { filter: brightness(1.8) saturate(.8); } }
+@media (max-width: 720px) {
+  .model-tabs-row { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); padding-right: 28px !important; scroll-padding-right: 28px; }
+}
+
+/* =====================================================================
+   38. Mid-run review (group A)
+   ===================================================================== */
+.cc, .cc-uk, .cc-us { box-shadow: none !important; border: 1px solid var(--ab-border); border-radius: 999px !important; background: var(--card); }
+.mc-grid > .mc-card[href="/pe"] > .mc-fail { grid-column: 1 / -1 !important; grid-area: auto !important; }
+@media (min-width: 1025px) { .mc-grid > .mc-card[href="/pe"] { grid-template-areas: "icon name pill verdict go" "icon q pill verdict go" ". fail fail fail ." !important; } .mc-grid > .mc-card[href="/pe"] > .mc-fail { grid-area: fail !important; } }
+@media (min-width: 768px) and (max-width: 1100px) { .mc-grid > .mc-card[href="/pe"] { grid-template-areas: "icon name pill" "icon q pill" "verdict verdict verdict" "fail fail fail" !important; } .mc-grid > .mc-card[href="/pe"] > .mc-fail { grid-area: fail !important; } }
+@media (min-width: 641px) { .lp-term pre { white-space: pre-wrap !important; overflow-wrap: anywhere; font-size: 12px; } }
+.lp-capchip svg, .lp-capline svg { margin-right: 6px !important; flex: 0 0 auto; }
+.fv-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.fv-list li { display: grid; gap: 3px; padding-bottom: 12px; border-bottom: 1px solid #F1F3F5; }
+.fv-list li:last-child { border-bottom: 0; padding-bottom: 0; }
+.fv-list strong { color: var(--text-strong); font-size: var(--fs-ab-small); }
+.fv-class { color: var(--ab-teal-700); font-size: var(--fs-ab-cap); font-weight: 600; }
+.fv-line { display: flex; align-items: flex-start; gap: 6px; color: var(--text-muted); font-size: var(--fs-ab-cap); line-height: 1.45; }
+.fv-line svg { flex: 0 0 auto; margin-top: 2px; color: var(--text-faint); }
+.gl-proof { margin-top: 4px; font-size: var(--fs-ab-cap); }
+.gl-clamp { -webkit-line-clamp: 2; line-height: 1.55; max-height: calc(1.55em * 2); }
+@media (max-width: 960px) { .lp-hero-grid { align-items: stretch !important; } }
+
+/* =====================================================================
+   39. Country switch — one segmented control for every UK | US choice
+   (Forecasts/Data sub-nav, Models chooser). Equal segments, a small flag,
+   the active segment filled teal. reveal.js adds a sliding indicator
+   (.seg.has-ind); without JS the active segment carries its own fill.
+   ===================================================================== */
+.seg { position: relative; isolation: isolate; display: inline-grid !important; grid-auto-flow: column; grid-auto-columns: 1fr; align-items: center; align-self: center; height: 34px; padding: 3px !important; border-radius: 999px; background: #F3F4F6 !important; border: 1px solid #E5E7EB !important; flex: 0 0 auto; }
+.seg > .cc-tog, .seg > .mc-seg { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 64px; height: 26px !important; min-height: 0 !important; padding: 0 12px !important; border: 0; border-radius: 999px; background: transparent; box-shadow: none; color: var(--text-muted); font: inherit; font-size: 13px; font-weight: 600; letter-spacing: .02em; line-height: 1; text-decoration: none; white-space: nowrap; cursor: pointer; transition: color .2s ease; }
+.seg > a.cc-tog:hover, .seg > .mc-seg[aria-pressed="false"]:hover { color: var(--text-strong); background: color-mix(in srgb, var(--card) 70%, transparent); }
+.seg > .is-on, .seg > .mc-seg[aria-pressed="true"] { background: var(--ab-teal-700); color: #FFFFFF; box-shadow: none; }
+.seg > .cc-tog:focus-visible, .seg > .mc-seg:focus-visible { outline: 2px solid var(--ab-teal-700); outline-offset: 2px; }
+.seg .flag { flex: none; width: 16px; height: 11px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(17, 24, 39, .14); }
+.seg > .is-on .flag, .seg > [aria-pressed="true"] .flag { box-shadow: 0 0 0 1px rgba(255, 255, 255, .55); }
+.seg .seg-globe { width: 14px; height: 14px; flex: none; }
+/* sliding indicator (JS) */
+.seg-ind { position: absolute; z-index: 0; top: 3px; bottom: 3px; left: 0; width: var(--seg-w, 0); transform: translateX(var(--seg-x, 0)); border-radius: 999px; background: var(--ab-teal-700); transition: transform .24s cubic-bezier(.2, .7, .2, 1), width .24s cubic-bezier(.2, .7, .2, 1); pointer-events: none; }
+.seg.has-ind > .is-on, .seg.has-ind > .mc-seg[aria-pressed="true"] { background: transparent; }
+.seg.seg-still .seg-ind { transition: none; }
+@media (prefers-reduced-motion: reduce) { .seg-ind, .seg > .cc-tog, .seg > .mc-seg { transition: none !important; } }
+/* no page for this country: muted, not struck through, with a tooltip on hover and focus */
+.seg > .is-off { color: var(--ab-none); cursor: not-allowed; text-decoration: none; }
+.seg > .is-off .flag { filter: grayscale(1); opacity: .55; }
+.seg > [data-tip]:hover::after, .seg > [data-tip]:focus::after { content: attr(data-tip); position: absolute; z-index: 30; top: calc(100% + 9px); right: -4px; white-space: nowrap; padding: 6px 9px; border-radius: 6px; background: #111827; color: #FFFFFF; font-size: 12px; font-weight: 500; letter-spacing: 0; line-height: 1.3; box-shadow: 0 4px 12px rgba(17, 24, 39, .18); pointer-events: none; }
+@media (prefers-color-scheme: dark) {
+  .seg > .is-on, .seg > .mc-seg[aria-pressed="true"], .seg-ind { background: var(--hub-core-dark); }
+  .seg.has-ind > .is-on, .seg.has-ind > .mc-seg[aria-pressed="true"] { background: transparent; }
+  .seg .flag { box-shadow: 0 0 0 1px rgba(255, 255, 255, .22); }
+  .seg > [data-tip]:hover::after, .seg > [data-tip]:focus::after { background: #F3F4F6; color: #111827; }
+  .seg > .is-off { color: #6B7280; }
+  .seg > .is-off .flag { opacity: .4; }
+  .seg { background: var(--ab-inset) !important; border-color: var(--ab-border) !important; }
+}
+@media (max-width: 820px) { .seg > .cc-tog, .seg > .mc-seg { min-width: 56px; padding: 0 10px !important; } }
+@media (max-width: 480px) {
+  .sn3 .seg { height: 32px; }
+  .seg > .cc-tog, .seg > .mc-seg { min-width: 0; height: 24px !important; padding: 0 9px !important; gap: 5px; font-size: 12.5px; }
+  .sn3 .economy-subnav-row { column-gap: 8px !important; }
+  .sn3 .sn-tabs .model-tabs-link { padding: 0 6px !important; }
+}
+/* Home "Run a model": long JSON tokens wrap inside the terminal card */
+.lp-term pre, .lp-term pre code { white-space: pre-wrap !important; overflow-wrap: anywhere; word-break: break-word; }
+/* Final review: stacked .t-stack scorecards carry no per-cell zebra (it read as grey patches);
+   a status chip alone in a desktop cell sizes its column instead of overflowing the padding */
+@media (max-width: 640px) { main .table-scroll > table.t-stack tbody tr > *, main .table-scroll > table.t-stack tbody tr:nth-child(even) > * { background: none !important; } }
+@media (min-width: 641px) { main table td:has(> .chip:only-child), main table td:has(> .st:only-child) { white-space: nowrap; width: 1%; } }
+/* phone sub-nav (≤420px): a smaller flag, never hidden */
+@media (max-width: 420px) {
+  .sn3 .seg .flag { width: 13px; height: 9px; }
+  .sn3 .seg > .cc-tog { min-width: 0; padding: 0 7px !important; gap: 4px; }
+}
+/* long topic names in the phone sub-nav: ellipsis, so the country switch keeps its place */
+@media (max-width: 480px) { .sn3 .sn-lbl { display: inline-block; max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; } }
+.sn3 .sn-country.seg { background: #F3F4F6 !important; border: 1px solid #E5E7EB !important; padding: 3px !important; }
+@media (prefers-color-scheme: dark) { .sn3 .sn-country.seg { background: var(--ab-inset) !important; border-color: var(--ab-border) !important; } }
+/* dark: the active Models section tab is the brightest, not the dimmest (light teal like model tabs) */
+@media (prefers-color-scheme: dark) { .mp-subnav a[aria-current], .mp-subnav a[aria-current] svg { color: var(--primary); } .mp-subnav a[aria-current] { font-weight: 600; } }
+/* hero caveat chip: keep its inline padding when it wraps on phones */
+.lp-fan-top .lp-capchip { padding: 4px 10px !important; height: auto; min-height: 28px; max-width: 100%; box-sizing: border-box; }
+/* Trust pills carry Home's ladder levels everywhere (green = checked against an outcome or the
+   original, slate = partial, amber = anchored/calibrated only) — decided with Opus (Fable limit) */
+.lp-trust.lv-gain { background: color-mix(in srgb, var(--ab-gain) 12%, transparent) !important; color: var(--ab-teal-700) !important; }
+.lp-trust.lv-mid { background: color-mix(in srgb, #64748B 12%, transparent) !important; color: #334155 !important; }
+.lp-trust.lv-loss { background: color-mix(in srgb, var(--ab-loss) 13%, transparent) !important; color: #92400E !important; }
+.lp-trust.lv-gain svg { color: var(--ab-gain); } .lp-trust.lv-mid svg { color: #64748B; } .lp-trust.lv-loss svg { color: var(--ab-loss); }
+@media (prefers-color-scheme: dark) {
+  .lp-trust.lv-gain { background: color-mix(in srgb, var(--ab-gain) 20%, transparent) !important; color: #99F6E4 !important; }
+  .lp-trust.lv-mid { background: color-mix(in srgb, #94A3B8 18%, transparent) !important; color: #CBD5E1 !important; }
+  .lp-trust.lv-loss { background: color-mix(in srgb, var(--ab-loss) 22%, transparent) !important; color: #FCD34D !important; }
+  .lp-trust.lv-gain svg { color: #5EEAD4; } .lp-trust.lv-mid svg { color: #94A3B8; } .lp-trust.lv-loss svg { color: #FBBF24; }
+}
+.about-list { margin: 8px 0 0; padding-left: 20px; } .about-list li { margin: 6px 0; line-height: 1.55; }
+
+/* =====================================================================
+   40. Scroll motion, visible but calm (Vahid: "add animations when scrolling").
+   Progressive: everything below applies only under html.rv-on (JS, IntersectionObserver,
+   no reduced-motion preference). Blocks fade and rise 28px over ~550ms; section headings
+   slide in from the left with the subtitle following; card grids stagger 85ms per item
+   (capped) from scale .98; reveal.js draws chart lines, fades bands, grows bars and pops dots
+   with the Web Animations API (resting state always visible). Above-the-fold blocks and
+   anchor jumps show at once; transforms only, so no layout shift.
+   ===================================================================== */
+.rv-on .scroll-reveal { opacity: 0; transform: translateY(28px); transition: opacity 550ms cubic-bezier(0.22, 1, 0.36, 1), transform 700ms cubic-bezier(0.22, 1, 0.36, 1); transition-delay: var(--rv-d, 0ms); }
+.rv-on .scroll-reveal.rv-card { transform: translateY(24px) scale(0.98); }
+.rv-on .scroll-reveal.in-view { opacity: 1; transform: none; }
+.rv-on .scroll-reveal.reveal-initial { transition: none; }
+.rv-on .scroll-reveal.rv-done { transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease, background-color 200ms ease; transition-delay: 0ms; }
+/* section headings: the block itself stays put; icon and heading slide from the left, subtitle follows */
+.rv-on .scroll-reveal.rv-head, .rv-on .scroll-reveal.rv-head.in-view { transform: none; }
+.rv-on .scroll-reveal.rv-head > *, .rv-on .scroll-reveal.rv-head::before { opacity: 0; transform: translateX(-18px); transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1), transform 650ms cubic-bezier(0.22, 1, 0.36, 1); }
+.rv-on .scroll-reveal.rv-head > p, .rv-on .scroll-reveal.rv-head > .section-intro { transform: translateY(10px); transition-delay: 160ms; }
+.rv-on .scroll-reveal.rv-head.in-view > *, .rv-on .scroll-reveal.rv-head.in-view::before { opacity: 1; transform: none; }
+.rv-on .scroll-reveal.rv-head.reveal-initial > *, .rv-on .scroll-reveal.rv-head.reveal-initial::before { transition: none; }
+/* hover lift on cards (pointer devices) */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :is(.mc-card, .qc, .uc, .hq, .ct-card, .fc-node, .rt-card):hover,
+  .rv-on :is(.mc-card, .qc, .uc, .hq, .ct-card, .fc-node, .rt-card).scroll-reveal.in-view:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(17, 24, 39, .08); }
+}
+/* reading progress under the header */
+.rv-progress { position: fixed; left: 0; right: 0; top: 0; height: 2px; z-index: 60; background: var(--ab-teal-700); transform: scaleX(0); transform-origin: 0 50%; opacity: 0; transition: opacity 200ms ease; pointer-events: none; }
+.rv-progress.is-on { opacity: 1; }
+@media (prefers-color-scheme: dark) { .rv-progress { background: var(--primary); } }
+@media (prefers-reduced-motion: reduce) {
+  .rv-on .scroll-reveal, .rv-on .scroll-reveal.rv-head > *, .rv-on .scroll-reveal.rv-head::before { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
+@media print {
+  .scroll-reveal, .rv-on .scroll-reveal, .rv-on .scroll-reveal.rv-head > *, .rv-on .scroll-reveal.rv-head::before { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .rv-progress { display: none; }
+}
+
+/* =====================================================================
+   41. Use-case cards (Home and Models "joins"): one tight grid per card.
+   Header row: icon, title, status chip. Flow: one rail, each step a dot on the
+   rail with its bold label and muted sub-label on one left edge. Footer: Details
+   on the right, on a hairline. Equal heights. One footer bar under the three.
+   ===================================================================== */
+.hub2 .uc-grid { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 16px; align-items: stretch; }
+@media (max-width: 900px) { .hub2 .uc-grid { grid-template-columns: 1fr !important; } }
+.hub2 .uc a { display: flex !important; flex-direction: column; gap: 0; height: 100%; padding: 20px; border: 1px solid var(--ab-border); border-top-width: 1px !important; border-radius: 12px; background: var(--card); box-shadow: none; text-decoration: none; color: inherit; }
+.hub2 .uc a::before { display: none !important; }
+.hub2 .uc-head { display: grid !important; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; column-gap: 10px; margin: 0 0 18px; }
+.hub2 .uc-ic { display: grid; place-items: center; width: 24px !important; height: 24px !important; background: none !important; color: var(--ab-teal-700); }
+.hub2 .uc-ic svg { width: 20px; height: 20px; }
+.hub2 .uc-title { font-size: 15px; font-weight: 650; line-height: 1.3; color: var(--text-strong); }
+.hub2 .uc-chip { justify-self: end; white-space: nowrap; height: 22px; display: inline-flex; align-items: center; padding: 0 9px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+.hub2 .uc-hosted .uc-chip { background: color-mix(in srgb, var(--ab-gain) 12%, transparent); color: var(--ab-teal-700); }
+.hub2 .uc-exp .uc-chip { background: color-mix(in srgb, #64748B 12%, transparent); color: #334155; }
+.hub2 .uc-local .uc-chip { background: color-mix(in srgb, var(--ab-loss) 13%, transparent); color: #92400E; }
+.hub2 .uc-ic { color: var(--ab-teal-700) !important; }
+/* the flow rail */
+.hub2 .vf { position: relative; display: grid; row-gap: 16px; margin: 0; padding: 0; list-style: none; }
+.hub2 .vf::before { content: ""; position: absolute; left: 11px; top: 12px; bottom: 12px; width: 2px; border-radius: 2px; background: color-mix(in srgb, var(--ab-teal-700) 22%, var(--ab-border)); }
+.hub2 .vf-step { position: relative; display: grid !important; grid-template-columns: 24px minmax(0, 1fr); column-gap: 12px; align-items: start; padding: 0 !important; }
+.hub2 .vf-step::before { display: none !important; }
+.hub2 .vf-dot { position: relative; z-index: 1; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--card); color: var(--ab-teal-700); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ab-teal-700) 40%, var(--ab-border)); }
+.hub2 .vf-dot svg { width: 13px; height: 13px; }
+.hub2 .vf-micro .vf-dot { background: var(--ab-teal-700); color: #FFFFFF; box-shadow: none; }
+.hub2 .vf-t { display: flex !important; flex-direction: column; gap: 2px; padding-top: 2px !important; min-width: 0; }
+.hub2 .vf-t strong { font-size: 14px; font-weight: 600; line-height: 1.3; color: var(--text-strong); }
+.hub2 .vf-t small { display: block !important; font-size: 12.5px; line-height: 1.4; color: var(--text-muted); }
+/* footer */
+.hub2 .uc-foot { display: flex; justify-content: flex-end; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--ab-border); }
+.hub2 .vf { margin-bottom: 20px !important; }
+.hub2 .uc-go { margin: 0 !important; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--ab-teal-700); }
+.hub2 .uc a:hover .uc-go svg { transform: translateX(2px); }
+/* one footer bar spanning the three cards */
+.hub2-foot { display: flex; align-items: center; gap: 12px; margin: 16px 0 0; padding: 12px 16px; border-radius: 12px; background: var(--ab-inset); border: 1px solid var(--ab-border); color: var(--text-body); font-size: 13.5px; line-height: 1.5; }
+.hub2-foot > svg { flex: none; color: var(--ab-teal-700); }
+.hub2-foot > span { flex: 1; min-width: 0; }
+.hub2-foot a { font-weight: 600; color: var(--ab-teal-700); }
+.hub2-foot-go { flex: none; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; text-decoration: none; }
+@media (max-width: 640px) { .hub2-foot { flex-wrap: wrap; align-items: flex-start; } .hub2-foot-go { margin-left: 28px; } }
+@media (prefers-color-scheme: dark) {
+  .hub2 .uc-exp .uc-chip { color: #CBD5E1; } .hub2 .uc-local .uc-chip { color: #FCD34D; } .hub2 .uc-hosted .uc-chip { color: #99F6E4; }
+  .hub2 .vf-micro .vf-dot { background: var(--hub-core-dark); }
+  .hub2 .uc-ic, .hub2 .vf-dot, .hub2-foot > svg, .hub2-foot a, .hub2 .uc-go { color: var(--primary) !important; }
+  .hub2 .vf-micro .vf-dot { color: #FFFFFF !important; }
+}
+.hub2 .vf::before { display: none !important; }
+.hub2 .vf-step:not(:last-child)::after { content: ""; position: absolute; left: 11px; top: 27px; bottom: -13px; width: 2px; border-radius: 2px; background: color-mix(in srgb, var(--ab-teal-700) 25%, var(--ab-border)); }
+.hub2 .vf .vf-dot { width: 24px !important; height: 24px !important; border-radius: 50% !important; background: var(--card) !important; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ab-teal-700) 45%, var(--ab-border)) !important; }
+.hub2 .vf .vf-micro .vf-dot { background: var(--ab-teal-700) !important; color: #FFFFFF !important; box-shadow: none !important; }
+@media (prefers-color-scheme: dark) { .hub2 .vf .vf-micro .vf-dot { background: var(--hub-core-dark) !important; } }
+.hub2 .vf .vf-micro .vf-dot svg { color: #FFFFFF !important; }
+
+/* =====================================================================
+   42. Consolidation (Vahid: "more professional", "consolidate all boxes and formats").
+   Decided with Opus (Fable limit). One final block, not another layer of one-offs:
+   - one plain card: white, 1px border, 12px radius, 20px padding, no shadow, no accent bar
+   - one inset/note box (sunken background, 1px border, 12px radius)
+   - one callout (3px left bar, 10px radius) — set in §42c
+   - one chip geometry in three tones (neutral, teal, amber)
+   - one section rhythm on Home: every section opens with the .sh header
+   ===================================================================== */
+:root { --card-pad: 20px; --card-radius: 12px; }
+@media (max-width: 767px) { :root { --card-pad: 16px; } }
+
+/* 42a. Plain card */
+:is(.mc-card, .ct-card, .lp-model, .tl, .lp-score-card, .lp-use, .mp-card, .fit-card, .mp-link-card, .fc-node-card, .spark, .ab-card) {
+  background: var(--card); border: 1px solid var(--ab-border) !important; border-radius: var(--card-radius) !important; box-shadow: none !important;
+}
+:is(.mc-card, .ct-card, .tl, .lp-score-card, .lp-use, .mp-card, .fit-card, .mp-link-card, .spark) { padding: var(--card-pad) !important; }
+.mc-card::before, .lp-model::before, .ct-card::before { display: none !important; }
+.fit-card.fit-no { background: var(--card); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :is(.mc-card, .ct-card, .qc, .hq):hover { border-color: color-mix(in srgb, var(--ab-teal-700) 35%, var(--ab-border)) !important; box-shadow: 0 6px 18px rgba(17, 24, 39, .07) !important; }
+}
+
+/* 42b. Inset / note box */
+:is(.hub2-foot, .codeblock:not(.lp-term), .vc-source, .ct-self) { background: var(--ab-inset); border: 1px solid var(--ab-border); border-radius: var(--card-radius); }
+
+/* 42c. Callout: one left-bar box */
+:is(.callout, .fc-warn, .ov-verdict-line, .verdict-chip) { border-radius: 10px !important; border-left-width: 3px !important; }
+
+/* 42d. One chip geometry, three tones */
+:is(.chip, .lp-pill, .uc-chip, .lp-trust, .lp-capchip, .cc-chip, .mc-pill) { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px !important; border-radius: 999px !important; font-size: 12px !important; font-weight: 600; letter-spacing: 0 !important; text-transform: none !important; white-space: nowrap; }
+.lp-pill { background: var(--surface-sunken); color: var(--text-body); border: 0; }
+.chip.chip-warn, .lp-capchip-warn { background: color-mix(in srgb, var(--ab-loss) 13%, transparent) !important; color: #92400E !important; border: 0 !important; }
+.chip.chip-warn svg, .lp-capchip-warn svg { color: var(--ab-loss) !important; }
+@media (prefers-color-scheme: dark) {
+  .lp-pill { background: color-mix(in srgb, #94A3B8 16%, transparent); color: #CBD5E1; }
+  .chip.chip-warn, .lp-capchip-warn { background: color-mix(in srgb, var(--ab-loss) 22%, transparent) !important; color: #FCD34D !important; }
+  .chip.chip-warn svg, .lp-capchip-warn svg { color: #FBBF24 !important; }
+}
+
+/* 42e. Home section rhythm: same gap before every section, no stray hairlines */
+.lp-section, .lp-section-alt { margin-top: 72px !important; padding: 0 !important; border: 0 !important; background: none !important; }
+@media (max-width: 767px) { .lp-section, .lp-section-alt { margin-top: 48px !important; } }
+.tl { margin-top: 0 !important; }
+.tl-foot { border-top-color: var(--ab-border) !important; }
+.tl-rung { border-top-color: var(--ab-border) !important; }
+@media (min-width: 900px) { .tl-rung { grid-template-columns: 28px minmax(0, 340px) minmax(0, 1fr) !important; column-gap: 20px !important; } }
+
+/* 42f. Hero chart: caption stacked, no floating hairline, tighter axis */
+.lp-fan figcaption.lp-fan-top { border-top: 0 !important; padding-top: 0 !important; margin: 0 0 12px !important; flex-direction: column; align-items: flex-start !important; justify-content: flex-start !important; gap: 8px !important; }
+.vc-fig.vc-hero .vc-plot { margin: 4px 40px 8px 0 !important; }
+
+/* 42g. Seven models: one card layout; "Open" pinned to the bottom; tight name-to-question gap */
+.mc-card { display: flex; flex-direction: column; }
+.mc-card .mc-go { margin-top: auto !important; padding-top: 12px; }
+.mc-card .mc-q { margin-top: 4px !important; }
+@media (min-width: 1025px) {
+  .home-models > .mc-card[href="/pe"] { grid-template-columns: 40px minmax(0, 1fr) auto !important; grid-template-areas: "icon name pill" "icon q go" !important; column-gap: 16px !important; }
+  .home-models > .mc-card[href="/pe"] > .mc-go { justify-self: end; align-self: end; padding-top: 0; }
+}
+
+/* 42h. Forecast record: stats in a row under the dots, never a squeezed side column */
+.lp-score-card .lp-rec { display: block !important; }
+.lp-score-card .lp-recstats { display: flex !important; flex-wrap: wrap; gap: 12px 40px; align-items: baseline; margin-top: 20px !important; padding-top: 16px; border-top: 1px solid var(--ab-border); }
+.lp-score-card .lp-recstats div { flex-direction: row-reverse !important; align-items: baseline; gap: 8px !important; justify-content: flex-end; }
+.lp-score-card .lp-dotkey { font-size: 12px; }
+
+/* 42i. Run a model: content from the top, a real terminal panel */
+.lp-use { display: grid !important; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr) !important; gap: 32px !important; align-items: start !important; }
+@media (max-width: 899px) { .lp-use { grid-template-columns: 1fr !important; } }
+.lp-use-copy h3 { margin: 0 0 6px; font-size: 17px; font-weight: 650; color: var(--text-strong); }
+.lp-use-copy p { margin: 0 0 16px; color: var(--text-body) !important; }
+.lp-term { position: relative; background: var(--ab-inset) !important; border: 1px solid var(--ab-border) !important; border-radius: var(--card-radius) !important; padding: 0 !important; overflow: hidden; }
+.lp-term .lp-term-bar { display: none !important; }
+.lp-term pre { margin: 0; padding: 16px 18px; padding-right: 76px; background: none !important; color: var(--text-strong) !important; font-size: 13px; line-height: 1.65; }
+.lp-term pre code { color: inherit !important; background: none !important; }
+.lp-term .lp-term-p { color: var(--ab-teal-700); }
+.lp-term .cb-copy { position: absolute; top: 10px; right: 10px; }
+
+/* 42j. Phones: footer links drop to their own line; long use-card titles wrap cleanly */
+@media (max-width: 600px) {
+  .hub2-foot { flex-direction: column; align-items: flex-start !important; }
+  .hub2-foot-go { margin-left: 0 !important; }
+  .lp-score-foot, .tl-foot { flex-wrap: wrap; }
+  .hub2 .uc-head { grid-template-columns: 24px minmax(0, 1fr) !important; row-gap: 6px; }
+  .hub2 .uc-chip { grid-column: 2; justify-self: start; }
+}
+
+/* 42k. Dark mode: quiet footer, readable primary buttons, readable fan bands */
+@media (prefers-color-scheme: dark) {
+  .foot.foot-bar { background: #0B1220 !important; border-top: 1px solid var(--border); }
+  .btn-primary, .btn-inv { background: var(--ab-teal-700) !important; color: #FFFFFF !important; border-color: var(--ab-teal-700) !important; }
+}
+.hub2 .uc a { align-items: stretch !important; }
+
+/* =====================================================================
+   43. Header stack (bug fix after the animation push). The header grows with its
+   content instead of a fixed 82px, so the tab row can never spill below it; it is
+   opaque and above every animated block; --nav-h is measured from it (reveal.js),
+   so sticky sub-navs sit directly under it; the progress bar lives inside it.
+   "Macro" is plain text; only the PolicyEngine wordmark links home.
+   ===================================================================== */
+header.nav { height: auto !important; min-height: 82px; z-index: 100 !important; background: var(--card) !important; isolation: isolate; }
+header.nav::before { background: var(--card) !important; opacity: 1 !important; }
+header.nav .nav-links { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; background: var(--card) !important; }
+header.nav .nav-links::-webkit-scrollbar { display: none; }
+@media (max-width: 720px) { header.nav { height: auto !important; } }
+.economy-subnav, .mp-subnav, .model-tabs-row, .sn3 { z-index: 50 !important; background: var(--card) !important; }
+.brand { display: inline-flex !important; align-items: center; gap: 12px; color: #FFFFFF; text-decoration: none; }
+.brand-home { display: inline-flex; align-items: center; border-radius: 4px; line-height: 0; }
+.brand-home:focus-visible, .footer-policyengine .brand-home:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 3px; }
+.brand-name, .footer-policyengine > span { cursor: default; user-select: none; pointer-events: none; }
+.foot-bar .footer-links .footer-policyengine { display: inline-flex; align-items: center; gap: 10px; color: #FFFFFF; font-weight: 600; }
+.foot-bar .footer-links .footer-policyengine img { width: auto; height: 20px; padding: 0; background: none; border-radius: 0; }
+header.nav > .rv-progress { position: absolute !important; left: 0; right: 0; top: auto !important; bottom: 0; height: 2px; z-index: 2; }
+@media (max-width: 420px) { .sn3 .sn-lbl { max-width: 70px !important; } }
+
+/* 42l. Home forecast record: one plain sentence, one small table, one secondary line */
+.lp-rec-head { margin: 0 0 16px; font-size: 16px; line-height: 1.5; color: var(--text-strong); }
+.lp-rec-head strong { font-weight: 700; }
+.lp-term-def { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
+.lp-rec-table { overflow-x: auto; }
+.lp-rec-table table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.lp-rec-table th, .lp-rec-table td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--ab-border); text-align: left; white-space: nowrap; background: none !important; }
+.lp-rec-table thead th { font-size: 12px; font-weight: 500; color: var(--text-muted); padding-top: 0; }
+.lp-rec-table tbody th { font-weight: 600; color: var(--text-strong); }
+.lp-rec-table .num { text-align: right; font-variant-numeric: tabular-nums; padding-right: 24px; }
+.lp-rec-table td { color: var(--text-body); }
+.lp-rt-q { margin-left: 4px; font-size: 12px; font-weight: 500; color: var(--text-muted); }
+.lp-res { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.lp-res-in { background: color-mix(in srgb, var(--ab-gain) 12%, transparent); color: var(--ab-teal-700); }
+.lp-res-out { background: color-mix(in srgb, var(--ab-loss) 13%, transparent); color: #92400E; }
+.lp-score-card .lp-score-foot { margin: 16px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; border: 0 !important; padding: 0 !important; color: var(--text-muted); font-size: 13.5px; }
+@media (prefers-color-scheme: dark) { .lp-res-in { color: #99F6E4; } .lp-res-out { color: #FCD34D; } }
+@media (max-width: 600px) { .lp-rec-table th:nth-child(2), .lp-rec-table td:nth-child(2) { display: none; } .lp-rec-table .num { padding-right: 12px; } }
+@media (max-width: 600px) {
+  .lp-rec-table table { font-size: 13px; }
+  .lp-rec-table th, .lp-rec-table td { white-space: normal; padding-right: 8px; }
+  .lp-rec-table .lp-rt-q { display: block; margin: 2px 0 0; }
+  .lp-rec-table .num { padding-right: 10px; }
+  .lp-res { padding: 0 8px; }
+}
+
+/* 42m. Sitewide consolidation follow-ups (Opus review; decided with Opus, Fable limit) */
+.fit-card { border-top: 1px solid var(--ab-border) !important; }
+.fit-card::before { display: none !important; }
+.use-page .stat-tile { border-radius: var(--card-radius) !important; }
+.meth-inline, .meth-panel .meth-inline { background: var(--ab-inset) !important; border: 1px solid var(--ab-border) !important; border-radius: var(--card-radius) !important; box-shadow: none !important; }
+.meth-inline::before { display: none !important; }
+/* chips: one geometry for the Forecasts and model-page chips too */
+:is(.fc-badge2, .fc-skill-chip, .mh-chip, .proof-row .chip) { height: 24px; padding: 0 10px !important; border-radius: 999px !important; font-size: 12px !important; font-weight: 600; text-transform: none !important; letter-spacing: 0 !important; }
+:is(.fc-badge2, .fc-skill-chip, .proof-row .chip) { border: 0 !important; box-shadow: none !important; }
+.fc-skill-chip { background: color-mix(in srgb, var(--ab-loss) 13%, transparent) !important; color: #92400E !important; }
+.fc-in { background: color-mix(in srgb, var(--ab-gain) 12%, transparent) !important; color: var(--ab-teal-700) !important; }
+.fc-out-b { background: color-mix(in srgb, var(--ab-loss) 13%, transparent) !important; color: #92400E !important; }
+@media (prefers-color-scheme: dark) {
+  .fc-skill-chip, .fc-out-b { background: color-mix(in srgb, var(--ab-loss) 22%, transparent) !important; color: #FCD34D !important; }
+  .fc-in { background: color-mix(in srgb, var(--ab-gain) 20%, transparent) !important; color: #99F6E4 !important; }
+}
+/* callouts: a white box with the 3px left bar, no tinted band */
+:is(.callout, .fc-warn, .ov-verdict-line, .verdict-chip) { background: var(--card) !important; border-top: 1px solid var(--ab-border) !important; border-right: 1px solid var(--ab-border) !important; border-bottom: 1px solid var(--ab-border) !important; }
+.verdict-chip { width: 100%; box-sizing: border-box; }
+/* phones: the hero caveat chip wraps inside the screen; Copy never covers the command */
+.lp-fan-top .lp-capchip { white-space: normal !important; height: auto !important; min-height: 24px; max-width: 100% !important; line-height: 1.35; padding-top: 4px !important; padding-bottom: 4px !important; }
+.ct-self { padding: 12px 16px; }
+.btn { gap: 8px; }
+/* Read next / where-next removed sitewide (Vahid); out-of-scope pe/olg pages keep the markup, hidden here */
+.where-next, .tp-next { display: none !important; }
+
+/* =====================================================================
+   44. One flow / stepper component (Vahid: "consolidate all boxes and formats").
+   Every stepper uses the same node and connector as the use-case flow (§41):
+   a 24px circle, outlined teal (white fill), the end node filled teal, joined by a
+   2px teal-tinted line with no arrowheads and no mint fills. Orientation follows
+   the space (horizontal pipeline, vertical list, archive timeline).
+   ===================================================================== */
+:root { --node: 24px; --node-ring: inset 0 0 0 1.5px color-mix(in srgb, var(--ab-teal-700) 45%, var(--ab-border)); --node-line: color-mix(in srgb, var(--ab-teal-700) 25%, var(--ab-border)); }
+/* pipeline (Models joins, model-page "With the microsimulation") */
+.pipeline { justify-content: flex-start !important; }
+.pipeline .pl-node::before { width: var(--node) !important; height: var(--node) !important; margin-bottom: 8px; background: var(--card) !important; box-shadow: var(--node-ring) !important; color: var(--ab-teal-700) !important; font-size: 12px !important; }
+.pipeline .pl-node:last-child::before { background: var(--ab-teal-700) !important; color: #FFFFFF !important; box-shadow: none !important; }
+.pipeline .pl-arrow { flex: 0 1 96px !important; height: 2px; margin-top: 11px !important; background: var(--node-line) !important; }
+.pipeline .pl-arrow::after { display: none !important; }
+@media (max-width: 819px) { .pipeline .pl-arrow { width: 2px !important; height: 16px !important; margin: 4px 0 4px 11px !important; flex: none !important; } .pipeline .pl-node .mono, .pipeline .pl-node small { padding-left: 36px !important; } }
+/* Use page numbered steps */
+.use-step-n { width: var(--node) !important; height: var(--node) !important; background: var(--card) !important; box-shadow: var(--node-ring); color: var(--ab-teal-700) !important; font-size: 12px !important; font-weight: 700; margin-top: 2px; }
+.use-step { grid-template-columns: var(--node) minmax(0, 1fr) !important; column-gap: 12px !important; position: relative; }
+.use-step:has(+ .use-step)::after { content: ""; position: absolute; left: 11px; top: 30px; bottom: -24px; width: 2px; background: var(--node-line); }
+@media (max-width: 640px) { .use-step:has(+ .use-step)::after { display: none; } }
+/* Forecasts archive timeline */
+.fc-timeline::before { background: var(--node-line) !important; top: 35px !important; }
+.fc-dot { width: var(--node) !important; height: var(--node) !important; background: var(--ab-teal-700) !important; box-shadow: 0 0 0 3px var(--surface-card) !important; }
+.fc-node.is-open .fc-dot { background: var(--card) !important; box-shadow: var(--node-ring), 0 0 0 3px var(--surface-card) !important; }
+.fc-node.is-retro .fc-dot { background: var(--card) !important; box-shadow: inset 0 0 0 1.5px var(--ab-loss), 0 0 0 3px var(--surface-card) !important; }
+.fc-gap { height: 22px; display: inline-flex; align-items: center; padding: 0 9px !important; border: 0 !important; background: var(--surface-sunken) !important; font-size: 11.5px !important; font-weight: 600; color: var(--text-muted) !important; }
+@media (max-width: 640px) { .fc-timeline::before { left: 11px !important; top: 12px !important; } .fc-timeline { padding-left: 36px !important; } }
+@media (prefers-color-scheme: dark) { .pipeline .pl-node:last-child::before, .fc-dot { background: var(--hub-core-dark) !important; } }
+
+/* =====================================================================
+   45. Phone tap targets (audit at 375/390, touch, DPR 3): every control is at
+   least 44px to the finger. Visual size stays; small controls get an invisible
+   hit area (::before) so layouts don't move.
+   ===================================================================== */
+@media (max-width: 720px), (pointer: coarse) {
+  header.nav .nav-links a { min-height: 44px; }
+  .brand-home { position: relative; }
+  .brand-home::before { content: ""; position: absolute; inset: -12px -8px; }
+  .seg > .cc-tog, .seg > .mc-seg { position: relative; }
+  .seg > .cc-tog::before, .seg > .mc-seg::before { content: ""; position: absolute; inset: -10px -2px; }
+  .cb-copy, .copy-btn, .gl-more, .cmp-more { position: relative; }
+  .cb-copy::before, .copy-btn::before, .gl-more::before, .cmp-more::before { content: ""; position: absolute; inset: -8px; }
+  main summary { min-height: 44px; box-sizing: border-box; }
+  .btn, .chip-btn, .use-tab, [role="tab"] { min-height: 44px; }
+  .foot-bar .footer-text { padding-block: 6px; min-height: 44px; display: inline-flex; align-items: center; }
+}
+
+/* =====================================================================
+   46. Phone review fixes (375/390 audit, reviewed with Opus; Fable limit)
+   ===================================================================== */
+@media (max-width: 640px) {
+  /* Use: one column for the numbered steps (the stepper rule must not win here) */
+  .use-step { grid-template-columns: minmax(0, 1fr) !important; }
+  /* Compare: stacked model cards fit the screen */
+  .cmp-table.t-stack, .cmp-table.t-stack tr, .cmp-table.t-stack tbody { width: 100% !important; min-width: 0 !important; }
+  .cmp-table.t-stack td, .cmp-table.t-stack th { min-width: 0 !important; overflow-wrap: anywhere; }
+  /* code: never break a token mid-word; scroll instead, and keep clear of Copy */
+  .lp-term pre, .lp-term pre code, main .codeblock pre, main .codeblock pre code { white-space: pre !important; overflow-wrap: normal !important; word-break: normal !important; }
+  main .codeblock pre, .lp-term pre { overflow-x: auto; padding-right: 84px !important; }
+  /* validation tables kept as tables: fit the column widths to the screen */
+  .vc-table { table-layout: fixed; width: 100% !important; min-width: 0 !important; }
+  .vc-table td, .vc-table th { overflow-wrap: anywhere; white-space: normal !important; }
+  .vc-table caption { white-space: normal; }
+  /* Forecasts release-notes rows: text full width, meta on its own line */
+  .fc-notes a { display: grid !important; grid-template-columns: auto minmax(0, 1fr) !important; column-gap: 10px; row-gap: 2px; }
+  .fc-notes a > strong { grid-column: 2; justify-self: start; }
+  /* chips that may wrap: soft corners instead of a broken pill */
+  .rt-chip { white-space: normal !important; height: auto !important; min-height: 24px; border-radius: 8px !important; padding-top: 3px !important; padding-bottom: 3px !important; }
+  /* stat tiles: icon aligned with the first line of a wrapped label */
+  .stat-label { align-items: flex-start !important; }
+  .stat-label svg { margin-top: 3px; flex: none; }
+  /* glossary: "more" and the page link share one row */
+  .gl-page dl.glossary dd { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 14px; }
+  .gl-page dl.glossary dd > p { flex: 1 1 100%; }
+  .gl-page dl.glossary dd > a { display: inline-block !important; margin-top: 4px; }
+  /* model-page heroes: icon above the eyebrow, no indented column */
+  .hero.mh .hero-inner { display: block !important; }
+  .hero.mh .mh-icon { display: inline-flex; margin: 0 0 8px; }
+  /* sub-nav tab strips: a fade shows there is more to scroll */
+  .mp-subnav, .model-tabs-row { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); }
+  /* validation side rail links reach 44px */
+  .page-rail a { min-height: 44px; display: inline-flex; align-items: center; }
+}
+@media (max-width: 720px), (pointer: coarse) {
+  [id^="client-tab-"], .gl-filter a, .gl-filters a, .gl-cats a { min-height: 44px; }
+  .gl-more { min-height: 44px; display: inline-flex; align-items: center; }
+}
+@media (max-width: 720px), (pointer: coarse) {
+  [id^="client-tab-"] { height: auto !important; min-height: 44px !important; }
+  .gl-page main nav a { min-height: 44px; display: inline-flex; align-items: center; }
+}
+@media (max-width: 640px) {
+  .cmp-scroll, .cmp-scroll.fade-r, .cmp-scroll.fade-l { -webkit-mask-image: none !important; mask-image: none !important; }
+}
+@media (max-width: 640px) {
+  .cmp-table.t-stack { display: block !important; box-sizing: border-box; max-width: 100%; }
+  .cmp-table.t-stack tr { box-sizing: border-box; max-width: 100%; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; }
+  .cmp-table.t-stack td[data-label="Verdict"], .cmp-table.t-stack th { grid-column: 1 / -1; }
+}
+
+/* =====================================================================
+   47. Phone follow-ups (Vahid: "the phone view right"): flat validation steps,
+   chip rows that wrap as a unit, legends as a tidy column, fewer hero ticks,
+   and every validation table stacked (reveal.js labels merged headers too).
+   ===================================================================== */
+@media (max-width: 640px) {
+  /* validation numbered steps: one card, no card-in-card */
+  .meth-step.meth-fold { border: 0 !important; padding: 0 !important; background: none !important; box-shadow: none !important; }
+  .step-fold :is(details.xp, details.more, details.vc-src) { border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; padding-left: 0 !important; padding-right: 0 !important; border-top: 1px solid var(--ab-border) !important; }
+  .step-fold .mo-tablecard { border: 0 !important; padding: 0 !important; background: none !important; }
+  .step-fold > summary .step-fold-text h3 { font-size: 15px; line-height: 1.3; }
+  /* Forecasts record rows: round link on its own line, chips together beneath it */
+  .fc-round-line { display: flex !important; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 2px; }
+  .fc-round-line .fc-round { flex: 1 1 100%; }
+  .fc-round-line .fc-h, .fc-round-line .fc-retro-mark { margin-left: 0 !important; }
+  /* chart legends: one tidy column of swatch + text, no wrapping pills */
+  :is(.vc-legend, .fc-legend, .sb-legend) { display: flex !important; flex-direction: column !important; align-items: flex-start !important; gap: 6px !important; }
+  :is(.vc-legend, .fc-legend, .sb-legend) li { width: auto !important; max-width: 100%; white-space: normal !important; border: 0 !important; background: none !important; padding: 0 !important; border-radius: 0 !important; line-height: 1.35; }
+  .fc-page #open .vc-legend { display: flex !important; }
+  /* t-stack tables (FRB/US validation, Forecasts scoreboard): fit the screen */
+  table.t-stack, table.t-stack :is(tbody, tr) { width: 100% !important; min-width: 0 !important; max-width: 100%; box-sizing: border-box; }
+  table.t-stack :is(td, th) { min-width: 0 !important; overflow-wrap: anywhere; white-space: normal !important; }
+  .table-scroll.has-t-stack { -webkit-mask-image: none !important; mask-image: none !important; }
+}
+/* hero fan: drop the crowded first year label on narrow phones */
+@media (max-width: 420px) { .lp-fan .hf-q.vc-a-s { display: none; } }
+@media (max-width: 720px), (pointer: coarse) {
+  .cb-copy, .copy-btn { min-height: 44px !important; min-width: 44px; }
+  footer a.footer-text { min-height: 44px; display: inline-flex; align-items: center; }
+}
