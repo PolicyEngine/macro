@@ -22,7 +22,7 @@ STYLESHEET = re.compile(r'href="/style\.css(?:\?v=[0-9]+)?"')
 # changes in a way a cached copy would render wrongly; ``render`` writes it
 # into every page and the generators read it from here (economy/topics.py,
 # notes/generate_release_notes.py), so no page can be left on an old copy.
-STYLE_VERSION = 49
+STYLE_VERSION = 50
 STYLE_HREF = f"/style.css?v={STYLE_VERSION}"
 
 # Inter (latin) is the body face on every page, but the browser only finds the
@@ -217,7 +217,7 @@ PAGE_NAMES = {
     "/papers/psl-og": "Paper",
     "/papers/define-uk": "Paper",
     "/reports/define-uk-replication": "Replication report",
-    "/reports/us-hank-open-source": "HANK survey",
+    "/reports/us-hank-open-source": "Survey",
     "/forecasts": "Forecasts",
     "/forecasts/us": "United States",
     "/notes/releases": "Releases",
@@ -294,7 +294,7 @@ SUBTABS = {
         ("/us-hank/validation", "Validation"), ("/us-hank/code", "Use it"),
         # us-hank has no paper; its fifth tab is a survey of other HANK models,
         # so it is labelled as such rather than as a page about this model.
-        ("/reports/us-hank-open-source", "HANK survey"))),
+        ("/reports/us-hank-open-source", "Survey"))),
     "olg": ("OG-UK pages", (
         ("/olg", "Overview"), ("/olg/methodology", "Methodology"),
         ("/olg/validation", "Validation"), ("/olg/code", "Use it"))),

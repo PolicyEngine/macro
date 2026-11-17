@@ -371,8 +371,9 @@ def chart_svar_fevd():
          "bars": [{"name": "ours", "value": ours["cpi"], "series": 1},
                   {"name": "paper", "value": paper["cpi"], "series": 2}]},
     ]
-    # The draw count of the production run is not recorded in the artifact, so
-    # it is not asserted here. The 68% bands are the 600-draw check
+    # The production run's draws (10,000 drawn, 765 accepted, ESS 368.0) are in
+    # boe-var-model results/summary.md at c13a9c91, not in this artifact, so the
+    # chart does not restate them. The 68% bands are the 600-draw check
     # configuration's, and are labelled as such rather than attached to the
     # production bars as if they had been measured on them.
     desc = (f"Grouped bar chart. Share of UK forecast-error variance attributed to identified "
