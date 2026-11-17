@@ -342,7 +342,7 @@
 /* Shared table component (r12, style.css §15). Every .table-scroll table
    gets: data-label on each cell so phones can show it as stacked cards,
    and an edge fade while the table scrolls sideways. Tables with merged
-   cells or more than six columns keep scrolling instead of stacking. */
+   cells or more than eight columns keep scrolling instead of stacking. */
 (function () {
   "use strict";
   var SKIP = ".sb-grid, .cap-grid, .vc-table, .vc-narrow-table";
@@ -354,7 +354,7 @@
     var labels = head ? Array.from(head.cells).map(function (c) { return c.textContent.trim(); }) : [];
     var merged = table.querySelector("[colspan]:not([colspan='1']), [rowspan]:not([rowspan='1'])");
     var own = table.matches(".t-stack") || box.matches(".has-t-stack, .mo-tablecard");
-    if (labels.length && labels.length <= 6 && !merged && !own) {
+    if (labels.length && labels.length <= 8 && !merged && !own) {
       table.classList.add("tbl-stack");
       Array.from(table.tBodies).forEach(function (body) {
         Array.from(body.rows).forEach(function (row) {
