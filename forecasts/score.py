@@ -956,9 +956,9 @@ def render_status(card: dict) -> str:
     if pending:
         short = {"gdp": "GDP", "cpi": "CPI", "unemployment": "unemployment"}
         who = ", ".join(short.get(v, v) for v in pending["variables"])
-        next_sub = f"Next: <span class=\"nowrap\">{esc(pending['period'])}</span> {esc(who)}."
+        next_sub = f"Next: <span class=\"nowrap\">{esc(pending['period'])}</span> {esc(who)}"
     else:
-        next_sub = "Every archived period has an outturn."
+        next_sub = "Every archived period scored"
     st = record_stats(card)
     first = card["detail"][0]["round_id"] if card["detail"] else None
     ex = [e for d, e in pairs if d["round_id"] != first]
@@ -972,42 +972,45 @@ def render_status(card: dict) -> str:
     else:
         asof = '      <p class="record-asof"><strong>Nothing scored yet.</strong></p>'
 
-    def tile(ic: str, label: str, value: str, sub: str, extra: str = "", cls: str = "") -> list[str]:
+    def tile(ic: str, label: str, value: str, sub: str, extra: str = "") -> list[str]:
+        # Fixed four-row structure (label, value, visual, sub) so the page CSS
+        # can line every row up across the tiles with a subgrid.
         return [
-            f'        <div class="fc-tile{(" " + cls) if cls else ""}">',
+            '        <div class="fc-tile">',
             f'          <span class="fc-tile-l">{icon(ic)}{label}</span>',
-            *([f'          <span class="fc-tile-v">{value}</span>'] if value else []),
-            *([extra] if extra else []),
+            f'          <span class="fc-tile-v">{value}</span>',
+            extra or '          <span class="fc-tile-x" aria-hidden="true"></span>',
             f'          <span class="fc-tile-s">{sub}</span>',
             "        </div>",
         ]
 
     if not scored:
-        return "\n".join([asof, '      <div class="fc-tiles ab-card" aria-label="The record so far"></div>'])
-    pips = (f'          <span class="fc-pips" role="img" aria-label="{st["exante_in68"]} of {st["exante"]} '
-            'ex-ante forecasts inside the 68% band">'
+        return "\n".join([asof, '      <div class="fc-tiles" aria-label="The record so far"></div>'])
+    pips = (f'          <span class="fc-tile-x fc-pips" role="img" aria-label="{st["exante_in68"]} of {st["exante"]} '
+            'live forecasts inside the 68% band">'
             + "".join(f'<i class="{"in" if e["in_68"] else "out"}"></i>' for e in ex) + "</span>")
-    tiles = tile("target", f'Live forecasts inside the 68% band ({st["exante"]} live)',
+    tiles = tile("target", "Live forecasts in range",
                  f'{st["exante_in68"]} of {st["exante"]}',
-                 f'+{st["retro"]} retroactive · {scored} forecasts of {st["outturns"]} outturns', pips)
+                 f'+{st["retro"]} retroactive · {scored} forecasts, {st["outturns"]} outturns', pips)
     if st["naive_mae"] is not None:
         top = max(st["mae"], st["naive_mae"])
-        bars = ('          <div class="fc-bars" role="img" aria-label="Average miss: this model '
+        bars = ('          <span class="fc-tile-x fc-bars" role="img" aria-label="Average miss: this model '
                 f'{st["mae"]:.2f}pp, no-change forecast {st["naive_mae"]:.2f}pp">'
-                f'<span class="fc-bar-l">This model {st["mae"]:.2f}pp</span><span class="fc-bar"><i class="fc-bar-ours" style="width:{st["mae"] / top * 100:.0f}%"></i></span>'
-                f'<span class="fc-bar-l">No change {st["naive_mae"]:.2f}pp</span><span class="fc-bar"><i class="fc-bar-naive" style="width:{st["naive_mae"] / top * 100:.0f}%"></i></span>'
-                "</div>")
-        tiles += tile("ruler", f"Average miss, all {scored}", "", "Lower is better; same forecasts, same outturns.", bars)
+                f'<span class="fc-bar-l">Model</span><span class="fc-bar"><i class="fc-bar-ours" style="width:{st["mae"] / top * 100:.0f}%"></i></span>'
+                f'<span class="fc-bar-l">No change</span><span class="fc-bar"><i class="fc-bar-naive" style="width:{st["naive_mae"] / top * 100:.0f}%"></i></span>'
+                "</span>")
+        tiles += tile("ruler", "Average miss", f'{st["mae"]:.2f}pp',
+                      f'No change: {st["naive_mae"]:.2f}pp · lower is better', bars)
     sign = "\u2212" if st["bias"] < 0 else "+"
     runs = (f'Ran low on {st["low"]} of {scored}' if st["bias"] < 0
             else f'Ran high on {scored - st["low"]} of {scored}')
-    tiles += tile("scale", f"Bias, all {scored}", f'{sign}{abs(st["bias"]):.2f}pp', runs)
-    tiles += tile("layers", "Rounds", f'{scored_rounds} scored', next_sub)
+    tiles += tile("scale", "Bias", f'{sign}{abs(st["bias"]):.2f}pp', runs)
+    tiles += tile("layers", "Rounds scored", f"{scored_rounds}", next_sub)
     chip = (f'      <p class="fc-skill"><span class="fc-skill-chip">{icon("alert")}Too few to show skill</span>'
             '<a href="#limits">Limits</a></p>')
     return "\n".join([
         asof,
-        '      <div class="fc-tiles ab-card" aria-label="The record so far">',
+        '      <div class="fc-tiles" aria-label="The record so far">',
         *tiles,
         "      </div>",
         chip,
