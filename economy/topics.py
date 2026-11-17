@@ -1726,39 +1726,25 @@ def uk_routes() -> str:
       </details>
       <details class="about">
         <summary>About the engine and the macro members, and the same routes over MCP</summary>
-        <p>
-          The engine underneath this section is
-          {model_link("pe-microsim")} — PolicyEngine's own
+        <ul class="about-list">
+          <li><strong>The engine:</strong> {model_link("pe-microsim")}, PolicyEngine's own
           {esc(microsim["model_class"])}, {only_household_member()} and
-          {only_two_country_member()}. It applies a reform to household microdata
-          and reports {registry_terms(microsim["outputs"])} over a
-          {esc(microsim["horizon"])}. {distribution_members()}
-        </p>
-        <p>
-          The macro members are what it cannot do on its own. pe-microsim
-          cannot answer {(cannot('pe-microsim'))} — so every macro number in this
-          section comes from a member that produces one, and the table says which,
-          in the order they run. Four of the six routes put pe-microsim in
-          the chain; two are a macro model standing alone, which is also a fine
-          thing to publish.
-        </p>
-        <p>
-          pe-microsim&rsquo;s question types are
-          {registry_terms(microsim["question_types"])}:
-          <span class="mono">forecast</span> is not among them, and its
-          predictive validation is recorded as
+          {only_two_country_member()}. It reports {registry_terms(microsim["outputs"])} over a
+          {esc(microsim["horizon"])}. {distribution_members()}</li>
+          <li><strong>The macro members</strong> supply what it cannot: {(cannot('pe-microsim'))}.
+          Four of the six routes put pe-microsim in the chain; two are a macro model standing alone.</li>
+          <li><strong>Not a forecaster:</strong> pe-microsim&rsquo;s question types are
+          {registry_terms(microsim["question_types"])}, without <span class="mono">forecast</span>;
+          its predictive validation is recorded as
           {registry_terms([microsim["quality"]["predictive_validation"]["level"]])}.
-          The uncertainty of {model_link("boe-svar")} is
-          {esc(svar["uncertainty"])}.
-        </p>
-        <p>
-          Over MCP the same six routes are {tool("household_reform_impact")},
+          {model_link("boe-svar")} reports {esc(svar["uncertainty"])}.</li>
+          <li><strong>Over MCP</strong> the six routes are {tool("household_reform_impact")},
           {tool("population_reform_impact")}, {tool("score_reform")},
           {tool("dynamic_reform_impact")}, {tool("forecast_uk")} and
           {tool("svar_inflation_incidence")}; {tool("recommend_model")} routes a
           question to a member, or refuses when none supports it.
-          <a href="/connect">Connect a client →</a>
-        </p>
+          <a href="/connect">Connect a client →</a></li>
+        </ul>
       </details>
     </div>"""
     return html.replace(
