@@ -1039,7 +1039,7 @@ def render_status(card: dict) -> str:
     nxt = (f'          <span class="fc-tile-x fc-next">{icon("calendar")}<span>{next_sub}</span></span>')
     open_n = rounds - scored_rounds
     tiles += tile("layers", "Rounds scored", f"{scored_rounds} of {rounds}",
-                  "Each archived round has at least one score" if not open_n
+                  "Each has at least one score" if not open_n
                   else f"{open_n} round{'s' if open_n != 1 else ''} still waiting", nxt)
     chip = (f'      <p class="fc-skill"><span class="fc-skill-chip">{icon("alert")}Too few to show skill</span>'
             '<a href="#limits">Limits</a></p>')
