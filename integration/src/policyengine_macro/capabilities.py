@@ -47,7 +47,7 @@ MODELS = {
         ],
         "horizon": "one policy year under long-run steady-state assumptions",
         "access": ["CLI", "Python"],
-        "runtime": "two OG steady-state solves (baseline cached; >10 min cold) + one microsim run",
+        "runtime": "two OG steady-state solves (baseline cached; tens of minutes, not formally timed) + one microsim run",
         "uncertainty": "none quantified; steady-state comparative statics",
         "status": (
             "experimental; local-only (oguk excluded from the hosted image), "

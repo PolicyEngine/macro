@@ -1505,7 +1505,7 @@ def reform_stands() -> str:
         route_card("hourglass", "Long-run dynamic", '<a href="/olg">OG-UK + microsimulation</a>',
                    "Feeds steady-state wage changes into a second microsimulation run.",
                    "Experimental, local only",
-                   [("Steady state", dynamic["horizon"]), ("Many minutes (10+ cold)", dynamic["runtime"]),
+                   [("Steady state", dynamic["horizon"]), ("Tens of minutes (untimed)", dynamic["runtime"]),
                     ("CLI", ", ".join(dynamic["access"]))]),
     ])
 

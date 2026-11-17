@@ -40,6 +40,11 @@ def n(x: float) -> str:
     return f"{x:.1f}"
 
 
+def data_edge() -> str:
+    """Last quarter of data the forecast conditions on, from the archived round."""
+    return json.loads(SRC.read_text())["data_edge"]
+
+
 def load_fan():
     """Quarterly year-on-year UK real GDP growth: median, 68% and 90% bands."""
     payload = json.loads(SRC.read_text())
@@ -96,7 +101,7 @@ def build() -> str:
         )
     desc = (
         f"Fan chart. Posterior forecast of UK year-on-year real GDP growth from the "
-        f"boe-svar model, {quarters[0]} to {quarters[-1]}, conditioned through 2026Q1. The "
+        f"boe-svar model, {quarters[0]} to {quarters[-1]}, conditioned through {data_edge()}. The "
         f"median path runs from {med[0]:+.2f}% to {med[-1]:+.2f}%. The 90% credible band "
         f"is widest at {quarters[w]}, spanning {lo90[w]:+.2f}% to {hi90[w]:+.2f}%; {edge}."
     )
