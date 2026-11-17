@@ -8664,3 +8664,156 @@ main .band-head[data-icon]::before, main .band-head::before {
   .scroll-reveal, .rv-on .scroll-reveal, .rv-on .scroll-reveal.rv-head > *, .rv-on .scroll-reveal.rv-head::before { opacity: 1 !important; transform: none !important; transition: none !important; }
   .rv-progress { display: none; }
 }
+
+/* =====================================================================
+   41. Use-case cards (Home and Models "joins"): one tight grid per card.
+   Header row: icon, title, status chip. Flow: one rail, each step a dot on the
+   rail with its bold label and muted sub-label on one left edge. Footer: Details
+   on the right, on a hairline. Equal heights. One footer bar under the three.
+   ===================================================================== */
+.hub2 .uc-grid { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 16px; align-items: stretch; }
+@media (max-width: 900px) { .hub2 .uc-grid { grid-template-columns: 1fr !important; } }
+.hub2 .uc a { display: flex !important; flex-direction: column; gap: 0; height: 100%; padding: 20px; border: 1px solid var(--ab-border); border-top-width: 1px !important; border-radius: 12px; background: var(--card); box-shadow: none; text-decoration: none; color: inherit; }
+.hub2 .uc a::before { display: none !important; }
+.hub2 .uc-head { display: grid !important; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; column-gap: 10px; margin: 0 0 18px; }
+.hub2 .uc-ic { display: grid; place-items: center; width: 24px !important; height: 24px !important; background: none !important; color: var(--ab-teal-700); }
+.hub2 .uc-ic svg { width: 20px; height: 20px; }
+.hub2 .uc-title { font-size: 15px; font-weight: 650; line-height: 1.3; color: var(--text-strong); }
+.hub2 .uc-chip { justify-self: end; white-space: nowrap; height: 22px; display: inline-flex; align-items: center; padding: 0 9px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+.hub2 .uc-hosted .uc-chip { background: color-mix(in srgb, var(--ab-gain) 12%, transparent); color: var(--ab-teal-700); }
+.hub2 .uc-exp .uc-chip { background: color-mix(in srgb, #64748B 12%, transparent); color: #334155; }
+.hub2 .uc-local .uc-chip { background: color-mix(in srgb, var(--ab-loss) 13%, transparent); color: #92400E; }
+.hub2 .uc-ic { color: var(--ab-teal-700) !important; }
+/* the flow rail */
+.hub2 .vf { position: relative; display: grid; row-gap: 16px; margin: 0; padding: 0; list-style: none; }
+.hub2 .vf::before { content: ""; position: absolute; left: 11px; top: 12px; bottom: 12px; width: 2px; border-radius: 2px; background: color-mix(in srgb, var(--ab-teal-700) 22%, var(--ab-border)); }
+.hub2 .vf-step { position: relative; display: grid !important; grid-template-columns: 24px minmax(0, 1fr); column-gap: 12px; align-items: start; padding: 0 !important; }
+.hub2 .vf-step::before { display: none !important; }
+.hub2 .vf-dot { position: relative; z-index: 1; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--card); color: var(--ab-teal-700); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ab-teal-700) 40%, var(--ab-border)); }
+.hub2 .vf-dot svg { width: 13px; height: 13px; }
+.hub2 .vf-micro .vf-dot { background: var(--ab-teal-700); color: #FFFFFF; box-shadow: none; }
+.hub2 .vf-t { display: flex !important; flex-direction: column; gap: 2px; padding-top: 2px !important; min-width: 0; }
+.hub2 .vf-t strong { font-size: 14px; font-weight: 600; line-height: 1.3; color: var(--text-strong); }
+.hub2 .vf-t small { display: block !important; font-size: 12.5px; line-height: 1.4; color: var(--text-muted); }
+/* footer */
+.hub2 .uc-foot { display: flex; justify-content: flex-end; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--ab-border); }
+.hub2 .vf { margin-bottom: 20px !important; }
+.hub2 .uc-go { margin: 0 !important; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--ab-teal-700); }
+.hub2 .uc a:hover .uc-go svg { transform: translateX(2px); }
+/* one footer bar spanning the three cards */
+.hub2-foot { display: flex; align-items: center; gap: 12px; margin: 16px 0 0; padding: 12px 16px; border-radius: 12px; background: var(--ab-inset); border: 1px solid var(--ab-border); color: var(--text-body); font-size: 13.5px; line-height: 1.5; }
+.hub2-foot > svg { flex: none; color: var(--ab-teal-700); }
+.hub2-foot > span { flex: 1; min-width: 0; }
+.hub2-foot a { font-weight: 600; color: var(--ab-teal-700); }
+.hub2-foot-go { flex: none; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; text-decoration: none; }
+@media (max-width: 640px) { .hub2-foot { flex-wrap: wrap; align-items: flex-start; } .hub2-foot-go { margin-left: 28px; } }
+@media (prefers-color-scheme: dark) {
+  .hub2 .uc-exp .uc-chip { color: #CBD5E1; } .hub2 .uc-local .uc-chip { color: #FCD34D; } .hub2 .uc-hosted .uc-chip { color: #99F6E4; }
+  .hub2 .vf-micro .vf-dot { background: var(--hub-core-dark); }
+  .hub2 .uc-ic, .hub2 .vf-dot, .hub2-foot > svg, .hub2-foot a, .hub2 .uc-go { color: var(--primary) !important; }
+  .hub2 .vf-micro .vf-dot { color: #FFFFFF !important; }
+}
+.hub2 .vf::before { display: none !important; }
+.hub2 .vf-step:not(:last-child)::after { content: ""; position: absolute; left: 11px; top: 27px; bottom: -13px; width: 2px; border-radius: 2px; background: color-mix(in srgb, var(--ab-teal-700) 25%, var(--ab-border)); }
+.hub2 .vf .vf-dot { width: 24px !important; height: 24px !important; border-radius: 50% !important; background: var(--card) !important; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ab-teal-700) 45%, var(--ab-border)) !important; }
+.hub2 .vf .vf-micro .vf-dot { background: var(--ab-teal-700) !important; color: #FFFFFF !important; box-shadow: none !important; }
+@media (prefers-color-scheme: dark) { .hub2 .vf .vf-micro .vf-dot { background: var(--hub-core-dark) !important; } }
+.hub2 .vf .vf-micro .vf-dot svg { color: #FFFFFF !important; }
+
+/* =====================================================================
+   42. Consolidation (Vahid: "more professional", "consolidate all boxes and formats").
+   Decided with Opus (Fable limit). One final block, not another layer of one-offs:
+   - one plain card: white, 1px border, 12px radius, 20px padding, no shadow, no accent bar
+   - one inset/note box (sunken background, 1px border, 12px radius)
+   - one callout (3px left bar, 10px radius) — set in §42c
+   - one chip geometry in three tones (neutral, teal, amber)
+   - one section rhythm on Home: every section opens with the .sh header
+   ===================================================================== */
+:root { --card-pad: 20px; --card-radius: 12px; }
+@media (max-width: 767px) { :root { --card-pad: 16px; } }
+
+/* 42a. Plain card */
+:is(.mc-card, .ct-card, .lp-model, .tl, .lp-score-card, .lp-use, .mp-card, .fit-card, .mp-link-card, .fc-node-card, .spark, .ab-card) {
+  background: var(--card); border: 1px solid var(--ab-border) !important; border-radius: var(--card-radius) !important; box-shadow: none !important;
+}
+:is(.mc-card, .ct-card, .tl, .lp-score-card, .lp-use, .mp-card, .fit-card, .mp-link-card, .spark) { padding: var(--card-pad) !important; }
+.mc-card::before, .lp-model::before, .ct-card::before { display: none !important; }
+.fit-card.fit-no { background: var(--card); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :is(.mc-card, .ct-card, .qc, .hq):hover { border-color: color-mix(in srgb, var(--ab-teal-700) 35%, var(--ab-border)) !important; box-shadow: 0 6px 18px rgba(17, 24, 39, .07) !important; }
+}
+
+/* 42b. Inset / note box */
+:is(.hub2-foot, .codeblock:not(.lp-term), .vc-source, .ct-self) { background: var(--ab-inset); border: 1px solid var(--ab-border); border-radius: var(--card-radius); }
+
+/* 42c. Callout: one left-bar box */
+:is(.callout, .fc-warn, .ov-verdict-line, .verdict-chip) { border-radius: 10px !important; border-left-width: 3px !important; }
+
+/* 42d. One chip geometry, three tones */
+:is(.chip, .lp-pill, .uc-chip, .lp-trust, .lp-capchip, .cc-chip, .mc-pill) { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px !important; border-radius: 999px !important; font-size: 12px !important; font-weight: 600; letter-spacing: 0 !important; text-transform: none !important; white-space: nowrap; }
+.lp-pill { background: var(--surface-sunken); color: var(--text-body); border: 0; }
+.chip.chip-warn, .lp-capchip-warn { background: color-mix(in srgb, var(--ab-loss) 13%, transparent) !important; color: #92400E !important; border: 0 !important; }
+.chip.chip-warn svg, .lp-capchip-warn svg { color: var(--ab-loss) !important; }
+@media (prefers-color-scheme: dark) {
+  .lp-pill { background: color-mix(in srgb, #94A3B8 16%, transparent); color: #CBD5E1; }
+  .chip.chip-warn, .lp-capchip-warn { background: color-mix(in srgb, var(--ab-loss) 22%, transparent) !important; color: #FCD34D !important; }
+  .chip.chip-warn svg, .lp-capchip-warn svg { color: #FBBF24 !important; }
+}
+
+/* 42e. Home section rhythm: same gap before every section, no stray hairlines */
+.lp-section, .lp-section-alt { margin-top: 72px !important; padding: 0 !important; border: 0 !important; background: none !important; }
+@media (max-width: 767px) { .lp-section, .lp-section-alt { margin-top: 48px !important; } }
+.tl { margin-top: 0 !important; }
+.tl-foot { border-top-color: var(--ab-border) !important; }
+.tl-rung { border-top-color: var(--ab-border) !important; }
+@media (min-width: 900px) { .tl-rung { grid-template-columns: 28px minmax(0, 340px) minmax(0, 1fr) !important; column-gap: 20px !important; } }
+
+/* 42f. Hero chart: caption stacked, no floating hairline, tighter axis */
+.lp-fan figcaption.lp-fan-top { border-top: 0 !important; padding-top: 0 !important; margin: 0 0 12px !important; flex-direction: column; align-items: flex-start !important; justify-content: flex-start !important; gap: 8px !important; }
+.vc-fig.vc-hero .vc-plot { margin: 4px 40px 8px 0 !important; }
+
+/* 42g. Seven models: one card layout; "Open" pinned to the bottom; tight name-to-question gap */
+.mc-card { display: flex; flex-direction: column; }
+.mc-card .mc-go { margin-top: auto !important; padding-top: 12px; }
+.mc-card .mc-q { margin-top: 4px !important; }
+@media (min-width: 1025px) {
+  .home-models > .mc-card[href="/pe"] { grid-template-columns: 40px minmax(0, 1fr) auto !important; grid-template-areas: "icon name pill" "icon q go" !important; column-gap: 16px !important; }
+  .home-models > .mc-card[href="/pe"] > .mc-go { justify-self: end; align-self: end; padding-top: 0; }
+}
+
+/* 42h. Forecast record: stats in a row under the dots, never a squeezed side column */
+.lp-score-card .lp-rec { display: block !important; }
+.lp-score-card .lp-recstats { display: flex !important; flex-wrap: wrap; gap: 12px 40px; align-items: baseline; margin-top: 20px !important; padding-top: 16px; border-top: 1px solid var(--ab-border); }
+.lp-score-card .lp-recstats div { flex-direction: row-reverse !important; align-items: baseline; gap: 8px !important; justify-content: flex-end; }
+.lp-score-card .lp-dotkey { font-size: 12px; }
+
+/* 42i. Run a model: content from the top, a real terminal panel */
+.lp-use { display: grid !important; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr) !important; gap: 32px !important; align-items: start !important; }
+@media (max-width: 899px) { .lp-use { grid-template-columns: 1fr !important; } }
+.lp-use-copy h3 { margin: 0 0 6px; font-size: 17px; font-weight: 650; color: var(--text-strong); }
+.lp-use-copy p { margin: 0 0 16px; color: var(--text-body) !important; }
+.lp-term { position: relative; background: #0F1720 !important; border: 1px solid #0F1720 !important; border-radius: var(--card-radius) !important; color: #E5E7EB; padding: 0 !important; overflow: hidden; }
+.lp-term .lp-term-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid rgba(255, 255, 255, .08); }
+.lp-term .lp-term-bar span { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, .22); }
+.lp-term .lp-term-title { margin-left: 8px; font: 600 11.5px/1 var(--mono, ui-monospace, monospace); color: rgba(255, 255, 255, .55); }
+.lp-term pre { margin: 0; padding: 16px 18px 18px; background: none !important; color: #E5E7EB !important; font-size: 13px; line-height: 1.65; }
+.lp-term pre code { color: inherit !important; background: none !important; }
+.lp-term .lp-term-p { color: #5EEAD4; }
+.lp-term .cb-copy { position: absolute; top: 6px; right: 8px; background: rgba(255, 255, 255, .08) !important; color: #E5E7EB !important; border: 1px solid rgba(255, 255, 255, .14) !important; }
+
+/* 42j. Phones: footer links drop to their own line; long use-card titles wrap cleanly */
+@media (max-width: 600px) {
+  .hub2-foot { flex-direction: column; align-items: flex-start !important; }
+  .hub2-foot-go { margin-left: 0 !important; }
+  .lp-score-foot, .tl-foot { flex-wrap: wrap; }
+  .hub2 .uc-head { grid-template-columns: 24px minmax(0, 1fr) !important; row-gap: 6px; }
+  .hub2 .uc-chip { grid-column: 2; justify-self: start; }
+}
+
+/* 42k. Dark mode: quiet footer, readable primary buttons, readable fan bands */
+@media (prefers-color-scheme: dark) {
+  .foot.foot-bar { background: #0B1220 !important; border-top: 1px solid var(--border); }
+  .btn-primary, .btn-inv { background: var(--ab-teal-700) !important; color: #FFFFFF !important; border-color: var(--ab-teal-700) !important; }
+  .lp-term { border-color: rgba(255, 255, 255, .1) !important; }
+}
+.hub2 .uc a { align-items: stretch !important; }

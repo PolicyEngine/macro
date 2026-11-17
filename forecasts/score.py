@@ -1326,13 +1326,11 @@ def render_home_record(card: dict) -> str:
         span = ""
     plural = lambda n, w: f"{n} {w}{'' if n == 1 else 's'}"
     return "\n".join([
-        '        <div class="lp-score-head">',
-        f'          <span class="icon-tile">{_lucide("target", 20)}</span>',
-        '          <div class="lp-score-title">',
-        '            <h2 id="record-h">Forecast record</h2>',
-        f'            <p>UK &middot; {subjects} &middot; {span}</p>',
-        "          </div>",
-        "        </div>",
+        f'      <div class="sh"><span class="sh-icon">{_lucide("target", 20)}</span>',
+        '        <h2 id="record-h">Forecast record</h2>',
+        f'        <p>UK &middot; {subjects} &middot; {span}</p>',
+        "      </div>",
+        '      <div class="lp-score-card">',
         '        <div class="lp-rec">',
         '          <div class="lp-rec-viz">',
         '          <div class="lp-dots">',
@@ -1353,6 +1351,7 @@ def render_home_record(card: dict) -> str:
         f'        <p class="lp-score-foot"><span class="chip chip-warn">{_lucide("alert", 14)}Too few to show skill</span>'
         f'<span>{plural(scored, "forecast")} of {plural(st["outturns"], "outturn")}; {st["retro"]} archived retroactively.</span>'
         '<a href="/forecasts#scored">See every score &rarr;</a></p>',
+        "      </div>",
     ])
 
 
