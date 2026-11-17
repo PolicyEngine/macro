@@ -111,7 +111,7 @@ MODELS = {
         "cannot_answer": ["PolicyEngine reforms", "model-consistent-expectations scenarios"],
         "horizon": "quarterly",
         "access": ["hosted raw shocks", "CLI with editable model checkout", "Python"],
-        "runtime": "seconds to minutes",
+        "runtime": "about 3 seconds cold; under a second warm",
         "uncertainty": "not comprehensive",
         "status": (
             "replicates the Fed's pyfrbus (1.0.0 and 1.1.1) on one 100bp "
