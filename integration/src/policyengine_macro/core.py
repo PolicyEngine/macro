@@ -3583,7 +3583,7 @@ def dynamic_population_reform_impact(
     reduces this exactly to the static score.
 
     UK only (OG-UK is UK-only). Runtime: two OG steady-state solves
-    (baseline cached; ~10+ min cold) plus one microsim run.
+    (baseline cached; tens of minutes, not formally timed) plus one microsim run.
     """
     from policyengine_macro.assumptions import (
         SCALED_INPUT_VARIABLES, EconomicAssumptions,
