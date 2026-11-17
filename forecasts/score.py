@@ -988,7 +988,7 @@ def render_status(card: dict) -> str:
     pips = (f'          <span class="fc-pips" role="img" aria-label="{st["exante_in68"]} of {st["exante"]} '
             'ex-ante forecasts inside the 68% band">'
             + "".join(f'<i class="{"in" if e["in_68"] else "out"}"></i>' for e in ex) + "</span>")
-    tiles = tile("target", "Inside the 68% band, made before the outturn",
+    tiles = tile("target", f'Live forecasts inside the 68% band ({st["exante"]} live)',
                  f'{st["exante_in68"]} of {st["exante"]}',
                  f'+{st["retro"]} retroactive · {scored} forecasts of {st["outturns"]} outturns', pips)
     if st["naive_mae"] is not None:
@@ -998,11 +998,11 @@ def render_status(card: dict) -> str:
                 f'<span class="fc-bar-l">This model {st["mae"]:.2f}pp</span><span class="fc-bar"><i class="fc-bar-ours" style="width:{st["mae"] / top * 100:.0f}%"></i></span>'
                 f'<span class="fc-bar-l">No change {st["naive_mae"]:.2f}pp</span><span class="fc-bar"><i class="fc-bar-naive" style="width:{st["naive_mae"] / top * 100:.0f}%"></i></span>'
                 "</div>")
-        tiles += tile("ruler", "Average miss", "", "Lower is better; same forecasts, same outturns.", bars)
+        tiles += tile("ruler", f"Average miss, all {scored}", "", "Lower is better; same forecasts, same outturns.", bars)
     sign = "\u2212" if st["bias"] < 0 else "+"
     runs = (f'Ran low on {st["low"]} of {scored}' if st["bias"] < 0
             else f'Ran high on {scored - st["low"]} of {scored}')
-    tiles += tile("scale", "Bias, mean error", f'{sign}{abs(st["bias"]):.2f}pp', runs)
+    tiles += tile("scale", f"Bias, all {scored}", f'{sign}{abs(st["bias"]):.2f}pp', runs)
     tiles += tile("layers", "Rounds", f'{scored_rounds} scored', next_sub)
     chip = (f'      <p class="fc-skill"><span class="fc-skill-chip">{icon("alert")}Too few to show skill</span>'
             '<a href="#limits">Limits</a></p>')
@@ -1168,7 +1168,7 @@ def render_results(card: dict) -> str:
             f'<div role="cell"><span class="visually-hidden">Median {e["forecast"]:.2f}%, 68% band '
             f'{e["lo68"]:.2f}–{e["hi68"]:.2f}, 90% band {e["lo90"]:.2f}–{e["hi90"]:.2f}, outturn {e["outturn"]:.2f}%.</span>'
             f"{_strip(e)}</div>"
-            f'<div role="cell" class="fc-err"><span class="fc-err-chip">{signed(e["error"])}</span></div>'
+            f'<div role="cell" class="fc-err"><span class="fc-err-chip" title="Stored error {e["error"]:+.4f}pp">{signed(round(e["forecast"], 2) - round(e["outturn"], 2))}</span></div>'
             f'<div role="cell" class="fc-where"><span class="fc-badge2 {badge_cls}">{icon("inside" if inside else "outside")}{esc(band[0].upper() + band[1:])}</span>{vint}{note}</div>'
             "</div>"
         )
@@ -1294,6 +1294,7 @@ def render_home_record(card: dict) -> str:
         return "lp-rdot-out", "Outside the 90% band."
 
     periods = sorted({e["period"] for _, e in pairs})
+    first_round = card["detail"][0]["round_id"] if card["detail"] else None
     groups = []
     for g, period in enumerate(periods, 1):
         items = []
@@ -1301,9 +1302,12 @@ def render_home_record(card: dict) -> str:
             if e["period"] != period:
                 continue
             cls, verdict = where(e)
+            retro = d["round_id"] == first_round
             text = esc(f"{name.get(e['variable'], e['variable'])}{who(d)}, {day(d['round_id'])} forecast: "
-                       f"{e['forecast']:.2f} vs outturn {e['outturn']:.2f}. {verdict}")
-            items.append(f'<li><span class="lp-rdot {cls}" aria-hidden="true" title="{text}"></span>'
+                       f"{e['forecast']:.2f} vs outturn {e['outturn']:.2f}. {verdict}"
+                       + (" Archived retroactively." if retro else ""))
+            style = ' style="opacity:.4"' if retro else ""
+            items.append(f'<li><span class="lp-rdot {cls}{" lp-rdot-retro" if retro else ""}"{style} aria-hidden="true" title="{text}"></span>'
                          f'<span class="visually-hidden">{text}</span></li>')
         groups.append(
             f'          <div class="lp-dotgroup"><span class="lp-dotgroup-l mono" id="rec-g{g}">{period}</span>'
@@ -1338,11 +1342,12 @@ def render_home_record(card: dict) -> str:
         '            <li><span class="lp-rdot lp-rdot-68" aria-hidden="true"></span>Inside 68%</li>',
         '            <li><span class="lp-rdot lp-rdot-90" aria-hidden="true"></span>Inside 90%</li>',
         f'            <li><span class="lp-rdot lp-rdot-out" aria-hidden="true"></span>Outside 90%: {esc("; ".join(misses)) if misses else "none"}</li>',
+        '            <li><span class="lp-rdot lp-rdot-68" style="opacity:.4" aria-hidden="true"></span>Faded: archived retroactively</li>',
         "          </ul>",
         "          </div>",
         '          <dl class="lp-recstats">',
-        f'            <div><dt>inside the 68% band, made before the outturn</dt><dd>{st["exante_in68"]}<small> of {st["exante"]}</small></dd></div>',
-        f'            <div><dt>bias, mean error</dt><dd>{"&minus;" if st["bias"] < 0 else "+"}{abs(st["bias"]):.2f}<small>pp</small></dd></div>',
+        f'            <div><dt>live forecasts inside the 68% band</dt><dd>{st["exante_in68"]}<small> of {st["exante"]}</small></dd></div>',
+        f'            <div><dt>bias, all {scored} forecasts</dt><dd>{"&minus;" if st["bias"] < 0 else "+"}{abs(st["bias"]):.2f}<small>pp</small></dd></div>',
         "          </dl>",
         "        </div>",
         f'        <p class="lp-score-foot"><span class="chip chip-warn">{_lucide("alert", 14)}Too few to show skill</span>'

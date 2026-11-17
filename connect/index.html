@@ -133,6 +133,7 @@
 <li class="cmd-row"><span class="cmd-row-l"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>US HANK shock</span><code>pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61</code><button type="button" class="copy-btn" data-copy><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span></button></li>
 </ul>
 <p class="use-note">Add <code>--json</code> to any command for machine-readable output.</p>
+<p class="use-note">Local UK population runs need private FRS access (<code>HUGGING_FACE_TOKEN</code>); hosted calls need nothing.</p>
 <p class="use-note">Shock units differ by lever and model: run <code>pe-macro variables</code>, <code>pe-macro frbus-variables</code> or <code>pe-macro hank-summary</code> first. <a href="https://github.com/PolicyEngine/macro/tree/main/integration#cli">Every CLI command on GitHub →</a></p>
 </div>
 </div>
@@ -176,6 +177,8 @@ forecast = asyncio.run(call("forecast_uk", {"horizons": 4}))</code></pre>
         r = await call("get_job_result", {"job_id": job["job_id"], "wait_seconds": 30})
         if r["status"] == "done":
             return r["result"]
+        if r["status"] in ("error", "failed"):
+            raise RuntimeError(r)
 
 score = asyncio.run(run_job("score_reform", {
     "country": "uk", "model": "obr",
