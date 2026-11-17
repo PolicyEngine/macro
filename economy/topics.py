@@ -2955,14 +2955,6 @@ def sentence_case_inline(text: str) -> str:
     return text
 
 
-def topic_where_next(topic: dict) -> str:
-    """The where-next row: the record, the data store, the country data hub."""
-    entry = COUNTRIES[topic["country"]]
-    cards = [
-        (entry["hub"], "chart", "Forecasts", "The record, open rounds and how they score"),
-        (entry["data"], "list", f'{entry["label"]} data', "Every topic and series in one place"),
-    ]
-    return site_nav.where_next(cards)
 
 
 SHORT_LEDES = {
@@ -3056,14 +3048,6 @@ def page(topic: dict) -> str:
 {site_nav.expander("database", "Data and sources", "Series, coverage and the append-only snapshot files.", data_body, id_="data")}
   </section>
 
-  <section class="band tp-next" aria-labelledby="next-h">
-    <h2 id="next-h"><span class="tp-h-ic" aria-hidden="true">{site_nav.icon("arrow-right", 16)}</span>Read next</h2>
-    <p class="tp-chips">
-      <a href="{COUNTRIES[topic["country"]]["hub"]}">{site_nav.icon("forecasts", 16)}Track record</a>
-      <a href="{COUNTRIES[topic["country"]]["data"]}">{site_nav.icon("list", 16)}{COUNTRIES[topic["country"]]["label"]} data</a>
-      <a href="/connect">{site_nav.icon("use", 16)}Run the models</a>
-    </p>
-  </section>
 </main>
 
 <footer class="foot foot-bar">

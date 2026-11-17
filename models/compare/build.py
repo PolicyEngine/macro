@@ -458,11 +458,6 @@ def body(data: dict) -> str:
         for i, q in enumerate(data["questions"])
     )
     sections = "\n".join(question(data, q, i == 0) for i, q in enumerate(data["questions"]))
-    cards = site_nav.where_next([
-        ("/models#choose", "list", "Which model answers your question", "Pick a model by question and country"),
-        ("/models#validation", "target", "How each model is checked", "The evidence behind every model"),
-        (data["issue"], "data", "The battery and its method", "macro #213, with every call"),
-    ])
     return f"""<main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
@@ -482,7 +477,6 @@ def body(data: dict) -> str:
       <p>Each verdict starts with one of six words: plausible, off, questionable, unresolved, not tested or no instrument; some add a qualifier (such as &ldquo;off, sign right&rdquo;), and each carries its reason and the open issue. These words grade one experiment; each model&rsquo;s overall standing uses the <a class="gloss-link" href="/glossary#verification-class">status vocabulary</a> on its model card. Results file version {esc(data["version"])}; <a href="{REPO_BLOB}/run_battery.py">how it is checked and regenerated</a>.</p></details>
   </section>
 {sections}
-{cards}
 </main>"""
 
 

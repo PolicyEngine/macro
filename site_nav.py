@@ -539,28 +539,6 @@ CARD_ICONS = {
 }
 
 
-def where_next(cards: list[tuple[str, str, str, str]], indent: str = "  ") -> str:
-    """A "where next" card: (href, icon key, title, one line) per entry card."""
-    rows = []
-    for href, key, title, line in cards:
-        rows.append(
-            f'{indent}    <a class="entry-card" href="{href}">\n'
-            f'{indent}      <span class="icon-badge" aria-hidden="true"><svg viewBox="0 0 24 24" '
-            'fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" '
-            f'stroke-linejoin="round">{CARD_ICONS[key]}</svg></span>\n'
-            f"{indent}      <h3>{title}</h3>\n"
-            f"{indent}      <p>{line}</p>\n"
-            f'{indent}      <span class="entry-cta">Explore <span aria-hidden="true">&rarr;</span></span>\n'
-            f"{indent}    </a>"
-        )
-    return (
-        f'{indent}<section class="band where-next" id="where-next">\n'
-        f'{indent}  <div class="band-head" data-icon="link"><h2>Keep reading</h2></div>\n'
-        f'{indent}  <div class="entry-grid">\n' + "\n".join(rows) + "\n"
-        f"{indent}  </div>\n{indent}</section>"
-    )
-
-
 # Standalone documents allowed to ship without the global nav header.
 # Empty: reports/us-hank-open-source was the last one, and a reader clicking
 # through from /us-hank landed on a page with no header, no breadcrumb and no

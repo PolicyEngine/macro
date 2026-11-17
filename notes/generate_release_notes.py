@@ -228,11 +228,6 @@ def digest_page(vintage: str) -> str:
           </tbody>
         </table>
     </div>""")
-    where = site_nav.where_next([
-        ("/notes/releases", "list", "All release digests", "Every stored date, newest first"),
-        ("/economy#data", "data", "The data store", "Every stored vintage of every series"),
-        ("/forecasts#scored", "chart", "The forecast record", "Rounds scored against outturns like these"),
-    ])
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -264,7 +259,6 @@ def digest_page(vintage: str) -> str:
 {chr(10).join(tables)}
     </div>
   </section>
-{where}
 </main>
 <footer class="foot foot-bar">
   <p class="footer-legal">© 2026 PolicyEngine</p>
