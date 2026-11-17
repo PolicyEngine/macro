@@ -664,6 +664,25 @@ def outturn_values(variable: str) -> dict[str, float]:
     }
 
 
+def outturn_vintages(variable: str) -> dict[str, str]:
+    """Snapshot date of the newest stored outturn per period."""
+    doc = json.loads(OUTTURNS.read_text())
+    return {
+        period: obs["vintage"]
+        for (period, var), obs in latest_outturns(doc.get("observations", [])).items()
+        if var == variable
+    }
+
+
+def dots_label(vintages: list[str], round_id: str) -> str:
+    """Name the outturn dots by when they were published against the round."""
+    if vintages and all(v > round_id for v in vintages):
+        return "ONS outturn (published after the round)"
+    if vintages and all(v <= round_id for v in vintages):
+        return "ONS outturn (published before the round; not scored)"
+    return "ONS outturn"
+
+
 OCT_EFO_SOURCE = {
     "gdp": ("OBR October 2026 EFO path: four-quarter growth of Table 1.1 real GDP, "
             "detailed economy tables, stored in "
@@ -794,6 +813,8 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
         chartkit.attach_table(chartkit.attach_plot(block, chartkit.fan_plot(
             rows, median_name="BoE SVAR median", band_note="(re-calibrated)",
             overlay=(efo_name, "efo"), dots=[(rows[i]["period"], v) for i, v in dots],
+            dots_name=dots_label([outturn_vintages(variable)[rows[i]["period"]] for i, _ in dots],
+                                 SVAR_ROUND.parent.name),
             y_range=(lo, hi), zero=lo < 0 < hi, target=2.0 if variable == "cpi" else None)),
             vs_official_table(variable, rows)),
         "      </figure>",
@@ -888,7 +909,7 @@ def release_day_timing(detail: dict, e: dict) -> str:
     release_utc = "06:00" if bst else "07:00"
     if stamp[11:16] >= release_utc:
         return ""
-    return f"archived {stamp[11:16]} UTC, before the 07:00 release"
+    return f"archived {stamp[11:16]} UTC, before the {release_utc} UTC ONS release"
 
 
 def long_date(iso: str) -> str:
@@ -1018,7 +1039,7 @@ def render_status(card: dict) -> str:
     def n(k: int) -> str:
         return f'<span class="fc-tile-n" title="Forecasts counted">n={k}</span>'
 
-    tiles = tile("target", f'Live forecasts in range{n(st["exante"])}',
+    tiles = tile("target", "Live forecasts in range",
                  f'{st["exante_in68"]} of {st["exante"]}',
                  f'+{st["retro"]} retroactive · {scored} forecasts, {st["outturns"]} outturns', pips)
     if st["naive_mae"] is not None:
