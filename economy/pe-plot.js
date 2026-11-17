@@ -92,6 +92,19 @@
     }
   });
 
+  // A chart in a closed tab draws when its panel opens. ResizeObserver covers
+  // that; this is the fallback where it is late (a background tab, an old
+  // engine): any tab click, hash change or return to the page retries.
+  function drawPending() {
+    figures.forEach(function (item) { if (!item.drawn) draw(item); });
+  }
+  var later = function () { setTimeout(drawPending, 0); };
+  document.addEventListener("click", function (e) {
+    if (e.target.closest && e.target.closest('[role="tab"], summary')) later();
+  });
+  window.addEventListener("hashchange", later);
+  document.addEventListener("visibilitychange", later);
+
   var scheme = window.matchMedia("(prefers-color-scheme: dark)");
   var redraw = function () { figures.forEach(function (item) { if (item.drawn) draw(item); }); };
   if (scheme.addEventListener) scheme.addEventListener("change", redraw);

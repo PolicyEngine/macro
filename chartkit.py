@@ -444,10 +444,21 @@ def _date_span(first: str, last: str, pad: float = 0.04) -> list[str]:
     return [(a - d).isoformat(), (b + d).isoformat()]
 
 
+def _x_ticks(x_span: tuple[str, str] | None) -> dict:
+    """Yearly ticks; quarterly ones ('2026Q3') when the window is under two years."""
+    if x_span:
+        a, b = (period_date(p)[:7] for p in x_span)
+        months = (int(b[:4]) - int(a[:4])) * 12 + int(b[5:7]) - int(a[5:7])
+        if months < 24:
+            return {"dtick": "M3", "tickformat": "%YQ%q", "tick0": "2000-02-15"}
+    return {"dtick": "M12", "tickformat": "%Y"}
+
+
 def plot_spec(traces: list[dict], *, unit: str = "%", height: int = 260,
               zero: bool = False, target: float | None = None, target_label: str = "",
               edge: str | None = None, y_range: tuple[float, float] | None = None,
-              x_span: tuple[str, str] | None = None, hovermode: str = "closest") -> dict:
+              x_span: tuple[str, str] | None = None, hovermode: str = "closest",
+              y_dtick: float | None = None) -> dict:
     """House-style layout: Inter, light grid, no modebar, no zoom or drag."""
     shapes, notes = [], []
     if zero:
@@ -475,11 +486,12 @@ def plot_spec(traces: list[dict], *, unit: str = "%", height: int = 260,
                        "font": {"color": "var(--text-strong)", "size": 12}},
         "xaxis": {**axis, "type": "date", "showgrid": False, "ticks": "outside",
                   **({"hoverformat": "%YQ%q"} if hovermode == "x unified" else {}),
-                  "ticklen": 4, "tickcolor": "var(--hairline)", "dtick": "M12",
-                  "tickformat": "%Y", "tickangle": 0, "ticklabelmode": "instant",
+                  "ticklen": 4, "tickcolor": "var(--hairline)", "tickangle": 0,
+                  "ticklabelmode": "instant", **_x_ticks(x_span),
                   **({"range": _date_span(*x_span)} if x_span else {})},
         "yaxis": {**axis, "showgrid": True, "gridcolor": "var(--chart-grid)", "ticksuffix": unit,
-                  "nticks": 6, **({"range": [_r(y_range[0]), _r(y_range[1])]} if y_range else {})},
+                  "nticks": 6, **({"range": [_r(y_range[0]), _r(y_range[1])]} if y_range else {}),
+                  **({"dtick": y_dtick} if y_dtick else {})},
         "shapes": shapes, "annotations": notes, "transition": {"duration": 0},
     }
     return {"data": traces, "layout": layout}
@@ -495,3 +507,34 @@ def attach_plot(fig: str, spec: dict) -> str:
     block = ('<div class="pe-plot" aria-hidden="true"></div>\n'
              f'<script type="application/json" class="pe-plot-json">{payload}</script>\n')
     return fig.replace(marker, block + marker, 1)
+
+
+def fan_plot(rows: list[dict], *, median_name: str, band_note: str,
+             overlay: tuple[str, str] | None = None,
+             dots: list[tuple[str, float]] | None = None,
+             y_range: tuple[float, float] | None = None, zero: bool = False,
+             target: float | None = None, height: int = 300) -> dict:
+    """A forecast fan as Plotly JSON: 90% and 68% bands, the median, an
+    optional published path (``overlay`` = (label, row key), dashed) and
+    outturn dots. ``rows`` carry period, median, lo68, hi68, lo90, hi90."""
+    traces = [
+        *plot_band([(r["period"], r["lo90"], r["hi90"]) for r in rows], f"90% band {band_note}".strip(), "var(--band-90)"),
+        *plot_band([(r["period"], r["lo68"], r["hi68"]) for r in rows], f"68% band {band_note}".strip(), "var(--band-68)"),
+        plot_line([(r["period"], r["median"]) for r in rows], median_name, "var(--series-ours)", digits=2),
+    ]
+    if overlay:
+        traces.append(plot_line([(r["period"], r[overlay[1]]) for r in rows], overlay[0],
+                                "var(--series-official)", dash="dash", width=2, digits=2))
+    if dots:
+        out = plot_line(dots, "ONS outturn", "var(--series-outturn)", digits=2, markers=True)
+        out["marker"] = {"color": "var(--series-outturn)", "size": 9,
+                         "line": {"color": "var(--surface-card)", "width": 2}}
+        traces.append(out)
+    for t in traces:   # unified hover: the quarter heads the box
+        if t.get("name") and "band" not in t["name"]:
+            t["hovertemplate"] = f"{t['name']}: %{{y:.2f}}%<extra></extra>"
+    span = (y_range[1] - y_range[0]) if y_range else None
+    dtick = None if span is None else next((d for d in (0.1, 0.2, 0.5, 1, 2, 5) if span / d <= 7), 10)
+    return plot_spec(traces, unit="%", height=height, zero=zero, target=target,
+                     target_label="2% target", y_range=y_range, y_dtick=dtick,
+                     x_span=(rows[0]["period"], rows[-1]["period"]), hovermode="x unified")

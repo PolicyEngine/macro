@@ -121,6 +121,7 @@ def render() -> str:
             f"{src.parent.name}: no official path to overlay; raw bands (no "
             "coverage evaluation).</p>",
             '      <figure class="vchart-figure">',
+            chartkit.attach_plot(
             chartkit.figure("\n".join([
                 f'<svg class="vchart" data-chart="{CHART_ID}" '
                 f'viewBox="{left - 4} {top - 4} {plot_w + 8} {plot_h + 8}" role="img" '
@@ -147,6 +148,8 @@ def render() -> str:
                        f'{src.parent.name}/{src.name}">{src.parent.name}/{src.name}</a>'
                        + ('; outturn, ONS series MGSX from the <a href="/economy#data">data store</a>'
                           if dots else ""))),
+                chartkit.fan_plot(rows, median_name="Satellite median", band_note="(raw)",
+                                  dots=[(rows[i]["period"], v) for i, v in dots], y_range=(lo, hi))),
             "      </figure>",
         ]
     )

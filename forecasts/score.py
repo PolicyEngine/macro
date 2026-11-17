@@ -791,7 +791,11 @@ def render_vs_official_variable(variable: str, include_note: bool = False) -> st
         '      <figure class="vchart-figure">',
         # The numbers sit in the chart's own footer ("Details"), so they
         # travel with their fan when the chart-tab script moves the figure.
-        chartkit.attach_table(block, vs_official_table(variable, rows)),
+        chartkit.attach_table(chartkit.attach_plot(block, chartkit.fan_plot(
+            rows, median_name="BoE SVAR median", band_note="(re-calibrated)",
+            overlay=(efo_name, "efo"), dots=[(rows[i]["period"], v) for i, v in dots],
+            y_range=(lo, hi), zero=lo < 0 < hi, target=2.0 if variable == "cpi" else None)),
+            vs_official_table(variable, rows)),
         "      </figure>",
     ])
 
