@@ -1278,7 +1278,12 @@ print(cpi[&quot;vintage&quot;], cpi[&quot;observations&quot;][-1])              
   if (!table) return;
   var groups = table.querySelectorAll(".series-group");
   var toggles = table.querySelectorAll(".series-toggle");
+  // Preview at least five series, cut at the end of a topic group.
   var preview = 5;
+  if (groups.length > preview) {
+    var cutCat = groups[preview - 1].getAttribute("data-cat");
+    while (preview < groups.length && groups[preview].getAttribute("data-cat") === cutCat) preview++;
+  }
 
   function setOpen(btn, open) {
     btn.setAttribute("aria-expanded", open ? "true" : "false");
