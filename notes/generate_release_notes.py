@@ -204,7 +204,7 @@ def digest_page(vintage: str) -> str:
     /notes/releases/<date>-<series> redirects to /notes/releases/<date>#<series>.
     """
     items = sorted(snapshots(vintage), key=lambda s: (s["series"][:3] != "uk_", _label(s)))
-    day = datetime.strptime(vintage, "%Y-%m-%d").strftime("%-d %B %Y")
+    day = datetime.strptime(vintage, "%Y-%m-%d").strftime("%-d %b %Y")
     canonical = f"https://policyengine-macro.vercel.app/notes/releases/{vintage}"
     new = sum(1 for s in items if "new observation" in what_is_new(s, vintage))
     uk = [s for s in items if s["series"].startswith("uk_")]
@@ -271,7 +271,7 @@ def digest_page(vintage: str) -> str:
   <nav class="footer-links" aria-label="PolicyEngine links">
   </nav>
 </footer>
-<script src="/reveal.js?v=6" defer></script>
+<script src="/reveal.js?v=7" defer></script>
 </body>
 </html>
 """
@@ -312,7 +312,7 @@ def rebuild_indexes() -> None:
         items = snapshots(vintage)
         kinds = [what_is_new(s, vintage) for s in items]
         new = sum(1 for k in kinds if "new observation" in k)
-        day = datetime.strptime(vintage, "%Y-%m-%d").strftime("%-d %B %Y")
+        day = datetime.strptime(vintage, "%Y-%m-%d").strftime("%-d %b %Y")
         index_rows.append(
             f'        <a href="/notes/releases/{vintage}"><span>{day}: {len(items)} '
             f"series, {new} with a new observation</span>"

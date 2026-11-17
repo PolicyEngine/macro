@@ -171,6 +171,7 @@
   }
   window.addEventListener("resize", set, { passive: true });
   window.addEventListener("load", set);
+  if (window.ResizeObserver) new ResizeObserver(set).observe(nav);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(set);
   set();
 })();
@@ -542,19 +543,18 @@
 
 /* Thin teal reading-progress bar under the sticky header (style.css §40). */
 (function () {
-  var nav = document.querySelector(".nav");
+  var nav = document.querySelector("header.nav");
   if (!nav || !document.querySelector("main")) return;
   var bar = document.createElement("div");
   bar.className = "rv-progress";
   bar.setAttribute("aria-hidden", "true");
-  document.body.appendChild(bar);
+  nav.appendChild(bar);   /* inside the header, on its bottom edge: never over the tabs */
   var ticking = false;
   function update() {
     ticking = false;
     var max = document.documentElement.scrollHeight - window.innerHeight;
     var p = max > 120 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
     bar.style.transform = "scaleX(" + p.toFixed(4) + ")";
-    bar.style.top = Math.max(0, nav.getBoundingClientRect().bottom) + "px";
     bar.classList.toggle("is-on", p > 0.002);
   }
   function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }

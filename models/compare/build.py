@@ -585,7 +585,7 @@ def page(data: dict) -> str:
   <nav class="footer-links" aria-label="PolicyEngine links">
   </nav>
 </footer>
-<script src="/reveal.js?v=6" defer></script>
+<script src="/reveal.js?v=7" defer></script>
 {SCRIPT}
 </body>
 </html>

@@ -865,11 +865,10 @@ def vintage_file(series: str, vintage: str) -> str | None:
 
 
 def long_date(iso: str) -> str:
-    """'2026-08-26' -> '26 August 2026' (no leading zero, locale-free)."""
+    """'2026-08-26' -> '26 Aug 2026': the one date format used sitewide."""
     import datetime as _dt
     d = _dt.date.fromisoformat(iso[:10])
-    months = ("January February March April May June July August September "
-              "October November December").split()
+    months = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
     return f"{d.day} {months[d.month - 1]} {d.year}"
 
 
@@ -1301,26 +1300,6 @@ def render_home_record(card: dict) -> str:
 
     periods = sorted({e["period"] for _, e in pairs})
     first_round = card["detail"][0]["round_id"] if card["detail"] else None
-    groups = []
-    for g, period in enumerate(periods, 1):
-        items = []
-        for d, e in pairs:
-            if e["period"] != period:
-                continue
-            cls, verdict = where(e)
-            retro = d["round_id"] == first_round
-            text = esc(f"{name.get(e['variable'], e['variable'])}{who(d)}, {day(d['round_id'])} forecast: "
-                       f"{e['forecast']:.2f} vs outturn {e['outturn']:.2f}. {verdict}"
-                       + (" Archived retroactively." if retro else ""))
-            style = ' style="opacity:.4"' if retro else ""
-            items.append(f'<li><span class="lp-rdot {cls}{" lp-rdot-retro" if retro else ""}"{style} aria-hidden="true" title="{text}"></span>'
-                         f'<span class="visually-hidden">{text}</span></li>')
-        groups.append(
-            f'          <div class="lp-dotgroup"><span class="lp-dotgroup-l mono" id="rec-g{g}">{period}</span>'
-            f'<ol aria-labelledby="rec-g{g}">{"".join(items)}</ol></div>'
-        )
-    misses = list(dict.fromkeys(f"{name.get(e['variable'], e['variable'])}{who(d)}"
-                                for d, e in pairs if not e["in_90"]))
     order = [v for v in ("cpi", "gdp", "unemployment") if any(e["variable"] == v for _, e in pairs)]
     subjects = ", ".join(name[v] if v != "unemployment" else "unemployment" for v in order)
     if periods and periods[0][:4] == periods[-1][:4]:
@@ -1330,35 +1309,47 @@ def render_home_record(card: dict) -> str:
         span = f'<span class="mono">{periods[0]}</span>&ndash;<span class="mono">{periods[-1]}</span>'
     else:
         span = ""
-    plural = lambda n, w: f"{n} {w}{'' if n == 1 else 's'}"
+
+    def short_date(round_id: str) -> str:
+        y, mo, dd = round_id[:10].split("-")
+        return f"{int(dd)} {months[int(mo) - 1]} {y}"
+
+    # Home shows only the live (ex-ante) forecasts, in plain words; the 68%/90%
+    # detail and the retroactive first round live in the row tooltips and on /forecasts.
+    live = sorted(((d, e) for d, e in pairs if d["round_id"] != first_round),
+                  key=lambda de: (de[1]["period"], order.index(de[1]["variable"]) if de[1]["variable"] in order else 9, de[0]["round_id"]))
+    rows = []
+    for d, e in live:
+        label = name.get(e["variable"], e["variable"]) + (" (satellite)" if who(d) else "")
+        band = "inside the 68% band" if e["in_68"] else ("inside the 90% band, outside the 68%" if e["in_90"] else "outside the 90% band")
+        tip = esc(f"{label}, {e['period']}: forecast {e['forecast']:.2f}% on {short_date(d['round_id'])}, outturn {e['outturn']:.2f}%; {band}.")
+        chip = ('<span class="lp-res lp-res-in">' + _lucide("check", 14) + "Inside</span>" if e["in_68"]
+                else '<span class="lp-res lp-res-out">' + _lucide("alert", 14) + "Outside</span>")
+        rows.append(
+            f'            <tr title="{tip}"><th scope="row">{label} <span class="mono lp-rt-q">{e["period"]}</span></th>'
+            f'<td>{short_date(d["round_id"])}</td><td class="num">{e["forecast"]:.2f}%</td><td class="num">{e["outturn"]:.2f}%</td><td>{chip}</td></tr>')
+    bias = st["bias"]
+    lean = "slightly low" if bias < 0 else "slightly high"
     return "\n".join([
-        '        <div class="lp-score-head">',
-        f'          <span class="icon-tile">{_lucide("target", 20)}</span>',
-        '          <div class="lp-score-title">',
-        '            <h2 id="record-h">Forecast record</h2>',
-        f'            <p>UK &middot; {subjects} &middot; {span}</p>',
-        "          </div>",
+        f'      <div class="sh"><span class="sh-icon">{_lucide("target", 20)}</span>',
+        '        <h2 id="record-h">Forecast record</h2>',
+        f'        <p>UK &middot; {subjects} &middot; {span}</p>',
+        "      </div>",
+        '      <div class="lp-score-card">',
+        f'        <p class="lp-rec-head">We publish forecasts before the data, then score them. '
+        f'So far: <strong>{st["exante_in68"]} of {st["exante"]}</strong> landed inside the <span class="lp-term-def" title="The model&rsquo;s central 68% band: the range it expects the outcome to fall in about two times in three.">expected range</span>.</p>',
+        '        <div class="lp-rec-table">',
+        '          <table>',
+        '            <thead><tr><th scope="col">Forecast of</th><th scope="col">Made on</th><th scope="col" class="num">Forecast</th><th scope="col" class="num">Actual</th><th scope="col">Result</th></tr></thead>',
+        "            <tbody>",
+        *rows,
+        "            </tbody>",
+        "          </table>",
         "        </div>",
-        '        <div class="lp-rec">',
-        '          <div class="lp-rec-viz">',
-        '          <div class="lp-dots">',
-        *groups,
-        "          </div>",
-        '          <ul class="lp-dotkey">',
-        '            <li><span class="lp-rdot lp-rdot-68" aria-hidden="true"></span>Inside 68%</li>',
-        '            <li><span class="lp-rdot lp-rdot-90" aria-hidden="true"></span>Inside 90%</li>',
-        f'            <li><span class="lp-rdot lp-rdot-out" aria-hidden="true"></span>Outside 90%: {esc("; ".join(misses)) if misses else "none"}</li>',
-        '            <li><span class="lp-rdot lp-rdot-68" style="opacity:.4" aria-hidden="true"></span>Faded: archived retroactively</li>',
-        "          </ul>",
-        "          </div>",
-        '          <dl class="lp-recstats">',
-        f'            <div><dt>live forecasts inside the 68% band</dt><dd>{st["exante_in68"]}<small> of {st["exante"]}</small></dd></div>',
-        f'            <div><dt>bias, all {scored} forecasts</dt><dd>{"&minus;" if st["bias"] < 0 else "+"}{abs(st["bias"]):.2f}<small>pp</small></dd></div>',
-        "          </dl>",
-        "        </div>",
-        f'        <p class="lp-score-foot"><span class="chip chip-warn">{_lucide("alert", 14)}Too few to show skill</span>'
-        f'<span>{plural(scored, "forecast")} of {plural(st["outturns"], "outturn")}; {st["retro"]} archived retroactively.</span>'
+        f'        <p class="lp-score-foot"><span class="chip chip-warn">{_lucide("alert", 14)}Too few to judge skill yet</span>'
+        f'<span>Across all {scored} scored forecasts they have run {lean} ({"&minus;" if bias < 0 else "+"}{abs(bias):.2f}pp on average).</span>'
         '<a href="/forecasts#scored">See every score &rarr;</a></p>',
+        "      </div>",
     ])
 
 

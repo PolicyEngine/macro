@@ -395,7 +395,7 @@ def calendar_rows() -> str:
     for when, name, series in upcoming():
         rows.append(
             "          <tr>"
-            f'<th scope="row">{when.strftime("%d %B %Y")}</th>'
+            f'<th scope="row">{when.strftime("%-d %b %Y")}</th>'
             f"<td>{esc(public_label(series))}</td>"
             f'<td><span class="mono">{esc(name)}</span></td>'
             f'<td><a href="{esc(display_url(series["url"]))}">'
