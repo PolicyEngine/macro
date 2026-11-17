@@ -462,12 +462,12 @@ def plot_spec(traces: list[dict], *, unit: str = "%", height: int = 260,
     """House-style layout: Inter, light grid, no modebar, no zoom or drag."""
     shapes, notes = [], []
     if zero:
-        shapes.append({"type": "line", "xref": "paper", "x0": 0, "x1": 1, "y0": 0, "y1": 0,
-                       "line": {"color": "var(--chart-zero)", "width": 1.25}})
+        shapes.append({"type": "line", "xref": "paper", "x0": 0, "x1": 1, "y0": 0, "y1": 0, "layer": "below",
+                       "line": {"color": "var(--chart-zero)", "width": 1}})
     if target is not None:
         shapes.append({"type": "line", "xref": "paper", "x0": 0, "x1": 1, "y0": target, "y1": target,
-                       "line": {"color": "var(--text-muted)", "width": 1, "dash": "dash"}})
-        notes.append({"xref": "paper", "x": 0.02, "xanchor": "left", "y": target, "yanchor": "top",
+                       "layer": "below", "line": {"color": "var(--text-muted)", "width": 1, "dash": "dot"}})
+        notes.append({"xref": "paper", "x": 1, "xanchor": "right", "y": target, "yanchor": "bottom",
                       "text": target_label, "showarrow": False,
                       "font": {"size": 11, "color": "var(--text-muted)"}})
     if edge:
@@ -491,7 +491,8 @@ def plot_spec(traces: list[dict], *, unit: str = "%", height: int = 260,
                   **({"range": _date_span(*x_span)} if x_span else {})},
         "yaxis": {**axis, "showgrid": True, "gridcolor": "var(--chart-grid)", "ticksuffix": unit,
                   "nticks": 6, **({"range": [_r(y_range[0]), _r(y_range[1])]} if y_range else {}),
-                  **({"dtick": y_dtick} if y_dtick else {})},
+                  **({"dtick": y_dtick} if y_dtick else {}),
+                  **({"tickformat": ".1f"} if y_dtick and y_dtick < 1 else {})},
         "shapes": shapes, "annotations": notes, "transition": {"duration": 0},
     }
     return {"data": traces, "layout": layout}
@@ -526,7 +527,8 @@ def fan_plot(rows: list[dict], *, median_name: str, band_note: str,
         traces.append(plot_line([(r["period"], r[overlay[1]]) for r in rows], overlay[0],
                                 "var(--series-official)", dash="dash", width=2, digits=2))
     if dots:
-        out = plot_line(dots, "ONS outturn", "var(--series-outturn)", digits=2, markers=True)
+        out = plot_line(dots, "ONS outturn (published after the round)", "var(--series-outturn)",
+                        digits=2, markers=True)
         out["marker"] = {"color": "var(--series-outturn)", "size": 9,
                          "line": {"color": "var(--surface-card)", "width": 2}}
         traces.append(out)
