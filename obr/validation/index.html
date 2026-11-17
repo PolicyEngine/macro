@@ -90,7 +90,7 @@
           <tr data-result="construction"><th scope="row"><a href="#anchored">Anchored fit, real GDP</a></th><td>October 2026 EFO, 2025Q1&ndash;2027Q4; consumption 0.72%</td><td class="sc-num">0.44% MAPE</td><td><span class="chip">by construction</span></td></tr>
           <tr data-result="weak"><th scope="row"><a href="#tests">Held add-factors, real GDP</a></th><td>October 2026 EFO, 2026Q1&ndash;2027Q4; 7 of 8 in band, but fitted on OBR-forecast quarters, so partly agreement by design</td><td class="sc-num">0.35% MAPE</td><td><span class="chip">weak</span></td></tr>
           <tr data-result="weak"><th scope="row"><a href="#val-freerun">Free-running, real GDP</a></th><td>October 2026 EFO, 2025Q1&ndash;2027Q4; the emulator&rsquo;s closure, not OBR forecast error</td><td class="sc-num">4.25% MAPE</td><td><span class="chip">weak</span></td></tr>
-          <tr data-result="weak"><th scope="row"><a href="#outturn">ONS outturns</a></th><td>q/q growth, 2025Q2&ndash;2026Q1</td><td class="sc-num">within 0.06pp in 2025; 2026Q1 outside (the EFO also missed it)</td><td><span class="chip">weak</span></td></tr>
+          <tr data-result="weak"><th scope="row"><a href="#outturn">ONS outturns</a></th><td>q/q growth, 2025Q2&ndash;2026Q1</td><td class="sc-num">misses up to 0.24pp in 2025 on current ONS data (0.06pp on the May 2026 release); 2026Q1 0.27pp, as the EFO also missed</td><td><span class="chip">weak</span></td></tr>
           <tr data-result="weak"><th scope="row"><a href="/obr#scen-tax">Income tax multiplier</a></th><td><a href="https://obr.uk/box/fiscal-multipliers/">OBR 0.3</a> on impact, fading; size close, profile reversed</td><td class="sc-num">0.10 (q1) &rarr; 0.21 (q4) &rarr; 0.38 (q12), current prices</td><td><span class="chip">weak</span></td></tr>
           <tr data-result="fail"><th scope="row"><a href="#multiplier">Spending multiplier</a></th><td><a href="https://obr.uk/box/fiscal-multipliers/">OBR 0.6</a>, fading; the shock lands in the GDP identity</td><td class="sc-num">1.01 &rarr; 1.05</td><td><span class="chip">fail</span></td></tr>
           <tr data-result="fail"><th scope="row"><a href="#bank-rate">Bank Rate +1pp</a></th><td>Bank of England &minus;0.2% to &minus;0.35% (1999); sign right</td><td class="sc-num">&minus;0.06% peak</td><td><span class="chip">fail</span></td></tr>
@@ -137,11 +137,11 @@
   <div class="xp-body">
     <dl class="cfg-detail">
       <dt>Anchored</dt>
-      <dd>Tiles above for 2025Q1&ndash;2027Q4. Over 2025Q1&ndash;2031Q1, GDP MAPE is 0.77%, and unemployment (<code>LFSUR</code>) is already 1.3pp below the EFO at 2027Q4 (3.8% against 5.1%); it drifts further on longer runs (<a href="#lfsur">limits</a>). That longer solve converges in every quarter under the default nominal-GDP pin (obr-macroeconomic-model <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/2965e82d3b24e0b834c3adb68459bfd356edb355/results/site_figures.json"><code>2965e82d</code></a>; GDP MAPE 0.772% on that run). CI gates tolerance, finiteness, the expenditure identity and signs.</dd>
+      <dd>GDP MAPE 0.77% (0.772%) to 2031Q1, every quarter converged at <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/2965e82d3b24e0b834c3adb68459bfd356edb355/results/site_figures.json"><code>2965e82d</code></a>; CI gates tolerance, the expenditure identity and signs (<a href="#anchored">step 1</a>, <a href="#lfsur">unemployment drift</a>).</dd>
       <dt>Held add-factors</dt>
-      <dd>Scored 2026Q1&ndash;2027Q4; GDP in the tiles above. Re-run on the October 2026 EFO with <code>python -m obr_macro.forecast</code> at <code>2965e82d</code> on 16 Nov 2026 (the repository&rsquo;s <code>docs/forecasting_framework.md</code> still shows the March 2026 run: GDP 0.28%, consumption 0.19%). It starts from the EFO values it is scored against and its fitting window contains OBR-forecast quarters, so it partly encodes &ldquo;agree with the OBR&rdquo;.</dd>
+      <dd>Re-run at <code>2965e82d</code> on 16 Nov 2026; fitted on OBR-forecast quarters, so partly agreement by design (<a href="#tests">scorecard</a>).</dd>
       <dt>Free-running</dt>
-      <dd>De-seeded: the emulator&rsquo;s raw structural dynamics. In the OBR&rsquo;s published model GDP is an input, so this is not a measure of OBR forecast error. Nominal household income 4.30%, business investment 7.34%, company profits 12.32%, current account 0.91% of GDP.</dd>
+      <dd>Raw dynamics with GDP endogenous, not OBR forecast error: household income 4.30%, investment 7.34%, profits 12.32%, current account 0.91% of GDP (<a href="#val-freerun">step 3</a>).</dd>
     </dl>
   </div>
 </details>
@@ -223,7 +223,7 @@
       </figure>
         <div class="table-scroll mo-tablecard">
       <table>
-        <caption>Anchored levels against the October 2026 EFO, &pound;bn/qtr</caption>
+        <caption>Anchored levels against the October 2026 EFO, &pound;bn/qtr, chained volume on the EFO&rsquo;s own price base (not today&rsquo;s ONS reference year, so levels differ from the current ABMI: read the deviations)</caption>
         <thead><tr><td></td><th scope="col">Ours</th><th scope="col">Official</th><th scope="col">Deviation</th></tr></thead>
         <tbody>
           <tr><th scope="row">Real GDP, 2025Q1</th><td>704.2</td><td>703.2</td><td>+0.15%</td></tr>
@@ -244,7 +244,7 @@
       </div>
       <div class="meth-step meth-fold" data-step="1">
         <details class="expander step-fold" id="outturn">
-          <summary><span class="meth-step-num mono">2</span><span class="step-fold-text"><h3>Against ONS outturns</h3><span class="step-fold-result">2025 tracked to 0.06pp; 2026Q1 missed, like the EFO</span></span></summary>
+          <summary><span class="meth-step-num mono">2</span><span class="step-fold-text"><h3>Against ONS outturns</h3><span class="step-fold-result">Up to 0.24pp on current ONS data; 0.06pp on May data</span></span></summary>
         <p class="mo-lead">The only test against reality, and mostly a test of the inherited EFO vintage.</p>
         <figure class="vfig">
         <div class="vc-fig" data-chart="obr-outturn">
@@ -310,10 +310,10 @@
 <tr><th scope="row">2026Q1</th><td class="num">0.37</td><td class="num">0.39</td><td class="num">0.60</td></tr>
 </tbody></table></div>
 </div><!-- /vc-fig -->
-        <figcaption>November 2025 EFO vintage, the working paper's study; the live baseline is anchored to the October 2026 EFO. Computed from <code>papers/obr-macro/figures/fig_outturn_data.csv</code>.</figcaption>
+        <figcaption>November 2025 EFO vintage, the working paper's study; ONS outturns are the 14 May 2026 release, revised since (16 Nov 2026 data: 0.01, 0.18, 0.01 and 0.64); the live baseline is anchored to the October 2026 EFO. Computed from <code>papers/obr-macro/figures/fig_outturn_data.csv</code>.</figcaption>
       </figure>
         <p class="kv-title">Four quarters of outturn</p>
-        <dl class="kv kv-text"><div><dt>2025 outturns</dt><dd>tracked to within 0.06pp</dd></div><div><dt>2026Q1</dt><dd>missed by roughly a quarter point, like the EFO</dd></div><div><dt>Own contribution</dt><dd>0.02&ndash;0.13pp gap between model rows</dd></div><div><dt>Vintage</dt><dd>November 2025 EFO, kept on purpose</dd></div></dl>
+        <dl class="kv kv-text"><div><dt>2025 outturns</dt><dd>misses up to 0.24pp on the 16 Nov 2026 ONS vintage (2025Q4); 0.06pp on the 14 May 2026 release the chart uses</dd></div><div><dt>2026Q1</dt><dd>missed by 0.27pp on current data, like the EFO</dd></div><div><dt>Own contribution</dt><dd>0.02&ndash;0.13pp gap between model rows</dd></div><div><dt>Vintage</dt><dd>November 2025 EFO, kept on purpose</dd></div></dl>
         <details class="xp">
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>3 points</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
