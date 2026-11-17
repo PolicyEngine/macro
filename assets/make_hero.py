@@ -146,8 +146,33 @@ def build() -> str:
     # The labels are lifted into HTML by chartkit, so they stay 12 px at every
     # width; the <figcaption> next to this figure carries the rest.
     out.append("</svg>")
-    return "\n".join([MARK_OPEN, chartkit.figure("\n".join(out), wrap_class="vc-hero",
-                                                  unit="UK real GDP, % change on a year earlier"), MARK_CLOSE])
+    fig = chartkit.figure("\n".join(out), wrap_class="vc-hero",
+                          unit="UK real GDP, % change on a year earlier")
+    # Interactive version, the same rows and range; the SVG above stays as the
+    # no-JS, print and screen-reader version. The home page loads none of the
+    # page stylesheets that carry the swap rules, so they travel with the block.
+    rows = [{"period": q, "median": m, "lo68": a, "hi68": b, "lo90": c, "hi90": d}
+            for q, m, a, b, c, d in zip(quarters, med, lo68, hi68, lo90, hi90)]
+    spec = chartkit.fan_plot(rows, median_name="BoE SVAR median", band_note="",
+                             y_range=(v_lo, v_hi), zero=True, height=300)
+    spec["data"].append(chartkit.plot_last(quarters[-1], med[-1], "var(--series-ours)", digits=2,
+                                           position="top left"))
+    return "\n".join([MARK_OPEN, chartkit.attach_plot(fig, spec), HERO_PLOT_CSS,
+                       chartkit.plot_scripts(), MARK_CLOSE])
+
+
+HERO_PLOT_CSS = (
+    "<style>"
+    ".vc-hero .pe-plot{width:100%;height:0;overflow:hidden}"
+    ".vc-hero.has-plot .pe-plot{height:auto;overflow:visible}"
+    ".vc-hero.has-plot>.vc-plot{position:absolute!important;width:1px!important;height:1px!important;"
+    "min-height:0!important;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}"
+    "@media (prefers-color-scheme:dark){.vc-hero{--band-68:color-mix(in srgb,var(--primary) 45%,transparent);"
+    "--band-90:color-mix(in srgb,var(--primary) 22%,transparent);--chart-zero:color-mix(in srgb,#fff 35%,transparent)}}"
+    "@media print{.vc-hero.has-plot .pe-plot{display:none}.vc-hero.has-plot>.vc-plot{position:relative!important;"
+    "width:auto!important;height:auto!important;overflow:visible;clip:auto;clip-path:none}}"
+    "</style>"
+)
 
 
 BLOCK_RE = re.compile(re.escape(MARK_OPEN) + r".*?" + re.escape(MARK_CLOSE), re.DOTALL)
