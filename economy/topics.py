@@ -1096,11 +1096,15 @@ def inflation_model() -> str:
             f"<td>{values['cpi']['lo90']:.2f}%–{values['cpi']['hi90']:.2f}%</td>"
             "</tr>"
         )
-    reaches = (
-        f"Its median does not return to 3% until {esc(facts['above'])}."
-        if facts["above"]
-        else "Its median stays below 3% across the archived horizon."
-    )
+    later = [(q, v["cpi"]["median"]) for q, v in facts["forecast"]["forecast"].items()
+             if q > facts["now"]["period"]]
+    if later:
+        peak_q, peak_v = max(later, key=lambda r: r[1])
+        tail = [v for q, v in later if q > peak_q][-4:]
+        settle = f", then settles near {sum(tail) / len(tail):.1f}%" if tail else ""
+        reaches = f"Median peaks at {peak_v:.1f}% in {esc(peak_q)}{settle}."
+    else:
+        reaches = ""
     return f"""    <div class="prose">
       <p class="model-chips"><a class="mchip" href="/svar">{site_nav.icon("activity", 14)}BoE SVAR</a><span class="mchip-t">forecasts UK CPI · round {esc(facts["forecast"]["generated"])} · path from {esc(facts["period"])}</span></p>
       <p class="model-note">{reaches}</p>
@@ -1818,31 +1822,14 @@ def us_platform() -> str:
         </table>
       </div>
       </details>
-      <details class="about">
+      <details class="about tg-info">
         <summary>About the engine</summary>
-        <p>
-          The engine underneath this section is
-          {model_link("pe-microsim")} — {only_two_country_member()}, so the two
-          household rows above are the same command as the UK ones with
-          <span class="mono">--country us</span>. It reports
-          {registry_terms(microsim["outputs"])} over a {esc(microsim["horizon"])}.
-        </p>
-      </details>
-      <details class="about">
-        <summary>The bridge that does exist, and the MCP routes</summary>
-        <p>
-          The bridge that does exist runs the other way: the incidence rows take
-          a <em>macro shock</em>, not a reform, and push its earnings
-          consequences through the microsimulation. So this section can answer
-          &ldquo;who bears this shock&rdquo; for the US, and cannot answer
-          &ldquo;what would this reform do to output&rdquo;.
-        </p>
-        <p>
-          Over MCP the four routes are {tool("household_reform_impact")},
-          {tool("population_reform_impact")}, {tool("frbus_shock_incidence")} and
-          {tool("hank_shock_incidence")}; {tool("recommend_model")} refuses a US
-          reform needing macro feedback, which is the correct answer.
-        </p>
+        <ul>
+          <li>{model_link("pe-microsim")} runs both countries; the US household rows are the UK commands with <span class="mono">--country us</span>.</li>
+          <li>It reports {registry_terms(microsim["outputs"])} over a {esc(microsim["horizon"])}.</li>
+          <li>The incidence rows take a macro shock, not a reform, and push its earnings effects through households: they answer who bears a shock, not what a reform does to output.</li>
+          <li>Over MCP: {tool("household_reform_impact")}, {tool("population_reform_impact")}, {tool("frbus_shock_incidence")} and {tool("hank_shock_incidence")}; {tool("recommend_model")} declines a US reform that needs macro feedback.</li>
+        </ul>
       </details>
     </div>"""
 
