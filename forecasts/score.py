@@ -1139,7 +1139,8 @@ def render_results(card: dict) -> str:
         '<li><span class="fc-sw fc-sw-med"></span>median</li>'
         '<li><span class="fc-sw fc-sw-out"></span>outturn</li>'
         f'<li class="fc-legend-note">{icon("info", "fc-ic fc-th-ic")}Each strip spans its own 90% band.</li></ul>',
-        '      <div class="fc-board ab-card" role="table" aria-label="Every scored forecast: archived median and bands, outturn, error">',
+        '      <div class="fc-recbox ab-card">',
+        '      <div class="fc-board" role="table" aria-label="Every scored forecast: archived median and bands, outturn, error">',
         f'        <div class="fc-row fc-head" role="row"><span role="columnheader">{icon("target", "fc-ic fc-th-ic")}Target and round</span>'
         f'<span role="columnheader">{icon("gdp", "fc-ic fc-th-ic")}Median, archived bands and outturn</span>'
         f'<span role="columnheader">{icon("ruler", "fc-ic fc-th-ic")}Error</span><span role="columnheader">{icon("inside", "fc-ic fc-th-ic")}Where it fell</span></div>',
@@ -1176,7 +1177,10 @@ def render_results(card: dict) -> str:
             "</div>"
         )
     body.append("      </div>")
-    body.append('      <p class="fc-cap">Error is the archived median minus the outturn, in percentage points: positive means the forecast ran high.</p>')
+    # Card footer: the error definition as a one-line footnote, then the
+    # benchmark grid as an expander at the card's foot (no loose lines).
+    body.append('      <div class="fc-recfoot">')
+    body.append(f'      <p class="fc-cap">{icon("info", "fc-ic fc-th-ic")}<span>Error = archived median minus outturn, in pp; positive means the forecast ran high.</span></p>')
 
     # Benchmark grid: one column per published path that scores anything,
     # in the order the scorecard lists them (earliest fixed first).
@@ -1202,12 +1206,12 @@ def render_results(card: dict) -> str:
     show = {SEF_LABEL: "BoE survey of external forecasters (Apr 2026)"}
     head += [f'<th scope="col" class="num">{icon("file", "fc-ic fc-th-ic")}{esc(show.get(lbl, lbl).replace("BoE SEF", "BoE survey of external forecasters"))}</th>' for lbl in labels]
     body += [
-        '      <details class="fc-more" id="benchmarks">',
-        f'        <summary>{icon("scale")}<span>Against the benchmarks <span class="fc-more-sub">absolute error on the same outturns</span></span>{icon("chev", "fc-ic fc-chev")}</summary>',
+        '      <details class="fc-recmore" id="benchmarks">',
+        f'        <summary>{icon("scale")}<span>Against the benchmarks</span>{icon("chev", "fc-ic fc-chev")}</summary>',
         '        <div class="fc-more-body">',
         '      <div class="table-scroll">',
         '        <table class="scoreboard sb-grid" data-stack="yes">',
-        "          <caption>Absolute error against the same outturn, in percentage "
+        "          <caption>Absolute error on the same outturns, in percentage "
         "points; each benchmark's own value beneath. A benchmark appears only beside "
         "rounds fixed after it was published, so a later edition never sits beside an "
         "earlier forecast; the October 2026 EFO and November 2026 MPR, published after "
@@ -1248,7 +1252,7 @@ def render_results(card: dict) -> str:
             '<a href="#limits">limits</a> say what happens against a walk with drift.'
         )
     body += [f"        <p>{n}</p>" for n in notes]
-    body += ["        </div>", "      </details>"]
+    body += ["        </div>", "      </details>", "      </div>", "      </div>"]
     return "\n".join(body)
 
 
