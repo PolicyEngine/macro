@@ -130,10 +130,22 @@ def boe_chart() -> str:
         ], unit="UK real GDP, % change on a year earlier",
             notes=[f"Forecast made {data['generated']} from data through {data['data_edge']}."]),
         f"<figcaption>Bands are raw posterior quantiles, not rescaled to measured coverage; the calibrated version is on the <a href='/forecasts'>forecast record</a>."
-        f"<details class=\"expander\"><summary>Run details</summary><p>Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through {data['data_edge']}; forecast begins {data['forecast_start']}. Estimated on {data['estimation_sample'].replace('-', '&ndash;')}; {data['draws']:,} posterior draws, {data['accepted']} accepted. A separate run from the shock probabilities, so the draw counts differ. Source: the archived round <a href='/forecasts/rounds/{data['source_round']}/boe-svar.json'><code>forecasts/rounds/{data['source_round']}/boe-svar.json</code></a>, shown through <code>papers/boe-svar/figures/current_forecast.json</code>.</p></details></figcaption>",
+        f"<details class=\"expander\"><summary>Run details</summary><p>Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through {data['data_edge']}; forecast begins {data['forecast_start']}. Estimated on {data['estimation_sample'].replace('-', '&ndash;')}; {data['draws']:,} posterior draws, {data['accepted']} accepted. {_shock_run_note(data)} Source: the archived round <a href='/forecasts/rounds/{data['source_round']}/boe-svar.json'><code>forecasts/rounds/{data['source_round']}/boe-svar.json</code></a>, shown through <code>papers/boe-svar/figures/current_forecast.json</code>.</p></details></figcaption>",
         "</figure>",
     ])
 
+
+
+def _shock_run_note(data: dict) -> str:
+    """Say how the forecast run relates to the shock-probability run, from the two files."""
+    try:
+        shocks = json.loads((ROOT / "papers" / "boe-svar" / "figures" / "latest_shocks.json").read_text())
+    except (OSError, ValueError):
+        return ""
+    if shocks.get("draws") == data.get("draws") and shocks.get("accepted_draws") == data.get("accepted"):
+        return ("A separate run from the shock probabilities with the same draw settings, "
+                f"so both show {data['draws']:,} draws and {data['accepted']} accepted.")
+    return "A separate run from the shock probabilities, so the draw counts differ."
 
 def render(page: Path, name: str, content: str) -> str:
     start, end = f"<!-- {name}:begin -->", f"<!-- {name}:end -->"
