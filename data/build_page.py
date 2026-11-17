@@ -113,15 +113,22 @@ def unit_short(series: dict) -> str:
 # Releases already published but not yet in the store (the store only grows
 # through data/fetch.py; nothing here edits a vintage).
 STALE_NOTES = {
-    "uk_business_investment": "2026Q3 first estimate published 12 Nov 2026, not yet ingested",
+    # name: (the published period not yet in the store, note). The note
+    # disappears by itself once a vintage carrying that period is fetched.
+    "uk_business_investment": ("2026Q3", "2026Q3 first estimate published 12 Nov 2026, not yet ingested"),
 }
 
 
-def value_with_unit(value: float, series: dict) -> str:
+def stale_note(name: str, latest_period: str) -> str:
+    entry = STALE_NOTES.get(name)
+    return entry[1] if entry and latest_period < entry[0] else ""
+
+
+def value_with_unit(value: float, series: dict, name: str = "") -> str:
     """A latest value with its unit placed as readers expect: '£757.0 per
     week', '£83,534m', '4.0%'. The stored number is not rounded."""
     units = str(series.get("units", "")).split(",")[0].strip()
-    if series.get("name") == "uk_public_sector_net_borrowing" or "borrowing" in str(series.get("label", "")).lower():
+    if name == "uk_public_sector_net_borrowing" or series.get("cdid") == "J5II":
         if units.startswith("£m") and value < 0:
             return f"£{-value / 1000:,.1f}bn borrowed"
     text = f"{int(value):,}" if float(value).is_integer() and units.startswith("£m") else fmt_value(value)
@@ -224,7 +231,7 @@ def catalogue_rows() -> str:
             ("Store path", f'<span class="mono">{esc(source_dir)}/{esc(name)}</span>'),
             ("Released", esc(released[:10]) if released else "not supplied by the source"),
             ("Next release", esc(next_release) if next_release else "not announced"),
-            *([("Note", esc(STALE_NOTES[name]))] if name in STALE_NOTES else []),
+            *([("Note", esc(stale_note(name, now["period"])))] if stale_note(name, now["period"]) else []),
             ("Official source",
              f'<a href="{esc(display_url(series["url"]))}">'
              f'{esc(series["source"])} · {esc(series["cdid"])}</a>'),
@@ -244,8 +251,8 @@ def catalogue_rows() -> str:
             f"                </th>\n"
             f'                <td>{esc(series["source"])}</td>\n'
             f'                <td>{esc(series["frequency"])}</td>\n'
-            f'                <td class="num">{value_with_unit(now["value"], series)}'
-            + (' <span class="unit">· Q3 not yet ingested</span>' if name in STALE_NOTES else "") + ' '
+            f'                <td class="num">{value_with_unit(now["value"], series, name)}'
+            + (' <span class="unit">· Q3 not yet ingested</span>' if stale_note(name, now["period"]) else "") + ' '
             f'<span class="mono">{esc(now["period"])}</span></td>\n'
             f'                <td class="num">{len(vintages)}</td>\n'
             f"              </tr>\n"
