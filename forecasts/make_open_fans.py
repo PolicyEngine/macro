@@ -149,7 +149,10 @@ def render() -> str:
                        + ('; outturn, ONS series MGSX from the <a href="/economy#data">data store</a>'
                           if dots else ""))),
                 chartkit.fan_plot(rows, median_name="BoE SVAR unemployment satellite median", band_note="(raw)",
-                                  dots=[(rows[i]["period"], v) for i, v in dots], y_range=(lo, hi))),
+                                  dots=[(rows[i]["period"], v) for i, v in dots], y_range=(lo, hi),
+                                  dots_name=("ONS outturn (published after the round)"
+                                             if all(seen[rows[i]["period"]][0] > src.parent.name for i, _ in dots)
+                                             else "ONS outturn"))),
             "      </figure>",
         ]
     )
