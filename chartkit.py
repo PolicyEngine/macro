@@ -48,6 +48,7 @@ Stdlib only; every generator imports it from the repository root.
 
 from __future__ import annotations
 
+import json
 import re
 
 import re
@@ -358,3 +359,139 @@ def figure(
         parts.append(source_block(source, source_short))
     parts.append(f"</div>{END}")
     return "\n".join(parts)
+
+
+# ---------------------------------------------------------------- Plotly
+# Interactive versions of the charts, drawn by the vendored plotly.js basic
+# build (vendor/plotly/) through economy/pe-plot.js. The figures are plain
+# Plotly JSON written here with the standard library: no plotly, pandas or
+# numpy, so every generator keeps running on a bare Python. Colours are CSS
+# tokens ("var(--series-ours)", optionally "/alpha"); the loader resolves them
+# for the current light or dark scheme. The SVG stays in the page as the
+# no-JS, print and screen-reader version.
+
+PLOTLY_JS = "/vendor/plotly/plotly-basic-2.35.2.min.js"
+PLOT_LOADER = "/economy/pe-plot.js"
+
+
+def plot_scripts() -> str:
+    """The two script tags a page with an interactive chart loads, once."""
+    return (f'<script src="{PLOTLY_JS}" defer></script>\n'
+            f'<script src="{PLOT_LOADER}" defer></script>')
+
+
+def period_date(period: str) -> str:
+    """An x position for a period: quarters and months at their middle."""
+    m = re.fullmatch(r"(\d{4})Q([1-4])", period)
+    if m:
+        return f"{m.group(1)}-{3 * int(m.group(2)) - 1:02d}-15"
+    if re.fullmatch(r"\d{4}-\d{2}", period):
+        return f"{period}-15"
+    return period
+
+
+def _r(v):
+    return None if v is None else round(float(v), 4)
+
+
+def plot_line(points: list[tuple[str, float | None]], name: str, color: str, *,
+              dash: str = "solid", width: float = 2.25, unit: str = "%",
+              digits: int = 1, markers: bool = False) -> dict:
+    """A line (or dots) through (period, value) pairs; None breaks the line."""
+    return {
+        "type": "scatter", "mode": "markers" if markers else "lines", "name": name,
+        "x": [period_date(p) if p else None for p, _ in points],
+        "y": [_r(v) for _, v in points],
+        "customdata": [p for p, _ in points],
+        "line": {"color": color, "width": width, "dash": dash, "shape": "linear"},
+        "marker": {"color": color, "size": 6},
+        "connectgaps": False,
+        "hovertemplate": f"%{{customdata}}<br><b>%{{y:.{digits}f}}{unit}</b><extra>{name}</extra>",
+    }
+
+
+def plot_band(rows: list[tuple[str, float, float]], name: str, color: str,
+              unit: str = "%") -> list[dict]:
+    """A filled band from (period, low, high): a hidden lower edge, then the upper."""
+    xs = [period_date(p) for p, _, _ in rows]
+    low = {"type": "scatter", "mode": "lines", "x": xs, "y": [_r(lo) for _, lo, _ in rows],
+           "line": {"width": 0, "color": color}, "hoverinfo": "skip", "showlegend": False}
+    high = {"type": "scatter", "mode": "lines", "name": name, "x": xs,
+            "y": [_r(hi) for _, _, hi in rows], "fill": "tonexty", "fillcolor": color,
+            "line": {"width": 0, "color": color},
+            "customdata": [[p, _r(lo), _r(hi)] for p, lo, hi in rows],
+            "hovertemplate": f"{name}: %{{customdata[1]:.2f}}{unit} to %{{customdata[2]:.2f}}{unit}<extra></extra>"}
+    return [low, high]
+
+
+def plot_last(period: str, value: float, color: str, unit: str = "%", digits: int = 1,
+              position: str = "middle right") -> dict:
+    """The emphasised last point, labelled with its value and period."""
+    return {"type": "scatter", "mode": "markers+text", "x": [period_date(period)], "y": [_r(value)],
+            "text": [f"{value:.{digits}f}{unit}"], "textposition": position, "cliponaxis": False,
+            "textfont": {"color": "var(--text-strong)", "size": 12},
+            "marker": {"color": color, "size": 9, "line": {"color": "var(--surface-card)", "width": 2}},
+            "customdata": [period], "showlegend": False,
+            "hovertemplate": f"%{{customdata}}<br><b>%{{y:.{digits}f}}{unit}</b><extra>Latest</extra>"}
+
+
+def _date_span(first: str, last: str, pad: float = 0.04) -> list[str]:
+    """An x range from the first to the last period, with a little room each side."""
+    import datetime as _dt
+    a = _dt.date.fromisoformat(period_date(first))
+    b = _dt.date.fromisoformat(period_date(last))
+    d = _dt.timedelta(days=max(10, round((b - a).days * pad)))
+    return [(a - d).isoformat(), (b + d).isoformat()]
+
+
+def plot_spec(traces: list[dict], *, unit: str = "%", height: int = 260,
+              zero: bool = False, target: float | None = None, target_label: str = "",
+              edge: str | None = None, y_range: tuple[float, float] | None = None,
+              x_span: tuple[str, str] | None = None, hovermode: str = "closest") -> dict:
+    """House-style layout: Inter, light grid, no modebar, no zoom or drag."""
+    shapes, notes = [], []
+    if zero:
+        shapes.append({"type": "line", "xref": "paper", "x0": 0, "x1": 1, "y0": 0, "y1": 0,
+                       "line": {"color": "var(--chart-zero)", "width": 1.25}})
+    if target is not None:
+        shapes.append({"type": "line", "xref": "paper", "x0": 0, "x1": 1, "y0": target, "y1": target,
+                       "line": {"color": "var(--text-muted)", "width": 1, "dash": "dash"}})
+        notes.append({"xref": "paper", "x": 0.02, "xanchor": "left", "y": target, "yanchor": "top",
+                      "text": target_label, "showarrow": False,
+                      "font": {"size": 11, "color": "var(--text-muted)"}})
+    if edge:
+        shapes.append({"type": "line", "yref": "paper", "y0": 0, "y1": 1,
+                       "x0": period_date(edge), "x1": period_date(edge),
+                       "line": {"color": "var(--line)", "width": 1, "dash": "dot"}})
+    axis = {"fixedrange": True, "showline": False, "zeroline": False,
+            "tickfont": {"size": 11, "color": "var(--text-muted)"}}
+    layout = {
+        "height": height,
+        "margin": {"l": 44, "r": 52 if any(t.get("textposition") for t in traces) else 14, "t": 18, "b": 30},
+        "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)",
+        "font": {"family": "Inter, system-ui, sans-serif", "size": 12, "color": "var(--text-body)"},
+        "showlegend": False, "dragmode": False, "hovermode": hovermode,
+        "hoverlabel": {"bgcolor": "var(--surface-card)", "bordercolor": "var(--hairline)",
+                       "font": {"color": "var(--text-strong)", "size": 12}},
+        "xaxis": {**axis, "type": "date", "showgrid": False, "ticks": "outside",
+                  **({"hoverformat": "%YQ%q"} if hovermode == "x unified" else {}),
+                  "ticklen": 4, "tickcolor": "var(--hairline)", "dtick": "M12",
+                  "tickformat": "%Y", "tickangle": 0, "ticklabelmode": "instant",
+                  **({"range": _date_span(*x_span)} if x_span else {})},
+        "yaxis": {**axis, "showgrid": True, "gridcolor": "var(--chart-grid)", "ticksuffix": unit,
+                  "nticks": 6, **({"range": [_r(y_range[0]), _r(y_range[1])]} if y_range else {})},
+        "shapes": shapes, "annotations": notes, "transition": {"duration": 0},
+    }
+    return {"data": traces, "layout": layout}
+
+
+def attach_plot(fig: str, spec: dict) -> str:
+    """Add the interactive version to a figure() block; the SVG stays as the fallback."""
+    payload = json.dumps(spec, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    payload = payload.replace("</", "<\\/")
+    marker = '<div class="vc-plot">'
+    if marker not in fig:
+        raise ValueError("attach_plot() needs a figure() block")
+    block = ('<div class="pe-plot" aria-hidden="true"></div>\n'
+             f'<script type="application/json" class="pe-plot-json">{payload}</script>\n')
+    return fig.replace(marker, block + marker, 1)

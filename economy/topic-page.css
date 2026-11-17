@@ -162,3 +162,21 @@ main .vc-foot .vc-more-h { margin: 0 0 6px; font-size: 12px; font-weight: 600; l
 main .vc-foot .vc-more-sec .table-scroll { margin: 0; }
 main .vc-foot .vc-more-sec .vc-source { margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--surface-sunken); color: var(--text-muted); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
 main .vc-foot > details.vc-more::details-content { flex: 1 1 100%; min-width: 0; }
+/* interactive charts (economy/pe-plot.js): the SVG shows until Plotly has
+   drawn; then it stays for screen readers and print, visually hidden */
+main .vc-fig .pe-plot { width: 100%; height: 0; overflow: hidden; }
+main .vc-fig.has-plot .pe-plot { height: auto; overflow: visible; }
+main .vc-fig.has-plot > .vc-plot { position: absolute !important; width: 1px !important; height: 1px !important; min-height: 0 !important; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+main .vc-fig .pe-plot .modebar-container { display: none !important; }
+@media print {
+  main .vc-fig.has-plot .pe-plot { display: none; }
+  main .vc-fig.has-plot > .vc-plot { position: relative !important; width: auto !important; height: auto !important; overflow: visible; clip: auto; clip-path: none; }
+}
+/* a second outturn line (US rates: the 10-year yield) in its own categorical colour, chart and legend alike */
+main .vc-fig .vchart .vc-s3 { stroke: var(--chart-2); }
+main .vc-fig .vchart .vc-s3-dot { fill: var(--chart-2); }
+main .vc-fig .vc-sw.ln-s3 { border-top-color: var(--chart-2); }
+/* dark mode: fan bands with enough body to read against the card */
+@media (prefers-color-scheme: dark) {
+  main .vc-fig { --band-68: color-mix(in srgb, var(--primary) 45%, transparent); --band-90: color-mix(in srgb, var(--primary) 22%, transparent); }
+}
