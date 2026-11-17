@@ -472,7 +472,13 @@ def body(data: dict) -> str:
     <div class="band-head" data-icon="list"><h2>Pick a question</h2>
       <p class="section-intro">Models are in the hub order, not ranked. The sourced benchmark sits in the first row; each model row gives its peak effects and a verdict, and Details holds the run, full units and caveats.</p></div>
     <div class="router-row cmp-chips" role="group" aria-label="Question">{chips}</div>
-    <p class="callout"><strong>Run at the current model pins.</strong> The OBR emulator rate, spending and tax rows were re-run locally on 16 Nov 2026 at <code>2965e82d</code> (October 2026 EFO), where every quarter converges; its energy row is an earlier committed output. The FRB/US rows were re-run at <code>846eeb5c</code> (October 2026 LONGBASE), with shocks from 2026Q3, the first quarter after LONGBASE history. The US HANK rows, run at <code>19a8e5e</code>, reproduce identically at the current <code>551a40d</code>. BoE SVAR and DEFINE-UK rows are committed model-repo outputs. Each row&rsquo;s Details give its exact call.</p>
+    <div class="callout cmp-pins"><p><strong>Run at the current model pins.</strong> Each row&rsquo;s Details give its exact call.</p>
+      <ul>
+        <li><strong>OBR emulator:</strong> rate, spending and tax rows re-run locally on 16 Nov 2026 at <code>2965e82d</code> (October 2026 EFO), where every quarter converges; the energy row is an earlier committed output.</li>
+        <li><strong>FRB/US:</strong> re-run at <code>846eeb5c</code> (October 2026 LONGBASE), with shocks from 2026Q3, the first quarter after LONGBASE history.</li>
+        <li><strong>US HANK:</strong> run at <code>19a8e5e</code>; reproduces identically at the current <code>551a40d</code>.</li>
+        <li><strong>BoE SVAR and DEFINE-UK:</strong> committed model-repo outputs.</li>
+      </ul></div>
     <details class="about cmp-howto"><summary>How to read the verdicts</summary>
       <p>Each verdict starts with one of six words: plausible, off, questionable, unresolved, not tested or no instrument; some add a qualifier (such as &ldquo;off, sign right&rdquo;), and each carries its reason and the open issue. These words grade one experiment; each model&rsquo;s overall standing uses the <a class="gloss-link" href="/glossary#verification-class">status vocabulary</a> on its model card. Results file version {esc(data["version"])}; <a href="{REPO_BLOB}/run_battery.py">how it is checked and regenerated</a>.</p></details>
   </section>

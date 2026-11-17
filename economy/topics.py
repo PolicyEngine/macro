@@ -1734,7 +1734,7 @@ def uk_routes() -> str:
             "That forecast carried into household incomes",
             ["boe-svar", "pe-microsim"],
             "pe-macro svar-inflation-incidence --year 2027 --reference obr",
-            "the model-versus-OBR CPI gap, scored as a real uprating reform",
+            "the model-versus-OBR CPI gap as an uprating change: an experimental illustration, not a scored reform",
         ),
     ]
     html = f"""    <div class="prose">

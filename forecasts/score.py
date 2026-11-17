@@ -1326,6 +1326,8 @@ def render_home_record(card: dict) -> str:
     for d, e in live:
         label = name.get(e["variable"], e["variable"]) + (" (satellite)" if who(d) else "")
         band = "inside the 68% band" if e["in_68"] else ("inside the 90% band, outside the 68%" if e["in_90"] else "outside the 90% band")
+        if who(d) and not e["in_68"]:
+            band += " (the satellite's raw band is too narrow by construction)"
         tip = esc(f"{label}, {e['period']}: forecast {e['forecast']:.2f}% on {short_date(d['round_id'])}, outturn {e['outturn']:.2f}%; {band}.")
         chip = ('<span class="lp-res lp-res-in">' + _lucide("check", 14) + "Inside</span>" if e["in_68"]
                 else '<span class="lp-res lp-res-out">' + _lucide("alert", 14) + "Outside</span>")
@@ -1333,7 +1335,6 @@ def render_home_record(card: dict) -> str:
             f'            <tr title="{tip}"><th scope="row">{label} <span class="mono lp-rt-q">{e["period"]}</span></th>'
             f'<td>{short_date(d["round_id"])}</td><td class="num">{e["forecast"]:.2f}%</td><td class="num">{e["outturn"]:.2f}%</td><td>{chip}</td></tr>')
     bias = st["bias"]
-    lean = "slightly low" if bias < 0 else "slightly high"
     return "\n".join([
         f'      <div class="sh"><span class="sh-icon">{_lucide("target", 20)}</span>',
         '        <h2 id="record-h">Forecast record</h2>',
@@ -1350,8 +1351,11 @@ def render_home_record(card: dict) -> str:
         "            </tbody>",
         "          </table>",
         "        </div>",
+        *([f'        <p class="lp-rec-note">Unemployment comes from a satellite of the BoE SVAR whose band is raw, '
+           f'not re-calibrated, and too narrow by construction, so a small miss can land outside it.</p>']
+          if any(who(d) and not e["in_68"] for d, e in live) else []),
         f'        <p class="lp-score-foot"><span class="chip chip-warn">{_lucide("alert", 14)}Too few to judge skill yet</span>'
-        f'<span>Across all {scored} scored forecasts they have run {lean} ({"&minus;" if bias < 0 else "+"}{abs(bias):.2f}pp on average).</span>'
+        f'<span>They ran {"low" if bias < 0 else "high"} on {st["low"] if bias < 0 else scored - st["low"]} of {scored} scored forecasts ({"&minus;" if bias < 0 else "+"}{abs(bias):.2f}pp on average).</span>'
         '<a href="/forecasts#scored">See every score &rarr;</a></p>',
         "      </div>",
     ])
