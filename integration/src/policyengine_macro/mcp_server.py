@@ -395,9 +395,11 @@ def hank_shock(
             NO transfer or tax-rate shock: the labor tax is endogenous, so no
             such instrument exists in the model.
         size: Impact size of the shock, in model units — UNITS DIFFER PER
-            KIND: monetary is a level change in the QUARTERLY policy rate
-            (-0.0025 = -25bp per quarter, about -100bp annualised; for a
-            25bp annualised move use -0.000625); fiscal_spending is a level
+            KIND: monetary is a level change in the intercept of the
+            QUARTERLY nominal Taylor rule; the policy rate itself moves less,
+            about 13bp on impact for -0.0025 (us-hank-model #18). -0.0025 is
+            a 25bp-per-quarter intercept shift, about 100bp annualised; for a
+            25bp annualised intercept shift use -0.000625. fiscal_spending is a level
             change in G (steady-state Y = 1, so 0.01 = 1% of GDP);
             productivity is a level change in Z (two_asset steady-state
             Z = 0.468, so 0.01 ~ 2.1% TFP, not 1%; one_asset steady-state

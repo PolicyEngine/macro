@@ -513,6 +513,7 @@ def attach_plot(fig: str, spec: dict) -> str:
 def fan_plot(rows: list[dict], *, median_name: str, band_note: str,
              overlay: tuple[str, str] | None = None,
              dots: list[tuple[str, float]] | None = None,
+             dots_name: str = "ONS outturn",
              y_range: tuple[float, float] | None = None, zero: bool = False,
              target: float | None = None, height: int = 300) -> dict:
     """A forecast fan as Plotly JSON: 90% and 68% bands, the median, an
@@ -527,8 +528,7 @@ def fan_plot(rows: list[dict], *, median_name: str, band_note: str,
         traces.append(plot_line([(r["period"], r[overlay[1]]) for r in rows], overlay[0],
                                 "var(--series-official)", dash="dash", width=2, digits=2))
     if dots:
-        out = plot_line(dots, "ONS outturn (published after the round)", "var(--series-outturn)",
-                        digits=2, markers=True)
+        out = plot_line(dots, dots_name, "var(--series-outturn)", digits=2, markers=True)
         out["marker"] = {"color": "var(--series-outturn)", "size": 9,
                          "line": {"color": "var(--surface-card)", "width": 2}}
         traces.append(out)
