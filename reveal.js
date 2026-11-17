@@ -12,12 +12,17 @@
   var targets = Array.from(document.querySelectorAll(BLOCKS));
   document.querySelectorAll(GRIDS).forEach(function (grid) {
     Array.from(grid.children).forEach(function (child, i) {
-      child.style.setProperty("--rv-d", Math.min(i, 6) * 45 + "ms");
+      child.style.setProperty("--rv-d", Math.min(i, 7) * 85 + "ms");
+      child.classList.add("rv-card");
       targets.push(child);
     });
   });
   targets = targets.filter(function (el, i, all) { return all.indexOf(el) === i && !el.closest(".hero, .lp-hero, .mp-hero, [data-no-reveal]"); });
-  targets.forEach(function (el) { el.classList.add("scroll-reveal"); });
+  var HEADS = ".sh, .band-head";
+  targets.forEach(function (el) {
+    el.classList.add("scroll-reveal");
+    if (el.matches(HEADS)) el.classList.add("rv-head");
+  });
   function showAll() { targets.forEach(function (el) { el.classList.add("in-view", "reveal-initial"); }); }
   window.addEventListener("beforeprint", showAll);
   if (reduce || !("IntersectionObserver" in window)) { showAll(); return; }
@@ -34,7 +39,7 @@
       var decimals = (m[3].split(".")[1] || "").length;
       if (!decimals && end >= 1900 && end <= 2100) return;   /* years and quarters do not count */
       el.dataset.counted = "1";
-      var start = null, dur = 600;
+      var start = null, dur = 900;
       function step(ts) {
         if (start === null) start = ts;
         var t = Math.min(1, (ts - start) / dur), e = 1 - Math.pow(1 - t, 3);
@@ -44,11 +49,72 @@
       requestAnimationFrame(step);
     });
   }
+  /* charts: lines draw in, bands fade up after the line, bars grow from the
+     baseline, dots pop in one by one. Web Animations only: the resting state is
+     always the visible one, so nothing can be left hidden. */
+  var EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+  function chartSvgs(root) {
+    return Array.from(root.querySelectorAll("svg:not(.i):not(.flag)")).filter(function (svg) {
+      var vb = svg.viewBox && svg.viewBox.baseVal;
+      return vb && vb.width >= 200 && !svg.closest("[data-no-reveal]") && !svg.dataset.drawn;
+    });
+  }
+  function drawCharts(root, delay) {
+    if (!Element.prototype.animate) return;
+    delay = delay || 0;
+    chartSvgs(root).forEach(function (svg) {
+      svg.dataset.drawn = "1";
+      var vbw = svg.viewBox.baseVal.width, lineEnd = delay;
+      svg.querySelectorAll("path, polyline").forEach(function (p) {
+        var cs = getComputedStyle(p);
+        if (cs.fill !== "none" || cs.stroke === "none" || parseFloat(cs.strokeWidth) < 1.4) return;
+        if (cs.strokeDasharray && cs.strokeDasharray !== "none") return;
+        var len = 0; try { len = p.getTotalLength(); } catch (e) { return; }
+        if (len < 60) return;
+        p.style.strokeDasharray = len;
+        var a = p.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
+          { duration: 1100, delay: delay, easing: EASE, fill: "backwards" });
+        lineEnd = Math.max(lineEnd, delay + 700);
+        a.onfinish = a.oncancel = function () { p.style.strokeDasharray = ""; };
+      });
+      svg.querySelectorAll("path").forEach(function (p) {
+        var cs = getComputedStyle(p);
+        if (cs.fill === "none" || parseFloat(cs.fillOpacity) >= 1 && parseFloat(cs.opacity) >= 1) return;
+        p.animate([{ opacity: 0 }, { opacity: cs.opacity }], { duration: 700, delay: lineEnd - 300, easing: "ease-out", fill: "backwards" });
+      });
+      var bars = Array.from(svg.querySelectorAll("rect")).filter(function (r) {
+        var w = r.width.baseVal.value, h = r.height.baseVal.value;
+        return h > 2 && w > 1 && w < vbw * 0.5 && getComputedStyle(r).fill !== "none";
+      });
+      bars.forEach(function (r, i) {
+        r.style.transformBox = "fill-box"; r.style.transformOrigin = "50% 100%";
+        r.animate([{ transform: "scaleY(0)" }, { transform: "scaleY(1)" }],
+          { duration: 750, delay: delay + Math.min(i, 12) * 40, easing: EASE, fill: "backwards" });
+      });
+      var dots = Array.from(svg.querySelectorAll("circle")).filter(function (c) { return c.r.baseVal.value <= 7; });
+      dots.forEach(function (c, i) {
+        c.style.transformBox = "fill-box"; c.style.transformOrigin = "50% 50%";
+        c.animate([{ transform: "scale(0)", opacity: 0 }, { transform: "scale(1.25)", opacity: 1, offset: 0.7 }, { transform: "scale(1)", opacity: 1 }],
+          { duration: 420, delay: lineEnd - 200 + Math.min(i, 16) * 70, easing: "ease-out", fill: "backwards" });
+      });
+    });
+    root.querySelectorAll(".fc-pips").forEach(function (row) {
+      Array.from(row.children).forEach(function (d, i) {
+        d.animate([{ transform: getComputedStyle(d).transform === "none" ? "scale(0)" : getComputedStyle(d).transform + " scale(0)", opacity: 0 }, { opacity: 1 }],
+          { duration: 360, delay: delay + 200 + Math.min(i, 16) * 70, easing: "ease-out", fill: "backwards" });
+      });
+    });
+  }
   function reveal(el, animate) {
     if (el.classList.contains("in-view")) return;
     if (!animate) el.classList.add("reveal-initial");
     el.classList.add("in-view");
-    if (animate) countUp(el);
+    if (animate) {
+      countUp(el);
+      drawCharts(el, 250 + (parseInt(el.style.getPropertyValue("--rv-d"), 10) || 0));
+    }
+    /* once in place, hand the transform back to hover styles with no stagger delay */
+    setTimeout(function () { el.classList.add("rv-done"); }, animate ? 1300 : 0);
   }
   var io = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) { if (e.isIntersecting) { reveal(e.target, true); io.unobserve(e.target); } });
@@ -57,22 +123,35 @@
   targets.forEach(function (el) {
     var r = el.getBoundingClientRect();
     if (r.top < vh * 0.94 || r.height > vh * 0.8) reveal(el, false);
+    else if (r.top < vh) reveal(el, true);   /* peeking in at the bottom edge: animate in now */
     else io.observe(el);
   });
-  /* catch-up: anything that is now at or above the viewport is shown */
-  function catchUp() {
+  /* charts already on screen at load (the home fan) draw in once; not after an anchor jump */
+  if (!location.hash) {
+    Array.from(document.querySelectorAll("main svg:not(.i):not(.flag)")).forEach(function (svg) {
+      if (svg.getBoundingClientRect().top < vh * 0.9) drawCharts(svg.parentElement, 200);
+    });
+  }
+  /* catch-up: blocks scrolled past are shown at once; blocks entering the viewport
+     animate, unless the scroll was a jump (anchor, Home/End, scrollbar drag) */
+  var lastY = window.scrollY;
+  function catchUp(jump) {
     var h = window.innerHeight;
     targets.forEach(function (el) {
       if (el.classList.contains("in-view")) return;
-      if (el.getBoundingClientRect().top < h) reveal(el, false);   /* catch-up is instant */
+      var r = el.getBoundingClientRect();
+      if (r.bottom < 0) reveal(el, false);
+      else if (r.top < h * 0.94) reveal(el, !jump);
     });
   }
   var timer = null;
   window.addEventListener("scroll", function () {
     /* synchronous catch-up, plus a timer fallback for throttled tabs where
        animation frames are delayed: nothing is left faded after a jump */
-    catchUp();
-    clearTimeout(timer); timer = setTimeout(catchUp, 150);
+    var dy = Math.abs(window.scrollY - lastY);
+    lastY = window.scrollY;
+    catchUp(dy > window.innerHeight * 1.2);
+    clearTimeout(timer); timer = setTimeout(function () { catchUp(false); }, 150);
   }, { passive: true });
   window.addEventListener("hashchange", function () {
     targets.forEach(function (el) { if (el.getBoundingClientRect().top < window.innerHeight) reveal(el, false); });
@@ -459,4 +538,27 @@
     all();
   });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(all);
+})();
+
+/* Thin teal reading-progress bar under the sticky header (style.css §40). */
+(function () {
+  var nav = document.querySelector(".nav");
+  if (!nav || !document.querySelector("main")) return;
+  var bar = document.createElement("div");
+  bar.className = "rv-progress";
+  bar.setAttribute("aria-hidden", "true");
+  document.body.appendChild(bar);
+  var ticking = false;
+  function update() {
+    ticking = false;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var p = max > 120 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    bar.style.transform = "scaleX(" + p.toFixed(4) + ")";
+    bar.style.top = Math.max(0, nav.getBoundingClientRect().bottom) + "px";
+    bar.classList.toggle("is-on", p > 0.002);
+  }
+  function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  update();
 })();

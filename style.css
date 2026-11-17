@@ -8627,3 +8627,40 @@ main .band-head[data-icon]::before, main .band-head::before {
   .lp-trust.lv-gain svg { color: #5EEAD4; } .lp-trust.lv-mid svg { color: #94A3B8; } .lp-trust.lv-loss svg { color: #FBBF24; }
 }
 .about-list { margin: 8px 0 0; padding-left: 20px; } .about-list li { margin: 6px 0; line-height: 1.55; }
+
+/* =====================================================================
+   40. Scroll motion, visible but calm (Vahid: "add animations when scrolling").
+   Progressive: everything below applies only under html.rv-on (JS, IntersectionObserver,
+   no reduced-motion preference). Blocks fade and rise 28px over ~550ms; section headings
+   slide in from the left with the subtitle following; card grids stagger 85ms per item
+   (capped) from scale .98; reveal.js draws chart lines, fades bands, grows bars and pops dots
+   with the Web Animations API (resting state always visible). Above-the-fold blocks and
+   anchor jumps show at once; transforms only, so no layout shift.
+   ===================================================================== */
+.rv-on .scroll-reveal { opacity: 0; transform: translateY(28px); transition: opacity 550ms cubic-bezier(0.22, 1, 0.36, 1), transform 700ms cubic-bezier(0.22, 1, 0.36, 1); transition-delay: var(--rv-d, 0ms); }
+.rv-on .scroll-reveal.rv-card { transform: translateY(24px) scale(0.98); }
+.rv-on .scroll-reveal.in-view { opacity: 1; transform: none; }
+.rv-on .scroll-reveal.reveal-initial { transition: none; }
+.rv-on .scroll-reveal.rv-done { transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease, background-color 200ms ease; transition-delay: 0ms; }
+/* section headings: the block itself stays put; icon and heading slide from the left, subtitle follows */
+.rv-on .scroll-reveal.rv-head, .rv-on .scroll-reveal.rv-head.in-view { transform: none; }
+.rv-on .scroll-reveal.rv-head > *, .rv-on .scroll-reveal.rv-head::before { opacity: 0; transform: translateX(-18px); transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1), transform 650ms cubic-bezier(0.22, 1, 0.36, 1); }
+.rv-on .scroll-reveal.rv-head > p, .rv-on .scroll-reveal.rv-head > .section-intro { transform: translateY(10px); transition-delay: 160ms; }
+.rv-on .scroll-reveal.rv-head.in-view > *, .rv-on .scroll-reveal.rv-head.in-view::before { opacity: 1; transform: none; }
+.rv-on .scroll-reveal.rv-head.reveal-initial > *, .rv-on .scroll-reveal.rv-head.reveal-initial::before { transition: none; }
+/* hover lift on cards (pointer devices) */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :is(.mc-card, .qc, .uc, .hq, .ct-card, .fc-node, .rt-card):hover,
+  .rv-on :is(.mc-card, .qc, .uc, .hq, .ct-card, .fc-node, .rt-card).scroll-reveal.in-view:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(17, 24, 39, .08); }
+}
+/* reading progress under the header */
+.rv-progress { position: fixed; left: 0; right: 0; top: 0; height: 2px; z-index: 60; background: var(--ab-teal-700); transform: scaleX(0); transform-origin: 0 50%; opacity: 0; transition: opacity 200ms ease; pointer-events: none; }
+.rv-progress.is-on { opacity: 1; }
+@media (prefers-color-scheme: dark) { .rv-progress { background: var(--primary); } }
+@media (prefers-reduced-motion: reduce) {
+  .rv-on .scroll-reveal, .rv-on .scroll-reveal.rv-head > *, .rv-on .scroll-reveal.rv-head::before { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
+@media print {
+  .scroll-reveal, .rv-on .scroll-reveal, .rv-on .scroll-reveal.rv-head > *, .rv-on .scroll-reveal.rv-head::before { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .rv-progress { display: none; }
+}

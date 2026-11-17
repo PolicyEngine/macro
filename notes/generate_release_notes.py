@@ -271,7 +271,7 @@ def digest_page(vintage: str) -> str:
   <nav class="footer-links" aria-label="PolicyEngine links">
   </nav>
 </footer>
-<script src="/reveal.js?v=5" defer></script>
+<script src="/reveal.js?v=6" defer></script>
 </body>
 </html>
 """
