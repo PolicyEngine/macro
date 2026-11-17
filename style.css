@@ -8601,10 +8601,10 @@ main .band-head[data-icon]::before, main .band-head::before {
    a status chip alone in a desktop cell sizes its column instead of overflowing the padding */
 @media (max-width: 640px) { main .table-scroll > table.t-stack tbody tr > *, main .table-scroll > table.t-stack tbody tr:nth-child(even) > * { background: none !important; } }
 @media (min-width: 641px) { main table td:has(> .chip:only-child), main table td:has(> .st:only-child) { white-space: nowrap; width: 1%; } }
-/* phone sub-nav (≤420px): labels only, so the switch never crowds the tabs */
+/* phone sub-nav (≤420px): a smaller flag, never hidden */
 @media (max-width: 420px) {
-  .sn3 .seg .flag { display: none; }
-  .sn3 .seg > .cc-tog { min-width: 38px; padding: 0 8px !important; }
+  .sn3 .seg .flag { width: 13px; height: 9px; }
+  .sn3 .seg > .cc-tog { min-width: 0; padding: 0 7px !important; gap: 4px; }
 }
 /* long topic names in the phone sub-nav: ellipsis, so the country switch keeps its place */
 @media (max-width: 480px) { .sn3 .sn-lbl { display: inline-block; max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; } }
@@ -8817,3 +8817,25 @@ main .band-head[data-icon]::before, main .band-head::before {
   .lp-term { border-color: rgba(255, 255, 255, .1) !important; }
 }
 .hub2 .uc a { align-items: stretch !important; }
+
+/* =====================================================================
+   43. Header stack (bug fix after the animation push). The header grows with its
+   content instead of a fixed 82px, so the tab row can never spill below it; it is
+   opaque and above every animated block; --nav-h is measured from it (reveal.js),
+   so sticky sub-navs sit directly under it; the progress bar lives inside it.
+   "Macro" is plain text; only the PolicyEngine wordmark links home.
+   ===================================================================== */
+header.nav { height: auto !important; min-height: 82px; z-index: 100 !important; background: var(--card) !important; isolation: isolate; }
+header.nav::before { background: var(--card) !important; opacity: 1 !important; }
+header.nav .nav-links { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; background: var(--card) !important; }
+header.nav .nav-links::-webkit-scrollbar { display: none; }
+@media (max-width: 720px) { header.nav { height: auto !important; } }
+.economy-subnav, .mp-subnav, .model-tabs-row, .sn3 { z-index: 50 !important; background: var(--card) !important; }
+.brand { display: inline-flex !important; align-items: center; gap: 12px; color: #FFFFFF; text-decoration: none; }
+.brand-home { display: inline-flex; align-items: center; border-radius: 4px; line-height: 0; }
+.brand-home:focus-visible, .footer-policyengine .brand-home:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 3px; }
+.brand-name, .footer-policyengine > span { cursor: default; user-select: none; pointer-events: none; }
+.foot-bar .footer-links .footer-policyengine { display: inline-flex; align-items: center; gap: 10px; color: #FFFFFF; font-weight: 600; }
+.foot-bar .footer-links .footer-policyengine img { width: auto; height: 20px; padding: 0; background: none; border-radius: 0; }
+header.nav > .rv-progress { position: absolute !important; left: 0; right: 0; top: auto !important; bottom: 0; height: 2px; z-index: 2; }
+@media (max-width: 420px) { .sn3 .sn-lbl { max-width: 70px !important; } }

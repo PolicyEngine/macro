@@ -22,7 +22,7 @@ STYLESHEET = re.compile(r'href="/style\.css(?:\?v=[0-9]+)?"')
 # changes in a way a cached copy would render wrongly; ``render`` writes it
 # into every page and the generators read it from here (economy/topics.py,
 # notes/generate_release_notes.py), so no page can be left on an old copy.
-STYLE_VERSION = 41
+STYLE_VERSION = 42
 STYLE_HREF = f"/style.css?v={STYLE_VERSION}"
 
 # Inter (latin) is the body face on every page, but the browser only finds the
@@ -447,8 +447,8 @@ def _footer_links() -> str:
         for href, label, key in _FOOTER_MAIN
     )
     return (
-        '    <a class="footer-policyengine" href="/" aria-label="PolicyEngine Macro home">'
-        '<img src="/assets/policyengine-white.png" alt="" width="96" height="20" /><span>Macro</span></a>\n'
+        '    <div class="footer-policyengine"><a class="brand-home" href="/" aria-label="PolicyEngine Macro home">'
+        '<img src="/assets/policyengine-white.png" alt="PolicyEngine" width="96" height="20" /></a><span>Macro</span></div>\n'
         f'    <div class="foot-main">\n{items}\n    </div>'
     )
 
@@ -500,9 +500,9 @@ def header(path: Path) -> str:
             f"    <a{class_attr} href=\"{href}\"{current_attr}>{icon(key, 18)}{label}</a>"
         )
     return """<header class="nav">
-  <a class="brand" href="/" aria-label="PolicyEngine Macro home">
-    <img class="brand-logo" src="/assets/policyengine-white.png" alt="" width="115" height="24" /><span class="brand-name">Macro</span>
-  </a>
+  <div class="brand">
+    <a class="brand-home" href="/" aria-label="PolicyEngine Macro home"><img class="brand-logo" src="/assets/policyengine-white.png" alt="PolicyEngine" width="115" height="24" /></a><span class="brand-name">Macro</span>
+  </div>
   <nav class="nav-links" aria-label="Primary">
 %s
   </nav>
