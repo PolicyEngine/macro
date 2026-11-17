@@ -176,7 +176,7 @@ def digest_rows(items: list[dict], vintage: str) -> list[str]:
     for series in items:
         now = series["observations"][-1]
         topic_url, topic_title = topic_home(series)
-        next_release = " ".join((series.get("next_release") or "not announced").split())
+        next_release = site_nav.short_date(" ".join((series.get("next_release") or "not announced").split()))
         rows.append(
             f'          <tr id="{series["series"]}">'
             f'<th scope="row">{html.escape(_label(series))}'
@@ -228,11 +228,6 @@ def digest_page(vintage: str) -> str:
           </tbody>
         </table>
     </div>""")
-    where = site_nav.where_next([
-        ("/notes/releases", "list", "All release digests", "Every stored date, newest first"),
-        ("/economy#data", "data", "The data store", "Every stored vintage of every series"),
-        ("/forecasts#scored", "chart", "The forecast record", "Rounds scored against outturns like these"),
-    ])
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -264,14 +259,13 @@ def digest_page(vintage: str) -> str:
 {chr(10).join(tables)}
     </div>
   </section>
-{where}
 </main>
 <footer class="foot foot-bar">
   <p class="footer-legal">© 2026 PolicyEngine</p>
   <nav class="footer-links" aria-label="PolicyEngine links">
   </nav>
 </footer>
-<script src="/reveal.js?v=7" defer></script>
+<script src="/reveal.js?v=8" defer></script>
 </body>
 </html>
 """

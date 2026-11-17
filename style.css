@@ -8792,14 +8792,12 @@ main .band-head[data-icon]::before, main .band-head::before {
 @media (max-width: 899px) { .lp-use { grid-template-columns: 1fr !important; } }
 .lp-use-copy h3 { margin: 0 0 6px; font-size: 17px; font-weight: 650; color: var(--text-strong); }
 .lp-use-copy p { margin: 0 0 16px; color: var(--text-body) !important; }
-.lp-term { position: relative; background: #0F1720 !important; border: 1px solid #0F1720 !important; border-radius: var(--card-radius) !important; color: #E5E7EB; padding: 0 !important; overflow: hidden; }
-.lp-term .lp-term-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid rgba(255, 255, 255, .08); }
-.lp-term .lp-term-bar span { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, .22); }
-.lp-term .lp-term-title { margin-left: 8px; font: 600 11.5px/1 var(--mono, ui-monospace, monospace); color: rgba(255, 255, 255, .55); }
-.lp-term pre { margin: 0; padding: 16px 18px 18px; background: none !important; color: #E5E7EB !important; font-size: 13px; line-height: 1.65; }
+.lp-term { position: relative; background: var(--ab-inset) !important; border: 1px solid var(--ab-border) !important; border-radius: var(--card-radius) !important; padding: 0 !important; overflow: hidden; }
+.lp-term .lp-term-bar { display: none !important; }
+.lp-term pre { margin: 0; padding: 16px 18px; padding-right: 76px; background: none !important; color: var(--text-strong) !important; font-size: 13px; line-height: 1.65; }
 .lp-term pre code { color: inherit !important; background: none !important; }
-.lp-term .lp-term-p { color: #5EEAD4; }
-.lp-term .cb-copy { position: absolute; top: 6px; right: 8px; background: rgba(255, 255, 255, .08) !important; color: #E5E7EB !important; border: 1px solid rgba(255, 255, 255, .14) !important; }
+.lp-term .lp-term-p { color: var(--ab-teal-700); }
+.lp-term .cb-copy { position: absolute; top: 10px; right: 10px; }
 
 /* 42j. Phones: footer links drop to their own line; long use-card titles wrap cleanly */
 @media (max-width: 600px) {
@@ -8814,7 +8812,6 @@ main .band-head[data-icon]::before, main .band-head::before {
 @media (prefers-color-scheme: dark) {
   .foot.foot-bar { background: #0B1220 !important; border-top: 1px solid var(--border); }
   .btn-primary, .btn-inv { background: var(--ab-teal-700) !important; color: #FFFFFF !important; border-color: var(--ab-teal-700) !important; }
-  .lp-term { border-color: rgba(255, 255, 255, .1) !important; }
 }
 .hub2 .uc a { align-items: stretch !important; }
 
@@ -8887,6 +8884,107 @@ header.nav > .rv-progress { position: absolute !important; left: 0; right: 0; to
 .verdict-chip { width: 100%; box-sizing: border-box; }
 /* phones: the hero caveat chip wraps inside the screen; Copy never covers the command */
 .lp-fan-top .lp-capchip { white-space: normal !important; height: auto !important; min-height: 24px; max-width: 100% !important; line-height: 1.35; padding-top: 4px !important; padding-bottom: 4px !important; }
-.lp-term .lp-term-bar { display: flex !important; min-height: 38px; }
 .ct-self { padding: 12px 16px; }
 .btn { gap: 8px; }
+/* Read next / where-next removed sitewide (Vahid); out-of-scope pe/olg pages keep the markup, hidden here */
+.where-next, .tp-next { display: none !important; }
+
+/* =====================================================================
+   44. One flow / stepper component (Vahid: "consolidate all boxes and formats").
+   Every stepper uses the same node and connector as the use-case flow (§41):
+   a 24px circle, outlined teal (white fill), the end node filled teal, joined by a
+   2px teal-tinted line with no arrowheads and no mint fills. Orientation follows
+   the space (horizontal pipeline, vertical list, archive timeline).
+   ===================================================================== */
+:root { --node: 24px; --node-ring: inset 0 0 0 1.5px color-mix(in srgb, var(--ab-teal-700) 45%, var(--ab-border)); --node-line: color-mix(in srgb, var(--ab-teal-700) 25%, var(--ab-border)); }
+/* pipeline (Models joins, model-page "With the microsimulation") */
+.pipeline { justify-content: flex-start !important; }
+.pipeline .pl-node::before { width: var(--node) !important; height: var(--node) !important; margin-bottom: 8px; background: var(--card) !important; box-shadow: var(--node-ring) !important; color: var(--ab-teal-700) !important; font-size: 12px !important; }
+.pipeline .pl-node:last-child::before { background: var(--ab-teal-700) !important; color: #FFFFFF !important; box-shadow: none !important; }
+.pipeline .pl-arrow { flex: 0 1 96px !important; height: 2px; margin-top: 11px !important; background: var(--node-line) !important; }
+.pipeline .pl-arrow::after { display: none !important; }
+@media (max-width: 819px) { .pipeline .pl-arrow { width: 2px !important; height: 16px !important; margin: 4px 0 4px 11px !important; flex: none !important; } .pipeline .pl-node .mono, .pipeline .pl-node small { padding-left: 36px !important; } }
+/* Use page numbered steps */
+.use-step-n { width: var(--node) !important; height: var(--node) !important; background: var(--card) !important; box-shadow: var(--node-ring); color: var(--ab-teal-700) !important; font-size: 12px !important; font-weight: 700; margin-top: 2px; }
+.use-step { grid-template-columns: var(--node) minmax(0, 1fr) !important; column-gap: 12px !important; position: relative; }
+.use-step:has(+ .use-step)::after { content: ""; position: absolute; left: 11px; top: 30px; bottom: -24px; width: 2px; background: var(--node-line); }
+@media (max-width: 640px) { .use-step:has(+ .use-step)::after { display: none; } }
+/* Forecasts archive timeline */
+.fc-timeline::before { background: var(--node-line) !important; top: 35px !important; }
+.fc-dot { width: var(--node) !important; height: var(--node) !important; background: var(--ab-teal-700) !important; box-shadow: 0 0 0 3px var(--surface-card) !important; }
+.fc-node.is-open .fc-dot { background: var(--card) !important; box-shadow: var(--node-ring), 0 0 0 3px var(--surface-card) !important; }
+.fc-node.is-retro .fc-dot { background: var(--card) !important; box-shadow: inset 0 0 0 1.5px var(--ab-loss), 0 0 0 3px var(--surface-card) !important; }
+.fc-gap { height: 22px; display: inline-flex; align-items: center; padding: 0 9px !important; border: 0 !important; background: var(--surface-sunken) !important; font-size: 11.5px !important; font-weight: 600; color: var(--text-muted) !important; }
+@media (max-width: 640px) { .fc-timeline::before { left: 11px !important; top: 12px !important; } .fc-timeline { padding-left: 36px !important; } }
+@media (prefers-color-scheme: dark) { .pipeline .pl-node:last-child::before, .fc-dot { background: var(--hub-core-dark) !important; } }
+
+/* =====================================================================
+   45. Phone tap targets (audit at 375/390, touch, DPR 3): every control is at
+   least 44px to the finger. Visual size stays; small controls get an invisible
+   hit area (::before) so layouts don't move.
+   ===================================================================== */
+@media (max-width: 720px), (pointer: coarse) {
+  header.nav .nav-links a { min-height: 44px; }
+  .brand-home { position: relative; }
+  .brand-home::before { content: ""; position: absolute; inset: -12px -8px; }
+  .seg > .cc-tog, .seg > .mc-seg { position: relative; }
+  .seg > .cc-tog::before, .seg > .mc-seg::before { content: ""; position: absolute; inset: -10px -2px; }
+  .cb-copy, .copy-btn, .gl-more, .cmp-more { position: relative; }
+  .cb-copy::before, .copy-btn::before, .gl-more::before, .cmp-more::before { content: ""; position: absolute; inset: -8px; }
+  main summary { min-height: 44px; box-sizing: border-box; }
+  .btn, .chip-btn, .use-tab, [role="tab"] { min-height: 44px; }
+  .foot-bar .footer-text { padding-block: 6px; min-height: 44px; display: inline-flex; align-items: center; }
+}
+
+/* =====================================================================
+   46. Phone review fixes (375/390 audit, reviewed with Opus; Fable limit)
+   ===================================================================== */
+@media (max-width: 640px) {
+  /* Use: one column for the numbered steps (the stepper rule must not win here) */
+  .use-step { grid-template-columns: minmax(0, 1fr) !important; }
+  /* Compare: stacked model cards fit the screen */
+  .cmp-table.t-stack, .cmp-table.t-stack tr, .cmp-table.t-stack tbody { width: 100% !important; min-width: 0 !important; }
+  .cmp-table.t-stack td, .cmp-table.t-stack th { min-width: 0 !important; overflow-wrap: anywhere; }
+  /* code: never break a token mid-word; scroll instead, and keep clear of Copy */
+  .lp-term pre, .lp-term pre code, main .codeblock pre, main .codeblock pre code { white-space: pre !important; overflow-wrap: normal !important; word-break: normal !important; }
+  main .codeblock pre, .lp-term pre { overflow-x: auto; padding-right: 84px !important; }
+  /* validation tables kept as tables: fit the column widths to the screen */
+  .vc-table { table-layout: fixed; width: 100% !important; min-width: 0 !important; }
+  .vc-table td, .vc-table th { overflow-wrap: anywhere; white-space: normal !important; }
+  .vc-table caption { white-space: normal; }
+  /* Forecasts release-notes rows: text full width, meta on its own line */
+  .fc-notes a { display: grid !important; grid-template-columns: auto minmax(0, 1fr) !important; column-gap: 10px; row-gap: 2px; }
+  .fc-notes a > strong { grid-column: 2; justify-self: start; }
+  /* chips that may wrap: soft corners instead of a broken pill */
+  .rt-chip { white-space: normal !important; height: auto !important; min-height: 24px; border-radius: 8px !important; padding-top: 3px !important; padding-bottom: 3px !important; }
+  /* stat tiles: icon aligned with the first line of a wrapped label */
+  .stat-label { align-items: flex-start !important; }
+  .stat-label svg { margin-top: 3px; flex: none; }
+  /* glossary: "more" and the page link share one row */
+  .gl-page dl.glossary dd { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 14px; }
+  .gl-page dl.glossary dd > p { flex: 1 1 100%; }
+  .gl-page dl.glossary dd > a { display: inline-block !important; margin-top: 4px; }
+  /* model-page heroes: icon above the eyebrow, no indented column */
+  .hero.mh .hero-inner { display: block !important; }
+  .hero.mh .mh-icon { display: inline-flex; margin: 0 0 8px; }
+  /* sub-nav tab strips: a fade shows there is more to scroll */
+  .mp-subnav, .model-tabs-row { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); }
+  /* validation side rail links reach 44px */
+  .page-rail a { min-height: 44px; display: inline-flex; align-items: center; }
+}
+@media (max-width: 720px), (pointer: coarse) {
+  [id^="client-tab-"], .gl-filter a, .gl-filters a, .gl-cats a { min-height: 44px; }
+  .gl-more { min-height: 44px; display: inline-flex; align-items: center; }
+}
+@media (max-width: 720px), (pointer: coarse) {
+  [id^="client-tab-"] { height: auto !important; min-height: 44px !important; }
+  .gl-page main nav a { min-height: 44px; display: inline-flex; align-items: center; }
+}
+@media (max-width: 640px) {
+  .cmp-scroll, .cmp-scroll.fade-r, .cmp-scroll.fade-l { -webkit-mask-image: none !important; mask-image: none !important; }
+}
+@media (max-width: 640px) {
+  .cmp-table.t-stack { display: block !important; box-sizing: border-box; max-width: 100%; }
+  .cmp-table.t-stack tr { box-sizing: border-box; max-width: 100%; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; }
+  .cmp-table.t-stack td[data-label="Verdict"], .cmp-table.t-stack th { grid-column: 1 / -1; }
+}

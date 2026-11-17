@@ -849,7 +849,7 @@ def data_rows(names: tuple[str, ...]) -> str:
         first, last = entry["coverage"]
         vintage = series["vintage"]
         file_url = f"/data/vintages/{dirs[name]}/{name}/{vintage}.json"
-        announced = " ".join((series.get("next_release") or "").split())
+        announced = site_nav.short_date(" ".join((series.get("next_release") or "").split()))
         rows.append(
             "          <tr>"
             f'<th scope="row">{esc(label(series))}</th>'
@@ -2994,14 +2994,6 @@ def sentence_case_inline(text: str) -> str:
     return text
 
 
-def topic_where_next(topic: dict) -> str:
-    """The where-next row: the record, the data store, the country data hub."""
-    entry = COUNTRIES[topic["country"]]
-    cards = [
-        (entry["hub"], "chart", "Forecasts", "The record, open rounds and how they score"),
-        (entry["data"], "list", f'{entry["label"]} data', "Every topic and series in one place"),
-    ]
-    return site_nav.where_next(cards)
 
 
 SHORT_LEDES = {
@@ -3095,14 +3087,6 @@ def page(topic: dict) -> str:
 {site_nav.expander("database", "Data and sources", "Series, coverage and the append-only snapshot files.", data_body, id_="data")}
   </section>
 
-  <section class="band tp-next" aria-labelledby="next-h">
-    <h2 id="next-h"><span class="tp-h-ic" aria-hidden="true">{site_nav.icon("arrow-right", 16)}</span>Read next</h2>
-    <p class="tp-chips">
-      <a href="{COUNTRIES[topic["country"]]["hub"]}">{site_nav.icon("forecasts", 16)}Track record</a>
-      <a href="{COUNTRIES[topic["country"]]["data"]}">{site_nav.icon("list", 16)}{COUNTRIES[topic["country"]]["label"]} data</a>
-      <a href="/connect">{site_nav.icon("use", 16)}Run the models</a>
-    </p>
-  </section>
 </main>
 
 <footer class="foot foot-bar">
@@ -3111,15 +3095,15 @@ def page(topic: dict) -> str:
 {site_nav.FOOTER_LINKS}
   </nav>
 </footer>
-<script src="/reveal.js?v=7" defer></script>
+<script src="/reveal.js?v=8" defer></script>
 {site_nav.SUBNAV_TAG}
 </body>
 </html>
 """
     path = COUNTRIES[topic["country"]]["dir"] / slug / "index.html"
     if "pe-plot-json" in body:   # plotly.js only on pages with an interactive chart
-        body = body.replace('<script src="/reveal.js?v=7" defer></script>\n',
-                            '<script src="/reveal.js?v=7" defer></script>\n' + chartkit.plot_scripts() + "\n", 1)
+        cut = body.rindex("</body>")
+        body = body[:cut] + chartkit.plot_scripts() + "\n" + body[cut:]
     return head + site_nav.header(path) + body
 
 

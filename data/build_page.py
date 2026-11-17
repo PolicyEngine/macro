@@ -65,6 +65,13 @@ RECIPE_SERIES = "uk_cpi_yoy"
 RECIPE_DATE = "2026-07-25"
 
 
+def _short(text: str) -> str:
+    import re
+    months = {"January": "Jan", "February": "Feb", "March": "Mar", "April": "Apr", "June": "Jun", "July": "Jul",
+              "August": "Aug", "September": "Sep", "October": "Oct", "November": "Nov", "December": "Dec"}
+    return re.sub(r"\b(\d{1,2}) (" + "|".join(months) + r") (\d{4})\b", lambda m: f"{m.group(1)} {months[m.group(2)]} {m.group(3)}", text)
+
+
 def manifest() -> dict:
     return json.loads((STORE / "MANIFEST.json").read_text(encoding="utf-8"))
 
@@ -316,7 +323,7 @@ def catalogue_rows() -> str:
             ("Observations", f"{len(series['observations']):,}"),
             ("Store path", f'<span class="mono">{esc(source_dir)}/{esc(name)}</span>'),
             ("Released", esc(released[:10]) if released else "not supplied by the source"),
-            ("Next release", esc(next_release) if next_release else "not announced"),
+            ("Next release", esc(_short(next_release)) if next_release else "not announced"),
             *([("Note", esc(stale_note(name, now["period"])))] if stale_note(name, now["period"]) else []),
             ("Official source",
              f'<a href="{esc(display_url(series["url"]))}">'
