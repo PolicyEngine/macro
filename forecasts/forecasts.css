@@ -473,3 +473,18 @@
 .fc-skill-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--warn-bg); border: 1px solid var(--warn-line); color: var(--warn-ink); font-weight: 600; }
 .fc-skill-chip .fc-ic { width: 14px; height: 14px; }
 @media (min-width: 600px) and (max-width: 899px) { main .fc-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+/* scoreboard tiles: no outer box; one aligned grid. Each tile is a 4-row
+   subgrid (label, value, visual, sub) so every row shares a baseline. */
+main .fc-page .fc-tiles { padding: 0 !important; border: 0 !important; background: none !important; border-radius: 0; box-shadow: none;
+  grid-template-columns: minmax(0, 1fr) !important; gap: 12px; }
+@media (min-width: 600px) { main .fc-page .fc-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (min-width: 900px) { main .fc-page .fc-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; } }
+main .fc-page .fc-tiles > .fc-tile { display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 6px; align-items: start; }
+main .fc-page .fc-tile > * { order: 0 !important; margin: 0 !important; }
+main .fc-page .fc-tile .fc-tile-l { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+main .fc-page .fc-tile .fc-tile-x { width: 100%; min-height: 12px; align-self: center; }
+main .fc-page .fc-tile .fc-bars { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 3px 8px; }
+main .fc-page .fc-tile .fc-bar-l { font-size: 11px; line-height: 1.2; }
+main .fc-page .fc-tile .fc-bar { height: 5px; }
+main .fc-page .fc-tile .fc-pips { display: flex; gap: 6px; }
+main .fc-page .fc-tile .fc-tile-x:empty { min-height: 0; }
