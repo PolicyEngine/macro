@@ -480,7 +480,7 @@ def body(data: dict) -> str:
         <li><strong>OBR emulator:</strong> rate, spending and tax rows run locally on 16 Nov 2026 at <code>2965e82d</code> (October 2026 EFO), the pin before the site&rsquo;s current <code>0fe04c9</code>; every quarter converges. The energy row is an earlier committed output.</li>
         <li><strong>FRB/US:</strong> the +100bp, spending, tax and energy rows re-run on 18 Nov 2026 at the current pin <code>162cfe6</code> (October 2026 LONGBASE), with shocks from 2026Q3, the first quarter after LONGBASE history; identical to the <code>846eeb5c</code> runs of 16 Nov, which the &minus;100bp and +25bp rows still are.</li>
         <li><strong>US HANK:</strong> the +100bp and spending rows re-run on 18 Nov 2026 at the current pin <code>58353e5</code>, now storing the policy-rate path; output and inflation are identical to the hosted runs of 6 Nov, which the &minus;100bp and +25bp rows still are.</li>
-        <li><strong>BoE SVAR and DEFINE-UK:</strong> committed model-repo outputs, with no solve; the SVAR medians come from its fast test fixture (see its Details).</li>
+        <li><strong>BoE SVAR and DEFINE-UK:</strong> committed model-repo outputs, with no solve; the SVAR +100bp medians come from its fast test fixture (see that row&rsquo;s Details).</li>
       </ul></div></details>
   </section>
 {sections}
