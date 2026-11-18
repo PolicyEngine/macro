@@ -165,7 +165,8 @@ OBR_VARIABLES = [
         # space (the EViews convention for a dlog equation), so the published
         # equation's own error-correction term gives the deviation a steady
         # state: for a sustained +5pp rise, delta_IF runs £0.24bn at q8,
-        # £0.38bn at q12, £0.68bn at q25, approaching a ~£0.95bn/q plateau.
+        # £0.38bn at q12, £0.68bn at q25, approaching a ~£0.96bn/q plateau
+        # (obr README at 0fe04c9).
         # The root is slow (~0.958/quarter), so a 12-quarter run captures
         # only ~40% of the full effect — the result's
         # investment_closure_plateau_fraction attr says where a run sits.
@@ -214,25 +215,74 @@ OBR_VARIABLES = [
         ),
     },
     {
+        "var": "VREC",
+        "description": "VAT receipts (the indirect-tax lever)",
+        "units": "£m per quarter of receipts (e.g. 2200 = a 1pp rise in the standard rate)",
+        "investment_closure": False,
+        # obr results/demo_shocks.json at 0fe04c9 (run at f0f61c5, 16 Nov
+        # 2026, October 2026 EFO, every quarter converged): +2,200/qtr for 12
+        # quarters gives current-price GDP per pound of 0.013 / 0.026 / 0.043
+        # at q1/q4/q12 by default, and 0.175 / 0.345 / 0.643 with
+        # price_passthrough=True (CPI up about 0.4%). The OBR's published VAT
+        # multiplier is 0.35, fading.
+        "caveat": (
+            "by default VAT barely reaches GDP: CPI is exogenous in the "
+            "OBR's listing, so the tax lands on company profits (about 0.03 "
+            "of GDP per pound after a year, against the OBR's published "
+            "0.35). price_passthrough=True is an opt-in, labelled judgement "
+            "overlay that passes the tax into CPI through the listing's own "
+            "cost-push weights with the retail markup held (about 0.35 per "
+            "pound after a year, still rising after that where the OBR's "
+            "fades). It is off by default and is not the shipped listing"
+        ),
+    },
+    {
         "var": "CGIPS",
         "description": "Nominal central government investment (feeds real GGI via the GGIPS/GGIDEF chain)",
         "units": "£m nominal per quarter (e.g. 3000 ≈ £2.5bn real per quarter)",
         "investment_closure": False,
-        # Measured at obr 2965e82d (October 2026 EFO, nominal-GDP pin, every
-        # quarter converged; obr results/site_figures.json): delta_IF is exactly 0.0 because IF has no
-        # live equation; business investment (IBUSX) is the residual of
-        # IBUS = IF - GGI - ... (l.84) and falls by exactly -delta GGI
-        # (+1500/qtr over 8 quarters from 2026Q1: -1,408 at q4); GDP falls only by the induced consumption
-        # (-3.8 at q4). Against the OBR's published 1.0 the channel is absent.
+        # Default (demand closure). Measured at obr 2965e82d (October 2026
+        # EFO, nominal-GDP pin, every quarter converged; obr
+        # results/site_figures.json, unchanged at 0fe04c9): delta_IF is
+        # exactly 0.0 because IF has no live equation; business investment
+        # (IBUSX) is the residual of IBUS = IF - GGI - ... (l.84) and falls by
+        # exactly -delta GGI (+1500/qtr over 8 quarters from 2026Q1: -1,408 at
+        # q4); GDP falls only by the induced consumption (-3.8 at q4).
+        # Opt-in (investment_closure=True; obr results/demo_shocks.json at
+        # 0fe04c9, run at f0f61c5, every quarter converged): the listing's
+        # commented-out IF identity (l.86) is live, and +3,000/qtr for 12
+        # quarters from 2025Q1 moves GDP +3,075 / +2,901 / +2,932 at
+        # q1/q4/q12. The OBR's published capital multiplier is 1.0, tapering.
         "caveat": (
-            "this channel does not transmit: total fixed investment (IF) has "
-            "no live equation and moves exactly zero, business investment "
-            "moves only as an accounting offset to the shock, and any "
-            "residual GDP effect is not a multiplier. Do not use it to score "
-            "capital spending"
+            "under the default closure this channel does not transmit: total "
+            "fixed investment (IF) has no live equation and moves exactly "
+            "zero, business investment moves only as an accounting offset to "
+            "the shock, and any residual GDP effect is not a multiplier. "
+            "investment_closure=True is an opt-in, labelled route that "
+            "switches on the listing's commented-out IF identity, so real "
+            "government investment enters GDP about one for one (identity "
+            "passthrough; see that run's caveat). Neither run is a validated "
+            "capital-spending multiplier"
         ),
     },
 ]
+
+# CGIPS under the opt-in investment closure (obr #70). The default caveat
+# above says the channel does not transmit, which is false for this run, so
+# obr_shock swaps in this one.
+_OBR_CGIPS_INVESTMENT_CLOSURE_CAVEAT = (
+    "opt-in investment closure: the listing's commented-out IF identity is "
+    "live, so real government investment enters total investment and GDP "
+    "about one for one. This is identity passthrough, not a validated "
+    "multiplier: no taper, no crowding-out, and the nominal-GDP pin is off "
+    "under this closure. The OBR's published capital-spending multiplier is "
+    "1.0 on impact, tapering to zero"
+)
+
+# The model's opt-in indirect-tax price pass-through (obr #60/#70) is defined
+# only for these levers and only under the demand closure; run_reform raises
+# otherwise. Mirrored here so a bad call fails before the model import.
+_OBR_PRICE_PASSTHROUGH_VARS = frozenset({"VREC", "TXFUEL"})
 
 
 def obr_list_variables() -> list[dict]:
@@ -283,30 +333,53 @@ def obr_shock(
     periods: int = 12,
     name: str | None = None,
     investment_closure: bool | None = None,
+    price_passthrough: bool = False,
 ) -> dict:
     """Shock one OBR exogenous variable directly, in model units.
 
     The escape hatch under score_reform: no PolicyEngine reform translation,
-    just a raw additive shock (£m per quarter for CGG/CGIPS, decimal rate
-    change for TCPRO). Runs baseline vs shocked solves and returns per-period
-    GDP deltas plus a headline cumulative GDP effect over the shocked periods.
+    just a raw additive shock (£m per quarter for CGG/CGIPS/VREC, decimal
+    rate change for TCPRO). Runs baseline vs shocked solves and returns
+    per-period GDP deltas plus a headline cumulative GDP effect over the
+    shocked periods.
 
     ``investment_closure`` defaults per variable from the curated list
     (e.g. True for TCPRO): a corporation-tax shock without the investment
     closure solves to all-zero deltas, which would read as a misleading
-    "no effect" result rather than a mis-specified run.
+    "no effect" result rather than a mis-specified run. For CGIPS it is an
+    opt-in (default False): it switches on the listing's commented-out IF
+    identity, so government investment reaches GDP as identity passthrough.
+
+    ``price_passthrough`` (default False) is the model's opt-in, labelled
+    overlay for an indirect-tax shock (VREC, TXFUEL): it passes the tax into
+    CPI through the listing's own cost-push weights with the retail markup
+    held. It is defined only under the demand closure.
     """
     periods = _bounded_int(
         "periods", periods, _OBR_MIN_PERIODS, _OBR_MAX_PERIODS
     )
     shock = _finite("shock", shock)
     end = _obr_window_end(periods)
-    run_reform = _import_obr()
     if investment_closure is None:
         known = {v["var"]: v["investment_closure"] for v in OBR_VARIABLES}
         investment_closure = known.get(var, False)
+    price_passthrough = bool(price_passthrough)
+    if price_passthrough and var not in _OBR_PRICE_PASSTHROUGH_VARS:
+        raise ValueError(
+            "price_passthrough applies only to an indirect-tax shock "
+            f"({', '.join(sorted(_OBR_PRICE_PASSTHROUGH_VARS))}); got var={var!r}"
+        )
+    if price_passthrough and investment_closure:
+        raise ValueError(
+            "price_passthrough is defined for the demand closure only; do "
+            "not combine it with investment_closure"
+        )
+    run_reform = _import_obr()
     if name is None:
         name = f"{var} shock {shock:+g}"
+    # Forwarded only when asked for, so a default run makes exactly the call
+    # it made before the option existed.
+    overlays = {"price_passthrough": True} if price_passthrough else {}
     df = run_reform(
         name=name,
         var=var,
@@ -315,6 +388,7 @@ def obr_shock(
         end=end,
         periods=periods,
         investment_closure=bool(investment_closure),
+        **overlays,
     )
     rows = _obr_result_rows(df)
     # The TCPRO caveat promises the caller an
@@ -334,15 +408,20 @@ def obr_shock(
             f"shock (window {_OBR_START}..{end})"
         )
     peak = max(rows, key=lambda r: abs(r["pct_gdp"]))
-    # A lever whose channel is dead or non-convergent must say so in the
-    # payload, not only in a docstring nobody reads over MCP. Of the four
-    # fiscal instruments here exactly one contains behaviour: CGG is mostly
-    # an accounting identity (multiplier 1.01 rising to 1.05, against the
-    # OBR's published 0.6), CGIPS is dead, TCPRO converges only slowly, and the
-    # household-income lever is the only one with a response worth reading.
+    # A lever whose channel is absent or non-convergent must say so in the
+    # payload, not only in a docstring nobody reads over MCP. Of the fiscal
+    # instruments here exactly one contains behaviour: CGG is mostly an
+    # accounting identity (multiplier 1.01 rising to 1.05, against the OBR's
+    # published 0.6), CGIPS does not transmit under the default closure and
+    # is identity passthrough under the opt-in investment closure, TCPRO
+    # converges only slowly, VAT barely reaches GDP without the opt-in price
+    # overlay, and the household-income lever is the only one with a
+    # response worth reading.
     caveat = next(
         (v.get("caveat") for v in OBR_VARIABLES if v["var"] == var), None
     )
+    if var == "CGIPS" and investment_closure:
+        caveat = _OBR_CGIPS_INVESTMENT_CLOSURE_CAVEAT
     result = {
         "name": name,
         "provenance": _provenance(
@@ -383,6 +462,27 @@ def obr_shock(
             result[key] = [round(float(v), 4) for v in list(values)[: len(rows)]]
     if attrs.get("gdp_per_revenue_basis_note"):
         result["gdp_per_revenue_basis_note"] = str(attrs["gdp_per_revenue_basis_note"])
+    # The model's own labels (obr #70). They live on the frame's attrs, which
+    # an MCP caller never sees, so they travel in the payload: an identity
+    # passthrough (default CGG, or CGIPS under the opt-in investment closure)
+    # or a judgement overlay must not arrive looking like a behavioural
+    # result. transmission_note is the model's one-paragraph reading of the
+    # channel, set for most levers.
+    if attrs.get("mechanical_passthrough"):
+        result["mechanical_passthrough"] = True
+    # Not on an overlay run: the model's VAT note describes the default
+    # ("no price channel"), which the overlay's own note supersedes.
+    if attrs.get("transmission_note") and not price_passthrough:
+        result["transmission_note"] = str(attrs["transmission_note"])
+    if price_passthrough:
+        result["price_passthrough"] = True
+        if attrs.get("price_passthrough_note"):
+            result["price_passthrough_note"] = str(attrs["price_passthrough_note"])
+        cpi = (attrs.get("price_passthrough_detail") or {}).get("cpi_pct_delta")
+        if cpi is not None:
+            result["cpi_pct_delta"] = [
+                round(float(v), 4) for v in list(cpi)[: len(rows)]
+            ]
     return result
 
 

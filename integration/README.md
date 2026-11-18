@@ -171,6 +171,8 @@ pe-macro compare --reform '{"gov.hmrc.income_tax.rates.uk[0].rate":0.21}' \
     --models microsim,obr                             # same reform, model classes side by side
 pe-macro obr-shock --var CGG --shock 1250 --periods 4 # £5bn/yr spending, 1 year
 pe-macro obr-shock --var TCPRO --shock -0.05          # 5pp corp tax cut (closure auto-on)
+pe-macro obr-shock --var CGIPS --shock 3000 --investment-closure  # opt-in: identity passthrough, not a multiplier
+pe-macro obr-shock --var VREC --shock 2200 --price-passthrough    # opt-in: VAT +1pp passed into CPI (labelled overlay)
 pe-macro frbus-variables                              # shockable FRB/US levers + units
 pe-macro frbus-summary                                # FRB/US metadata + validation provenance
 pe-macro frbus-shock --var rffintay_aerr --shock 1.0  # 100bp US monetary tightening
