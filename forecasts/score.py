@@ -1410,6 +1410,9 @@ def render_home_record(card: dict) -> str:
             f'            <tr title="{tip}"><th scope="row">{label} <span class="mono lp-rt-q">{e["period"]}</span></th>'
             f'<td>{short_date(d["round_id"])}</td><td class="num">{e["forecast"]:.2f}%</td><td class="num">{e["outturn"]:.2f}%</td><td>{chip}</td></tr>')
     bias = st["bias"]
+    # The head line counts the live forecasts only; say so where the count widens to all scored.
+    retro = scored - st["exante"]
+    lead = f"Counting the {retro} archived retroactively, they" if retro > 0 else "They"
     return "\n".join([
         f'      <div class="sh"><span class="sh-icon">{_lucide("target", 20)}</span>',
         '        <h2 id="record-h">Forecast record</h2>',
@@ -1430,7 +1433,7 @@ def render_home_record(card: dict) -> str:
            f'and is too narrow, so a small miss can land outside it.</p>']
           if any(who(d) and not e["in_68"] for d, e in live) else []),
         f'        <p class="lp-score-foot"><span class="chip chip-warn">{_lucide("alert", 14)}Too few to judge skill yet</span>'
-        f'<span>They ran {"low" if bias < 0 else "high"} on {st["low"] if bias < 0 else scored - st["low"]} of {scored} scored forecasts ({"&minus;" if bias < 0 else "+"}{abs(bias):.2f}pp on average).</span>'
+        f'<span>{lead} ran {"low" if bias < 0 else "high"} on {st["low"] if bias < 0 else scored - st["low"]} of {scored} scored forecasts ({"&minus;" if bias < 0 else "+"}{abs(bias):.2f}pp on average).</span>'
         '<a href="/forecasts#scored">See every score &rarr;</a></p>',
         "      </div>",
     ])

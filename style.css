@@ -9030,3 +9030,30 @@ header.nav > .rv-progress { position: absolute !important; left: 0; right: 0; to
   .model-tabs-row .model-tabs-link::before, .model-tabs-row .model-tabs-link svg { display: none !important; }
 }
 @media (max-width: 420px) { .model-tabs-row { -webkit-mask-image: none !important; mask-image: none !important; } }
+
+/* =====================================================================
+   49. Review of 18 Nov, shell pages (/, /models, /models/compare, /connect)
+   ===================================================================== */
+/* Sentence case and the 12px floor (DESIGN §1.5, §2.3): these labels were 11px tracked capitals */
+.hq-label, main dl.kv dt { text-transform: none; letter-spacing: 0; font-size: var(--fs-label); }
+.cc, .tn-inline, .repo-owner { font-size: var(--fs-label); }
+/* Compare: the last question no longer ends against the footer; two chart panels fill the row */
+.compare-page main { padding-bottom: var(--s-7); }
+.cmp-sm-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 520px)); }
+/* Compare title band reads title, lede, tabs, as on /models and the Forecasts pages (the h1 sat 8px above the tab row) */
+.doc.compare-page main > .hero > .hero-inner > .lede { order: 2; }
+.doc.compare-page main:has(> .hero) > .model-tabs { order: 3; margin-top: 16px; }
+/* Compare charts, dark theme: the benchmark band and its swatch were near invisible at 16% */
+@media (prefers-color-scheme: dark) {
+  .cmp-sm .cmp-band, .cmp-fig .vc-sw.sw-band { fill: color-mix(in srgb, var(--primary) 34%, transparent); background: color-mix(in srgb, var(--primary) 34%, transparent); }
+}
+/* Models comparison table, tablet widths: the Answers column wrapped to two or three words a line */
+@media (min-width: 641px) and (max-width: 960px) {
+  .mp #compare tbody th { min-width: 150px; }
+  .mp #compare th, .mp #compare td { padding-left: 10px; padding-right: 10px; }
+}
+/* Compare table at tablet width: tighter cells so it fits its card (it scrolled 50px and hid the Details buttons under the edge fade) */
+@media (min-width: 721px) and (max-width: 900px) {
+  main .cmp-scroll table.cmp-table th, main .cmp-scroll table.cmp-table td { padding-left: 8px; padding-right: 8px; }
+  main .cmp-scroll table.cmp-table tbody th { min-width: 7rem; }
+}
