@@ -333,7 +333,7 @@ def latest_digest_row() -> str:
     day = datetime.strptime(latest, "%Y-%m-%d").strftime("%-d %b %Y")
     return (
         f'    <p class="fc-note-row">{icon}<span><strong>Latest release digest, {day}:</strong> '
-        f'what each stored release changed. <a href="/notes/releases/{latest}">Read it</a> · '
+        f'what each stored release changed. <a href="/notes/releases/{latest}">Read the digest</a> · '
         '<a href="/notes/releases">All digests</a></span></p>'
     )
 
