@@ -1132,7 +1132,12 @@ def inflation_model() -> str:
         peak_q, peak_v = max(later, key=lambda r: r[1])
         tail = [v for q, v in later if q > peak_q][-4:]
         settle = f", then settles near {sum(tail) / len(tail):.1f}%" if tail else ""
-        reaches = f"Median peaks at {peak_v:.1f}% in {esc(peak_q)}{settle}."
+        # The plateau is the model, not a call: boe-var-model README at c827ab8
+        # ("no inflation anchor"); /svar/validation#no-anchor carries the detail.
+        anchor = (': the model has a unit root and no inflation anchor, so it extends '
+                  'recent inflation rather than returning to 2% '
+                  '(<a href="/svar/validation#no-anchor">limits</a>)' if tail else "")
+        reaches = f"Median peaks at {peak_v:.1f}% in {esc(peak_q)}{settle}{anchor}."
     else:
         reaches = ""
     return f"""    <div class="prose">
@@ -1216,7 +1221,8 @@ def jobs_chart(facts: dict) -> str:
     rid = esc(round_file["round_id"])
     source = (f'BoE SVAR unemployment satellite round {rid}, '
               f'<a class="mono" href="/forecasts/rounds/{rid}/okun-unemployment.json">'
-              "okun-unemployment.json</a>; bands raw, GDP-forecast uncertainty only")
+              "okun-unemployment.json</a>; bands carry GDP-forecast uncertainty only and are too narrow "
+              '(<a href="/svar/validation#rolling">measured coverage</a>)')
     return path_chart(
         "topic-unemployment-path", "unemployment", "UK unemployment rate", "%",
         rows, round_file["round_id"],
