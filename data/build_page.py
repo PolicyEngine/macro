@@ -223,6 +223,7 @@ _ICON = {
     "landmark": '<line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/>',
     "chart": '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
     "database": '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+    "file": '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
     "alert": '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
 }
 
@@ -322,7 +323,7 @@ def catalogue_rows() -> str:
             ("Coverage", f"{esc(first)} – {esc(last)}"),
             ("Observations", f"{len(series['observations']):,}"),
             ("Store path", f'<span class="mono">{esc(source_dir)}/{esc(name)}</span>'),
-            ("Released", esc(released[:10]) if released else "not supplied by the source"),
+            ("Released", esc(period_label(released[:10])) if released else "not supplied by the source"),
             ("Next release", esc(_short(next_release)) if next_release else "not announced"),
             *([("Note", esc(stale_note(name, now["period"])))] if stale_note(name, now["period"]) else []),
             ("Official source",
@@ -357,7 +358,7 @@ def catalogue_rows() -> str:
             f'                <td colspan="5">\n'
             f"                  <dl>\n{dl}\n                  </dl>\n"
             f'                  <p class="series-vintages-head">Every snapshot '
-            f"taken, newest first — each file immutable.</p>\n"
+            f"taken, newest first. Each file is immutable.</p>\n"
             f'                  <ul class="vintage-list mono">\n{listed}\n'
             f"                  </ul>\n"
             f"                </td>\n"
@@ -394,23 +395,49 @@ def release_status(when: datetime, series: dict) -> str:
     fetched = datetime.strptime(last_fetch(), "%Y-%m-%d")
     if when > fetched:
         return "ahead of the last fetch"
-    return f"passed; not in the store as of {fetched:%Y-%m-%d}"
+    return f"passed; not in the store as of {period_label(last_fetch())}"
 
 
-def calendar_rows() -> str:
+def calendar_table() -> str:
+    """The announced releases as a three-column table: date, series, source.
+
+    It used to carry a store-id column (the catalogue above is the home of
+    the ids) and a status column that read "ahead of the last fetch" on every
+    row, which on a phone stacked into ten four-line cards. The status is now
+    stated once in the caption while every date is ahead of the store, and
+    comes back as a column only when a date has passed without a snapshot.
+    """
+    releases = upcoming()
+    statuses = [release_status(when, series) for when, _, series in releases]
+    passed = any(status.startswith("passed") for status in statuses)
     rows = []
-    for when, name, series in upcoming():
+    for (when, _name, series), status in zip(releases, statuses):
         rows.append(
             "          <tr>"
             f'<th scope="row">{when.strftime("%-d %b %Y")}</th>'
             f"<td>{esc(public_label(series))}</td>"
-            f'<td><span class="mono">{esc(name)}</span></td>'
             f'<td><a href="{esc(display_url(series["url"]))}">'
             f'{esc(series["source"])} · {esc(series["cdid"])}</a></td>'
-            f"<td>{esc(release_status(when, series))}</td>"
-            "</tr>"
+            + (f"<td>{esc(status)}</td>" if passed else "")
+            + "</tr>"
         )
-    return "\n".join(rows)
+    updated = period_label(last_fetch())
+    lead = (
+        f"{len(releases)} announced releases; the store was last updated {updated}."
+        if passed
+        else f"{len(releases)} announced releases, all after the store's last update on {updated}."
+    )
+    status_head = '<th scope="col">Status</th>' if passed else ""
+    stack = "" if passed else ' data-stack="no"'
+    return f"""      <div class="table-scroll">
+        <table{stack}>
+          <caption>{lead} Only the ONS publishes the field; dates are the publisher's and can move. iCalendar feed: <a href="/data/calendar.ics">/data/calendar.ics</a>.</caption>
+          <thead><tr><th scope="col">Date</th><th scope="col">Series</th><th scope="col">Source</th>{status_head}</tr></thead>
+          <tbody>
+{chr(10).join(rows)}
+          </tbody>
+        </table>
+      </div>"""
 
 
 def recipe() -> list[tuple[str, str]]:
@@ -474,6 +501,21 @@ def recipe_block() -> str:
     # past a 375 px viewport. The block scrolls inside itself instead.
     body = "\n".join(lines)
     return f'      <div class="codeblock"><pre><code>{body}</code></pre></div>'
+
+
+def endpoint(path: str, icon: str) -> str:
+    """An endpoint path as a row header, led by an icon.
+
+    The icon is not only decoration: the site capitalises the first letter of
+    a row header (style.css, ``.prose th::first-letter``), which rendered
+    these case-sensitive paths as "/Data/MANIFEST.json". ``::first-letter``
+    does not apply when the line starts with an image, so the icon must stay
+    the first thing in the cell. ``path`` is already HTML-escaped.
+    """
+    # A break opportunity after each directory, so a long path wraps beside
+    # its icon on a phone instead of dropping below it whole.
+    breakable = path[0] + path[1:].replace("/", "/<wbr>")
+    return f'{ic(icon)}&nbsp;<span class="mono">{breakable}</span>'
 
 
 def counts() -> tuple[int, int, str]:
@@ -565,10 +607,9 @@ def render_fragment() -> str:
     with Models and Economy.
     """
     series_count, snapshot_count, earliest = counts()
-    calendar_count = len(upcoming())
     return f"""{BEGIN}
     <div class="prose">
-      <p class="store-chips"><span>{series_count} series</span><span>{snapshot_count} snapshots</span><span>since {earliest}</span></p>
+      <p class="store-chips"><span>{series_count} series</span><span>{snapshot_count} snapshots</span><span>since {period_label(earliest)}</span></p>
       <div class="table-scroll">
         <table id="series-table" class="series-table ds-table">
           <caption><span class="ds-hint">{ic("chev")}Expand a row for its snapshot history and store path.</span></caption>
@@ -609,35 +650,27 @@ def render_fragment() -> str:
 {recipe_block()}
       <p>
         Two dates, two snapshots: the difference between them is the revision.
-        The store starts {earliest} and runs forward from there — it does not
-        reconstruct vintages older than itself.
+        The store starts on {period_label(earliest)} and runs forward from there:
+        it does not reconstruct vintages older than itself.
       </p>
       </details>
 
       <details class="about">
         <summary>Announced releases</summary>
-      <div class="table-scroll">
-        <table>
-          <caption>{calendar_count} announced releases, from the committed snapshots; the store was last updated {last_fetch()}. Only the ONS publishes the field; dates are the publisher's and can move. Also an iCalendar feed: <a href="/data/calendar.ics">/data/calendar.ics</a>.</caption>
-          <thead><tr><th scope="col">Date</th><th scope="col">Series</th><th scope="col">Store id</th><th scope="col">Source</th><th scope="col">Status</th></tr></thead>
-          <tbody>
-{calendar_rows()}
-          </tbody>
-        </table>
-      </div>
+{calendar_table()}
       </details>
 
       <details class="about">
         <summary>Endpoints and file format</summary>
       <div class="table-scroll">
         <table>
-          <caption>Static files over HTTPS, GET and HEAD only — there is no API to authenticate against. Everything under <code>/data/</code> is served with <code>Access-Control-Allow-Origin: *</code>, so a browser-side notebook or dashboard on any origin can read it directly.</caption>
+          <caption>Static files over HTTPS, GET and HEAD only: there is no API to authenticate against. Everything under <code>/data/</code> is served with <code>Access-Control-Allow-Origin: *</code>, so a browser-side notebook or dashboard on any origin can read it directly.</caption>
           <thead><tr><th scope="col">Endpoint</th><th scope="col">Contains</th><th scope="col">Stability</th></tr></thead>
           <tbody>
-          <tr><th scope="row"><span class="mono">/data/MANIFEST.json</span></th><td>Index of every series: source, CDID, units, frequency, coverage, and every snapshot date.</td><td>Rewritten on each fetch; short cache.</td></tr>
-          <tr><th scope="row"><span class="mono">/data/latest/&lt;series&gt;.json</span></th><td>The newest snapshot, flattened. Same schema as a vintage file.</td><td>Moves. Do not cite as a fixed reference.</td></tr>
-          <tr><th scope="row"><span class="mono">/data/vintages/&lt;source&gt;/&lt;series&gt;/&lt;YYYY-MM-DD&gt;.json</span></th><td>One dated snapshot, exactly as fetched.</td><td>Immutable by construction; one-year cache.</td></tr>
-          <tr><th scope="row"><span class="mono">/data/calendar.ics</span></th><td>The release calendar above, as iCalendar.</td><td>Regenerated with the store.</td></tr>
+          <tr><th scope="row">{endpoint("/data/MANIFEST.json", "file")}</th><td>Index of every series: source, CDID, units, frequency, coverage, and every snapshot date.</td><td>Rewritten on each fetch; short cache.</td></tr>
+          <tr><th scope="row">{endpoint("/data/latest/&lt;series&gt;.json", "file")}</th><td>The newest snapshot, flattened. Same schema as a vintage file.</td><td>Moves. Do not cite as a fixed reference.</td></tr>
+          <tr><th scope="row">{endpoint("/data/vintages/&lt;source&gt;/&lt;series&gt;/&lt;YYYY-MM-DD&gt;.json", "file")}</th><td>One dated snapshot, exactly as fetched.</td><td>Immutable by construction; one-year cache.</td></tr>
+          <tr><th scope="row">{endpoint("/data/calendar.ics", "calendar")}</th><td>The release calendar above, as iCalendar.</td><td>Regenerated with the store.</td></tr>
           </tbody>
         </table>
       </div>

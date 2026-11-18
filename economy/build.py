@@ -234,6 +234,11 @@ def line_chart(
         target=2.0 if title == "UK CPI inflation" else None, target_label="2% target",
         x_span=(first["period"], last["period"]),
     )
+    # Twenty monthly points span under two years, where chartkit ticks every
+    # quarter ("2025Q1"): seven labels do not fit a 300px card and ran into
+    # each other. Every second quarter does.
+    if spec["layout"]["xaxis"].get("dtick") == "M3":
+        spec["layout"]["xaxis"]["dtick"] = "M6"
     fig = chartkit.attach_plot(
         chartkit.figure(svg, source=f'<a href="{url}">{source} →</a>', source_short=source.split(' · ')[0]),
         spec)
