@@ -120,7 +120,7 @@ SHORT_VERDICT = {
     "obr": "Scores income tax and NICs changes; not a forecaster.",
     "pe": "Exact for rules; costings static, no interval.",
     "svar": "GDP variance share consistent with the paper; no forecast skill.",
-    "frb-us": "Solver matches the Fed&rsquo;s code; economic checks mixed.",
+    "frb-us": "Solver matches Fed code; one economic check passes.",
     "us-hank": "Parameters match; one response size checked, others not.",
     "olg": "Targets met by construction; no outcome benchmark.",
     "define": "Deltas only, never levels.",
