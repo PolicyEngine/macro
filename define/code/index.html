@@ -83,35 +83,23 @@
       <div class="meth-step" id="run-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Hosted MCP tools</h3></div>
         <p>Three tools on the <a href="/connect">hosted MCP server</a> reach this model. None of them runs it.</p>
-<details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>More detail</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
-  <div class="xp-body">
-<p><code>define_list_scenarios</code> returns the curated scenario set; <code>define_scenario</code> returns local run instructions; and <code>define_scenario_incidence</code> (experimental) takes a <code>define_payload</code> of locally produced deltas and turns them into a pre-tax earnings overlay on <a href="/pe">PolicyEngine</a>'s UK population.</p>
-  </div>
-</details>
         <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>The three tools</strong><small>What each returns</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
-          
-          <p>What each scenario represents is on the <a href="/define">overview</a>; the gates behind the numbers are on the <a href="/define/validation">validation</a> page.</p>
-        
+          <ul>
+            <li><code>define_list_scenarios</code>: the curated scenario set.</li>
+            <li><code>define_scenario</code>: local run instructions, never results.</li>
+            <li><code>define_scenario_incidence</code> (experimental): turns a <code>define_payload</code> of locally produced deltas into a pre-tax earnings overlay on <a href="/pe">PolicyEngine</a>&rsquo;s UK population.</li>
+            <li>What each scenario represents is on the <a href="/define">overview</a>; the gates behind the numbers are on the <a href="/define/validation">validation</a> page.</li>
+          </ul>
   </div>
 </details>
       </div>
 
       <div class="meth-step" id="run-2" data-step="1">
         <div class="meth-step-head"><span class="meth-step-num mono">2</span><h3>Install locally</h3></div>
-        <p>The adapter installs from GitHub. Nothing upstream is vendored: at runtime it fetches <code>DEFINE-model/DEFINE_UK_1.1</code> at pinned commit <code>846081a</code> and runs the published notebook unmodified.</p>
+        <p>The adapter installs from GitHub and vendors nothing upstream: at runtime it fetches <code>DEFINE-model/DEFINE_UK_1.1</code> at pinned commit <code>846081a</code> and runs the published notebook unmodified. A fresh run needs local R with the notebook&rsquo;s packages; after that, deltas are instant from the <a href="https://github.com/DEFINE-model/DEFINE_UK_1.1/tree/846081a580a6033159d5c421632ad8f0b30d0ded">cached pinned run</a>.</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/define-uk-model</code></pre></div>
-        <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
-  <div class="xp-body">
-        <p class="kv-title">Install</p>
-          
-          <p>A fresh full run needs local R with the notebook's packages; after that, scenario deltas are instant from the <a href="https://github.com/DEFINE-model/DEFINE_UK_1.1/tree/846081a580a6033159d5c421632ad8f0b30d0ded">cached pinned run</a>.</p>
-        
-  </div>
-</details>
       </div>
 
       <div class="meth-step" id="run-3" data-step="2">
@@ -119,42 +107,26 @@
         <p>List the curated scenarios, then run one locally for its deltas against baseline: real GDP, emissions, unemployment, real consumption. Deltas only, never levels.</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pe-macro define-scenarios              <span class="cm"># list the curated set</span>
 pe-macro define-scenario &lt;name&gt;        <span class="cm"># scenario deltas vs baseline</span></code></pre></div>
-        <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>More detail</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
-  <div class="xp-body">
-        <p class="kv-title">CLI commands</p>
-        
-  </div>
-</details>
       </div>
 
       <div class="meth-step" id="run-4" data-step="3">
         <div class="meth-step-head"><span class="meth-step-num mono">4</span><h3>Development: gates and the clean room</h3></div>
-        <p>The test suite carries the validation gate; in CI the oracle comparisons must skip.</p>
+        <p>The test suite carries the validation gate. Hermetic artifact checks run everywhere; the oracle comparisons run where a local cache exists and must skip in CI, where passing would mean the unlicensed upstream was fetched.</p>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>git clone https://github.com/PolicyEngine/define-uk-model
 cd define-uk-model
 pytest                    <span class="cm"># hermetic gate everywhere; oracle tests need the local cache</span></code></pre></div>
         <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>More detail</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>The clean-room reimplementation</strong><small>Solves the whole manual &middot; milestone 2 not passed &middot; thirteen manual gaps pinned</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
-        <p class="kv-title">Development</p>
-        
-  </div>
-</details>
-        <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>More detail</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
-  <div class="xp-body">
-<p>Hermetic artifact checks always run, and the oracle comparisons against the pinned upstream run execute wherever a local cache exists. In CI they must skip, because a passing oracle test there would mean the unlicensed upstream was fetched.</p>
-  </div>
-</details>
-        <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
-  <div class="xp-body">
-          
-          <p class="opt-note">A clean-room Python reimplementation of the published Model Manual v1.1 is the route to a hostable model — protocol and milestones in <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">REIMPLEMENTATION.md</a>, upstream code used only as a numerical oracle.</p>
-          <p>Every printed equation of the manual (§3.1&ndash;§3.4.7) is now registered and the whole model solves quarter by quarter. It does not reproduce the upstream run: baseline GDP falls up to 44% below it by 2040 and its green-investment multiplier is 1.52 against the upstream&rsquo;s full-run 2.30, so milestone 2 is not passed and <strong>nothing here is hostable yet</strong>; the hosted tools continue to return run instructions.</p>
-          <p>Reimplementing from the manual is also what surfaces its gaps, and <strong>thirteen</strong> are now pinned by tests as machine-readable gap records rather than absorbed into a tolerance, with more written up in the reimplementation notes &mdash; a net-lending residual the manual itself says &ldquo;should equal 0&rdquo;, identities that fail at the manual's own initial values, and symbols the equations use that the parameter tables never list. The largest is a blocker: <strong>§3.3.2 as published cannot be simulated forward.</strong> Six parameters it uses are absent from Table 5, and two variables are never defined anywhere in the manual, so credit rationing collapses to a constant and desired power-sector investment turns negative. That is the section the climate-policy scenarios run through, and it is <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">recorded in full</a> for the authors.</p>
-        
+          <ul>
+            <li>A Python reimplementation of the published Model Manual v1.1 is the route to a hostable model. The upstream code is used only as a numerical oracle (<a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">REIMPLEMENTATION.md</a>).</li>
+            <li>Every printed equation of the manual (§3.1&ndash;§3.4.7) is registered and the whole model solves quarter by quarter.</li>
+            <li>It does not reproduce the upstream run: baseline GDP falls up to 44% below it by 2040, and its green-investment multiplier is 1.52 against the upstream&rsquo;s full-run 2.30.</li>
+            <li>So milestone 2 is not passed and <strong>nothing here is hostable yet</strong>; the hosted tools continue to return run instructions.</li>
+            <li><strong>Thirteen</strong> gaps in the manual are pinned by tests as machine-readable records, not absorbed into a tolerance: a net-lending residual the manual itself says &ldquo;should equal 0&rdquo;, identities that fail at the manual&rsquo;s own initial values, and symbols the parameter tables never list.</li>
+            <li>The largest is a blocker: <strong>§3.3.2 as published cannot be simulated forward.</strong> Six parameters it uses are absent from Table 5 and two variables are never defined, so credit rationing collapses to a constant and desired power-sector investment turns negative.</li>
+            <li>The climate-policy scenarios run through that section; it is <a href="https://github.com/PolicyEngine/define-uk-model/blob/main/REIMPLEMENTATION.md">recorded in full</a> for the authors.</li>
+          </ul>
   </div>
 </details>
       </div>
