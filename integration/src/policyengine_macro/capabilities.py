@@ -242,7 +242,7 @@ MODEL_QUALITY = {
         ),
         "predictive_validation": _quality(
             "weak",
-            "Free-running GDP and consumption MAPE are 4.25% and 7.24% under "
+            "Free-running GDP and consumption MAPE are 4.05% and 6.92% under "
             "the nominal-GDP pin (8 of 11 computed lines in band); the "
             "anchored fit is by construction.",
             "Pass rolling-origin historical-vintage tests against simple "
