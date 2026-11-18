@@ -215,6 +215,7 @@ def obr_shock(
     periods: Annotated[int, Field(ge=1, le=25)] = 12,
     name: str | None = None,
     investment_closure: bool | None = None,
+    price_passthrough: bool = False,
 ) -> dict:
     """Shock one OBR model variable directly, in model units (the escape
     hatch under score_reform — no PolicyEngine reform translation).
@@ -226,13 +227,14 @@ def obr_shock(
         var: Policy variable to shock. Common choices (see list_reform_variables):
             R (Bank Rate), HHDI_ADDFACTOR (household income, the costing
             channel score_reform uses), CGG (real government consumption),
-            TCPRO (corporation tax main rate), CGIPS (nominal central
-            government investment).
+            TCPRO (corporation tax main rate), VREC (VAT receipts), CGIPS
+            (nominal central government investment).
         shock: Shock size, applied each quarter. UNITS DEPEND ON THE VARIABLE:
             R is in percentage points (1.0 = +1pp); HHDI_ADDFACTOR is £ million
             of revenue raised per quarter (positive = household income falls;
             1637.5 = £6.55bn/year); CGG and CGIPS are in £ million per quarter
-            (e.g. 1250 = £5bn/year); TCPRO is a rate change in decimal (e.g.
+            (e.g. 1250 = £5bn/year); VREC is £ million of receipts per quarter
+            (2200 = a 1pp VAT rise); TCPRO is a rate change in decimal (e.g.
             -0.05 = 5 percentage point cut).
         periods: Number of quarters the shock is applied from 2025Q1 (1-25;
             default 12 = 3 years). The solve runs to 2027Q4 or to the last
@@ -241,19 +243,34 @@ def obr_shock(
         investment_closure: Omit to use the safe per-variable default (True
             for TCPRO, False otherwise). It activates the cost-of-capital
             investment channel; a TCPRO shock without it solves to misleading
-            all-zero deltas, which is why the default is per-variable.
+            all-zero deltas, which is why the default is per-variable. For
+            CGIPS it is an opt-in: by default government investment does not
+            reach GDP; with True the listing's commented-out investment
+            identity is live and GDP moves about one for one with real
+            government investment. That is identity passthrough (no taper, no
+            crowding-out), not a validated capital-spending multiplier.
+        price_passthrough: Opt-in, default False, for an indirect-tax shock
+            only (VREC or TXFUEL) and not with investment_closure. By default
+            CPI is fixed and VAT barely reaches GDP; with True the tax is
+            passed into CPI through the listing's own cost-push weights with
+            the retail markup held. A labelled judgement overlay, not the
+            shipped listing; the result carries price_passthrough_note and
+            cpi_pct_delta.
 
     Returns per-period rows (period, delta_gdp_bn, pct_gdp, delta_cons_m,
     delta_if_m), the cumulative GDP effect in £bn over the shocked periods, and
     the peak percent-of-GDP effect, plus a caveat for levers whose channel is
     partial and, for HHDI_ADDFACTOR, the GDP-per-pound ratio on both bases
     (gdp_per_revenue_current_price is the one to compare with the OBR's 0.3).
+    Opt-in runs are labelled in the payload (mechanical_passthrough,
+    transmission_note, price_passthrough_note).
     Takes about one to two minutes (two solves); on a cold hosted server use
     start_job.
     """
     return core.obr_shock(
         var=var, shock=shock, periods=periods, name=name,
         investment_closure=investment_closure,
+        price_passthrough=price_passthrough,
     )
 
 

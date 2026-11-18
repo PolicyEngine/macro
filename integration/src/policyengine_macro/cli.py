@@ -241,13 +241,18 @@ def compare(country, reform, models, year, as_json):
 @click.option("--name", default=None, help="Label for the reform.")
 @click.option("--investment-closure/--no-investment-closure", default=None,
               help="Cost-of-capital investment channel; omit for the safe "
-                   "per-variable default (on for TCPRO, off otherwise).")
+                   "per-variable default (on for TCPRO, off otherwise). For "
+                   "CGIPS it is an opt-in identity passthrough.")
+@click.option("--price-passthrough", is_flag=True, default=False,
+              help="Opt-in overlay for VREC/TXFUEL: pass the tax into CPI "
+                   "(labelled judgement, off by default).")
 @click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
-def obr_shock(var, shock, periods, name, investment_closure, as_json):
+def obr_shock(var, shock, periods, name, investment_closure, price_passthrough, as_json):
     """Shock one OBR variable directly, in model units (escape hatch)."""
     res = core.obr_shock(
         var=var, shock=shock, periods=periods, name=name,
         investment_closure=investment_closure,
+        price_passthrough=price_passthrough,
     )
     if as_json:
         _emit_json(res)
