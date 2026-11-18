@@ -20,7 +20,7 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=48" />
+<link rel="stylesheet" href="/style.css?v=50" />
 <link rel="stylesheet" href="/models/model-pages.css?v=23" />
 </head>
 <body class="doc">
@@ -63,7 +63,7 @@
       <a class="model-tabs-link" href="/us-hank/methodology">Methodology</a>
       <a class="model-tabs-link" href="/us-hank/validation" aria-current="page">Validation</a>
       <a class="model-tabs-link" href="/us-hank/code">Use it</a>
-      <a class="model-tabs-link" href="/reports/us-hank-open-source">HANK survey</a>
+      <a class="model-tabs-link" href="/reports/us-hank-open-source">Survey</a>
     </div>
   </nav>
   <div class="with-rail">
@@ -87,11 +87,11 @@
           <tr data-result="pass"><th scope="row"><a href="#targets">Solved steady-state parameters</a></th><td>Auclert et al. (2021) Table B.III, gate under 5e&minus;4, largest gap 4.2e&minus;4; <code>vphi</code> after &times; &mu;<sub>w</sub>&sup2;</td><td class="sc-num">6 of 7 direct, 1 after conversion</td><td><span class="chip">pass</span></td></tr>
           <tr data-result="pass"><th scope="row"><a href="#targets">Goods-market clearing (untargeted)</a></th><td>Walras&rsquo; law: should be zero</td><td class="sc-num">3.3e&minus;08</td><td><span class="chip">pass</span></td></tr>
           <tr data-result="pass"><th scope="row"><a href="#gated">Impulse-response signs</a></th><td>Theory, three shock kinds, both directions; spending impact multiplier in (0, 1)</td><td class="sc-num">all gated by tests</td><td><span class="chip">pass</span></td></tr>
-          <tr data-result="none"><th scope="row"><a href="#gated">Impulse-response magnitudes</a></th><td>No published two-asset response to match; regression-pinned (25bp quarterly (&asymp;100bp annualised) cut, &rho;&nbsp;0.61)</td><td class="sc-num">Y +0.49%, C +0.30%, I +1.70%</td><td><span class="chip">not assessed</span></td></tr>
-          <tr data-result="partial"><th scope="row"><a href="#first-order">First-order accuracy</a></th><td>The model&rsquo;s own nonlinear solve; 25bp quarterly (&asymp;100bp annualised) cut within 4%, spending 1% of GDP is not</td><td class="sc-num">0.175 vs 0.251 / 0.125</td><td><span class="chip">partial</span></td></tr>
+          <tr data-result="none"><th scope="row"><a href="#gated">Impulse-response magnitudes</a></th><td>No published two-asset response to match; regression-pinned (intercept easing shock &minus;0.0025, &rho;&nbsp;0.61)</td><td class="sc-num">Y +0.49%, C +0.30%, I +1.70%</td><td><span class="chip">not assessed</span></td></tr>
+          <tr data-result="partial"><th scope="row"><a href="#first-order">First-order accuracy</a></th><td>The model&rsquo;s own nonlinear solve; the intercept easing shock within 4%, spending 1% of GDP is not</td><td class="sc-num">0.175 vs 0.251 / 0.125</td><td><span class="chip">partial</span></td></tr>
           <tr data-result="weak"><th scope="row"><a href="#spending-sign">Spending multiplier (&rho;&nbsp;0.8)</a></th><td>No published benchmark; 0.376 on impact in the opt-in 0.20-MPC calibration</td><td class="sc-num">0.175 impact, &minus;0.015 over 20q</td><td><span class="chip">weak</span></td></tr>
           <tr data-result="fail"><th scope="row"><a href="#htm-share">Hand-to-mouth share</a></th><td>About one third of US households (Kaplan, Violante and Weidner 2014)</td><td class="sc-num">0.537, of which 0.518 wealthy</td><td><span class="chip">fail</span></td></tr>
-          <tr data-result="fail"><th scope="row"><a href="#mpc-level">Quarterly MPC out of a rebate</a></th><td>0.15&ndash;0.25 in US rebate studies; $500 / $1,000 / $1,500 per household</td><td class="sc-num">0.104 / 0.091 / 0.083</td><td><span class="chip">fail</span></td></tr>
+          <tr data-result="fail"><th scope="row"><a href="#mpc-level">Quarterly MPC out of a rebate</a></th><td>0.15&ndash;0.25 in US rebate studies</td><td class="sc-num">0.104 / 0.091 / 0.083 for $500 / $1,000 / $1,500 rebates per household</td><td><span class="chip">fail</span></td></tr>
         </tbody>
       </table></div>
     <h3 class="trust-sub">Evidence by dimension</h3>
@@ -203,7 +203,7 @@
         <p>Monetary, fiscal-spending and productivity shocks; the labour tax is <a class="gloss-link" href="/glossary#exogenous">endogenous</a>. No transfer or tax-rate instrument, so <code>score_reform</code> refuses <code>model="hank"</code>.</p>
       </details>
       <details class="expander limit" id="first-order"><summary>First-order responses</summary>
-        <p>Hosted <a class="gloss-link" href="/glossary#irf">IRFs</a> are linear in shock size: no state dependence, no zero lower bound, and a rise mirrors a cut. The model itself is not linear: on the nonlinear transition, a spending rise of 1% of GDP (&rho;&nbsp;0.8) gives an impact multiplier of 0.251; a cut of 1% of GDP lowers output by 0.125% (a multiplier of 0.125), against the first-order 0.175. A 25bp quarterly (&asymp;100bp annualised) monetary cut is close to linear: 0.511 against 0.493. At +2% of GDP the nonlinear solve does not converge. Parameter uncertainty is not quantified — the calibration is a single point.</p>
+        <p>Hosted <a class="gloss-link" href="/glossary#irf">IRFs</a> are linear in shock size: no state dependence, no zero lower bound, and a rise mirrors a cut. The model itself is not linear: on the nonlinear transition, a spending rise of 1% of GDP (&rho;&nbsp;0.8) gives an impact multiplier of 0.251; a cut of 1% of GDP lowers output by 0.125% (a multiplier of 0.125), against the first-order 0.175. The monetary intercept easing shock (&minus;0.0025) is close to linear: 0.511 against 0.493. At +2% of GDP the nonlinear solve does not converge. Parameter uncertainty is not quantified — the calibration is a single point.</p>
       </details>
       <details class="expander limit" id="mpc-level"><summary>MPCs below the empirical range</summary>
         <p>The aggregate quarterly MPC is 0.058 out of the default windfall, 25% of mean quarterly post-tax labour income (about $2,400 per head or $6,200 per household). On a refined liquid grid, rebates of $500, $1,000 and $1,500 per household give 0.104, 0.091 and 0.083, far below the 0.15–0.25 that US rebate studies find. The grid explains little of the gap. The main cause is the illiquid account&rsquo;s adjustment cost: it is smooth and convex, with zero marginal cost at zero adjustment and no fixed or linear component, so a constrained household that holds illiquid wealth puts most of a rebate into that account. Auclert et al. (2021) report no MPC, so this is a property of the calibration, not a replication failure (<a href="https://github.com/PolicyEngine/us-hank-model/issues/6">us-hank-model #6</a>, <a href="https://github.com/PolicyEngine/us-hank-model/pull/7">PR #7</a>).</p>
@@ -215,7 +215,7 @@
         <p>After a monetary shock, output, consumption, investment and inflation all peak on impact; empirical monetary responses are usually delayed and hump-shaped. The model has no habits or information frictions to delay them.</p>
       </details>
       <details class="expander limit" id="ex-post-r"><summary>The real rate is ex-post</summary>
-        <p>The reported <code>r</code> is the ex-post real return on bonds held into the quarter. On impact it moves only with the inflation surprise; the policy move shows from quarter&nbsp;1. For the 25bp quarterly (&asymp;100bp annualised) cut (&rho;&nbsp;0.61) it falls 0.08pp on impact and 0.18pp in quarter&nbsp;1.</p>
+        <p>The reported <code>r</code> is the ex-post real return on bonds held into the quarter. On impact it moves only with the inflation surprise; the policy move shows from quarter&nbsp;1. For the intercept easing shock (&rho;&nbsp;0.61) it falls 0.08pp on impact and 0.18pp in quarter&nbsp;1.</p>
       </details>
       <details class="expander limit" id="spending-sign"><summary>Spending multiplier turns negative</summary>
         <p>A spending rise of 1% of GDP (&rho;&nbsp;0.8) raises output by 0.175% on impact, but output is below baseline from quarter&nbsp;3 (impact is quarter&nbsp;0) while spending is still raised; the 20-quarter cumulative multiplier is &minus;0.015. The labour tax that finances the spending enters the union wage Phillips curve: a higher tax raises the wage unions set, which raises inflation, and the <a class="gloss-link" href="/glossary#taylor-rule">Taylor rule</a> answers with a higher real rate that crowds out investment and consumption. The household and government budget constraints hold along the path, so this is a property of the model, not a bug (<a href="https://github.com/PolicyEngine/us-hank-model/blob/551a40d38aae13220b8faad8fc1f48780697b7ed/tests/test_spending_mechanism.py"><code>tests/test_spending_mechanism.py</code></a>; <a href="https://github.com/PolicyEngine/us-hank-model/issues/5">us-hank-model #5</a>). No published impulse response gates these numbers. It is a tax-financed multiplier, not comparable with deficit-financed ones. The sign depends on the MPC: in the opt-in 0.20-MPC calibration the multiplier is 0.376 on impact and 0.309 over 20 quarters (<a href="#variants">below</a>).</p>
@@ -227,7 +227,7 @@
         <p>Two opt-in calibrations ship in the model package (<code>us_hank.beta_het</code>) but are not the default and are not hosted. A discount-factor heterogeneity variant is calibrated to a 0.20 MPC out of $1,000: spending impact multiplier 0.376, 20-quarter cumulative 0.309 (&rho;&nbsp;0.8). A median-wealth sensitivity gives a $500 MPC of 0.126 and multipliers of 0.274 / 0.213 (<a href="https://github.com/PolicyEngine/us-hank-model/pull/9">PR #9</a>, <a href="https://github.com/PolicyEngine/us-hank-model/pull/10">PR #10</a>, <a href="https://github.com/PolicyEngine/us-hank-model/issues/8">#8</a>). No result on this site comes from them.</p>
       </details>
       <details class="expander limit"><summary>Approximate distributional output</summary>
-        <p>By-quartile consumption splits the aggregate response across total-wealth quartiles in proportion to steady-state MPCs — the MPC-heterogeneity channel, not household-level dynamics along the transition. The split is nearly flat: for the 25bp quarterly (&asymp;100bp annualised) cut, 0.36% in the lowest quartile and 0.28% in the highest.</p>
+        <p>By-quartile consumption splits the aggregate response across total-wealth quartiles in proportion to steady-state MPCs — the MPC-heterogeneity channel, not household-level dynamics along the transition. The split is nearly flat: for the intercept easing shock, 0.36% in the lowest quartile and 0.28% in the highest.</p>
       </details>
       <details class="expander limit"><summary>Calibration, not vintage</summary>
         <p>The parameterisation is the paper's; there is no data vintage to refresh. Changing it would be a model change.</p>

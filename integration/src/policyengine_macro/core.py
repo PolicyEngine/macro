@@ -1047,9 +1047,11 @@ HANK_SHOCK_KINDS = [
         "kind": "monetary",
         "input": "rstar",
         "description": "Taylor-rule intercept (monetary policy) shock",
-        "units": "level change in the QUARTERLY real policy rate "
-                 "(-0.0025 = -25bp per quarter on impact, about -100bp "
-                 "annualised; for a 25bp annualised move use -0.000625). "
+        "units": "level change in the intercept of the QUARTERLY nominal "
+                 "Taylor rule; the policy rate itself moves less, about 13bp "
+                 "on impact for -0.0025 (us-hank-model #18). -0.0025 is a "
+                 "25bp-per-quarter intercept shift, about 100bp annualised; "
+                 "for a 25bp annualised intercept shift use -0.000625. "
                  "The r and pi responses are quarterly rates too: multiply "
                  "by 4 to compare with FRB/US or BoE annual rates",
         "typical_size": -0.0025,

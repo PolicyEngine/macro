@@ -20,7 +20,7 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=48" />
+<link rel="stylesheet" href="/style.css?v=50" />
 <link rel="stylesheet" href="/models/model-pages.css?v=23" />
 </head>
 <body class="doc">
@@ -79,7 +79,7 @@
   <section class="band band-wide" id="trust">
     <div class="band-head" data-icon="shield">
       <h2>How far to trust it, and where it stops</h2>
-      <p class="section-intro">Close to the EFO when anchored, by construction; weak when run free. Errors are MAPE against the EFO path.</p>
+      <p class="section-intro">Anchored to the EFO, but GDP drifts to +0.80% and consumption to +1.32% above it by 2027Q4, and unemployment is unusable by 2027Q4. Weak when run free. Errors are MAPE against the EFO path.</p>
     </div>
     <div class="table-scroll scorecard"><table data-stack="yes">
         <caption>What was checked, against what, and the result</caption>
@@ -87,7 +87,7 @@
         <tbody>
           <tr data-result="pass"><th scope="row"><a href="#nominal-gdp">Solver convergence</a></th><td>Tolerance in every quarter, 12 demo shocks</td><td class="sc-num">12 of 12 quarters</td><td><span class="chip">pass</span></td></tr>
           <tr data-result="construction"><th scope="row"><a href="#anchored">Anchored fit, real GDP</a></th><td>October 2026 EFO, 2025Q1&ndash;2027Q4; consumption 0.72%</td><td class="sc-num">0.44% MAPE</td><td><span class="chip">by construction</span></td></tr>
-          <tr data-result="weak"><th scope="row"><a href="#tests">Held add-factors, real GDP</a></th><td>October 2026 EFO, 2026Q1&ndash;2027Q4; 7 of 8 in band, but fitted on OBR-forecast quarters, so partly agreement by design</td><td class="sc-num">0.35% MAPE</td><td><span class="chip">weak</span></td></tr>
+          <tr data-result="weak"><th scope="row"><a href="#tests">Held add-factors, real GDP</a></th><td>October 2026 EFO, 2026Q1&ndash;2027Q4; 7 of 8 in band; lower than anchored only because it is scored on a shorter window from the EFO&rsquo;s own 2026Q1 values, with less time to drift: not more skill</td><td class="sc-num">0.35% MAPE</td><td><span class="chip">weak</span></td></tr>
           <tr data-result="weak"><th scope="row"><a href="#val-freerun">Free-running, real GDP</a></th><td>October 2026 EFO, 2025Q1&ndash;2027Q4; the emulator&rsquo;s closure, not OBR forecast error</td><td class="sc-num">4.25% MAPE</td><td><span class="chip">weak</span></td></tr>
           <tr data-result="weak"><th scope="row"><a href="#outturn">ONS outturns</a></th><td>q/q growth, 2025Q2&ndash;2026Q1</td><td class="sc-num">misses up to 0.24pp in 2025 on current ONS data (0.06pp on the May 2026 release); 2026Q1 0.27pp, as the EFO also missed</td><td><span class="chip">weak</span></td></tr>
           <tr data-result="weak"><th scope="row"><a href="/obr#scen-tax">Income tax multiplier</a></th><td><a href="https://obr.uk/box/fiscal-multipliers/">OBR 0.3</a> on impact, fading; size close, profile reversed</td><td class="sc-num">0.10 (q1) &rarr; 0.21 (q4) &rarr; 0.38 (q12), current prices</td><td><span class="chip">weak</span></td></tr>
@@ -138,9 +138,9 @@
       <dt>Anchored</dt>
       <dd>GDP MAPE 0.77% (0.772%) to 2031Q1, every quarter converged at <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/2965e82d3b24e0b834c3adb68459bfd356edb355/results/site_figures.json"><code>2965e82d</code></a>; CI gates tolerance, the expenditure identity and signs (<a href="#anchored">step 1</a>, <a href="#lfsur">unemployment drift</a>).</dd>
       <dt>Held add-factors</dt>
-      <dd>Re-run at <code>2965e82d</code> on 16 Nov 2026; fitted on OBR-forecast quarters, so partly agreement by design (<a href="#tests">scorecard</a>).</dd>
+      <dd>Re-run at <code>2965e82d</code> on 16 Nov 2026. Its 0.35% beats the anchored 0.44% only because it is scored on 2026Q1&ndash;2027Q4 from the EFO&rsquo;s own 2026Q1 values, so it has less time to drift (<a href="#tests">scorecard</a>).</dd>
       <dt>Free-running</dt>
-      <dd>Raw dynamics with GDP endogenous, not OBR forecast error: household income 4.30%, investment 7.34%, profits 12.32%, current account 0.91% of GDP (<a href="#val-freerun">step 3</a>).</dd>
+      <dd>Raw dynamics with GDP endogenous, not OBR forecast error: nominal household income 4.30%, investment 7.34%, profits 12.32%, current account 0.91% of GDP (<a href="#val-freerun">step 3</a>).</dd>
     </dl>
   </div>
 </details>
@@ -417,7 +417,7 @@
 <li><span class="vc-sw ln-s3" aria-hidden="true"></span>free-running (4.25% MAPE)</li>
 </ul>
 </div><!-- /vc-fig -->
-        <figcaption>Current October 2026 EFO baseline. The anchored path tracks the EFO; the same equations free-running (de-seeded, no add-factors) contract away from it. Computed from <code>papers/obr-macro/figures/fig_free_running_data.csv</code> and <code>fig_anchored_data.csv</code>, regenerated at obr-macroeconomic-model <code>2965e82d</code> on 16 Nov 2026.</figcaption>
+        <figcaption>Current October 2026 EFO baseline. The anchored path stays within 0.8% of the EFO, drifting up to +0.80% by 2027Q4; the same equations free-running (de-seeded, no add-factors) contract away from it. Computed from <code>papers/obr-macro/figures/fig_free_running_data.csv</code> and <code>fig_anchored_data.csv</code>, regenerated at obr-macroeconomic-model <code>2965e82d</code> on 16 Nov 2026.</figcaption>
       </figure>
 
 
@@ -551,7 +551,7 @@
           <li>Reviving the channel needs a <code>CORP</code> series.</li>
         </ul>
       </details>
-      <details class="expander limit" id="bank-rate"><summary>Bank Rate: sign right, GDP response about 3.5&ndash;6&times; below the Bank of England&rsquo;s range</summary>
+      <details class="expander limit" id="bank-rate"><summary>Bank Rate: sign right, GDP response about 3&ndash;6&times; below the Bank of England&rsquo;s range</summary>
         <p>A sustained +100bp lowers GDP (<a href="/obr#answers">figures on the Overview</a>); a 100bp cut raises it by a similar amount (about £134m to £522m).</p>
         <ul>
           <li>The response runs through household spending alone. There is no monetary rule; unemployment, prices and trade do not move.</li>
@@ -590,7 +590,7 @@
     <h3 class="limits-h"><span class="limits-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Hosted runs, closure and vintage</h3>
     <div class="limits">
       <details class="expander limit" id="lfsur"><summary>Unemployment drifts on long anchored runs</summary>
-        <p>Anchored to the EFO, unemployment (<code>LFSUR</code>) is already 1.3pp below it at 2027Q4 (3.8% against 5.1%) and drifts to 1.0% against the EFO&rsquo;s 4.2% by 2031Q1. Do not read unemployment past 2027Q4.</p>
+        <p>Anchored to the EFO, unemployment (<code>LFSUR</code>) is already 1.3pp below it at 2027Q4 (3.8% against 5.1%) and drifts to 1.0% against the EFO&rsquo;s 4.2% by 2031Q1. By 2027Q4 it is already outside the 1.0pp band for rates, so do not use it from there on.</p>
       </details>
       <details class="expander limit" id="hosted"><summary>Hosted results depend on the model pin and window</summary>
         <p>This repository pins the hosted service to <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/commit/2965e82d3b24e0b834c3adb68459bfd356edb355"><code>2965e82d</code></a>, on the October 2026 EFO, and the server has run that pin since its deploy of 16 Nov 2026.</p>

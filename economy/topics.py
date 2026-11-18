@@ -1172,7 +1172,8 @@ def inflation_run() -> str:
         The CPI path above comes from the same command as the growth forecast.
         A second command carries it into household incomes: it scales the
         statutorily CPI-uprated benefit parameters by the model-versus-reference
-        gap and scores that as a real reform.
+        gap and runs that through the microsimulation: an experimental
+        illustration, not a scored reform.
       </p>
 {codeblock(
         command("pe-macro forecast --horizons 8", "GDP and CPI, medians with 68% and 90% bands"),
@@ -1734,7 +1735,7 @@ def uk_routes() -> str:
             "That forecast carried into household incomes",
             ["boe-svar", "pe-microsim"],
             "pe-macro svar-inflation-incidence --year 2027 --reference obr",
-            "the model-versus-OBR CPI gap, scored as a real uprating reform",
+            "the model-versus-OBR CPI gap through the microsimulation: an experimental illustration, not a scored reform",
         ),
     ]
     html = f"""    <div class="prose">
@@ -2384,7 +2385,7 @@ def us_inflation_run() -> str:
 {codeblock(
         command("pe-macro frbus-shock --var rffintay_aerr --shock 1.0 --horizon 20", "price response to a 1pp policy surprise"),
         command("pe-macro hank-summary", "shock catalogue, units and scope limits"),
-        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "a 25bp-per-quarter (about 100bp annualised) easing, quarterly IRF"),
+        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "an easing shock to the Taylor-rule intercept (about 13bp off the policy rate on impact), quarterly IRF"),
     )}
 {us_run_note()}
     </div>"""

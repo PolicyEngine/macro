@@ -20,7 +20,7 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=48" />
+<link rel="stylesheet" href="/style.css?v=50" />
 <link rel="stylesheet" href="/models/model-pages.css?v=23" />
 </head>
 <body class="doc">
@@ -46,7 +46,7 @@
       <div class="mh-body">
         <p class="eyebrow mh-kind">Replication report · UK · experimental · deltas only</p>
         <h1 class="page-title">DEFINE-UK: running and gating an unlicensed ecological SFC model</h1>
-        <p class="lede">The authors' unmodified R code runs at a pinned commit. The baseline macro block matches Table&nbsp;4 within every gate (two by only 0.01pp), the emissions path diverges and no numeric scenario results are published to replicate against, so the adapter serves scenario <em>deltas only</em>, never levels.</p>
+        <p class="lede">The authors' unmodified R code runs at a pinned commit. The baseline macro block matches Table&nbsp;4 within every gate (set after the run; two by only 0.01pp), the emissions path diverges and no numeric scenario results are published to replicate against, so the adapter serves scenario <em>deltas only</em>, never levels.</p>
         <ul class="mh-meta" aria-label="Model facts">
           <li class="mh-chip"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>UK</li>
           <li><a class="mh-chip mh-trust" href="/glossary#partial-replication"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Partial replication</a></li>
@@ -111,7 +111,7 @@
         for each — tolerances, component checks, arithmetic, search history —
         is one disclosure away.
       </p>
-      <p>The macro block matches Table&nbsp;4 within every gate; 2025 growth (&minus;0.30pp, gate &plusmn;0.31) and 2040 unemployment (&minus;0.19pp, gate &plusmn;0.2) clear by only 0.01pp.</p>
+      <p>The macro block matches Table&nbsp;4 within every gate (the gates were set after the run); 2025 growth (&minus;0.30pp, gate &plusmn;0.31) and 2040 unemployment (&minus;0.19pp, gate &plusmn;0.2) clear by only 0.01pp.</p>
       <div class="table-scroll mo-tablecard"><table>
         <caption>DEFINE-UK replication gates: verdict, date, and enforcing test</caption>
         <thead><tr><th scope="col">gate</th><th scope="col">verdict</th><th scope="col">date</th><th scope="col">enforced by</th></tr></thead>
@@ -154,7 +154,7 @@
           </tr>
           <tr>
             <th scope="row">Green public investment cumulative multiplier</th>
-            <td><strong>COMPUTED</strong> — <strong>2.30</strong> nominal per &pound; of power-sector spending (3.26 on real GDP and deflated spending) (1.78 per &pound; of all non-wage spending), ours, not upstream's, and not comparable to any published multiplier; includes a <a href="/define/validation#alpha-pp">parameter mismatch</a></td>
+            <td><strong>COMPUTED</strong> — <strong>2.30</strong> nominal per &pound; of power-sector spending (3.26 on real GDP and deflated spending, a full-horizon cumulative ratio under a demand-led closure, with the baseline/policy parameter mismatch in the numerator; back-loaded: about 0.5 after one year from the 2027 policy start, 0.79 to 2031, 1.40 to 2034 and 2.25 by 2040, so at short horizons it sits below published estimates such as Batini et al. (2021, IMF WP/21/87: 1.1&ndash;1.5 for renewable investment)) (1.78 per &pound; of all non-wage spending), ours, not upstream's, and not comparable to any published multiplier; includes a <a href="/define/validation#alpha-pp">parameter mismatch</a></td>
             <td>2026-08-05</td>
             <td><code>tests/test_validation.py</code></td>
           </tr>
@@ -297,7 +297,7 @@
           <strong>2.30</strong> by <em>our own</em> computation: cumulative
           ΔGDP of 209.9 over the cumulative change of 91.2 in ΔSPEND_GVTPS,
           the government power-sector spending the policy switch sets, nominal,
-          over the full simulation. In real terms it is 3.26: cumulative real ΔGDP of 250.6 over the same spending deflated by the scenario&rsquo;s GDP deflator (76.8), from the same cached outputs. Real exceeds nominal because the price level falls later in the run as electricity gets cheaper; early on, prices rise and real GDP is flat (2027&ndash;28). Over all non-wage spending (ΔSPEND_GVT,
+          over the full simulation. In real terms it is 3.26 (a full-horizon cumulative ratio under a demand-led closure, with the baseline/policy parameter mismatch in the numerator; back-loaded: about 0.5 after one year from the 2027 policy start, 0.79 to 2031, 1.40 to 2034 and 2.25 by 2040, so at short horizons it sits below published estimates such as Batini et al. (2021, IMF WP/21/87: 1.1&ndash;1.5 for renewable investment)): cumulative real ΔGDP of 250.6 over the same spending deflated by the scenario&rsquo;s GDP deflator (76.8), from the same cached outputs. Real exceeds nominal because the price level falls later in the run as electricity gets cheaper; early on, prices rise and real GDP is flat (2027&ndash;28). Over all non-wage spending (ΔSPEND_GVT,
           118.2) it is 1.78, the headline until define-uk-model #16 was decided
           on 15 Nov 2026. Both include a Baseline/policy parameter
           mismatch; without it they are about 2.08&ndash;2.25 and 1.73&ndash;1.75
@@ -328,14 +328,7 @@
           (<code>GPI_MULTIPLIER_CAVEATS</code>, held by a test).
         </p>
         <p>
-          One comparator this report previously quoted has been withdrawn: an
-          IMF green-spending range of 1.1&ndash;1.5, attributed to a source
-          that could not be located in either repository. The only IMF
-          reference either repository actually holds is Batini et&nbsp;al.
-          (2014), a different paper with a different quantity — first-year
-          multipliers of 0&ndash;1 for advanced economies. No published
-          multiplier is quoted alongside 2.30 or 1.78 here, because none of them
-          measures the same object.
+          A published comparator exists: Batini, Di&nbsp;Serio, Fragetta, Melina and Waldron (2021, IMF Working Paper WP/21/87) estimate multipliers of about 1.1&ndash;1.5 for renewable-energy investment. Counted from the 2027 policy start, this model&rsquo;s ratio is about 0.5 after one year and 0.79 to 2031, below that range at short horizons, and 2.25 only by 2040. An earlier IMF paper the repositories hold, Batini et&nbsp;al. (2014), measures a different quantity (first-year multipliers of 0&ndash;1 for advanced economies).
         </p>
         <p>
           The upstream repository's own

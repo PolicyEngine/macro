@@ -45,17 +45,37 @@ def data_edge() -> str:
     return json.loads(SRC.read_text())["data_edge"]
 
 
+CALIBRATION = ROOT / "forecasts" / "band_calibration.json"
+
+
+def _qi(period: str) -> int:
+    return int(period[:4]) * 4 + int(period[5]) - 1
+
+
 def load_fan():
-    """Quarterly year-on-year UK real GDP growth: median, 68% and 90% bands."""
+    """Quarterly year-on-year UK real GDP growth: median, 68% and 90% bands.
+
+    The bands are re-calibrated exactly as the /forecasts fans are
+    (forecasts/score.py build_vs_official): each half-width is scaled around the
+    archived median by the per-horizon factor in forecasts/band_calibration.json,
+    with h beyond the evaluated 8 holding the h8 factor. The archived round is
+    never modified; only the drawn bands change.
+    """
     payload = json.loads(SRC.read_text())
     table = payload["forecast"]
     quarters = list(table)
+    k = json.loads(CALIBRATION.read_text())["k"]["gdp"]
+    edge = _qi(payload["data_edge"])
     med, lo68, hi68, lo90, hi90 = [], [], [], [], []
     for q in quarters:
         row = table[q]["gdp"]
         m, l68, h68, l90, h90 = (
-            row[k] for k in ("median", "lo68", "hi68", "lo90", "hi90")
+            row[kk] for kk in ("median", "lo68", "hi68", "lo90", "hi90")
         )
+        h = min(max(_qi(q) - edge, 1), 8)
+        k68, k90 = k["68"][f"h{h}"], k["90"][f"h{h}"]
+        l68, h68 = m + (l68 - m) * k68, m + (h68 - m) * k68
+        l90, h90 = m + (l90 - m) * k90, m + (h90 - m) * k90
         med.append(m)
         lo68.append(l68)
         hi68.append(h68)
@@ -72,7 +92,10 @@ def build() -> str:
     # the median (at 1440 the "+1%" label used to sit on the median path).
     x0, x1 = 30.0, 580.0
     top, bot = 40.0, 344.0  # plot area for the value range below
-    v_lo, v_hi = -1.7, 3.4
+    # the value range follows the (re-calibrated) 90% band, with a little headroom
+    import math
+    v_lo = math.floor(min(lo90) - 0.2)
+    v_hi = math.ceil(max(hi90) + 0.2)
     step = (x1 - x0) / (len(quarters) - 1)
     xs = [x0 + i * step for i in range(len(quarters))]
 
@@ -102,7 +125,7 @@ def build() -> str:
     desc = (
         f"Fan chart. Posterior forecast of UK year-on-year real GDP growth from the "
         f"boe-svar model, {quarters[0]} to {quarters[-1]}, conditioned through {data_edge()}. The "
-        f"median path runs from {med[0]:+.2f}% to {med[-1]:+.2f}%. The 90% credible band "
+        f"median path runs from {med[0]:+.2f}% to {med[-1]:+.2f}%. The re-calibrated 90% band "
         f"is widest at {quarters[w]}, spanning {lo90[w]:+.2f}% to {hi90[w]:+.2f}%; {edge}."
     )
 
@@ -110,11 +133,11 @@ def build() -> str:
         f'<svg class="hero-fan" data-chart="hero-fan" viewBox="{x0 - 6:g} {top - 6:g} '
         f'{x1 - x0 + 12:g} {bot - top + 12:g}" '
         f'role="img" aria-labelledby="hero-fan-t hero-fan-d">',
-        '<title id="hero-fan-t">boe-svar: UK real GDP growth forecast, median with 68% and 90% credible bands</title>',
+        '<title id="hero-fan-t">boe-svar: UK real GDP growth forecast, median with re-calibrated 68% and 90% bands</title>',
         f'<desc id="hero-fan-d">{esc(desc)}</desc>',
     ]
 
-    for tick in (-1, 0, 1, 2, 3):
+    for tick in range(math.ceil(v_lo), math.floor(v_hi) + 1):
         y = ymap(tick)
         cls = "hf-zero" if tick == 0 else "hf-grid"
         out.append(
@@ -153,16 +176,29 @@ def build() -> str:
     # page stylesheets that carry the swap rules, so they travel with the block.
     rows = [{"period": q, "median": m, "lo68": a, "hi68": b, "lo90": c, "hi90": d}
             for q, m, a, b, c, d in zip(quarters, med, lo68, hi68, lo90, hi90)]
-    spec = chartkit.fan_plot(rows, median_name="BoE SVAR median", band_note="",
+    spec = chartkit.fan_plot(rows, median_name="BoE SVAR median", band_note="(re-calibrated)",
                              y_range=(v_lo, v_hi), zero=True, height=300)
     spec["data"].append(chartkit.plot_last(quarters[-1], med[-1], "var(--series-ours)", digits=2,
                                            position="top left"))
-    return "\n".join([MARK_OPEN, chartkit.attach_plot(fig, spec), HERO_PLOT_CSS,
+    legend = ('<div class="hf-key"><ul class="hf-legend" aria-label="Chart key">'
+              '<li><span class="hf-sw hf-sw-med" aria-hidden="true"></span>Median</li>'
+              '<li><span class="hf-sw hf-sw-68" aria-hidden="true"></span>68% band</li>'
+              '<li><span class="hf-sw hf-sw-90" aria-hidden="true"></span>90% band</li></ul>'
+              '<p class="hf-key-note">Bands re-calibrated for measured under-coverage, as on '
+              '<a href="/forecasts#open">Forecasts</a>.</p></div>')
+    return "\n".join([MARK_OPEN, chartkit.attach_plot(fig, spec), legend, HERO_PLOT_CSS,
                        chartkit.plot_scripts(), MARK_CLOSE])
 
 
 HERO_PLOT_CSS = (
     "<style>"
+    ".hf-key{margin:8px 0 0;font-size:12px;color:var(--text-muted)}"
+    ".hf-legend{display:flex;flex-wrap:wrap;gap:4px 16px;margin:0;padding:0;list-style:none}"
+    ".hf-legend li{display:inline-flex;align-items:center;gap:6px;margin:0;padding:0;border:0;background:none}"
+    ".hf-sw{display:inline-block;flex:none;width:14px;height:10px;border-radius:2px}"
+    ".hf-sw-med{height:0;border-top:2.25px solid var(--series-ours);border-radius:0;width:18px}"
+    ".hf-sw-68{background:var(--band-68)}.hf-sw-90{background:var(--band-90)}"
+    ".hf-key-note{margin:4px 0 0;line-height:1.4}"
     ".vc-hero .pe-plot{width:100%;height:0;overflow:hidden}"
     ".vc-hero.has-plot .pe-plot{height:auto;overflow:visible}"
     ".vc-hero.has-plot>.vc-plot{position:absolute!important;width:1px!important;height:1px!important;"
