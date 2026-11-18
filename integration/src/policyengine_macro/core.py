@@ -462,10 +462,12 @@ def obr_shock(
             result[key] = [round(float(v), 4) for v in list(values)[: len(rows)]]
     if attrs.get("gdp_per_revenue_basis_note"):
         result["gdp_per_revenue_basis_note"] = str(attrs["gdp_per_revenue_basis_note"])
-    # The model's own labels for the opt-in routes (obr #70). They live on the
-    # frame's attrs, which an MCP caller never sees, so they travel in the
-    # payload: an identity passthrough or a judgement overlay must not arrive
-    # looking like a model result.
+    # The model's own labels (obr #70). They live on the frame's attrs, which
+    # an MCP caller never sees, so they travel in the payload: an identity
+    # passthrough (default CGG, or CGIPS under the opt-in investment closure)
+    # or a judgement overlay must not arrive looking like a behavioural
+    # result. transmission_note is the model's one-paragraph reading of the
+    # channel, set for most levers.
     if attrs.get("mechanical_passthrough"):
         result["mechanical_passthrough"] = True
     # Not on an overlay run: the model's VAT note describes the default

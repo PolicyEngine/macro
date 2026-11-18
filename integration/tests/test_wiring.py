@@ -500,7 +500,9 @@ def _obr_frame(attrs=None):
 
 def test_obr_shock_default_call_forwards_no_overlay(monkeypatch):
     """The opt-in routes are opt-in: a default run makes exactly the call it
-    made before price_passthrough existed, and its payload is unlabelled."""
+    made before price_passthrough existed, and the adapter adds no overlay
+    label of its own (the model's attrs, absent from this stub, are the only
+    source of mechanical_passthrough)."""
     from policyengine_macro import core
 
     seen = []
@@ -616,6 +618,16 @@ def test_price_passthrough_reaches_core_from_the_cli_and_mcp(runner, monkeypatch
     assert seen == [False, True]
     schema = _registered_tools()["obr_shock"].inputSchema["properties"]
     assert schema["price_passthrough"]["default"] is False
+
+
+def test_cli_refuses_a_misapplied_price_passthrough_cleanly(runner):
+    """Refused before the model import, so it is fast and needs no stub."""
+    res = runner.invoke(
+        main, ["obr-shock", "--var", "CGG", "--shock", "1", "--price-passthrough"]
+    )
+    assert res.exit_code != 0
+    assert "Traceback" not in res.output
+    assert "indirect-tax shock" in res.output
 
 
 def test_cli_help_header_names_every_subcommand():

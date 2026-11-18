@@ -255,15 +255,16 @@ def obr_shock(
             passed into CPI through the listing's own cost-push weights with
             the retail markup held. A labelled judgement overlay, not the
             shipped listing; the result carries price_passthrough_note and
-            cpi_pct_delta.
+            cpi_pct_delta. It adds three re-solves, so run it through
+            start_job on the hosted server.
 
     Returns per-period rows (period, delta_gdp_bn, pct_gdp, delta_cons_m,
     delta_if_m), the cumulative GDP effect in £bn over the shocked periods, and
     the peak percent-of-GDP effect, plus a caveat for levers whose channel is
     partial and, for HHDI_ADDFACTOR, the GDP-per-pound ratio on both bases
     (gdp_per_revenue_current_price is the one to compare with the OBR's 0.3).
-    Opt-in runs are labelled in the payload (mechanical_passthrough,
-    transmission_note, price_passthrough_note).
+    Identity-passthrough and overlay runs are labelled in the payload
+    (mechanical_passthrough, transmission_note, price_passthrough_note).
     Takes about one to two minutes (two solves); on a cold hosted server use
     start_job.
     """

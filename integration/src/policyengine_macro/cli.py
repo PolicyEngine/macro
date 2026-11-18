@@ -249,11 +249,16 @@ def compare(country, reform, models, year, as_json):
 @click.option("--json", "as_json", is_flag=True, help="Emit JSON.")
 def obr_shock(var, shock, periods, name, investment_closure, price_passthrough, as_json):
     """Shock one OBR variable directly, in model units (escape hatch)."""
-    res = core.obr_shock(
-        var=var, shock=shock, periods=periods, name=name,
-        investment_closure=investment_closure,
-        price_passthrough=price_passthrough,
-    )
+    try:
+        res = core.obr_shock(
+            var=var, shock=shock, periods=periods, name=name,
+            investment_closure=investment_closure,
+            price_passthrough=price_passthrough,
+        )
+    except ValueError as e:
+        # A refused input (bad periods, a misapplied overlay) is a usage
+        # error, not a crash.
+        raise click.ClickException(str(e)) from e
     if as_json:
         _emit_json(res)
         return
