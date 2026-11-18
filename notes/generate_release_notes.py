@@ -13,6 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NOTES_INDEX = ROOT / "forecasts" / "index.html"
+ECONOMY_INDEX = ROOT / "economy" / "index.html"
 RELEASES_INDEX = ROOT / "notes" / "releases" / "index.html"
 SITEMAP = ROOT / "sitemap.xml"
 GENERATED_ROOT = ROOT / "notes" / "releases"
@@ -297,6 +298,47 @@ def digest_pages() -> list[Path]:
     return [p for p in generated_pages() if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.parent.name)]
 
 
+def latest_digest() -> str:
+    """Date of the newest committed digest page, or "" when there is none."""
+    pages = digest_pages()
+    return pages[-1].parent.name if pages else ""
+
+
+def latest_digest_row() -> str:
+    """The data hub's pointer to the newest digest (economy/index.html).
+
+    The date is the newest digest directory under notes/releases/, never the
+    day the generator ran, so the row is a statement about committed data.
+    """
+    icon = (
+        '<svg class="fc-ic" viewBox="0 0 24 24" aria-hidden="true">'
+        '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/>'
+        '<path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>'
+    )
+    latest = latest_digest()
+    if not latest:
+        return (
+            f'    <p class="fc-note-row">{icon}<span><strong>Release digests:</strong> '
+            'what each stored release changed. <a href="/notes/releases">All digests</a></span></p>'
+        )
+    day = datetime.strptime(latest, "%Y-%m-%d").strftime("%-d %b %Y")
+    return (
+        f'    <p class="fc-note-row">{icon}<span><strong>Latest release digest, {day}:</strong> '
+        f'what each stored release changed. <a href="/notes/releases/{latest}">Read it</a> · '
+        '<a href="/notes/releases">All digests</a></span></p>'
+    )
+
+
+def marker_block(path: Path, name: str) -> str | None:
+    """The body between a marker pair, or None when the pair is absent."""
+    m = re.search(
+        re.escape(f"<!-- {name}:begin -->") + r"\n(.*?)\n" + re.escape(f"<!-- {name}:end -->"),
+        path.read_text(),
+        flags=re.S,
+    )
+    return m.group(1) if m else None
+
+
 def rebuild_indexes() -> None:
     index_rows = []
     sitemap_rows = []
@@ -316,7 +358,6 @@ def rebuild_indexes() -> None:
             f"  <url><loc>https://policyengine-macro.vercel.app/notes/releases/{vintage}</loc>"
             "<priority>0.6</priority></url>"
         )
-    latest = pages[0].parent.name if pages else ""
     summary_row = (
         f'        <a href="/notes/releases"><span class="fc-li-ic"><svg class="fc-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg></span><span>{len(pages)} automated release '
         f"digests, newest first</span><strong>Release digests</strong></a>"
@@ -324,6 +365,7 @@ def rebuild_indexes() -> None:
     marker_replace(NOTES_INDEX, "generated-release-notes", summary_row)
     marker_replace(RELEASES_INDEX, "generated-release-notes", "\n".join(index_rows))
     marker_replace(SITEMAP, "generated-release-notes", "\n".join(sitemap_rows))
+    marker_replace(ECONOMY_INDEX, "latest-release-digest", latest_digest_row())
 
 
 def check() -> int:
@@ -334,6 +376,14 @@ def check() -> int:
         failures.append("forecasts index: missing collapsed link to /notes/releases")
     if "/notes/releases</loc>" not in sitemap:
         failures.append("sitemap: missing /notes/releases entry")
+    shown = marker_block(ECONOMY_INDEX, "latest-release-digest")
+    if shown is None:
+        failures.append("economy index: missing the latest-release-digest markers")
+    elif shown != latest_digest_row():
+        failures.append(
+            f"economy index: latest-digest row is stale (newest digest is "
+            f"{latest_digest() or 'none'}); run notes/generate_release_notes.py --rebuild"
+        )
     for page in generated_pages():
         if page not in digest_pages():
             failures.append(f"{page.parent.name}: legacy per-series note; run --rebuild")
