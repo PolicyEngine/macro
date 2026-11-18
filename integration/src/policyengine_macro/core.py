@@ -1148,8 +1148,10 @@ HANK_SHOCK_KINDS = [
         "input": "rstar",
         "description": "Taylor-rule intercept (monetary policy) shock",
         "units": "level change in the intercept of the QUARTERLY nominal "
-                 "Taylor rule; the policy rate itself moves less, about 13bp "
-                 "on impact for -0.0025 (us-hank-model #18). -0.0025 is a "
+                 "Taylor rule; the policy rate itself is returned as the "
+                 "series i and does not move one for one: about -13bp on "
+                 "impact for -0.0025 at persistence 0.61 (pinned in "
+                 "us-hank-model #18), and it depends on the persistence. -0.0025 is a "
                  "25bp-per-quarter intercept shift, about 100bp annualised; "
                  "for a 25bp annualised intercept shift use -0.000625. "
                  "The r and pi responses are quarterly rates too: multiply "
@@ -1206,6 +1208,11 @@ HANK_HEADLINE = {
     # spending IRF read without it invites a deficit-financed reading.
     "tax": "Labour tax rate, pp deviation from steady state (the budget-"
            "balancing financing of the shock)",
+    # The Taylor-rule outcome. A monetary shock moves the rule's intercept
+    # (rstar), not the rate; i = rstar + phi * pi, so the rate the rule sets
+    # is a different number from the shock and has to be read, not assumed.
+    "i": "Nominal policy rate (quarterly rate), pp deviation from steady "
+         "state: the Taylor-rule outcome, not the intercept shock",
 }
 
 # Cache the steady state + GE jacobian per (variant, T). The steady state
@@ -1385,6 +1392,12 @@ def hank_shock(
                 / float(ss[extra])
             )
 
+    # The nominal policy rate, from the same GE Jacobian. It is a rate, so a
+    # pp deviation (x100), not a % deviation from its steady state. Omitted,
+    # never invented, when the variant's Jacobian does not carry it.
+    if "i" not in irf and "i" in G and irf["shock_input"] in G["i"]:
+        irf["i"] = 100.0 * (G["i"][irf["shock_input"]] @ irf["shock"])
+
     series_names = [v for v in HANK_HEADLINE if v in irf]
     series = {
         v: [round(float(x), 6) for x in irf[v][:horizon]] for v in series_names
@@ -1421,7 +1434,9 @@ def hank_shock(
         "framing": (
             "Partial replication of Auclert, Bardóczy, Rognlie & Straub "
             "(Econometrica 2021): six of seven solved steady-state parameters "
-            "match the paper; shock signs are tested, magnitudes are not validated; "
+            "match the paper; shock signs are tested; one published magnitude "
+            "(impact consumption after a monetary shock) is matched within "
+            "about 2%, the other magnitudes are not validated; "
             "stylized shocks around a calibrated steady state; NOT a "
             "forecaster and does not score detailed tax reforms; responses "
             "are linear/first-order."
@@ -1466,6 +1481,7 @@ def hank_shock(
             "hand_to_mouth_share": round(
                 float(stats["hand_to_mouth_share"]), 4
             ),
+            **_hank_high_mpc_share(stats),
             "hand_to_mouth_definition": {
                 "liquid_threshold_model_units": round(
                     float(stats["hand_to_mouth_breakdown"]["threshold"]), 4
@@ -1491,9 +1507,41 @@ def hank_shock(
     return result
 
 
-# us-hank-model README (main) maps model units to dollars at 2025 US GDP per
+# us-hank-model docs/DISTRIBUTIONAL.md maps model units to dollars at 2025 US GDP per
 # household, about $58,000 a quarter (steady-state quarterly output Y = 1).
 HANK_USD_PER_MODEL_UNIT_PER_HOUSEHOLD = 58_000
+
+
+def _hank_high_mpc_share(stats: dict) -> dict:
+    """The model's high-MPC share with the windfall it was measured out of.
+
+    hand_to_mouth_share counts households by liquid wealth (about 54%); most
+    of them hold illiquid wealth and spend little of a rebate. us-hank-model
+    #17 added the behavioural count: the share with an MPC above a threshold.
+    It is passed through as the model reports it, at the model's default
+    windfall, and omitted for a model build that predates it.
+    """
+    block = stats.get("high_mpc_share")
+    if not isinstance(block, dict) or "share" not in block:
+        return {}
+    return {
+        "high_mpc_share": {
+            "share": round(float(block["share"]), 4),
+            "mpc_threshold": float(block["mpc_threshold"]),
+            "windfall_frac_of_quarterly_income": float(
+                block["windfall_frac_of_quarterly_income"]
+            ),
+            "note": (
+                "Share of households with an MPC above the threshold out of "
+                "a windfall of this fraction of mean quarterly labour "
+                "income. The share falls as the windfall grows: on the "
+                "model's refined grid it is about 3% at $1,000 "
+                "(us-hank-model tests/test_refined_mpc.py). Read it beside "
+                "hand_to_mouth_share, which counts by liquid wealth, not by "
+                "spending behaviour."
+            ),
+        }
+    }
 
 
 def _hank_mpc_windfall(stats: dict) -> dict:
@@ -1514,7 +1562,7 @@ def _hank_mpc_windfall(stats: dict) -> dict:
             "MPC range of roughly 0.15-0.25 comes from, and the model's MPC "
             "falls with windfall size, so do not compare it with that range. "
             "Dollar figure: model units x about $58,000 (2025 US GDP per "
-            "household per quarter), as in the us-hank-model README."
+            "household per quarter), as in us-hank-model docs/DISTRIBUTIONAL.md."
         ),
     }
 
@@ -1536,7 +1584,9 @@ def hank_summary() -> dict:
         "package_version": _package_version("us-hank-model"),
         "framing": (
             "Partial replication: six of seven solved steady-state parameters "
-            "match; IRF magnitudes are not validated; stylized shocks; not a "
+            "match; one published IRF magnitude (impact consumption after a "
+            "monetary shock) is matched within about 2%, the other IRF "
+            "magnitudes are not validated; stylized shocks; not a "
             "forecaster; distributional outputs are "
             "first-order: steady-state MPCs and an MPC-proportional split of "
             "the aggregate response."
@@ -1569,10 +1619,12 @@ def hank_summary() -> dict:
         "validation": {
             "suite": "the model repo's replication suite gates the six "
                      "steady-state parameters that match the paper's Table "
-                     "B.III, market clearing, and shock-response signs; IRF "
-                     "magnitudes are regression pins on this implementation, "
-                     "not checks against the paper, which publishes no "
-                     "comparable two-asset IRF figure",
+                     "B.III, market clearing, shock-response signs, and "
+                     "one published magnitude (impact consumption after a "
+                     "monetary shock, Fig. 7a, within about 2%, units "
+                     "inferred); the other IRF magnitudes are regression "
+                     "pins on this implementation, not checks against the "
+                     "paper",
             "note": "a replication gate, not a forecast-accuracy claim: no "
                     "predictive validation exists or is claimed for this model",
         },

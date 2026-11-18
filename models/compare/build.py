@@ -388,7 +388,7 @@ def multiples(data: dict, q: dict) -> str:
         f'<figcaption><strong>How the response unfolds, quarter by quarter.</strong> '
         "The paths behind the peaks and timing in the table; each panel has its own scale."
         # One visible line, no disclosure: this section's caveats stay unfolded.
-        + f'<p class="vc-src-line">{chartkit._INFO_ICON}<span>Source: each row&rsquo;s stored path (FRB/US local run of 16 Nov 2026 at 846eeb5c; US HANK hosted run of 6 Nov 2026, identical at 551a40d) · '
+        + f'<p class="vc-src-line">{chartkit._INFO_ICON}<span>Source: each row&rsquo;s stored path (FRB/US and US HANK local runs of 18 Nov 2026 at 162cfe6 and 58353e5) · '
         f'<a href="{REPO_BLOB}/results.json">results.json</a></span></p>'
         + "</figcaption>"
         f'<div class="cmp-sm-grid">{"".join(figs)}</div>{note}</figure>'
@@ -475,8 +475,8 @@ def body(data: dict) -> str:
     <div class="callout cmp-pins"><p><strong>Run at the current model pins.</strong> Each row&rsquo;s Details give its exact call.</p>
       <ul>
         <li><strong>OBR emulator:</strong> rate, spending and tax rows re-run locally on 16 Nov 2026 at <code>2965e82d</code> (October 2026 EFO), where every quarter converges; the energy row is an earlier committed output.</li>
-        <li><strong>FRB/US:</strong> re-run at <code>846eeb5c</code> (October 2026 LONGBASE), with shocks from 2026Q3, the first quarter after LONGBASE history.</li>
-        <li><strong>US HANK:</strong> run at <code>19a8e5e</code>; reproduces identically at the current <code>551a40d</code>.</li>
+        <li><strong>FRB/US:</strong> re-run on 18 Nov 2026 at <code>162cfe6</code> (October 2026 LONGBASE), with shocks from 2026Q3, the first quarter after LONGBASE history; identical to the <code>846eeb5c</code> runs.</li>
+        <li><strong>US HANK:</strong> re-run on 18 Nov 2026 at <code>58353e5</code>, now storing the policy-rate path; output and inflation are identical to the hosted runs of 6 Nov.</li>
         <li><strong>BoE SVAR and DEFINE-UK:</strong> committed model-repo outputs.</li>
       </ul></div>
     <details class="about cmp-howto"><summary>How to read the verdicts</summary>

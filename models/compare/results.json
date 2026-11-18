@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "2026-11-17.1",
-  "date": "2026-11-17",
+  "version": "2026-11-18.1",
+  "date": "2026-11-18",
   "title": "Same question, every model: cross-model scenario battery",
   "issue": "https://github.com/PolicyEngine/macro/issues/213",
   "about": "Battery run on 6 Nov 2026 on the hosted PolicyEngine Macro MCP (adapter 0.2.0). Cells with a stored path were fetched for this file; cells marked 'battery' are the values from the same day's battery (macro#213), stored with their exact call. Committed cells are read from a model repository's own outputs, with no solve. Regenerate the FRB/US cells with models/compare/run_battery.py --refresh frb-us.",
@@ -25,14 +25,14 @@
       "country": "US",
       "href": "/frb-us",
       "repo": "https://github.com/PolicyEngine/us-frb-model",
-      "revision": "846eeb5cc81448944352686ece5da337e0f5501b"
+      "revision": "162cfe6a590ebbd90d6e2b40ec180b26bdc4360c (rows with stored paths re-run 2026-11-18; identical to the 846eeb5c runs of 2026-11-16)"
     },
     "us-hank": {
       "name": "US HANK",
       "country": "US",
       "href": "/us-hank",
       "repo": "https://github.com/PolicyEngine/us-hank-model",
-      "revision": "551a40d38aae13220b8faad8fc1f48780697b7ed (rows run at 19a8e5e reproduce identically at 551a40d, checked 2026-11-16)"
+      "revision": "58353e5f821b869198a6b179f15e2183beb68c54 (rows with stored paths re-run 2026-11-18; identical to the hosted runs of 2026-11-06)"
     },
     "define": {
       "name": "DEFINE-UK",
@@ -215,7 +215,7 @@
           "verdict": "off",
           "verdict_label": "Off, sign right",
           "reason": "At h = 8 GDP is −1.6% (scaled to 100bp) against the BoE's −0.2% to −0.35% after about a year: 4.6–8× the peak, or 2–4× per pp-quarter once the SVAR's longer rate path is allowed for. It builds to h = 8 and does not revert within 5 years (the rate path has a unit root), against the BoE's fullest effect after about a year.",
-          "draws": "The medians are from the repository's fast test fixture (600 posterior draws, about 50 accepted, unweighted; tests/conftest.py), not the published replication run (10,000 draws, 765 accepted, effective sample size 368.0; results/summary.md at c13a9c9). An earlier sense check found bands wider than the paper's (186 accepted draws, effective sample size 91, against the paper's 10,000; results/sense_check.md).",
+          "draws": "The medians are from the repository's fast test fixture (600 posterior draws, about 50 accepted, unweighted; tests/conftest.py), not the published replication run (10,000 draws, 765 accepted, effective sample size 368.0; results/summary.md at c827ab8). An earlier sense check found bands wider than the paper's (186 accepted draws, effective sample size 91, against the paper's 10,000; results/sense_check.md).",
           "issue": "boe-11"
         },
         {
@@ -223,7 +223,7 @@
           "status": "answered",
           "short": {
             "tag": "Plausible",
-            "why": "Core PCE matches the Board; unemployment 28% above",
+            "why": "Core PCE matches; unemployment 1.04× on the Board's design",
             "timing": "Hump, peak q8"
           },
           "run": {
@@ -237,10 +237,10 @@
               "start": "2026Q3",
               "policy_rule": "inertial_taylor"
             },
-            "date": "2026-11-17",
-            "run_at": "2026-11-17T00:30:01.579727+00:00",
+            "date": "2026-11-18",
+            "run_at": "2026-11-18T19:55:05.176346+00:00",
             "adapter": "0.2.0",
-            "label": "local run at frbus 846eeb5c (October 2026 LONGBASE), 2026-11-16, shocks from 2026Q3 (the first quarter after LONGBASE history)"
+            "label": "local run at frbus 162cfe6 (October 2026 LONGBASE), 2026-11-18, shocks from 2026Q3 (the first quarter after LONGBASE history)"
           },
           "rate_path": "+1.00pp on impact, decays under the inertial rule, crosses zero at q8, undershoots",
           "pp_quarters": 3.6,
@@ -259,8 +259,8 @@
           "timing": "Hump: GDP and inflation peak at q8",
           "gdp_per_ppq": 0.15,
           "verdict": "plausible",
-          "verdict_label": "Plausible; core PCE matches, unemployment 28% above",
-          "reason": "The Board's simulation of the current model gives an output-gap trough of −0.486pp, core PCE −0.0345pp and an unemployment peak of +0.219pp at quarter 8 (Laforte 2018). This run gives core PCE −0.034pp at quarter 8 and an output-gap trough of −0.50pp, but an unemployment peak of +0.28pp, 28% above the Board's; that gap depends on the start date (us-frb-model VALIDATION.md). The −0.08pp in earlier Fed notes describes the pre-2018 model.",
+          "verdict_label": "Plausible; within 10% of the Board on its own design",
+          "reason": "The Board's simulation of the current model gives an output-gap trough of −0.486pp, core PCE −0.0345pp and an unemployment peak of +0.219pp at quarter 8 (Laforte 2018). This run gives core PCE −0.034pp at quarter 8 and an output-gap trough of −0.50pp, and an unemployment peak of +0.28pp, 1.28× the Board's. That ratio depends on the start date: on the Board's own 2020Q1 design the model gives +0.228pp, 1.04×, with core PCE 0.96× and the output gap 0.97× (us-frb-model results/inflation_transmission.md at 162cfe6). The −0.08pp in earlier Fed notes describes the pre-2018 model.",
           "issue": null,
           "benchmark": "fed-2018",
           "path": {
@@ -329,12 +329,12 @@
               "horizon": 12,
               "variant": "two_asset"
             },
-            "date": "2026-11-06",
-            "run_at": "2026-11-06T01:08:27Z",
+            "date": "2026-11-18",
+            "run_at": "2026-11-18T19:55:17.111772+00:00",
             "adapter": "0.2.0",
-            "label": "hosted run, 2026-11-06"
+            "label": "local run at us-hank-model 58353e5, 2026-11-18"
           },
-          "rate_path": "Taylor-rule intercept shock (rstar) +0.25pp a quarter, AR(1) ρ = 0.9: not a policy-rate change of that size; the nominal policy rate moves less, and its path is not in the stored output. Realised real rate +1.36pp annualised on impact",
+          "rate_path": "Taylor-rule intercept shock (rstar) +0.25pp a quarter, AR(1) ρ = 0.9: not a policy-rate rise of that size. The nominal policy rate the rule sets falls 0.25pp a quarter on impact (about 1.0pp annualised), because inflation falls by more than the intercept rises (i = rstar + 1.5π), and is still 0.11pp below steady state at q11. Realised real rate +1.36pp annualised on impact",
           "pp_quarters": 2.3,
           "pp_quarters_note": "real rate, 12 quarters",
           "gdp": {
@@ -351,23 +351,23 @@
           "gdp_per_ppq": 0.16,
           "verdict": "plausible-in-model",
           "verdict_label": "Plausible in-model, off on timing; an intercept shock, not a 100bp rate rise",
-          "reason": "Inflation is about 40× FRB/US and 3–7× the BoE range, and peaks on impact rather than after about two years, which is consistent with the model's forward-looking Phillips curve. The tool's unit label is easy to misread.",
+          "reason": "Inflation is about 40× FRB/US and 3–7× the BoE range, and peaks on impact rather than after about two years, which is consistent with the model's forward-looking Phillips curve. The shock is to the rule's intercept: the nominal policy rate falls while the real rate rises.",
           "issue": "macro-211",
           "benchmark": null,
           "path": {
             "x": [
-              "q0",
-              "q1",
-              "q2",
-              "q3",
-              "q4",
-              "q5",
-              "q6",
-              "q7",
-              "q8",
-              "q9",
-              "q10",
-              "q11"
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11
             ],
             "gdp": [
               -0.36117,
@@ -399,7 +399,22 @@
               -0.126991
             ],
             "inflation_units": "pp, quarterly rate (pi); × 4 for an annual rate",
-            "inflation_scale": 4
+            "inflation_scale": 4,
+            "rate": [
+              -0.253433,
+              -0.255749,
+              -0.247804,
+              -0.234143,
+              -0.217776,
+              -0.200494,
+              -0.183338,
+              -0.166889,
+              -0.151448,
+              -0.137147,
+              -0.124017,
+              -0.112035
+            ],
+            "rate_units": "pp, quarterly rate (i, the nominal policy rate); × 4 for an annual rate"
           }
         },
         {
@@ -748,10 +763,10 @@
               "start": "2026Q3",
               "policy_rule": "inertial_taylor"
             },
-            "date": "2026-11-17",
-            "run_at": "2026-11-17T00:30:01.615748+00:00",
+            "date": "2026-11-18",
+            "run_at": "2026-11-18T19:55:05.230447+00:00",
             "adapter": "0.2.0",
-            "label": "local run at frbus 846eeb5c (October 2026 LONGBASE), 2026-11-16, shocks from 2026Q3 (the first quarter after LONGBASE history)"
+            "label": "local run at frbus 162cfe6 (October 2026 LONGBASE), 2026-11-18, shocks from 2026Q3 (the first quarter after LONGBASE history)"
           },
           "experiment": "Federal purchases +1% (about 0.046% of GDP), one quarter",
           "gdp": {
@@ -837,10 +852,10 @@
               "horizon": 12,
               "variant": "two_asset"
             },
-            "date": "2026-11-06",
-            "run_at": "2026-11-06T01:13:54Z",
+            "date": "2026-11-18",
+            "run_at": "2026-11-18T19:55:17.112712+00:00",
             "adapter": "0.2.0",
-            "label": "hosted run, 2026-11-06"
+            "label": "local run at us-hank-model 58353e5, 2026-11-18"
           },
           "experiment": "G +1% of GDP on impact, AR(1) ρ = 0.8, financed by the labour tax",
           "gdp": {
@@ -861,18 +876,18 @@
           "benchmark": null,
           "path": {
             "x": [
-              "q0",
-              "q1",
-              "q2",
-              "q3",
-              "q4",
-              "q5",
-              "q6",
-              "q7",
-              "q8",
-              "q9",
-              "q10",
-              "q11"
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11
             ],
             "gdp": [
               0.175259,
@@ -904,7 +919,22 @@
               0.034079
             ],
             "inflation_units": "pp, quarterly rate (pi); × 4 for an annual rate",
-            "inflation_scale": 4
+            "inflation_scale": 4,
+            "rate": [
+              0.313065,
+              0.29641,
+              0.266001,
+              0.231013,
+              0.196413,
+              0.164641,
+              0.136692,
+              0.112772,
+              0.092673,
+              0.076002,
+              0.062302,
+              0.051118
+            ],
+            "rate_units": "pp, quarterly rate (i, the nominal policy rate); × 4 for an annual rate"
           }
         },
         {
@@ -913,7 +943,7 @@
           "short": {
             "tag": "No benchmark",
             "why": "Annual, investment-led; not comparable",
-            "multiplier": "2.30 nominal; 3.26 real"
+            "multiplier": "2.25 nominal, 2027 to 2040"
           },
           "run": {
             "kind": "committed",
@@ -927,10 +957,10 @@
             "label": "committed output"
           },
           "experiment": "Green public investment, annual, investment-led",
-          "multiplier": "2.30 nominal per £ of the power-sector spending the policy sets (3.26 in real terms: real ΔGDP 250.6 over deflated spending of 76.8; real exceeds nominal because prices fall later in the run); 1.78 nominal per £ of all non-wage spending (both to 2040; about 2.08–2.25 and 1.73–1.75 nominal without the parameter mismatch); back-loaded: about 0.5 after one year from the policy start, 2.25 by 2040",
+          "multiplier": "2.25 nominal per £ of the power-sector spending the policy sets, from the 2027 policy start to 2040; back-loaded: 0.47 after one year, 0.79 to 2031, 1.40 to 2034. Over the full run from 2023: 2.30 nominal (3.26 in real terms: real ΔGDP 250.6 over deflated spending of 76.8), and 1.78 per £ of all non-wage spending. Parameter mismatch included: 2.25 if its effect stops in 2027, as low as 2.08 if it persists (1.73–1.75 for the secondary)",
           "verdict": "unresolved",
           "verdict_label": "Unresolved",
-          "reason": "The headline impulse is now the policy instrument, government power-sector spending (define-uk-model #16, decided 15 Nov 2026). An annual, investment-led scenario cumulated to 2040 is still not comparable to a 4-quarter purchases shock, and there is no published benchmark. Both figures include a Baseline/policy parameter mismatch (define-uk-model #20).",
+          "reason": "The headline impulse is now the policy instrument, government power-sector spending (define-uk-model #16, decided 15 Nov 2026). An annual, investment-led scenario cumulated to 2040 is still not comparable to a 4-quarter purchases shock, and the published comparators (the OBR's impact multiplier of about 1.0; Batini et al. 2021, IMF WP/21/87: 1.1–1.5 for renewable investment) are short-horizon, where this model sits below them (0.47 after one year). Both figures include a Baseline/policy parameter mismatch (define-uk-model #20).",
           "issue": "define-16",
           "link": {
             "label": "DEFINE-UK limits",
@@ -1012,10 +1042,10 @@
               "start": "2026Q3",
               "policy_rule": "inertial_taylor"
             },
-            "date": "2026-11-17",
-            "run_at": "2026-11-17T00:30:01.649074+00:00",
+            "date": "2026-11-18",
+            "run_at": "2026-11-18T19:55:05.278275+00:00",
             "adapter": "0.2.0",
-            "label": "local run at frbus 846eeb5c (October 2026 LONGBASE), 2026-11-16, shocks from 2026Q3 (the first quarter after LONGBASE history)"
+            "label": "local run at frbus 162cfe6 (October 2026 LONGBASE), 2026-11-18, shocks from 2026Q3 (the first quarter after LONGBASE history)"
           },
           "experiment": "+1pp on the effective personal rate on impact, decaying to +0.05pp by q8",
           "gdp": {
@@ -1187,10 +1217,10 @@
               "start": "2026Q3",
               "policy_rule": "inertial_taylor"
             },
-            "date": "2026-11-17",
-            "run_at": "2026-11-17T00:30:01.680691+00:00",
+            "date": "2026-11-18",
+            "run_at": "2026-11-18T19:55:05.318926+00:00",
             "adapter": "0.2.0",
-            "label": "local run at frbus 846eeb5c (October 2026 LONGBASE), 2026-11-16, shocks from 2026Q3 (the first quarter after LONGBASE history)"
+            "label": "local run at frbus 162cfe6 (October 2026 LONGBASE), 2026-11-18, shocks from 2026Q3 (the first quarter after LONGBASE history)"
           },
           "experiment": "Oil +$10 a barrel (+9.9% at the 2026Q3 LONGBASE price) for 4 quarters",
           "gdp": {

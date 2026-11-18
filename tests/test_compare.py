@@ -127,7 +127,7 @@ def test_compare_tab_is_on_both_models_pages():
 
 def test_refresh_rejects_heavy_models():
     with pytest.raises(SystemExit):
-        battery.refresh(json.loads(json.dumps(DATA)), "us-hank")
+        battery.refresh(json.loads(json.dumps(DATA)), "obr")
 
 
 def _section(qid: str) -> str:
@@ -152,7 +152,7 @@ def test_every_fact_moves_to_details_not_out():
             for key in ("gdp", "inflation"):
                 if cell.get(key):
                     assert cell[key]["units"] in section
-    # 765 accepted of 10,000: boe_var results/summary.md at the pinned c13a9c9 (was 744).
+    # 765 accepted of 10,000: boe_var results/summary.md, identical at c13a9c9 and the pinned c827ab8 (was 744).
     assert "186 accepted draws" in text and "765 accepted" in text
 
 

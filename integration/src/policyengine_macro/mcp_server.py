@@ -448,7 +448,9 @@ def hank_shock(
 
     Returns per-quarter rows (Y, C, I in % deviation from steady state; pi
     and r in pp deviations of quarterly rates, where r is the ex-post real
-    return, so its quarter 0 is the inflation surprise; plus the shock path), a
+    return, so its quarter 0 is the inflation surprise; i, the nominal policy
+    rate the Taylor rule sets, in pp of a quarterly rate, which is not the
+    intercept shock; plus the shock path), a
     `peaks` block, and `series_meaning`. First call per variant pays the
     steady-state (~13s) and jacobian (~5s) solves; both are cached, so warm
     calls are effectively instant.
@@ -467,7 +469,8 @@ def hank_summary() -> dict:
     States what the model is (a replication of Auclert, Bardóczy,
     Rognlie & Straub, Econometrica 2021, at the paper's production grids),
     the available shock kinds and their units, the two variants, and the
-    scope limits: stylized shocks only, IRF magnitudes not validated, not a
+    scope limits: stylized shocks only, one published IRF magnitude matched
+    and the others not validated, not a
     forecaster, no PolicyEngine-reform bridge (hank_shock is the supported
     entry point), distributional outputs are first-order approximations, and
     there is no transfer or tax-rate instrument because the labor tax is
