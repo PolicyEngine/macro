@@ -10,6 +10,13 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### Model re-pin and site review (#278, #279)
+
+- **#278: model pins.** OBR `2965e82d` → `0fe04c9a`, BoE SVAR `c13a9c91` → `c827ab86`, FRB/US `846eeb5c` → `162cfe6a`, US HANK `551a40d3` → `58353e5f`. After a redeploy the hosted tools run these pins. Anchored OBR figures and every compare row re-run identically.
+- **#278: quoted figures.** OBR free-running real GDP error 4.25% → 4.05% (consumption 7.24 → 6.92, household income 4.30 → 3.08, company profits 12.32 → 11.66), from holding household taxes on their data path, not better fit. FRB/US against Laforte (2018) moves to the Board's own 2020Q1 design (unemployment +0.228pp against +0.219pp, 1.04×). DEFINE-UK headline multiplier 2.30 → 2.25 (2027 policy start to 2040). US HANK: one published magnitude matched within about 2%.
+- **#278: tool output.** `hank_shock` returns `i` (the nominal policy rate the Taylor rule sets) and `high_mpc_share`; `obr_shock` gains `price_passthrough` (default off) and a closure-aware capital-spending caveat. README counts 28 MCP tools.
+- **#279: site review.** Accuracy, design and function fixes across every in-scope page at 1440, 820 and 375 wide, light and dark. `frbus_summary` quotes the October-vintage 100bp responses (−0.55% → −0.56%, +0.26pp → +0.28pp); the DEFINE-UK default horizon reads 2027–2040 (was 2023–2037).
+
 ### Site redesign stack (#200)
 
 Bullets by PR, in merge order. Every PR listed here merged with #200 on 10 November 2026.
