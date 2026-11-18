@@ -151,7 +151,8 @@ def test_hank_is_not_in_the_supported_score_models():
 @pytest.mark.slow
 @requires_hank
 def test_monetary_easing_is_expansionary_with_the_documented_shape():
-    """A -25bp AR(1) easing must raise output, consumption, investment and
+    """A -0.0025 AR(1) easing of the Taylor-rule intercept (25bp per quarter;
+    the policy rate moves less) must raise output, consumption, investment and
     inflation, and the reported r deviation must be negative on impact."""
     res = core.hank_shock(kind="monetary", size=-0.0025, persistence=0.6)
 

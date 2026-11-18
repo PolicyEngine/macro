@@ -67,9 +67,9 @@
     </div>
   </nav>
   <section id="verdict" class="band band-result ov-verdict">
-    <div class="ov-verdict-line"><span class="ov-verdict-short">Parameters match the paper; responses not validated.</span>
+    <div class="ov-verdict-line"><span class="ov-verdict-short">Parameters match the paper; one response size matched.</span>
       <a class="ov-verdict-link" href="#proof">Evidence <span aria-hidden="true">&rarr;</span></a>
-      <span class="ov-verdict-why">Six of seven solved parameters match the paper, the seventh after a wage-markup conversion. Impulse-response magnitudes are not validated, and the headline targets are inputs, not results.</span></div>
+      <span class="ov-verdict-why">Six of seven solved parameters match the paper, the seventh after a wage-markup conversion. One published magnitude (impact consumption after a monetary shock, Fig.&nbsp;7a) is reproduced within about 2%; other magnitudes are not checked, and the headline targets are inputs, not results.</span></div>
   </section>
 
   <section id="fit" class="band ov-fit" aria-label="What it is good for and not for">
@@ -86,7 +86,7 @@
         <h2>Not for</h2>
         <ul>
           <li>Scoring statute: <code>score_reform</code> refuses it; <a href="/pe">PolicyEngine microsimulation</a> costs it</li>
-          <li>Magnitudes to quote: impulse responses are not validated (<a href="/us-hank/validation#caveats">limits</a>)</li>
+          <li>Magnitudes to quote: one published response is matched, the rest are unchecked (<a href="/us-hank/validation#gated">what is gated</a>)</li>
           <li>US spending behaviour: its MPCs sit below US estimates (<a href="/us-hank/validation#mpc-level">why</a>)</li>
         </ul>
       </div>
@@ -95,7 +95,7 @@
 
   <section id="answers" class="band ov-example">
     <div class="band-head" data-icon="calculator"><h2>A worked example</h2>
-      <p class="section-intro">An easing shock to the Taylor-rule intercept (&minus;0.0025 per quarter); the policy rate falls about 13bp on impact, &rho;&nbsp;0.61. Changes from steady state.</p></div>
+      <p class="section-intro">An easing shock to the Taylor-rule intercept: &minus;0.0025 per quarter, &rho;&nbsp;0.61. The quarterly policy rate falls about 13bp on impact (about 53bp annualised), not 25bp. Changes from steady state.</p></div>
     <div class="scen-panel">
       <h3 class="scen-title">Monetary easing: Taylor-rule intercept shock of &minus;0.0025</h3>
       <div class="stat-row stat-row-3">
@@ -107,7 +107,7 @@
         <li>Quarterly inflation rises 0.08pp; the labour tax rate falls 0.63pp on impact as debt service drops</li>
         <li>Output, consumption, investment and inflation peak on impact, with no hump (<a href="/us-hank/validation#peaks-on-impact">limit</a>)</li>
         <li>The by-household split is imposed and nearly flat across total-wealth quartiles (<a href="/us-hank/validation#caveats">why</a>)</li>
-        <li>Regression values of this implementation, not a published result (<a href="https://github.com/PolicyEngine/us-hank-model/blob/551a40d38aae13220b8faad8fc1f48780697b7ed/tests/test_scenarios.py">pinned test</a>)</li>
+        <li>Regression values of this implementation, not a published result (<a href="https://github.com/PolicyEngine/us-hank-model/blob/58353e5f821b869198a6b179f15e2183beb68c54/tests/test_scenarios.py">pinned test</a>)</li>
       </ul>
     </div>
     <div class="card-grid ov-mini">
@@ -121,10 +121,10 @@
       <p class="section-intro">Three checks, weakest included; each opens its evidence.</p></div>
     <ul class="proof-list">
       <li class="proof-row" data-result="pass"><a class="proof-link" href="/us-hank/validation#targets"><span class="proof-check">Solved steady-state parameters<small>Table B.III, largest gap 4.2e&minus;4; <code>vphi</code> after a wage-markup conversion</small></span><span class="proof-num">6 of 7 direct, 1 after conversion</span><span class="chip">pass</span></a></li>
-      <li class="proof-row" data-result="none"><a class="proof-link" href="/us-hank/validation#gated"><span class="proof-check">Impulse-response magnitudes<small>Regression-pinned; no published response to match</small></span><span class="proof-num">Y +0.49%, C +0.30%, I +1.70%</span><span class="chip">not assessed</span></a></li>
+      <li class="proof-row" data-result="partial"><a class="proof-link" href="/us-hank/validation#gated"><span class="proof-check">Impulse-response magnitudes<small>The one the paper states: impact consumption after a &minus;5pp monetary shock (Fig.&nbsp;7a), units inferred; all others regression-pinned only</small></span><span class="proof-num">1.485% against 1.46%</span><span class="chip">partial</span></a></li>
       <li class="proof-row" data-result="fail"><a class="proof-link" href="/us-hank/validation#mpc-level"><span class="proof-check">Quarterly MPC out of a rebate<small>MPCs for $500 / $1,000 / $1,500 rebates per household (refined grid), against 0.15&ndash;0.25 in US rebate studies</small></span><span class="proof-num">0.104 / 0.091 / 0.083</span><span class="chip">fail</span></a></li>
     </ul>
-    <p class="proof-more"><strong>Read signs and mechanisms, not magnitudes.</strong> The hand-to-mouth share is also off (<a href="/us-hank/validation#htm-share">0.537 against about one third</a>).</p>
+    <p class="proof-more"><strong>Read signs and mechanisms, not magnitudes.</strong> The hand-to-mouth share is also off (<a href="/us-hank/validation#htm-share">0.537 against about one third</a>). It counts households by liquid wealth: most hold illiquid wealth and spend little of a rebate (MPC above 0.25: about 3% of households at $1,000, refined grid).</p>
     <p class="proof-more"><a href="/us-hank/validation">Full scorecard and limits <span aria-hidden="true">&rarr;</span></a></p>
   </section>
 
@@ -156,7 +156,7 @@ irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0
           <span class="pl-node pl-node-out"><strong>Who bears it</strong></span>
         </div>
     <p class="ov-flow-note"><code>hank_shock_incidence</code> scales US employment income with the model&rsquo;s wage and labour responses; the microsimulation reports the change after taxes, SNAP and the EITC, decile by decile (<a href="/models#compose">every join in the suite</a>).</p>
-    <p class="callout callout-warn"><strong>The distribution is calibrated, not matched to US data:</strong> its hand-to-mouth share is about 54%, against about one third in US estimates.</p>
+    <p class="callout callout-warn"><strong>The distribution is calibrated, not matched to US data:</strong> its hand-to-mouth share, counted by liquid wealth, is about 54%, against about one third in US estimates.</p>
   </section>
 
   <section id="card" class="band ov-spec">
@@ -173,7 +173,7 @@ irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0
       <div><dt>Access</dt><dd>Hosted stylised shocks, CLI, Python package (<a href="/us-hank/code">Code</a>)</dd></div>
       <div><dt>Runtime</dt><dd>About 10 seconds cold on a laptop (steady state plus Jacobian, then cached); instant warm</dd></div>
       <div class="model-card-wide"><dt>Joins the microsimulation</dt><dd>Wage and labour responses scale US employment income (<a href="#pe-bridge">the join above</a>, experimental)</dd></div>
-      <div class="model-card-wide"><dt>Status</dt><dd>Partial replication of Auclert et al. (2021): six of seven solved parameters match directly and the seventh (vphi) after a wage-markup convention conversion; steady-state targets are inputs; shock signs are tested, magnitudes are not; not a forecaster; distributional outputs are steady-state statistics and an MPC-proportional split of the aggregate</dd></div>
+      <div class="model-card-wide"><dt>Status</dt><dd>Partial replication of Auclert et al. (2021): six of seven solved parameters match directly and the seventh (vphi) after a wage-markup convention conversion; steady-state targets are inputs; shock signs are tested; one published magnitude (impact consumption after a monetary shock, units inferred) is matched within about 2%, the others are not checked; not a forecaster; distributional outputs are steady-state statistics and an MPC-proportional split of the aggregate</dd></div>
       <div class="model-card-wide"><dt>Cannot answer</dt><dd>Forecasts; detailed tax reforms (the labour tax is <a class="gloss-link" href="/glossary#exogenous">endogenous</a>); PolicyEngine reforms; nonlinear or state-dependent dynamics</dd></div>
     </dl>
     

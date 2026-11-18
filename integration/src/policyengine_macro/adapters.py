@@ -197,8 +197,10 @@ class USHankShockAdapter(ModelAdapter):
             validation=[
                 "us-hank-model's replication suite gates the six steady-state "
                 "parameters that match Econometrica 2021 Table B.III, market "
-                "clearing and shock-response signs; IRF magnitudes are "
-                "regression pins on this implementation, not validated "
+                "clearing, shock-response signs and one published magnitude "
+                "(impact consumption after the paper's monetary shock, within "
+                "about 2%, shock units inferred); every other IRF magnitude is "
+                "a regression pin on this implementation, not validated "
                 "against the paper",
             ],
             warnings=[payload["warning"]] if payload.get("warning") else [],

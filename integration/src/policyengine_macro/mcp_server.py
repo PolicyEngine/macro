@@ -382,7 +382,8 @@ def hank_shock(
     Keynesian, solved in the sequence space) and return the impulse responses.
 
     HONEST FRAMING: a partial replication (six of seven solved steady-state
-    parameters match; IRF magnitudes are not validated) scoring STYLIZED
+    parameters match; one published IRF magnitude is matched within about
+    2%, the others are not validated) scoring STYLIZED
     shocks. It is NOT a forecaster and does NOT score
     detailed tax reforms (score_reform rejects model='hank'); distributional
     outputs are first-order approximations. Responses are linear deviations
@@ -396,8 +397,11 @@ def hank_shock(
             such instrument exists in the model.
         size: Impact size of the shock, in model units — UNITS DIFFER PER
             KIND: monetary is a level change in the intercept of the
-            QUARTERLY nominal Taylor rule; the policy rate itself moves less,
-            about 13bp on impact for -0.0025 (us-hank-model #18). -0.0025 is
+            QUARTERLY nominal Taylor rule, not in the policy rate: the rule
+            also responds to the inflation the shock causes, so the quarterly
+            policy rate falls only about 13bp on impact for -0.0025 at
+            persistence 0.61 (us-hank-model #18; not pinned at other
+            persistences, including the default 0.9). -0.0025 is
             a 25bp-per-quarter intercept shift, about 100bp annualised; for a
             25bp annualised intercept shift use -0.000625. fiscal_spending is a level
             change in G (steady-state Y = 1, so 0.01 = 1% of GDP);
