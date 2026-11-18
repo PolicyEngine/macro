@@ -82,25 +82,22 @@
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Hosted MCP tools</h3></div>
         <p>The quickest route is the <a href="/connect">hosted MCP server</a>: no install, no credentials.</p>
         <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>More detail</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>Tools, returns and runtime</strong><small>the four tools · draws and runtime</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
-        <p class="kv-title">Hosted tools</p>
-        <dl class="kv"><div><dt>Forecast</dt><dd><code>forecast_uk(horizons=12, draws=2000)</code></dd></div><div><dt>Shocks</dt><dd><code>latest_shocks(draws=2000)</code></dd></div><div><dt>Headlines</dt><dd><code>model_summary()</code>, instant</dd></div><div><dt>Incidence</dt><dd><code>svar_inflation_incidence(year=2027)</code>, experimental</dd></div></dl>
-        
-  </div>
-</details>
-        <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>What each tool returns</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
-  <div class="xp-body">
-<p><code>forecast_uk</code> (YoY GDP-growth and CPI-inflation fan charts with 68%/90% bands), <code>latest_shocks</code> (<a class="gloss-link" href="/glossary#prior-posterior">posterior</a> sign probabilities of each identified shock in the latest quarter), <code>model_summary</code> (headline replication results — instant, no estimation), and the experimental <code>svar_inflation_incidence</code> (the CPI gap priced through benefit uprating in the microsimulation).</p>
-  </div>
-</details>
-        <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
-  <div class="xp-body">
+          <h4>The four tools and what each returns</h4>
+          <ul>
+            <li><code>forecast_uk(horizons=12, draws=2000)</code>: year-on-year GDP growth and CPI inflation fan charts with 68% and 90% bands.</li>
+            <li><code>latest_shocks(draws=2000)</code>: <a class="gloss-link" href="/glossary#prior-posterior">posterior</a> sign probabilities of each identified shock in the latest quarter.</li>
+            <li><code>model_summary()</code>: headline replication results; instant, no estimation.</li>
+            <li><code>svar_inflation_incidence(year=2027)</code>, experimental: the CPI gap priced through benefit uprating in the microsimulation.</li>
+          </ul>
           <h4>Draws and runtime</h4>
-          <p>The first call estimates the model, a couple of minutes cold; results are cached in-process. The default 2,000 draws yield about 159 accepted (ESS about 49), below the 100 at which the response warns; 3,500 give ESS about 92, still under; 6,000 give 455 accepted and ESS about 181. Every response carries a <code>warnings</code> list when inference is weak.</p>
-        
+          <ul>
+            <li>The first call estimates the model, a couple of minutes cold; results are cached in-process.</li>
+            <li>The default 2,000 draws give about 159 accepted (<a class="gloss-link" href="/glossary#ess">ESS</a> about 49), below the ESS of 100 at which the response warns.</li>
+            <li>3,500 draws give ESS about 92, still under; 6,000 give 455 accepted and ESS about 181.</li>
+            <li>Every response carries a <code>warnings</code> list when inference is weak.</li>
+          </ul>
   </div>
 </details>
       </div>
@@ -112,31 +109,30 @@
 pe-macro shocks                                <span class="cm"># latest-quarter shocks</span>
 pe-macro summary                               <span class="cm"># replication headlines</span>
 pe-macro svar-inflation-incidence --year 2027  <span class="cm"># experimental; needs HUGGING_FACE_TOKEN</span></code></pre></div>
-        <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>More detail</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
-  <div class="xp-body">
-        <p class="kv-title">CLI commands</p>
-        
-  </div>
-</details>
       </div>
 
       <div class="meth-step" id="run-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Install locally</h3></div>
-        <p>The package installs straight from GitHub with the prepared quarterly dataset inside, so <code>boe_var.data.load_data()</code> works immediately.</p>
-        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code></pre></div>
+        <p>Install the suite from GitHub: it pins the model package, which ships the prepared quarterly dataset. The calls match the hosted tools and return dicts.</p>
+        <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code></pre></div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> policyengine_macro <span class="kw">import</span> svar_forecast, svar_latest_shocks
 
 fc = svar_forecast(horizons=12, draws=2000)   <span class="cm"># median + 68%/90% bands</span>
 shocks = svar_latest_shocks(draws=2000)</code></pre></div>
         <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>the model package alone · public inputs</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
-        <p class="kv-title">Install</p>
+          <h4>The model package alone</h4>
+          <ul>
+            <li><code>pip install git+https://github.com/PolicyEngine/boe-var-model</code> installs <code>boe_var</code> without the suite.</li>
+            <li>The prepared quarterly dataset is inside, so <code>boe_var.data.load_data()</code> works immediately.</li>
+          </ul>
           <h4>All inputs are public</h4>
-          <p>Every input series is public: ONS (CPI, CPI energy, real GDP), Bank of England (Bank Rate, sterling ERI), and FRED (oil, exchange rates, world components).</p>
-          <h4>Or through the suite, from Python</h4>
-          <p>The same calls as the hosted tools, returning dicts: install the suite (<code>pip install "policyengine-macro[models] @ git+https://github.com/PolicyEngine/macro#subdirectory=integration"</code>) and import them.</p>
+          <ul>
+            <li>ONS: CPI, CPI energy, real GDP.</li>
+            <li>Bank of England: Bank Rate, sterling exchange-rate index.</li>
+            <li>FRED: oil, exchange rates, world components.</li>
+          </ul>
         
   </div>
 </details>
@@ -154,11 +150,13 @@ python scripts/run_replication.py
 <span class="cm"># composite IRFs, and the forecast-revision decomposition</span>
 python scripts/run_forecast_revision.py</code></pre></div>
         <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>what lands where · runtime</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
-        <p class="kv-title">Runner scripts</p>
           <h4>What lands where</h4>
-          <p class="opt-note">Outputs land in <code>results/</code>: the replication figures (fig2–fig6), the forecast figures (fig1, fig7–fig9) and two summary reports. Runtime scales with draw count; the importance weights are the expensive part, one numerical Jacobian per accepted draw.</p>
+          <ul>
+            <li>Outputs land in <code>results/</code>: the replication figures (fig2&ndash;fig6), the forecast figures (fig1, fig7&ndash;fig9) and two summary reports.</li>
+            <li>Runtime scales with draw count; the importance weights are the expensive part, one numerical Jacobian per accepted draw.</li>
+          </ul>
         
   </div>
 </details>
