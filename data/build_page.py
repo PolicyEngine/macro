@@ -406,6 +406,11 @@ def calendar_table() -> str:
     row, which on a phone stacked into ten four-line cards. The status is now
     stated once in the caption while every date is ahead of the store, and
     comes back as a column only when a date has passed without a snapshot.
+
+    ``data-stack="no"`` opts the table out of reveal.js's tall "label above
+    value" phone layout (``.t-stack``, for word-heavy tables); reveal.js then
+    gives it the compact one (``.tbl-stack``: one card a row, label beside
+    value, below 560px), which is the layout the catalogue's neighbours use.
     """
     releases = upcoming()
     statuses = [release_status(when, series) for when, _, series in releases]
@@ -663,7 +668,7 @@ def render_fragment() -> str:
       <details class="about">
         <summary>Endpoints and file format</summary>
       <div class="table-scroll">
-        <table>
+        <table data-stack="no">
           <caption>Static files over HTTPS, GET and HEAD only: there is no API to authenticate against. Everything under <code>/data/</code> is served with <code>Access-Control-Allow-Origin: *</code>, so a browser-side notebook or dashboard on any origin can read it directly.</caption>
           <thead><tr><th scope="col">Endpoint</th><th scope="col">Contains</th><th scope="col">Stability</th></tr></thead>
           <tbody>

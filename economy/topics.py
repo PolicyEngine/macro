@@ -184,9 +184,14 @@ PUBLIC_LABELS = {
 FORECAST_FILE = ROOT / "papers" / "boe-svar" / "figures" / "current_forecast.json"
 # The archived round keeps the filename it was generated under; the satellite's
 # display name is "svar-unemployment satellite".
-UNEMPLOYMENT_ROUND = (
-    ROOT / "forecasts" / "rounds" / "2026-07-28" / "okun-unemployment.json"
-)
+# The newest one, chosen as forecasts/make_open_fans.py chooses it, so the jobs
+# page and the /forecasts fan cannot show different rounds. (It was a typed
+# path to 2026-07-28, which is still the newest today.)
+UNEMPLOYMENT_ROUND = sorted(
+    path
+    for path in (ROOT / "forecasts" / "rounds").glob("*/okun-unemployment.json")
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", path.parent.name)
+)[-1]
 
 
 # --------------------------------------------------------------- data access
@@ -927,7 +932,7 @@ def data_rows(names: tuple[str, ...]) -> str:
 def data_layer(names: tuple[str, ...], closing: str) -> str:
     return f"""    <div class="prose">
       <div class="table-scroll">
-        <table>
+        <table data-stack="no">
           <caption>Each value is read from the vintage file linked here.</caption>
           <thead><tr><th scope="col">Series</th><th scope="col">Publisher</th><th scope="col">Coverage</th><th scope="col">Snapshots</th><th scope="col">This vintage</th><th scope="col">Next release</th></tr></thead>
           <tbody>
@@ -1595,7 +1600,7 @@ def reform_stands() -> str:
                    [("Single year", microsim["horizon"]), ("Seconds to minutes", microsim["runtime"]),
                     ("Hosted", ", ".join(microsim["access"]))]),
         route_card("landmark", "Macro feedback", '<a href="/obr">OBR emulator</a>',
-                   "Adds second-round GDP, consumption and investment effects.", "Income tax and NICs only",
+                   "Adds second-round GDP, consumption and investment effects.", "Checked: income tax and NICs",
                    [("3 to 5 years", obr["horizon"]), ("10+ min for a reform", obr["runtime"]),
                     ("Hosted", ", ".join(obr["access"]))]),
         route_card("hourglass", "Long-run dynamic", '<a href="/olg">OG-UK + microsimulation</a>',
@@ -2434,7 +2439,7 @@ def us_growth_run() -> str:
         command("pe-macro frbus-summary", "implementation, provenance and scope limits"),
         command("pe-macro frbus-variables", "the shockable FRB/US levers and their units"),
         command("pe-macro frbus-shock --var rffintay_aerr --shock 1.0 --horizon 20", "output response to a 1pp policy surprise"),
-        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "HANK: an easing shock to the Taylor-rule intercept (policy rate about 13bp lower on impact)"),
+        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "HANK: an easing shock to the Taylor-rule intercept (quarterly policy rate about 13bp lower on impact)"),
     )}
 {us_run_note()}
     </div>"""
@@ -2525,7 +2530,7 @@ def us_inflation_run() -> str:
 {codeblock(
         command("pe-macro frbus-shock --var rffintay_aerr --shock 1.0 --horizon 20", "price response to a 1pp policy surprise"),
         command("pe-macro hank-summary", "shock catalogue, units and scope limits"),
-        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "HANK: an easing shock to the Taylor-rule intercept (policy rate about 13bp lower on impact)"),
+        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "HANK: an easing shock to the Taylor-rule intercept (quarterly policy rate about 13bp lower on impact)"),
     )}
 {us_run_note()}
     </div>"""
@@ -2630,7 +2635,7 @@ def us_rates_model() -> str:
 {icon_items([
         ("x-circle", "<strong>No model forecasts the funds rate or Treasury yields.</strong>"),
         ("building", '<a href="/frb-us">FRB/US</a>: the funds rate only as a policy-rule response to a shock.'),
-        ("users", '<a href="/us-hank">US HANK</a>: a model-consistent real rate, not a market yield.'),
+        ("users", '<a href="/us-hank">US HANK</a>: model-consistent policy and real rates in a shock response, not a market yield.'),
         ("calculator", f'<a href="/pe">Microsimulation</a>: cannot answer {esc(microsim["cannot_answer"][2])}.'),
         ("table", "No model of the Treasury curve at any maturity."),
     ])}
@@ -3210,7 +3215,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
-<link rel="stylesheet" href="/economy/topic-page.css?v=22" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=23" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>
