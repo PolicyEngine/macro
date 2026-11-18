@@ -118,8 +118,10 @@ def render() -> str:
     return "\n".join(
         [
             '      <p class="chart-intro">Unemployment, satellite round '
-            f"{src.parent.name}: no official path to overlay; raw bands (no "
-            "coverage evaluation).</p>",
+            f"{src.parent.name}: no official path to overlay. Bands carry GDP "
+            "uncertainty only; in a backtest, bands built this way held 22–48% of "
+            "outturns at 68% and 30–61% at 90% "
+            '(<a href="/svar/validation#rolling">coverage</a>).</p>',
             '      <figure class="vchart-figure">',
             chartkit.attach_plot(
             chartkit.figure("\n".join([
@@ -139,8 +141,8 @@ def render() -> str:
                 "</svg>",
             ]), legend=[
                 ("ln-s1", "BoE SVAR unemployment satellite median"),
-                ("sw-band68", "68% band (raw)"),
-                ("sw-band90", "90% band (raw)"),
+                ("sw-band68", "68% band (GDP uncertainty only)"),
+                ("sw-band90", "90% band (GDP uncertainty only)"),
                 *([("sw-dot-out", "ONS outturn")] if dots else []),
             ], unit="UK unemployment rate, %", y_gutter=True,
                source_short=f"BoE SVAR unemployment satellite, {chartkit.short_date(src.parent.name)} · ONS",
@@ -148,7 +150,7 @@ def render() -> str:
                        f'{src.parent.name}/{src.name}">{src.parent.name}/{src.name}</a>'
                        + ('; outturn, ONS series MGSX from the <a href="/economy#data">data store</a>'
                           if dots else ""))),
-                chartkit.fan_plot(rows, median_name="BoE SVAR unemployment satellite median", band_note="(raw)",
+                chartkit.fan_plot(rows, median_name="BoE SVAR unemployment satellite median", band_note="(GDP uncertainty only)",
                                   dots=[(rows[i]["period"], v) for i, v in dots], y_range=(lo, hi),
                                   dots_name=("ONS outturn (published after the round)"
                                              if all(seen[rows[i]["period"]][0] > src.parent.name for i, _ in dots)

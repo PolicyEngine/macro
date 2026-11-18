@@ -215,7 +215,7 @@
 <li><span class="vc-sw sw-b2" aria-hidden="true"></span>paper</li>
 </ul>
 </div><!-- /vc-fig -->
-                <figcaption>Global-shock (world demand + energy + supply) FEVD shares four quarters ahead: the production run (10,000 posterior draws, 765 accepted, ESS 368.0; <code>results/summary.md</code> at boe-var-model c13a9c9) against the paper's approximate published values.
+                <figcaption>Global-shock (world demand + energy + supply) FEVD shares four quarters ahead: the production run (10,000 posterior draws, 765 accepted, ESS 368.0; <code>results/summary.md</code> at boe-var-model c827ab8) against the paper's approximate published values.
 <p class="vc-src-line"><svg class="vc-src-ic" viewBox="0 0 24 24" width="14" height="14" style="width:14px;height:14px;flex:0 0 14px" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span style="min-width:0;flex:1">Source: BoE SVAR replication</span></p>
 <details class="vc-src"><summary>Source details</summary>
 <p class="vc-source">Source: <code>papers/boe-svar/figures/comparison_numbers.json</code>.</p>
@@ -421,7 +421,7 @@
 </details></figcaption>
               </figure>
         <p class="kv-title">50 expanding-window origins</p>
-        <dl class="kv kv-text"><div><dt>Run</dt><dd>evaluation model without Covid dummies</dd></div><div><dt>68% band, h=1</dt><dd>70%, just above nominal</dd></div><div><dt>68% band, h=8</dt><dd>57%</dd></div><div><dt>90% band</dt><dd>under-covers at every horizon</dd></div><div><dt>Unemployment satellite</dt><dd>beats no-change at h=1&ndash;4 only excluding the Covid quarters, not significant</dd></div></dl>
+        <dl class="kv kv-text"><div><dt>Run</dt><dd>evaluation model without Covid dummies</dd></div><div><dt>68% band, h=1</dt><dd>70%, just above nominal</dd></div><div><dt>68% band, h=8</dt><dd>57%</dd></div><div><dt>90% band</dt><dd>under-covers at every horizon</dd></div><div><dt>Unemployment satellite</dt><dd>beats no-change at h=1&ndash;4 only excluding the Covid quarters, not significant; bands too narrow</dd></div></dl>
         <details class="xp">
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
@@ -432,9 +432,16 @@
                 not significant); on all 73 targets it is level at h=1 (0.99) and
                 worse from h=2 (1.12&ndash;1.35). The published path is capped at four quarters. Its
                 specification is on the <a href="/svar/methodology#meth-5">methodology
-                tab</a>; skill table:
+                tab</a>; skill and band coverage:
                 <a href="https://github.com/PolicyEngine/boe-var-model/blob/main/results/unemployment_satellite_validation.json">unemployment_satellite_validation.json</a>.
               </p>
+          <p><strong>Its bands, over the same 73 origins</strong> (h=1&ndash;4; 67 targets a horizon once the Covid quarters are excluded):</p>
+          <ul>
+            <li>GDP uncertainty only, as in the archived 28 Jul 2026 round: 22&ndash;48% of outturns inside the 68% band, 30&ndash;61% inside the 90% band.</li>
+            <li>With the satellite&rsquo;s residual and estimation uncertainty, which the model now adds (<a href="https://github.com/PolicyEngine/boe-var-model/pull/32">boe-var-model #32</a>): 60&ndash;66% at 68%, somewhat below nominal at every horizon; 87%, 78%, 75% and 70% at 90%, close to nominal only one quarter ahead.</li>
+            <li>On all 73 targets the second set covers 58&ndash;63% at 68% and 81%, 75%, 74% and 68% at 90%.</li>
+            <li>The backtest draws its GDP paths from a refit without Covid dummies, not the published specification; no round with the wider bands is archived yet.</li>
+          </ul>
         
   </div>
 </details>
@@ -777,8 +784,8 @@
             </ul></td>
           </tr>
           <tr>
-            <th scope="row"><strong>Assumed lag length and simplified pandemic prior</strong></th>
-            <td>p&nbsp;=&nbsp;4 is assumed, not selected; the pandemic is handled by <a class="gloss-link" href="/glossary#exogenous">exogenous</a> Covid dummies.</td>
+            <th scope="row"><strong>Assumed lag length; loose pandemic prior</strong></th>
+            <td>p&nbsp;=&nbsp;4 is assumed, not selected; the pandemic is handled by six <a class="gloss-link" href="/glossary#exogenous">exogenous</a> Covid dummies with a loose prior, which is the Cascaldi-Garcia (2022) pandemic prior at its uninformative default.</td>
           </tr>
           <tr id="explosive">
             <th scope="row"><strong>The <a class="gloss-link" href="/glossary#prior-posterior">posterior</a> is mildly explosive</strong></th>
@@ -802,11 +809,12 @@
             <th scope="row"><strong>No after-the-fact fix brings the 90% band to 90%</strong></th>
             <td><ul>
               <li>Scored held-out, the raw 90% band covers about 77% of outturns.</li>
-              <li>Per-horizon rescaling factors: 82.7% (82.9% on year-on-year growth) (<a href="https://github.com/PolicyEngine/boe-var-model/pull/19">#19</a>).</li>
+              <li>Per-horizon rescaling factors: 82.7% (82.9% on year-on-year growth), with a 95% interval of about 68% to 95%, so the gap left to 90% is within sampling error (<a href="https://github.com/PolicyEngine/boe-var-model/pull/19">#19</a>).</li>
               <li>Conformal factors: 83.2% on the same specification (<a href="https://github.com/PolicyEngine/boe-var-model/pull/20">#20</a>).</li>
               <li>Lenza&ndash;Primiceri Covid volatility scaling: 81.2%, or 86.9% combined with the rescaling (<a href="https://github.com/PolicyEngine/boe-var-model/pull/21">#21</a>).</li>
-              <li>The misses cluster in 2019&ndash;22. Read the 90% fan as under-covering, not as a 90% probability.</li>
-              <li>Remaining candidate fix: time-varying volatility (<a href="https://github.com/PolicyEngine/boe-var-model/issues/12">boe-var-model #12</a>).</li>
+              <li>88% of the misses fall in three episodes, each on one side of the band: 2014Q3&ndash;2016Q4, 2020Q1&ndash;2021Q2 and 2021Q3&ndash;2023Q4. Outside them the raw 90% band covers 94%.</li>
+              <li>So the shortfall is mostly the central forecast missing for several quarters, not tail shape; stochastic-volatility variants, tried and not adopted, left the below-band misses in place (<a href="https://github.com/PolicyEngine/boe-var-model/blob/main/docs/band_decision.md">band decision note</a>, <a href="https://github.com/PolicyEngine/boe-var-model/issues/12">#12</a>).</li>
+              <li>Read the 90% fan as under-covering, not as a 90% probability.</li>
             </ul></td>
           </tr>
           <tr id="rate-size">
@@ -814,7 +822,7 @@
             <td><ul>
               <li>Per 25bp monetary policy shock, GDP is about 0.40% lower at h8 (posterior median, pre-refresh run of 744 accepted draws; not yet recounted).</li>
               <li>Scaled linearly to 100bp that is about 1.6%, above the Bank of England&rsquo;s published range for a 1pp rise (<a href="/models#shops">the benchmark</a>).</li>
-              <li>The experiments differ: here the rate path is persistent (a unit root), not held for one year (<a href="https://github.com/PolicyEngine/boe-var-model/issues/11">boe-var-model #11</a>).</li>
+              <li>The experiments differ: here the rate path is persistent (a unit root), not held for one year, and the GDP level effect does not fade (<a href="https://github.com/PolicyEngine/boe-var-model/issues/11">boe-var-model #11</a>).</li>
             </ul></td>
           </tr>
           <tr>
