@@ -96,7 +96,7 @@ pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61 --distribu
 
       <div class="meth-step" id="code-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Know the units and variants</h3></div>
-        <p><code>monetary</code>: level change in the <em>quarterly</em> Taylor-rule intercept (&minus;0.0025 is 25bp per quarter, about 100bp annualised; the quarterly policy rate itself falls only about 13bp on impact at &rho;&nbsp;0.61, about 53bp annualised, because the rule responds to the inflation the cut causes); <code>fiscal_spending</code>: level change in G (steady-state output is 1, so 0.01 = 1% of GDP); <code>productivity</code>: level change in TFP (steady-state TFP is 0.468, so 0.01 is a 2.14% rise, not 1%).</p>
+        <p><code>monetary</code>: level change in the <em>quarterly</em> Taylor-rule intercept (&minus;0.0025 is 25bp per quarter, about 100bp annualised; the quarterly policy rate itself falls only about 13bp on impact at &rho;&nbsp;0.61, because the rule responds to the inflation the cut causes); <code>fiscal_spending</code>: level change in G (steady-state output is 1, so 0.01 = 1% of GDP); <code>productivity</code>: level change in TFP (steady-state TFP is 0.468, so 0.01 is a 2.14% rise, not 1%).</p>
         <details class="xp">
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
@@ -112,8 +112,8 @@ pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61 --distribu
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code>pip install git+https://github.com/PolicyEngine/us-hank-model</code></pre></div>
         <div class="codeblock"><button class="cb-copy" data-copy>copy</button><pre><code><span class="kw">from</span> us_hank <span class="kw">import</span> model, distributional
 
-ss = model.solve_steady_state()          <span class="cm"># ~10s, cached</span>
-G = model.solve_jacobian(ss, T=<span class="kw">300</span>)      <span class="cm"># ~3s, cached</span>
+ss = model.solve_steady_state()          <span class="cm"># a few seconds, cached</span>
+G = model.solve_jacobian(ss, T=<span class="kw">300</span>)      <span class="cm"># a few seconds, cached</span>
 
 irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0025</span>, persistence=<span class="kw">0.61</span>, ss=ss, G_jac=G)
 <span class="kw">print</span>(irf[<span class="kw">"Y"</span>][:<span class="kw">8</span>])                      <span class="cm"># output, % deviation from steady state</span>

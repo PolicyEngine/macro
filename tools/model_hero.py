@@ -121,7 +121,7 @@ SHORT_VERDICT = {
     "pe": "Exact for rules; costings static, no interval.",
     "svar": "GDP variance share consistent with the paper; no forecast skill.",
     "frb-us": "Solver matches the Fed&rsquo;s code; economic checks weak.",
-    "us-hank": "Parameters match the paper; one response size matched.",
+    "us-hank": "Parameters match; one response size checked, others not.",
     "olg": "Targets met by construction; no outcome benchmark.",
     "define": "Deltas only, never levels.",
 }
