@@ -23,9 +23,9 @@ It passes. The accounting test module collects \textbf{62} tests, of which \text
 
 That inconsistency is worth stating because it is the template for everything in Section~\ref{sec:gaps}. Table~6's rest-of-world lending entry omits the net-dividends term of Eq.~(383), so the MFI and RoW transaction columns miss lending by $\mp$5.44. This is not an inference: the manual itself tabulates overall lending at 5.44 where, by its own account, it ``should equal 0''. Rather than adjust a value or widen a tolerance until the matrix closed, the discrepancy is pinned exactly, so the implementation reproduces the manual including its defect and a future correction upstream fails the test rather than passing silently.
 
-\subsection{Milestone 2: IN PROGRESS, not passed}
+\subsection{Milestone 2: not passed}
 
-Milestone~2 covers the high-level macro and production blocks (\S3.2--3.3), gated on the baseline GDP path against the oracle. Three of its four sections have landed:
+Milestone~2 covers the high-level macro and production blocks (\S3.2--3.3), gated on the baseline GDP path against the oracle. By 11 August 2026 three of its four sections had landed:
 
 \begin{center}
 \begin{tabular}{@{}llrl@{}}
@@ -43,7 +43,9 @@ Manual section & Content & Equations & Range \\
 
 \noindent Each section solves as a system under its own test module, and contiguity is checked structurally rather than asserted: the equation numbers parsed out of the provenance strings must form an unbroken range, so a skipped equation fails a test rather than going unnoticed.
 
-\textbf{Milestone 2 is not passed.} \S3.3.3, the input--output calculations, is not implemented, and the oracle baseline comparison --- the milestone's actual gate --- has not been run. Reporting 118 contiguous equations as a milestone pass would be reporting effort as evidence. What can be said is narrower and true: three of four sections are transcribed and internally consistent against the manual's own initial values, at the precision those values are printed to, with every disagreement enumerated below rather than absorbed.
+The remaining sections followed on 6 November 2026: \S3.3.3, Eqs.~(139)--(158); the ecosystem block \S3.1, Eqs.~(1)--(20); and the seven sectoral sections \S3.4.1--\S3.4.7, Eqs.~(159)--(401). Every printed equation of the manual is now registered and the whole model solves quarter by quarter, with sectoral net lending summing to zero once the forms the upstream outputs follow are used for the dividend row.
+
+\textbf{Milestone 2 is not passed.} The gate is a real solve against the oracle, held as a strict expected failure in \texttt{tests/test\_full\_model.py}, and the solved baseline does not reproduce the upstream run: GDP falls up to 44 per cent below it by 2040, mainly through equity-revaluation equations that are not yet diagnosed. With \S3.1 and \S3.4 held at the oracle, solved GDP stays within 0.41 per cent of it every quarter, so the gap opens once the sectoral equations are solved as well. The reimplementation's own green-public-investment multiplier is 1.52, against 2.30 from the upstream run on the same impulse over the full simulation; it is a diagnostic, and nothing served comes from it. Reporting a model that solves as a milestone pass would be reporting effort as evidence.
 
 \subsection{Thirteen gap records}
 \label{sec:gaps}
