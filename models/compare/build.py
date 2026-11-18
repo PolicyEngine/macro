@@ -474,7 +474,7 @@ def body(data: dict) -> str:
     <div class="router-row cmp-chips" role="group" aria-label="Question">{chips}</div>
     <div class="callout cmp-pins"><p><strong>Run at the current model pins.</strong> Each row&rsquo;s Details give its exact call.</p>
       <ul>
-        <li><strong>OBR emulator:</strong> rate, spending and tax rows re-run locally on 16 Nov 2026 at <code>2965e82d</code> (October 2026 EFO), where every quarter converges; the energy row is an earlier committed output.</li>
+        <li><strong>OBR emulator:</strong> rate, spending and tax rows re-run locally on 18 Nov 2026 at <code>0fe04c9</code> (October 2026 EFO), where every quarter converges; identical to the <code>2965e82d</code> runs; the energy row is an earlier committed output.</li>
         <li><strong>FRB/US:</strong> re-run on 18 Nov 2026 at <code>162cfe6</code> (October 2026 LONGBASE), with shocks from 2026Q3, the first quarter after LONGBASE history; identical to the <code>846eeb5c</code> runs.</li>
         <li><strong>US HANK:</strong> re-run on 18 Nov 2026 at <code>58353e5</code>, now storing the policy-rate path; output and inflation are identical to the hosted runs of 6 Nov.</li>
         <li><strong>BoE SVAR and DEFINE-UK:</strong> committed model-repo outputs.</li>

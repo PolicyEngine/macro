@@ -88,7 +88,7 @@ def test_monetary_caveat_is_on_the_page_not_folded():
 def test_failures_and_flags_are_plain():
     # Every row's solver flag is printed as stored, so a non-converged solve
     # can never be hidden. (This asserted the literal "converged: false" while
-    # the OBR rows were run at e4d7faa; at 2965e82d every quarter converges.)
+    # the OBR rows were run at e4d7faa; at 0fe04c9 every quarter converges.)
     import html as _html
     solvers = [c["solver"] for q in DATA["questions"] for c in q["cells"] if c.get("solver")]
     assert solvers

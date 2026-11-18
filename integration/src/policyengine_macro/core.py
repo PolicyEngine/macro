@@ -139,7 +139,7 @@ OBR_VARIABLES = [
         "description": "Real government consumption",
         "units": "£m per quarter (e.g. 1250 = £5bn/year increase)",
         "investment_closure": False,
-        # Measured at obr 2965e82d (October 2026 EFO, nominal-GDP pin, every
+        # Measured at obr 0fe04c9 (October 2026 EFO, nominal-GDP pin, every
         # quarter converged): +1250/qtr moves GDP +1.267bn in the first
         # quarter, rising to +1.310bn by the twelfth -- an impact multiplier of 1.01
         # rising to 1.05. Most of it is the GDP identity; the small rise is
@@ -185,7 +185,7 @@ OBR_VARIABLES = [
         "description": "Bank Rate",
         "units": "percentage points, held each shocked quarter (e.g. 1.0 = +1pp)",
         "investment_closure": False,
-        # Measured at obr 2965e82d (October 2026 EFO): +1pp held 12 quarters
+        # Measured at obr 0fe04c9 (October 2026 EFO): +1pp held 12 quarters
         # lowers GDP by £128m, £406m, £475m and £503m at q1/q4/q8/q12; +1pp
         # for four quarters peaks at about -0.06% of GDP, against the Bank of
         # England's published -0.2% to -0.35% for a comparable rise.
@@ -203,7 +203,7 @@ OBR_VARIABLES = [
         "units": "£m per quarter of revenue raised (positive = household income falls; e.g. 1637.5 = £6.55bn/year)",
         "investment_closure": False,
         # The channel score_reform feeds with the microsimulation's costing.
-        # Measured at obr 2965e82d: +1,637.5/qtr lowers real GDP by £540m at
+        # Measured at obr 0fe04c9: +1,637.5/qtr lowers real GDP by £540m at
         # q12; GDP per pound raised is 0.211 after a year and 0.376 after three
         # in current prices (0.33 at q12 in real GDP).
         "caveat": (
@@ -241,7 +241,7 @@ OBR_VARIABLES = [
         "description": "Nominal central government investment (feeds real GGI via the GGIPS/GGIDEF chain)",
         "units": "£m nominal per quarter (e.g. 3000 ≈ £2.5bn real per quarter)",
         "investment_closure": False,
-        # Default (demand closure). Measured at obr 2965e82d (October 2026
+        # Default (demand closure). Measured at obr 0fe04c9 (October 2026
         # EFO, nominal-GDP pin, every quarter converged; obr
         # results/site_figures.json, unchanged at 0fe04c9): delta_IF is
         # exactly 0.0 because IF has no live equation; business investment
