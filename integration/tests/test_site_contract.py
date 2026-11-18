@@ -116,7 +116,7 @@ def test_current_obr_outlook_uses_latest_official_efo_window():
 def test_frozen_validation_vintages_are_not_relabelled_as_current_forecasts():
     # /validation was folded into per-model validation subpages.
     assert "frozen 2024Q2 data edge" in _read("svar/validation/index.html")
-    assert "outturn backtest above retains November 2025" in _read(
+    assert "only the outturn backtest retains November 2025" in _read(
         "obr/validation/index.html"
     )
 
@@ -130,7 +130,7 @@ def test_validation_and_paper_landings_lead_with_current_uk_vintages():
     obr_paper = _read("papers/obr-macro/index.html")
     assert "March 2026 EFO baseline" in obr_paper
     boe_paper = _read("papers/boe-svar/index.html")
-    assert "Current forecast: data through" in boe_paper
+    assert "Forecast in the paper:</strong> data through" in boe_paper
     assert "2026Q2&ndash;2029Q2" in boe_paper
 
 

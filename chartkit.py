@@ -467,7 +467,7 @@ def plot_spec(traces: list[dict], *, unit: str = "%", height: int = 260,
     if target is not None:
         shapes.append({"type": "line", "xref": "paper", "x0": 0, "x1": 1, "y0": target, "y1": target,
                        "layer": "below", "line": {"color": "var(--text-muted)", "width": 1, "dash": "dot"}})
-        notes.append({"xref": "paper", "x": 1, "xanchor": "right", "y": target, "yanchor": "bottom",
+        notes.append({"xref": "paper", "x": 1, "xanchor": "right", "y": target, "yanchor": "top",
                       "text": target_label, "showarrow": False,
                       "font": {"size": 11, "color": "var(--text-muted)"}})
     if edge:

@@ -128,7 +128,7 @@ MODELS = {
         "geography": ["us"],
         "question_types": ["economic_shock"],
         "inputs": ["stylized shock (kind, size, persistence)"],
-        "outputs": ["gdp", "consumption", "investment", "inflation", "real_rate"],
+        "outputs": ["gdp", "consumption", "investment", "inflation", "policy_rate", "real_rate"],
         "cannot_answer": [
             "forecasts (IRFs around a calibrated steady state, not a forecaster)",
             "detailed tax reforms (only monetary/fiscal-spending/productivity instruments; the labor tax is endogenous)",

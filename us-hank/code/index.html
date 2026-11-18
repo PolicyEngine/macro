@@ -20,8 +20,8 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=50" />
-<link rel="stylesheet" href="/models/model-pages.css?v=23" />
+<link rel="stylesheet" href="/style.css?v=51" />
+<link rel="stylesheet" href="/models/model-pages.css?v=24" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -78,12 +78,17 @@
       <div class="meth-step" id="code-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Ask the hosted server</h3></div>
         <p>The <a href="/connect">hosted MCP server</a> has three tools:</p>
-        <ul>
+        <details class="xp">
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>More detail</strong><small>3 points</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <div class="xp-body">
+<ul>
           <li><code>hank_shock</code> runs a stylised shock, optionally with the distributional block.</li>
           <li><code>hank_summary</code> lists shock kinds, units, variants and scope limits, with no solve.</li>
           <li><code>hank_shock_incidence</code> passes the wage and labour responses to the US microsimulation (<a href="/us-hank#pe-bridge">the join</a>).</li>
         </ul>
         <p>The first call per variant pays the solves (<a href="/us-hank#card">timings</a>); later calls are instant.</p>
+  </div>
+</details>
       </div>
 
       <div class="meth-step" id="code-2" data-step="1">
@@ -96,7 +101,10 @@ pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61 --distribu
       <div class="meth-step" id="code-3" data-step="2">
         <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Know the units and outputs</h3></div>
         <p><code>size</code> is a level change in the instrument:</p>
-        <ul>
+        <details class="xp">
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>More detail</strong><small>table, 6 points</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <div class="xp-body">
+<ul>
           <li><code>monetary</code>: the quarterly Taylor-rule intercept. &minus;0.0025 is 25bp per quarter, about 100bp annualised. The policy rate is an output (<code>i</code>), not the shock (<a href="/us-hank/validation#ex-post-r">how it responds</a>).</li>
           <li><code>fiscal_spending</code>: government spending. Steady-state output is 1, so 0.01 is 1% of GDP.</li>
           <li><code>productivity</code>: TFP. Steady-state TFP is 0.468, so 0.01 is a 2.14% rise, not 1%.</li>
@@ -118,6 +126,8 @@ pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61 --distribu
           <li><code>--distribution</code> adds <a class="gloss-link" href="/glossary#mpc">MPCs</a> by liquid-wealth quartile, the <a class="gloss-link" href="/glossary#hand-to-mouth">hand-to-mouth</a> share and impact consumption by total-wealth quartile. With <code>--json</code> it also carries the share with an MPC above 0.25, which is zero at the default windfall and positive at rebate size (<a href="/us-hank/validation#htm-share">figure</a>).</li>
           <li><code>variant</code>: the paper&rsquo;s <code>two_asset</code> model (default) or a fast <code>one_asset</code> textbook variant with no capital, so no investment response, and monetary and productivity shocks only.</li>
         </ul>
+  </div>
+</details>
       </div>
 
       <div class="meth-step" id="code-4" data-step="3">
@@ -132,7 +142,12 @@ G = model.solve_jacobian(ss, T=<span class="kw">300</span>)      <span class="cm
 irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0025</span>, persistence=<span class="kw">0.61</span>, ss=ss, G_jac=G)
 <span class="kw">print</span>(irf[<span class="kw">"Y"</span>][:<span class="kw">8</span>])                      <span class="cm"># output, % deviation from steady state</span>
 <span class="kw">print</span>(distributional.summary(ss))        <span class="cm"># MPCs by quartile, hand-to-mouth share</span></code></pre></div>
-        <p>The solve behind these calls is on <a href="/us-hank/methodology">Methodology</a>; what to trust the results for is on <a href="/us-hank/validation">Validation</a>.</p>
+        <details class="xp">
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>More detail</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <div class="xp-body">
+<p>The solve behind these calls is on <a href="/us-hank/methodology">Methodology</a>; what to trust the results for is on <a href="/us-hank/validation">Validation</a>.</p>
+  </div>
+</details>
       </div>
       </div>
     </div>
