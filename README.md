@@ -32,7 +32,7 @@ verbatim — that registry is authoritative and this table is a copy of it.
 | 04 | **`frb-us`** — Federal Reserve FRB-US implementation | replicates the Fed's pyfrbus (1.0.0 and 1.1.1) on one 100bp funds-rate shock, within a 1e-6 tolerance; a solver check, not a test of the economics | [PolicyEngine/us-frb-model](https://github.com/PolicyEngine/us-frb-model) |
 | 05 | **`us-hank`** — US two-asset HANK (Auclert–Bardóczy–Rognlie–Straub 2021) | partial replication of Auclert et al. (2021): six of seven solved parameters match directly and the seventh (vphi) after a wage-markup convention conversion; steady-state targets are inputs; shock signs are tested; one published magnitude (impact consumption after a monetary shock, units inferred) is matched within about 2%, the others are not checked; not a forecaster; distributional outputs are steady-state statistics and an MPC-proportional split of the aggregate | [PolicyEngine/us-hank-model](https://github.com/PolicyEngine/us-hank-model) |
 | 06 | **`psl-og`** — OG-UK overlapping generations model | calibrated; no outcome benchmark; research prototype | [PSLmodels/OG-UK](https://github.com/PSLmodels/OG-UK) |
-| 07 | **`define-uk`** — DEFINE-UK ecological stock-flow consistent model | partial replication of the DEFINE-UK manual: baseline macro block matches Table 4 except 2025 growth; scenario deltas gated on the pinned oracle run, the published scenario definitions, and two paper anchors (no numeric v1.1 scenario results are published); experimental; unlicensed upstream is never hosted, so hosted calls return run instructions | [PolicyEngine/define-uk-model](https://github.com/PolicyEngine/define-uk-model) (upstream [DEFINE-model/DEFINE_UK_1.1](https://github.com/DEFINE-model/DEFINE_UK_1.1)) |
+| 07 | **`define-uk`** — DEFINE-UK ecological stock-flow consistent model | partial replication of the DEFINE-UK manual: baseline macro block matches Table 4 inside every gate (set after the run), two by only 0.01pp; scenario deltas gated on the pinned oracle run, the published scenario definitions, and two paper anchors (no numeric v1.1 scenario results are published); experimental; unlicensed upstream is never hosted, so hosted calls return run instructions | [PolicyEngine/define-uk-model](https://github.com/PolicyEngine/define-uk-model) (upstream [DEFINE-model/DEFINE_UK_1.1](https://github.com/DEFINE-model/DEFINE_UK_1.1)) |
 | — | More model classes (incl. OG-USA) | planned | — |
 
 **One naming split to know about.** The site calls the overlapping-generations
@@ -117,7 +117,7 @@ models:
   claude mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp
   ```
 
-  The server exposes **26 tools** (`@mcp.tool` functions in
+  The server exposes **28 tools** (`@mcp.tool` functions in
   [`integration/src/policyengine_macro/mcp_server.py`](integration/src/policyengine_macro/mcp_server.py);
   `site_contract.check_docs_match_code` fails CI if the count drifts from
   [`integration/README.md`](integration/README.md), which documents each one):
@@ -136,6 +136,8 @@ models:
     `define_scenario_incidence`
   - **experimental incidence overlays** — `frbus_shock_incidence`,
     `hank_shock_incidence`, `svar_inflation_incidence`
+  - **background jobs** — `start_job`, `get_job_result` (run a slow tool past
+    the hosted 150 s request limit, then collect it)
 
   `score_reform` takes `model` from `("og", "obr", "microsim", "og+microsim")`
   and deliberately refuses `'frbus'`, `'hank'`, `'svar'` and `'define'`: those

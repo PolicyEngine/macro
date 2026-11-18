@@ -154,8 +154,8 @@
           </tr>
           <tr>
             <th scope="row">Green public investment cumulative multiplier</th>
-            <td><strong>COMPUTED</strong> — <strong>2.30</strong> nominal per &pound; of power-sector spending (3.26 on real GDP and deflated spending, a full-horizon cumulative ratio under a demand-led closure, with the baseline/policy parameter mismatch in the numerator; back-loaded: about 0.5 after one year from the 2027 policy start, 0.79 to 2031, 1.40 to 2034 and 2.25 by 2040, so at short horizons it sits below published estimates such as Batini et al. (2021, IMF WP/21/87: 1.1&ndash;1.5 for renewable investment)) (1.78 per &pound; of all non-wage spending), ours, not upstream's, and not comparable to any published multiplier; includes a <a href="/define/validation#alpha-pp">parameter mismatch</a></td>
-            <td>2026-08-05</td>
+            <td><strong>COMPUTED</strong> — <strong>2.25</strong> nominal per &pound; of power-sector spending, from the 2027 policy start to 2040 (0.47 after one year; 2.30 over the full run from 2023; 1.78 per &pound; of all non-wage spending), ours, not upstream's, and below published short-horizon multipliers at their horizons; includes a <a href="/define/validation#alpha-pp">parameter mismatch</a></td>
+            <td>2026-11-17</td>
             <td><code>tests/test_validation.py</code></td>
           </tr>
           <tr>
@@ -291,52 +291,55 @@
       </details>
 
       <details class="more">
-        <summary>Multiplier: our arithmetic, and why it is not comparable to a published one</summary>
+        <summary>Multiplier: our arithmetic, and how it sits against published ones</summary>
         <p>
           The model's cumulative green-public-investment multiplier is
-          <strong>2.30</strong> by <em>our own</em> computation: cumulative
-          ΔGDP of 209.9 over the cumulative change of 91.2 in ΔSPEND_GVTPS,
-          the government power-sector spending the policy switch sets, nominal,
-          over the full simulation. In real terms it is 3.26 (a full-horizon cumulative ratio under a demand-led closure, with the baseline/policy parameter mismatch in the numerator; back-loaded: about 0.5 after one year from the 2027 policy start, 0.79 to 2031, 1.40 to 2034 and 2.25 by 2040, so at short horizons it sits below published estimates such as Batini et al. (2021, IMF WP/21/87: 1.1&ndash;1.5 for renewable investment)): cumulative real ΔGDP of 250.6 over the same spending deflated by the scenario&rsquo;s GDP deflator (76.8), from the same cached outputs. Real exceeds nominal because the price level falls later in the run as electricity gets cheaper; early on, prices rise and real GDP is flat (2027&ndash;28). Over all non-wage spending (ΔSPEND_GVT,
-          118.2) it is 1.78, the headline until define-uk-model #16 was decided
-          on 15 Nov 2026. Both include a Baseline/policy parameter
-          mismatch; without it they are about 2.08&ndash;2.25 and 1.73&ndash;1.75
-          (<a href="/define/validation#alpha-pp">limits</a>).
+          <strong>2.25</strong> by <em>our own</em> computation: nominal
+          cumulative ΔGDP over the cumulative change in ΔSPEND_GVTPS, the
+          government power-sector spending the policy switch sets, both counted
+          from the 2027Q1 policy start to 2040 (209.9 less 4.8 of pre-policy
+          change, over 91.2).
+        </p>
+        <ul>
+          <li>By horizon: 0.47 after one year, 0.79 to 2031, 1.40 to 2034 and 2.25 to 2040.</li>
+          <li>Full run from 2023: 2.30 (209.9 over 91.2), the model repository&rsquo;s headline. The extra 4.8 of GDP change falls in 2023&ndash;26, before any policy switch acts.</li>
+          <li>2.25 is the headline here because the served scenario paths now start at the 2027 policy start (<a href="https://github.com/PolicyEngine/define-uk-model/pull/31">define-uk-model #31</a>).</li>
+          <li>Real terms, full run: 3.26, cumulative real ΔGDP of 250.6 over the same spending deflated by the scenario&rsquo;s GDP deflator (76.8), from the same cached outputs. Real exceeds nominal because the price level falls later in the run as electricity gets cheaper; early on, prices rise and real GDP is flat (2027&ndash;28).</li>
+          <li>All non-wage spending (ΔSPEND_GVT, 118.2), full run: 1.78, the headline until define-uk-model #16 was decided on 15 Nov 2026.</li>
+          <li>Parameter mismatch: included. The headline is 2.25 if its effect stops in 2027 and as low as about 2.08 if it persists; the secondary is 1.73&ndash;1.75 (<a href="/define/validation#alpha-pp">limits</a>).</li>
+        </ul>
+        <p>
+          A published comparator exists: Batini, Di&nbsp;Serio, Fragetta, Melina and Waldron (2021, IMF Working Paper WP/21/87) estimate multipliers of about 1.1&ndash;1.5 for renewable-energy investment over a few years, and the OBR&rsquo;s capital-spending impact multiplier is about 1.0. At those horizons this model&rsquo;s ratio sits below them (0.47 after one year, 0.79 to 2031) and exceeds them only cumulated to 2040, so it is <em>not</em> like-for-like. An earlier IMF paper the repositories hold, Batini et&nbsp;al. (2014), measures a different quantity (first-year multipliers of 0&ndash;1 for advanced economies).
         </p>
         <p>
-          It is <em>not</em> like-for-like against the published green-spending
-          multipliers it used to be set beside here. Ours is a <em>cumulative
-          ratio to 2040</em>; the published figures are short-horizon
-          multipliers. The gain is back-loaded: real GDP is flat in
-          2027&ndash;28 while spending runs at about &pound;15bn a year, nominal
-          GDP rises about &pound;0.5 per &pound; spent in 2027, and real GDP
-          peaks in 2034 as spending winds down. The 91.2 is net of 6.8 clawed
-          back after 2035; on gross spending (98.0) the ratio is 2.14. Its denominator <code>SPEND_GVT</code>
+          The gain is back-loaded: real GDP is flat in 2027&ndash;28 while
+          spending runs at about &pound;15bn a year, and peaks in 2034 as
+          spending winds down. The 91.2 is net of 6.8 clawed back after 2035; on
+          gross spending (98.0) the full-run ratio is 2.14. The secondary&rsquo;s
+          denominator <code>SPEND_GVT</code>
           mixes the impulse with <em><a class="gloss-link" href="/glossary#exogenous">endogenous</a></em> items: in the cached run
           its cumulative change of 118.2 is government power-sector spending
           +91.2, other government consumption +21.1, social benefits +8.0 and
           government investment &minus;2.3 (green +17.0 offset by conventional
           &minus;19.3); the parts sum to 118.0, the 0.2 being rounding in the
           printed outputs. Social benefits rise rather than fall, so the direction
-          of the denominator's bias is not established, and an earlier
+          of that denominator's bias is not established, and an earlier
           statement here that 1.78 is upper-leaning is withdrawn. Cumulative
           ΔGDP over cumulative ΔGCF_GVTG is not a usable impulse ratio either,
           because green investment is a small, offset share of the impulse.
-          That mix is why the headline now uses the policy instrument alone
+          That mix is why the headline uses the policy instrument alone
           (<a href="https://github.com/PolicyEngine/define-uk-model/issues/16">define-uk-model #16</a>). These caveats travel with the number
           wherever a delta is served
           (<code>GPI_MULTIPLIER_CAVEATS</code>, held by a test).
         </p>
         <p>
-          A published comparator exists: Batini, Di&nbsp;Serio, Fragetta, Melina and Waldron (2021, IMF Working Paper WP/21/87) estimate multipliers of about 1.1&ndash;1.5 for renewable-energy investment. Counted from the 2027 policy start, this model&rsquo;s ratio is about 0.5 after one year and 0.79 to 2031, below that range at short horizons, and 2.25 only by 2040. An earlier IMF paper the repositories hold, Batini et&nbsp;al. (2014), measures a different quantity (first-year multipliers of 0&ndash;1 for advanced economies).
-        </p>
-        <p>
           The upstream repository's own
           <code>tables/Multiplier_Summary.csv</code> is <strong>documented
           unusable</strong>: its multiplier columns are identical across all
-          eight scenarios, and its ΔG figure (104.22) matches the cumulative
-          delta of no variable in the scenario file. It is never quoted, and
-          neither is the &asymp;2.4 once derived from it.
+          eight scenarios. Its totals are real government spending (104.22;
+          104.1 by our sum) and real GDP (250.76; 250.6), so the &asymp;2.4
+          once derived from them is a real ratio, not comparable with the
+          nominal ones here. It is never quoted.
         </p>
       </details>
     </div>
@@ -497,7 +500,7 @@
       </p>
           <p>
         <strong>Milestone 2: NOT PASSED</strong> (2026-11-10).
-        Every printed equation of the manual (§3.1&ndash;§3.4.7) is now registered and the whole model solves quarter by quarter. It does not reproduce the upstream run: baseline GDP falls up to 44% below it by 2040 and its green-investment multiplier is 1.52 against 2.30 (<code>tests/test_full_model.py</code>, <code>tests/test_oracle.py</code>), so milestone 2 is <strong>not passed</strong>.</p>
+        Every printed equation of the manual (§3.1&ndash;§3.4.7) is now registered and the whole model solves quarter by quarter. It does not reproduce the upstream run: baseline GDP falls up to 44% below it by 2040 and its green-investment multiplier is 1.52 against the upstream&rsquo;s full-run 2.30 (<code>tests/test_full_model.py</code>, <code>tests/test_oracle.py</code>), so milestone 2 is <strong>not passed</strong>.</p>
           <p>
         Reimplementation is already earning its keep as a reading of the
         manual that the R source cannot give: <strong>thirteen manual defects
