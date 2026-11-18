@@ -117,7 +117,7 @@ models:
   claude mcp add --transport http policyengine-macro https://policyengine--policyengine-macro-mcp-serve.modal.run/mcp
   ```
 
-  The server exposes **26 tools** (`@mcp.tool` functions in
+  The server exposes **28 tools** (`@mcp.tool` functions in
   [`integration/src/policyengine_macro/mcp_server.py`](integration/src/policyengine_macro/mcp_server.py);
   `site_contract.check_docs_match_code` fails CI if the count drifts from
   [`integration/README.md`](integration/README.md), which documents each one):
@@ -136,6 +136,8 @@ models:
     `define_scenario_incidence`
   - **experimental incidence overlays** — `frbus_shock_incidence`,
     `hank_shock_incidence`, `svar_inflation_incidence`
+  - **background jobs** — `start_job`, `get_job_result` (run a slow tool past
+    the hosted 150 s request limit, then collect it)
 
   `score_reform` takes `model` from `("og", "obr", "microsim", "og+microsim")`
   and deliberately refuses `'frbus'`, `'hank'`, `'svar'` and `'define'`: those
