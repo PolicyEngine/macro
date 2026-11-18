@@ -948,16 +948,16 @@
 .doc main:has(> .hero.mh) .scorecard table { table-layout: fixed; width: 100%; }
 .doc main:has(> .hero.mh) .scorecard th, .doc main:has(> .hero.mh) .scorecard td { overflow-wrap: normal; word-break: normal; hyphens: none; vertical-align: top; }
 .doc main:has(> .hero.mh) .scorecard thead th:nth-child(1) { width: 24%; }
-.doc main:has(> .hero.mh) .scorecard thead th:nth-child(2) { width: 38%; }
+.doc main:has(> .hero.mh) .scorecard thead th:nth-child(2) { width: 35%; }
 .doc main:has(> .hero.mh) .scorecard thead th:nth-child(3) { width: 22%; }
-.doc main:has(> .hero.mh) .scorecard thead th:nth-child(4) { width: 16%; }
+.doc main:has(> .hero.mh) .scorecard thead th:nth-child(4) { width: 19%; }
 .doc main:has(> .hero.mh) .scorecard .sc-num { white-space: normal; }
-/* nov18-b-svar: the verdict column is sized to its widest chip ("by construction") so the table never overflows its wrapper by a few px,
-   which made reveal.js add .is-scroll and force the first column onto one line over the next column; the row label always wraps here */
-.doc main:has(> .hero.mh) .scorecard thead th:nth-child(2) { width: auto; }
-.doc main:has(> .hero.mh) .scorecard thead th:nth-child(4) { width: 158px; }
-.doc main:has(> .hero.mh) .scorecard.is-scroll > table tbody tr > :first-child { white-space: normal; }
-/* nov18-b-svar: a list inside a table cell keeps the cell's type size (was 14px/1.7 beside 13px/1.5 plain cells in the same table) */
+/* 18 Nov review: the verdict column (was 16%) was narrower than the "by construction" chip, so the wrapper
+   overflowed by 4px, reveal.js flagged it .is-scroll, and the shared wide-table rule (style.css, "first column
+   stays one line") painted long check labels over the Against column. The column now fits the chip (19%, taken
+   from Against), and a scorecard's first column always wraps, since its columns are fixed. */
+.doc main:has(> .hero.mh) .scorecard.is-scroll > table tbody tr > :first-child { white-space: normal; min-width: 0; }
+/* 18 Nov review: a list inside a table cell keeps the cell's type size (was 14px/1.7 beside 13px/1.5 plain cells in the same table) */
 .doc main:has(> .hero.mh) td li { font-size: inherit; line-height: inherit; }
 /* below 900px every scorecard row is a compact card (also between 640 and 900, where the shared stack does not apply) */
 @media (max-width: 900px) {
