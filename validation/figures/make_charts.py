@@ -626,7 +626,11 @@ def chart_obr_outturn():
             h = v * scale
             y = base_y - h
             out.append(f'<rect class="{cls}" x="{n(x)}" y="{n(y)}" width="{bar_w:g}" height="{n(h)}"/>')
-            out.append(f'<text class="vc-val vc-minor" x="{n(x + bar_w / 2)}" y="{n(min(y, base_y - o * scale) - 6)}" '
+            # A value sits on its own bar. It is lifted over the outturn rule
+            # only where the rule would otherwise run through the label.
+            yo_rule = base_y - o * scale
+            lab_y = yo_rule if y - 24 <= yo_rule <= y else y
+            out.append(f'<text class="vc-val vc-minor" x="{n(x + bar_w / 2)}" y="{n(lab_y - 6)}" '
                        f'text-anchor="middle">{v:.2f}</text>')
         yo = base_y - o * scale
         half = bar_w + bar_gap / 2 + 10

@@ -650,6 +650,8 @@
 }
 .doc main:has(> .hero.mh) .limits > details.expander[open] { background: var(--surface-card); grid-column: 1 / -1; }
 .doc main:has(> .hero.mh) .limits > details.expander[open] > :not(summary) { padding: 0 20px 18px 64px; font-size: 15px; }
+/* 18 Nov review: on a phone the 64px indent left a 225px text column inside an open limit */
+@media (max-width: 640px) { .doc main:has(> .hero.mh) .limits > details.expander[open] > :not(summary) { padding-left: 20px; } }
 @media (max-width: 767px) { .doc main:has(> .hero.mh) .limits { grid-template-columns: minmax(0, 1fr); } }
 .doc main:has(> .hero.mh) .dial-cards { gap: 20px; }
 .doc main:has(> .hero.mh) .dial-cards > * {
@@ -979,7 +981,9 @@
 .doc main:has(> .hero.mh) .codeblock .cm { color: var(--text-muted); }
 .doc main:has(> .hero.mh) .codeblock .cb-copy { color: var(--text-body); border-color: var(--hairline-strong); }
 .doc main:has(> .hero.mh) .codeblock pre { overflow-x: auto; }
-@media (max-width: 640px) { .doc main:has(> .hero.mh) .codeblock:has(> .cb-copy) { padding-top: 36px; padding-right: 12px; } }
+/* 18 Nov review: on a phone style.css already puts the copy button in the flow above the code (static, order -1), so the 36px
+   reserved for an absolute button doubled the gap, and the 24px block padding plus the pre's 16px left 40px of indent */
+@media (max-width: 640px) { .doc main:has(> .hero.mh) .codeblock:has(> .cb-copy) { padding-top: 0; padding-right: 12px; padding-left: 8px; } }
 /* run tabs: three equal columns, never 2 + 1 */
 .doc main:has(> .hero.mh) .run-switch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: min(100%, 420px); }
 /* notes: only a note attached under a card is a strip; a free note is plain muted text, full width */
