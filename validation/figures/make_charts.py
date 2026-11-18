@@ -1220,19 +1220,27 @@ def chart_hank_targets():
     # readable at 375 px (it scrolls inside its own wrapper) where an SVG
     # table's text shrank to 5 px. The description the SVG carried for screen
     # readers is the table itself now, plus the notes under it.
+    # Four columns, not five: how each parameter is solved sits under its name,
+    # and the <col> widths give the three number columns room at 375 px, where
+    # the table is laid out fixed and five equal columns broke words mid-letter.
     body = []
     for r in rows:
-        warn = ' class="vc-warn"' if r["tag"] == "unresolved" else ""
+        sym, _, desc = r["name"].partition(" (")
+        how = r["tag"] if r["tag"] in ("unresolved", "after × μw²") else f'solved {r["tag"]}'
+        how = f'<span class="vc-warn">{how}</span>' if r["tag"] == "unresolved" else how
         body.append(
-            f'<tr><th scope="row">{esc(r["name"])}</th><td{warn}>{r["tag"]}</td>'
+            f'<tr><th scope="row">{esc(sym)}<small style="display:block;font-weight:400;color:var(--text-muted)">'
+            f'{esc(desc.rstrip(")"))}, {how}</small></th>'
             f'<td class="num">{r["pub"]:g}</td><td class="num">{r["ours"]:.7g}</td>'
             f'<td class="num">{abs(r["ours"] - r["pub"]):.1e}</td></tr>')
     parts = [
         '<div class="vc-fig vc-tablefig" data-chart="hank-targets">',
         '<div class="table-scroll"><table class="vc-table">',
         "<caption>US HANK: internally solved parameters vs <a href=\"https://doi.org/10.3982/ECTA17434\">Auclert et al. (2021)</a> Table B.III</caption>",
-        '<thead><tr><th scope="col">parameter</th><th scope="col">solved</th>'
-        '<th scope="col" class="num">published</th><th scope="col" class="num">ours</th>'
+        '<colgroup><col style="width:30%" /><col style="width:18%" />'
+        '<col style="width:30%" /><col style="width:22%" /></colgroup>',
+        '<thead><tr><th scope="col">parameter</th>'
+        '<th scope="col" class="num">paper</th><th scope="col" class="num">ours</th>'
         '<th scope="col" class="num">|diff|</th></tr></thead>',
         "<tbody>", *body, "</tbody></table></div>",
         (f'<p class="vc-notes">{word(agree).capitalize()} of seven agree to the last '
