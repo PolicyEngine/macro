@@ -472,15 +472,16 @@ def body(data: dict) -> str:
     <div class="band-head" data-icon="list"><h2>Pick a question</h2>
       <p class="section-intro">Models are in the hub order, not ranked. The sourced benchmark sits in the first row; each model row gives its peak effects and a verdict, and Details holds the run, full units and caveats.</p></div>
     <div class="router-row cmp-chips" role="group" aria-label="Question">{chips}</div>
-    <div class="callout cmp-pins"><p><strong>Where each row was run.</strong> The battery was first put on 6 Nov 2026; each row&rsquo;s Details give its exact call and commit.</p>
+    <details class="about cmp-howto"><summary>How to read the verdicts</summary>
+      <p>Each verdict starts with one of six words: plausible, off, questionable, unresolved, not tested or no instrument; some add a qualifier (such as &ldquo;off, sign right&rdquo;), and each carries its reason and the open issue. These words grade one experiment; each model&rsquo;s overall standing uses the <a class="gloss-link" href="/glossary#verification-class">status vocabulary</a> on its model card. Results file version {esc(data["version"])}; <a href="{REPO_BLOB}/run_battery.py">how it is checked and regenerated</a>.</p></details>
+    <details class="about cmp-howto"><summary>Where and when each row was run</summary>
+      <div class="cmp-pins"><p>The battery was first put on 6 Nov 2026; each row&rsquo;s Details give its exact call and commit.</p>
       <ul>
         <li><strong>OBR emulator:</strong> rate, spending and tax rows run locally on 16 Nov 2026 at <code>2965e82d</code> (October 2026 EFO), the pin before the site&rsquo;s current <code>0fe04c9</code>; every quarter converges. The energy row is an earlier committed output.</li>
         <li><strong>FRB/US:</strong> the +100bp, spending, tax and energy rows re-run on 18 Nov 2026 at the current pin <code>162cfe6</code> (October 2026 LONGBASE), with shocks from 2026Q3, the first quarter after LONGBASE history; identical to the <code>846eeb5c</code> runs of 16 Nov, which the &minus;100bp and +25bp rows still are.</li>
         <li><strong>US HANK:</strong> the +100bp and spending rows re-run on 18 Nov 2026 at the current pin <code>58353e5</code>, now storing the policy-rate path; output and inflation are identical to the hosted runs of 6 Nov, which the &minus;100bp and +25bp rows still are.</li>
         <li><strong>BoE SVAR and DEFINE-UK:</strong> committed model-repo outputs, with no solve; the SVAR medians come from its fast test fixture (see its Details).</li>
-      </ul></div>
-    <details class="about cmp-howto"><summary>How to read the verdicts</summary>
-      <p>Each verdict starts with one of six words: plausible, off, questionable, unresolved, not tested or no instrument; some add a qualifier (such as &ldquo;off, sign right&rdquo;), and each carries its reason and the open issue. These words grade one experiment; each model&rsquo;s overall standing uses the <a class="gloss-link" href="/glossary#verification-class">status vocabulary</a> on its model card. Results file version {esc(data["version"])}; <a href="{REPO_BLOB}/run_battery.py">how it is checked and regenerated</a>.</p></details>
+      </ul></div></details>
   </section>
 {sections}
 </main>"""
