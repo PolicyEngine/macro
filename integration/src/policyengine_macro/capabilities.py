@@ -196,7 +196,7 @@ MODELS = {
             "reform scoring (no statute mapping; score_reform refuses it)",
             "forecasts or baseline levels (deltas only — the baseline is not validated against outturns)",
         ],
-        "horizon": "annual scenario deltas, 2023-2037",
+        "horizon": "annual scenario deltas, 2027-2040 (from the policy start)",
         "access": [
             "local CLI scenarios", "Python package",
             "microsim incidence overlay (define_scenario_incidence, "

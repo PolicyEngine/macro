@@ -43,7 +43,7 @@ MODELS = {
     "frb-us": ("Fed FRB/US, rebuilt", "US", ("Replicates the Fed&rsquo;s solver", "replicates"), "hosted", "Quarterly"),
     "us-hank": ("Two-asset HANK", "US", ("Partial replication", "partial-replication"), "hosted", "Quarterly IRFs"),
     "olg": ("OG-UK overlapping generations", "UK", ("Calibrated", "calibrated-counterfactual"), "local", "Long-run steady state"),
-    "define": ("DEFINE-UK ecological stock-flow", "UK", ("Partial replication", "partial-replication"), "local", "Annual, 2023&ndash;2040; default to 2037"),
+    "define": ("DEFINE-UK ecological stock-flow", "UK", ("Partial replication", "partial-replication"), "local", "Annual, 2027&ndash;2040, from the policy start"),
 }
 
 # page -> model key; the two reports keep their own kind line
