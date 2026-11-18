@@ -1221,7 +1221,8 @@ def jobs_chart(facts: dict) -> str:
     rid = esc(round_file["round_id"])
     source = (f'BoE SVAR unemployment satellite round {rid}, '
               f'<a class="mono" href="/forecasts/rounds/{rid}/okun-unemployment.json">'
-              "okun-unemployment.json</a>; bands raw, GDP-forecast uncertainty only")
+              "okun-unemployment.json</a>; bands carry GDP-forecast uncertainty only and are too narrow "
+              '(<a href="/svar/validation#rolling">measured coverage</a>)')
     return path_chart(
         "topic-unemployment-path", "unemployment", "UK unemployment rate", "%",
         rows, round_file["round_id"],

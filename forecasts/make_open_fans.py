@@ -119,8 +119,8 @@ def render() -> str:
         [
             '      <p class="chart-intro">Unemployment, satellite round '
             f"{src.parent.name}: no official path to overlay. Bands carry GDP "
-            "uncertainty only; in a backtest, bands built this way held 22–48% of "
-            "outturns at 68% and 30–61% at 90% "
+            "uncertainty only; in a backtest excluding Covid quarters, bands built "
+            "this way held 22–48% of outturns at 68% and 30–61% at 90% "
             '(<a href="/svar/validation#rolling">coverage</a>).</p>',
             '      <figure class="vchart-figure">',
             chartkit.attach_plot(
