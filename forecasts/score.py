@@ -645,11 +645,11 @@ VS_OFFICIAL_SPECS = {
             "<code>papers/obr-macro/figures/efo_march_2026_cpi.csv</code>"
         ),
         "intro": (
-            "Same round, CPI: the model sits close to the EFO through 2027Q3, "
-            "then stays near 3% as the EFO returns towards 2%. The model has a "
-            "unit root and no inflation anchor, so medium-term CPI extends recent "
-            "inflation rather than returning to 2% "
-            '(<a href="/svar/validation#no-anchor">limits</a>).'
+            "Same round, CPI: the model tracks the EFO through 2027Q3, then "
+            "stays near 3% while the EFO returns towards 2%. Nothing in the model "
+            'pulls inflation back to target (a <a href="/glossary#unit-root">unit '
+            "root</a>, no inflation anchor), so its later quarters extend recent "
+            'inflation (<a href="/svar/validation#no-anchor">limits</a>).'
         ),
     },
 }
@@ -1101,8 +1101,9 @@ def render_rounds(card: dict) -> str:
         chips = []
         if i == 0:
             chips.append('<a class="fc-chip fc-chip-retro" href="#retro" title="Archived retroactively; see the note below">Retroactive</a>')
-        chips.append(f'<span class="fc-chip fc-chip-scored">Scored {n}</span>' if n
-                     else '<span class="fc-chip fc-chip-open">Open</span>')
+        # The scored count lives once, in the card's own figures below.
+        if not n:
+            chips.append('<span class="fc-chip fc-chip-open">Open</span>')
         items.append(
             f'        <li class="fc-node {state}{flag}">{gap}'
             '<span class="fc-dot" aria-hidden="true"></span>'
@@ -1315,7 +1316,7 @@ def render_results(card: dict) -> str:
                 cells.append(
                     f'<td class="num"{tip}>{bv:.2f}{bar(bv)}'
                     f'<span class="sb-sub">{b["value"]:.2f}%</span></td>'
-                    if b else '<td class="num">—</td>'
+                    if b else '<td class="num sb-na">—</td>'
                 )
         body.append("          <tr>" + "".join(cells) + "</tr>")
     body += ["          </tbody>", "        </table>", "      </div>"]
