@@ -234,11 +234,19 @@ def line_chart(
         target=2.0 if title == "UK CPI inflation" else None, target_label="2% target",
         x_span=(first["period"], last["period"]),
     )
-    # Twenty monthly points span under two years, where chartkit ticks every
-    # quarter ("2025Q1"): seven labels do not fit a 300px card and ran into
-    # each other. Every second quarter does.
-    if spec["layout"]["xaxis"].get("dtick") == "M3":
-        spec["layout"]["xaxis"]["dtick"] = "M6"
+    # These are small multiples: three to a row from 640px, where a card's plot
+    # is about 140px wide. chartkit's default ticks (every year, or every
+    # quarter for a window under two years) put five to seven labels there and
+    # they ran into each other, so the hub charts tick every second year, or
+    # once a year for the short monthly windows.
+    xaxis = spec["layout"]["xaxis"]
+    xaxis["dtick"] = "M12" if xaxis.get("dtick") == "M3" else "M24"
+    # The "2% target" label hangs under its rule when the whole window is at
+    # or above it: above the rule it sat on the line where CPI dipped to 2%.
+    if window_low >= 2.0:
+        for note in spec["layout"]["annotations"]:
+            if note.get("text") == "2% target":
+                note["yanchor"] = "top"
     fig = chartkit.attach_plot(
         chartkit.figure(svg, source=f'<a href="{url}">{source} →</a>', source_short=source.split(' · ')[0]),
         spec)

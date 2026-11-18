@@ -1342,6 +1342,16 @@ def jobs_model() -> str:
         if satellite_has_no_surface()
         else "The satellite is exposed in the run surface below."
     )
+    # The one visible verdict line (DESIGN.md §1.2), as on the growth and
+    # inflation pages. It restates two of the round file's own caveats, so it
+    # is printed only while the round still states them.
+    stated = " ".join(round_file["caveats"])
+    if "GDP-forecast uncertainty only" not in stated or "capped at 4 quarters" not in stated:
+        raise RuntimeError(
+            f"{UNEMPLOYMENT_ROUND.name}: the round no longer states the two "
+            "caveats the jobs page's verdict line summarises; rewrite the line"
+        )
+    verdict = "They carry GDP-forecast uncertainty only, and the forecast stops at four quarters."
     caveats = limits_list([esc(caveat) for caveat in round_file["caveats"]] + [
         registry,
         "Vacancies and average weekly earnings have no model view: they are "
@@ -1364,6 +1374,10 @@ def jobs_model() -> str:
       <figure class="vchart-figure">
 {chartkit.attach_table(jobs_chart(facts), jobs_table(facts))}
       </figure>
+      <p class="callout"><span><strong>Bands too narrow.</strong>
+        {verdict}
+        <a href="/svar/validation#rolling">Measured coverage →</a></span>
+      </p>
       <details class="about tg-limits">
         <summary>Its limits</summary>
 {caveats}
@@ -2196,14 +2210,17 @@ def us_path_chart(chart_id: str, name: str, unit: str,
     if baseline:
         legend.append(("ln-s2", LONGBASE_LABEL))
 
-    def label_position(obs: list[dict]) -> str:
-        """Where the last point's value label touches no line.
+    def label_position(obs: list[dict]) -> str | None:
+        """Where the last point's value label touches no line, or None.
 
         The baseline is not joined to the outturn, so it can pass on either
         side of the last point; a fixed corner put the label on a line on two
         of the three charts. Each candidate corner is scored by how much of
         any drawn line falls inside the label's box, at a phone and a desktop
-        plot width, and the clearest wins (ties go to the first listed).
+        plot width, and the clearest wins (ties go to the first listed). If
+        every corner touches a line at one of the two widths the point is
+        drawn without a label: its value is the stat tile above the chart and
+        the hover, and a label run through by a line is worse than none.
         """
         polys = [[(month_index(o["period"]), o["value"]) for o in series] for _, _, series in lines]
         if baseline:
@@ -2236,7 +2253,7 @@ def us_path_chart(chart_id: str, name: str, unit: str,
                                 hits += 1
             if best is None or hits < best[0]:
                 best = (hits, position)
-        return best[1]
+        return best[1] if best[0] == 0 else None
     # Interactive version: the same lines, gaps kept as breaks, the LONGBASE
     # path dashed with its quarter dots.
     suffix = "%" if "%" in unit else ""
@@ -2253,8 +2270,13 @@ def us_path_chart(chart_id: str, name: str, unit: str,
         dp = 2 if "rates" in chart_id else 1
         traces.append(chartkit.plot_line(pts, name_, color, width=2.25 if cls == "vc-out-line" else 1.75,
                                          unit=suffix, digits=dp))
-        traces.append(chartkit.plot_last(obs[-1]["period"], obs[-1]["value"], color, unit=suffix, digits=dp,
-                                         position=label_position(obs)))
+        where = label_position(obs)
+        last = chartkit.plot_last(obs[-1]["period"], obs[-1]["value"], color, unit=suffix, digits=dp,
+                                  position=where or "middle right")
+        if where is None:
+            last["mode"] = "markers"
+            del last["text"], last["textposition"], last["textfont"]
+        traces.append(last)
     if baseline:
         base = chartkit.plot_line([(b["period"], b["value"]) for b in baseline], "LONGBASE baseline",
                                   "var(--series-official)", dash="dash", width=2, unit=suffix, digits=2)
@@ -2381,8 +2403,8 @@ def us_model_items(extra: list[tuple[str, str]] | None = None) -> str:
     hank = MODELS["us-hank"]["quality"]["predictive_validation"]["level"]
     return icon_items([
         ("x-circle", "<strong>No US forecaster in the suite.</strong>"),
-        ("building", f'<a href="/frb-us">FRB/US</a>: shock responses under a declared policy rule · {esc(level_label(frbus))}'),
-        ("users", f'<a href="/us-hank">US HANK</a>: shock responses around a steady state · {esc(level_label(hank))}'),
+        ("building", f'<a href="/frb-us">FRB/US</a>: shock responses under a declared policy rule · predictive validation {registry_terms([frbus])}'),
+        ("users", f'<a href="/us-hank">US HANK</a>: shock responses around a steady state · predictive validation {registry_terms([hank])}'),
     ] + (extra or []))
 
 
