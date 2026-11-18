@@ -117,13 +117,18 @@ def render() -> str:
 
     return "\n".join(
         [
-            '      <p class="chart-intro">Unemployment, satellite round '
-            f"{src.parent.name}: no official path to overlay. Bands carry GDP "
-            "uncertainty only; in a backtest excluding Covid quarters, bands built "
-            "this way held 22–48% of outturns at 68% and 30–61% at 90% "
-            '(<a href="/svar/validation#rolling">coverage</a>).</p>',
+            # The home of the measured coverage figures on this page: the
+            # limits list links here instead of restating them.
+            '      <p class="chart-intro" id="unemployment-bands">Unemployment, satellite round '
+            f"{src.parent.name}; no official path to overlay. Bands carry GDP "
+            "uncertainty only and run narrow: in a "
+            '<a href="/svar/validation#rolling">backtest</a> excluding Covid quarters, '
+            "68% bands built this way held 22–48% of outturns and 90% bands 30–61% "
+            '(<a href="/glossary#coverage">coverage</a>: the share inside a band).</p>',
             '      <figure class="vchart-figure">',
-            chartkit.attach_plot(
+            # Same footer as the GDP and CPI fans: one "Details" disclosure
+            # holding the archived numbers and the full source line.
+            chartkit.attach_table(chartkit.attach_plot(
             chartkit.figure("\n".join([
                 f'<svg class="vchart" data-chart="{CHART_ID}" '
                 f'viewBox="{left - 4} {top - 4} {plot_w + 8} {plot_h + 8}" role="img" '
@@ -155,9 +160,36 @@ def render() -> str:
                                   dots_name=("ONS outturn (published after the round)"
                                              if all(seen[rows[i]["period"]][0] > src.parent.name for i, _ in dots)
                                              else "ONS outturn"))),
+                _table(src, rows)),
             "      </figure>",
         ]
     )
+
+
+def _table(src: Path, rows: list[dict]) -> str:
+    """The fan's own numbers, quarter by quarter, exactly as archived."""
+
+    def pc(v: float) -> str:
+        return f"{v:.2f}%"
+
+    body = "\n".join(
+        "          <tr>"
+        f'<th scope="row">{r["period"]}</th>'
+        f'<td class="num">{pc(r["median"])}</td>'
+        f'<td class="num">{pc(r["lo68"])}–{pc(r["hi68"])}</td>'
+        f'<td class="num">{pc(r["lo90"])}–{pc(r["hi90"])}</td>'
+        "</tr>"
+        for r in rows
+    )
+    return f"""      <div class="table-scroll">
+        <table>
+          <caption>BoE SVAR unemployment satellite, round {src.parent.name}: UK unemployment rate, %. Bands as archived (GDP uncertainty only).</caption>
+          <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68% band</th><th scope="col">90% band</th></tr></thead>
+          <tbody>
+{body}
+          </tbody>
+        </table>
+      </div>"""
 
 
 def render_page(html: str) -> str:
