@@ -204,7 +204,7 @@ def chart_obr_anchored():
     W, H = 760, 326
     x0, x1 = 58.0, 724.0
     # Frame runs -0.3pp to +1.5pp: on the October 2026 vintage consumption
-    # drifts above the EFO to about +1.3% by 2027Q4.
+    # drifts above the EFO to about +0.7% by 2027Q4 (+1.3% before obr #74).
     zero_y = 244.0
     per_unit = 46.0 / 0.3          # px per percentage point
     step = (x1 - x0) / (len(quarters) - 1)
