@@ -410,9 +410,9 @@ def test_cli_score_still_rejects_a_genuinely_unknown_model(runner):
 def test_obr_shock_carries_the_lever_caveat_in_the_payload():
     """None of the three OBR levers reads straight, and the payload says so.
 
-    Measured in the model repo: CGIPS moves total fixed investment by exactly
-    zero in all twelve quarters (business investment moves only as an
-    accounting offset), and
+    Measured in the model repo: under the default closure CGIPS moves total
+    fixed investment by exactly zero in all twelve quarters (business
+    investment moves only as an accounting offset), and
     TCPRO's response converges only slowly (a 12-quarter run captures ~40%
     of the plateau, since the 2026-08 log-space anchor fix gave it a steady
     state at all). A docstring does not reach an MCP caller reading a JSON
@@ -421,9 +421,9 @@ def test_obr_shock_carries_the_lever_caveat_in_the_payload():
     CGG carries one too, as of 2026-08. It was previously exempt because the
     "~1 by construction" reading was documented on the website -- but the
     website is exactly what an MCP caller never sees, which is the reason
-    the other two levers carry caveats at all. Measured at obr 2965e82d
-    (October 2026 EFO): +1250/qtr gives GDP +1.267bn rising to +1.310bn, a multiplier of 1.01
-    rising to 1.05, against the OBR's published 0.6 (1.0000 and flat under
+    the other two levers carry caveats at all. Measured at obr 0e44ec8
+    (October 2026 EFO): +1250/qtr gives GDP +1.266bn rising to +1.300bn, a multiplier of 1.01
+    rising to 1.04, against the OBR's published 0.6 (1.0000 and flat under
     the old published closure). That is the largest published-vs-modelled gap of any
     lever here, so it is the last one that should have shipped silent.
     """
@@ -431,7 +431,11 @@ def test_obr_shock_carries_the_lever_caveat_in_the_payload():
 
     levers = {v["var"]: v for v in core.obr_list_variables()}
     assert levers["TCPRO"]["caveat"], "the slow-converging lever declares no caveat"
-    assert levers["CGIPS"]["caveat"], "the dead lever declares no caveat"
+    assert levers["CGIPS"]["caveat"], "the non-transmitting lever declares no caveat"
+    assert "default closure" in levers["CGIPS"]["caveat"]
+    assert "investment_closure=True" in levers["CGIPS"]["caveat"]
+    assert "price_passthrough=True" in levers["VREC"]["caveat"]
+    assert "off by default" in levers["VREC"]["caveat"]
     assert levers["CGG"]["caveat"], "the identity lever declares no caveat"
     assert "1.01" in levers["CGG"]["caveat"], "CGG caveat omits the measured multiplier"
     assert "0.6" in levers["CGG"]["caveat"], "CGG caveat omits the OBR published figure"
@@ -479,6 +483,151 @@ def test_obr_shock_carries_the_household_ratio_on_both_bases(monkeypatch):
     assert out["gdp_per_revenue_real"] == [0.0929, 0.131]
     assert "current-price" in out["gdp_per_revenue_basis_note"]
     assert "current_price" in out["caveat"]
+
+
+def _obr_frame(attrs=None):
+    import pandas as pd
+
+    df = pd.DataFrame({
+        "period": ["2025Q1", "2025Q2"], "delta_gdp_bn": [3.075, 3.01],
+        "pct_gdp": [0.437, 0.43], "delta_cons_m": [0.0, -1.0],
+        "delta_if_m": [3075.4, 3010.0],
+    })
+    df.attrs.update(solver_converged=True, solver_nonconverged_periods=[])
+    df.attrs.update(attrs or {})
+    return df
+
+
+def test_obr_shock_default_call_forwards_no_overlay(monkeypatch):
+    """The opt-in routes are opt-in: a default run makes exactly the call it
+    made before price_passthrough existed, and the adapter adds no overlay
+    label of its own (the model's attrs, absent from this stub, are the only
+    source of mechanical_passthrough)."""
+    from policyengine_macro import core
+
+    seen = []
+
+    def fake_run_reform(name, var, shock, start, end, periods, investment_closure):
+        seen.append(investment_closure)
+        return _obr_frame()
+
+    monkeypatch.setattr(core, "_import_obr", lambda: fake_run_reform)
+    monkeypatch.setattr(core, "_obr_window_end", lambda periods: "2025Q2")
+    for var in ("CGG", "CGIPS", "VREC"):
+        out = core.obr_shock(var, 1000.0, periods=2)
+        assert "price_passthrough" not in out
+        assert "mechanical_passthrough" not in out
+    assert seen == [False, False, False], "an opt-in route was on by default"
+    assert "does not transmit" in core.obr_shock("CGIPS", 3000.0, periods=2)["caveat"]
+
+
+def test_obr_shock_cgips_investment_closure_is_labelled_passthrough(monkeypatch):
+    """obr #70: under the opt-in investment closure government investment
+    reaches GDP as an identity. The payload must not carry the default
+    "does not transmit" caveat, and must carry the model's own label."""
+    from policyengine_macro import core
+
+    seen = []
+
+    def fake_run_reform(**kw):
+        seen.append(kw)
+        return _obr_frame({
+            "mechanical_passthrough": True,
+            "transmission_note": "Investment closure: identity passthrough.",
+            "investment_closure_plateau_fraction": None,
+        })
+
+    monkeypatch.setattr(core, "_import_obr", lambda: fake_run_reform)
+    monkeypatch.setattr(core, "_obr_window_end", lambda periods: "2025Q2")
+    out = core.obr_shock("CGIPS", 3000.0, periods=2, investment_closure=True)
+    assert seen[0]["investment_closure"] is True
+    assert "price_passthrough" not in seen[0]
+    assert out["investment_closure"] is True
+    assert out["mechanical_passthrough"] is True
+    assert "identity passthrough" in out["transmission_note"]
+    assert "identity passthrough" in out["caveat"]
+    assert "not a validated" in out["caveat"]
+    assert "does not transmit" not in out["caveat"]
+    assert out["investment_closure_plateau_fraction"] is None
+
+
+def test_obr_shock_price_passthrough_is_forwarded_and_labelled(monkeypatch):
+    """obr #60/#70: the VAT price overlay is forwarded only when asked for,
+    and the payload carries the model's judgement-overlay note and CPI shift
+    rather than the default run's "no price channel" note."""
+    from policyengine_macro import core
+
+    seen = []
+
+    def fake_run_reform(**kw):
+        seen.append(kw)
+        return _obr_frame({
+            "transmission_note": "CPI is exogenous, so there is no price channel.",
+            "price_passthrough_note": "Judgement overlay, not the shipped listing.",
+            "price_passthrough_detail": {"cpi_pct_delta": [0.4078, 0.3889, 0.3817]},
+        })
+
+    monkeypatch.setattr(core, "_import_obr", lambda: fake_run_reform)
+    monkeypatch.setattr(core, "_obr_window_end", lambda periods: "2025Q2")
+    out = core.obr_shock("VREC", 2200.0, periods=2, price_passthrough=True)
+    assert seen[0]["price_passthrough"] is True
+    assert seen[0]["investment_closure"] is False
+    assert out["price_passthrough"] is True
+    assert "Judgement overlay" in out["price_passthrough_note"]
+    assert out["cpi_pct_delta"] == [0.4078, 0.3889]
+    assert "transmission_note" not in out
+    assert "off by default" in out["caveat"]
+
+
+@pytest.mark.parametrize(
+    ("var", "kwargs", "match"),
+    [
+        ("CGG", {}, "indirect-tax shock"),
+        ("HHDI_ADDFACTOR", {}, "indirect-tax shock"),
+        ("VREC", {"investment_closure": True}, "demand closure only"),
+    ],
+)
+def test_obr_shock_refuses_a_misapplied_price_passthrough(monkeypatch, var, kwargs, match):
+    """The model defines the overlay only for VREC/TXFUEL under the demand
+    closure; the adapter refuses anything else before importing the model."""
+    from policyengine_macro import core
+
+    def no_import():
+        raise AssertionError("the model was imported for a refused call")
+
+    monkeypatch.setattr(core, "_import_obr", no_import)
+    with pytest.raises(ValueError, match=match):
+        core.obr_shock(var, 1000.0, periods=2, price_passthrough=True, **kwargs)
+
+
+def test_price_passthrough_reaches_core_from_the_cli_and_mcp(runner, monkeypatch):
+    """Off unless asked for on both surfaces, and forwarded when asked."""
+    seen = []
+
+    def fake_obr_shock(**kwargs):
+        seen.append(kwargs["price_passthrough"])
+        return {"name": "x", "var": "VREC", "shock": 2200.0, "periods": 12,
+                "investment_closure": False, "results": [],
+                "cumulative_delta_gdp_bn_over_shock_periods": 0.0,
+                "peak_pct_gdp": 0.0, "peak_period": "2025Q1"}
+
+    monkeypatch.setattr(core, "obr_shock", fake_obr_shock)
+    base = ["obr-shock", "--var", "VREC", "--shock", "2200", "--json"]
+    assert runner.invoke(main, base).exit_code == 0
+    assert runner.invoke(main, base + ["--price-passthrough"]).exit_code == 0
+    assert seen == [False, True]
+    schema = _registered_tools()["obr_shock"].inputSchema["properties"]
+    assert schema["price_passthrough"]["default"] is False
+
+
+def test_cli_refuses_a_misapplied_price_passthrough_cleanly(runner):
+    """Refused before the model import, so it is fast and needs no stub."""
+    res = runner.invoke(
+        main, ["obr-shock", "--var", "CGG", "--shock", "1", "--price-passthrough"]
+    )
+    assert res.exit_code != 0
+    assert "Traceback" not in res.output
+    assert "indirect-tax shock" in res.output
 
 
 def test_cli_help_header_names_every_subcommand():

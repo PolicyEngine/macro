@@ -215,6 +215,7 @@ def obr_shock(
     periods: Annotated[int, Field(ge=1, le=25)] = 12,
     name: str | None = None,
     investment_closure: bool | None = None,
+    price_passthrough: bool = False,
 ) -> dict:
     """Shock one OBR model variable directly, in model units (the escape
     hatch under score_reform — no PolicyEngine reform translation).
@@ -226,13 +227,14 @@ def obr_shock(
         var: Policy variable to shock. Common choices (see list_reform_variables):
             R (Bank Rate), HHDI_ADDFACTOR (household income, the costing
             channel score_reform uses), CGG (real government consumption),
-            TCPRO (corporation tax main rate), CGIPS (nominal central
-            government investment).
+            TCPRO (corporation tax main rate), VREC (VAT receipts), CGIPS
+            (nominal central government investment).
         shock: Shock size, applied each quarter. UNITS DEPEND ON THE VARIABLE:
             R is in percentage points (1.0 = +1pp); HHDI_ADDFACTOR is £ million
             of revenue raised per quarter (positive = household income falls;
             1637.5 = £6.55bn/year); CGG and CGIPS are in £ million per quarter
-            (e.g. 1250 = £5bn/year); TCPRO is a rate change in decimal (e.g.
+            (e.g. 1250 = £5bn/year); VREC is £ million of receipts per quarter
+            (2200 = a 1pp VAT rise); TCPRO is a rate change in decimal (e.g.
             -0.05 = 5 percentage point cut).
         periods: Number of quarters the shock is applied from 2025Q1 (1-25;
             default 12 = 3 years). The solve runs to 2027Q4 or to the last
@@ -241,19 +243,35 @@ def obr_shock(
         investment_closure: Omit to use the safe per-variable default (True
             for TCPRO, False otherwise). It activates the cost-of-capital
             investment channel; a TCPRO shock without it solves to misleading
-            all-zero deltas, which is why the default is per-variable.
+            all-zero deltas, which is why the default is per-variable. For
+            CGIPS it is an opt-in: by default government investment does not
+            reach GDP; with True the listing's commented-out investment
+            identity is live and GDP moves about one for one with real
+            government investment. That is identity passthrough (no taper, no
+            crowding-out), not a validated capital-spending multiplier.
+        price_passthrough: Opt-in, default False, for an indirect-tax shock
+            only (VREC or TXFUEL) and not with investment_closure. By default
+            CPI is fixed and VAT barely reaches GDP; with True the tax is
+            passed into CPI through the listing's own cost-push weights with
+            the retail markup held. A labelled judgement overlay, not the
+            shipped listing; the result carries price_passthrough_note and
+            cpi_pct_delta. It adds three re-solves, so run it through
+            start_job on the hosted server.
 
     Returns per-period rows (period, delta_gdp_bn, pct_gdp, delta_cons_m,
     delta_if_m), the cumulative GDP effect in £bn over the shocked periods, and
     the peak percent-of-GDP effect, plus a caveat for levers whose channel is
     partial and, for HHDI_ADDFACTOR, the GDP-per-pound ratio on both bases
     (gdp_per_revenue_current_price is the one to compare with the OBR's 0.3).
+    Identity-passthrough and overlay runs are labelled in the payload
+    (mechanical_passthrough, transmission_note, price_passthrough_note).
     Takes about one to two minutes (two solves); on a cold hosted server use
     start_job.
     """
     return core.obr_shock(
         var=var, shock=shock, periods=periods, name=name,
         investment_closure=investment_closure,
+        price_passthrough=price_passthrough,
     )
 
 
@@ -382,7 +400,8 @@ def hank_shock(
     Keynesian, solved in the sequence space) and return the impulse responses.
 
     HONEST FRAMING: a partial replication (six of seven solved steady-state
-    parameters match; IRF magnitudes are not validated) scoring STYLIZED
+    parameters match; one published IRF magnitude is matched within about
+    2%, the others are not validated) scoring STYLIZED
     shocks. It is NOT a forecaster and does NOT score
     detailed tax reforms (score_reform rejects model='hank'); distributional
     outputs are first-order approximations. Responses are linear deviations
@@ -396,8 +415,11 @@ def hank_shock(
             such instrument exists in the model.
         size: Impact size of the shock, in model units — UNITS DIFFER PER
             KIND: monetary is a level change in the intercept of the
-            QUARTERLY nominal Taylor rule; the policy rate itself moves less,
-            about 13bp on impact for -0.0025 (us-hank-model #18). -0.0025 is
+            QUARTERLY nominal Taylor rule, not in the policy rate: the rule
+            also responds to the inflation the shock causes, so the quarterly
+            policy rate falls only about 13bp on impact for -0.0025 at
+            persistence 0.61 (us-hank-model #18; not pinned at other
+            persistences, including the default 0.9). -0.0025 is
             a 25bp-per-quarter intercept shift, about 100bp annualised; for a
             25bp annualised intercept shift use -0.000625. fiscal_spending is a level
             change in G (steady-state Y = 1, so 0.01 = 1% of GDP);
@@ -426,7 +448,9 @@ def hank_shock(
 
     Returns per-quarter rows (Y, C, I in % deviation from steady state; pi
     and r in pp deviations of quarterly rates, where r is the ex-post real
-    return, so its quarter 0 is the inflation surprise; plus the shock path), a
+    return, so its quarter 0 is the inflation surprise; i, the nominal policy
+    rate the Taylor rule sets, in pp of a quarterly rate, which is not the
+    intercept shock; plus the shock path), a
     `peaks` block, and `series_meaning`. First call per variant pays the
     steady-state (~13s) and jacobian (~5s) solves; both are cached, so warm
     calls are effectively instant.
@@ -445,7 +469,8 @@ def hank_summary() -> dict:
     States what the model is (a replication of Auclert, Bardóczy,
     Rognlie & Straub, Econometrica 2021, at the paper's production grids),
     the available shock kinds and their units, the two variants, and the
-    scope limits: stylized shocks only, IRF magnitudes not validated, not a
+    scope limits: stylized shocks only, one published IRF magnitude matched
+    and the others not validated, not a
     forecaster, no PolicyEngine-reform bridge (hank_shock is the supported
     entry point), distributional outputs are first-order approximations, and
     there is no transfer or tax-rate instrument because the labor tax is

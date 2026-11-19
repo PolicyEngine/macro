@@ -129,7 +129,7 @@ def boe_chart() -> str:
             ("ln-s1", "median"), ("sw-band68", "68% band"), ("sw-band90", "90% band"),
         ], unit="UK real GDP, % change on a year earlier",
             notes=[f"Forecast made {data['generated']} from data through {data['data_edge']}."]),
-        f"<figcaption>Bands are raw posterior quantiles, not rescaled to measured coverage; the calibrated version is on the <a href='/forecasts'>forecast record</a>."
+        f"<figcaption>Bands are raw posterior quantiles, not rescaled to measured coverage; the calibrated version, with the CPI fan, is on the <a href='/forecasts#open'>forecast record</a>."
         f"<details class=\"expander\"><summary>Run details</summary><p>Live-facing forecast, distinct from the frozen 2024Q2 validation experiment. Data through {data['data_edge']}; forecast begins {data['forecast_start']}. Estimated on {data['estimation_sample'].replace('-', '&ndash;')}; a separate forecast run, {data['accepted']} of {data['draws']:,} posterior draws accepted, not the production estimation run behind the <a href='/svar/methodology'>methodology</a> and validation figures. {_shock_run_note(data)} Source: the archived round <a href='/forecasts/rounds/{data['source_round']}/boe-svar.json'><code>forecasts/rounds/{data['source_round']}/boe-svar.json</code></a>, shown through <code>papers/boe-svar/figures/current_forecast.json</code>.</p></details></figcaption>",
         "</figure>",
     ])

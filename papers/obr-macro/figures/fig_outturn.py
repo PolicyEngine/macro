@@ -6,6 +6,12 @@ outturn (GDP first quarterly estimate, Jan-Mar 2026 bulletin, published
 14 May 2026: 2025Q2 +0.1, Q3 +0.2, Q4 +0.2, 2026Q1 +0.6 per cent).
 Model path from figures/fig_anchored_data.csv (the anchored solve).
 
+This is the November 2025 EFO study and its inputs are pinned to that vintage:
+fig_anchored_data.csv has since been regenerated on the October 2026 EFO, so
+main() refuses to run on it (see NOV_2025_EFO_QOQ). The site's chart keeps
+the committed fig_outturn_data.csv columns and takes current ONS outturns from
+the vintage file pinned in validation/figures/chart_data.json.
+
 Right panel: the emulator's government-consumption multiplier (~1.0) and the
 implied income-tax "multiplier" of the 1p basic-rate reform (second-round GDP
 effect / HHDI shock, both in per cent of GDP: 0.09 on impact to 0.25 by
@@ -35,6 +41,12 @@ HERE = Path(__file__).parent
 OUT_PERIODS = ["2025Q2", "2025Q3", "2025Q4", "2026Q1"]
 ONS_OUTTURN = [0.1, 0.2, 0.2, 0.6]
 
+# The November 2025 EFO's own q/q growth for OUT_PERIODS, as committed in
+# fig_outturn_data.csv. The vintage pin: if fig_anchored_data.csv no longer
+# reproduces these, it holds a later EFO and this script must not overwrite
+# the study.
+NOV_2025_EFO_QOQ = [0.2765, 0.2037, 0.2700, 0.3925]
+
 # Multiplier comparison: (label, low, high or None for a point, ours?)
 MULTS = [
     ("Emulator: gov. consumption", 1.0, None, True),
@@ -60,6 +72,13 @@ def main():
         100 * (gdp_e.loc[p] / gdp_e.iloc[list(df.index).index(p) - 1] - 1)
         for p in OUT_PERIODS
     ]
+    if any(abs(g - ref) > 5e-4 for g, ref in zip(efo_g, NOV_2025_EFO_QOQ)):
+        raise SystemExit(
+            "fig_anchored_data.csv is not the November 2025 EFO vintage "
+            f"(EFO q/q {[round(float(g), 4) for g in efo_g]}, expected {NOV_2025_EFO_QOQ}). "
+            "Refusing to overwrite the November 2025 outturn study; restore "
+            "that vintage of fig_anchored_data.csv first."
+        )
 
     fig, (ax, ax2) = plt.subplots(
         1, 2, figsize=(7.2, 2.9), gridspec_kw={"width_ratios": [1, 1.25]}

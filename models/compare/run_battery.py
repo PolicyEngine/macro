@@ -16,11 +16,16 @@ for stored paths, the hosted ``run_at``.
         integration layer (``policyengine_macro.core.frbus_shock``, about a
         second each) and rewrite their paths, peaks and provenance.
 
-FRB/US is the only cheap local path. US HANK needs a steady-state and
-jacobian solve, and the OBR emulator a full Gauss-Seidel solve per run; both
-are heavy jobs on a laptop, so their cells stay as the hosted results of
-6 Nov 2026 (``run.kind`` "hosted" or "battery") and are refreshed only by
-re-running the hosted tools. The BoE SVAR and DEFINE-UK cells are committed
+    PYTHONPATH=integration/src python3 models/compare/run_battery.py --refresh us-hank
+        The same for the US HANK cells (``policyengine_macro.core.hank_shock``;
+        one steady-state and jacobian solve, about 20 seconds, then every
+        shock is instant). It also stores the nominal policy-rate path the
+        Taylor rule sets (``path.rate``), which the intercept shock does not
+        equal.
+
+The OBR emulator needs a full Gauss-Seidel solve per run, a heavy job on a
+laptop, so its cells are refreshed by hand from a local run and carry that
+run's label. The BoE SVAR and DEFINE-UK cells are committed
 model-repo outputs (``run.kind`` "committed"); neither model has a hosted
 shock surface.
 """
@@ -38,7 +43,7 @@ RESULTS = HERE / "results.json"
 RUN_KINDS = {"hosted", "battery", "committed"}
 VERDICTS = {"plausible", "plausible-in-model", "off", "questionable", "unresolved", "not-tested"}
 MODEL_ORDER = ("obr", "svar", "frb-us", "us-hank", "define")
-REFRESHABLE = {"frb-us"}
+REFRESHABLE = {"frb-us", "us-hank"}
 
 
 def load(path: Path = RESULTS) -> dict:
@@ -114,7 +119,9 @@ def problems(data: dict) -> list[str]:
                 if run.get("kind") != "hosted" or not run.get("run_at"):
                     out.append(f"{tag}: a stored path needs a hosted run_at")
                 n = len(path["x"])
-                for key in ("gdp", "inflation"):
+                if "rate" in path and not path.get("rate_units"):
+                    out.append(f"{tag}: path.rate_units missing")
+                for key in ("gdp", "inflation") + (("rate",) if "rate" in path else ()):
                     if len(path[key]) != n:
                         out.append(f"{tag}: path.{key} length {len(path[key])} != {n}")
                     if not path.get(f"{key}_units"):
@@ -152,6 +159,34 @@ def _frbus_refresh(cell: dict) -> None:
     )
 
 
+def _hank_refresh(cell: dict) -> None:
+    from policyengine_macro import core
+
+    args = dict(cell["run"]["args"])
+    result = core.hank_shock(**args)
+    rows = result["results"]
+    path = cell["path"]
+    path["x"] = [r["quarter"] for r in rows]
+    path["gdp"] = [r["Y"] for r in rows]
+    path["inflation"] = [r["pi"] for r in rows]
+    if "i" in rows[0]:
+        path["rate"] = [r["i"] for r in rows]
+        path["rate_units"] = "pp, quarterly rate (i, the nominal policy rate); × 4 for an annual rate"
+    cell["gdp"]["value"] = round(result["peaks"]["Y"]["value"], 3)
+    prov = result["provenance"]
+    day = str(prov.get("run_at", ""))[:10]
+    cell["run"].update(
+        kind="hosted" if prov.get("run_at") else cell["run"]["kind"],
+        run_at=prov.get("run_at", ""),
+        adapter=prov.get("adapter_version", cell["run"].get("adapter")),
+        date=day or cell["run"]["date"],
+        label=f"local run, {day}",
+    )
+
+
+_REFRESHERS = {"frb-us": _frbus_refresh, "us-hank": _hank_refresh}
+
+
 def refresh(data: dict, model: str) -> int:
     if model not in REFRESHABLE:
         raise SystemExit(f"{model}: not a cheap local path; re-run the hosted tool instead")
@@ -159,7 +194,7 @@ def refresh(data: dict, model: str) -> int:
     for q in data["questions"]:
         for cell in q["cells"]:
             if cell.get("model") == model and cell.get("path"):
-                _frbus_refresh(cell)
+                _REFRESHERS[model](cell)
                 n += 1
     return n
 

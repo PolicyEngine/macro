@@ -151,7 +151,8 @@ def test_hank_is_not_in_the_supported_score_models():
 @pytest.mark.slow
 @requires_hank
 def test_monetary_easing_is_expansionary_with_the_documented_shape():
-    """A -25bp AR(1) easing must raise output, consumption, investment and
+    """A -0.0025 AR(1) easing of the Taylor-rule intercept (25bp per quarter;
+    the policy rate moves less) must raise output, consumption, investment and
     inflation, and the reported r deviation must be negative on impact."""
     res = core.hank_shock(kind="monetary", size=-0.0025, persistence=0.6)
 
@@ -159,7 +160,14 @@ def test_monetary_easing_is_expansionary_with_the_documented_shape():
     assert "warning" not in res, res.get("warning")
     assert len(res["results"]) == core.HANK_DEFAULT_HORIZON
     assert res["shock_input"] == "rstar"
-    assert set(res["series_meaning"]) == {"Y", "C", "I", "pi", "r", "w", "N"}
+    # tax (the budget-balancing labour tax) is returned for every kind since
+    # us-hank-model 58353e5; i is the Taylor-rule outcome the adapter reads
+    # from the Jacobian.
+    assert set(res["series_meaning"]) == {
+        "Y", "C", "I", "pi", "r", "w", "N", "tax", "i"}
+    # The intercept falls 25bp a quarter; the policy rate the rule sets falls
+    # by less (us-hank-model #18 pins -0.1316pp at persistence 0.61).
+    assert -0.25 < res["results"][0]["i"] < 0
 
     first = res["results"][0]
     assert first["Y"] > 0, "an easing must be expansionary on impact"
@@ -240,6 +248,13 @@ def test_distributional_block_is_coherent_and_labelled_first_order():
     assert mpc["Q1"] > mpc["Q4"]
     assert 0 < d["aggregate_quarterly_mpc_liquid"] < 1
     assert 0 < d["hand_to_mouth_share"] < 1
+    # us-hank-model #17: the behavioural count beside the liquid-wealth one,
+    # passed through with the windfall it was measured out of.
+    high = d["high_mpc_share"]
+    assert 0 <= high["share"] < d["hand_to_mouth_share"]
+    assert high["mpc_threshold"] == 0.25
+    assert high["windfall_frac_of_quarterly_income"] > 0
+    assert "liquid wealth" in high["note"]
 
     dc = d["impact_consumption_response_pct_by_wealth_quartile"]
     assert set(dc) == {"Q1", "Q2", "Q3", "Q4"}
@@ -265,6 +280,42 @@ def test_tax_financing_path_is_surfaced_when_the_package_returns_it(monkeypatch)
     assert "tax" in res["series_meaning"]
     assert "pp" in res["series_meaning"]["tax"]
     assert res["results"][0]["tax"] == 0.1
+
+
+def test_policy_rate_is_read_from_the_jacobian_not_assumed(monkeypatch):
+    """The monetary shock moves the Taylor-rule intercept; the rate the rule
+    sets (i) is a different number, so the adapter returns it as a series in
+    pp (x100 of the Jacobian response), and omits it when the Jacobian has
+    no i."""
+    import types
+
+    import numpy as np
+
+    T = core.HANK_T
+    shock = 0.0025 * 0.9 ** np.arange(T)
+    irf = {v: np.full(T, 0.1) for v in ("Y", "C", "pi", "r")}
+    irf.update(shock=shock, shock_input="rstar")
+    fake = types.SimpleNamespace(shock=lambda *a, **k: dict(irf))
+    monkeypatch.setattr(core, "_hank_module", lambda variant: fake)
+
+    G = {"i": {"rstar": 0.5 * np.eye(T)}}
+    monkeypatch.setattr(core, "_hank_solved", lambda variant: ({}, G))
+    res = core.hank_shock("monetary", 0.0025, persistence=0.9, horizon=4)
+    assert res["results"][0]["i"] == pytest.approx(0.125)
+    assert "not the intercept shock" in res["series_meaning"]["i"]
+
+    monkeypatch.setattr(core, "_hank_solved", lambda variant: ({}, {}))
+    res = core.hank_shock("monetary", 0.0025, persistence=0.9, horizon=4)
+    assert "i" not in res["series_meaning"]
+
+
+def test_high_mpc_share_is_passed_through_with_its_windfall():
+    block = core._hank_high_mpc_share({"high_mpc_share": {
+        "share": 0.001234, "mpc_threshold": 0.25,
+        "windfall_frac_of_quarterly_income": 0.25}})["high_mpc_share"]
+    assert block["share"] == 0.0012
+    assert block["windfall_frac_of_quarterly_income"] == 0.25
+    assert core._hank_high_mpc_share({}) == {}
 
 
 def test_monetary_and_tfp_units_are_stated_per_quarter_and_in_tfp_terms():

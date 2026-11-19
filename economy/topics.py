@@ -1132,7 +1132,12 @@ def inflation_model() -> str:
         peak_q, peak_v = max(later, key=lambda r: r[1])
         tail = [v for q, v in later if q > peak_q][-4:]
         settle = f", then settles near {sum(tail) / len(tail):.1f}%" if tail else ""
-        reaches = f"Median peaks at {peak_v:.1f}% in {esc(peak_q)}{settle}."
+        # The plateau is the model, not a call: boe-var-model README at c827ab8
+        # ("no inflation anchor"); /svar/validation#no-anchor carries the detail.
+        anchor = (': the model has a unit root and no inflation anchor, so it extends '
+                  'recent inflation rather than returning to 2% '
+                  '(<a href="/svar/validation#no-anchor">limits</a>)' if tail else "")
+        reaches = f"Median peaks at {peak_v:.1f}% in {esc(peak_q)}{settle}{anchor}."
     else:
         reaches = ""
     return f"""    <div class="prose">
@@ -1216,7 +1221,8 @@ def jobs_chart(facts: dict) -> str:
     rid = esc(round_file["round_id"])
     source = (f'BoE SVAR unemployment satellite round {rid}, '
               f'<a class="mono" href="/forecasts/rounds/{rid}/okun-unemployment.json">'
-              "okun-unemployment.json</a>; bands raw, GDP-forecast uncertainty only")
+              "okun-unemployment.json</a>; bands carry GDP-forecast uncertainty only and are too narrow "
+              '(<a href="/svar/validation#rolling">measured coverage</a>)')
     return path_chart(
         "topic-unemployment-path", "unemployment", "UK unemployment rate", "%",
         rows, round_file["round_id"],
@@ -2294,7 +2300,7 @@ def us_growth_run() -> str:
         command("pe-macro frbus-summary", "implementation, provenance and scope limits"),
         command("pe-macro frbus-variables", "the shockable FRB/US levers and their units"),
         command("pe-macro frbus-shock --var rffintay_aerr --shock 1.0 --horizon 20", "output response to a 1pp policy surprise"),
-        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "the same question in the HANK model, as an IRF"),
+        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "the HANK counterpart: an easing shock to the Taylor-rule intercept, as an IRF"),
     )}
 {us_run_note()}
     </div>"""
@@ -2385,7 +2391,7 @@ def us_inflation_run() -> str:
 {codeblock(
         command("pe-macro frbus-shock --var rffintay_aerr --shock 1.0 --horizon 20", "price response to a 1pp policy surprise"),
         command("pe-macro hank-summary", "shock catalogue, units and scope limits"),
-        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "an easing shock to the Taylor-rule intercept (about 13bp off the policy rate on impact), quarterly IRF"),
+        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "an easing shock to the Taylor-rule intercept (about 13bp off the quarterly policy rate on impact), quarterly IRF"),
     )}
 {us_run_note()}
     </div>"""

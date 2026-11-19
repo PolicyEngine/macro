@@ -105,6 +105,34 @@ def test_notes_step_uses_only_flags_both_generators_accept():
     assert '"--vintage"' in source and '"--check"' in source
 
 
+def test_data_hub_names_the_newest_committed_digest():
+    """The "Latest release digest" row on /economy is generated, not typed.
+
+    It was hand-written ("16 Nov 2026") and would have gone stale on the next
+    fetch. The date and link must be the newest digest directory under
+    notes/releases/, read from committed files rather than the clock.
+    """
+    spec = importlib.util.spec_from_file_location(
+        "generate_release_notes", ROOT / "notes" / "generate_release_notes.py"
+    )
+    notes = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(notes)
+
+    dated = sorted(
+        p.name for p in (ROOT / "notes" / "releases").iterdir()
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.name) and (p / "index.html").is_file()
+    )
+    newest = dated[-1]
+    assert notes.latest_digest() == newest
+
+    shown = notes.marker_block(ROOT / "economy" / "index.html", "latest-release-digest")
+    assert shown == notes.latest_digest_row()
+    year, month, day = newest.split("-")
+    assert f'href="/notes/releases/{newest}"' in shown
+    assert re.search(rf"Latest release digest, {int(day)} [A-Z][a-z]{{2}} {year}:", shown)
+    assert len(re.findall(r"/notes/releases/\d{4}-\d{2}-\d{2}", shown)) == 1
+
+
 # --------------------------------------------------------------- workflow
 
 

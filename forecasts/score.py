@@ -646,9 +646,10 @@ VS_OFFICIAL_SPECS = {
         ),
         "intro": (
             "Same round, CPI: the model sits close to the EFO through 2027Q3, "
-            "then stays higher as the EFO returns towards 2% — partly because a "
-            "VAR estimated through the 2021–23 surge mean-reverts toward a higher "
-            "sample mean."
+            "then stays near 3% as the EFO returns towards 2%. The model has a "
+            "unit root and no inflation anchor, so medium-term CPI extends recent "
+            "inflation rather than returning to 2% "
+            '(<a href="/svar/validation#no-anchor">limits</a>).'
         ),
     },
 }
@@ -1217,7 +1218,7 @@ def render_results(card: dict) -> str:
         back = detail["round_id"] > q_end
         horizon = (f'<a class="fc-h" href="/glossary#horizon" title="Quarters after the round\'s data edge">h{h}</a>'
                    + ('<a class="fc-h fc-h-back" href="/glossary#backcast" title="The quarter had already ended when the round was archived">backcast</a>' if back else ""))
-        note = ('<a class="fc-row-note" href="#limits">Satellite band understates uncertainty</a>'
+        note = ('<a class="fc-row-note" href="#limits">Band carries GDP uncertainty only</a>'
                 if e["variable"] == "unemployment" else "")
         body.append(
             '        <div class="fc-row" role="row">'
@@ -1400,7 +1401,7 @@ def render_home_record(card: dict) -> str:
         label = name.get(e["variable"], e["variable"]) + (" (satellite)" if who(d) else "")
         band = "inside the 68% band" if e["in_68"] else ("inside the 90% band, outside the 68%" if e["in_90"] else "outside the 90% band")
         if who(d) and not e["in_68"]:
-            band += " (the satellite's raw band is too narrow by construction)"
+            band += " (the satellite's band carries GDP uncertainty only and is too narrow)"
         tip = esc(f"{label}, {e['period']}: forecast {e['forecast']:.2f}% on {short_date(d['round_id'])}, outturn {e['outturn']:.2f}%; {band}.")
         chip = ('<span class="lp-res lp-res-in">' + _lucide("check", 14) + "Inside</span>" if e["in_68"]
                 else '<span class="lp-res lp-res-out">' + _lucide("alert", 14) + "Outside</span>")
@@ -1424,8 +1425,8 @@ def render_home_record(card: dict) -> str:
         "            </tbody>",
         "          </table>",
         "        </div>",
-        *([f'        <p class="lp-rec-note">Unemployment comes from a satellite of the BoE SVAR whose band is raw, '
-           f'not re-calibrated, and too narrow by construction, so a small miss can land outside it.</p>']
+        *([f'        <p class="lp-rec-note">Unemployment comes from a satellite of the BoE SVAR. Its archived band carries GDP uncertainty only '
+           f'and is too narrow, so a small miss can land outside it.</p>']
           if any(who(d) and not e["in_68"] for d, e in live) else []),
         f'        <p class="lp-score-foot"><span class="chip chip-warn">{_lucide("alert", 14)}Too few to judge skill yet</span>'
         f'<span>They ran {"low" if bias < 0 else "high"} on {st["low"] if bias < 0 else scored - st["low"]} of {scored} scored forecasts ({"&minus;" if bias < 0 else "+"}{abs(bias):.2f}pp on average).</span>'

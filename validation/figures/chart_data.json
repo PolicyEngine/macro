@@ -4,7 +4,7 @@
   "source": "Ours: papers/pe-microsim/figures/basic_rate_costing.json (hosted runs, policyengine 6.11.1). HMRC: Direct effects of illustrative tax changes, June 2025. Earlier figures (6.46 in 2026, 7.38 in 2030, 2028 interpolated) came from papers/obr-macro under policyengine 4.x.",
   "groups": [
    {
-    "label": "basic rate +1pp, 2026\u201327",
+    "label": "basic rate +1pp, 2026–27",
     "bars": [
      {
       "name": "ours",
@@ -21,7 +21,7 @@
     ]
    },
    {
-    "label": "basic rate +1pp, 2028\u201329",
+    "label": "basic rate +1pp, 2028–29",
     "bars": [
      {
       "name": "ours",
@@ -39,30 +39,37 @@
    }
   ]
  },
+ "obr_outturn": {
+  "_comment": "The emulator and EFO columns stay the November 2025 EFO study in papers/obr-macro/figures/fig_outturn_data.csv. Only the ONS outturn is refreshed, from one pinned file in the append-only vintage store, so a later ONS revision cannot move the chart silently: re-pin here to rescore. The working paper scored against the 14 May 2026 first quarterly estimate (0.1, 0.2, 0.2, 0.6), which is still the ons_outturn_qoq_pct column of that CSV.",
+  "ons_vintage_file": "data/vintages/ons/uk_gdp_cvm/2026-11-16.json",
+  "ons_vintage_label": "ONS release of 12 Nov 2026",
+  "source": "ONS ABMI (GDP, chained volume measure, seasonally adjusted), release_updated 2026-11-12, fetched 2026-11-16; quarter-on-quarter growth computed from the levels"
+ },
  "obr_computed_share": {
-  "source": "docs/calibration_scorecard.md in the PolicyEngine/obr-macroeconomic-model repository at commit 2965e82d (PR #69, re-anchored to the October 2026 EFO; default nominal-GDP-pin closure, CI run 43866052221). Earlier figures here were the March 2026 vintage under the published closure, before the receipts identities (#56) and the ended EU payments (#62)",
+  "source": "docs/calibration_scorecard.md in the PolicyEngine/obr-macroeconomic-model repository at commit 0e44ec8 (October 2026 EFO; default nominal-GDP-pin closure; CI run 44392267520). At 0e44ec8 the forecast 16+ population follows the EFO-implied path (PR #74), which moved the unemployment rate 1.17pp to 0.62pp (poor to fair), real GDP 4.05 to 4.24, consumption 6.92 to 7.23, household income 3.08 to 3.10, real household income 3.29 to 3.30 and company profits 11.66 to 12.88; GDP and consumption read worse because the drained unemployment had been lifting raw consumption, an artefact of the frozen population, not fit. Earlier, household taxes TYWHH were held on their data path (PR #71, at 0fe04c9). Before that, the March 2026 vintage under the published closure, before the receipts identities (#56) and the ended EU payments (#62)",
   "total": 21,
   "computed": 11,
   "passthrough": 10,
-  "bands_note": "bands: rates \u00b11.0pp \u00b7 net balances \u00b11.5% of GDP \u00b7 levels \u226410% MAPE",
+  "bands_note": "bands: rates ±1.0pp · net balances ±1.5% of GDP · levels ≤10% MAPE",
   "_grades_comment": "The 11 computed variables graded against the bands above. 'identity' is employment, where both inputs are themselves passthrough, so the accounting identity closes trivially and the pass carries no information.",
   "grades": [
    {
     "key": "fair",
     "label": "fair or good",
-    "count": 7,
+    "count": 8,
     "series": 1,
     "in_band": true,
     "examples": [
-     "real GDP 4.25 per cent",
-     "consumption 7.24 per cent",
+     "real GDP 4.24 per cent",
+     "consumption 7.23 per cent",
      "business investment 7.34 per cent",
-     "household income 4.30 per cent",
-     "real household income 4.52 per cent",
+     "the unemployment rate 0.62 percentage points",
+     "household income 3.10 per cent",
+     "real household income 3.30 per cent",
      "the current account 0.91 per cent of GDP",
      "trade balance 0.41 per cent of GDP"
     ],
-    "source": "calibration_scorecard.md at 2965e82d, default closure column"
+    "source": "calibration_scorecard.md at 0e44ec8, default closure column"
    },
    {
     "key": "identity",
@@ -79,31 +86,30 @@
    {
     "key": "badfit",
     "label": "fit badly",
-    "count": 3,
+    "count": 2,
     "series": 3,
     "in_band": false,
     "examples": [
-     "company profits 12.32 per cent",
-     "the unemployment rate 1.17 percentage points",
+     "company profits 12.88 per cent",
      "RPI inflation 2.32 percentage points"
     ],
-    "source": "calibration_scorecard.md at 2965e82d, computed variables outside band"
+    "source": "calibration_scorecard.md at 0e44ec8, computed variables outside band"
    }
   ]
  },
  "frbus_residuals": {
-  "source": "us-frb-model VALIDATION.md at 846eeb5c (October 2026 LONGBASE, rerun 16 Nov 2026): Test 1 tracking table and the pyfrbus 1.1.1 cross-check table. The paper (papers/frb-us/sections/validation.tex) reports the April 2026 vintage",
+  "source": "us-frb-model VALIDATION.md at 162cfe6 (October 2026 LONGBASE, rerun 16 Nov 2026): Test 1 tracking table and the pyfrbus 1.1.1 cross-check table. The paper (papers/frb-us/sections/validation.tex) reports the April 2026 vintage",
   "_series_comment": "series is the row's KIND of comparison, not a decoration: 1 = ours against the Fed's implementation under shock (the evidence), 2 = the Fed's own two releases against each other (the reference-noise yardstick our rows are judged against), 3 = a tracking identity that re-solves to its own input and therefore cannot fail. Series 3 was previously 1 on the first row, which painted the row the page calls 'not evidence' in the accent colour.",
   "rows": [
    {
-    "label": "ours vs LONGBASE \u2014 tracking identity, not evidence",
+    "label": "ours vs LONGBASE — tracking identity, not evidence",
     "value": 7.3e-12,
     "series": 3,
     "source": "VALIDATION.md Test 1, max abs error",
-    "note": "init_trac defines add-factors as minus the residuals at the input data, so re-solving reproduces it up to float64 for ANY input \u2014 verified: the same test passes at 9.0e-9 on randomly scrambled data. Shown for completeness; it measures arithmetic, not economics."
+    "note": "init_trac defines add-factors as minus the residuals at the input data, so re-solving reproduces it up to float64 for ANY input — verified: the same test passes at 9.0e-9 on randomly scrambled data. Shown for completeness; it measures arithmetic, not economics."
    },
    {
-    "label": "pyfrbus 1.1.1 vs LONGBASE \u2014 tracking identity",
+    "label": "pyfrbus 1.1.1 vs LONGBASE — tracking identity",
     "value": 1.9e-08,
     "series": 3,
     "source": "VALIDATION.md, pyfrbus 1.1.1 tracking"
@@ -121,7 +127,7 @@
     "source": "VALIDATION.md cross-check table row 2"
    },
    {
-    "label": "pyfrbus 1.1.1 vs 1.0.0 \u2014 the Fed\u2019s own releases",
+    "label": "pyfrbus 1.1.1 vs 1.0.0 — the Fed’s own releases",
     "value": 1.4e-08,
     "series": 2,
     "source": "VALIDATION.md cross-check table row 3"
@@ -130,7 +136,7 @@
  },
  "define_emissions": {
   "_comment": "What the define-uk divergence gate actually pins is the RATIO of the pinned run to the manual's Table 4, not the two levels: the levels in validation/figures/data/define_emissions_divergence.csv are rounded to whole MtCO2e, so recomputing the percentage from them gives -3.4 / -10.2 / -23.1 where the gate and the validation page say -3.5 / -10.2 / -23.3. The bars plot the rounded levels; the percentages come from the gated ratios below.",
-  "source": "validation/reference_outputs.json in the PolicyEngine define-uk adapter repository (the divergence gate, pinned to \u00b10.02), as recorded in that repository's VALIDATION.md target 1b and published on define/validation/",
+  "source": "validation/reference_outputs.json in the PolicyEngine define-uk adapter repository (the divergence gate, pinned to ±0.02), as recorded in that repository's VALIDATION.md target 1b and published on define/validation/",
   "gated_ratios": {
    "2025": 0.965,
    "2030": 0.898,

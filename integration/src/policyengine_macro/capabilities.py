@@ -140,15 +140,20 @@ MODELS = {
         "runtime": "about 10 seconds cold on a laptop (steady state plus Jacobian, then cached); instant warm",
         "uncertainty": "none quantified; deterministic linear IRFs",
         "status": (
-            # us-hank-model README "Validation status": only the solved
-            # steady-state parameters are validated (Table B.III, phi differs);
-            # IRF magnitudes are not, and the by-wealth split is an
-            # accounting allocation (distributional.py), not a solved response.
+            # us-hank-model docs/VALIDATION.md: the solved steady-state
+            # parameters are validated (Table B.III, phi after a convention
+            # conversion) and so is one IRF magnitude, impact consumption
+            # after the paper's monetary shock (Fig. 7a, within about 2%,
+            # tests/test_published_magnitude.py). No other magnitude is, and
+            # the by-wealth split is an accounting allocation
+            # (distributional.py), not a solved response.
             "partial replication of Auclert et al. (2021): six of seven "
             "solved parameters match directly and the seventh (vphi) after "
             "a wage-markup convention conversion; "
-            "steady-state targets are inputs; shock signs are tested, "
-            "magnitudes are not; not a forecaster; distributional outputs "
+            "steady-state targets are inputs; shock signs are tested; one "
+            "published magnitude (impact consumption after a monetary shock, "
+            "units inferred) is matched within about 2%, the others are not "
+            "checked; not a forecaster; distributional outputs "
             "are steady-state statistics and an MPC-proportional split of "
             "the aggregate"
         ),
@@ -202,7 +207,7 @@ MODELS = {
         "uncertainty": "none quantified; deterministic scenario deltas from one calibration",
         "status": (
             "partial replication of the DEFINE-UK manual: baseline macro "
-            "block matches Table 4 inside every gate (set after the run), two by only 0.01pp; scenario deltas gated on the pinned "
+            "block matches Table 4 inside every gate, two by only 0.01pp (the 2025 growth gate was set at that miss); scenario deltas gated on the pinned "
             "oracle run, the published scenario definitions, and two paper "
             "anchors (no numeric v1.1 scenario results are published); "
             "experimental; unlicensed upstream is never hosted, so hosted "
@@ -242,8 +247,8 @@ MODEL_QUALITY = {
         ),
         "predictive_validation": _quality(
             "weak",
-            "Free-running GDP and consumption MAPE are 4.25% and 7.24% under "
-            "the nominal-GDP pin (8 of 11 computed lines in band); the "
+            "Free-running GDP and consumption MAPE are 4.24% and 7.23% under "
+            "the nominal-GDP pin (9 of 11 computed lines in band); the "
             "anchored fit is by construction.",
             "Pass rolling-origin historical-vintage tests against simple "
             "benchmarks and first-release outturns.",
@@ -386,9 +391,11 @@ MODEL_QUALITY = {
             "paper's production grids. The model repo's replication suite gates "
             "the seven Table B.III parameters (vphi after the wage-markup "
             "convention conversion), market clearing and shock-response signs "
-            "against Econometrica 2021; IRF magnitudes are regression pins on "
-            "this implementation, because the paper publishes no comparable "
-            "two-asset IRF figure.",
+            "against Econometrica 2021, and the one impulse-response magnitude "
+            "the paper states: impact consumption after a -5pp Taylor-rule "
+            "shock (Fig. 7a), 1.485% against 1.46%, reading the shock in "
+            "annualised points, which the paper does not state. Every other "
+            "IRF magnitude is a regression pin on this implementation.",
             "Keep the replication gates hard-failing and extend them across "
             "all three shock kinds and both variants.",
         ),

@@ -120,8 +120,9 @@ results = run_reform(
     periods=12,
 )
 <span class="kw">print</span>(results[[<span class="kw">"period"</span>, <span class="kw">"delta_gdp_bn"</span>, <span class="kw">"pct_gdp"</span>]])
-<span class="cm"># ΔGDP ≈ £1.27bn rising to £1.31bn — the shock mostly enters the GDP</span>
-<span class="cm"># identity, so the multiplier is about 1.01 to 1.05 (OBR: 0.6)</span></code></pre></div>
+<span class="cm"># ΔGDP ≈ £1.27bn rising to £1.30bn — the shock mostly enters the GDP</span>
+<span class="cm"># identity, so the multiplier is about 1.01 to 1.04 (OBR: 0.6);</span>
+<span class="cm"># borrowing rises by the cash cost (nominal_consistent=True, the default)</span></code></pre></div>
         <details class="xp">
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
@@ -133,7 +134,7 @@ results = run_reform(
           <code>python -m obr_macro.reform_analysis</code> runs the five
           bundled scenarios, with charts landing in <code>outputs/</code>: a £5bn spending rise, a 5pp corporation-tax cut
           and rise, a £10bn spending cut, and £10bn public real investment (~£3bn nominal
-          <code>CGIPS</code> per quarter, which should not be scored).
+          <code>CGIPS</code> per quarter, which does not reach GDP under the default closure).
         </p>
           <p class="opt-note">
           To score a statutory reform end to end from Python, install the
@@ -160,7 +161,8 @@ results = run_reform(
           <div class="dial-card">
             <div class="dial-name mono">levers — set these (exogenous)</div>
             <div class="dial-choice"><code>CGG</code><span class="dial-tradeoff"><strong>Government consumption</strong> — spending shocks, £m per quarter</span></div>
-            <div class="dial-choice"><code>CGIPS</code><span class="dial-tradeoff"><strong>Central government investment</strong> — £m per quarter (nominal). <strong>Dead channel:</strong> total investment has no live equation, so GDP does not move, against the OBR&rsquo;s published 1.0. Do not score capital spending with it</span></div>
+            <div class="dial-choice"><code>CGIPS</code><span class="dial-tradeoff"><strong>Central government investment</strong> — £m per quarter (nominal). <strong>No transmission by default:</strong> total investment has no live equation, so GDP does not move, against the OBR&rsquo;s published 1.0. With <code>investment_closure=True</code> it enters GDP one for one: identity passthrough, not a multiplier</span></div>
+            <div class="dial-choice"><code>VREC</code><span class="dial-tradeoff"><strong>VAT receipts</strong> — £m per quarter (2,200 is a 1pp rise). <strong>Barely reaches GDP by default:</strong> CPI is fixed. <code>price_passthrough=True</code> passes the tax into CPI: a labelled overlay, off by default</span></div>
             <div class="dial-choice"><code>TCPRO</code><span class="dial-tradeoff"><strong>Corporation tax rate</strong> — rate, e.g. &minus;0.05 for a 5pp cut. <strong>Converges slowly:</strong> a 12-quarter run captures only ~40% of the full effect, and the result reports its <code>plateau_fraction</code></span></div>
             <div class="dial-choice"><code>HHDI_ADDFACTOR</code><span class="dial-tradeoff"><strong>Externally costed household reform</strong> — virtual instrument, quarterly £m; positive revenue lowers HHDI via a held add-factor</span></div>
             <div class="dial-choice"><code>R / GILT / RX</code><span class="dial-tradeoff"><strong>Bank Rate &middot; gilt yields &middot; exchange rate</strong> — monetary &amp; market assumptions</span></div>
@@ -169,7 +171,7 @@ results = run_reform(
             <div class="dial-name mono">readouts — read these (endogenous)</div>
             <div class="dial-choice"><code>GDPM</code><span class="dial-tradeoff"><strong>GDP at market prices</strong> — headline output</span></div>
             <div class="dial-choice"><code>CONS</code><span class="dial-tradeoff"><strong>Private consumption</strong></span></div>
-            <div class="dial-choice"><code>IBUS / IF</code><span class="dial-tradeoff"><strong>Business / total investment</strong> — <code>IF</code> has no live equation and moves exactly zero</span></div>
+            <div class="dial-choice"><code>IBUS / IF</code><span class="dial-tradeoff"><strong>Business / total investment</strong> — <code>IF</code> has no live equation under the default closure and moves exactly zero</span></div>
             <div class="dial-choice"><code>LFSUR</code><span class="dial-tradeoff"><strong>Unemployment rate</strong> — rate, pp. <strong>Does not respond</strong> to any lever tested: no <a class="gloss-link" href="/glossary#okun">Okun</a> channel</span></div>
           </div>
           </div>

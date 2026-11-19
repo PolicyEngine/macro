@@ -17,6 +17,8 @@ markup directly keeps every fill and stroke on a `vc-*` class defined in style.c
 
 Every plotted number is either read from a committed data file under papers/*/figures/
 or transcribed, with a per-value source pointer, in chart_data.json next to this file.
+One exception, also committed: the ONS outturns on the OBR outturn chart come from a
+single pinned file in data/vintages/, named in chart_data.json.
 """
 
 from __future__ import annotations
@@ -81,14 +83,31 @@ def load_levels(name, cols):
     return quarters, out
 
 
+def _prev_quarter(q: str) -> str:
+    year, quarter = int(q[:4]), int(q[5])
+    return f"{year - 1}Q4" if quarter == 1 else f"{year}Q{quarter - 1}"
+
+
 def load_outturn():
-    """Quarterly %q/q GDP growth: emulator vs EFO vintage vs ONS outturn."""
+    """Quarterly %q/q GDP growth: emulator vs EFO vintage vs ONS outturn.
+
+    The emulator and EFO columns are the November 2025 EFO study in
+    fig_outturn_data.csv (they cannot be rebuilt from fig_anchored_data.csv,
+    which now holds the October 2026 EFO). The ONS column is recomputed from
+    the pinned vintage file named in chart_data.json, not from the CSV's
+    ons_outturn_qoq_pct column, which is the 14 May 2026 first estimate the
+    working paper used.
+    """
+    pin = load_transcribed()["obr_outturn"]
+    vintage = json.loads((ROOT / pin["ons_vintage_file"]).read_text())
+    level = {o["period"]: float(o["value"]) for o in vintage["observations"]}
     path = ROOT / "papers" / "obr-macro" / "figures" / "fig_outturn_data.csv"
     rows = []
     with path.open() as fh:
         for row in csv.DictReader(fh):
-            rows.append((row["period"], float(row["model_qoq_pct"]),
-                         float(row["efo_qoq_pct"]), float(row["ons_outturn_qoq_pct"])))
+            q = row["period"]
+            ons = 100 * (level[q] / level[_prev_quarter(q)] - 1)
+            rows.append((q, float(row["model_qoq_pct"]), float(row["efo_qoq_pct"]), ons))
     return rows
 
 
@@ -185,7 +204,7 @@ def chart_obr_anchored():
     W, H = 760, 326
     x0, x1 = 58.0, 724.0
     # Frame runs -0.3pp to +1.5pp: on the October 2026 vintage consumption
-    # drifts above the EFO to about +1.3% by 2027Q4.
+    # drifts above the EFO to about +0.7% by 2027Q4 (+1.3% before obr #74).
     zero_y = 244.0
     per_unit = 46.0 / 0.3          # px per percentage point
     step = (x1 - x0) / (len(quarters) - 1)
@@ -562,12 +581,21 @@ def chart_obr_outturn():
     first_centre = 138.5
 
     parts = "; ".join(f"{q}: emulator {m:.2f}, EFO {e:.2f}, ONS {o:.2f}" for q, m, e, o in rows)
+    pin = load_transcribed()["obr_outturn"]
+    # Misses are differences of the plotted two-decimal values, so the text
+    # agrees with the labels on the chart.
+    miss = {q: abs(round(m, 2) - round(o, 2)) for q, m, e, o in rows}
+    efo_miss = {q: abs(round(e, 2) - round(o, 2)) for q, m, e, o in rows}
+    worst_2025 = max((q for q in miss if q.startswith("2025")), key=miss.get)
+    last = rows[-1][0]
     desc = (
         f"Bar chart with outturn markers, percentage quarter-on-quarter real GDP growth for the four "
-        f"quarters with ONS outturns since anchoring. {parts}. The emulator tracks the three "
-        f"2025 outturns to within 0.06 points; both the emulator and the November EFO it "
-        f"inherits miss the strong 0.6 per cent 2026Q1 outturn by roughly a quarter of a point. "
-        f"Data from papers/obr-macro/figures/fig_outturn_data.csv. Coordinates: value v maps to "
+        f"quarters the November 2025 EFO study scored. {parts}. Against the {pin['ons_vintage_label']} "
+        f"the emulator misses the 2025 outturns by up to {miss[worst_2025]:.2f} points "
+        f"({worst_2025}); it misses the {rows[-1][3]:.2f} per cent {last} outturn by "
+        f"{miss[last]:.2f} points, and the November EFO it inherits misses it by {efo_miss[last]:.2f}. "
+        f"Emulator and EFO from papers/obr-macro/figures/fig_outturn_data.csv; ONS outturns from "
+        f"{pin['ons_vintage_file']}. Coordinates: value v maps to "
         f"y = {base_y:g} - v * {scale:.1f} on a 0 to {y_max:g} axis."
     )
     x0, x1 = 24.0, 724.0      # room for the y labels left of the first bar

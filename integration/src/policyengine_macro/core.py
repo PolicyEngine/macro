@@ -139,21 +139,28 @@ OBR_VARIABLES = [
         "description": "Real government consumption",
         "units": "£m per quarter (e.g. 1250 = £5bn/year increase)",
         "investment_closure": False,
-        # Measured at obr 2965e82d (October 2026 EFO, nominal-GDP pin, every
-        # quarter converged): +1250/qtr moves GDP +1.267bn in the first
-        # quarter, rising to +1.310bn by the twelfth -- an impact multiplier of 1.01
-        # rising to 1.05. Most of it is the GDP identity; the small rise is
-        # induced spending. Under the published closure (pin e4d7faa) it was
+        # Measured at obr 0e44ec8 (October 2026 EFO, nominal-GDP pin, every
+        # quarter converged; results/demo_shocks.json row cgg): +1250/qtr
+        # moves GDP +1.266bn in the first quarter, rising to +1.300bn by the
+        # twelfth -- an impact multiplier of 1.01 rising to 1.04. Most of it
+        # is the GDP identity; the small rise is induced spending. Since obr
+        # #75 the shock is nominal-consistent by default (run_reform
+        # nominal_consistent=True): nominal spending moves by the same cash
+        # amount, so borrowing (CGNB) rises by the cash cost, +1.336bn to
+        # +1.419bn a quarter; this adapter does not return borrowing. Under the published closure (pin e4d7faa) it was
         # exactly 1.0000 and flat. Either way it is far above the OBR's
         # published 0.6 for day-to-day spending, tapering over five years,
         # and the reading must reach MCP callers, not only the website.
         "caveat": (
             "mostly an accounting identity, not a behavioural response: the "
             "shock enters the GDP identity and little else moves, so the "
-            "multiplier is about 1.01 on impact, rising to about 1.05 by the "
+            "multiplier is about 1.01 on impact, rising to about 1.04 by the "
             "twelfth quarter. The OBR's published impact multiplier for "
             "day-to-day spending and welfare is 0.6, tapering over five "
-            "years, so read this as an upper bound"
+            "years, so read this as an upper bound. In the model the shock is "
+            "nominal-consistent by default, so borrowing rises by the cash "
+            "cost (receipts do not respond); this tool returns GDP, "
+            "consumption and investment only, not borrowing"
         ),
     },
     {
@@ -165,7 +172,8 @@ OBR_VARIABLES = [
         # space (the EViews convention for a dlog equation), so the published
         # equation's own error-correction term gives the deviation a steady
         # state: for a sustained +5pp rise, delta_IF runs £0.24bn at q8,
-        # £0.38bn at q12, £0.68bn at q25, approaching a ~£0.95bn/q plateau.
+        # £0.38bn at q12, £0.68bn at q25, approaching a ~£0.96bn/q plateau
+        # (obr README at 0e44ec8).
         # The root is slow (~0.958/quarter), so a 12-quarter run captures
         # only ~40% of the full effect — the result's
         # investment_closure_plateau_fraction attr says where a run sits.
@@ -184,8 +192,8 @@ OBR_VARIABLES = [
         "description": "Bank Rate",
         "units": "percentage points, held each shocked quarter (e.g. 1.0 = +1pp)",
         "investment_closure": False,
-        # Measured at obr 2965e82d (October 2026 EFO): +1pp held 12 quarters
-        # lowers GDP by £128m, £406m, £475m and £503m at q1/q4/q8/q12; +1pp
+        # Measured at obr 0e44ec8 (October 2026 EFO): +1pp held 12 quarters
+        # lowers GDP by £128m, £406m, £472m and £500m at q1/q4/q8/q12; +1pp
         # for four quarters peaks at about -0.06% of GDP, against the Bank of
         # England's published -0.2% to -0.35% for a comparable rise.
         "caveat": (
@@ -202,8 +210,8 @@ OBR_VARIABLES = [
         "units": "£m per quarter of revenue raised (positive = household income falls; e.g. 1637.5 = £6.55bn/year)",
         "investment_closure": False,
         # The channel score_reform feeds with the microsimulation's costing.
-        # Measured at obr 2965e82d: +1,637.5/qtr lowers real GDP by £540m at
-        # q12; GDP per pound raised is 0.211 after a year and 0.376 after three
+        # Measured at obr 0e44ec8: +1,637.5/qtr lowers real GDP by £536m at
+        # q12; GDP per pound raised is 0.211 after a year and 0.374 after three
         # in current prices (0.33 at q12 in real GDP).
         "caveat": (
             "the one live household channel: income falls by the revenue and "
@@ -214,25 +222,74 @@ OBR_VARIABLES = [
         ),
     },
     {
+        "var": "VREC",
+        "description": "VAT receipts (the indirect-tax lever)",
+        "units": "£m per quarter of receipts (e.g. 2200 = a 1pp rise in the standard rate)",
+        "investment_closure": False,
+        # obr results/demo_shocks.json at 0e44ec8 (run at a822045, 18 Nov
+        # 2026, October 2026 EFO, every quarter converged): +2,200/qtr for 12
+        # quarters gives current-price GDP per pound of 0.013 / 0.026 / 0.043
+        # at q1/q4/q12 by default, and 0.175 / 0.345 / 0.638 with
+        # price_passthrough=True (CPI up about 0.4%). The OBR's published VAT
+        # multiplier is 0.35, fading.
+        "caveat": (
+            "by default VAT barely reaches GDP: CPI is exogenous in the "
+            "OBR's listing, so the tax lands on company profits (about 0.03 "
+            "of GDP per pound after a year, against the OBR's published "
+            "0.35). price_passthrough=True is an opt-in, labelled judgement "
+            "overlay that passes the tax into CPI through the listing's own "
+            "cost-push weights with the retail markup held (about 0.35 per "
+            "pound after a year, still rising after that where the OBR's "
+            "fades). It is off by default and is not the shipped listing"
+        ),
+    },
+    {
         "var": "CGIPS",
         "description": "Nominal central government investment (feeds real GGI via the GGIPS/GGIDEF chain)",
         "units": "£m nominal per quarter (e.g. 3000 ≈ £2.5bn real per quarter)",
         "investment_closure": False,
-        # Measured at obr 2965e82d (October 2026 EFO, nominal-GDP pin, every
-        # quarter converged; obr results/site_figures.json): delta_IF is exactly 0.0 because IF has no
-        # live equation; business investment (IBUSX) is the residual of
-        # IBUS = IF - GGI - ... (l.84) and falls by exactly -delta GGI
-        # (+1500/qtr over 8 quarters from 2026Q1: -1,408 at q4); GDP falls only by the induced consumption
-        # (-3.8 at q4). Against the OBR's published 1.0 the channel is absent.
+        # Default (demand closure). Measured at obr 0e44ec8 (October 2026
+        # EFO, nominal-GDP pin, every quarter converged; obr
+        # results/site_figures.json at 0e44ec8, run at b56fe3b): delta_IF is
+        # exactly 0.0 because IF has no live equation; business investment
+        # (IBUSX) is the residual of IBUS = IF - GGI - ... (l.84) and falls by
+        # exactly -delta GGI (+1500/qtr over 8 quarters from 2026Q1: -1,408 at
+        # q4); GDP falls only by the induced consumption (-3.8 at q4).
+        # Opt-in (investment_closure=True; obr results/demo_shocks.json at
+        # 0e44ec8, run at a822045, every quarter converged): the listing's
+        # commented-out IF identity (l.86) is live, and +3,000/qtr for 12
+        # quarters from 2025Q1 moves GDP +3,075 / +2,901 / +2,903 at
+        # q1/q4/q12. The OBR's published capital multiplier is 1.0, tapering.
         "caveat": (
-            "this channel does not transmit: total fixed investment (IF) has "
-            "no live equation and moves exactly zero, business investment "
-            "moves only as an accounting offset to the shock, and any "
-            "residual GDP effect is not a multiplier. Do not use it to score "
-            "capital spending"
+            "under the default closure this channel does not transmit: total "
+            "fixed investment (IF) has no live equation and moves exactly "
+            "zero, business investment moves only as an accounting offset to "
+            "the shock, and any residual GDP effect is not a multiplier. "
+            "investment_closure=True is an opt-in, labelled route that "
+            "switches on the listing's commented-out IF identity, so real "
+            "government investment enters GDP about one for one (identity "
+            "passthrough; see that run's caveat). Neither run is a validated "
+            "capital-spending multiplier"
         ),
     },
 ]
+
+# CGIPS under the opt-in investment closure (obr #70). The default caveat
+# above says the channel does not transmit, which is false for this run, so
+# obr_shock swaps in this one.
+_OBR_CGIPS_INVESTMENT_CLOSURE_CAVEAT = (
+    "opt-in investment closure: the listing's commented-out IF identity is "
+    "live, so real government investment enters total investment and GDP "
+    "about one for one. This is identity passthrough, not a validated "
+    "multiplier: no taper, no crowding-out, and the nominal-GDP pin is off "
+    "under this closure. The OBR's published capital-spending multiplier is "
+    "1.0 on impact, tapering to zero"
+)
+
+# The model's opt-in indirect-tax price pass-through (obr #60/#70) is defined
+# only for these levers and only under the demand closure; run_reform raises
+# otherwise. Mirrored here so a bad call fails before the model import.
+_OBR_PRICE_PASSTHROUGH_VARS = frozenset({"VREC", "TXFUEL"})
 
 
 def obr_list_variables() -> list[dict]:
@@ -283,30 +340,53 @@ def obr_shock(
     periods: int = 12,
     name: str | None = None,
     investment_closure: bool | None = None,
+    price_passthrough: bool = False,
 ) -> dict:
     """Shock one OBR exogenous variable directly, in model units.
 
     The escape hatch under score_reform: no PolicyEngine reform translation,
-    just a raw additive shock (£m per quarter for CGG/CGIPS, decimal rate
-    change for TCPRO). Runs baseline vs shocked solves and returns per-period
-    GDP deltas plus a headline cumulative GDP effect over the shocked periods.
+    just a raw additive shock (£m per quarter for CGG/CGIPS/VREC, decimal
+    rate change for TCPRO). Runs baseline vs shocked solves and returns
+    per-period GDP deltas plus a headline cumulative GDP effect over the
+    shocked periods.
 
     ``investment_closure`` defaults per variable from the curated list
     (e.g. True for TCPRO): a corporation-tax shock without the investment
     closure solves to all-zero deltas, which would read as a misleading
-    "no effect" result rather than a mis-specified run.
+    "no effect" result rather than a mis-specified run. For CGIPS it is an
+    opt-in (default False): it switches on the listing's commented-out IF
+    identity, so government investment reaches GDP as identity passthrough.
+
+    ``price_passthrough`` (default False) is the model's opt-in, labelled
+    overlay for an indirect-tax shock (VREC, TXFUEL): it passes the tax into
+    CPI through the listing's own cost-push weights with the retail markup
+    held. It is defined only under the demand closure.
     """
     periods = _bounded_int(
         "periods", periods, _OBR_MIN_PERIODS, _OBR_MAX_PERIODS
     )
     shock = _finite("shock", shock)
     end = _obr_window_end(periods)
-    run_reform = _import_obr()
     if investment_closure is None:
         known = {v["var"]: v["investment_closure"] for v in OBR_VARIABLES}
         investment_closure = known.get(var, False)
+    price_passthrough = bool(price_passthrough)
+    if price_passthrough and var not in _OBR_PRICE_PASSTHROUGH_VARS:
+        raise ValueError(
+            "price_passthrough applies only to an indirect-tax shock "
+            f"({', '.join(sorted(_OBR_PRICE_PASSTHROUGH_VARS))}); got var={var!r}"
+        )
+    if price_passthrough and investment_closure:
+        raise ValueError(
+            "price_passthrough is defined for the demand closure only; do "
+            "not combine it with investment_closure"
+        )
+    run_reform = _import_obr()
     if name is None:
         name = f"{var} shock {shock:+g}"
+    # Forwarded only when asked for, so a default run makes exactly the call
+    # it made before the option existed.
+    overlays = {"price_passthrough": True} if price_passthrough else {}
     df = run_reform(
         name=name,
         var=var,
@@ -315,6 +395,7 @@ def obr_shock(
         end=end,
         periods=periods,
         investment_closure=bool(investment_closure),
+        **overlays,
     )
     rows = _obr_result_rows(df)
     # The TCPRO caveat promises the caller an
@@ -334,15 +415,20 @@ def obr_shock(
             f"shock (window {_OBR_START}..{end})"
         )
     peak = max(rows, key=lambda r: abs(r["pct_gdp"]))
-    # A lever whose channel is dead or non-convergent must say so in the
-    # payload, not only in a docstring nobody reads over MCP. Of the four
-    # fiscal instruments here exactly one contains behaviour: CGG is mostly
-    # an accounting identity (multiplier 1.01 rising to 1.05, against the
-    # OBR's published 0.6), CGIPS is dead, TCPRO converges only slowly, and the
-    # household-income lever is the only one with a response worth reading.
+    # A lever whose channel is absent or non-convergent must say so in the
+    # payload, not only in a docstring nobody reads over MCP. Of the fiscal
+    # instruments here exactly one contains behaviour: CGG is mostly an
+    # accounting identity (multiplier 1.01 rising to 1.04, against the OBR's
+    # published 0.6), CGIPS does not transmit under the default closure and
+    # is identity passthrough under the opt-in investment closure, TCPRO
+    # converges only slowly, VAT barely reaches GDP without the opt-in price
+    # overlay, and the household-income lever is the only one with a
+    # response worth reading.
     caveat = next(
         (v.get("caveat") for v in OBR_VARIABLES if v["var"] == var), None
     )
+    if var == "CGIPS" and investment_closure:
+        caveat = _OBR_CGIPS_INVESTMENT_CLOSURE_CAVEAT
     result = {
         "name": name,
         "provenance": _provenance(
@@ -383,6 +469,27 @@ def obr_shock(
             result[key] = [round(float(v), 4) for v in list(values)[: len(rows)]]
     if attrs.get("gdp_per_revenue_basis_note"):
         result["gdp_per_revenue_basis_note"] = str(attrs["gdp_per_revenue_basis_note"])
+    # The model's own labels (obr #70). They live on the frame's attrs, which
+    # an MCP caller never sees, so they travel in the payload: an identity
+    # passthrough (default CGG, or CGIPS under the opt-in investment closure)
+    # or a judgement overlay must not arrive looking like a behavioural
+    # result. transmission_note is the model's one-paragraph reading of the
+    # channel, set for most levers.
+    if attrs.get("mechanical_passthrough"):
+        result["mechanical_passthrough"] = True
+    # Not on an overlay run: the model's VAT note describes the default
+    # ("no price channel"), which the overlay's own note supersedes.
+    if attrs.get("transmission_note") and not price_passthrough:
+        result["transmission_note"] = str(attrs["transmission_note"])
+    if price_passthrough:
+        result["price_passthrough"] = True
+        if attrs.get("price_passthrough_note"):
+            result["price_passthrough_note"] = str(attrs["price_passthrough_note"])
+        cpi = (attrs.get("price_passthrough_detail") or {}).get("cpi_pct_delta")
+        if cpi is not None:
+            result["cpi_pct_delta"] = [
+                round(float(v), 4) for v in list(cpi)[: len(rows)]
+            ]
     return result
 
 
@@ -1048,8 +1155,10 @@ HANK_SHOCK_KINDS = [
         "input": "rstar",
         "description": "Taylor-rule intercept (monetary policy) shock",
         "units": "level change in the intercept of the QUARTERLY nominal "
-                 "Taylor rule; the policy rate itself moves less, about 13bp "
-                 "on impact for -0.0025 (us-hank-model #18). -0.0025 is a "
+                 "Taylor rule; the policy rate itself is returned as the "
+                 "series i and does not move one for one: about -13bp on "
+                 "impact for -0.0025 at persistence 0.61 (pinned in "
+                 "us-hank-model #18), and it depends on the persistence. -0.0025 is a "
                  "25bp-per-quarter intercept shift, about 100bp annualised; "
                  "for a 25bp annualised intercept shift use -0.000625. "
                  "The r and pi responses are quarterly rates too: multiply "
@@ -1106,6 +1215,11 @@ HANK_HEADLINE = {
     # spending IRF read without it invites a deficit-financed reading.
     "tax": "Labour tax rate, pp deviation from steady state (the budget-"
            "balancing financing of the shock)",
+    # The Taylor-rule outcome. A monetary shock moves the rule's intercept
+    # (rstar), not the rate; i = rstar + phi * pi, so the rate the rule sets
+    # is a different number from the shock and has to be read, not assumed.
+    "i": "Nominal policy rate (quarterly rate), pp deviation from steady "
+         "state: the Taylor-rule outcome, not the intercept shock",
 }
 
 # Cache the steady state + GE jacobian per (variant, T). The steady state
@@ -1285,6 +1399,12 @@ def hank_shock(
                 / float(ss[extra])
             )
 
+    # The nominal policy rate, from the same GE Jacobian. It is a rate, so a
+    # pp deviation (x100), not a % deviation from its steady state. Omitted,
+    # never invented, when the variant's Jacobian does not carry it.
+    if "i" not in irf and "i" in G and irf["shock_input"] in G["i"]:
+        irf["i"] = 100.0 * (G["i"][irf["shock_input"]] @ irf["shock"])
+
     series_names = [v for v in HANK_HEADLINE if v in irf]
     series = {
         v: [round(float(x), 6) for x in irf[v][:horizon]] for v in series_names
@@ -1321,7 +1441,9 @@ def hank_shock(
         "framing": (
             "Partial replication of Auclert, Bardóczy, Rognlie & Straub "
             "(Econometrica 2021): six of seven solved steady-state parameters "
-            "match the paper; shock signs are tested, magnitudes are not validated; "
+            "match the paper; shock signs are tested; one published magnitude "
+            "(impact consumption after a monetary shock) is matched within "
+            "about 2%, the other magnitudes are not validated; "
             "stylized shocks around a calibrated steady state; NOT a "
             "forecaster and does not score detailed tax reforms; responses "
             "are linear/first-order."
@@ -1366,6 +1488,7 @@ def hank_shock(
             "hand_to_mouth_share": round(
                 float(stats["hand_to_mouth_share"]), 4
             ),
+            **_hank_high_mpc_share(stats),
             "hand_to_mouth_definition": {
                 "liquid_threshold_model_units": round(
                     float(stats["hand_to_mouth_breakdown"]["threshold"]), 4
@@ -1391,9 +1514,41 @@ def hank_shock(
     return result
 
 
-# us-hank-model README (main) maps model units to dollars at 2025 US GDP per
+# us-hank-model docs/DISTRIBUTIONAL.md maps model units to dollars at 2025 US GDP per
 # household, about $58,000 a quarter (steady-state quarterly output Y = 1).
 HANK_USD_PER_MODEL_UNIT_PER_HOUSEHOLD = 58_000
+
+
+def _hank_high_mpc_share(stats: dict) -> dict:
+    """The model's high-MPC share with the windfall it was measured out of.
+
+    hand_to_mouth_share counts households by liquid wealth (about 54%); most
+    of them hold illiquid wealth and spend little of a rebate. us-hank-model
+    #17 added the behavioural count: the share with an MPC above a threshold.
+    It is passed through as the model reports it, at the model's default
+    windfall, and omitted for a model build that predates it.
+    """
+    block = stats.get("high_mpc_share")
+    if not isinstance(block, dict) or "share" not in block:
+        return {}
+    return {
+        "high_mpc_share": {
+            "share": round(float(block["share"]), 4),
+            "mpc_threshold": float(block["mpc_threshold"]),
+            "windfall_frac_of_quarterly_income": float(
+                block["windfall_frac_of_quarterly_income"]
+            ),
+            "note": (
+                "Share of households with an MPC above the threshold out of "
+                "a windfall of this fraction of mean quarterly labour "
+                "income. The share falls as the windfall grows: on the "
+                "model's refined grid it is about 3% at $1,000 "
+                "(us-hank-model tests/test_refined_mpc.py). Read it beside "
+                "hand_to_mouth_share, which counts by liquid wealth, not by "
+                "spending behaviour."
+            ),
+        }
+    }
 
 
 def _hank_mpc_windfall(stats: dict) -> dict:
@@ -1414,7 +1569,7 @@ def _hank_mpc_windfall(stats: dict) -> dict:
             "MPC range of roughly 0.15-0.25 comes from, and the model's MPC "
             "falls with windfall size, so do not compare it with that range. "
             "Dollar figure: model units x about $58,000 (2025 US GDP per "
-            "household per quarter), as in the us-hank-model README."
+            "household per quarter), as in us-hank-model docs/DISTRIBUTIONAL.md."
         ),
     }
 
@@ -1436,7 +1591,9 @@ def hank_summary() -> dict:
         "package_version": _package_version("us-hank-model"),
         "framing": (
             "Partial replication: six of seven solved steady-state parameters "
-            "match; IRF magnitudes are not validated; stylized shocks; not a "
+            "match; one published IRF magnitude (impact consumption after a "
+            "monetary shock) is matched within about 2%, the other IRF "
+            "magnitudes are not validated; stylized shocks; not a "
             "forecaster; distributional outputs are "
             "first-order: steady-state MPCs and an MPC-proportional split of "
             "the aggregate response."
@@ -1469,10 +1626,12 @@ def hank_summary() -> dict:
         "validation": {
             "suite": "the model repo's replication suite gates the six "
                      "steady-state parameters that match the paper's Table "
-                     "B.III, market clearing, and shock-response signs; IRF "
-                     "magnitudes are regression pins on this implementation, "
-                     "not checks against the paper, which publishes no "
-                     "comparable two-asset IRF figure",
+                     "B.III, market clearing, shock-response signs, and "
+                     "one published magnitude (impact consumption after a "
+                     "monetary shock, Fig. 7a, within about 2%, units "
+                     "inferred); the other IRF magnitudes are regression "
+                     "pins on this implementation, not checks against the "
+                     "paper",
             "note": "a replication gate, not a forecast-accuracy claim: no "
                     "predictive validation exists or is claimed for this model",
         },
