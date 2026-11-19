@@ -207,7 +207,7 @@ MODELS = {
         "uncertainty": "none quantified; deterministic scenario deltas from one calibration",
         "status": (
             "partial replication of the DEFINE-UK manual: baseline macro "
-            "block matches Table 4 inside every gate (set after the run), two by only 0.01pp; scenario deltas gated on the pinned "
+            "block matches Table 4 inside every gate, two by only 0.01pp (the 2025 growth gate was set at that miss); scenario deltas gated on the pinned "
             "oracle run, the published scenario definitions, and two paper "
             "anchors (no numeric v1.1 scenario results are published); "
             "experimental; unlicensed upstream is never hosted, so hosted "
@@ -247,8 +247,8 @@ MODEL_QUALITY = {
         ),
         "predictive_validation": _quality(
             "weak",
-            "Free-running GDP and consumption MAPE are 4.05% and 6.92% under "
-            "the nominal-GDP pin (8 of 11 computed lines in band); the "
+            "Free-running GDP and consumption MAPE are 4.24% and 7.23% under "
+            "the nominal-GDP pin (9 of 11 computed lines in band); the "
             "anchored fit is by construction.",
             "Pass rolling-origin historical-vintage tests against simple "
             "benchmarks and first-release outturns.",

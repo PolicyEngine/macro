@@ -139,21 +139,28 @@ OBR_VARIABLES = [
         "description": "Real government consumption",
         "units": "£m per quarter (e.g. 1250 = £5bn/year increase)",
         "investment_closure": False,
-        # Measured at obr 0fe04c9 (October 2026 EFO, nominal-GDP pin, every
-        # quarter converged): +1250/qtr moves GDP +1.267bn in the first
-        # quarter, rising to +1.310bn by the twelfth -- an impact multiplier of 1.01
-        # rising to 1.05. Most of it is the GDP identity; the small rise is
-        # induced spending. Under the published closure (pin e4d7faa) it was
+        # Measured at obr 0e44ec8 (October 2026 EFO, nominal-GDP pin, every
+        # quarter converged; results/demo_shocks.json row cgg): +1250/qtr
+        # moves GDP +1.266bn in the first quarter, rising to +1.300bn by the
+        # twelfth -- an impact multiplier of 1.01 rising to 1.04. Most of it
+        # is the GDP identity; the small rise is induced spending. Since obr
+        # #75 the shock is nominal-consistent by default (run_reform
+        # nominal_consistent=True): nominal spending moves by the same cash
+        # amount, so borrowing (CGNB) rises by the cash cost, +1.336bn to
+        # +1.419bn a quarter; this adapter does not return borrowing. Under the published closure (pin e4d7faa) it was
         # exactly 1.0000 and flat. Either way it is far above the OBR's
         # published 0.6 for day-to-day spending, tapering over five years,
         # and the reading must reach MCP callers, not only the website.
         "caveat": (
             "mostly an accounting identity, not a behavioural response: the "
             "shock enters the GDP identity and little else moves, so the "
-            "multiplier is about 1.01 on impact, rising to about 1.05 by the "
+            "multiplier is about 1.01 on impact, rising to about 1.04 by the "
             "twelfth quarter. The OBR's published impact multiplier for "
             "day-to-day spending and welfare is 0.6, tapering over five "
-            "years, so read this as an upper bound"
+            "years, so read this as an upper bound. In the model the shock is "
+            "nominal-consistent by default, so borrowing rises by the cash "
+            "cost (receipts do not respond); this tool returns GDP, "
+            "consumption and investment only, not borrowing"
         ),
     },
     {
@@ -166,7 +173,7 @@ OBR_VARIABLES = [
         # equation's own error-correction term gives the deviation a steady
         # state: for a sustained +5pp rise, delta_IF runs £0.24bn at q8,
         # £0.38bn at q12, £0.68bn at q25, approaching a ~£0.96bn/q plateau
-        # (obr README at 0fe04c9).
+        # (obr README at 0e44ec8).
         # The root is slow (~0.958/quarter), so a 12-quarter run captures
         # only ~40% of the full effect — the result's
         # investment_closure_plateau_fraction attr says where a run sits.
@@ -185,8 +192,8 @@ OBR_VARIABLES = [
         "description": "Bank Rate",
         "units": "percentage points, held each shocked quarter (e.g. 1.0 = +1pp)",
         "investment_closure": False,
-        # Measured at obr 0fe04c9 (October 2026 EFO): +1pp held 12 quarters
-        # lowers GDP by £128m, £406m, £475m and £503m at q1/q4/q8/q12; +1pp
+        # Measured at obr 0e44ec8 (October 2026 EFO): +1pp held 12 quarters
+        # lowers GDP by £128m, £406m, £472m and £500m at q1/q4/q8/q12; +1pp
         # for four quarters peaks at about -0.06% of GDP, against the Bank of
         # England's published -0.2% to -0.35% for a comparable rise.
         "caveat": (
@@ -203,8 +210,8 @@ OBR_VARIABLES = [
         "units": "£m per quarter of revenue raised (positive = household income falls; e.g. 1637.5 = £6.55bn/year)",
         "investment_closure": False,
         # The channel score_reform feeds with the microsimulation's costing.
-        # Measured at obr 0fe04c9: +1,637.5/qtr lowers real GDP by £540m at
-        # q12; GDP per pound raised is 0.211 after a year and 0.376 after three
+        # Measured at obr 0e44ec8: +1,637.5/qtr lowers real GDP by £536m at
+        # q12; GDP per pound raised is 0.211 after a year and 0.374 after three
         # in current prices (0.33 at q12 in real GDP).
         "caveat": (
             "the one live household channel: income falls by the revenue and "
@@ -219,10 +226,10 @@ OBR_VARIABLES = [
         "description": "VAT receipts (the indirect-tax lever)",
         "units": "£m per quarter of receipts (e.g. 2200 = a 1pp rise in the standard rate)",
         "investment_closure": False,
-        # obr results/demo_shocks.json at 0fe04c9 (run at f0f61c5, 16 Nov
+        # obr results/demo_shocks.json at 0e44ec8 (run at a822045, 18 Nov
         # 2026, October 2026 EFO, every quarter converged): +2,200/qtr for 12
         # quarters gives current-price GDP per pound of 0.013 / 0.026 / 0.043
-        # at q1/q4/q12 by default, and 0.175 / 0.345 / 0.643 with
+        # at q1/q4/q12 by default, and 0.175 / 0.345 / 0.638 with
         # price_passthrough=True (CPI up about 0.4%). The OBR's published VAT
         # multiplier is 0.35, fading.
         "caveat": (
@@ -241,17 +248,17 @@ OBR_VARIABLES = [
         "description": "Nominal central government investment (feeds real GGI via the GGIPS/GGIDEF chain)",
         "units": "£m nominal per quarter (e.g. 3000 ≈ £2.5bn real per quarter)",
         "investment_closure": False,
-        # Default (demand closure). Measured at obr 0fe04c9 (October 2026
+        # Default (demand closure). Measured at obr 0e44ec8 (October 2026
         # EFO, nominal-GDP pin, every quarter converged; obr
-        # results/site_figures.json, unchanged at 0fe04c9): delta_IF is
+        # results/site_figures.json at 0e44ec8, run at b56fe3b): delta_IF is
         # exactly 0.0 because IF has no live equation; business investment
         # (IBUSX) is the residual of IBUS = IF - GGI - ... (l.84) and falls by
         # exactly -delta GGI (+1500/qtr over 8 quarters from 2026Q1: -1,408 at
         # q4); GDP falls only by the induced consumption (-3.8 at q4).
         # Opt-in (investment_closure=True; obr results/demo_shocks.json at
-        # 0fe04c9, run at f0f61c5, every quarter converged): the listing's
+        # 0e44ec8, run at a822045, every quarter converged): the listing's
         # commented-out IF identity (l.86) is live, and +3,000/qtr for 12
-        # quarters from 2025Q1 moves GDP +3,075 / +2,901 / +2,932 at
+        # quarters from 2025Q1 moves GDP +3,075 / +2,901 / +2,903 at
         # q1/q4/q12. The OBR's published capital multiplier is 1.0, tapering.
         "caveat": (
             "under the default closure this channel does not transmit: total "
@@ -411,7 +418,7 @@ def obr_shock(
     # A lever whose channel is absent or non-convergent must say so in the
     # payload, not only in a docstring nobody reads over MCP. Of the fiscal
     # instruments here exactly one contains behaviour: CGG is mostly an
-    # accounting identity (multiplier 1.01 rising to 1.05, against the OBR's
+    # accounting identity (multiplier 1.01 rising to 1.04, against the OBR's
     # published 0.6), CGIPS does not transmit under the default closure and
     # is identity passthrough under the opt-in investment closure, TCPRO
     # converges only slowly, VAT barely reaches GDP without the opt-in price

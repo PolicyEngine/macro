@@ -37,9 +37,9 @@ def _obr_response(gdp_m, revision, model_id="obr-macro", url=OBR_URL):
 
 
 # Bank Rate +1 x12, quarter-by-quarter ΔGDP (£m). NEW is the current pin
-# (obr 0fe04c9, October 2026 EFO, every quarter converged); OLD is the
+# (obr 0e44ec8, October 2026 EFO, every quarter converged); OLD is the
 # earlier pin e4d7faa, which the canaries must reject.
-NEW_PIN_PATH = [-128, -356, -381, -406, -431, -449, -464, -475, -484, -491, -497, -503]
+NEW_PIN_PATH = [-128, -356, -381, -406, -431, -446, -461, -472, -481, -488, -494, -500]
 OLD_PIN_PATH = [-121, -200, -300, -431, -460, -470, -480, -482, -470, -450, -430, -416]
 
 
@@ -216,7 +216,7 @@ def test_bank_rate_canary_matches_the_page():
     c = CANARIES["obr_bank_rate_100bp"]
     line = int(dc.quoted_location(c).rsplit(":", 1)[1])
     text = (REPO / c["quoted_at"]).read_text().splitlines()[line - 1]
-    for figure in ("£128m", "£406m", "£475m", "£503m"):
+    for figure in ("£128m", "£406m", "£472m", "£500m"):
         assert figure in text
 
 
