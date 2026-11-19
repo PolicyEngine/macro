@@ -590,7 +590,7 @@ def chart_obr_outturn():
     last = rows[-1][0]
     desc = (
         f"Bar chart with outturn markers, percentage quarter-on-quarter real GDP growth for the four "
-        f"quarters with ONS outturns since anchoring. {parts}. Against the {pin['ons_vintage_label']} "
+        f"quarters the November 2025 EFO study scored. {parts}. Against the {pin['ons_vintage_label']} "
         f"the emulator misses the 2025 outturns by up to {miss[worst_2025]:.2f} points "
         f"({worst_2025}); it misses the {rows[-1][3]:.2f} per cent {last} outturn by "
         f"{miss[last]:.2f} points, and the November EFO it inherits misses it by {efo_miss[last]:.2f}. "

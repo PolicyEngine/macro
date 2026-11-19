@@ -318,7 +318,7 @@ faint, never underlined.
 <div class="stat-row">
   <div class="stat">
     <span class="stat-label"><span class="icon-badge" aria-hidden="true">…svg…</span>GDP fit, anchored</span>
-    <span class="stat-value">0.44%</span>
+    <span class="stat-value">0.24%</span>
     <span class="stat-sub">MAPE vs October 2026 EFO</span>
     <span class="stat-foot"><a class="chip" href="/obr/validation#caveats">By construction</a></span>
   </div>
