@@ -645,11 +645,11 @@ VS_OFFICIAL_SPECS = {
             "<code>papers/obr-macro/figures/efo_march_2026_cpi.csv</code>"
         ),
         "intro": (
-            "Same round, CPI: the model sits close to the EFO through 2027Q3, "
-            "then stays near 3% as the EFO returns towards 2%. The model has a "
-            "unit root and no inflation anchor, so medium-term CPI extends recent "
-            "inflation rather than returning to 2% "
-            '(<a href="/svar/validation#no-anchor">limits</a>).'
+            "Same round, CPI: the model tracks the EFO through 2027Q3, then "
+            "stays near 3% while the EFO returns towards 2%. Nothing in the model "
+            'pulls inflation back to target (a <a href="/glossary#unit-root">unit '
+            "root</a>, no inflation anchor), so its later quarters extend recent "
+            'inflation (<a href="/svar/validation#no-anchor">limits</a>).'
         ),
     },
 }
@@ -1101,8 +1101,9 @@ def render_rounds(card: dict) -> str:
         chips = []
         if i == 0:
             chips.append('<a class="fc-chip fc-chip-retro" href="#retro" title="Archived retroactively; see the note below">Retroactive</a>')
-        chips.append(f'<span class="fc-chip fc-chip-scored">Scored {n}</span>' if n
-                     else '<span class="fc-chip fc-chip-open">Open</span>')
+        # The scored count lives once, in the card's own figures below.
+        if not n:
+            chips.append('<span class="fc-chip fc-chip-open">Open</span>')
         items.append(
             f'        <li class="fc-node {state}{flag}">{gap}'
             '<span class="fc-dot" aria-hidden="true"></span>'
@@ -1315,7 +1316,7 @@ def render_results(card: dict) -> str:
                 cells.append(
                     f'<td class="num"{tip}>{bv:.2f}{bar(bv)}'
                     f'<span class="sb-sub">{b["value"]:.2f}%</span></td>'
-                    if b else '<td class="num">—</td>'
+                    if b else '<td class="num sb-na">—</td>'
                 )
         body.append("          <tr>" + "".join(cells) + "</tr>")
     body += ["          </tbody>", "        </table>", "      </div>"]
@@ -1403,12 +1404,17 @@ def render_home_record(card: dict) -> str:
         if who(d) and not e["in_68"]:
             band += " (the satellite's band carries GDP uncertainty only and is too narrow)"
         tip = esc(f"{label}, {e['period']}: forecast {e['forecast']:.2f}% on {short_date(d['round_id'])}, outturn {e['outturn']:.2f}%; {band}.")
-        chip = ('<span class="lp-res lp-res-in">' + _lucide("check", 14) + "Inside</span>" if e["in_68"]
-                else '<span class="lp-res lp-res-out">' + _lucide("alert", 14) + "Outside</span>")
+        # Word and tone, no icon: the same dot-and-word form as the verdict
+        # chips on the validation scorecards (one chip style site-wide).
+        chip = ('<span class="lp-res lp-res-in">Inside</span>' if e["in_68"]
+                else '<span class="lp-res lp-res-out">Outside</span>')
         rows.append(
             f'            <tr title="{tip}"><th scope="row">{label} <span class="mono lp-rt-q">{e["period"]}</span></th>'
             f'<td>{short_date(d["round_id"])}</td><td class="num">{e["forecast"]:.2f}%</td><td class="num">{e["outturn"]:.2f}%</td><td>{chip}</td></tr>')
     bias = st["bias"]
+    # The head line counts the live forecasts only; say so where the count widens to all scored.
+    retro = scored - st["exante"]
+    lead = f"Counting the {retro} archived retroactively, they" if retro > 0 else "They"
     return "\n".join([
         f'      <div class="sh"><span class="sh-icon">{_lucide("target", 20)}</span>',
         '        <h2 id="record-h">Forecast record</h2>',
@@ -1429,7 +1435,7 @@ def render_home_record(card: dict) -> str:
            f'and is too narrow, so a small miss can land outside it.</p>']
           if any(who(d) and not e["in_68"] for d, e in live) else []),
         f'        <p class="lp-score-foot"><span class="chip chip-warn">{_lucide("alert", 14)}Too few to judge skill yet</span>'
-        f'<span>They ran {"low" if bias < 0 else "high"} on {st["low"] if bias < 0 else scored - st["low"]} of {scored} scored forecasts ({"&minus;" if bias < 0 else "+"}{abs(bias):.2f}pp on average).</span>'
+        f'<span>{lead} ran {"low" if bias < 0 else "high"} on {st["low"] if bias < 0 else scored - st["low"]} of {scored} scored forecasts ({"&minus;" if bias < 0 else "+"}{abs(bias):.2f}pp on average).</span>'
         '<a href="/forecasts#scored">See every score &rarr;</a></p>',
         "      </div>",
     ])

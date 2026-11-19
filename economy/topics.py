@@ -184,9 +184,14 @@ PUBLIC_LABELS = {
 FORECAST_FILE = ROOT / "papers" / "boe-svar" / "figures" / "current_forecast.json"
 # The archived round keeps the filename it was generated under; the satellite's
 # display name is "svar-unemployment satellite".
-UNEMPLOYMENT_ROUND = (
-    ROOT / "forecasts" / "rounds" / "2026-07-28" / "okun-unemployment.json"
-)
+# The newest one, chosen as forecasts/make_open_fans.py chooses it, so the jobs
+# page and the /forecasts fan cannot show different rounds. (It was a typed
+# path to 2026-07-28, which is still the newest today.)
+UNEMPLOYMENT_ROUND = sorted(
+    path
+    for path in (ROOT / "forecasts" / "rounds").glob("*/okun-unemployment.json")
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", path.parent.name)
+)[-1]
 
 
 # --------------------------------------------------------------- data access
@@ -525,8 +530,11 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
         f"{model} median", "var(--series-ours)", digits=2)
     traces.append(med)
     if hist:   # the jump-off outturn, emphasised and labelled
+        # The label sits on the side the outturn line does not arrive from:
+        # above a line that rises into the point, below one that falls into it.
+        falling = len(hist) > 1 and hist[-2]["value"] > hist[-1]["value"]
         traces.append(chartkit.plot_last(hist[-1]["period"], hist[-1]["value"], "var(--series-outturn)", digits=1,
-                                         position="top left"))
+                                         position="bottom left" if falling else "top left"))
     for t in traces:   # unified hover: the quarter heads the box, one line per series
         if t.get("name") and "band" not in t["name"]:
             t["hovertemplate"] = f"{t['name']}: %{{y:.2f}}%<extra></extra>"
@@ -539,8 +547,19 @@ def path_chart(chart_id: str, variable: str, name: str, unit: str,
                         source_short=short, y_gutter=True), spec)
 
 
+def pct(value: float, digits: int = 2) -> str:
+    """A percentage with a real minus sign (U+2212), DESIGN.md §2.3."""
+    return f"{value:.{digits}f}%".replace("-", "\u2212")
+
+
+def pct_range(lo: float, hi: float, digits: int = 2) -> str:
+    """A band as "lo% to hi%": an en dash beside a negative bound reads as a
+    second minus ("-0.09%–2.50%")."""
+    return f"{pct(lo, digits)} to {pct(hi, digits)}"
+
+
 def band_text(values: dict) -> str:
-    return f"{values['lo68']:.1f}%–{values['hi68']:.1f}%"
+    return pct_range(values["lo68"], values["hi68"], 1)
 
 
 # --------------------------------------------------- verified run-it-yourself
@@ -619,7 +638,11 @@ def command(line: str, comment: str = "") -> str:
                 f"(have: {', '.join(sorted(CLI_COMMANDS[name])) or 'none'})"
             )
     rendered = esc(line)
-    if comment:
+    if comment and len(line) + len(comment) > 110:
+        # A long command with a long comment ran off the block (about 120
+        # characters fit at desktop width): the comment goes on its own line.
+        rendered = f'<span class="cm"># {esc(comment)}</span>\n{rendered}'
+    elif comment:
         rendered += f'   <span class="cm"># {esc(comment)}</span>'
     return rendered
 
@@ -649,7 +672,30 @@ def satellite_has_no_surface() -> bool:
 
 # --------------------------------------------------------------- page pieces
 
-TILE_LABELS = {"Monthly gross value added index": "Monthly GVA index"}
+TILE_LABELS = {
+    "Monthly gross value added index": "Monthly GVA index",
+    # Tile labels are five words at most (DESIGN.md §4.2); the full published
+    # title stays in the data table and the "How these are measured" note.
+    "UK nominal par yield, 5 year": "Gilt yield, 5 year",
+    "UK nominal par yield, 10 year": "Gilt yield, 10 year",
+    "UK nominal par yield, 20 year": "Gilt yield, 20 year",
+    "Real gross domestic product, year on year": "Real GDP, year on year",
+    "Consumer price index, all urban consumers, year on year": "CPI, year on year",
+    "Consumer price index, all urban consumers": "CPI index, urban consumers",
+    "Nonfarm payroll employment, year on year": "Payrolls, year on year",
+}
+
+
+def period_label(period: str) -> str:
+    """A stored period as readers see it, in the data store's one format
+    (data/build_page.py): 'Sep 2026', '13 Nov 2026', '2026Q3'."""
+    months = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
+    parts = period.split("-")
+    if len(parts) == 3 and all(part.isdigit() for part in parts):
+        return f"{int(parts[2])} {months[int(parts[1]) - 1]} {parts[0]}"
+    if len(parts) == 2 and all(part.isdigit() for part in parts):
+        return f"{months[int(parts[1]) - 1]} {parts[0]}"
+    return period
 
 
 def _card(heading: str, value: str, note: str, series: dict, period: str,
@@ -667,15 +713,15 @@ def _card(heading: str, value: str, note: str, series: dict, period: str,
         parts = change.split(" ")
         head = " ".join(parts[:2]) if len(parts) > 1 and parts[1] == "y/y" else parts[0]
         number = re.sub(r"[^0-9.]", "", head.split(" ")[0])
-        flat = bool(number) and float(number) == 0
+        flat = head == "unchanged" or (bool(number) and float(number) == 0)
         arrow = "" if flat else ("\u25b2" if head.startswith("+") else ("\u25bc" if head.startswith("\u2212") else ""))
         if flat:
             head = "no change"
         chip = f'<span class="stat-chg" title="{esc(change)}">{arrow} {esc(head)}</span>'
     return f"""      <div class="stat tp-stat">
-        <span class="stat-label"><span class="stat-ic" aria-hidden="true">{site_nav.icon("activity", 14)}</span>{heading}<details class="stat-meta"><summary aria-label="About this reading">{site_nav.icon("info", 14)}</summary><span class="stat-meta-pop">{esc(period)} · vintage {esc(series["vintage"])}<br>{note}<br><a href="{esc(series["url"])}">{esc(series["source"])} · {esc(series["cdid"])}</a></span></details></span>
+        <span class="stat-label"><span class="stat-ic" aria-hidden="true">{site_nav.icon("activity", 14)}</span>{heading}<details class="stat-meta"><summary aria-label="About this reading">{site_nav.icon("info", 14)}</summary><span class="stat-meta-pop">{esc(period_label(period))} · vintage {esc(series["vintage"])}<br>{note}<br><a href="{esc(series["url"])}">{esc(series["source"])} · {esc(series["cdid"])}</a></span></details></span>
         <span class="stat-value">{value}</span>
-        <span class="stat-sub">{esc(period)} &middot; {chip or "latest"}</span>
+        <span class="stat-sub">{esc(period_label(period))}{" &middot; " + chip if chip else ""}</span>
       </div>"""
 
 
@@ -699,16 +745,17 @@ def stat_card(series: dict, kind: str | None = None, change: str = "") -> str:
             change,
         )
     now, before, unmatched = latest_year_on_year(series)
-    change = 100 * (now["value"] / before["value"] - 1)
+    rate = 100 * (now["value"] / before["value"] - 1)
     return _card(
         esc(f"{label(series)}, year on year"),
-        f"{change:+.1f}%",
+        f"{rate:+.1f}%".replace("-", "\u2212"),
         f'derived here, not stored: {esc(stored(now["value"]))} in '
         f'{esc(now["period"])} against {esc(stored(before["value"]))} in '
         f'{esc(before["period"])} &middot; {esc(series["units"])}'
         + (f".{no_year_earlier(series, unmatched)}" if unmatched else ""),
         series,
         now["period"],
+        change,
     )
 
 
@@ -779,11 +826,12 @@ def movement(name: str) -> str:
         expected = previous_period(rates[-1]["period"])
         if periods == 1 and before["period"] != expected:
             against = (
-                f"{esc(before['period'])}, the latest earlier rate "
-                f"({esc(expected)} has none)"
+                f"{esc(period_label(before['period']))}, the latest earlier rate "
+                f"({esc(period_label(expected))} has none)"
             )
     elif kind == "pp":
-        change = f"{now['value'] - before['value']:+.{digits}f}pp"
+        gap = now["value"] - before["value"]
+        change = "unchanged" if round(gap, digits) == 0 else f"{gap:+.{digits}f}pp"
     elif kind == "pct":
         change = f"{100 * (now['value'] / before['value'] - 1):+.{digits}f}%"
     elif kind == "thousands":
@@ -795,7 +843,7 @@ def movement(name: str) -> str:
     if change.startswith("-"):
         change = "\u2212" + change[1:]
     if against is None:
-        against = f"{window} ({esc(before['period'])})"
+        against = f"{window} ({esc(period_label(before['period']))})"
     return f"{esc(label(series))} {change} against {against}"
 
 
@@ -831,7 +879,20 @@ def stands(cards: tuple[tuple[str, str | None], ...], note: str,
     distinct series the topic reads, which is what the movement note and the
     provenance table are keyed on.
     """
-    rendered = "\n".join(stat_card(load(name), kind, _change_of(name)) for name, kind in cards)
+    # A series shown twice (a derived rate and the level it came from) moves
+    # in its rate, so the change chip sits on the rate tile: on the level
+    # tile it read as a change in the level, and for us_cpi it described a
+    # different month from the one the level tile is dated. A level compared
+    # with a year earlier (payrolls) keeps its chip on the level tile.
+    derived = {name for name, kind in cards if kind is not None}
+
+    def chip(name: str, kind: str | None) -> str:
+        rate_move = MOVEMENT.get(name, ("",))[0] in ("yoy_pp", "yoy12_pp")
+        if name in derived and (kind is None) == rate_move:
+            return ""   # the move is in the rate: not on the level tile, and vice versa
+        return _change_of(name)
+
+    rendered = "\n".join(stat_card(load(name), kind, chip(name, kind)) for name, kind in cards)
     measured = (
         '    <details class="about tg-info"><summary>How these are measured</summary>'
         f'<p class="economy-method">{note}</p></details>'
@@ -871,7 +932,7 @@ def data_rows(names: tuple[str, ...]) -> str:
 def data_layer(names: tuple[str, ...], closing: str) -> str:
     return f"""    <div class="prose">
       <div class="table-scroll">
-        <table>
+        <table data-stack="no">
           <caption>Each value is read from the vintage file linked here.</caption>
           <thead><tr><th scope="col">Series</th><th scope="col">Publisher</th><th scope="col">Coverage</th><th scope="col">Snapshots</th><th scope="col">This vintage</th><th scope="col">Next release</th></tr></thead>
           <tbody>
@@ -1018,16 +1079,16 @@ def growth_model() -> str:
         rows.append(
             "          <tr>"
             f'<th scope="row">{esc(period)}</th>'
-            f"<td>{values['gdp']['median']:.2f}%</td>"
-            f"<td>{values['gdp']['lo68']:.2f}%–{values['gdp']['hi68']:.2f}%</td>"
-            f"<td>{values['gdp']['lo90']:.2f}%–{values['gdp']['hi90']:.2f}%</td>"
+            f"<td>{pct(values['gdp']['median'])}</td>"
+            f"<td>{pct_range(values['gdp']['lo68'], values['gdp']['hi68'])}</td>"
+            f"<td>{pct_range(values['gdp']['lo90'], values['gdp']['hi90'])}</td>"
             "</tr>"
         )
     return f"""    <div class="prose">
       <p class="model-chips"><a class="mchip" href="/svar">{site_nav.icon("activity", 14)}BoE SVAR</a><span class="mchip-t">forecasts UK GDP · round {esc(forecast["generated"])} · data to {esc(forecast["data_edge"])}</span></p>
       <figure class="vchart-figure">
 {chartkit.attach_table(path_chart("topic-gdp-path", "gdp", "UK real GDP", "% change on a year earlier", open_rows[:5], forecast["generated"], history=yoy(facts["gdp"], 4)[-8:], vintage=facts["gdp"]["vintage"], history_note="ABMI, growth derived from the stored level,"), f"""      <div class="table-scroll">
-        <table>
+        <table data-stack="no">
           <caption>BoE SVAR year-on-year real GDP growth: median and predictive ranges, from the archived round. Bands are raw model quantiles; the fans on the <a href="/forecasts#open">track record</a> are re-calibrated to measured coverage.</caption>
           <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68%</th><th scope="col">90%</th></tr></thead>
           <tbody>
@@ -1037,9 +1098,9 @@ def growth_model() -> str:
       </div>
 """)}
       </figure>
-      <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Predictive validation: {esc(level_label(quality["level"]))}.</strong>
+      <p class="callout"><span><strong>Predictive validation: {esc(level_label(quality["level"]))}.</strong>
         {esc(verdict_line(quality["evidence"]))}
-        <a href="/svar/validation">Validation →</a>
+        <a href="/svar/validation">Validation →</a></span>
       </p>
       <details class="about tg-limits">
         <summary>Its limits</summary>
@@ -1050,7 +1111,7 @@ def growth_model() -> str:
         f"Estimated on {esc(model['estimation_sample'])} but conditioned on {esc(model['data_edge'])} data, so the estimation sample stops well short of the quarters being forecast.",
     ])}
       </details>
-      <p class="link-row">{site_nav.icon("check-circle", 16)}<a href="/forecasts#scored">Every round is archived before its outturn and scored: see the scoreboard</a></p>
+      <p class="link-row">{site_nav.icon("archive", 16)}<a href="/forecasts#scored">Every round is archived before its outturn and scored: see the scoreboard</a></p>
     </div>"""
 
 
@@ -1058,7 +1119,7 @@ def growth_run() -> str:
     return f"""    <div class="prose">
       <p>
         The forecast above is one command. It re-estimates and re-identifies the
-        model, so it takes minutes rather than seconds ({esc(MODELS["boe-svar"]["runtime"])}).
+        model: {esc(MODELS["boe-svar"]["runtime"])}.
       </p>
 {codeblock(
         command("pe-macro forecast --horizons 8", "GDP and CPI, medians with 68% and 90% bands"),
@@ -1121,9 +1182,9 @@ def inflation_model() -> str:
         rows.append(
             "          <tr>"
             f'<th scope="row">{esc(period)}</th>'
-            f"<td>{values['cpi']['median']:.2f}%</td>"
-            f"<td>{values['cpi']['lo68']:.2f}%–{values['cpi']['hi68']:.2f}%</td>"
-            f"<td>{values['cpi']['lo90']:.2f}%–{values['cpi']['hi90']:.2f}%</td>"
+            f"<td>{pct(values['cpi']['median'])}</td>"
+            f"<td>{pct_range(values['cpi']['lo68'], values['cpi']['hi68'])}</td>"
+            f"<td>{pct_range(values['cpi']['lo90'], values['cpi']['hi90'])}</td>"
             "</tr>"
         )
     later = [(q, v["cpi"]["median"]) for q, v in facts["forecast"]["forecast"].items()
@@ -1145,7 +1206,7 @@ def inflation_model() -> str:
       <p class="model-note">{reaches}</p>
       <figure class="vchart-figure">
 {chartkit.attach_table(path_chart("topic-cpi-path", "cpi", "UK CPI", "% change on a year earlier", open_rows[:5], facts["forecast"]["generated"], history=facts["cpi"]["observations"][-8:], vintage=facts["cpi"]["vintage"], history_note="D7G7,"), f"""      <div class="table-scroll">
-        <table>
+        <table data-stack="no">
           <caption>BoE SVAR year-on-year CPI inflation: median and predictive ranges, from the archived round. Bands are raw model quantiles; the fans on the <a href="/forecasts#open">track record</a> are re-calibrated to measured coverage.</caption>
           <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68%</th><th scope="col">90%</th></tr></thead>
           <tbody>
@@ -1155,9 +1216,9 @@ def inflation_model() -> str:
       </div>
 """)}
       </figure>
-      <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Predictive validation: {esc(level_label(quality["level"]))}.</strong>
+      <p class="callout"><span><strong>Predictive validation: {esc(level_label(quality["level"]))}.</strong>
         {esc(verdict_line(quality["evidence"]))}
-        <a href="/svar/validation">Validation →</a>
+        <a href="/svar/validation">Validation →</a></span>
       </p>
       <details class="about tg-limits">
         <summary>Its limits</summary>
@@ -1242,15 +1303,15 @@ def jobs_table(facts: dict) -> str:
         rows.append(
             "          <tr>"
             f'<th scope="row">{esc(period)}</th>'
-            f"<td>{v['median']:.2f}%</td>"
-            f"<td>{v['lo68']:.2f}%–{v['hi68']:.2f}%</td>"
-            f"<td>{v['lo90']:.2f}%–{v['hi90']:.2f}%</td>"
+            f"<td>{pct(v['median'])}</td>"
+            f"<td>{pct_range(v['lo68'], v['hi68'])}</td>"
+            f"<td>{pct_range(v['lo90'], v['hi90'])}</td>"
             "</tr>"
         )
     return f"""      <details class="about tg-table">
         <summary>Quarter by quarter</summary>
       <div class="table-scroll">
-        <table>
+        <table data-stack="no">
           <caption>BoE SVAR unemployment satellite, UK unemployment rate: median and raw model bands, from the archived round.</caption>
           <thead><tr><th scope="col">Quarter</th><th scope="col">Median</th><th scope="col">68%</th><th scope="col">90%</th></tr></thead>
           <tbody>
@@ -1279,14 +1340,28 @@ def jobs_model() -> str:
     round_file = facts["round"]
     model = round_file["model"]
     information = round_file["information_set"]
-    caveats = limits_list([esc(caveat) for caveat in round_file["caveats"]])
     registry = (
-        "The satellite has no entry in the capability registry that backs the "
-        "other model pages, and no CLI command or MCP tool of its own: its "
-        "limits are the ones the archived round file states, quoted above."
+        "The satellite has no entry in the capability registry and no CLI "
+        "command or MCP tool of its own, so the limits above are the archived "
+        'round file\'s, verbatim (<a href="/forecasts#rounds">archived rounds</a>).'
         if satellite_has_no_surface()
         else "The satellite is exposed in the run surface below."
     )
+    # The one visible verdict line (DESIGN.md §1.2), as on the growth and
+    # inflation pages. It restates two of the round file's own caveats, so it
+    # is printed only while the round still states them.
+    stated = " ".join(round_file["caveats"])
+    if "GDP-forecast uncertainty only" not in stated or "capped at 4 quarters" not in stated:
+        raise RuntimeError(
+            f"{UNEMPLOYMENT_ROUND.name}: the round no longer states the two "
+            "caveats the jobs page's verdict line summarises; rewrite the line"
+        )
+    verdict = "They carry GDP-forecast uncertainty only, and the forecast stops at four quarters."
+    caveats = limits_list([esc(caveat) for caveat in round_file["caveats"]] + [
+        registry,
+        "Vacancies and average weekly earnings have no model view: they are "
+        "outturns, shown because they move before the unemployment rate does.",
+    ])
     return f"""    <div class="prose">
       <p class="model-chips"><a class="mchip" href="/svar">{site_nav.icon("activity", 14)}BoE SVAR satellite</a><span class="mchip-t">maps the GDP forecast onto UK unemployment</span></p>
       <details class="about tg-layers"><summary>How the satellite works</summary>
@@ -1304,8 +1379,12 @@ def jobs_model() -> str:
       <figure class="vchart-figure">
 {chartkit.attach_table(jobs_chart(facts), jobs_table(facts))}
       </figure>
-      <details class="about">
-        <summary>The round states its own limits, and they are strict</summary>
+      <p class="callout"><span><strong>Bands too narrow.</strong>
+        {verdict}
+        <a href="/svar/validation#rolling">Measured coverage →</a></span>
+      </p>
+      <details class="about tg-limits">
+        <summary>Its limits</summary>
 {caveats}
       </details>
       <details class="about">
@@ -1315,14 +1394,6 @@ def jobs_model() -> str:
         {esc(model["description"])}
       </p>
       </details>
-      <p class="callout">{registry}
-        <a href="/forecasts">See the archived rounds →</a>
-      </p>
-      <p class="chooser-note">
-        Vacancies and average weekly earnings above have no model view at all.
-        They are outturns, shown because they move before the unemployment rate
-        does — not because anything here forecasts them.
-      </p>
     </div>"""
 
 
@@ -1368,16 +1439,13 @@ def rates_model() -> str:
       <p class="model-chips"><span class="mchip mchip-none">{site_nav.icon("x-circle", 14)}No forecast</span><span class="mchip-t">No model in this suite forecasts Bank Rate or gilt yields.</span></p>
       <details class="about tg-layers"><summary>What each model covers instead</summary>
 {limits_list([
-        f"<a href=\"/svar\">BoE SVAR</a> outputs {registry_terms(svar['outputs'])} — no interest-rate path is among them.",
+        f"<a href=\"/svar\">BoE SVAR</a> outputs {registry_terms(svar['outputs'])}: no interest-rate path is among them.",
         f"<a href=\"/pe\">PolicyEngine microsimulation</a> lists {esc(microsim['cannot_answer'][2])} in its own cannot-answer field.",
-        f"<a href=\"/olg\">{site_name('og-uk')}</a> does report an interest rate, but only as part of a {esc(og['horizon'].split(';')[0])}, and it cannot answer a {esc(og['cannot_answer'][0])}. A long-run comparative static is not a market view.",
+        f"<a href=\"/olg\">{SHORT_NAMES['og-uk']}</a> does report an interest rate, but only as part of a {esc(og['horizon'].split(';')[0])}, and it cannot answer a {esc(og['cannot_answer'][0])}. A long-run comparative static is not a market view.",
         f"<a href=\"/frb-us\">FRB/US</a> produces a {esc(frbus['outputs'][-1])}, for the {esc(', '.join(frbus['geography']).upper())} only.",
     ])}
       </details>
-      <p class="callout">
-        The numbers above stand alone: observed data with no forecast beside them.
-        <a href="/models">See what the models do cover →</a>
-      </p>
+      <p class="link-row">{site_nav.icon("models", 16)}<a href="/models">Outturns only. See what the models cover</a></p>
     </div>"""
 
 
@@ -1449,11 +1517,11 @@ def public_finances_model() -> str:
         ("landmark", '<strong><a href="/obr">OBR emulator</a>: shock questions, not forecasts.</strong>'),
         ("list", f"Outputs: {registry_terms(model['outputs'])}; not borrowing or debt."),
         ("x-circle", "No reform incidence or borrowing."),
-        ("clock", f"Baseline: {esc(model['data_vintage'])}; scenarios are deviations from it."),
+        ("clock", f"Baseline: {esc(model['data_vintage'].removesuffix(' baseline'))}; scenarios are deviations from it."),
     ])}
-      <p class="verdict-chip">{site_nav.icon("alert", 14)}<strong>Predictive validation: {esc(level_label(predictive["level"]))}.</strong>
+      <p class="callout"><span><strong>Predictive validation: {esc(level_label(predictive["level"]))}.</strong>
         <strong>Policy counterfactuals: {esc(level_label(counterfactual["level"]))}.</strong>
-        <a href="/obr/validation">Validation →</a>
+        <a href="/obr/validation">Validation →</a></span>
       </p>
       <p class="link-row">{site_nav.icon("scale", 16)}<a href="/economy/topics/reform">Costing lives on tax and benefit reform</a></p>
     </div>"""
@@ -1473,7 +1541,7 @@ def public_finances_run() -> str:
       <p>
         Over MCP: {tool("list_reform_variables")} and {tool("obr_shock")}. The
         result carries the per-quarter GDP, consumption and investment
-        deviations — and nothing about borrowing, for the reason stated above.
+        deviations, and nothing about borrowing, for the reason stated above.
         <a href="/connect">Connect a client →</a>
       </p>
     </div>"""
@@ -1532,7 +1600,7 @@ def reform_stands() -> str:
                    [("Single year", microsim["horizon"]), ("Seconds to minutes", microsim["runtime"]),
                     ("Hosted", ", ".join(microsim["access"]))]),
         route_card("landmark", "Macro feedback", '<a href="/obr">OBR emulator</a>',
-                   "Adds second-round GDP, consumption and investment effects.", "Checked for income tax and NICs only; no corporation tax",
+                   "Adds second-round GDP, consumption and investment effects.", "Checked: income tax and NICs",
                    [("3 to 5 years", obr["horizon"]), ("10+ min for a reform", obr["runtime"]),
                     ("Hosted", ", ".join(obr["access"]))]),
         route_card("hourglass", "Long-run dynamic", '<a href="/olg">OG-UK + microsimulation</a>',
@@ -1574,7 +1642,7 @@ def reform_run() -> str:
         Over MCP: {tool("list_reform_parameters")}, {tool("score_reform")},
         {tool("population_reform_impact")} for the population costing,
         {tool("household_reform_impact")} for a single household, and
-        {tool("dynamic_reform_impact")} for the {site_name("og+microsim")} overlay.
+        {tool("dynamic_reform_impact")} for the OG-UK + microsimulation overlay.
         {tool("recommend_model")} routes a question to a model, or refuses.
         <a href="/connect">Connect a client →</a>
       </p>
@@ -1860,6 +1928,28 @@ LONGBASE_FILE = (
 )
 
 
+def longbase_meta() -> dict:
+    """The baseline's vintage and extraction date, from the CSV's own header.
+
+    Both used to be typed into this generator ("October 2026 vintage",
+    "extracted 2026-07-29"); the file was re-extracted at a new model pin and
+    the typed date went stale. Raises if the header stops stating either.
+    """
+    head = " ".join(
+        line[1:].strip()
+        for line in LONGBASE_FILE.read_text().splitlines()
+        if line.startswith("#")
+    )
+    vintage = re.search(r"FRB/US ([A-Z][a-z]+ \d{4}) LONGBASE", head)
+    extracted = re.search(r"Extracted (\d{4}-\d{2}-\d{2})", head)
+    if vintage is None or extracted is None:
+        raise RuntimeError(
+            f"{LONGBASE_FILE.name}: the header no longer states the LONGBASE "
+            "vintage and extraction date that the US topic pages print"
+        )
+    return {"vintage": vintage.group(1), "extracted": extracted.group(1)}
+
+
 def longbase() -> list[dict]:
     """The committed FRB/US LONGBASE conditioning baseline, near-term path."""
     lines = [
@@ -1942,10 +2032,10 @@ def us_model_limits(extra: list[str] | None = None) -> str:
     hank_quality = hank["quality"]["predictive_validation"]
     return limits_list([
         f'<a href="/frb-us">FRB/US</a> answers '
-        f'{registry_terms(frbus["question_types"])} only; predictive validation '
+        f'{registry_terms(frbus["question_types"])} questions only; predictive validation '
         f'{registry_terms([frbus_quality["level"]])} (its baseline is illustrative, not a Fed forecast).',
         f'<a href="/us-hank">US HANK</a> answers '
-        f'{registry_terms(hank["question_types"])}; it cannot answer '
+        f'{registry_terms(hank["question_types"])} questions; it cannot answer '
         f'{esc(hank["cannot_answer"][0])}. Predictive validation '
         f'{registry_terms([hank_quality["level"]])}: it makes no predictive claims.',
     ] + (extra or []))
@@ -1976,14 +2066,13 @@ def longbase_layer(column: str, last_observed: str) -> str:
             "          <tr>"
             f'<th scope="row">{esc(row["quarter"])}</th>'
             f"<td>{row[column]:.2f}{unit}</td>"
-            f"<td>{'outturn already published' if published else 'no outturn yet'}</td>"
-            "<td>none — the baseline carries no interval</td>"
+            f"<td>{'published' if published else 'not yet'}</td>"
             "</tr>"
         )
     return f"""      <div class="table-scroll">
-        <table>
-          <caption>FRB/US October 2026 LONGBASE, {esc(description)}. This is the conditioning baseline that FRB/US shock experiments deviate from; it is not scored on <a href="/forecasts">the forecast record</a>.</caption>
-          <thead><tr><th scope="col">Quarter</th><th scope="col">Baseline</th><th scope="col">Status against the outturn</th><th scope="col">Uncertainty</th></tr></thead>
+        <table data-stack="no">
+          <caption>FRB/US {esc(longbase_meta()["vintage"])} LONGBASE, {esc(description)}. This is the conditioning baseline that FRB/US shock experiments deviate from: it carries no uncertainty interval and is not scored on <a href="/forecasts">the forecast record</a>.</caption>
+          <thead><tr><th scope="col">Quarter</th><th scope="col">Baseline</th><th scope="col">Outturn</th></tr></thead>
           <tbody>
 {chr(10).join(rows)}
           </tbody>
@@ -1991,11 +2080,11 @@ def longbase_layer(column: str, last_observed: str) -> str:
       </div>"""
 
 
-LONGBASE_LABEL = "FRB/US LONGBASE baseline (Fed staff, October 2026 vintage)"
+LONGBASE_LABEL = f"FRB/US LONGBASE baseline (Fed staff, {longbase_meta()['vintage']} vintage)"
 LONGBASE_SOURCE = (
     '<a href="https://github.com/PolicyEngine/macro/blob/main/'
     'papers/frb-us/figures/longbase_baseline_yoy.csv">FRB/US LONGBASE</a> '
-    "(extracted 2026-07-29); no bands"
+    f"(extracted {longbase_meta()['extracted']}); no bands"
 )
 
 
@@ -2125,6 +2214,51 @@ def us_path_chart(chart_id: str, name: str, unit: str,
     legend = [("ln-out" if cls == "vc-out-line" else "ln-s3", label) for cls, label, _ in lines]
     if baseline:
         legend.append(("ln-s2", LONGBASE_LABEL))
+
+    def label_position(obs: list[dict]) -> str | None:
+        """Where the last point's value label touches no line, or None.
+
+        The baseline is not joined to the outturn, so it can pass on either
+        side of the last point; a fixed corner put the label on a line on two
+        of the three charts. Each candidate corner is scored by how much of
+        any drawn line falls inside the label's box, at a phone and a desktop
+        plot width, and the clearest wins (ties go to the first listed). If
+        every corner touches a line at one of the two widths the point is
+        drawn without a label: its value is the stat tile above the chart and
+        the hover, and a label run through by a line is worse than none.
+        """
+        polys = [[(month_index(o["period"]), o["value"]) for o in series] for _, _, series in lines]
+        if baseline:
+            polys.append([(month_index(b["period"]), b["value"]) for b in baseline])
+        ta, tb = t0 - 0.04 * (t1 - t0), t1 + 0.04 * (t1 - t0)
+        last_t, last_v = month_index(obs[-1]["period"]), obs[-1]["value"]
+        box_w, box_h, plot_h = 36, 14, 252
+        best = None
+        for position in ("middle right", "top right", "bottom right", "top center",
+                         "bottom center", "top left", "bottom left"):
+            vert, horiz = position.split(" ")
+            hits = 0
+            for plot_px in (270, 900):
+                def px(t: float) -> float:
+                    return plot_px * (t - ta) / (tb - ta)
+
+                def py(v: float) -> float:
+                    return plot_h * (1 - (v - lo) / (hi - lo))
+
+                cx, cy = px(last_t), py(last_v)
+                x0 = cx + 8 if horiz == "right" else cx - 8 - box_w if horiz == "left" else cx - box_w / 2
+                y0 = cy - 7 - box_h if vert == "top" else cy + 7 if vert == "bottom" else cy - box_h / 2
+                for poly in polys:
+                    for (a_t, a_v), (b_t, b_v) in zip(poly, poly[1:]):
+                        ax, ay, bx, by = px(a_t), py(a_v), px(b_t), py(b_v)
+                        steps = max(2, int(abs(bx - ax) + abs(by - ay)) // 2)
+                        for k in range(steps + 1):
+                            qx, qy = ax + (bx - ax) * k / steps, ay + (by - ay) * k / steps
+                            if x0 - 3 <= qx <= x0 + box_w + 3 and y0 - 3 <= qy <= y0 + box_h + 3:
+                                hits += 1
+            if best is None or hits < best[0]:
+                best = (hits, position)
+        return best[1] if best[0] == 0 else None
     # Interactive version: the same lines, gaps kept as breaks, the LONGBASE
     # path dashed with its quarter dots.
     suffix = "%" if "%" in unit else ""
@@ -2141,8 +2275,13 @@ def us_path_chart(chart_id: str, name: str, unit: str,
         dp = 2 if "rates" in chart_id else 1
         traces.append(chartkit.plot_line(pts, name_, color, width=2.25 if cls == "vc-out-line" else 1.75,
                                          unit=suffix, digits=dp))
-        traces.append(chartkit.plot_last(obs[-1]["period"], obs[-1]["value"], color, unit=suffix, digits=dp,
-                                         position="bottom left" if baseline else "middle right"))
+        where = label_position(obs)
+        last = chartkit.plot_last(obs[-1]["period"], obs[-1]["value"], color, unit=suffix, digits=dp,
+                                  position=where or "middle right")
+        if where is None:
+            last["mode"] = "markers"
+            del last["text"], last["textposition"], last["textfont"]
+        traces.append(last)
     if baseline:
         base = chartkit.plot_line([(b["period"], b["value"]) for b in baseline], "LONGBASE baseline",
                                   "var(--series-official)", dash="dash", width=2, unit=suffix, digits=2)
@@ -2193,7 +2332,7 @@ def us_baseline_chart(chart_id: str, name: str, unit: str, column: str,
         chart_id, name, unit,
         [("vc-out-line", f"Outturn, FRED snapshot {esc(series['vintage'])}", outturns)],
         baseline=baseline, zero=False, source=source,
-        source_short=f"{FRED_PUBLISHER.get(series['cdid'], 'FRED')} via FRED · FRB/US LONGBASE, 29 Jul 2026",
+        source_short=f"{FRED_PUBLISHER.get(series['cdid'], 'FRED')} via FRED · FRB/US LONGBASE, {longbase_meta()['vintage']}",
         notes=gap_note(outturns) + ["Baseline quarters are drawn at their middle month."]
         if "Q" not in outturns[0]["period"] else gap_note(outturns))
 
@@ -2269,8 +2408,8 @@ def us_model_items(extra: list[tuple[str, str]] | None = None) -> str:
     hank = MODELS["us-hank"]["quality"]["predictive_validation"]["level"]
     return icon_items([
         ("x-circle", "<strong>No US forecaster in the suite.</strong>"),
-        ("building", f'<a href="/frb-us">FRB/US</a>: shock responses under a declared policy rule · {esc(level_label(frbus))}'),
-        ("users", f'<a href="/us-hank">US HANK</a>: shock responses around a steady state · {esc(level_label(hank))}'),
+        ("building", f'<a href="/frb-us">FRB/US</a>: shock responses under a declared policy rule · predictive validation {registry_terms([frbus])}'),
+        ("users", f'<a href="/us-hank">US HANK</a>: shock responses around a steady state · predictive validation {registry_terms([hank])}'),
     ] + (extra or []))
 
 
@@ -2278,7 +2417,7 @@ def us_growth_model() -> str:
     facts = us_growth_facts()
     frbus = MODELS["frb-us"]
     return f"""    <div class="prose">
-{us_model_items([("forecasts", "Baseline: FRB/US LONGBASE (Fed staff, October 2026), with no bands.")])}
+{us_model_items([("forecasts", f"Baseline: FRB/US LONGBASE (Fed staff, {longbase_meta()['vintage']}), with no bands.")])}
       <figure class="vchart-figure">
 {chartkit.attach_table(us_baseline_chart("us-topic-gdp-path", "US real GDP", "% change on a year earlier", "gdp_yoy_pct", facts["gdp"], yoy(facts["gdp"], 4)[-8:], ", growth derived from the stored level"), longbase_layer("gdp_yoy_pct", facts["now"]["period"]))}
       </figure>
@@ -2300,7 +2439,7 @@ def us_growth_run() -> str:
         command("pe-macro frbus-summary", "implementation, provenance and scope limits"),
         command("pe-macro frbus-variables", "the shockable FRB/US levers and their units"),
         command("pe-macro frbus-shock --var rffintay_aerr --shock 1.0 --horizon 20", "output response to a 1pp policy surprise"),
-        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "the HANK counterpart: an easing shock to the Taylor-rule intercept, as an IRF"),
+        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "HANK: an easing shock to the Taylor-rule intercept (quarterly policy rate about 13bp lower on impact)"),
     )}
 {us_run_note()}
     </div>"""
@@ -2368,7 +2507,7 @@ def us_inflation_model() -> str:
       <details class="about tg-layers"><summary>Why there is no US price path</summary>
       <p>Only <a href="/svar">BoE SVAR</a> forecasts, and it is UK-only. Both US models report a price response, and neither reports a price <em>path</em>:</p>
 {us_model_limits([
-        f'us-hank outputs {registry_terms(hank["outputs"])} as '
+        f'US HANK outputs {registry_terms(hank["outputs"])} as '
         f'{esc(hank["horizon"])} around a calibrated steady state, with '
         f'uncertainty {esc(hank["uncertainty"])}.',
         "Neither model is scored against an inflation outturn anywhere on this "
@@ -2391,7 +2530,7 @@ def us_inflation_run() -> str:
 {codeblock(
         command("pe-macro frbus-shock --var rffintay_aerr --shock 1.0 --horizon 20", "price response to a 1pp policy surprise"),
         command("pe-macro hank-summary", "shock catalogue, units and scope limits"),
-        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "an easing shock to the Taylor-rule intercept (about 13bp off the quarterly policy rate on impact), quarterly IRF"),
+        command("pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61", "HANK: an easing shock to the Taylor-rule intercept (quarterly policy rate about 13bp lower on impact)"),
     )}
 {us_run_note()}
     </div>"""
@@ -2496,7 +2635,7 @@ def us_rates_model() -> str:
 {icon_items([
         ("x-circle", "<strong>No model forecasts the funds rate or Treasury yields.</strong>"),
         ("building", '<a href="/frb-us">FRB/US</a>: the funds rate only as a policy-rule response to a shock.'),
-        ("users", '<a href="/us-hank">US HANK</a>: a model-consistent real rate, not a market yield.'),
+        ("users", '<a href="/us-hank">US HANK</a>: model-consistent policy and real rates in a shock response, not a market yield.'),
         ("calculator", f'<a href="/pe">Microsimulation</a>: cannot answer {esc(microsim["cannot_answer"][2])}.'),
         ("table", "No model of the Treasury curve at any maturity."),
     ])}
@@ -3076,7 +3215,7 @@ def page(topic: dict) -> str:
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
 <link rel="stylesheet" href="{site_nav.STYLE_HREF}" />
-<link rel="stylesheet" href="/economy/topic-page.css?v=20" />
+<link rel="stylesheet" href="/economy/topic-page.css?v=23" />
 </head>
 <body class="doc economy-page">
 <a class="skip-link" href="#top">Skip to main content</a>

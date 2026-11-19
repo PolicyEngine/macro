@@ -99,7 +99,7 @@ def test_us_inflation_note_survives_a_newest_month_with_no_year_earlier(october_
 
 def test_us_inflation_card_names_the_month_its_rate_is_for(october_cpi):
     card = topics.stat_card(october_cpi, "yoy")  # raised RuntimeError before the fix
-    assert '<span class="stat-sub">2026-09 &middot;' in card
+    assert '<span class="stat-sub">Sep 2026' in card  # the tile face names its month in the reader format
     assert "2026-10, has no year-on-year rate here" in card
 
 
@@ -116,12 +116,12 @@ def test_movement_does_not_call_a_two_month_gap_the_prior_month(monkeypatch):
     monkeypatch.setattr(topics, "load", lambda name: series)
     text = topics.movement("us_cpi")
     assert "the prior month" not in text
-    assert "against 2026-09, the latest earlier rate (2026-10 has none)" in text
+    assert "against Sep 2026, the latest earlier rate (Oct 2026 has none)" in text
 
 
 def test_movement_wording_is_unchanged_when_the_prior_month_has_a_rate(october_cpi):
     text = topics.movement("us_cpi")
-    assert text.endswith("against the prior month (2026-08)")
+    assert text.endswith("against the prior month (Aug 2026)")
 
 
 def test_previous_period():

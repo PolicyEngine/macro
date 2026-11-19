@@ -20,8 +20,8 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=50" />
-<link rel="stylesheet" href="/models/model-pages.css?v=23" />
+<link rel="stylesheet" href="/style.css?v=51" />
+<link rel="stylesheet" href="/models/model-pages.css?v=24" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -77,12 +77,16 @@
       <div class="scrolly-steps">
       <div class="meth-step" id="code-1" data-step="0">
         <div class="meth-step-head"><span class="meth-step-num mono">1</span><h3>Ask the hosted server</h3></div>
-        <p>The <a href="/connect">hosted MCP server</a> has three tools: <code>hank_shock</code> runs a stylised shock, optionally with the distributional block; <code>hank_summary</code> lists shock kinds, units, variants and scope limits, with no solve; <code>hank_shock_incidence</code> passes the wage and labour responses to the US microsimulation (<a href="/us-hank#pe-bridge">the join</a>).</p>
+        <p>The <a href="/connect">hosted MCP server</a> has three tools:</p>
         <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>More detail</strong><small>3 points</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
-          <p>The first call per variant is slow; the <a href="/us-hank#card">model card</a> gives the timings.</p>
-        
+<ul>
+          <li><code>hank_shock</code> runs a stylised shock, optionally with the distributional block.</li>
+          <li><code>hank_summary</code> lists shock kinds, units, variants and scope limits, with no solve.</li>
+          <li><code>hank_shock_incidence</code> passes the wage and labour responses to the US microsimulation (<a href="/us-hank#pe-bridge">the join</a>).</li>
+        </ul>
+        <p>The first call per variant pays the solves (<a href="/us-hank#card">timings</a>); later calls are instant.</p>
   </div>
 </details>
       </div>
@@ -95,13 +99,33 @@ pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61 --distribu
       </div>
 
       <div class="meth-step" id="code-3" data-step="2">
-        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Know the units and variants</h3></div>
-        <p><code>monetary</code>: level change in the <em>quarterly</em> Taylor-rule intercept (&minus;0.0025 is 25bp per quarter, about 100bp annualised; the quarterly policy rate itself falls only about 13bp on impact at &rho;&nbsp;0.61, because the rule responds to the inflation the cut causes); <code>fiscal_spending</code>: level change in G (steady-state output is 1, so 0.01 = 1% of GDP); <code>productivity</code>: level change in TFP (steady-state TFP is 0.468, so 0.01 is a 2.14% rise, not 1%).</p>
+        <div class="meth-step-head"><span class="meth-step-num mono">3</span><h3>Know the units and outputs</h3></div>
+        <p><code>size</code> is a level change in the instrument:</p>
         <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>More detail</strong><small>table, 6 points</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
-          <p><code>variant</code> selects the paper's <code>two_asset</code> model (the default) or a fast <code>one_asset</code> textbook variant: no capital, so no investment response, and monetary and productivity shocks only.</p>
-        
+<ul>
+          <li><code>monetary</code>: the quarterly Taylor-rule intercept. &minus;0.0025 is 25bp per quarter, about 100bp annualised. The policy rate is an output (<code>i</code>), not the shock (<a href="/us-hank/validation#ex-post-r">how it responds</a>).</li>
+          <li><code>fiscal_spending</code>: government spending. Steady-state output is 1, so 0.01 is 1% of GDP.</li>
+          <li><code>productivity</code>: TFP. Steady-state TFP is 0.468, so 0.01 is a 2.14% rise, not 1%.</li>
+        </ul>
+        <div class="table-scroll"><table>
+          <caption>Returned series: quarterly deviations from steady state</caption>
+          <thead><tr><th scope="col">Series</th><th scope="col">Meaning</th><th scope="col">Unit</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>Y</code> <code>C</code> <code>I</code></th><td>Output, consumption, investment</td><td>%</td></tr>
+            <tr><th scope="row"><code>w</code> <code>N</code></th><td>Pre-tax real wage, labour</td><td>%</td></tr>
+            <tr><th scope="row"><code>pi</code></th><td>Inflation</td><td>pp, quarterly rate</td></tr>
+            <tr><th scope="row"><code>i</code></th><td>Nominal policy rate: what the Taylor rule sets</td><td>pp, quarterly rate</td></tr>
+            <tr><th scope="row"><code>r</code></th><td>Ex-post real return</td><td>pp, quarterly rate</td></tr>
+            <tr><th scope="row"><code>tax</code></th><td>Labour tax rate: the financing of the shock</td><td>pp</td></tr>
+          </tbody>
+        </table></div>
+        <ul>
+          <li><code>w</code>, <code>N</code> and <code>i</code> come from the <code>pe-macro</code> CLI and the <code>policyengine_macro</code> package; <code>us_hank</code> itself returns the other six.</li>
+          <li><code>--distribution</code> adds <a class="gloss-link" href="/glossary#mpc">MPCs</a> by liquid-wealth quartile, the <a class="gloss-link" href="/glossary#hand-to-mouth">hand-to-mouth</a> share and impact consumption by total-wealth quartile. With <code>--json</code> it also carries the share with an MPC above 0.25, which is zero at the default windfall and positive at rebate size (<a href="/us-hank/validation#htm-share">figure</a>).</li>
+          <li><code>variant</code>: the paper&rsquo;s <code>two_asset</code> model (default) or a fast <code>one_asset</code> textbook variant with no capital, so no investment response, and monetary and productivity shocks only.</li>
+        </ul>
   </div>
 </details>
       </div>
@@ -119,11 +143,9 @@ irf = model.shock(<span class="kw">"monetary"</span>, size=-<span class="kw">0.0
 <span class="kw">print</span>(irf[<span class="kw">"Y"</span>][:<span class="kw">8</span>])                      <span class="cm"># output, % deviation from steady state</span>
 <span class="kw">print</span>(distributional.summary(ss))        <span class="cm"># MPCs by quartile, hand-to-mouth share</span></code></pre></div>
         <details class="xp">
-  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>About this step</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>More detail</strong><small>notes</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
-        <p class="kv-title">Python API</p>
-          <p>The solve behind these calls (steady state, Jacobian, then instant <a class="gloss-link" href="/glossary#irf">IRFs</a>) is on <a href="/us-hank/methodology">Methodology</a>; what to trust the results for is on <a href="/us-hank/validation">Validation</a>.</p>
-        
+<p>The solve behind these calls is on <a href="/us-hank/methodology">Methodology</a>; what to trust the results for is on <a href="/us-hank/validation">Validation</a>.</p>
   </div>
 </details>
       </div>

@@ -941,7 +941,7 @@ def define_list_scenarios() -> dict:
 @mcp.tool()
 def define_scenario(name: str, horizon_years: int = 15) -> dict:
     """Run a DEFINE-UK climate-policy scenario and return annual DELTAS vs
-    baseline (real GDP, emissions, unemployment, real consumption), 2023-2037.
+    baseline (real GDP, emissions, unemployment, real consumption), from the 2027 policy start to 2040.
 
     Deltas only, by design: the model's baseline levels are not validated
     against outturns, and every result carries mandatory caveats (demand-led
@@ -953,7 +953,7 @@ def define_scenario(name: str, horizon_years: int = 15) -> dict:
         name: Scenario name from define_list_scenarios (e.g.
             "green_public_investment", "fossil_fuel_ban",
             "housing_regulation_subsidy").
-        horizon_years: Annual delta horizon (default 15 = 2023-2037).
+        horizon_years: Annual delta horizon (default 15, which reaches the end of the run: 2027-2040).
     """
     return core.define_scenario(name, horizon_years=horizon_years)
 

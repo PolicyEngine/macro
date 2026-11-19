@@ -186,7 +186,7 @@ def digest_rows(items: list[dict], vintage: str) -> list[str]:
             f'<br><span class="dg-sub mono">{html.escape(now["period"])}</span></td>'
             f'<td class="num">{_split_on(delta(series))}</td>'
             f'<td class="kind">{html.escape(what_is_new(series, vintage))}</td>'
-            f"<td>{html.escape(next_release)}</td>"
+            f"<td>{html.escape(next_release).replace(' ', '&nbsp;')}</td>"
             f'<td><a href="https://github.com/PolicyEngine/macro/blob/main/{series["_path"]}">Snapshot</a>'
             f' · <a href="{html.escape(series["url"])}">{html.escape(series["source"])} · {html.escape(series["cdid"])}</a></td>'
             "</tr>"
@@ -210,19 +210,28 @@ def digest_page(vintage: str) -> str:
     new = sum(1 for s in items if "new observation" in what_is_new(s, vintage))
     uk = [s for s in items if s["series"].startswith("uk_")]
     us = [s for s in items if not s["series"].startswith("uk_")]
+    # Width hints on the header cells keep the UK and the US table of one
+    # digest on the same columns (the phone stack hides the header, so they
+    # do not apply there).
     head = (
-        '          <thead><tr><th scope="col">Series</th>'
-        '<th scope="col" class="num">Latest value</th><th scope="col" class="num">Change</th><th scope="col">What is new</th>'
-        '<th scope="col">Next release</th><th scope="col">Files</th></tr></thead>'
+        '          <thead><tr><th scope="col" style="width:27%">Series</th>'
+        '<th scope="col" class="num" style="width:12%">Latest value</th>'
+        '<th scope="col" class="num" style="width:13%">Change</th>'
+        '<th scope="col" style="width:18%">What is new</th>'
+        '<th scope="col" style="width:11%">Next release</th>'
+        '<th scope="col" style="width:19%">Files</th></tr></thead>'
     )
     tables = []
     for title, group, ident in (("UK", uk, "uk"), ("US", us, "us")):
         if not group:
             continue
         tables.append(f"""    <h3 id="{ident}-series">{title} series</h3>
+    <!-- Six columns need about 920 px: between the phone stack (below 640 px)
+         and that width the table scrolls inside its wrapper instead of
+         breaking words to fit. -->
     <div class="table-scroll">
-        <table class="digest-table" data-stack="yes">
-          <caption>{title} series with a new snapshot on {vintage}. Change is on the prior stored observation; values as the publisher stored them.</caption>
+        <table class="digest-table" data-stack="yes" style="min-width:920px">
+          <caption>{title} series with a new snapshot on {vintage}.</caption>
 {head}
           <tbody>
 {chr(10).join(digest_rows(group, vintage))}
@@ -250,12 +259,12 @@ def digest_page(vintage: str) -> str:
   <section class="hero model-hero">
     <div class="hero-inner">
       <h1 class="page-title">Official data stored on {day}</h1>
-      <p class="lede">An automated factual digest of the <span class="mono">{vintage}</span> snapshot: every series that changed, as the publisher released it, with no interpretation.</p>
+      <p class="lede">Automated digest of the <span class="mono">{vintage}</span> snapshot: every series that changed, as its publisher released it. No interpretation.</p>
     </div>
   </section>
   <section class="band" id="changed">
     <div class="band-head" data-icon="table"><h2>{new} of {len(items)} series added an observation</h2>
-    <p class="section-intro">Generated from committed snapshots; no editorial or causal interpretation.</p></div>
+    <p class="section-intro">Values as stored; each change is on the prior stored observation.</p></div>
     <div class="prose">
 {chr(10).join(tables)}
     </div>
@@ -324,7 +333,7 @@ def latest_digest_row() -> str:
     day = datetime.strptime(latest, "%Y-%m-%d").strftime("%-d %b %Y")
     return (
         f'    <p class="fc-note-row">{icon}<span><strong>Latest release digest, {day}:</strong> '
-        f'what each stored release changed. <a href="/notes/releases/{latest}">Read it</a> · '
+        f'what each stored release changed. <a href="/notes/releases/{latest}">Read the digest</a> · '
         '<a href="/notes/releases">All digests</a></span></p>'
     )
 
@@ -350,9 +359,8 @@ def rebuild_indexes() -> None:
         new = sum(1 for k in kinds if "new observation" in k)
         day = datetime.strptime(vintage, "%Y-%m-%d").strftime("%-d %b %Y")
         index_rows.append(
-            f'        <a href="/notes/releases/{vintage}"><span>{day}: {len(items)} '
-            f"series, {new} with a new observation</span>"
-            f"<strong>{vintage} · automated digest</strong></a>"
+            f'        <a href="/notes/releases/{vintage}"><span><time datetime="{vintage}">{day}</time></span>'
+            f"<strong>{len(items)} series · {new} with a new observation</strong></a>"
         )
         sitemap_rows.append(
             f"  <url><loc>https://policyengine-macro.vercel.app/notes/releases/{vintage}</loc>"

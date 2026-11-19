@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=23" />'
+CSS_LINK = '<link rel="stylesheet" href="/models/model-pages.css?v=24" />'
 CSS_RE = re.compile(r'<link rel="stylesheet" href="/models/model-pages\.css(?:\?v=\d+)?" />\n?')
 
 sys.path.insert(0, str(ROOT))
@@ -43,7 +43,7 @@ MODELS = {
     "frb-us": ("Fed FRB/US, rebuilt", "US", ("Replicates the Fed&rsquo;s solver", "replicates"), "hosted", "Quarterly"),
     "us-hank": ("Two-asset HANK", "US", ("Partial replication", "partial-replication"), "hosted", "Quarterly IRFs"),
     "olg": ("OG-UK overlapping generations", "UK", ("Calibrated", "calibrated-counterfactual"), "local", "Long-run steady state"),
-    "define": ("DEFINE-UK ecological stock-flow", "UK", ("Partial replication", "partial-replication"), "local", "Annual, 2023&ndash;2040; default to 2037"),
+    "define": ("DEFINE-UK ecological stock-flow", "UK", ("Partial replication", "partial-replication"), "local", "Annual, 2027&ndash;2040, from the policy start"),
 }
 
 # page -> model key; the two reports keep their own kind line
@@ -120,7 +120,7 @@ SHORT_VERDICT = {
     "obr": "Scores income tax and NICs changes; not a forecaster.",
     "pe": "Exact for rules; costings static, no interval.",
     "svar": "GDP variance share consistent with the paper; no forecast skill.",
-    "frb-us": "Solver matches the Fed&rsquo;s code; economic checks weak.",
+    "frb-us": "Solver matches Fed code; one economic check passes.",
     "us-hank": "Parameters match; one response size checked, others not.",
     "olg": "Targets met by construction; no outcome benchmark.",
     "define": "Deltas only, never levels.",

@@ -1349,6 +1349,10 @@ h3 { color: var(--text-strong); font-weight: 600; }
 .question-list a::after { content: "→"; color: var(--brand); }
 .question-list a:hover strong,
 .question-list a:hover::after { color: var(--brand-deep); }
+/* Part B (forecasts agent): the list's one user (/notes/releases) sits inside a
+   card, so there is no rule (or gap) above the first row. */
+.band .question-list { border-top: 0; margin-top: 0; }
+.band .question-list a:first-child { padding-top: 4px; }
 .question-list span { font-size: var(--fs-body); line-height: 1.45; }
 .question-list strong {
   color: var(--brand-strong);
@@ -8275,6 +8279,11 @@ main .table-scroll > table :is(th, td).num { text-align: right; font-feature-set
   main .table-scroll > table.tbl-stack tbody tr { border-color: #EEF0F3; padding: 12px 14px; }
   main .table-scroll > table.tbl-stack tbody tr:nth-child(even) > * { background: none; }
   main .table-scroll > table.tbl-stack tbody tr > [data-label]:not(:first-child) { border-top-color: #F1F3F5; }
+  /* 18 Nov review: the two light hairlines here are literals, so stacked table cards had near-white borders and dividers in dark mode */
+  @media (prefers-color-scheme: dark) {
+    main .table-scroll > table.tbl-stack tbody tr { border-color: var(--ab-border); }
+    main .table-scroll > table.tbl-stack tbody tr > [data-label]:not(:first-child) { border-top-color: var(--ab-border); }
+  }
 }
 
 /* =====================================================================
@@ -8568,6 +8577,8 @@ main .band-head[data-icon]::before, main .band-head::before {
 /* Final review: stacked .t-stack scorecards carry no per-cell zebra (it read as grey patches);
    a status chip alone in a desktop cell sizes its column instead of overflowing the padding */
 @media (max-width: 640px) { main .table-scroll > table.t-stack tbody tr > *, main .table-scroll > table.t-stack tbody tr:nth-child(even) > * { background: none !important; } }
+/* 18 Nov review: in a stacked table every value sits under its label on the left; the desktop right-alignment of numeric columns (.num, set by reveal.js) no longer applies. */
+@media (max-width: 640px) { main .table-scroll > table.t-stack :is(th, td).num { text-align: left; } }
 @media (min-width: 641px) { main table td:has(> .chip:only-child), main table td:has(> .st:only-child) { white-space: nowrap; width: 1%; } }
 /* phone sub-nav (≤420px): a smaller flag, never hidden */
 @media (max-width: 420px) {
@@ -8818,6 +8829,7 @@ header.nav > .rv-progress { position: absolute !important; left: 0; right: 0; to
 .lp-rec-table td { color: var(--text-body); }
 .lp-rt-q { margin-left: 4px; font-size: 12px; font-weight: 500; color: var(--text-muted); }
 .lp-res { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.lp-res::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: 0 0 auto; }
 .lp-res-in { background: color-mix(in srgb, var(--ab-gain) 12%, transparent); color: var(--ab-teal-700); }
 .lp-res-out { background: color-mix(in srgb, var(--ab-loss) 13%, transparent); color: #92400E; }
 .lp-score-card .lp-score-foot { margin: 16px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; border: 0 !important; padding: 0 !important; color: var(--text-muted); font-size: 13.5px; }
@@ -9019,3 +9031,43 @@ header.nav > .rv-progress { position: absolute !important; left: 0; right: 0; to
   .model-tabs-row .model-tabs-link::before, .model-tabs-row .model-tabs-link svg { display: none !important; }
 }
 @media (max-width: 420px) { .model-tabs-row { -webkit-mask-image: none !important; mask-image: none !important; } }
+
+/* =====================================================================
+   49. Review of 18 Nov, shell pages (/, /models, /models/compare, /connect)
+   ===================================================================== */
+/* Sentence case and the 12px floor (DESIGN §1.5, §2.3): these labels were 11px tracked capitals */
+.hq-label, main dl.kv dt { text-transform: none; letter-spacing: 0; font-size: var(--fs-label); }
+.cc, .tn-inline, .repo-owner { font-size: var(--fs-label); }
+/* Compare: the last question no longer ends against the footer; two chart panels fill the row */
+.compare-page main { padding-bottom: var(--s-7); }
+.cmp-sm-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 520px)); }
+/* Compare title band reads title, lede, tabs, as on /models and the Forecasts pages (the h1 sat 8px above the tab row) */
+.doc.compare-page main > .hero > .hero-inner > .lede { order: 2; }
+.doc.compare-page main:has(> .hero) > .model-tabs { order: 3; margin-top: 16px; }
+/* Compare charts, dark theme: the benchmark band and its swatch were near invisible at 16% */
+@media (prefers-color-scheme: dark) {
+  .cmp-sm .cmp-band, .cmp-fig .vc-sw.sw-band { fill: color-mix(in srgb, var(--primary) 34%, transparent); background: color-mix(in srgb, var(--primary) 34%, transparent); }
+}
+/* Models comparison table, tablet widths: the Answers column wrapped to two or three words a line */
+@media (min-width: 641px) and (max-width: 960px) {
+  .mp #compare tbody th { min-width: 150px; }
+  .mp #compare th, .mp #compare td { padding-left: 10px; padding-right: 10px; }
+}
+/* Compare table at tablet width: tighter cells so it fits its card (it scrolled 50px and hid the Details buttons under the edge fade) */
+@media (min-width: 721px) and (max-width: 900px) {
+  main .cmp-scroll table.cmp-table th, main .cmp-scroll table.cmp-table td { padding-left: 8px; padding-right: 8px; }
+  main .cmp-scroll table.cmp-table tbody th { min-width: 7rem; }
+}
+
+/* 50. Review of 18 Nov, shell: footer links reach a 40px tap height on phones (a later
+   min-height: 0 had outranked the 44px rules), and the legal line meets the 12px floor. */
+@media (max-width: 640px) {
+  .foot.foot-bar :is(.footer-links, .foot-main) a { min-height: 40px; display: inline-flex; align-items: center; }
+}
+.foot.foot-bar .footer-legal { font-size: 12px; }
+/* Phones: the copy button's ::before is its icon. The tap-area rule above made it an absolutely
+   placed box, and because the button is position: static inside a code block the box landed in
+   the block's top-left corner as a stray mark. The button is already 44px tall there. */
+@media (max-width: 720px), (pointer: coarse) {
+  main :is(.codeblock, .lp-term) > .cb-copy::before { position: static; inset: auto; }
+}

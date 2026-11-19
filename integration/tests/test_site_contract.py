@@ -116,7 +116,7 @@ def test_current_obr_outlook_uses_latest_official_efo_window():
 def test_frozen_validation_vintages_are_not_relabelled_as_current_forecasts():
     # /validation was folded into per-model validation subpages.
     assert "frozen 2024Q2 data edge" in _read("svar/validation/index.html")
-    assert "outturn backtest above retains November 2025" in _read(
+    assert "only the outturn backtest retains November 2025" in _read(
         "obr/validation/index.html"
     )
 
@@ -130,7 +130,7 @@ def test_validation_and_paper_landings_lead_with_current_uk_vintages():
     obr_paper = _read("papers/obr-macro/index.html")
     assert "March 2026 EFO baseline" in obr_paper
     boe_paper = _read("papers/boe-svar/index.html")
-    assert "Current forecast: data through" in boe_paper
+    assert "Forecast in the paper:</strong> data through" in boe_paper
     assert "2026Q2&ndash;2029Q2" in boe_paper
 
 
@@ -165,6 +165,10 @@ def test_paper_landings_publish_the_page_count_of_the_pdf_they_link():
     18 Nov 2026: define-uk 29 -> 30 (the multiplier section now headlines
     2.25 from the 2027 policy start, with the horizon profile, the reinstated
     IMF comparator and three November run-record rows).
+
+    18 Nov 2026 (review): define-uk 30 -> 31 (the clean-room section now
+    records the whole model registered and solved with milestone 2 not
+    passed, as the model repository does, plus two run-record rows).
     """
     expected = {
         "obr-macro": 42,
@@ -172,7 +176,7 @@ def test_paper_landings_publish_the_page_count_of_the_pdf_they_link():
         "frb-us": 39,
         "psl-og": 34,
         "pe-microsim": 25,
-        "define-uk": 30,
+        "define-uk": 31,
     }
     # The /papers listing was retired; each landing carries its own
     # "slug · … · N pages" line, and /models links every paper landing.

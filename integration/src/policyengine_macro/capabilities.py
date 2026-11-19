@@ -128,7 +128,7 @@ MODELS = {
         "geography": ["us"],
         "question_types": ["economic_shock"],
         "inputs": ["stylized shock (kind, size, persistence)"],
-        "outputs": ["gdp", "consumption", "investment", "inflation", "real_rate"],
+        "outputs": ["gdp", "consumption", "investment", "inflation", "policy_rate", "real_rate"],
         "cannot_answer": [
             "forecasts (IRFs around a calibrated steady state, not a forecaster)",
             "detailed tax reforms (only monetary/fiscal-spending/productivity instruments; the labor tax is endogenous)",
@@ -196,7 +196,7 @@ MODELS = {
             "reform scoring (no statute mapping; score_reform refuses it)",
             "forecasts or baseline levels (deltas only — the baseline is not validated against outturns)",
         ],
-        "horizon": "annual scenario deltas, 2023-2037",
+        "horizon": "annual scenario deltas, 2027-2040 (from the policy start)",
         "access": [
             "local CLI scenarios", "Python package",
             "microsim incidence overlay (define_scenario_incidence, "

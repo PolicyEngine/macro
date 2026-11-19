@@ -650,6 +650,8 @@
 }
 .doc main:has(> .hero.mh) .limits > details.expander[open] { background: var(--surface-card); grid-column: 1 / -1; }
 .doc main:has(> .hero.mh) .limits > details.expander[open] > :not(summary) { padding: 0 20px 18px 64px; font-size: 15px; }
+/* 18 Nov review: on a phone the 64px indent left a 225px text column inside an open limit */
+@media (max-width: 640px) { .doc main:has(> .hero.mh) .limits > details.expander[open] > :not(summary) { padding-left: 20px; } }
 @media (max-width: 767px) { .doc main:has(> .hero.mh) .limits { grid-template-columns: minmax(0, 1fr); } }
 .doc main:has(> .hero.mh) .dial-cards { gap: 20px; }
 .doc main:has(> .hero.mh) .dial-cards > * {
@@ -948,10 +950,17 @@
 .doc main:has(> .hero.mh) .scorecard table { table-layout: fixed; width: 100%; }
 .doc main:has(> .hero.mh) .scorecard th, .doc main:has(> .hero.mh) .scorecard td { overflow-wrap: normal; word-break: normal; hyphens: none; vertical-align: top; }
 .doc main:has(> .hero.mh) .scorecard thead th:nth-child(1) { width: 24%; }
-.doc main:has(> .hero.mh) .scorecard thead th:nth-child(2) { width: 38%; }
+.doc main:has(> .hero.mh) .scorecard thead th:nth-child(2) { width: 35%; }
 .doc main:has(> .hero.mh) .scorecard thead th:nth-child(3) { width: 22%; }
-.doc main:has(> .hero.mh) .scorecard thead th:nth-child(4) { width: 16%; }
+.doc main:has(> .hero.mh) .scorecard thead th:nth-child(4) { width: 19%; }
 .doc main:has(> .hero.mh) .scorecard .sc-num { white-space: normal; }
+/* 18 Nov review: the verdict column (was 16%) was narrower than the "by construction" chip, so the wrapper
+   overflowed by 4px, reveal.js flagged it .is-scroll, and the shared wide-table rule (style.css, "first column
+   stays one line") painted long check labels over the Against column. The column now fits the chip (19%, taken
+   from Against), and a scorecard's first column always wraps, since its columns are fixed. */
+.doc main:has(> .hero.mh) .scorecard.is-scroll > table tbody tr > :first-child { white-space: normal; min-width: 0; }
+/* 18 Nov review: a list inside a table cell keeps the cell's type size (was 14px/1.7 beside 13px/1.5 plain cells in the same table) */
+.doc main:has(> .hero.mh) td li { font-size: inherit; line-height: inherit; }
 /* below 900px every scorecard row is a compact card (also between 640 and 900, where the shared stack does not apply) */
 @media (max-width: 900px) {
   .doc main:has(> .hero.mh) .scorecard { overflow: visible; }
@@ -972,7 +981,9 @@
 .doc main:has(> .hero.mh) .codeblock .cm { color: var(--text-muted); }
 .doc main:has(> .hero.mh) .codeblock .cb-copy { color: var(--text-body); border-color: var(--hairline-strong); }
 .doc main:has(> .hero.mh) .codeblock pre { overflow-x: auto; }
-@media (max-width: 640px) { .doc main:has(> .hero.mh) .codeblock:has(> .cb-copy) { padding-top: 36px; padding-right: 12px; } }
+/* 18 Nov review: on a phone style.css already puts the copy button in the flow above the code (static, order -1), so the 36px
+   reserved for an absolute button doubled the gap, and the 24px block padding plus the pre's 16px left 40px of indent */
+@media (max-width: 640px) { .doc main:has(> .hero.mh) .codeblock:has(> .cb-copy) { padding-top: 0; padding-right: 12px; padding-left: 8px; } }
 /* run tabs: three equal columns, never 2 + 1 */
 .doc main:has(> .hero.mh) .run-switch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: min(100%, 420px); }
 /* notes: only a note attached under a card is a strip; a free note is plain muted text, full width */
@@ -993,3 +1004,9 @@
 @media (max-width: 900px) {
   .doc main:has(> .hero.mh) .scorecard tr, .doc main:has(> .hero.mh) .scorecard tr > * { background: none !important; }
 }
+
+/* Overnight review (Opus 5.5, Fable limit): a list directly inside a details.xp body was the browser's
+   round disc beside the 6px square of every other model-tab list. One list style: the square. */
+.doc main:has(> .hero.mh) .xp-body > ul:not([class]) { list-style: none; padding-left: 0; }
+.doc main:has(> .hero.mh) .xp-body > ul:not([class]) > li { position: relative; padding-left: 18px; margin: 6px 0; }
+.doc main:has(> .hero.mh) .xp-body > ul:not([class]) > li::before { content: ""; position: absolute; left: 4px; top: .62em; width: 6px; height: 6px; border-radius: 1px; background: var(--primary); }

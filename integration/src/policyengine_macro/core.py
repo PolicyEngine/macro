@@ -1091,8 +1091,11 @@ def frbus_summary() -> dict:
             "monetary_tightening_properties": {
                 "shock": "100bp rffintay_aerr, 2026Q1, inertial Taylor rule",
                 "rff_impact_pp": 1.0,
-                "xgdp_trough_pct": -0.55,
-                "lur_peak_pp": 0.26,
+                # us-frb-model results/site_numbers.json at the pin (October
+                # 2026 LONGBASE): -0.5554, +0.2758, -0.0336. The April
+                # vintage gave -0.55 and +0.26.
+                "xgdp_trough_pct": -0.56,
+                "lur_peak_pp": 0.28,
                 "picxfe_trough_pp": -0.034,
                 "note": "consistent with the published FRB/US VAR simulation "
                         "properties (output falls a few tenths to ~1% after "

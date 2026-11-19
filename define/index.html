@@ -20,8 +20,8 @@
 <link rel="preload" href="/vendor/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
-<link rel="stylesheet" href="/style.css?v=50" />
-<link rel="stylesheet" href="/models/model-pages.css?v=23" />
+<link rel="stylesheet" href="/style.css?v=51" />
+<link rel="stylesheet" href="/models/model-pages.css?v=24" />
 </head>
 <body class="doc">
 <a class="skip-link" href="#top">Skip to main content</a>
@@ -51,7 +51,7 @@
           <li class="mh-chip"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>UK</li>
           <li><a class="mh-chip mh-trust" href="/glossary#partial-replication"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Partial replication</a></li>
           <li class="mh-chip mh-local"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/></svg>Runs locally</li>
-          <li class="mh-chip"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Annual, 2023&ndash;2040; default to 2037</li>
+          <li class="mh-chip"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Annual, 2027&ndash;2040, from the policy start</li>
         </ul>
       </div>
     </div>
@@ -96,7 +96,7 @@
     <div class="band-head" data-icon="calculator"><h2>A worked example</h2>
       <p class="section-intro">Green public investment (<code>green_public_investment</code>), minus the current-policies baseline, from the <a href="https://github.com/DEFINE-model/DEFINE_UK_1.1/tree/846081a580a6033159d5c421632ad8f0b30d0ded">cached pinned run</a> (upstream commit <code>846081a</code>).</p></div>
     <h3 class="scen-title">Extra public spending on green power, financed with green bonds</h3>
-    <p class="scen-note">About &pound;15&ndash;16bn a year in 2027&ndash;31, tapering to 2035: &pound;98bn gross, &pound;91bn net of a small claw-back after 2035.</p>
+    <p class="scen-note">About &pound;15&ndash;16bn a year in 2027&ndash;31, tapering to 2035; about &pound;91bn net over the run.</p>
     <div class="stat-row stat-row-4">
       <div class="stat"><span class="stat-label">Real GDP, 2035</span><span class="stat-value is-gain">+0.91%</span><span class="stat-sub">peak +0.92% in 2034; real GDP flat in 2027&ndash;28</span></div>
       <div class="stat"><span class="stat-label">Emissions, 2035</span><span class="stat-value">&minus;54 Mt</span><span class="stat-sub">MtCO2e a year (&minus;18.4%)</span></div>
@@ -106,7 +106,7 @@
     <p class="scen-note">Effects on public debt and interest costs are not among the served outputs, so the fiscal side of the green-bond financing is not shown here.</p>
       <ul class="scen-points">
       <li>By 2040 (full run) the GDP gain fades to +0.25% and the emissions cut to 23 MtCO2e a year</li>
-      <li>The gain is back-loaded: nominal GDP rises &pound;0.47 per &pound; spent in 2027 while real GDP stays flat, then real GDP peaks in 2034 as spending winds down. The cumulative multiplier is 2.25 from the 2027 policy start to 2040 (nominal), and below published estimates at short horizons (<a href="/define/validation#multiplier">multiplier</a>)</li>
+      <li>The gain is back-loaded: the cumulative multiplier is 2.25 (nominal, 2027 policy start to 2040), below published estimates at short horizons (<a href="/define/validation#multiplier">by horizon</a>)</li>
       <li>In 2035, 46 of the 54 Mt come from outside the power sector (2030: 23 of 49): electricity becomes much cheaper (&minus;52% in 2030), which moves other sectors off fossil fuels; this channel is read from the outputs, not traced equation by equation (<a href="/define/validation#emis-channel">limits</a>)</li>
     </ul>
     <p class="callout callout-warn"><strong>Read with care.</strong> Every delta includes a parameter mismatch between the baseline and policy runs, about &minus;0.16% of GDP (<a href="/define/validation#alpha-pp">limits</a>). No published v1.1 result exists to check these against.</p>
@@ -134,7 +134,7 @@
 
   <section id="run" class="band ov-run">
     <div class="band-head" data-icon="code"><h2>Run it</h2>
-      <p class="section-intro">The worked example above, three ways, after a one-off local R run. Defaults return 2023&ndash;2037; 2023&ndash;26 is the parameter mismatch alone.</p></div>
+      <p class="section-intro">The worked example above, three ways, after a one-off local R run. Defaults return 2027&ndash;2040, from the policy start; 2023&ndash;26, the parameter mismatch alone, is left out.</p></div>
     <div class="glance-switch run-switch scen-switch" role="tablist" aria-label="Run it">
       <button type="button" role="tab" id="run-tab-mcp" aria-controls="run-mcp" aria-selected="true">MCP prompt</button>
       <button type="button" role="tab" id="run-tab-cli" aria-controls="run-cli" aria-selected="false" tabindex="-1">CLI</button>
@@ -170,7 +170,7 @@ r = scenarios.run_scenario(<span class="kw">"green_public_investment"</span>)
       <div><dt>Answers</dt><dd>How a UK climate-policy mix moves output, emissions, unemployment and consumption against the current-policies baseline</dd></div>
       <div><dt>Inputs</dt><dd>A curated scenario name from the upstream scenario set</dd></div>
       <div><dt>Outputs</dt><dd>Scenario minus baseline: real GDP, emissions, unemployment, real consumption</dd></div>
-      <div><dt>Horizon</dt><dd>Annual scenario deltas, 2023&ndash;2037 by default (<code>horizon_years=15</code>); the validation checks read the run to 2040</dd></div>
+      <div><dt>Horizon</dt><dd>Annual scenario deltas, 2027&ndash;2040 (from the policy start); the validation checks read the full run from 2023</dd></div>
       <div><dt>Data</dt><dd>DEFINE-UK 1.1 upstream at pinned commit <code>846081a</code> (April 2026 manual)</dd></div>
       <div><dt>Uncertainty</dt><dd>None quantified: deterministic deltas from one calibration; every delta also carries a Baseline/policy parameter mismatch (<a href="/define/validation#alpha-pp">limits</a>)</dd></div>
       <div><dt>Access</dt><dd>Local CLI and Python package; hosted tools return run instructions, never results (<a href="/define/code">Code</a>)</dd></div>

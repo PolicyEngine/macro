@@ -10,6 +10,13 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### Model re-pin and site review (#278, #279)
+
+- **#278: model pins.** OBR `2965e82d` → `0e44ec87` (main after obr-macroeconomic-model #74 and #75), BoE SVAR `c13a9c91` → `c827ab86`, FRB/US `846eeb5c` → `162cfe6a`, US HANK `551a40d3` → `58353e5f`. After a redeploy the hosted tools run these pins. The FRB/US and US HANK compare rows with stored paths re-run identically; the OBR rows were re-run at `0e44ec8`.
+- **#278: OBR figures at `0e44ec8`.** Anchored GDP MAPE 0.44% → 0.24% (consumption 0.72% → 0.40%); anchored unemployment now follows the EFO by construction (obr #74, the forecast population on the EFO path). Free-running real GDP error (not OBR forecast error) 4.25% → 4.24% (consumption 7.24 → 7.23, unemployment 1.17pp → 0.62pp, company profits 12.32 → 12.88), 9 of 11 lines in band; on the way, holding household taxes on their data path (obr #71) had moved GDP to 4.05%. Spending multiplier 1.01 → 1.04 by q12 (was 1.05), with borrowing now rising by the cash cost (obr #75); tax ratio at q12 0.38 → 0.37 in current prices. FRB/US against Laforte (2018) moves to the Board's own 2020Q1 design (unemployment +0.228pp against +0.219pp, 1.04×); its size-of-responses verdict is re-banded partial → pass on the model repository's ±10% gate. DEFINE-UK headline multiplier 2.30 → 2.25 (2027 policy start to 2040). US HANK: one published magnitude matched within about 2%.
+- **#278: tool output.** `hank_shock` returns `i` (the nominal policy rate the Taylor rule sets) and `high_mpc_share`; `obr_shock` gains `price_passthrough` (default off) and a closure-aware capital-spending caveat. README counts 28 MCP tools.
+- **#279: site review.** Accuracy, design and function fixes across every in-scope page at 1440, 820 and 375 wide, light and dark. `frbus_summary` quotes the October-vintage 100bp responses (−0.55% → −0.56%, +0.26pp → +0.28pp); the DEFINE-UK default horizon reads 2027–2040 (was 2023–2037). Home-page result chips use the dot-and-word chip style (no tick or warning icon).
+
 ### Site redesign stack (#200)
 
 Bullets by PR, in merge order. Every PR listed here merged with #200 on 10 November 2026.
