@@ -1404,8 +1404,10 @@ def render_home_record(card: dict) -> str:
         if who(d) and not e["in_68"]:
             band += " (the satellite's band carries GDP uncertainty only and is too narrow)"
         tip = esc(f"{label}, {e['period']}: forecast {e['forecast']:.2f}% on {short_date(d['round_id'])}, outturn {e['outturn']:.2f}%; {band}.")
-        chip = ('<span class="lp-res lp-res-in">' + _lucide("check", 14) + "Inside</span>" if e["in_68"]
-                else '<span class="lp-res lp-res-out">' + _lucide("alert", 14) + "Outside</span>")
+        # Word and tone, no icon: the same dot-and-word form as the verdict
+        # chips on the validation scorecards (one chip style site-wide).
+        chip = ('<span class="lp-res lp-res-in">Inside</span>' if e["in_68"]
+                else '<span class="lp-res lp-res-out">Outside</span>')
         rows.append(
             f'            <tr title="{tip}"><th scope="row">{label} <span class="mono lp-rt-q">{e["period"]}</span></th>'
             f'<td>{short_date(d["round_id"])}</td><td class="num">{e["forecast"]:.2f}%</td><td class="num">{e["outturn"]:.2f}%</td><td>{chip}</td></tr>')
