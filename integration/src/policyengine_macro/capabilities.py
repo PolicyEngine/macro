@@ -91,9 +91,10 @@ MODELS = {
         "runtime": "minutes per estimation and identification run",
         "uncertainty": "posterior 68% and 90% intervals",
         "status": (
-            "partial replication of Brignone and Piffer (2025): GDP "
-            "decomposition consistent with the paper; CPI global-shock share "
-            "about 8.5pp short; no forecast skill against a drifting random walk"
+            "partial replication of Brignone and Piffer (2025): global share "
+            "of GDP variance consistent with the paper; global share of CPI "
+            "variance close on the mean, with a wide band; domestic CPI share "
+            "about 15pp short; no forecast skill against a drifting random walk"
         ),
         "estimation_sample": "1992Q1-2025Q1",
         "data_edge": "2026Q2",
@@ -288,15 +289,16 @@ MODEL_QUALITY = {
             "real data to numerical precision.",
             "Keep all exact invariants hard-gated for every specification.",
         ),
-        # Figures in this entry and the next are from boe-var-model #24
-        # (data through 2026Q2), the run vintage cited on /svar/validation;
-        # the pre-refresh values are at boe-var-model 845e2a4.
+        # Figures in this entry and the next are read at boe-var-model 17f5d82
+        # (data through 2026Q2, world CPI seasonally adjusted in #34), the run
+        # vintage cited on /svar/validation; the values before #34 are at
+        # c827ab8 (UK CPI global share 41.5%, smallest q 0.39, Bank Rate 0.79).
         "predictive_validation": _quality(
             "weak",
             "No demonstrated skill against a random walk with drift on any "
             "variable at any horizon. The grid runs 64 variable-by-horizon "
             "tests; adjusted together, the smallest Benjamini-Hochberg q is "
-            "0.39. Bank Rate comes closest (0.79 at h=1) and does not "
+            "0.36. Bank Rate comes closest (0.80 at h=1) and does not "
             "survive. The model looks strong against a driftless walk, but "
             "that benchmark forfeits the trend on a trending log level and "
             "is too weak to learn from. Under the published specification "
@@ -311,10 +313,13 @@ MODEL_QUALITY = {
             "moderate",
             "On the paper's own definition -- the posterior mean of the "
             "per-draw group share of TOTAL four-quarter-ahead variance -- UK "
-            "GDP replicates (38.7% against ~40%) and UK CPI falls about 8.5pp "
-            "short (41.5% against ~50%). The 68% band is roughly +/-15pp, "
-            "wider than the shortfall, so the data do not resolve it. Proxy "
-            "world aggregates remain a candidate explanation.",
+            "GDP replicates (37.6% against ~40%) and UK CPI is close on the "
+            "mean (52.0% against ~50%); the 68% bands are roughly +/-14pp and "
+            "+/-17pp, wider than either gap. The domestic share of UK CPI is "
+            "about 15pp short (24.8% against ~40%), and monetary policy "
+            "explains 11.2% of UK GDP variance against about 20% read off the "
+            "paper's figure. Proxy world aggregates remain a candidate "
+            "explanation.",
             "Show conclusions across lag, prior, proxy-data and weighting grids "
             "with effective-sample-size diagnostics.",
         ),
