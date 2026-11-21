@@ -10,6 +10,11 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### OBR page: fiscal rules view and conventions
+
+- **Fiscal rules on `/obr`.** A new "Against the fiscal rules" section sets the October 2026 EFO path for the current budget (Table 6.5) and public sector net financial liabilities (derived from Table 6.14) beside what the model books for the four worked examples (`results/demo_shocks.json` at obr-macroeconomic-model `0e44ec8`). Only the spending example moves the public finances; the section says it is not a rule readout. No existing figure changes.
+- **Conventions on `/obr/methodology`.** Step 2 gains a table of the OBR conventions the emulator inherits as EFO Table 1.9 input paths, imposes through an opt-in overlay, or does not reproduce.
+
 ### Model re-pin and site review (#278, #279)
 
 - **#278: model pins.** OBR `2965e82d` → `0e44ec87` (main after obr-macroeconomic-model #74 and #75), BoE SVAR `c13a9c91` → `c827ab86`, FRB/US `846eeb5c` → `162cfe6a`, US HANK `551a40d3` → `58353e5f`. After a redeploy the hosted tools run these pins. The FRB/US and US HANK compare rows with stored paths re-run identically; the OBR rows were re-run at `0e44ec8`.
