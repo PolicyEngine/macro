@@ -187,3 +187,25 @@ def test_takeaway_names_the_model_behind_each_verdict():
         for cell in q["cells"]:
             if cell["status"] == "answered":
                 assert DATA["models"][cell["model"]]["name"] in line
+
+
+def test_boe_gap_explanation_sits_with_the_comparison():
+    # The reasons the UK rows differ from the Bank of England's range live in
+    # the +100bp question itself, unfolded, one item per axis (raised in review, Nov 2026).
+    section = html.unescape(_section("rate-up-100"))
+    gaps = DATA["questions"][0]["gaps"]
+    assert gaps["title"] in section
+    labels = " ".join(item["label"] for item in gaps["items"])
+    for axis in ("Model", "Shock", "Horizon", "Monetary response"):
+        assert axis in labels
+    for item in gaps["items"]:
+        assert item["text"] in section
+    bad = copy.deepcopy(DATA)
+    bad["questions"][0]["gaps"]["items"][0]["text"] = ""
+    assert any("gaps item" in p for p in battery.problems(bad))
+
+
+def test_multipliers_carry_one_labelled_sign_convention():
+    for qid in ("spending", "tax"):
+        assert "Multipliers are positive numbers" in html.unescape(_section(qid))
+    assert "GDP gained per unit spent" in PAGE and "GDP lost per unit of tax raised" in PAGE

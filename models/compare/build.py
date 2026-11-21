@@ -54,8 +54,8 @@ COLUMNS = {
     "rate-up-100": (GDP, INFL, ("Timing", "", "timing"), ("GDP per pp-quarter", "% of GDP", "ppq")),
     "rate-down-100": (("Against the rise", "peak GDP, % of GDP: cut vs rise", "result"),),
     "rate-up-25": (("Against 100bp ÷ 4", "peak GDP per bp", "result"),),
-    "spending": (("Multiplier", "GDP per unit spent", "multiplier"), GDP, INFL),
-    "tax": (("Multiplier", "GDP per unit of tax", "multiplier"), GDP, INFL),
+    "spending": (("Multiplier", "GDP gained per unit spent", "multiplier"), GDP, INFL),
+    "tax": (("Multiplier", "GDP lost per unit of tax raised", "multiplier"), GDP, INFL),
     "energy": (GDP, ("Peak price effect", "% on the CPI level", "inflation"),
                ("Policy rate", "", "result")),
 }
@@ -65,6 +65,17 @@ DETAIL_FIELDS = (
     ("experiment", "Experiment"), ("rate_path", "Rate path"), ("timing", "Timing"),
     ("multiplier", "Multiplier"), ("symmetry", "Against the rise"),
     ("linearity", "Against 100bp ÷ 4"), ("result", "What else moves"),
+)
+
+# One sign convention for every multiplier on the page (and on /obr), the
+# OBR's own: a positive number, whatever the direction of the policy. The
+# signed effect is the Peak GDP column.
+SIGN_CONVENTION = (
+    "Multipliers are positive numbers, as in the OBR&rsquo;s table "
+    '(<a href="https://obr.uk/box/fiscal-multipliers/">EFO July 2015, Box 3.2</a>): '
+    "GDP gained per unit of extra spending, GDP lost per unit of extra tax. "
+    "A tax cut or a spending cut has the same multiplier with the GDP sign reversed. "
+    "Signed effects are in the Peak GDP column."
 )
 
 VERDICT_CLASS = {
@@ -405,8 +416,25 @@ TITLE_Q = {
 }
 
 
+def gaps_html(q: dict) -> str:
+    """Itemised reasons the rows differ from the benchmark, shown unfolded."""
+    g = q.get("gaps")
+    if not g:
+        return ""
+    items = []
+    for item in g["items"]:
+        src = item.get("source")
+        link = f' (<a href="{esc(src["url"])}">{esc(src["label"])}</a>)' if src else ""
+        items.append(f'<li><strong>{esc(item["label"])}.</strong> {esc(item["text"])}{link}</li>')
+    return (f'<div class="cmp-note cmp-pins cmp-gaps" id="gaps-{q["id"]}"><h3>{esc(g["title"])}</h3>'
+            f'<p>{esc(g["intro"])}</p><ul>{"".join(items)}</ul></div>')
+
+
 def question(data: dict, q: dict, first: bool) -> str:
     notes = "".join(f'<p class="cmp-note">{esc(n)}</p>' for n in q["notes"])
+    if q["id"] in ("spending", "tax"):
+        notes = f'<p class="cmp-note">{SIGN_CONVENTION}</p>' + notes
+    notes += gaps_html(q)
     return (
         f'<section class="band cmp-q" id="q-{q["id"]}" data-q="{q["id"]}"'
         + ("" if first else " data-later")

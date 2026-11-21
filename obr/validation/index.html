@@ -90,8 +90,8 @@
           <tr data-result="weak"><th scope="row"><a href="#tests">Held add-factors, real GDP</a></th><td>October 2026 EFO, 2026Q1&ndash;2027Q4; consumption 0.85%; 7 of 8 in band, two of them identities on EFO inputs</td><td class="sc-num">0.63% MAPE</td><td><span class="chip">weak</span></td></tr>
           <tr data-result="weak"><th scope="row"><a href="#val-freerun">Free-running, real GDP</a></th><td>October 2026 EFO, 2025Q1&ndash;2027Q4; the emulator&rsquo;s closure, not OBR forecast error</td><td class="sc-num">4.24% MAPE</td><td><span class="chip">weak</span></td></tr>
           <tr data-result="weak"><th scope="row"><a href="#outturn">ONS outturns</a></th><td>q/q growth, 2025Q2&ndash;2026Q1, ONS release of 12 Nov 2026; the EFO missed 2026Q1 by 0.25pp</td><td class="sc-num">misses up to 0.27pp</td><td><span class="chip">weak</span></td></tr>
-          <tr data-result="weak"><th scope="row"><a href="/obr#scen-tax">Income tax multiplier</a></th><td><a href="https://obr.uk/box/fiscal-multipliers/">OBR 0.3</a> on impact, fading; q1, q4 and q12 in current prices; size close, profile reversed</td><td class="sc-num">0.10 &rarr; 0.21 &rarr; 0.37</td><td><span class="chip">weak</span></td></tr>
-          <tr data-result="fail"><th scope="row"><a href="#multiplier">Spending multiplier</a></th><td><a href="https://obr.uk/box/fiscal-multipliers/">OBR 0.6</a>, fading; the shock lands in the GDP identity</td><td class="sc-num">1.01 &rarr; 1.04</td><td><span class="chip">fail</span></td></tr>
+          <tr data-result="weak"><th scope="row"><a href="/obr#scen-tax">Income tax multiplier</a></th><td><a href="https://obr.uk/box/fiscal-multipliers/">OBR 0.3</a> on impact, fading; GDP lost per &pound; raised at q1, q4 and q12, current prices; size close, profile reversed</td><td class="sc-num">0.10 &rarr; 0.21 &rarr; 0.37</td><td><span class="chip">weak</span></td></tr>
+          <tr data-result="fail"><th scope="row"><a href="#multiplier">Spending multiplier</a></th><td><a href="https://obr.uk/box/fiscal-multipliers/">OBR 0.6</a>, fading; GDP gained per &pound; spent, q1 to q12; the shock lands in the GDP identity</td><td class="sc-num">1.01 &rarr; 1.04</td><td><span class="chip">fail</span></td></tr>
           <tr data-result="fail"><th scope="row"><a href="#bank-rate">Bank Rate +1pp</a></th><td>Bank of England &minus;0.2% to &minus;0.35% (1999); sign right</td><td class="sc-num">&minus;0.06% peak</td><td><span class="chip">fail</span></td></tr>
         </tbody>
       </table></div>
@@ -436,7 +436,7 @@
         <li>Every headline on this page is computed on the October 2026 baseline; only the outturn backtest retains November 2025.</li>
         <li>Reform effects are differences between structurally identical runs, so the re-anchoring leaves the static costing untouched.</li>
         <li>Anchoring add-factors are fixed in baseline and shocked runs and cancel in the difference.</li>
-        <li>Second-round GDP is quoted as a ratio to revenue raised, not a per-quarter percentage, so it sits beside the OBR&rsquo;s published multipliers (<a href="/obr#answers">worked example</a>).</li>
+        <li>Second-round GDP is quoted as a ratio to revenue raised, not a per-quarter percentage, so it sits beside the OBR&rsquo;s published multipliers. Every multiplier here is a positive number, as in the OBR&rsquo;s table: GDP lost per pound of tax raised, GDP gained per pound spent (<a href="/obr#answers">worked example</a>).</li>
       </ul>
       </details>
     </div>
@@ -538,7 +538,7 @@
         <p>A 1pp VAT rise is &pound;2.2bn a quarter on <code>VREC</code>. Receipts and borrowing move one for one, but GDP barely moves, against the OBR&rsquo;s <a href="https://obr.uk/box/fiscal-multipliers/">published VAT multiplier of 0.35</a>, fading.</p>
         <div class="table-scroll mo-tablecard">
       <table>
-        <caption>GDP moved per pound of VAT raised, current prices</caption>
+        <caption>GDP lost per pound of VAT raised, current prices</caption>
         <thead><tr><td></td><th scope="col">q1</th><th scope="col">q4</th><th scope="col">q12</th></tr></thead>
         <tbody>
           <tr><th scope="row">Default</th><td class="num">0.013</td><td class="num">0.026</td><td class="num">0.043</td></tr>
@@ -600,7 +600,7 @@
         <ul>
           <li>The response runs through household spending alone. There is no monetary rule; unemployment, prices and trade do not move.</li>
           <li>A 1pp rise held for four quarters lowers GDP by about 0.06% at peak, in the published closure and under the nominal-GDP pin (<a href="https://github.com/PolicyEngine/obr-macroeconomic-model/issues/50">obr-macroeconomic-model #50</a>).</li>
-          <li>The Bank of England&rsquo;s published range for the same experiment is &minus;0.2% to &minus;0.35% (<a href="/models#shops">the benchmark</a>).</li>
+          <li>The Bank of England&rsquo;s published range for the same experiment is &minus;0.2% to &minus;0.35% (<a href="/models#shops">the benchmark</a>). The model, the shock, the horizon and the monetary response all differ: <a href="/models/compare#q-rate-up-100">why the gap</a>.</li>
           <li>The default holds the mortgage rate on its EFO path. The model&rsquo;s opt-in <code>monetary_conditioning=True</code> moves it with Bank Rate at the listing&rsquo;s own pass-through and gives &minus;0.149% at peak, still below the range. It is a labelled overlay on <code>run_reform</code>, off by default and not exposed by <code>obr_shock</code>.</li>
           <li>The benchmark dates from 1999. A sustained rise never turns within 12 quarters, and company profits move by an artefact of the nominal-GDP pin, so do not read profits from rate shocks.</li>
           <li>Each figure is the difference between a baseline and a shocked solve under the default nominal-GDP pin; every quarter of both converges.
