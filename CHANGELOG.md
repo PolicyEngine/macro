@@ -14,6 +14,7 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 - **`/models/compare`, 100bp question.** A new unfolded block lists why the two UK rows sit either side of the Bank of England's 1999 range: model, shock, horizon and monetary response, plus what narrows each gap. It is generated from a new optional `gaps` key in `results.json`. No figure in any row changed.
 - **Multiplier sign convention.** Every multiplier takes the sign of the OBR's table (EFO July 2015, Box 3.2): GDP gained per unit spent, GDP lost per unit of tax raised, so the usual response is positive. The compare columns, `/obr` and `/obr/validation` now use that one wording ("GDP fall per £", "GDP moved per pound" and "ratio" are gone). No number changed sign: the wording was mixed, the values were already positive.
+- **SVAR draws.** The 100bp row's description of the published replication run follows boe-var-model `17f5d82`: 765 accepted draws → 731, effective sample size 368.0 → 333.3 (`results/summary.md`). The row's medians are still the fast fixture's.
 - **OBR benchmark source.** The spending and tax benchmarks name EFO July 2015 Box 3.2 as the source of 0.6 and 0.3, and note that the OBR's November 2023 article gives 0.45 for public services and 0.33 for tax (obr-macroeconomic-model `docs/published_model_review.md`, G11).
 
 ### Model re-pin and site review (#278, #279)
