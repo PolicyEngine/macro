@@ -207,5 +207,5 @@ def test_boe_gap_explanation_sits_with_the_comparison():
 
 def test_multipliers_carry_one_labelled_sign_convention():
     for qid in ("spending", "tax"):
-        assert "Multipliers are positive numbers" in html.unescape(_section(qid))
+        assert "Multipliers take the sign of the OBR’s table" in html.unescape(_section(qid))
     assert "GDP gained per unit spent" in PAGE and "GDP lost per unit of tax raised" in PAGE

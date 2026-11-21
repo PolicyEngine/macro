@@ -68,12 +68,14 @@ DETAIL_FIELDS = (
 )
 
 # One sign convention for every multiplier on the page (and on /obr), the
-# OBR's own: a positive number, whatever the direction of the policy. The
-# signed effect is the Peak GDP column.
+# OBR's own: positive when GDP rises with spending or falls with a tax rise,
+# whatever the direction of the policy. The signed effect is the Peak GDP
+# column.
 SIGN_CONVENTION = (
-    "Multipliers are positive numbers, as in the OBR&rsquo;s table "
+    "Multipliers take the sign of the OBR&rsquo;s table "
     '(<a href="https://obr.uk/box/fiscal-multipliers/">EFO July 2015, Box 3.2</a>): '
-    "GDP gained per unit of extra spending, GDP lost per unit of extra tax. "
+    "GDP gained per unit of extra spending, GDP lost per unit of extra tax, "
+    "so the usual response is a positive number. "
     "A tax cut or a spending cut has the same multiplier with the GDP sign reversed. "
     "Signed effects are in the Peak GDP column."
 )
