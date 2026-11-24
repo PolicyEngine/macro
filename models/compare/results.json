@@ -66,14 +66,14 @@
     "purchases": {
       "label": "Purchases multiplier, year 1",
       "country": "US",
-      "text": "CBO 0.45–1.82 (Fed responding); Ramey 2019 0.6–1; Coenen et al. 2012 FRB-US, no accommodation, ≈0.95. OBR uses 0.6 for current spending on impact, tapering to zero over five years (OBR, Nov 2023).",
+      "text": "CBO 0.45–1.82 (Fed responding); Ramey 2019 0.6–1; Coenen et al. 2012 FRB-US, no accommodation, ≈0.95. OBR uses 0.6 for current spending on impact, tapering to zero over five years (EFO July 2015 Box 3.2; its Nov 2023 article restates the taper and gives 0.45 for public services).",
       "source": "Whalen and Reichling, CBO Working Paper 2015-02 (converted); Ramey, Journal of Economic Perspectives 2019; Coenen et al., AEJ: Macroeconomics 2012; OBR, Dynamic scoring of policy measures in OBR forecasts, Nov 2023",
       "url": "https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md"
     },
     "tax": {
       "label": "Tax multiplier",
       "country": "US and UK",
-      "text": "CBO, Fed not tightening: two-year lower/middle-income cut 0.3–1.5; one-year higher-income cut 0.1–0.6; no central value. OBR household tax 0.3 on impact, decaying.",
+      "text": "CBO, Fed not tightening: two-year lower/middle-income cut 0.3–1.5; one-year higher-income cut 0.1–0.6; no central value. OBR household tax 0.3 on impact, decaying (EFO July 2015 Box 3.2; 0.33 in its Nov 2023 article).",
       "source": "Whalen and Reichling, CBO Working Paper 2015-02; OBR, Dynamic scoring of policy measures in OBR forecasts, Nov 2023",
       "url": "https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md"
     }
@@ -136,6 +136,52 @@
         "GDP per pp-quarter divides the peak GDP effect by the rate path's size to the peak. HANK's figure uses the realised real-rate path; the other rows use the nominal policy rate, which is close to the real rate in FRB/US because its inflation barely moves. On HANK's rstar path (10 pp-quarters at ρ = 0.9) the figure would be about 0.04%, so HANK's 0.16 and FRB/US's 0.15 are not like-for-like.",
         "HANK reports inflation as a quarterly rate; this page multiplies it by 4 to give an annual rate."
       ],
+      "gaps": {
+        "title": "Why the two UK rows sit either side of the Bank of England's range",
+        "intro": "The OBR emulator is 3–6× below the range and the BoE SVAR is above it. The three are different models answering different experiments.",
+        "items": [
+          {
+            "label": "Benchmark",
+            "text": "The Bank's 1999 illustration: Bank Rate 1pp higher for one year, then back. Output is −0.2% to −0.35% lower after about a year. It is one published range from 1999, not a current Bank estimate."
+          },
+          {
+            "label": "Model, OBR emulator",
+            "text": "The OBR's published equations. Bank Rate reaches consumption and household interest payments, and nothing else. The mortgage rate, gilt yields, sterling and house prices are inputs with no equation; investment, trade, prices and unemployment do not respond. A small answer is the expected result of the missing channels."
+          },
+          {
+            "label": "Model, BoE SVAR",
+            "text": "A statistical model: our replication of the Bank's own structural vector autoregression (Macro Technical Paper No. 3), estimated on 1992Q1–2025Q1. It has no named channels. Its answer is how GDP moved after past policy surprises."
+          },
+          {
+            "label": "Shock",
+            "text": "The OBR row imposes the benchmark's own rate path (+1pp for four quarters) with everything else held. The SVAR row is a one-standard-deviation policy surprise identified by sign restrictions, scaled linearly to 100bp. A surprise and an announced path are different experiments."
+          },
+          {
+            "label": "Horizon",
+            "text": "The benchmark and the OBR row are read at about a year (the OBR row peaks at q4). The SVAR row is read at h = 8 and is still building: its rate path has a unit root (a shock never fully dies out), so neither Bank Rate nor GDP returns within five years."
+          },
+          {
+            "label": "Monetary response",
+            "text": "In the benchmark the rate returns after a year by assumption. The OBR emulator has no policy rule and no price response, so nothing feeds back to the rate. In the SVAR the Bank's usual reaction is part of the estimated dynamics and the rate stays high, so more tightening accumulates: per pp-quarter the gap narrows from 4.6–8× to 2–4×."
+          },
+          {
+            "label": "What narrows the gap, OBR emulator",
+            "text": "Moving the mortgage rate with Bank Rate at the listing's own 0.9 pass-through (the opt-in monetary_conditioning) gives −0.149% at the peak, still below the range. Interest received has no equation, so neither figure is a bound on the full effect.",
+            "source": {
+              "label": "obr-macroeconomic-model docs/monetary_conditioning.md",
+              "url": "https://github.com/PolicyEngine/obr-macroeconomic-model/blob/main/docs/monetary_conditioning.md"
+            }
+          },
+          {
+            "label": "What narrows the gap, BoE SVAR",
+            "text": "Part of it is the replication, not the method. For a surprise of about 10bp on impact, the committed replication run gives a GDP trough of about −0.16% where the Bank's paper shows about −0.07% (approximate read-offs from its figures). The row above uses the fast test fixture, where the same surprise is 25bp on impact; the effect per basis point is the same. Scaled to 100bp the same way, the paper's own figure is also above the 1999 range. Open.",
+            "source": {
+              "label": "boe-var-model results/sense_check.md at 17f5d82",
+              "url": "https://github.com/PolicyEngine/boe-var-model/blob/17f5d82/results/sense_check.md"
+            }
+          }
+        ]
+      },
       "cells": [
         {
           "model": "obr",
@@ -215,7 +261,7 @@
           "verdict": "off",
           "verdict_label": "Off, sign right",
           "reason": "At h = 8 GDP is −1.6% (scaled to 100bp) against the BoE's −0.2% to −0.35% after about a year: 4.6–8× the peak, or 2–4× per pp-quarter once the SVAR's longer rate path is allowed for. It builds to h = 8 and does not revert within 5 years (the rate path has a unit root), against the BoE's fullest effect after about a year.",
-          "draws": "The medians are from the repository's fast test fixture (600 posterior draws, about 50 accepted, unweighted; tests/conftest.py), not the published replication run (10,000 draws, 765 accepted, effective sample size 368.0; results/summary.md at c827ab8). An earlier sense check found bands wider than the paper's (186 accepted draws, effective sample size 91, against the paper's 10,000; results/sense_check.md).",
+          "draws": "The medians are from the repository's fast test fixture (600 posterior draws, about 50 accepted, unweighted; tests/conftest.py), not the published replication run (10,000 draws, 731 accepted, effective sample size 333.3; results/summary.md at 17f5d82). An earlier sense check found bands wider than the paper's (186 accepted draws, effective sample size 91, against the paper's 10,000; results/sense_check.md).",
           "issue": "boe-11"
         },
         {
