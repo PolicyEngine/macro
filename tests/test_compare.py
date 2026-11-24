@@ -152,8 +152,8 @@ def test_every_fact_moves_to_details_not_out():
             for key in ("gdp", "inflation"):
                 if cell.get(key):
                     assert cell[key]["units"] in section
-    # 765 accepted of 10,000: boe_var results/summary.md, identical at c13a9c9 and the pinned c827ab8 (was 744).
-    assert "186 accepted draws" in text and "765 accepted" in text
+    # 731 accepted of 10,000 (ESS 333.3): boe_var results/summary.md at 17f5d82 (was 765 at c827ab8).
+    assert "186 accepted draws" in text and "731 accepted" in text
 
 
 def test_headline_verdicts_are_short_and_benchmark_row_leads():
@@ -187,3 +187,25 @@ def test_takeaway_names_the_model_behind_each_verdict():
         for cell in q["cells"]:
             if cell["status"] == "answered":
                 assert DATA["models"][cell["model"]]["name"] in line
+
+
+def test_boe_gap_explanation_sits_with_the_comparison():
+    # The reasons the UK rows differ from the Bank of England's range live in
+    # the +100bp question itself, unfolded, one item per axis (raised in review, Nov 2026).
+    section = html.unescape(_section("rate-up-100"))
+    gaps = DATA["questions"][0]["gaps"]
+    assert gaps["title"] in section
+    labels = " ".join(item["label"] for item in gaps["items"])
+    for axis in ("Model", "Shock", "Horizon", "Monetary response"):
+        assert axis in labels
+    for item in gaps["items"]:
+        assert item["text"] in section
+    bad = copy.deepcopy(DATA)
+    bad["questions"][0]["gaps"]["items"][0]["text"] = ""
+    assert any("gaps item" in p for p in battery.problems(bad))
+
+
+def test_multipliers_carry_one_labelled_sign_convention():
+    for qid in ("spending", "tax"):
+        assert "Multipliers take the sign of the OBR’s table" in html.unescape(_section(qid))
+    assert "GDP gained per unit spent" in PAGE and "GDP lost per unit of tax raised" in PAGE
