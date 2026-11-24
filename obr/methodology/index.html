@@ -161,6 +161,38 @@
         
   </div>
 </details>
+        <details class="xp" id="conventions">
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>OBR conventions: inherited, opt-in or absent</strong><small>Market paths, oil and gas, sterling, multipliers, judgement</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <div class="xp-body">
+        <p>A convention is a rule the OBR applies outside its equations, such as taking interest rates from financial markets. The emulator handles each in one of three ways.</p>
+        <ul>
+          <li><strong>Inherited</strong>: read as a fixed input path from the EFO&rsquo;s Table 1.9, &ldquo;Market-derived assumptions&rdquo;. The emulator applies no rule of its own.</li>
+          <li><strong>Opt-in overlay</strong>: imposed by a labelled switch on the model&rsquo;s <code>run_reform</code>, off by default.</li>
+          <li><strong>Absent</strong>: not reproduced, or loaded but used by no equation.</li>
+        </ul>
+        <div class="table-scroll"><table data-stack="yes">
+          <caption>OBR conventions and the emulator, October 2026 EFO, model pin 0e44ec8</caption>
+          <thead><tr><th scope="col">Convention</th><th scope="col">In the emulator</th><th scope="col">Status</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Bank Rate and gilt yields from market curves</th><td>Table 1.9 paths for Bank Rate (<code>R</code>) and the 20-year gilt yield (<code>RL</code>). No curve is built, and neither responds to a fiscal shock</td><td><span class="chip">inherited</span></td></tr>
+            <tr><th scope="row">Mortgage and deposit rates</th><td>Table 1.9 paths (<code>RMORT</code>, <code>RDEP</code>). <code>monetary_conditioning</code> moves the mortgage rate with Bank Rate (<a href="/obr/validation#bank-rate">Bank Rate limits</a>); the deposit rate, gilt yields, sterling and house prices stay fixed</td><td><span class="chip">inherited</span> <span class="chip">opt-in overlay</span></td></tr>
+            <tr><th scope="row">Oil price from futures</th><td>Table 1.9 path (<code>PBRENT</code>). Its note: Brent spot for outturn, ICE Brent futures over the forecast window</td><td><span class="chip">inherited</span></td></tr>
+            <tr><th scope="row">Gas price from futures</th><td>Table 1.9 path, loaded as <code>PGAS</code> but used by no equation in the listing, so it has no effect. Its note: one-month-forward gas price expectations averaged over the forecast window</td><td><span class="chip">absent</span></td></tr>
+            <tr><th scope="row">Exchange rate held flat</th><td>Table 1.9 path (<code>RX</code>): the sterling index is constant at 85.7 from 2026Q4 to 2032Q1. Sterling moves trade prices only, never volumes</td><td><span class="chip">inherited</span></td></tr>
+            <tr><th scope="row">Fiscal multipliers imposed by judgement, fading to zero over five years</th><td><code>published_conventions</code> imposes the OBR&rsquo;s impact multipliers on government consumption and investment (<a href="/obr/validation#multiplier">multiplier</a>, <a href="/obr/validation#capital">capital spending</a>). The straight-line fade between the two published points is our choice</td><td><span class="chip">opt-in overlay</span></td></tr>
+            <tr><th scope="row">Indirect taxes passed through to prices</th><td><code>price_passthrough</code>, for VAT and fuel duty shocks (<a href="/obr/validation#vat">VAT limits</a>)</td><td><span class="chip">opt-in overlay</span></td></tr>
+            <tr><th scope="row">Multiplier fade dated from the announcement</th><td>The fade starts at the shock start; the emulator has no announcement date</td><td><span class="chip">absent</span></td></tr>
+            <tr><th scope="row">Quarter-by-quarter forecast judgement</th><td>Recent add-factors are averaged and held flat (<a href="/obr/validation#caveats">limits</a>)</td><td><span class="chip">absent</span></td></tr>
+            <tr><th scope="row">Fresh market data between EFOs</th><td>The paths are those of the pinned EFO; no curve date or averaging window is applied or updated</td><td><span class="chip">absent</span></td></tr>
+          </tbody>
+        </table></div>
+        <ul>
+          <li><strong>Hosted tools</strong>: <code>obr_shock</code> exposes <code>price_passthrough</code> only. <code>published_conventions</code> and <code>monetary_conditioning</code> need the model package.</li>
+          <li><strong>What Table 1.9 shows and does not</strong>: it gives the paths and their sources, not the date or window the OBR sampled. Those are in the EFO text, which is not in the repository.</li>
+          <li><strong>Sources</strong>: Table 1.9 of the <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/0e44ec87681eba0a1f61d634875f5431ac2344c8/obr_macro/_data/obr_efo_october_2026_economy.xlsx">October 2026 EFO economy workbook</a>; <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/0e44ec87681eba0a1f61d634875f5431ac2344c8/obr_macro/published_conventions.py"><code>published_conventions.py</code></a>; <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/0e44ec87681eba0a1f61d634875f5431ac2344c8/docs/monetary_conditioning.md"><code>monetary_conditioning.md</code></a>; finding G14 of the <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/0e44ec87681eba0a1f61d634875f5431ac2344c8/docs/published_model_review.md">published-model review</a>.</li>
+        </ul>
+  </div>
+</details>
       </div>
 
       <div class="meth-step" id="meth-3" data-step="2">

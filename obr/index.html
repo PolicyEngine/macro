@@ -157,6 +157,49 @@
     </div>
   </section>
 
+  <section id="fiscal-rules" class="band ov-rules">
+    <div class="band-head" data-icon="scale"><h2>Against the fiscal rules</h2>
+      <p class="section-intro">The October 2026 EFO path for the two rules, beside what the model books for the four examples above. Not a rule test: the examples end in 2027Q4, before the target year.</p></div>
+    <ul class="scen-points rules-points">
+      <li><strong>Stability rule</strong>: the current budget (day-to-day spending and depreciation against receipts) in surplus in 2029-30</li>
+      <li><strong>Investment rule</strong>: public sector net financial liabilities (PSNFL, financial liabilities less financial assets) falling as a share of GDP by 2029-30</li>
+      <li><strong>Headroom</strong> is the margin by which a rule is met in its target year. The table is our reading of the committed tables, not the OBR&rsquo;s published headroom</li>
+    </ul>
+    <div class="table-scroll rules-table"><table data-stack="no">
+      <caption>The EFO path, October 2026. 2029-30 is the year the Charter names; the current budget is in deficit in 2028-29, so the reading depends on the year tested</caption>
+      <thead><tr><th scope="col">Financial year</th><th scope="col">2026-27</th><th scope="col">2027-28</th><th scope="col">2028-29</th><th scope="col">2029-30</th><th scope="col">2030-31</th><th scope="col">2031-32</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Current budget, &pound;bn (surplus +)</th><td>&minus;40.6</td><td>&minus;17.5</td><td>&minus;7.8</td><td><strong>+14.5</strong></td><td>+21.7</td><td>+20.9</td></tr>
+        <tr><th scope="row">PSNFL, % of GDP (derived)</th><td>83.3</td><td>83.7</td><td>83.5</td><td><strong>82.6</strong></td><td>81.6</td><td>80.9</td></tr>
+        <tr><th scope="row">PSNFL change, pp of GDP (derived)</th><td>+1.34</td><td>+0.39</td><td>&minus;0.20</td><td><strong>&minus;0.86</strong></td><td>&minus;0.98</td><td>&minus;0.74</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-scroll rules-table"><table data-stack="yes">
+      <caption>What the model books for each example in its third year (2027, four quarters summed)</caption>
+      <thead><tr><th scope="col">Example</th><th scope="col">Receipts</th><th scope="col">Current spending</th><th scope="col">Net borrowing</th><th scope="col">What is and is not counted</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Spending up &pound;1.25bn a quarter</th><td>no change</td><td>+&pound;5.7bn</td><td>+&pound;5.7bn</td><td>The cash cost only; receipts do not respond to the higher GDP</td></tr>
+        <tr><th scope="row">1p on the basic rate</th><td>no change</td><td>no change</td><td>no change</td><td>The &pound;6.55bn a year costing is the microsimulation&rsquo;s input; it enters as lower household income, not as model receipts</td></tr>
+        <tr><th scope="row">Bank Rate up 1 point</th><td>no change</td><td>no change</td><td>no change</td><td>Debt interest is an input. Checked on the four-quarter run; the sustained run records no fiscal lines</td></tr>
+        <tr><th scope="row">Corporation tax up 5 points</th><td>no change</td><td>no change</td><td>no change</td><td>The rate moves the cost of capital; no receipts are booked</td></tr>
+      </tbody>
+    </table></div>
+    <p class="scen-note"><span class="chip chip-warn">Not a rule readout</span> Only the spending example moves the public finances in the model, by its cash cost, so it lowers the current budget by &pound;5.7bn in 2027. The hosted <code>obr_shock</code> returns none of these lines, and no run reaches 2029-30.</p>
+    <details class="xp">
+  <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>The rules and the sources</strong><small>Charter wording, table derivations, what is missing</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
+  <div class="xp-body">
+      <ul>
+        <li><strong>Source of the rules</strong>: HM Treasury, <a href="https://obr.uk/about-the-obr/legislation-and-related-material/"><em>Charter for Budget Responsibility: autumn 2025</em></a> (February 2026), paragraphs 3.6 and 3.7. The Charter calls them the fiscal mandate and a supplementary target; stability rule and investment rule are the names in common use.</li>
+        <li><strong>Target year</strong>: 2029-30, until 2029-30 becomes the third year of the forecast period; after that, the third year of the rolling forecast. The Charter text does not say which applies to an October 2026 forecast, so the table shows every year.</li>
+        <li><strong>Current budget</strong>: the &ldquo;Current budget deficit&rdquo; row of Table 6.5 with the sign reversed, from the <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/0e44ec87681eba0a1f61d634875f5431ac2344c8/obr_macro/_data/obr_efo_october_2026_aggregates.xlsx">October 2026 EFO aggregates workbook</a> in the model repository.</li>
+        <li><strong>PSNFL</strong>: not printed in the committed workbooks. Derived from Table 6.14 as minus (net worth less non-financial assets less unfunded pension liabilities). This is our subtraction, in percentage points of GDP only; no &pound;bn headroom is given.</li>
+        <li><strong>Examples</strong>: the <code>PSCR</code> (receipts), <code>PSCE</code> (current spending) and <code>PSNBNSA</code> (net borrowing) changes in <a href="https://github.com/PolicyEngine/obr-macroeconomic-model/blob/0e44ec87681eba0a1f61d634875f5431ac2344c8/results/demo_shocks.json"><code>results/demo_shocks.json</code></a>, rows <code>cgg</code>, <code>household_costing</code>, <code>bank_rate</code> and <code>corporation_tax_rate</code>. The current budget is receipts less current spending less depreciation.</li>
+        <li><strong>Missing</strong>: the OBR&rsquo;s own headroom figures, a model run to 2029-30 that records the current budget, and any response of receipts or debt interest to the economy (<a href="/obr/validation#caveats">limits</a>).</li>
+      </ul>
+  </div>
+</details>
+  </section>
+
   <section id="proof" class="band ov-proof">
     <div class="band-head" data-icon="shield"><h2>How far to trust it</h2>
       <p class="section-intro">Three checks, weakest included; each opens its evidence.</p></div>

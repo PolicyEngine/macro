@@ -10,6 +10,11 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### OBR page: fiscal rules view and conventions
+
+- **Fiscal rules on `/obr`.** A new "Against the fiscal rules" section sets the October 2026 EFO path for the current budget (Table 6.5) and public sector net financial liabilities (derived from Table 6.14) beside what the model books for the four worked examples (`results/demo_shocks.json` at obr-macroeconomic-model `0e44ec8`). Only the spending example moves the public finances; the section says it is not a rule readout. No existing figure changes.
+- **Conventions on `/obr/methodology`.** Step 2 gains a table of the OBR conventions the emulator inherits as EFO Table 1.9 input paths, imposes through an opt-in overlay, or does not reproduce.
+
 ### Bank of England gap explanation and one multiplier sign convention (#280)
 
 - **`/models/compare`, 100bp question.** A new unfolded block lists why the two UK rows sit either side of the Bank of England's 1999 range: model, shock, horizon and monetary response, plus what narrows each gap. It is generated from a new optional `gaps` key in `results.json`. No figure in any row changed.
