@@ -71,6 +71,14 @@ def problems(data: dict) -> list[str]:
         for row in q.get("benchmark_rows", []):
             if row.get("benchmark") not in q.get("benchmarks", []):
                 out.append(f"{where}: benchmark row {row.get('benchmark')} is not one of the question's benchmarks")
+        for gi, item in enumerate((q.get("gaps") or {}).get("items", [])):
+            if not item.get("label") or not item.get("text"):
+                out.append(f"{where}: gaps item {gi} needs a label and a text")
+            src = item.get("source")
+            if src is not None and not (src.get("label") and src.get("url")):
+                out.append(f"{where}: gaps item {gi} source needs a label and a url")
+        if q.get("gaps") and not (q["gaps"].get("title") and q["gaps"].get("intro") and q["gaps"].get("items")):
+            out.append(f"{where}: gaps needs a title, an intro and items")
         models = [c.get("model") for c in q["cells"]]
         if tuple(sorted(models, key=MODEL_ORDER.index)) != tuple(models):
             out.append(f"{where}: cells are not in the fixed hub order")

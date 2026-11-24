@@ -15,6 +15,13 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 - **Fiscal rules on `/obr`.** A new "Against the fiscal rules" section sets the October 2026 EFO path for the current budget (Table 6.5) and public sector net financial liabilities (derived from Table 6.14) beside what the model books for the four worked examples (`results/demo_shocks.json` at obr-macroeconomic-model `0e44ec8`). Only the spending example moves the public finances; the section says it is not a rule readout. No existing figure changes.
 - **Conventions on `/obr/methodology`.** Step 2 gains a table of the OBR conventions the emulator inherits as EFO Table 1.9 input paths, imposes through an opt-in overlay, or does not reproduce.
 
+### Bank of England gap explanation and one multiplier sign convention (#280)
+
+- **`/models/compare`, 100bp question.** A new unfolded block lists why the two UK rows sit either side of the Bank of England's 1999 range: model, shock, horizon and monetary response, plus what narrows each gap. It is generated from a new optional `gaps` key in `results.json`. No figure in any row changed.
+- **Multiplier sign convention.** Every multiplier takes the sign of the OBR's table (EFO July 2015, Box 3.2): GDP gained per unit spent, GDP lost per unit of tax raised, so the usual response is positive. The compare columns, `/obr` and `/obr/validation` now use that one wording ("GDP fall per £", "GDP moved per pound" and "ratio" are gone). No number changed sign: the wording was mixed, the values were already positive.
+- **SVAR draws.** The 100bp row's description of the published replication run follows boe-var-model `17f5d82`: 765 accepted draws → 731, effective sample size 368.0 → 333.3 (`results/summary.md`). The row's medians are still the fast fixture's.
+- **OBR benchmark source.** The spending and tax benchmarks name EFO July 2015 Box 3.2 as the source of 0.6 and 0.3, and note that the OBR's November 2023 article gives 0.45 for public services and 0.33 for tax (obr-macroeconomic-model `docs/published_model_review.md`, G11).
+
 ### Model re-pin and site review (#278, #279)
 
 - **#278: model pins.** OBR `2965e82d` → `0e44ec87` (main after obr-macroeconomic-model #74 and #75), BoE SVAR `c13a9c91` → `c827ab86`, FRB/US `846eeb5c` → `162cfe6a`, US HANK `551a40d3` → `58353e5f`. After a redeploy the hosted tools run these pins. The FRB/US and US HANK compare rows with stored paths re-run identically; the OBR rows were re-run at `0e44ec8`.
