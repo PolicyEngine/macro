@@ -1692,10 +1692,13 @@ _SVAR_EST_END = "2025Q1"
 # Covid dummies): draws=500 -> 34 accepted, ESS 15.0; 1000 -> 80, ESS 40.6;
 # 2000 -> 159, ESS 48.7; 3500 -> 264, ESS 91.5; 6000 -> 455, ESS 181.4 (the
 # hosted round of 12 Nov 2026). The 2026Q1 dataset gave 135 / ESS 65.3 at
-# 2000. 2000 remains the smallest default that clears the 100-accepted-draws
-# threshold -- 1000 would not (80). ESS is not proportional to draws, so ESS
-# >= 100 needs somewhat more than 3500; a `warnings` entry flags the
-# shortfall honestly instead of hiding it. First-call runtime is
+# 2000. Re-measured again at boe_var 17f5d82 (world CPI seasonally adjusted,
+# boe-var-model #34; 21 Nov 2026): 500 -> 31, ESS 14.6; 1000 -> 67, ESS 21.7;
+# 2000 -> 147, ESS 55.3; 3500 -> 260, ESS 106.1; 6000 -> 430, ESS 185.6.
+# 2000 remains the smallest default that clears the 100-accepted-draws
+# threshold -- 1000 would not (67). ESS is not proportional to draws: ESS
+# >= 100 is reached at 3500 on this dataset and was not on the previous one;
+# a `warnings` entry flags the shortfall honestly instead of hiding it. First-call runtime is
 # a couple of minutes end to end and results are cached in-process.
 _SVAR_DEFAULT_DRAWS = 2000
 _SVAR_MIN_DRAWS = 50

@@ -390,22 +390,28 @@ def chart_svar_fevd():
          "bars": [{"name": "ours", "value": ours["cpi"], "series": 1},
                   {"name": "paper", "value": paper["cpi"], "series": 2}]},
     ]
-    # The production run's draws (10,000 drawn, 765 accepted, ESS 368.0) are in
-    # boe-var-model results/summary.md at c13a9c91, not in this artifact, so the
+    # The production run's draws (10,000 drawn, 731 accepted, ESS 333.3) are in
+    # boe-var-model results/summary.md at 17f5d82, not in this artifact, so the
     # chart does not restate them. The 68% bands are the 600-draw check
     # configuration's, and are labelled as such rather than attached to the
     # production bars as if they had been measured on them.
+    # The sign of the gap is data, not a constant: the CPI share was 8.5 points
+    # short until boe-var-model #34 and is 2.0 above since, and a description
+    # that hard-codes "short" would have gone on saying so.
+    def _gap(o, p):
+        return f"{abs(o - p):.1f} points {'short' if o < p else 'above'}"
+
     desc = (f"Grouped bar chart. Share of UK forecast-error variance attributed to identified "
             f"global shocks (world demand, energy and supply) four quarters ahead, as a share of "
             f"total variance — the statistic the paper's Figure 4 plots. For GDP, our production "
             f"artifact gives {ours['gdp']:.1f}% against the paper's {paper['gdp']:.1f}%, "
-            f"{abs(ours['gdp'] - paper['gdp']):.1f} points short; for CPI, {ours['cpi']:.1f}% "
-            f"against {paper['cpi']:.1f}%, {abs(ours['cpi'] - paper['cpi']):.1f} points short. "
+            f"{_gap(ours['gdp'], paper['gdp'])}; for CPI, {ours['cpi']:.1f}% "
+            f"against {paper['cpi']:.1f}%, {_gap(ours['cpi'], paper['cpi'])}. "
             f"Neither gap is resolvable: on the {fast['n_draws']}-draw check configuration the "
             f"68 per cent posterior band on the same share runs {fast['gdp_68_band_pct'][0]:.0f} "
             f"to {fast['gdp_68_band_pct'][1]:.0f} per cent for GDP and "
             f"{fast['cpi_68_band_pct'][0]:.0f} to {fast['cpi_68_band_pct'][1]:.0f} per cent for "
-            f"CPI, both far wider than the shortfall, and the paper's values are read off its "
+            f"CPI, both far wider than either gap, and the paper's values are read off its "
             f"figure and approximate. This comparison and the fan chart elsewhere on this page "
             f"are different runs: the fan chart is the frozen 2024Q2-edge run of "
             f"{fan['n_draws']:,} draws at seed {fan['seed']}.")

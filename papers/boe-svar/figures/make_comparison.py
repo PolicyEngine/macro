@@ -101,14 +101,17 @@ QUARTERS_AHEAD = 4       # the paper's "one year after the shocks"
 # Fast fixed-seed configuration, identical to tests/conftest.py.
 N_DRAWS, SAMPLE_SEED, IDENT_SEED, LAGS = 600, 1, 2, 4
 
-# Production artifact (results/summary.md after boe-var-model #24, data through
-# 2026Q2 -- the run vintage the site and paper cite; 845e2a4 had 37.4 / 42.3): 10,000 draws, importance-weighted,
-# sample 1992Q1-2025Q1 (2026Q1 vintage). Posterior MEAN of the per-draw group
-# share at 4 quarters — the paper-comparable statistic.
-PROD = {"gdp": 38.7, "cpi": 41.5}
+# Production artifact (results/summary.md at boe-var-model 17f5d82, after #34
+# seasonally adjusted the world CPI proxy; data through 2026Q2): 10,000 draws,
+# 731 accepted, importance-weighted, sample 1992Q1-2025Q1. Posterior MEAN of
+# the per-draw group share at 4 quarters — the paper-comparable statistic.
+# Before #34 (c827ab8, the #24 vintage) these were 38.7 / 41.5; 845e2a4 had
+# 37.4 / 42.3.
+PROD = {"gdp": 37.6, "cpi": 52.0}
 # The same run under the superseded presentation: sum of per-shock medians,
 # renormalised to 100%. Kept so the change is legible, never plotted.
-PROD_RENORMALISED = {"gdp": 43.2, "cpi": 48.0}
+# (43.2 / 48.0 before #34.)
+PROD_RENORMALISED = {"gdp": 42.9, "cpi": 59.0}
 # Published values (approximate, as stated in the paper).
 PAPER = {"gdp": 40.0, "cpi": 50.0}
 

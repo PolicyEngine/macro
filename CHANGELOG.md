@@ -10,6 +10,15 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### BoE SVAR re-pin to `17f5d82`
+
+- **Pin.** BoE SVAR `c827ab86` → `17f5d824` (boe-var-model #34, world CPI seasonal adjustment; #35, November 2026 MPR comparator and 2026Q3 scoring). After a redeploy the hosted `forecast_uk` and `latest_shocks` run this pin.
+- **Replication figures** (`results/summary.md` at `17f5d82`): accepted draws 765 → 731, ESS 368.0 → 333.3; global share of UK GDP variance 38.7 → 37.6%, of UK CPI 41.5 → 52.0% (paper about 50%); domestic share of UK CPI 36.8 → 24.8% (paper about 40%), now the open gap.
+- **Evaluation figures** (`rolling_evaluation.json`, `coverage_evaluation.json` at `17f5d82`): smallest adjusted q against drift 0.39 → 0.36; no-change wins after adjustment 3 of 64 → 1 of 64; UK CPI 90% band coverage 78% → 76% at one quarter, 54% → 56% at eight.
+- **Shock reading, 2026Q2**: world supply "negative, 70%" → no call (55% positive); 430 of 6,000 draws accepted.
+- **Band factors** follow the pin: eight of 32 moved, seven by one step of measured coverage (one origin in 50) and one by two (`forecasts/band_calibration.json`). Archived rounds are untouched.
+- **Not changed**: the archived 12 Nov 2026 round shown as the current forecast (it predates #34), the working-paper PDF (the #24 vintage, now labelled) and the compare page.
+
 ### OBR page: fiscal rules view and conventions
 
 - **Fiscal rules on `/obr`.** A new "Against the fiscal rules" section sets the October 2026 EFO path for the current budget (Table 6.5) and public sector net financial liabilities (derived from Table 6.14) beside what the model books for the four worked examples (`results/demo_shocks.json` at obr-macroeconomic-model `0e44ec8`). Only the spending example moves the public finances; the section says it is not a rule readout. No existing figure changes.

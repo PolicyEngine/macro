@@ -145,6 +145,15 @@ def _shock_run_note(data: dict) -> str:
     if shocks.get("draws") == data.get("draws") and shocks.get("accepted_draws") == data.get("accepted"):
         return ("A separate run from the shock probabilities with the same draw settings, "
                 f"so both show {data['draws']:,} draws and {data['accepted']} accepted.")
+    # The shock file can be newer than the archived round (it was after the
+    # 17f5d82 re-pin, which seasonally adjusted world CPI): say which run is
+    # which from the two files' own provenance rather than implying one model.
+    prov = shocks.get("provenance", {})
+    run_date, rev = str(prov.get("run_at", ""))[:10], str(prov.get("source_revision", ""))[:7]
+    if run_date and rev and run_date > str(data.get("generated", "")):
+        return (f"The shock probabilities are a later run ({run_date}, boe-var-model {rev}, "
+                f"{shocks.get('accepted_draws')} of {shocks.get('draws'):,} accepted), "
+                "so the draw counts differ and this forecast predates that model version.")
     return "A separate run from the shock probabilities, so the draw counts differ."
 
 def render(page: Path, name: str, content: str) -> str:
