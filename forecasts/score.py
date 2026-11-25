@@ -139,7 +139,7 @@ LOG_BASIS_ROUNDS = {
 LOG_BASIS_VARIABLES = ("cpi", "gdp")
 _BAND_KEYS = ("median", "lo68", "hi68", "lo90", "hi90")
 BASIS_NOTE = (
-    "Basis: boe-svar rounds archived before 6 November 2026 hold the model's "
+    "Basis: the two boe-svar rounds archived in July 2026 hold the model's "
     "four-quarter log difference. They are converted to the simple "
     "four-quarter rate, 100*(exp(x/100) - 1), when scored, because the "
     "outturns and the published forecasts are simple rates. The archived "
@@ -1418,7 +1418,7 @@ def render_results(card: dict) -> str:
         )
     if any("forecast_archived_log_basis" in e for _, e in rows):
         notes.append(
-            "Rounds archived before 6 November 2026 hold the model&rsquo;s "
+            "The two boe-svar rounds archived in July 2026 hold the model&rsquo;s "
             "four-quarter log difference. They are converted to the simple "
             "four-quarter rate when scored, because the outturns and the "
             "published forecasts are simple rates; the archived files are "
