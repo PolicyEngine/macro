@@ -127,7 +127,7 @@
     <details class="xp">
   <summary><span class="xp-ic"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></svg></span><span class="xp-t"><strong>Data and sample</strong><small>Data through 2026Q2, sample from 1992Q1</small></span><span class="xp-chev" aria-hidden="true"></span></summary>
   <div class="xp-body">
-    <p class="section-intro">Every figure here uses data through 2026Q2, except test 2 (frozen origin, scored through 2026Q1), and the estimation sample 1992Q1&ndash;2025Q1. They are read at boe-var-model <a href="https://github.com/PolicyEngine/boe-var-model/tree/17f5d82">17f5d82</a>, after the world CPI series was seasonally adjusted (<a href="https://github.com/PolicyEngine/boe-var-model/pull/34">#34</a>); the figures before that are at <a href="https://github.com/PolicyEngine/boe-var-model/tree/c827ab8">c827ab8</a>.</p>
+    <p class="section-intro">Every figure here uses data through 2026Q2, except test 2 (frozen origin, scored through 2026Q1), and the estimation sample 1992Q1&ndash;2025Q1. They are read at boe-var-model <a href="https://github.com/PolicyEngine/boe-var-model/tree/17f5d82">17f5d82</a>, after the world CPI series was seasonally adjusted (<a href="https://github.com/PolicyEngine/boe-var-model/pull/34">#34</a>); the figures before that are at <a href="https://github.com/PolicyEngine/boe-var-model/tree/c827ab8">c827ab8</a>. Two limits rows (<a href="#explosive">stable draws</a>, <a href="#rate-size">rate-shock size</a>) still quote the pre-refresh run of 744 accepted draws and say so.</p>
     
   </div>
 </details>
@@ -230,7 +230,7 @@
                 change moved the domestic CPI share away from the paper (36.8% to 24.8%, against about 40%).
               </p>
               <p>
-                The CI gate uses a cheap ~50-draw configuration whose global GDP share
+                The CI gate uses a cheap configuration (600 posterior draws, 45 accepted) whose global GDP share
                 moves about &plusmn;6.5pp across sampling seeds, checked against a wide
                 [30, 60]% band. It catches gross regressions; it is not a second
                 opinion on the production run.
@@ -317,7 +317,7 @@
 </ul>
 <p class="vc-notes">Each panel starts at the frozen 2024Q2 edge; scored through 2026Q1 and not re-scored on the 2026Q2 refresh; the 6 quarters right of the dashed rule are not evaluated.</p>
 </div><!-- /vc-fig -->
-                <figcaption>Every outturn sits inside the 68% band, which is over-dispersion, not a pass. Frozen 2024Q2 data edge; source: <code>papers/boe-svar/figures/figure_numbers.json</code>.</figcaption>
+                <figcaption>Every outturn sits inside the 68% band, which is over-dispersion, not a pass. Frozen 2024Q2 data edge; source: <code>papers/boe-svar/figures/figure_numbers.json</code>. The outturns are the one-decimal values transcribed in <code>papers/boe-svar/figures/make_figures.py</code>, with no recorded vintage. On the ONS release of 12 Nov 2026 (<code>data/latest/uk_gdp_cvm.json</code>) GDP growth for the same seven quarters is 1.3, 1.9, 1.8, 1.1, 1.2, 0.8 and 0.8%, which gives a GDP RMSE of 0.24pp against the same medians; all seven stay inside the 68% band.</figcaption>
               </figure>
         <p class="chart-note">
               The model put inflation at about 3.2% from mid-2025 and held it there.
@@ -471,10 +471,9 @@
                 <li>Every published forecast here carries those dummies.</li>
                 <li>Published specification: UK GDP against drift goes <strong>1.07 &rarr; 0.99</strong> at one quarter.</li>
                 <li>At eight quarters it goes <strong>1.12 &rarr; 0.95</strong>.</li>
-                <li>CPI and Bank Rate move by less than 0.02.</li>
+                <li>CPI and Bank Rate move by 0.03 or less.</li>
                 <li>Level with a naive benchmark is still not beating it.</li>
-                <li>UK GDP is statistically inseparable from drift at every horizon (p&nbsp;=&nbsp;0.32&ndash;0.42).</li>
-                <li>That result holds in both specifications.</li>
+                <li>UK GDP is statistically inseparable from drift at every horizon (p&nbsp;=&nbsp;0.32&ndash;0.42 in the evaluation run; 0.10&ndash;0.46 in the published specification).</li>
               </ul>
               <p class="vc-note">
                 The AR(1) comparison in the source file is <strong>not usable at long
@@ -770,7 +769,7 @@
           </tr>
           <tr>
             <th scope="row"><strong>Proxied world aggregates</strong></th>
-            <td>The Bank's UK-trade-weighted world GDP and CPI are unpublished, so they are rebuilt as chain-weighted US + euro-area + Japan + China with time-varying UK trade weights.</td>
+            <td>The Bank's UK-trade-weighted world GDP and CPI are unpublished, so they are rebuilt as chain-weighted US + euro-area + Japan + China with approximate UK trade weights fixed within each of three eras.</td>
           </tr>
           <tr>
             <th scope="row"><strong>One ranking does not replicate</strong></th>
@@ -788,7 +787,7 @@
           <tr id="explosive">
             <th scope="row"><strong>The <a class="gloss-link" href="/glossary#prior-posterior">posterior</a> is mildly explosive</strong></th>
             <td><ul>
-              <li>In 99.3% of the 10,000 posterior draws the largest root of the VAR is above 1; the median is about 1.004.</li>
+              <li>In 99.2% of the 10,000 posterior draws the largest root of the VAR is above 1; the median is about 1.004.</li>
               <li>Only 4 of 744 accepted draws are stable, counted on the pre-refresh run (10,000 draws, 744 accepted, before the 2026Q2 data); not yet recounted on the production run (731 accepted).</li>
               <li>The cause is the specification (variables in levels, a prior centred on a random walk), not a code error.</li>
               <li>The paper&rsquo;s Fig.&nbsp;3C has the same shape: Bank Rate fades; GDP and CPI levels stay shifted to h20.</li>
@@ -809,7 +808,7 @@
               <li>Scored held-out, the raw 90% band covers about 77% of outturns.</li>
               <li>Per-horizon rescaling factors: 82.5% (82.9% on year-on-year growth), with a 95% interval of about 67% to 95%, so the gap left to 90% is within sampling error (<a href="https://github.com/PolicyEngine/boe-var-model/pull/19">#19</a>).</li>
               <li>Conformal factors: 83.0% on the same specification (<a href="https://github.com/PolicyEngine/boe-var-model/pull/20">#20</a>).</li>
-              <li>Lenza&ndash;Primiceri Covid volatility scaling: 80.7%, or 87.4% combined with the rescaling (<a href="https://github.com/PolicyEngine/boe-var-model/pull/21">#21</a>).</li>
+              <li>Lenza&ndash;Primiceri Covid volatility scaling: 83.6% on the same held-out origins (80.7% over all 50), or 87.4% combined with the rescaling (<a href="https://github.com/PolicyEngine/boe-var-model/pull/21">#21</a>).</li>
               <li>88% of the misses fall in three episodes, each mostly on one side of the band: 2014Q3&ndash;2016Q4, 2020Q1&ndash;2021Q2 and 2021Q3&ndash;2023Q4. Outside them the raw 90% band covers 94%.</li>
               <li>So the shortfall is mostly the central forecast missing for several quarters, not tail shape; stochastic-volatility variants, tried and not adopted, left the below-band misses in place (<a href="https://github.com/PolicyEngine/boe-var-model/blob/main/docs/band_decision.md">band decision note</a>, <a href="https://github.com/PolicyEngine/boe-var-model/issues/12">#12</a>).</li>
               <li>Read the 90% fan as under-covering, not as a 90% probability.</li>
