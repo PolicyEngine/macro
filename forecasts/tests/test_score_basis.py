@@ -37,9 +37,14 @@ class Conversion(unittest.TestCase):
         # Prices up 5% on the year: log difference 4.879, simple rate 5.
         p0, p4 = 100.0, 105.0
         log_diff = 100.0 * math.log(p4 / p0)
-        self.assertAlmostEqual(score.log_to_simple_pct(log_diff), 100.0 * (p4 / p0 - 1.0), places=12)
-        self.assertAlmostEqual(score.log_to_simple_pct(0.0), 0.0, places=12)
+        self.assertAlmostEqual(score.log_to_simple_pct(log_diff), 100.0 * (p4 / p0 - 1.0), places=6)
+        self.assertAlmostEqual(score.log_to_simple_pct(0.0), 0.0, places=6)
         self.assertLess(score.log_to_simple_pct(-2.0), 0.0)
+
+    def test_is_rounded_so_the_scorecard_is_the_same_on_every_machine(self):
+        for x in (2.6785302332498873, 1.1042806220419834, -0.09097516145835696):
+            y = score.log_to_simple_pct(x)
+            self.assertEqual(y, round(y, 6))
 
     def test_is_monotone_so_band_order_survives(self):
         xs = [-3.0, -0.5, 0.0, 1.1, 2.7, 9.0]
@@ -59,7 +64,7 @@ class Conversion(unittest.TestCase):
         self.assertEqual(doc["forecast"]["2026Q2"]["cpi"]["median"], 3.0)
         cpi = out["forecast"]["2026Q2"]["cpi"]
         for key in KEYS:
-            self.assertAlmostEqual(cpi[key], 100.0 * math.expm1(0.03), places=12)
+            self.assertAlmostEqual(cpi[key], 100.0 * math.expm1(0.03), places=6)
         self.assertEqual(cpi["median_archived_log_basis"], 3.0)
         # A level, not a growth rate: not converted.
         self.assertEqual(out["forecast"]["2026Q2"]["unemployment"]["median"], 4.9)
@@ -90,7 +95,7 @@ class ArchivedRounds(unittest.TestCase):
                         got = loaded["forecast"][period][variable]
                         for key in KEYS:
                             self.assertAlmostEqual(
-                                got[key], 100.0 * math.expm1(block[variable][key] / 100.0), places=12
+                                got[key], 100.0 * math.expm1(block[variable][key] / 100.0), places=6
                             )
                         self.assertGreaterEqual(got["median"], block[variable]["median"])
 
@@ -103,8 +108,8 @@ class ArchivedRounds(unittest.TestCase):
         cpi = next(e for e in entries if (e["period"], e["variable"]) == ("2026Q2", "cpi"))
         archived = raw["forecast"]["2026Q2"]["cpi"]["median"]
         self.assertEqual(cpi["forecast_archived_log_basis"], archived)
-        self.assertAlmostEqual(cpi["forecast"], 100.0 * math.expm1(archived / 100.0), places=12)
-        self.assertAlmostEqual(cpi["error"], cpi["forecast"] - cpi["outturn"], places=12)
+        self.assertAlmostEqual(cpi["forecast"], 100.0 * math.expm1(archived / 100.0), places=6)
+        self.assertAlmostEqual(cpi["error"], cpi["forecast"] - cpi["outturn"], places=6)
 
     def test_simple_basis_rounds_score_as_archived(self):
         rel = "forecasts/rounds/2026-11-12/boe-svar.json"

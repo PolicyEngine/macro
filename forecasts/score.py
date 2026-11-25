@@ -149,8 +149,14 @@ BASIS_NOTE = (
 
 
 def log_to_simple_pct(x: float) -> float:
-    """A four-quarter log difference (log points x100) as a simple % rate."""
-    return 100.0 * math.expm1(x / 100.0)
+    """A four-quarter log difference (log points x100) as a simple % rate.
+
+    Rounded to six decimal places (a millionth of a percentage point): the
+    result is written to scorecard.json, and exp differs in the last bit
+    between C libraries, which would make ``--check`` fail on a machine other
+    than the one that wrote the file.
+    """
+    return round(100.0 * math.expm1(x / 100.0), 6)
 
 
 def on_simple_basis(data: dict) -> dict:
