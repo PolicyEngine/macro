@@ -10,6 +10,13 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### FRB/US lever units: which add-factors stack, and by how much
+
+- **`rfftay_aerr` does not stack.** The non-inertial Taylor rule has no lag of the funds rate, but the lever carried the inertial rule's text ("periods=4 peaks near +3pp"). Held for four quarters at 1.0 the funds rate is +1.00, +0.82, +0.71, +0.55pp above baseline, never above +1pp. The text now says so.
+- **`ebfi_aerr` keeps building.** "1% higher BFI after one period" holds in the shocked quarter only: one 0.01 shock gives +1.0% on impact and about +1.8% a year later.
+- **Per-lever stacking figures.** The six fiscal and demand levers shared one sentence quoting egfe and trp. Each now quotes its own fourth-quarter figure for 0.01 held four quarters: egfe 2.9%, egse 3.7%, trp 2.3pp (was "~2.4pp"), trci 2.9pp, consumption 4.2%, BFI 5.9%. `poil_aerr` says +$10 is about 15% of the baseline price in 2026Q1 and about 10% in the next three quarters.
+- All figures are from local solves at us-frb-model `162cfe6` (October 2026 LONGBASE) and match the table in us-frb-model #28. A slow test checks them against the installed model in the nightly contract job. Tool text only; no result changes.
+
 ### BoE SVAR re-pin to `17f5d82`
 
 - **Pin.** BoE SVAR `c827ab86` → `17f5d824` (boe-var-model #34, world CPI seasonal adjustment; #35, November 2026 MPR comparator and 2026Q3 scoring). After a redeploy the hosted `forecast_uk` and `latest_shocks` run this pin.
