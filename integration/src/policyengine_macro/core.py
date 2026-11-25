@@ -588,8 +588,8 @@ FRBUS_VARIABLES = [
         "description": "Add-error on federal government purchases (defence + "
                        "non-defence consumption and investment)",
         "units": "LOG POINTS of quarterly growth in egfe (0.01 ~ a 1% higher "
-                 "level of federal purchases; egfe is ~4.6% of GDP, so 0.01 "
-                 "is roughly 0.046% of GDP). NOT billions of dollars — a "
+                 "level of federal purchases; egfe is ~4.5% of real GDP, so 0.01 "
+                 "is roughly 0.045% of GDP). NOT billions of dollars — a "
                  "shock of order 1 or more diverges the solver."
                  " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised move exceeds one period's shock: 0.01 held for periods=4 lifts egfe 2.9% by the fourth quarter. The realised lever path is returned in the results.",
         "typical_shock": 0.01,
@@ -618,7 +618,7 @@ FRBUS_VARIABLES = [
         "description": "Add-error on the corporate income tax rate",
         "units": "decimal rate change (0.01 = a 1pp rise in the effective "
                  "corporate tax rate on impact)."
-                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised move exceeds one period's shock: 0.01 held for periods=4 raises trci 2.9pp by the fourth quarter. The realised lever path is returned in the results.",
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised move exceeds one period's shock: 0.01 held for periods=4 raises trci 2.95pp by the fourth quarter. The realised lever path is returned in the results.",
         "typical_shock": 0.01,
         "requires_policy_rule": None,
     },
@@ -629,7 +629,7 @@ FRBUS_VARIABLES = [
         "units": "log points of quarterly consumption growth (0.01 ~ 1% higher "
                  "consumption after one period; large, since consumption is "
                  "~68% of GDP)."
-                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised move exceeds one period's shock: 0.01 held for periods=4 lifts consumption 4.2% by the fourth quarter, and a one-period shock barely decays (1.06% on impact, 0.97% a year later). The realised lever path is returned in the results.",
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised move exceeds one period's shock: 0.01 held for periods=4 lifts consumption 4.2% by the fourth quarter, and a one-period shock barely decays (1.06% on impact, 1.01% in the fourth quarter). The realised lever path is returned in the results.",
         "typical_shock": 0.01,
         "requires_policy_rule": None,
     },
@@ -638,8 +638,8 @@ FRBUS_VARIABLES = [
         "description": "Add-error on business fixed investment",
         "units": "log points of quarterly BFI growth (0.01 ~ 1.0% higher BFI "
                  "in the shocked quarter only: the response keeps building "
-                 "after a one-period shock, to about 1.8% a year later)."
-                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised move exceeds one period's shock: 0.01 held for periods=4 lifts BFI 5.9% by the fourth quarter. The realised lever path is returned in the results.",
+                 "after a one-period shock, to 1.79% in the fourth quarter)."
+                 " PER SHOCKED PERIOD: with periods>1 the add-errors accumulate through the equation's own lags, so the realised move exceeds one period's shock: 0.01 held for periods=4 lifts BFI 5.95% by the fourth quarter. The realised lever path is returned in the results.",
         "typical_shock": 0.01,
         "requires_policy_rule": None,
     },

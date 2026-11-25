@@ -376,6 +376,15 @@ def test_stacking_text_matches_which_levers_stack():
     # A one-period investment shock keeps building; the text must not say
     # the level is 1% higher "after one period" and stop there.
     assert "keeps building" in index["ebfi_aerr"]["units"]
+    # The figures us-frb-model #28's VALIDATION.md table prints, to its
+    # decimals: egfe is 4.5% of real GDP in 2026Q1, and the one-quarter
+    # responses are quoted in q4 (the fourth quarter), as that table does.
+    assert "~4.5% of real GDP" in index["egfe_aerr"]["units"]
+    assert "0.045% of GDP" in index["egfe_aerr"]["units"]
+    assert "trci 2.95pp" in index["trci_aerr"]["units"]
+    assert "BFI 5.95%" in index["ebfi_aerr"]["units"]
+    assert "1.79% in the fourth quarter" in index["ebfi_aerr"]["units"]
+    assert "1.01% in the fourth quarter" in index["ecnia_aerr"]["units"]
 
 
 @pytest.mark.slow
@@ -403,9 +412,15 @@ def test_stacking_text_matches_the_installed_model():
     # in dollars, it never builds up.
     assert max(oil[:4]) == oil[0] and min(oil[:4]) > 0.6 * oil[0], oil
 
+    # One shocked quarter: index 0 is the shocked quarter (q1) and index 3
+    # is q4, the column us-frb-model #28's table reports.
     bfi = own_path("ebfi_aerr", "ebfi", 0.01, 1)
     assert bfi[0] == pytest.approx(1.0, abs=0.02)
-    assert bfi[4] == pytest.approx(1.85, abs=0.05) and bfi[4] > bfi[0]
+    assert bfi[3] == pytest.approx(1.79, abs=0.02) and bfi[4] > bfi[3]
+
+    cons = own_path("ecnia_aerr", "ecnia", 0.01, 1)
+    assert cons[0] == pytest.approx(1.06, abs=0.01)
+    assert cons[3] == pytest.approx(1.01, abs=0.01)
 
 
 def _fake_frbus(monkeypatch):
