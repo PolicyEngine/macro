@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 import sys
 from datetime import datetime, timedelta, timezone
@@ -110,12 +111,87 @@ def naive_random_walk(variable: str, data_edge: str) -> float | None:
 REPO_BLOB = "https://github.com/PolicyEngine/macro/blob/main"
 
 
+# Rounds archived on the model's four-quarter LOG difference, 100*log(P_t /
+# P_{t-4}), before the adapter published the simple rate (macro #208; adapter
+# commit e2ef6752, 6 Nov 2026). Outturns and every published forecast beside
+# them are simple four-quarter rates, 100*(P_t/P_{t-4} - 1), which sit above
+# the log difference by about x^2/200: 0.04pp at 2.7% CPI. Scoring the archived
+# number unconverted compares two different quantities.
+#
+# Rounds are append-only, so the basis cannot be corrected in the round file.
+# It is converted here, as the round is read. The map is monotone, so the
+# converted median and band edges are exactly the median and band edges of
+# the converted paths; nothing is re-estimated.
+#
+# Each entry needs evidence anyone can check. test_score_guard.py asserts that
+# a listed round's own ``units`` string does not already claim the simple
+# basis, and that every boe-svar round is either listed here or says "simple".
+LOG_BASIS_ROUNDS = {
+    "forecasts/rounds/2026-07-21/boe-svar.json": (
+        "boe-var-model pipeline output, YoY from boe_var.forecast.yoy "
+        "(x_t - x_{t-4} on 100*log levels); archived 25 July 2026"
+    ),
+    "forecasts/rounds/2026-07-29/boe-svar.json": (
+        "policyengine_macro.core.svar_forecast before e2ef6752 passed "
+        "boe_var.forecast.yoy through unconverted; archived 29 July 2026"
+    ),
+}
+LOG_BASIS_VARIABLES = ("cpi", "gdp")
+_BAND_KEYS = ("median", "lo68", "hi68", "lo90", "hi90")
+BASIS_NOTE = (
+    "Basis: the two boe-svar rounds archived in July 2026 hold the model's "
+    "four-quarter log difference. They are converted to the simple "
+    "four-quarter rate, 100*(exp(x/100) - 1), when scored, because the "
+    "outturns and the published forecasts are simple rates. The archived "
+    "files are unchanged; each affected entry keeps the archived median as "
+    "forecast_archived_log_basis."
+)
+
+
+def log_to_simple_pct(x: float) -> float:
+    """A four-quarter log difference (log points x100) as a simple % rate.
+
+    Rounded to six decimal places (a millionth of a percentage point): the
+    result is written to scorecard.json, and exp differs in the last bit
+    between C libraries, which would make ``--check`` fail on a machine other
+    than the one that wrote the file.
+    """
+    return round(100.0 * math.expm1(x / 100.0), 6)
+
+
+def on_simple_basis(data: dict) -> dict:
+    """The round with log-basis growth rates converted; others unchanged.
+
+    Returns the same dict when the round is not in LOG_BASIS_ROUNDS. For a
+    listed round, returns a copy whose cpi/gdp stats are simple rates, with
+    the archived median kept beside each as ``median_archived_log_basis``.
+    """
+    if data.get("_path") not in LOG_BASIS_ROUNDS:
+        return data
+    out = dict(data)
+    out["_basis_converted"] = True
+    out["forecast"] = {}
+    for period, block in data["forecast"].items():
+        out["forecast"][period] = {}
+        for variable, stats in block.items():
+            if variable not in LOG_BASIS_VARIABLES:
+                out["forecast"][period][variable] = stats
+                continue
+            converted = dict(stats)
+            for key in _BAND_KEYS:
+                if key in stats:
+                    converted[key] = log_to_simple_pct(stats[key])
+            converted["median_archived_log_basis"] = stats["median"]
+            out["forecast"][period][variable] = converted
+    return out
+
+
 def load_rounds() -> list[dict]:
     rounds = []
     for path in sorted(ROUNDS.glob("*/*.json")):
         data = json.loads(path.read_text())
         data["_path"] = str(path.relative_to(ROOT))
-        rounds.append(data)
+        rounds.append(on_simple_basis(data))
     return rounds
 
 
@@ -258,6 +334,13 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
                     "period": period,
                     "variable": variable,
                     "forecast": point,
+                    # Present only where the archived round was on the log
+                    # basis (LOG_BASIS_ROUNDS): the median as archived.
+                    **(
+                        {"forecast_archived_log_basis":
+                         stats["median_archived_log_basis"]}
+                        if "median_archived_log_basis" in stats else {}
+                    ),
                     "outturn": actual,
                     "outturn_vintage": obs.get("vintage"),
                     "outturn_series": obs.get("series"),
@@ -285,7 +368,9 @@ def score_round(rnd: dict, outturns: dict[tuple[str, str], dict]) -> dict:
                     # whose 68% band contains the outturn 68% of the time is
                     # calibrated, however large its point errors are.
                     "benchmarks": benchmarks,
-                    # The archived band, as it was stated: coverage is scored
+                    # The archived band, as it was stated (on the simple basis
+                    # for a LOG_BASIS_ROUNDS round; the conversion is monotone,
+                    # so it is the same band): coverage is scored
                     # on the raw quantiles, never on the re-calibrated display
                     # bands of the open-round fans.
                     "lo68": stats["lo68"],
@@ -371,6 +456,7 @@ def build() -> dict:
             else None
         ),
         "naive_note": NAIVE_NOTE,
+        "basis_note": BASIS_NOTE,
         "status": (
             "accumulating — no forecast period has an outturn yet"
             if total_scored == 0
@@ -590,6 +676,8 @@ def build_vs_official(variable: str) -> list[dict]:
     factor). The archived round artifact itself is never modified.
     """
     rnd = json.loads(SVAR_ROUND.read_text())
+    rnd["_path"] = str(SVAR_ROUND.relative_to(ROOT))
+    rnd = on_simple_basis(rnd)
     fixed = _parse_utc(rnd.get("archived_utc") or "")
     edge = _quarter_index(rnd["information_set"]["data_edge"])
     k = _calibration_k(variable)
@@ -1327,6 +1415,14 @@ def render_results(card: dict) -> str:
             "No change is the naive baseline: "
             + esc(NAIVE_NOTE.split(": ", 1)[1]) + " This is the driftless walk; the "
             '<a href="#limits">limits</a> say what happens against a walk with drift.'
+        )
+    if any("forecast_archived_log_basis" in e for _, e in rows):
+        notes.append(
+            "The two boe-svar rounds archived in July 2026 hold the model&rsquo;s "
+            "four-quarter log difference. They are converted to the simple "
+            "four-quarter rate when scored, because the outturns and the "
+            "published forecasts are simple rates; the archived files are "
+            "unchanged. The conversion raises a 2.7% forecast by about 0.04pp."
         )
     body += [f"        <p>{n}</p>" for n in notes]
     body += ["        </div>", "      </details>", "      </div>", "      </div>"]
