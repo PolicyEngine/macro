@@ -10,6 +10,11 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### `obr_shock`: household lever no longer fails on a shock shorter than the solve window
+
+- **Bug.** `obr_shock(var="HHDI_ADDFACTOR", ...)` with `periods` below 12 raised `TypeError: float() argument must be a string or a real number, not 'NoneType'` after both solves had run, locally and on the hosted server. The model solves to 2027Q4 at least and leaves the GDP-per-pound ratio undefined in the quarters after the shock ends; the adapter tried to round those. In place since the ratio was added on 16 Nov 2026 (`9b2c8e1d`).
+- **Fix.** `gdp_per_revenue_current_price`, `gdp_per_revenue_real` and `cpi_pct_delta` keep `null` for an undefined quarter, so each list still lines up with `results` row for row. No published number changes: the site's figures use 12 shocked quarters, where every ratio is defined.
+
 ### BoE SVAR re-pin to `17f5d82`
 
 - **Pin.** BoE SVAR `c827ab86` → `17f5d824` (boe-var-model #34, world CPI seasonal adjustment; #35, November 2026 MPR comparator and 2026Q3 scoring). After a redeploy the hosted `forecast_uk` and `latest_shocks` run this pin.

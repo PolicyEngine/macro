@@ -485,6 +485,64 @@ def test_obr_shock_carries_the_household_ratio_on_both_bases(monkeypatch):
     assert "current_price" in out["caveat"]
 
 
+def test_obr_shock_household_ratio_is_none_after_the_shock_ends(monkeypatch):
+    """A household shock shorter than the solve window must not crash.
+
+    The model solves to 2027Q4 at least (12 quarters) and leaves the
+    GDP-per-pound ratio None in every quarter after the shock ends. Before
+    25 Nov 2026 obr_shock did float(None) on those, so every HHDI_ADDFACTOR
+    call with periods < 12 raised TypeError after both solves had run; the
+    earlier test missed it by patching the window down to the shocked
+    quarters. The window is the real one here.
+    """
+    import pandas as pd
+    from policyengine_macro import core
+
+    quarters = [str(p) for p in pd.period_range("2025Q1", "2027Q4", freq="Q")]
+    shocked = 8
+
+    def fake_run_reform(**kw):
+        assert kw["end"] == "2027Q4" and kw["periods"] == shocked
+        df = pd.DataFrame({
+            "period": quarters,
+            "delta_gdp_bn": [-0.1] * 12, "pct_gdp": [-0.01] * 12,
+            "delta_cons_m": [-100.0] * 12, "delta_if_m": [0.0] * 12,
+        })
+        tail = [None] * (12 - shocked)
+        df.attrs.update(
+            gdp_per_revenue_current_price=[0.1] * shocked + tail,
+            # NaN is the other way a model marks "undefined"; JSON has none.
+            gdp_per_revenue_real=[0.09] * shocked + [float("nan")] * len(tail),
+            solver_converged=True, solver_nonconverged_periods=[],
+        )
+        return df
+
+    monkeypatch.setattr(core, "_import_obr", lambda: fake_run_reform)
+    out = core.obr_shock("HHDI_ADDFACTOR", 1000, periods=shocked)
+    for key in ("gdp_per_revenue_current_price", "gdp_per_revenue_real"):
+        assert len(out[key]) == len(out["results"]) == 12
+        assert all(v is not None for v in out[key][:shocked])
+        assert out[key][shocked:] == [None] * 4
+    # Strict JSON: what the MCP transport has to serialise.
+    import json
+    json.dumps(out, allow_nan=False)
+
+
+@pytest.mark.slow
+def test_obr_shock_household_lever_real_solve_shorter_than_window():
+    """The same path against the installed model, not a mocked frame."""
+    pytest.importorskip("obr_macro")
+    import json
+    from policyengine_macro import core
+
+    out = core.obr_shock("HHDI_ADDFACTOR", 1000, periods=4)
+    ratio = out["gdp_per_revenue_current_price"]
+    assert len(ratio) == len(out["results"])
+    assert all(isinstance(v, float) for v in ratio[:4])
+    assert all(v is None for v in ratio[4:])
+    json.dumps(out, allow_nan=False)
+
+
 def _obr_frame(attrs=None):
     import pandas as pd
 

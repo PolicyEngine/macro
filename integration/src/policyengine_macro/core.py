@@ -6,6 +6,7 @@ serialisable.
 
 from __future__ import annotations
 
+import math
 import os
 import re
 import time
@@ -334,6 +335,23 @@ def _obr_result_rows(df) -> list[dict]:
     ]
 
 
+def _rounded_or_none(values, n: int, digits: int = 4) -> list:
+    """The first ``n`` per-quarter values, rounded; undefined ones stay None.
+
+    The model marks a quarter where a ratio is undefined with None (or NaN).
+    Neither may become a number: JSON has no NaN, and a 0.0 would read as a
+    measured zero.
+    """
+    out = []
+    for v in list(values)[:n]:
+        if v is None:
+            out.append(None)
+            continue
+        f = float(v)
+        out.append(round(f, digits) if math.isfinite(f) else None)
+    return out
+
+
 def obr_shock(
     var: str,
     shock: float,
@@ -462,11 +480,16 @@ def obr_shock(
     # bases on the frame (obr #63/#66); without them an MCP caller can only
     # form -delta_gdp/shock, the real-GDP ratio, and compare it with the
     # OBR's current-price 0.3.
+    # The model leaves the ratio undefined (None) in every quarter after the
+    # shock ends, where there is no revenue to divide by. Those quarters stay
+    # None here so the list lines up with `results` row for row; before 25
+    # Nov 2026 float(None) raised, so every household-lever call with fewer
+    # shocked quarters than solved ones (periods < 12) failed after the solve.
     attrs = getattr(df, "attrs", {}) or {}
     for key in ("gdp_per_revenue_current_price", "gdp_per_revenue_real"):
         values = attrs.get(key)
         if values is not None:
-            result[key] = [round(float(v), 4) for v in list(values)[: len(rows)]]
+            result[key] = _rounded_or_none(values, len(rows))
     if attrs.get("gdp_per_revenue_basis_note"):
         result["gdp_per_revenue_basis_note"] = str(attrs["gdp_per_revenue_basis_note"])
     # The model's own labels (obr #70). They live on the frame's attrs, which
@@ -487,9 +510,7 @@ def obr_shock(
             result["price_passthrough_note"] = str(attrs["price_passthrough_note"])
         cpi = (attrs.get("price_passthrough_detail") or {}).get("cpi_pct_delta")
         if cpi is not None:
-            result["cpi_pct_delta"] = [
-                round(float(v), 4) for v in list(cpi)[: len(rows)]
-            ]
+            result["cpi_pct_delta"] = _rounded_or_none(cpi, len(rows))
     return result
 
 
