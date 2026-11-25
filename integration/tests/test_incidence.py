@@ -423,6 +423,65 @@ def test_hank_shock_incidence_wiring(monkeypatch):
     json.dumps(res)
 
 
+def _hank_with_tax(tax_by_quarter):
+    payload = _synthetic_hank(w=0.2, n=0.11, quarters=len(tax_by_quarter))
+    for row, tax in zip(payload["results"], tax_by_quarter):
+        row["tax"] = tax
+    return payload
+
+
+def test_from_hank_states_the_unapplied_labour_tax_financing():
+    """The overlay scales pre-tax earnings; the model also moves the labour
+    tax rate to balance the budget (macro #214). For a spending rise that tax
+    rise can outweigh the pre-tax gain, so the caveat and the size must be in
+    the payload, not left to the model's README."""
+    ea = EconomicAssumptions.from_hank_result(
+        _hank_with_tax([0.5, 1.5, 1.0, 1.0]), year=2026
+    )
+    financing = [c for c in ea.caveat_strings() if "labour-tax financing" in c]
+    assert len(financing) == 1
+    assert "not applied" in financing[0]
+    assert "+1.000pp" in financing[0]
+    assert any("+1.000pp" in n and "not applied" in n for n in ea.notes)
+    # Reported only: the applied factor is still the pre-tax wage bill.
+    assert ea.earnings_factor == pytest.approx(1.0031)
+
+
+def test_from_hank_financing_caveat_without_a_tax_series():
+    """An older payload has no tax path: keep the caveat, invent no number."""
+    ea = EconomicAssumptions.from_hank_result(_synthetic_hank(), year=2026)
+    financing = [c for c in ea.caveat_strings() if "labour-tax financing" in c]
+    assert len(financing) == 1
+    assert "pp from steady state" not in financing[0]
+    assert not any("labour tax rate" in n for n in ea.notes)
+
+
+def test_hank_shock_incidence_reports_the_tax_path_it_does_not_apply(
+    monkeypatch,
+):
+    payload = _hank_with_tax([0.0, 0.0, 0.0, 0.0, -0.4, -0.2, -0.2, -0.4])
+    monkeypatch.setattr(core, "hank_shock", lambda **kw: payload)
+    monkeypatch.setattr(
+        core, "_pe_population_incidence",
+        lambda country, year, dataset, modifier, label: dict(_FAKE_MICRO),
+    )
+    res = core.hank_shock_incidence(
+        kind="monetary", size=-0.0025, year=2027, start_year=2026,
+    )
+    app = res["application"]
+    assert app["labour_tax_rate_change_pp_not_applied"] == pytest.approx(-0.3)
+    for caveats in (res["caveats"], res["score"]["caveats"]):
+        assert any("labour-tax financing" in c for c in caveats)
+
+    for row in payload["results"]:
+        del row["tax"]
+    res = core.hank_shock_incidence(
+        kind="monetary", size=-0.0025, year=2027, start_year=2026,
+    )
+    assert res["application"]["labour_tax_rate_change_pp_not_applied"] is None
+    json.dumps(res, allow_nan=False)
+
+
 # ---------------------------------------------------------------------------
 # svar_inflation_incidence with a stubbed forecast, parameter tree, microsim
 # ---------------------------------------------------------------------------
