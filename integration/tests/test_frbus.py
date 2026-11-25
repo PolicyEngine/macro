@@ -341,6 +341,88 @@ def test_every_stacking_lever_says_so_and_poil_has_real_units():
             assert "PER SHOCKED PERIOD" in entry["units"], entry["var"]
 
 
+# Levers whose own equation carries the shock forward, so holding the
+# add-error for several quarters builds the move up. Measured at us-frb-model
+# 162cfe6 (October 2026 LONGBASE), shock from 2026Q1; the same table is pinned
+# upstream in us-frb-model #28.
+_FRBUS_STACKING = {
+    # lever: (own variable, shock, policy rule, own variable in the fourth
+    #         of four shocked quarters: % for levels, decimal for tax rates)
+    "rffintay_aerr": ("rff", 1.0, None, 2.97),
+    "egfe_aerr": ("egfe", 0.01, None, 2.90),
+    "egse_aerr": ("egse", 0.01, None, 3.71),
+    "trp_aerr": ("trp", 0.01, None, 0.0233),
+    "trci_aerr": ("trci", 0.01, None, 0.0295),
+    "ecnia_aerr": ("ecnia", 0.01, None, 4.19),
+    "ebfi_aerr": ("ebfi", 0.01, None, 5.95),
+}
+_FRBUS_NOT_STACKING = ("rfftay_aerr", "poil_aerr")
+
+
+def test_stacking_text_matches_which_levers_stack():
+    """The non-inertial Taylor rule has no lag of the funds rate, so its
+    add-factor does not stack; before 25 Nov 2026 it carried the inertial
+    rule's "peaks near +3pp" text. Every curated lever is in exactly one of
+    the two lists, and its units string says the right thing."""
+    index = core._FRBUS_VAR_INDEX
+    assert set(_FRBUS_STACKING) | set(_FRBUS_NOT_STACKING) == set(index)
+    for var in _FRBUS_NOT_STACKING:
+        assert "does not stack" in index[var]["units"], var
+        assert "+3pp" not in index[var]["units"], var
+    for var in _FRBUS_STACKING:
+        units = index[var]["units"]
+        assert "does not stack" not in units, var
+        assert "stack" in units or "accumulate" in units, var
+    # A one-period investment shock keeps building; the text must not say
+    # the level is 1% higher "after one period" and stop there.
+    assert "keeps building" in index["ebfi_aerr"]["units"]
+    # The figures us-frb-model #28's VALIDATION.md table prints, to its
+    # decimals: egfe is 4.5% of real GDP in 2026Q1, and the one-quarter
+    # responses are quoted in q4 (the fourth quarter), as that table does.
+    assert "~4.5% of real GDP" in index["egfe_aerr"]["units"]
+    assert "0.045% of GDP" in index["egfe_aerr"]["units"]
+    assert "trci 2.95pp" in index["trci_aerr"]["units"]
+    assert "BFI 5.95%" in index["ebfi_aerr"]["units"]
+    assert "1.79% in the fourth quarter" in index["ebfi_aerr"]["units"]
+    assert "1.01% in the fourth quarter" in index["ecnia_aerr"]["units"]
+
+
+@pytest.mark.slow
+def test_stacking_text_matches_the_installed_model():
+    """The figures the units strings quote, against a real solve."""
+    pytest.importorskip("frbus")
+
+    def own_path(var, own, shock, periods, rule=None):
+        kwargs = {"policy_rule": rule} if rule else {}
+        res = core.frbus_shock(var, shock, periods=periods, horizon=8, **kwargs)
+        return [row[own] for row in res["results"]]
+
+    for var, (own, shock, rule, q4) in _FRBUS_STACKING.items():
+        path = own_path(var, own, shock, 4, rule)
+        assert path[3] == pytest.approx(q4, rel=0.02), (var, path)
+        assert abs(path[3]) > 2 * abs(path[0]), (var, path)
+
+    taylor = own_path("rfftay_aerr", "rff", 1.0, 4, "taylor")
+    assert taylor[0] == pytest.approx(1.0, abs=0.01)
+    assert max(taylor) < 1.01, taylor
+    assert taylor[1:4] == pytest.approx([0.82, 0.71, 0.55], abs=0.01)
+
+    oil = own_path("poil_aerr", "poil", 10.0, 4)
+    # Reported as a % of the baseline price, which differs by quarter; held
+    # in dollars, it never builds up.
+    assert max(oil[:4]) == oil[0] and min(oil[:4]) > 0.6 * oil[0], oil
+
+    # One shocked quarter: index 0 is the shocked quarter (q1) and index 3
+    # is q4, the column us-frb-model #28's table reports.
+    bfi = own_path("ebfi_aerr", "ebfi", 0.01, 1)
+    assert bfi[0] == pytest.approx(1.0, abs=0.02)
+    assert bfi[3] == pytest.approx(1.79, abs=0.02) and bfi[4] > bfi[3]
+
+    cons = own_path("ecnia_aerr", "ecnia", 0.01, 1)
+    assert cons[0] == pytest.approx(1.06, abs=0.01)
+    assert cons[3] == pytest.approx(1.01, abs=0.01)
+
+
 def _fake_frbus(monkeypatch):
     import pandas as pd
 
