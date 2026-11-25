@@ -10,6 +10,13 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### Forecast scorecard: score log-basis rounds on the simple four-quarter rate (#208)
+
+- **What was mixed.** The two boe-svar rounds archived in July 2026 hold the model's four-quarter log difference, 100·log(P_t/P_{t-4}). The outturns and the published forecasts beside them are simple rates, 100·(P_t/P_{t-4} − 1). `forecasts/score.py` subtracted one from the other. The adapter has published the simple rate since 6 Nov 2026 (`e2ef6752`), so the 12 Nov round is unaffected.
+- **Change.** `score.py` converts a listed log-basis round as it reads it (`LOG_BASIS_ROUNDS`, `100·expm1(x/100)`). The round files are untouched. The map is monotone, so medians and band edges convert exactly and no band result changes. Each affected scorecard entry keeps the archived median as `forecast_archived_log_basis`, and the scoreboard's notes say what was converted.
+- **Numbers that move** (`forecasts/scorecard.json`, the `scorecard-*` blocks on `/forecasts`, the record strip on the home page): average miss 0.34 → 0.33pp; average signed error −0.33 → −0.31pp. Per entry, CPI 2026Q2 (round 21 Jul) error −0.12 → −0.09pp; CPI 2026Q3 −0.39 → −0.35pp (21 Jul) and −0.56 → −0.53pp (29 Jul); the four GDP entries move by 0.01pp. Shown medians move with them (CPI 2026Q3, 29 Jul: 2.54% → 2.57%). All nine scored outturns stay inside or outside the same bands.
+- **Not changed.** The dated note `notes/2026-07-25-cpi-2026q2` still says the outturn was 0.12pp above the median, which is the log-basis figure it was written with.
+
 ### BoE SVAR re-pin to `17f5d82`
 
 - **Pin.** BoE SVAR `c827ab86` → `17f5d824` (boe-var-model #34, world CPI seasonal adjustment; #35, November 2026 MPR comparator and 2026Q3 scoring). After a redeploy the hosted `forecast_uk` and `latest_shocks` run this pin.
