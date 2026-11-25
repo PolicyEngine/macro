@@ -263,6 +263,8 @@ def obr_shock(
     the peak percent-of-GDP effect, plus a caveat for levers whose channel is
     partial and, for HHDI_ADDFACTOR, the GDP-per-pound ratio on both bases
     (gdp_per_revenue_current_price is the one to compare with the OBR's 0.3).
+    The ratio lists line up with the rows and are null in the quarters after
+    the shock ends, where there is no revenue to divide by.
     Identity-passthrough and overlay runs are labelled in the payload
     (mechanical_passthrough, transmission_note, price_passthrough_note).
     Takes about one to two minutes (two solves); on a cold hosted server use
