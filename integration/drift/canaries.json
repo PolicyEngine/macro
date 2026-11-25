@@ -156,14 +156,25 @@
       "tool": "hank_shock",
       "args": {
         "kind": "monetary",
-        "size": -0.0025
+        "size": -0.0025,
+        "persistence": 0.61
       },
       "cost": "cheap",
       "local_cheap": true,
       "quoted_at": "connect/index.html",
-      "quote": "pe-macro hank-shock --kind monetary --size -0.0025 (command quoted; no number on the page)",
-      "basis": "regression pin, not a site figure: the page quotes the command only. Hosted us-hank-model 19a8e5e on 6 Nov 2026 gave Y +0.361% on impact, reproduced locally at 58353e5 on 18 Nov 2026 (the +0.0025 run in r5/cross-model.md gave −0.36%, so the model is linear in the sign as expected) and +0.175% at quarter 3",
+      "quote": "pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61 (the command the page quotes); the prompt beside it says about 13bp off the policy rate on impact",
+      "basis": "the page quotes the command at persistence 0.61 and one number, the impact fall in the policy rate (about 13bp). Before 25 Nov 2026 this canary ran the tool's default persistence, 0.9, which is a different experiment: there the policy rate rises 0.25pp on impact and output moves +0.361%. Local run at us-hank-model 58353e5 on 25 Nov 2026, persistence 0.61: policy rate i -0.1316pp on impact, output Y +0.4926% on impact and +0.0971% at quarter 3. The two output checks are regression pins, not site figures",
       "checks": [
+        {
+          "name": "policy_rate_impact_pp",
+          "path": [
+            "results",
+            0,
+            "i"
+          ],
+          "expected": -0.132,
+          "tolerance": 0.005
+        },
         {
           "name": "output_impact_pct",
           "path": [
@@ -171,7 +182,7 @@
             0,
             "Y"
           ],
-          "expected": 0.361,
+          "expected": 0.493,
           "tolerance": 0.005
         },
         {
@@ -181,11 +192,11 @@
             3,
             "Y"
           ],
-          "expected": 0.175,
+          "expected": 0.097,
           "tolerance": 0.005
         }
       ],
-      "quoted_anchor": "--size -0.0025"
+      "quoted_anchor": "--size -0.0025 --persistence 0.61"
     },
     {
       "id": "svar_forecast_median",
@@ -243,7 +254,7 @@
       "local_cheap": true,
       "check_provenance": false,
       "quoted_at": "define/validation/index.html",
-      "quote": "PASS — peak +0.92% vs ≈+1%",
+      "quote": "PINNED, not a replication — peak +0.92% vs our own 0.7–1.3% band",
       "basis": "DEFINE-UK is never hosted (unlicensed upstream): the hosted check is that it still refuses; the number is checked against the cached pinned run with --local",
       "checks": [
         {

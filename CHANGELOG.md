@@ -10,6 +10,12 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### Drift canaries follow the pages; two pinned-model gates
+
+- **HANK canary.** `/connect` quotes `pe-macro hank-shock --kind monetary --size -0.0025 --persistence 0.61` and "about 13bp off the policy rate on impact". The canary ran the tool's default persistence (0.9), a different experiment in which the policy rate rises on impact. It now runs 0.61 and checks the quoted number: policy rate −0.132pp on impact, with output +0.493% on impact and +0.097% at quarter 3 as regression pins (hosted and local agree at us-hank-model `58353e5`).
+- **DEFINE canary.** Its quote text said "PASS — peak +0.92% vs ≈+1%"; the page says "PINNED, not a replication — peak +0.92% vs our own 0.7–1.3% band". The text now matches. The check itself is unchanged.
+- **Nightly gates** (`tests/test_contract.py`, slow): the household lever must be symmetric and linear to within 2% of its peak response (0.15% at obr-macroeconomic-model `0e44ec8`; 32% and 16% at the non-converging pin in #215), and the hand-typed SVAR data-edge strings must match the last quarter of the pinned data (#225).
+
 ### BoE SVAR re-pin to `17f5d82`
 
 - **Pin.** BoE SVAR `c827ab86` → `17f5d824` (boe-var-model #34, world CPI seasonal adjustment; #35, November 2026 MPR comparator and 2026Q3 scoring). After a redeploy the hosted `forecast_uk` and `latest_shocks` run this pin.

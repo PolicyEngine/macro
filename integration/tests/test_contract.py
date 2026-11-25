@@ -33,6 +33,75 @@ def _import_or_require(modname: str):
 
 
 # ---------------------------------------------------------------------------
+# Pinned-model gates (slow; the nightly contract job installs the pins)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.slow
+def test_svar_data_edge_strings_match_the_pinned_data():
+    """The registry and model_summary state the SVAR data edge by hand.
+
+    They went stale once already: after the 2026Q2 dataset was pinned they
+    said 2026Q1 for a month (macro #225), while forecast_uk, which reads the
+    edge from the data, said 2026Q2. This reads the last quarter of the
+    installed data and fails when either string disagrees.
+
+    Slow-marked on purpose: the fast CI job installs boe_var from its HEAD,
+    not the pin, so there the data can run ahead of these strings without
+    anything being wrong here. The nightly contract job installs the pin.
+    """
+    data = _import_or_require("boe_var.data")
+    from policyengine_macro import capabilities
+
+    edge = str(data.load_data().index[-1])
+    entry = capabilities.MODELS["boe-svar"]
+    assert entry["data_edge"] == edge, (
+        f"capabilities.MODELS['boe-svar']['data_edge'] says "
+        f"{entry['data_edge']!r}; the installed boe_var data ends {edge}"
+    )
+    assert edge in entry["data_vintage"], entry["data_vintage"]
+    vintage = core.svar_summary()["provenance"]["data_vintage"]
+    assert f"conditioning data through {edge}" in vintage, vintage
+    assert core._SVAR_EST_END <= edge
+
+
+@pytest.mark.slow
+def test_obr_household_lever_is_symmetric_and_linear():
+    """A reform and its mirror image must score as mirror images.
+
+    score_reform(model="obr") injects the costing through HHDI_ADDFACTOR, so
+    its GDP figure is a difference of two solves on this lever. On 6 Nov
+    2026, at a pin where no quarter converged, +1000 and -1000 differed by
+    32% of the peak response and doubling the shock missed by 16% (macro
+    #215). At obr-macroeconomic-model 0e44ec8 both are 0.15%. The bound is
+    2% of the peak: loose enough for a re-pin to move it, tight enough that
+    a return of solver residue fails.
+    """
+    _import_or_require("obr_macro")
+    run_reform = core._import_obr()
+
+    def solve(shock: float) -> list[float]:
+        df = run_reform(
+            name=f"HHDI_ADDFACTOR {shock:+g}", var="HHDI_ADDFACTOR",
+            shock=shock, start=core._OBR_START, end=core._OBR_DEFAULT_END,
+            periods=8, investment_closure=False,
+        )
+        assert df.attrs.get("solver_converged") is True, (
+            shock, df.attrs.get("solver_nonconverged_periods")
+        )
+        return [float(v) for v in df.delta_gdp_bn]
+
+    up, down, double = solve(1000.0), solve(-1000.0), solve(2000.0)
+    peak = max(abs(v) for v in up)
+    assert peak > 0.05, f"the household lever barely moved GDP: {up}"
+    # Revenue raised lowers GDP in every quarter, and the mirror raises it.
+    assert all(v < 0 for v in up) and all(v > 0 for v in down)
+    asymmetry = max(abs(a + b) for a, b in zip(up, down)) / peak
+    nonlinearity = max(abs(c - 2 * a) for a, c in zip(up, double)) / peak
+    assert asymmetry < 0.02, f"+1000 and -1000 differ by {asymmetry:.1%} of peak"
+    assert nonlinearity < 0.02, f"+2000 is {nonlinearity:.1%} of peak from 2 x +1000"
+
+
+# ---------------------------------------------------------------------------
 # boe_var (fast)
 # ---------------------------------------------------------------------------
 
