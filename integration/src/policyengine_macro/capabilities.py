@@ -615,8 +615,8 @@ MODEL_QUALITY = {
             "quarter by quarter, but does not reproduce the upstream run: "
             "baseline GDP falls up to 44% below it by 2040, mostly through "
             "undiagnosed equity-revaluation equations, and its own green "
-            "public investment multiplier is about 1.52 against 2.30 "
-            "upstream. Every served number comes from the cached upstream "
+            "public investment multiplier is about 1.52 against 2.25 "
+            "upstream from the 2027 policy start. Every served number comes from the cached upstream "
             "run. Where the outputs follow a different form from the manual "
             "as printed, the form is recovered from the outputs alone "
             "(empirical.py) rather than absorbed into a tolerance.",

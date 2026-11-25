@@ -153,7 +153,8 @@ def test_every_fact_moves_to_details_not_out():
                 if cell.get(key):
                     assert cell[key]["units"] in section
     # 731 accepted of 10,000 (ESS 333.3): boe_var results/summary.md at 17f5d82 (was 765 at c827ab8).
-    assert "186 accepted draws" in text and "731 accepted" in text
+    # results/sense_check.md at 17f5d82 describes that run; its 186-draw version is replaced.
+    assert "186 accepted draws" not in text and "731 accepted" in text
 
 
 def test_headline_verdicts_are_short_and_benchmark_row_leads():

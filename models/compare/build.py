@@ -201,11 +201,14 @@ def details_html(data: dict, q: dict, cell: dict) -> str:
     links = []
     if cell.get("issue"):
         issue = data["issues"][cell["issue"]]
-        links.append(f'<a href="{issue["url"]}">{esc(issue["label"])}</a>')
+        closed = " (closed)" if issue.get("state") == "closed" else ""
+        links.append(f'<a href="{issue["url"]}">{esc(issue["label"])}</a>{closed}')
     if cell.get("link"):
         links.append(f'<a href="{cell["link"]["href"]}">{esc(cell["link"]["label"])}</a>')
     if links:
-        items.append(("Open issue" if cell.get("issue") and not cell.get("link") else "See also", " · ".join(links)))
+        tracked = cell.get("issue") and not cell.get("link")
+        still_open = tracked and data["issues"][cell["issue"]].get("state") != "closed"
+        items.append(("Open issue" if still_open else "Issue" if tracked else "See also", " · ".join(links)))
     return '<dl class="cmp-dl">' + "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in items) + "</dl>"
 
 

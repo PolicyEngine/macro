@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "2026-11-19.1",
+  "version": "2026-11-19.2",
   "date": "2026-11-19",
   "title": "Same question, every model: cross-model scenario battery",
   "issue": "https://github.com/PolicyEngine/macro/issues/213",
@@ -66,7 +66,7 @@
     "purchases": {
       "label": "Purchases multiplier, year 1",
       "country": "US",
-      "text": "CBO 0.45–1.82 (Fed responding); Ramey 2019 0.6–1; Coenen et al. 2012 FRB-US, no accommodation, ≈0.95. OBR uses 0.6 for current spending on impact, tapering to zero over five years (EFO July 2015 Box 3.2; its Nov 2023 article restates the taper and gives 0.45 for public services).",
+      "text": "CBO 0.45–1.82 (Fed responding; converted to a calendar-year ratio); Ramey 2019 0.6–1; Coenen et al. 2012 FRB-US, no accommodation, ≈0.95. OBR uses 0.6 for current spending on impact, tapering to zero over five years (EFO July 2015 Box 3.2; its Nov 2023 article restates the taper and gives 0.45 for public services).",
       "source": "Whalen and Reichling, CBO Working Paper 2015-02 (converted); Ramey, Journal of Economic Perspectives 2019; Coenen et al., AEJ: Macroeconomics 2012; OBR, Dynamic scoring of policy measures in OBR forecasts, Nov 2023",
       "url": "https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md"
     },
@@ -81,11 +81,13 @@
   "issues": {
     "obr-50": {
       "label": "obr-macroeconomic-model #50",
-      "url": "https://github.com/PolicyEngine/obr-macroeconomic-model/issues/50"
+      "url": "https://github.com/PolicyEngine/obr-macroeconomic-model/issues/50",
+      "state": "closed"
     },
     "hank-5": {
       "label": "us-hank-model #5",
-      "url": "https://github.com/PolicyEngine/us-hank-model/issues/5"
+      "url": "https://github.com/PolicyEngine/us-hank-model/issues/5",
+      "state": "closed"
     },
     "boe-11": {
       "label": "boe-var-model #11",
@@ -101,7 +103,8 @@
     },
     "define-16": {
       "label": "define-uk-model #16",
-      "url": "https://github.com/PolicyEngine/define-uk-model/issues/16"
+      "url": "https://github.com/PolicyEngine/define-uk-model/issues/16",
+      "state": "closed"
     }
   },
   "questions": [
@@ -133,7 +136,7 @@
         }
       ],
       "notes": [
-        "GDP per pp-quarter divides the peak GDP effect by the rate path's size to the peak. HANK's figure uses the realised real-rate path; the other rows use the nominal policy rate, which is close to the real rate in FRB/US because its inflation barely moves. On HANK's rstar path (10 pp-quarters at ρ = 0.9) the figure would be about 0.04%, so HANK's 0.16 and FRB/US's 0.15 are not like-for-like.",
+        "GDP per pp-quarter divides the peak GDP effect by the rate path's size to the peak. HANK's GDP peaks on impact, so its figure divides by the realised real-rate path over all 12 quarters instead; the other rows use the nominal policy rate, which is close to the real rate in FRB/US because its inflation barely moves. On HANK's rstar path (10 pp-quarters at ρ = 0.9) the figure would be about 0.04%, so HANK's 0.16 and FRB/US's 0.15 are not like-for-like.",
         "HANK reports inflation as a quarterly rate; this page multiplies it by 4 to give an annual rate."
       ],
       "gaps": {
@@ -174,10 +177,10 @@
           },
           {
             "label": "What narrows the gap, BoE SVAR",
-            "text": "Part of it is the replication, not the method. For a surprise of about 10bp on impact, the committed replication run gives a GDP trough of about −0.16% where the Bank's paper shows about −0.07% (approximate read-offs from its figures). The row above uses the fast test fixture, where the same surprise is 25bp on impact; the effect per basis point is the same. Scaled to 100bp the same way, the paper's own figure is also above the 1999 range. Open.",
+            "text": "Part of it is the replication, not the method. For a one-standard-deviation surprise (8bp on Bank Rate on impact in the Bank's paper, 9bp in the replication), the paper's GDP response is −0.12% on impact and fades to −0.07% by five years, while the replication's persists: −0.14% on impact, −0.16% at two years and −0.17% at five. The figures are from the benchmark in boe-var-model #37, not yet merged; the paper's medians are read from its figures. The row above uses the fast test fixture and normalises the surprise to 25bp on impact; the effect per basis point is about the same. Scaled to 100bp the same way, the paper's own figure is also above the 1999 range. Open.",
             "source": {
-              "label": "boe-var-model results/sense_check.md at 17f5d82",
-              "url": "https://github.com/PolicyEngine/boe-var-model/blob/17f5d82/results/sense_check.md"
+              "label": "boe-var-model #37, results/irf_vs_paper.md (open pull request)",
+              "url": "https://github.com/PolicyEngine/boe-var-model/pull/37"
             }
           }
         ]
@@ -238,7 +241,7 @@
             "kind": "committed",
             "tool": "committed fig3 fixture + PR #17",
             "args": {
-              "shock": "1 s.d. UK monetary-policy shock (+25bp on impact), scaled ×4"
+              "shock": "UK monetary-policy shock normalised to +25bp on Bank Rate on impact (one s.d. is about 10bp), scaled ×4"
             },
             "date": "2026-11-06",
             "source": "https://github.com/PolicyEngine/boe-var-model/pull/17",
@@ -256,12 +259,12 @@
             "units": "% on the CPI level at h = 20, scaled from −0.63% per 25bp",
             "measure": "CPI level, still falling"
           },
-          "timing": "GDP −0.14% per s.d. on impact, building to −0.39% by h = 8; no reversion within 5 years",
+          "timing": "Builds from impact to −0.39% per 25bp by h = 8; no reversion within 5 years",
           "gdp_per_ppq": 0.2,
           "verdict": "off",
           "verdict_label": "Off, sign right",
           "reason": "At h = 8 GDP is −1.6% (scaled to 100bp) against the BoE's −0.2% to −0.35% after about a year: 4.6–8× the peak, or 2–4× per pp-quarter once the SVAR's longer rate path is allowed for. It builds to h = 8 and does not revert within 5 years (the rate path has a unit root), against the BoE's fullest effect after about a year.",
-          "draws": "The medians are from the repository's fast test fixture (600 posterior draws, about 50 accepted, unweighted; tests/conftest.py), not the published replication run (10,000 draws, 731 accepted, effective sample size 333.3; results/summary.md at 17f5d82). An earlier sense check found bands wider than the paper's (186 accepted draws, effective sample size 91, against the paper's 10,000; results/sense_check.md).",
+          "draws": "The medians are from the repository's fast test fixture (600 posterior draws, about 50 accepted, unweighted; tests/conftest.py), not the published replication run (10,000 draws, 731 accepted, effective sample size 333.3; results/summary.md at 17f5d82). The sense check on that run gives about the same effect per basis point: a GDP trough of about −0.16% for a surprise of about 10bp (results/sense_check.md at 17f5d82).",
           "issue": "boe-11"
         },
         {
@@ -380,7 +383,7 @@
             "adapter": "0.2.0",
             "label": "local run at us-hank-model 58353e5, 2026-11-18"
           },
-          "rate_path": "Taylor-rule intercept shock (rstar) +0.25pp a quarter, AR(1) ρ = 0.9: not a policy-rate rise of that size. The nominal policy rate the rule sets falls 0.25pp a quarter on impact (about 1.0pp annualised), because inflation falls by more than the intercept rises (i = rstar + 1.5π), and is still 0.11pp below steady state at q11. Realised real rate +1.36pp annualised on impact",
+          "rate_path": "Taylor-rule intercept shock (rstar) +0.25pp a quarter, AR(1) ρ = 0.9: not a policy-rate rise of that size. The nominal policy rate the rule sets falls 0.25pp a quarter on impact (about 1.0pp annualised), because inflation falls by more than the intercept rises (i = rstar + 1.5π), and is still 0.11pp below steady state at q12 (impact is q1). Realised real rate +1.36pp annualised on impact",
           "pp_quarters": 2.3,
           "pp_quarters_note": "real rate, 12 quarters",
           "gdp": {
@@ -794,7 +797,7 @@
           "status": "answered",
           "short": {
             "tag": "Plausible",
-            "why": "0.81 impact, 0.747 yr 1: inside both ranges",
+            "why": "0.747 yr 1: inside both ranges",
             "multiplier": "0.81 on impact; 0.75 year 1",
             "gdp": "per 0.046% of GDP"
           },
@@ -829,7 +832,7 @@
           },
           "verdict": "plausible",
           "verdict_label": "Inside CBO and Ramey ranges",
-          "reason": "Impact 0.81 and year-1 0.747 sit inside CBO's 0.45–1.82 and Ramey's 0.6–1. Both are below Coenen's ≈0.95, which is consistent: Coenen assumes no accommodation, while this run uses an inertial Taylor rule that responds.",
+          "reason": "Year-1 0.747 sits inside CBO's 0.45–1.82 (CBO's quarterly path converted to a calendar-year ratio) and Ramey's 0.6–1; the impact ratio is 0.81. It is about 0.2 below the 2010 FRB-US line in Coenen et al. (≈0.95, a chart reading for the same no-accommodation regime). The fiscal closure and the expectations mode do not explain that gap (us-frb-model docs/benchmarks.md).",
           "issue": "macro-212",
           "benchmark": null,
           "path": {
@@ -909,7 +912,7 @@
             "units": "% of GDP, peak",
             "when": "impact"
           },
-          "multiplier": "0.175 (ρ = 0.8); 0.075 at ρ = 0.9. Output turns negative from q3 while spending is still 51–73% of impact",
+          "multiplier": "0.175 (ρ = 0.8); 0.075 at ρ = 0.9. Output turns negative from q4 (impact is q1; the model page counts impact as quarter 0 and says quarter 3) while spending is still 51–73% of impact",
           "inflation": {
             "value": 0.84,
             "units": "pp, annual rate (+0.21pp a quarter × 4)",
@@ -1178,7 +1181,7 @@
       "experiment": "A rise in the oil price of about $10 a barrel. No sourced magnitude benchmark exists for any model, so only the sign and the transmission are judged.",
       "benchmarks": [],
       "notes": [
-        "FRB/US's tool labels the oil lever's units 'model units'; they are dollars a barrel, so +10 is about +15% at the tool's default 2026Q1 start and +9.9% at this run's 2026Q3 start (macro #212)."
+        "FRB/US's oil lever is in US dollars a barrel, so +10 is about +15% at the tool's default 2026Q1 start and +9.9% at this run's 2026Q3 start (macro #212)."
       ],
       "cells": [
         {

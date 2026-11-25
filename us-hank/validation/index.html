@@ -86,7 +86,7 @@
         <tbody>
           <tr data-result="pass"><th scope="row"><a href="#targets">Solved steady-state parameters</a></th><td>Auclert et al. (2021) Table B.III, gate under 5e&minus;4, largest gap 4.2e&minus;4; <code>vphi</code> after &times; &mu;<sub>w</sub>&sup2;</td><td class="sc-num">6 of 7 direct, 1 after conversion</td><td><span class="chip">pass</span></td></tr>
           <tr data-result="pass"><th scope="row"><a href="#targets">Goods-market clearing (untargeted)</a></th><td>Walras&rsquo; law: should be zero</td><td class="sc-num">3.3e&minus;08</td><td><span class="chip">pass</span></td></tr>
-          <tr data-result="pass"><th scope="row"><a href="#gated">Impulse-response signs</a></th><td>Theory, three shock kinds, both directions; spending impact multiplier in (0, 1)</td><td class="sc-num">all gated by tests</td><td><span class="chip">pass</span></td></tr>
+          <tr data-result="pass"><th scope="row"><a href="#gated">Impulse-response signs</a></th><td>Theory, three shock kinds, both directions; spending impact multiplier in (0, 0.5)</td><td class="sc-num">all gated by tests</td><td><span class="chip">pass</span></td></tr>
           <tr data-result="partial"><th scope="row"><a href="#gated">Impulse-response magnitudes</a></th><td>The one magnitude the paper states: impact consumption after a &minus;5pp monetary shock, &rho;&nbsp;0.6 (Fig.&nbsp;7a), 1.46%; shock units inferred. Every other response is regression-pinned only</td><td class="sc-num">1.485%, within about 2%</td><td><span class="chip">partial</span></td></tr>
           <tr data-result="partial"><th scope="row"><a href="#first-order">First-order accuracy</a></th><td>The model&rsquo;s own nonlinear solve; the intercept easing shock within 4%, spending 1% of GDP is not</td><td class="sc-num">0.175 vs 0.251 / 0.125</td><td><span class="chip">partial</span></td></tr>
           <tr data-result="weak"><th scope="row"><a href="#spending-sign">Spending multiplier (&rho;&nbsp;0.8)</a></th><td>No published benchmark; 0.376 on impact in the opt-in 0.20-MPC calibration</td><td class="sc-num">0.175 impact, &minus;0.015 over 20q</td><td><span class="chip">weak</span></td></tr>
@@ -268,12 +268,12 @@
       <details class="expander limit" id="variants"><summary>Opt-in calibrations</summary>
         <ul>
           <li><strong>Status.</strong> Two opt-in calibrations ship in the model package (<code>us_hank.beta_het</code>) but are not the default and are not hosted. No result on this site comes from them.</li>
-          <li><strong>Discount-factor heterogeneity.</strong> Calibrated to a 0.20 MPC out of $1,000: spending impact multiplier 0.376, 20-quarter cumulative 0.309 (&rho;&nbsp;0.8).</li>
+          <li><strong>Discount-factor heterogeneity.</strong> Calibrated to a 0.20 MPC out of $1,000: spending impact multiplier 0.376, 20-quarter cumulative 0.309 (&rho;&nbsp;0.8). It needs a third of households with a discount factor of 0.852 a quarter, 0.53 a year, a device to raise the MPC, not an estimate.</li>
           <li><strong>Median-wealth sensitivity.</strong> A $500 MPC of 0.126 and multipliers of 0.274 / 0.213 (<a href="https://github.com/PolicyEngine/us-hank-model/pull/9">PR #9</a>, <a href="https://github.com/PolicyEngine/us-hank-model/pull/10">PR #10</a>, <a href="https://github.com/PolicyEngine/us-hank-model/issues/8">#8</a>).</li>
         </ul>
       </details>
       <details class="expander limit"><summary>Approximate distributional output</summary>
-        <p>By-quartile consumption splits the aggregate response across total-wealth quartiles in proportion to steady-state MPCs — the MPC-heterogeneity channel, not household-level dynamics along the transition. The split is nearly flat: for the intercept easing shock, 0.36% in the lowest quartile and 0.28% in the highest.</p>
+        <p>By-quartile consumption splits the aggregate response across total-wealth quartiles in proportion to steady-state MPCs — the MPC-heterogeneity channel, not household-level dynamics along the transition. The split is nearly flat: for the intercept easing shock (&minus;0.0025 a quarter, persistence 0.61), 0.36% in the lowest quartile and 0.28% in the highest (0.29% and 0.27% in the middle two). These come from a hosted <code>hank_shock</code> call with <code>include_distribution</code> at us-hank-model 58353e5 on 25 Nov 2026; no committed file or test pins them.</p>
       </details>
       <details class="expander limit"><summary>Calibration, not vintage</summary>
         <p>The parameterisation is the paper's; there is no data vintage to refresh. Changing it would be a model change.</p>

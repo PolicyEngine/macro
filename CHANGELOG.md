@@ -10,6 +10,17 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### Model pages: provenance review of the SVAR, FRB/US, HANK and DEFINE-UK pages
+
+Every change was checked against the model repository at the pinned commit; no model was run.
+
+- **BoE SVAR** (`boe-var-model` `17f5d82`): the share of draws with a root above 1 is 99.2%, not 99.3% (`covid_volatility_evaluation.json`); Lenza–Primiceri scaling covers 83.6% on the held-out origins the other fixes are scored on (80.7% is all 50 origins); CPI and Bank Rate move by up to 0.03 with the Covid dummies, not "less than 0.02"; UK GDP against drift is p = 0.32–0.42 in the evaluation run and 0.10–0.46 in the published specification; the CI gate is 600 draws with 45 accepted, not "~50-draw"; world trade weights are fixed within three eras, not time-varying; the shock reading says a positive monetary-policy shock is a tightening; the frozen-origin GDP outturns have no recorded vintage, and on the ONS release of 12 Nov 2026 the same medians give an RMSE of 0.24pp.
+- **DEFINE-UK** (`define-uk-model` `283f92a`): the clean-room multiplier of 1.52 is set against the upstream's 2.25 (policy window), as the model repository does, not the full-run 2.30; the cumulative figures carry units (£bn) and both windows; the secondary ratio from the policy start (1.75) is given beside the full-run 1.78; define-uk-model #15 merged on 10 Nov, not 6 Nov; the 22 scenario names are 16 distinct solves, two of them refused.
+- **FRB/US** (`us-frb-model` `162cfe6`): the transfers row names the matched comparison for each regime instead of "below all three"; source links on the validation page point at the pinned commit, not `main`; the `/models` income-tax row names CBO, the benchmark the validation page uses, not the OBR.
+- **US HANK** (`us-hank-model` `58353e5`): the discount-factor variant states its 0.53-a-year discount factor; the methodology gives the Phillips-curve slopes; the spending-multiplier gate is (0, 0.5), as tested; the `/connect` prompt and the US forecasts command state the shock size and persistence.
+- **`/models/compare`** (results file `2026-11-19.2`): the SVAR shock is described as a 25bp normalisation (one s.d. is about 10bp), and a stale reference to a 186-draw sense check is gone; HANK quarters use the page's own numbering (impact is q1); the FRB/US spending row says its 0.2 gap to the 2010 FRB-US line is unexplained, where it said the gap was consistent; closed issues are no longer labelled open.
+- **Cross-PR consistency** (not at a pinned commit): the capability note and the DEFINE-UK paper source set the clean-room 1.52 against the upstream's 2.25 from the 2027 policy start, as the site does (the committed paper PDF is not rebuilt); the `/models/compare` energy note no longer says the FRB/US tool labels the oil lever "model units" (it says US dollars per barrel); the SVAR gap note replaces "a GDP trough of about −0.16% against the paper's −0.07%" with the paper's response of −0.12% on impact fading to −0.07% by five years against the replication's −0.14%, −0.16% at two years and −0.17% at five. Those figures are from the benchmark in boe-var-model #37 (`results/irf_vs_paper.md`), which is not merged.
+
 ### BoE SVAR re-pin to `17f5d82`
 
 - **Pin.** BoE SVAR `c827ab86` → `17f5d824` (boe-var-model #34, world CPI seasonal adjustment; #35, November 2026 MPR comparator and 2026Q3 scoring). After a redeploy the hosted `forecast_uk` and `latest_shocks` run this pin.
