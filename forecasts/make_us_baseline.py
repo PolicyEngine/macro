@@ -46,7 +46,7 @@ def render() -> str:
     return "\n".join(
         [
             "      <p class=\"fc-table-cap\">FRB/US October 2026 LONGBASE. Not a PolicyEngine "
-            "forecast; no bands; never scored.</p>",
+            "forecast; no bands; not scored in the forecast record.</p>",
             "      <div class=\"table-scroll\">",
             "        <table aria-label=\"FRB/US October 2026 LONGBASE baseline\">",
             "          <thead><tr><th scope=\"col\">Quarter</th>"

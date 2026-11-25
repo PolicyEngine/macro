@@ -1885,10 +1885,10 @@ def us_platform() -> str:
             "the wage-bill change applied through the automatic stabilisers",
         ),
         route_row(
-            "The same question in the HANK member",
+            "A rate shock in the HANK member (an easing, the opposite sign)",
             ["us-hank", "pe-microsim"],
-            "pe-macro hank-shock-incidence --kind monetary --size -0.0025 --year 2026",
-            "impulse responses around a calibrated steady state",
+            "pe-macro hank-shock-incidence --kind monetary --size -0.0025 --persistence 0.61 --year 2026",
+            "impulse responses around a calibrated steady state; the size is a quarterly rate, about 13bp off the policy rate on impact",
         ),
     ]
     return f"""    <div class="prose">

@@ -130,7 +130,7 @@
         <li>A dedicated CI job re-runs the Board's pyfrbus from source and gates against that fresh solution, not a committed CSV.</li>
         <li>A weekly run repeats the suite on Python 3.11 and 3.12.</li>
         <li>The multipliers are re-gated weekly; the published comparators and this table are refreshed by hand.</li>
-        <li>Full tables: <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/VALIDATION.md">VALIDATION.md</a> and the <a href="/papers/frb-us">working paper</a> (the paper is on the April 2026 vintage).</li>
+        <li>Full tables: <a href="https://github.com/PolicyEngine/us-frb-model/blob/162cfe6a590ebbd90d6e2b40ec180b26bdc4360c/VALIDATION.md">VALIDATION.md</a> and the <a href="/papers/frb-us">working paper</a> (the paper is on the April 2026 vintage).</li>
       </ul>
     </details>
     <details class="xp">
@@ -213,7 +213,7 @@
                   <tr>
                     <th scope="row"><strong>Tracking invariant</strong></th>
                     <td>Re-solving the baseline reproduces LONGBASE, 284 endogenous variables over 2026Q1–2030Q4.</td>
-                    <td>Against a 1e&minus;8 gate, but <strong>an identity, not a comparison</strong>. <code>init_trac</code> sets each add-factor to minus that equation's residual at the input data, so the solve reproduces whatever it was tracked to, for any input: the model repository's <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/tests/test_tracking.py"><code>test_tracking_invariant_holds_for_arbitrary_data</code></a> passes at 9.0e&minus;9 on a scrambled baseline with every accounting identity destroyed. Read the row below, not this one, as evidence.</td>
+                    <td>Against a 1e&minus;8 gate, but <strong>an identity, not a comparison</strong>. <code>init_trac</code> sets each add-factor to minus that equation's residual at the input data, so the solve reproduces whatever it was tracked to, for any input: the model repository's <a href="https://github.com/PolicyEngine/us-frb-model/blob/162cfe6a590ebbd90d6e2b40ec180b26bdc4360c/tests/test_tracking.py"><code>test_tracking_invariant_holds_for_arbitrary_data</code></a> passes at 9.0e&minus;9 on a scrambled baseline with every accounting identity destroyed. Read the row below, not this one, as evidence.</td>
                   </tr>
                   <tr>
                     <th scope="row"><strong>Cross-validation</strong></th>
@@ -254,7 +254,7 @@
                   <tr><th scope="row">Gov. purchases, yr 2, pegged funds rate</th><td>0.93</td><td>CBO, Fed response limited: 0.50&ndash;2.50 (converted); FRB-US in Coenen et al. Fig.&nbsp;25, 2-yr accommodation: &asymp;1.25</td><td>inside the CBO range, near the low end; about 0.3 <strong>below</strong> the 2010 FRB-US line</td></tr>
                   <tr><th scope="row">Personal tax cut, yr 1</th><td>0.23</td><td>CBO, Fed not tightening: lower- and middle-income 0.3&ndash;1.5; higher-income 0.1&ndash;0.6</td><td>below the first row, inside the second; regimes differ (ours is under the Taylor rule)</td></tr>
                   <tr><th scope="row">Personal tax cut, yr 2</th><td>0.32</td><td>CBO, Fed not tightening: two-year cut for lower- and middle-income people 0.3&ndash;1.5; one-year cut for higher-income people 0.1&ndash;0.6. CBO publishes no central value</td><td>between the two rows; regimes differ (ours is under the Taylor rule)</td></tr>
-                  <tr><th scope="row">Transfers, yr 1</th><td>0.28</td><td>CBO, Fed responding typically (derived): 0.36&ndash;1.52; CBO Table&nbsp;3, Fed not tightening: 0.4&ndash;2.1; FRB-US in Coenen et al. Fig.&nbsp;28: &asymp;0.48</td><td><strong>below</strong> all three (model economics, not implementation). Depends on the regime: 0.28 under the inertial Taylor rule with the surplus rule on, 0.32 with the funds rate pegged and the fiscal rule off. FRB/US gives transfer recipients the same MPC as earners (hand-to-mouth share 0.31)</td></tr>
+                  <tr><th scope="row">Transfers, yr 1</th><td>0.28</td><td>CBO, Fed responding typically (derived): 0.36&ndash;1.52; CBO Table&nbsp;3, Fed not tightening: 0.4&ndash;2.1; FRB-US in Coenen et al. Fig.&nbsp;28: &asymp;0.48</td><td><strong>below</strong> each matched comparison (model economics, not implementation): 0.28 under the inertial Taylor rule against the derived 0.36&ndash;1.52; 0.32 with the funds rate pegged and the fiscal rule off against Table&nbsp;3&rsquo;s 0.4&ndash;2.1; 0.31 under the Taylor rule with taxes held fixed against &asymp;0.48. The 0.28 is not comparable with Table&nbsp;3, a no-tightening range. FRB/US gives transfer recipients the same MPC as earners (hand-to-mouth share 0.31)</td></tr>
                 </tbody>
               </table></div>
           <ul>
@@ -265,7 +265,7 @@
             <li>Ramey&rsquo;s survey range pools estimates across horizons and monetary regimes.</li>
             <li>The yr-1 purchases value depends on the shock: 0.75 for a +1%-of-GDP rise, about 0.83 for small shocks, 0.93 for a 1% cut. The cut/rise gap is an artefact of the model file adding growth in logs, not economics; CBO assumes symmetry.</li>
             <li>Pegged purchases stay below 1 partly because the demo surplus rule raises the personal tax rate; with it off, the pegged yr-2 value is 1.04.</li>
-            <li>Sources and the conversion: <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/docs/benchmarks.md">us-frb-model docs/benchmarks.md</a>.</li>
+            <li>Sources and the conversion: <a href="https://github.com/PolicyEngine/us-frb-model/blob/162cfe6a590ebbd90d6e2b40ec180b26bdc4360c/docs/benchmarks.md">us-frb-model docs/benchmarks.md</a>.</li>
           </ul>
         
   </div>
@@ -316,7 +316,7 @@
     </div>
     <div class="limits">
         <details class="expander limit"><summary>The baseline misses core inflation</summary>
-          <p>Against the first outturn since its data edge, 2026Q3, the October 2026 LONGBASE tracks unemployment within 0.1pp and the funds rate within 0.2pp, <strong>undershoots GDP growth by 1.23pp</strong> (2.1% vs a 3.4% annualized outturn) and <strong>overshoots core PCE inflation by 0.80pp</strong> (3.3% vs 2.5%). The April 2026 vintage missed 2026Q1 core PCE by &minus;1.65pp (<a href="https://github.com/PolicyEngine/us-frb-model/blob/main/backtests/longbase_2026-04_vs_outturns.md">April record</a>). A weekly <a href="https://github.com/PolicyEngine/us-frb-model/blob/main/backtests/longbase_vs_outturns.md">outturn backtest</a> reports this rather than gating it, because the baseline is the Board&rsquo;s. LONGBASE is an illustrative tracking baseline, not an official Fed forecast.</p>
+          <p>Against the first outturn since its data edge, 2026Q3, the October 2026 LONGBASE tracks unemployment within 0.1pp and the funds rate within 0.2pp, <strong>undershoots GDP growth by 1.23pp</strong> (2.1% vs a 3.4% annualized outturn) and <strong>overshoots core PCE inflation by 0.80pp</strong> (3.3% vs 2.5%). The April 2026 vintage missed 2026Q1 core PCE by &minus;1.65pp (<a href="https://github.com/PolicyEngine/us-frb-model/blob/162cfe6a590ebbd90d6e2b40ec180b26bdc4360c/backtests/longbase_2026-04_vs_outturns.md">April record</a>). A weekly <a href="https://github.com/PolicyEngine/us-frb-model/blob/162cfe6a590ebbd90d6e2b40ec180b26bdc4360c/backtests/longbase_vs_outturns.md">outturn backtest</a> reports this rather than gating it, because the baseline is the Board&rsquo;s. LONGBASE is an illustrative tracking baseline, not an official Fed forecast.</p>
         </details>
         <details class="expander limit"><summary>VAR expectations only</summary>
           <p>The hosted tools run VAR expectations only, so forward guidance is out of scope here. The package itself now supports opt-in model-consistent expectations (<code>Frbus(path, mce=...)</code>), gated against the Board&rsquo;s pyfrbus at under 1e-6, for use from Python.</p>
@@ -334,7 +334,7 @@
           <p>A 100bp shock moves core PCE inflation by &minus;0.034pp at the trough, as in the Board&rsquo;s own simulation of the current model (<a href="#worked-shock">worked shock</a>). Almost all of it runs through the VAR-expectations equations. A scenario whose conclusion depends on inflation should say so (<a href="https://github.com/PolicyEngine/us-frb-model/pull/15">us-frb-model #15</a>).</p>
         </details>
         <details class="expander limit"><summary>Little disinflation from the 2022&ndash;23 hikes</summary>
-          <p>FRB/US (VAR), as the Board publishes it, attributes about 0.1pp of the 2022&ndash;24 fall in core PCE inflation to the hikes (mean &minus;0.12pp against never tightening, &minus;0.11pp against following the rule from 2024). Empirical high-frequency estimates put it at about 3pp (FRBSF Economic Letter 2025-03). This follows from the small inflation response above (<a href="https://github.com/PolicyEngine/us-frb-model/blob/main/results/episode_2022_tightening.md">episode results</a>, <a href="https://github.com/PolicyEngine/us-frb-model/issues/14">us-frb-model #14</a>).</p>
+          <p>FRB/US (VAR), as the Board publishes it, attributes about 0.1pp of the 2022&ndash;24 fall in core PCE inflation to the hikes (mean &minus;0.12pp against never tightening, &minus;0.11pp against following the rule from 2024). Empirical high-frequency estimates put it at about 3pp (FRBSF Economic Letter 2025-03). This follows from the small inflation response above (<a href="https://github.com/PolicyEngine/us-frb-model/blob/162cfe6a590ebbd90d6e2b40ec180b26bdc4360c/results/episode_2022_tightening.md">episode results</a>, <a href="https://github.com/PolicyEngine/us-frb-model/issues/14">us-frb-model #14</a>).</p>
         </details>
         <details class="expander limit"><summary>Vintage</summary>
           <p>New Board vintages of <code>model.xml</code> and LONGBASE are adopted by hand, not automatically; the one in use, October 2026, is on the <a href="/frb-us#card">model card</a>. Its history runs through 2026Q2 while the simulation window still starts in 2026Q1.</p>
