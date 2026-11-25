@@ -413,7 +413,34 @@ class EconomicAssumptions(BaseModel):
                 "against a 0.0 baseline convention"
             )
         notes.append(rate_note)
+        # The financing leg the overlay leaves out (macro #214). The DAG
+        # holds bond supply fixed and balances the government budget every
+        # period with the labour tax rate, so the model's households see a
+        # tax change alongside the pre-tax wage and labor paths. The overlay
+        # applies only the pre-tax paths; say so, and report the size.
+        financing_caveat = (
+            "HANK's labour-tax financing is not applied: in the model the "
+            "labour tax rate moves every period to balance the government "
+            "budget, so households' post-tax labour income changes by a "
+            "different amount from the pre-tax earnings factor used here"
+        )
+        if "tax" in rows[0]:
+            tax_pp = _annual_mean("tax")
+            notes.append(
+                f"labour tax rate: the model moves it {tax_pp:+.3f}pp on "
+                f"average over {year} to balance the government budget; "
+                "reported, not applied (PolicyEngine's statutory taxes are "
+                "the same on both sides)"
+            )
+            financing_caveat += (
+                f" (the model's rate is {tax_pp:+.3f}pp from steady state "
+                f"on average over {year}). Where the tax rate and pre-tax "
+                "earnings move in the same direction they work against "
+                "each other, and the net effect on workers' income can "
+                "have the opposite sign from the one reported"
+            )
         caveats = [
+            financing_caveat,
             "uniform scaling understates distributional incidence: actual "
             "labour-market adjustment concentrates in job losers, while "
             "the overlay spreads the change evenly over all employment "

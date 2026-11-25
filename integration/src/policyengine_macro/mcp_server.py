@@ -579,7 +579,12 @@ def hank_shock_incidence(
     stylized model around the Auclert-Bardóczy-Rognlie-Straub 2021
     calibrated steady state, not a US forecast baseline); allocate job
     losses to individual households (uniform scaling — stated in
-    caveats). US only.
+    caveats); apply the model's financing. In HANK the labour tax rate
+    moves every period to balance the government budget (it rises after a
+    spending increase), and the overlay leaves that out: it scales pre-tax
+    earnings only. The model's tax change is reported as
+    application.labour_tax_rate_change_pp_not_applied and in the caveats,
+    and for a spending shock it can outweigh the pre-tax gain. US only.
 
     Returns the hank payload, the economic_assumptions factors, an
     `application` block, the microsim incidence block, and a common

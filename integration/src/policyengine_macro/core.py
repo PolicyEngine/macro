@@ -4125,6 +4125,19 @@ def frbus_shock_incidence(
     return out
 
 
+def _hank_tax_annual_mean(payload: dict, year: int, start_year: int):
+    """Annual mean of the HANK labour tax path (pp) over ``year``, or None.
+
+    The same four quarters from_hank_result averages for w and N. None when
+    the payload carries no ``tax`` series, never a zero.
+    """
+    offset = 4 * (int(year) - int(start_year))
+    window = payload["results"][offset:offset + 4]
+    if len(window) < 4 or any("tax" not in r for r in window):
+        return None
+    return round(sum(float(r["tax"]) for r in window) / 4.0, 6)
+
+
 def hank_shock_incidence(
     kind: str,
     size: float,
@@ -4216,6 +4229,12 @@ def hank_shock_incidence(
             "variables_tried": list(SCALED_INPUT_VARIABLES),
             "earnings_factor": ea.earnings_factor,
             "applied": modifier is not None,
+            # The model's financing of the shock, which the overlay does not
+            # apply (#214): annual mean of the labour tax rate's pp deviation
+            # over the incidence year. None when the payload has no tax path.
+            "labour_tax_rate_change_pp_not_applied": _hank_tax_annual_mean(
+                payload, year, start_year
+            ),
         },
         "microsim": micro,
         "assumptions": assumptions,

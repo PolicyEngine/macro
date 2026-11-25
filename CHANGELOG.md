@@ -10,6 +10,11 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### `hank_shock_incidence`: state the labour-tax financing the overlay leaves out (#214)
+
+- **Gap.** The overlay scales pre-tax employment income by the HANK wage and labor paths and leaves PolicyEngine's taxes unchanged. In the model the labour tax rate moves every period to balance the government budget, and nothing in the result said that leg was missing. At us-hank-model `58353e5`, a spending rise of 1% of GDP (persistence 0.8) gives a pre-tax earnings factor of +0.28% for the first year while the model's labour tax rate is 1.16pp higher on average.
+- **Change.** The result now carries a caveat saying the financing is not applied, with the model's annual-mean tax change, and reports it as `application.labour_tax_rate_change_pp_not_applied`. The applied earnings factor and every incidence number are unchanged; applying the tax leg is a separate decision.
+
 ### BoE SVAR re-pin to `17f5d82`
 
 - **Pin.** BoE SVAR `c827ab86` → `17f5d824` (boe-var-model #34, world CPI seasonal adjustment; #35, November 2026 MPR comparator and 2026Q3 scoring). After a redeploy the hosted `forecast_uk` and `latest_shocks` run this pin.
