@@ -98,8 +98,12 @@ def recommend_model(
     dynamic_scoring, economic_shock, translated_policy_scenario, forecast,
     economic_diagnosis, structural_change, or climate_policy_scenario; any
     other value is an error. Unsupported combinations return no model rather
-    than an invented mapping. ``horizon`` is echoed back but does not yet
-    change the routing.
+    than an invented mapping.
+
+    ``horizon`` is deprecated: it is accepted for backward compatibility and
+    echoed back, but it has never changed the routing. When it is passed the
+    result carries ``horizon_note`` saying so. Each recommended model's own
+    horizon is in ``details``; choose on that.
     """
     return capabilities.recommend(
         question_type=question_type,

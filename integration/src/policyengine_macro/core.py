@@ -477,6 +477,18 @@ def obr_shock(
     # channel, set for most levers.
     if attrs.get("mechanical_passthrough"):
         result["mechanical_passthrough"] = True
+    # obr #90: a shock to a line of public sector current expenditure whose
+    # imposed total was held is absorbed by the listing's subsidy (or
+    # procurement) residual, so the borrowing figures are not the effect of
+    # the spending change. nominal_consistent_legs names the nominal totals
+    # that moved with the shock instead. Absent on older pins, hence .get.
+    for key in ("subsidy_residual_warning", "procurement_residual_warning"):
+        if attrs.get(key):
+            result[key] = str(attrs[key])
+    if attrs.get("nominal_consistent_legs"):
+        result["nominal_consistent_legs"] = [
+            str(v) for v in attrs["nominal_consistent_legs"]
+        ]
     # Not on an overlay run: the model's VAT note describes the default
     # ("no price channel"), which the overlay's own note supersedes.
     if attrs.get("transmission_note") and not price_passthrough:
@@ -4871,6 +4883,28 @@ def define_scenario(
                     "lending does not sum to zero), so its deltas are not "
                     "served as results. Re-solve the scenario upstream, or "
                     "pick another scenario from define_list_scenarios."
+                ),
+            }
+        # define-uk-model#36: BaselineParameterMismatch, also a ValueError.
+        # Matched by class name over the MRO, so it needs no adapter that
+        # has the class and still catches a subclass.
+        if any(
+            c.__name__ == "BaselineParameterMismatch" for c in type(e).__mro__
+        ):
+            return {
+                "model": "define-uk",
+                "available": False,
+                "refused": "baseline parameter mismatch",
+                "scenario": name,
+                "error": str(e),
+                "how_to_run": (
+                    f"{name!r} is a listed scenario, but its cached DEFINE-UK "
+                    "parameters differ from the Baseline's outside the policy "
+                    "levers, so its deltas would carry that difference as "
+                    "well as the policy and are not served as results. The "
+                    "cached run has to be redone upstream with a matched "
+                    "Baseline; meanwhile pick another scenario from "
+                    "define_list_scenarios."
                 ),
             }
         if isinstance(e, KeyError):

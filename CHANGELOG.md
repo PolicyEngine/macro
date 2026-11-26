@@ -10,6 +10,13 @@ heading here; `tests/test_repo_hygiene.py` asserts that they do.
 
 ## [Unreleased]
 
+### Adapters: labels from two open model PRs, `horizon` deprecated
+
+- **`obr_shock`** forwards three more of the model's labels when the model sets them: `subsidy_residual_warning`, `procurement_residual_warning` and `nominal_consistent_legs` (obr-macroeconomic-model #90). The first two say that the listing's subsidy or procurement residual absorbed the shock, so the borrowing figures are not the effect of the spending change. The current pin sets `nominal_consistent_legs` only, for `CGG`; the warnings arrive with a re-pin.
+- **`define_scenario`** reports a `BaselineParameterMismatch` (define-uk-model #36) as its own refusal, `"refused": "baseline parameter mismatch"`, like the stock-flow one. It fell into the generic branch, whose hint is about a cached run that does not depart from baseline. The class is matched by name, so the adapter works before and after the DEFINE re-pin.
+- **`recommend_model`**: `horizon` is deprecated (#210). It never changed the routing. It stays in the tool schema and is echoed back, so no caller breaks; a caller who passes it now gets `horizon_note` (and Python callers a `DeprecationWarning`) saying it was ignored and pointing at each candidate's own `horizon` under `details`.
+- **Drift canary `hank_25bp_easing`** gains a `description`: the 25bp is per quarter, a shift in the Taylor-rule intercept of about 100bp annualised. The id is unchanged, so drift reports and #264 still refer to it.
+
 ### BoE SVAR re-pin to `17f5d82`
 
 - **Pin.** BoE SVAR `c827ab86` → `17f5d824` (boe-var-model #34, world CPI seasonal adjustment; #35, November 2026 MPR comparator and 2026Q3 scoring). After a redeploy the hosted `forecast_uk` and `latest_shocks` run this pin.

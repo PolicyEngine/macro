@@ -6,6 +6,7 @@ model can be production-ready for one use and inappropriate for another.
 
 from __future__ import annotations
 
+import warnings
 from copy import deepcopy
 
 
@@ -775,6 +776,13 @@ EXPERIMENTAL_INCIDENCE_TOOLS = {
 }
 
 
+HORIZON_DEPRECATION_NOTE = (
+    "`horizon` is deprecated and ignored: it does not change which model is "
+    "recommended, and it will be removed in a later release. Read each "
+    "candidate's own `horizon` under `details` and choose on that."
+)
+
+
 def recommend(
     question_type: str,
     country: str = "uk",
@@ -787,6 +795,11 @@ def recommend(
     combination, so it raises with the valid types listed; before 6 Nov 2026
     a typo such as 'shock' came back as "no registered model supports this
     request", which reads as a capability gap.
+
+    ``horizon`` is deprecated (macro #210). It never changed the routing, and
+    it still does not: it is accepted, echoed back, and answered with
+    ``horizon_note`` and a ``DeprecationWarning`` so no caller thinks it
+    filtered anything. Each candidate's own horizon is in ``details``.
     """
     valid_types = question_types()
     question_type = str(question_type).strip().lower()
@@ -821,7 +834,7 @@ def recommend(
                 f" Experimental, not a recommendation: {', '.join(tools)} feed "
                 "this model's macro path into the microsimulation."
             )
-    return {
+    out = {
         "question_type": question_type,
         "country": country,
         "needs_distribution": needs_distribution,
@@ -831,3 +844,9 @@ def recommend(
         "warning": warning,
         "details": [get_status(model_id) for model_id in candidates],
     }
+    if horizon is not None:
+        # Its own key, not `warning`: `warning` is None whenever a model is
+        # recommended, and callers read a non-None value as "no model".
+        out["horizon_note"] = HORIZON_DEPRECATION_NOTE
+        warnings.warn(HORIZON_DEPRECATION_NOTE, DeprecationWarning, stacklevel=2)
+    return out

@@ -194,3 +194,43 @@ def test_experimental_incidence_tools_are_published_tools_of_registered_models()
     spec.loader.exec_module(surface)
     assert set(EXPERIMENTAL_INCIDENCE_TOOLS.values()) <= surface.GOLDEN_TOOLS
     assert set(EXPERIMENTAL_INCIDENCE_TOOLS) <= set(MODELS)
+
+
+def test_horizon_is_deprecated_and_never_routes():
+    """macro #210: the argument stays in the schema so no caller breaks, but
+    a caller who passes it is told it did nothing."""
+    import pytest
+
+    plain = capabilities.recommend("economic_shock", country="us")
+    assert "horizon_note" not in plain
+    assert plain["horizon"] is None
+    for value in ("long run", "next four quarters", "short_run"):
+        with pytest.warns(DeprecationWarning, match="deprecated and ignored"):
+            got = capabilities.recommend(
+                "economic_shock", country="us", horizon=value
+            )
+        assert got["horizon"] == value
+        assert got["horizon_note"] == capabilities.HORIZON_DEPRECATION_NOTE
+        # The note is not a "no model" warning, and the routing is unchanged.
+        assert got["warning"] is None
+        assert got["candidate_models"] == plain["candidate_models"]
+        assert all(d["horizon"] for d in got["details"])
+
+
+def test_recommend_model_tool_keeps_horizon_in_its_schema():
+    import asyncio
+    import pytest
+    from policyengine_macro import mcp_server
+
+    tools = {t.name: t for t in asyncio.run(mcp_server.mcp.list_tools())}
+    props = tools["recommend_model"].inputSchema["properties"]
+    assert "horizon" in props
+    assert "horizon" not in tools["recommend_model"].inputSchema.get("required", [])
+    assert "deprecated" in tools["recommend_model"].description
+    with pytest.warns(DeprecationWarning):
+        out = mcp_server.recommend_model("forecast", country="uk", horizon="long_run")
+    assert out["primary_model"] and "horizon_note" in out
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert "horizon_note" not in mcp_server.recommend_model("forecast", country="uk")
