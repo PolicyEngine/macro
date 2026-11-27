@@ -556,3 +556,122 @@ def test_no_page_rebinds_the_shared_copy_handler(page):
         f"{page.rel} defines its own [data-copy] click handler; reveal.js "
         "already binds one for every page, and both would fire"
     )
+
+
+# ------------------------------------------------- 8. second-pass checks
+#
+# Added by the November 2026 quality pass. Each one failed on, or was written
+# after auditing, the site as it stood; none asserts on prose.
+
+def test_page_titles_are_unique(pages):
+    """No two pages share a ``<title>``.
+
+    The UK and US topic pages were generated from the same topic name, so
+    ``/economy/topics/growth`` and ``/economy/us/topics/growth`` were both
+    "Growth — PolicyEngine Macro": identical in a tab strip, in browser
+    history and in a search result. A generator is the usual culprit, which is
+    why this is one whole-site test and not a per-page one.
+    """
+    seen: dict[str, list[str]] = {}
+    for page in pages:
+        titles = page.elements("title")
+        # The first <title> under <head>; inline SVGs carry their own.
+        text = " ".join(titles[0].visible_text().split()) if titles else ""
+        seen.setdefault(text, []).append(page.rel)
+    shared = {title: rels for title, rels in seen.items() if len(rels) > 1}
+    assert not shared, "pages share a <title>:\n  " + "\n  ".join(
+        f"{title!r}: {', '.join(rels)}" for title, rels in sorted(shared.items())
+    )
+
+
+def test_page_carries_link_preview_metadata(page):
+    """Every page has the Open Graph tags a shared link is rendered from.
+
+    Without ``og:title`` and ``og:image`` a link pasted into Slack, LinkedIn or
+    a message shows a bare URL. The generated release digests had none, and
+    they are the pages most likely to be shared on the day they are written.
+    """
+    present = {node.attrs.get("property", "") for node in page.elements("meta")}
+    missing = [
+        name for name in ("og:title", "og:description", "og:image")
+        if name not in present
+    ]
+    assert not missing, f"{page.rel}: no {', '.join(missing)} meta tag"
+
+
+def test_ids_are_unique_within_a_page(page):
+    """An ``id`` names one element.
+
+    A duplicate makes ``href="#id"``, ``aria-controls`` and ``<label for>``
+    resolve to whichever comes first, silently. The anchor test above only
+    asks whether a target exists, so it cannot see this.
+    """
+    lines: dict[str, list[int]] = {}
+    for node in page.nodes:
+        identifier = node.attrs.get("id")
+        if identifier:
+            lines.setdefault(identifier, []).append(node.line)
+    repeated = {key: where for key, where in lines.items() if len(where) > 1}
+    assert not repeated, f"{page.rel}: duplicate id(s):\n  " + "\n  ".join(
+        f"#{key} on lines {', '.join(map(str, where))}" for key, where in sorted(repeated.items())
+    )
+
+
+def test_form_controls_have_a_label(page):
+    """Every input, select and textarea has a programmatic label.
+
+    A placeholder is not a label: it disappears on input and many screen
+    readers do not announce it. Accepted: a wrapping ``<label>``, a
+    ``<label for>`` naming the control's id, ``aria-label`` or
+    ``aria-labelledby``.
+    """
+    labelled_ids = {
+        node.attrs["for"] for node in page.elements("label") if node.attrs.get("for")
+    }
+    problems = []
+    for node in page.elements("input", "select", "textarea"):
+        if node.attrs.get("type") in ("hidden", "submit", "button", "reset", "image"):
+            continue
+        if node.attrs.get("aria-label", "").strip() or node.attrs.get("aria-labelledby"):
+            continue
+        if node.attrs.get("id") in labelled_ids:
+            continue
+        if any(ancestor.tag == "label" for ancestor in node.ancestors()):
+            continue
+        problems.append(
+            f"line {node.line}: <{node.tag} "
+            f"id=\"{node.attrs.get('id', '')}\" name=\"{node.attrs.get('name', '')}\"> has no label"
+        )
+    assert not problems, f"{page.rel}:\n  " + "\n  ".join(problems)
+
+
+def test_data_tables_have_header_cells(page):
+    """Every ``<table>`` has at least one ``<th>``.
+
+    The phone layout stacks table rows into cards and labels each value from
+    its column header, and a screen reader announces a cell by its header. A
+    table of bare ``<td>`` gets neither.
+    """
+    problems = [
+        f"line {table.line}: <table class=\"{table.attrs.get('class', '')}\"> has no <th>"
+        for table in page.elements("table")
+        if table.attrs.get("role") not in ("presentation", "none")
+        and not any(node.tag == "th" for node in table.descendants())
+    ]
+    assert not problems, f"{page.rel}:\n  " + "\n  ".join(problems)
+
+
+def test_new_tab_links_do_not_expose_the_opener(page):
+    """``target="_blank"`` carries ``rel="noopener"``.
+
+    Current browsers imply it, older ones do not, and the cost of stating it
+    is nothing.
+    """
+    problems = [
+        f"line {node.line}: <a href=\"{node.attrs.get('href', '')}\" target=\"_blank\"> "
+        "without rel=\"noopener\""
+        for node in page.elements("a")
+        if node.attrs.get("target") == "_blank"
+        and "noopener" not in node.attrs.get("rel", "")
+    ]
+    assert not problems, f"{page.rel}:\n  " + "\n  ".join(problems)

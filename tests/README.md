@@ -16,7 +16,7 @@ vintage, and each message names the file and line at fault.
 
 ### `test_site_integrity.py`
 
-Everything about the 78 public HTML pages that can break without anyone
+Everything about the 71 public HTML pages that can break without anyone
 noticing. Resolution follows `vercel.json`: `cleanUrls`, `trailingSlash: false`,
 and the `redirects` table (a link to a redirect *source* is fine — the
 destination is what must exist).
@@ -38,6 +38,10 @@ destination is what must exist).
   public page appears. Deliberate omissions go in `SITEMAP_EXCLUSIONS` at the
   top of the file, with the reason.
 - **Domain** — internal links use paths, not the current Vercel hostname.
+- **Second-pass checks** — page titles are unique across the site; every page
+  has `og:title`, `og:description` and `og:image`; ids are unique within a
+  page; every form control has a label; every table has header cells; every
+  `target="_blank"` link carries `rel="noopener"`.
 
 The canonical origin is read from the first `<loc>` in `sitemap.xml` rather than
 hardcoded, so moving the site to a new domain is a one-line edit.
@@ -45,6 +49,23 @@ hardcoded, so moving the site to a new domain is a one-line edit.
 This complements `site_contract.py` and `site_nav.py` rather than replacing
 them: those assert on prose and navigation markup, these assert only on
 structure, so a copy rewrite cannot fail them and a broken link cannot pass.
+
+### `test_model_pins.py`
+
+Ties the model commit a page shows to the commit `integration/pyproject.toml`
+installs.
+
+- The hero strip on every model page is what `tools/model_hero.py` would stamp
+  today. After a re-pin this fails until the script is re-run.
+- The four tabs of each commit-pinned model (OBR emulator, BoE SVAR, FRB/US,
+  US HANK) carry a chip linking the model repository at the pinned commit.
+- Every link from the site into one of those repositories *at a commit* names
+  the pinned commit. Deliberate links to an older commit are listed in
+  `HISTORICAL_PINS` with the reason.
+
+Not covered: links to `blob/main`, and external links in general. The second
+is `tools/check_external_links.py`, a manual tool because its result depends on
+the network.
 
 ### `test_data_store.py`
 
