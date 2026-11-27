@@ -3193,18 +3193,22 @@ def page(topic: dict) -> str:
             f'<ul class="xp-list">{rows}</ul>',
         )
     short = SHORT_LEDES.get((topic["country"], slug))
+    # The same words as the <h1>: "UK growth", "US growth". The bare topic
+    # title gave four UK/US pairs one <title> each, so two browser tabs or two
+    # search results could not be told apart.
+    page_title = f'{topic["country"].upper()} {topic["title"][0].lower() + topic["title"][1:]}'
     head = f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>{esc(topic["title"])} — PolicyEngine Macro</title>
+<title>{esc(page_title)} — PolicyEngine Macro</title>
 <meta name="description" content="{esc(lede)}" />
 <link rel="canonical" href="{SITE}{url}" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="{SITE}{url}" />
 <meta property="og:site_name" content="PolicyEngine Macro" />
-<meta property="og:title" content="PolicyEngine Macro — {esc(topic["title"])}" />
+<meta property="og:title" content="PolicyEngine Macro — {esc(page_title)}" />
 <meta property="og:description" content="{esc(lede)}" />
 <meta property="og:image" content="{SITE}/assets/og-image.png" />
 <meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
@@ -3224,7 +3228,7 @@ def page(topic: dict) -> str:
     body = f"""<main id="top">
   <section class="hero model-hero">
     <div class="hero-inner">
-      <h1 class="page-title tp-h1">{topic_icon(slug, 24)}{esc(topic["country"].upper())} {esc(topic["title"][0].lower() + topic["title"][1:])}</h1>
+      <h1 class="page-title tp-h1">{topic_icon(slug, 24)}{esc(page_title)}</h1>
       <p class="lede">{esc(short) if short else esc(topic["heading"])}</p>
     </div>
   </section>

@@ -238,14 +238,28 @@ def digest_page(vintage: str) -> str:
           </tbody>
         </table>
     </div>""")
+    # One sentence for both <meta name="description"> and the link preview, so
+    # a shared digest link carries the same summary a search result does.
+    description = (
+        f"Factual digest of the {len(items)} official data series with a new committed snapshot on "
+        f"{vintage}: latest value, change, and whether it is a new observation or a revision."
+    )
     return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Data stored {day} — PolicyEngine Macro</title>
-<meta name="description" content="Factual digest of the {len(items)} official data series with a new committed snapshot on {vintage}: latest value, change, and whether it is a new observation or a revision." />
+<meta name="description" content="{description}" />
 <link rel="canonical" href="{canonical}" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="{canonical}" />
+<meta property="og:site_name" content="PolicyEngine Macro" />
+<meta property="og:title" content="PolicyEngine Macro — data stored {day}" />
+<meta property="og:description" content="{description}" />
+<meta property="og:image" content="https://policyengine-macro.vercel.app/assets/og-image.png" />
+<meta property="og:image:alt" content="PolicyEngine Macro — open economic models for the UK and US" />
+<meta name="twitter:card" content="summary_large_image" />
 <link rel="icon" type="image/svg+xml" href="/assets/policyengine-mark.svg" />
 <link rel="stylesheet" href="/vendor/fonts/fonts.css" />
 <link rel="stylesheet" href="/vendor/ui-kit-tokens.css" />
