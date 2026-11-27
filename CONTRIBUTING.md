@@ -3,7 +3,7 @@
 Thanks for helping. This repository holds three separable things, and each has
 its own rules:
 
-- **the site** — 84 static HTML pages, no build step, many of them *generated*
+- **the site** — 71 static HTML pages, no build step, many of them *generated*
 - **the integration layer** (`integration/`) — the `pe-macro` CLI and the MCP
   server, published as the `policyengine-macro` package
 - **two append-only archives** — `data/vintages/` and `forecasts/rounds/`
@@ -48,6 +48,13 @@ cd integration && pytest tests -q                # integration layer (fast)
 cd integration && pytest tests -q --runslow      # + real model solves (slow)
 ```
 
+External links are checked by hand, because the answer depends on other
+people's servers:
+
+```bash
+python3 tools/check_external_links.py            # every http(s) link, politely
+```
+
 And the two contract scripts, which are checks rather than tests and are what
 `site-provenance.yml` finishes with:
 
@@ -86,6 +93,7 @@ hand-written and part generated. Edit outside the markers freely; never inside.
 | `forecasts/ingest_outturns.py` | `forecasts/outturns.json` — the data store mapped onto the variables the models forecast. Appends, never edits. | `forecast-archive.yml` |
 | `forecasts/nowcast.py` | generates a forecast round from the hosted MCP server and archives it *before* the outturn exists. No `--check`; it is scheduled (`nowcast-round.yml`) and refuses far more often than it writes. | scheduled only |
 | `validation/figures/make_charts.py` | every inline `<svg class="vchart" data-chart="…">` on `obr/validation`, `svar/validation`, `frb-us/validation` and `us-hank/validation`. | `site-provenance.yml` |
+| `tools/model_hero.py` | the hero strip on every model page (`<section class="hero model-hero">`): icon, kind line, title, lede and the fact chips, **including the pinned-commit chip read from the `[models]` extra in `integration/pyproject.toml`**. Re-run it after a re-pin. | `site-tests.yml` (`tests/test_model_pins.py`) |
 | `assets/make_hero.py` | the `hero-fan` inline SVG in the homepage hero. | `site-provenance.yml` |
 | `assets/make_current_outlooks.py` | `obr-current-outlook` on `obr/methodology/index.html` and `boe-current-outlook` on `svar/index.html`. | `site-provenance.yml` |
 | `olg/figures/make_showcase.py` | the `olg-stats` headline table on `olg/index.html`. | `site-provenance.yml` |

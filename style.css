@@ -5510,7 +5510,9 @@ a .model-id, a:hover .model-id { text-decoration: none; display: inline-block; }
 .round-table td.mono, .round-table th .mono { white-space: nowrap; }
 .round-table thead th.num { text-align: right; }
 /* chart foot line (chartkit source=) */
-:is(.doc, .prose, .band, body) .vc-fig p.vc-source { margin: var(--s-2) 0 0; color: var(--text-faint); font-size: var(--fs-label); line-height: 1.45; }
+/* --text-muted, not --text-faint: the line sits on a grey inset (#F3F4F6 as
+   rendered), where --text-faint is 4.39:1, under the 4.5:1 small text needs. */
+:is(.doc, .prose, .band, body) .vc-fig p.vc-source { margin: var(--s-2) 0 0; color: var(--text-muted); font-size: var(--fs-label); line-height: 1.45; }
 .vc-fig .vc-source code { font-size: 0.95em; }
 /* y labels sit inside the plot: a card-coloured halo keeps them legible over bands and lines */
 .vc-fig .vc-t.vc-y { padding: 0 3px; margin-left: -3px; border-radius: 3px; background: color-mix(in srgb, var(--surface-card) 82%, transparent); }
@@ -7463,7 +7465,7 @@ main .table-scroll > table :is(th, td).num { text-align: right; white-space: now
 .mp #compare .tbl-stack tbody tr > [data-label] { align-items: center; }
 #compare .yn { width: auto; height: auto; margin: 0; vertical-align: baseline; }
 #compare .yn-yes { color: var(--ab-teal-700); }
-#compare .yn-no { color: var(--text-faint); }
+#compare .yn-no { color: var(--text-muted); } /* the pill is #F3F4F6: --text-faint is 4.39:1 on it */
 .mp #compare td:nth-child(4), .mp #compare td:nth-child(5) { white-space: nowrap; }
 @media (max-width: 560px) {
   main .table-scroll > table.tbl-stack tbody tr > [data-label]:not(:first-child) { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
@@ -8790,7 +8792,9 @@ main .band-head[data-icon]::before, main .band-head::before {
 /* 42k. Dark mode: quiet footer, readable primary buttons, readable fan bands */
 @media (prefers-color-scheme: dark) {
   .foot.foot-bar { background: #0B1220 !important; border-top: 1px solid var(--border); }
-  .btn-primary, .btn-inv { background: var(--ab-teal-700) !important; color: #FFFFFF !important; border-color: var(--ab-teal-700) !important; }
+  /* --ab-teal-700 is var(--primary) in dark mode (#38B2AC), where white text is
+     2.58:1. --primary-foreground is the token paired with it (#0B0E14, about 7.5:1). */
+  .btn-primary, .btn-inv { background: var(--ab-teal-700) !important; color: var(--primary-foreground) !important; border-color: var(--ab-teal-700) !important; }
 }
 .hub2 .uc a { align-items: stretch !important; }
 

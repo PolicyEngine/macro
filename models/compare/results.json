@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "2026-11-19.2",
+  "version": "2026-11-19.3",
   "date": "2026-11-19",
   "title": "Same question, every model: cross-model scenario battery",
   "issue": "https://github.com/PolicyEngine/macro/issues/213",
@@ -161,7 +161,7 @@
           },
           {
             "label": "Horizon",
-            "text": "The benchmark and the OBR row are read at about a year (the OBR row peaks at q4). The SVAR row is read at h = 8 and is still building: its rate path has a unit root (a shock never fully dies out), so neither Bank Rate nor GDP returns within five years."
+            "text": "The benchmark and the OBR row are read at about a year (the OBR row peaks at q4). The SVAR row is read at h = 8; its response is there on impact, roughly flat to h = 8, and does not fade: its rate path has a unit root (a shock never fully dies out), so neither Bank Rate nor GDP returns within five years."
           },
           {
             "label": "Monetary response",
@@ -233,7 +233,7 @@
           "short": {
             "tag": "Off, sign right",
             "why": "4.6–8× the BoE peak; 2–4× per pp-quarter",
-            "timing": "Builds, no reversion",
+            "timing": "On impact, no reversion",
             "gdp": "h = 8",
             "inflation": "CPI level, h = 20"
           },
@@ -259,11 +259,11 @@
             "units": "% on the CPI level at h = 20, scaled from −0.63% per 25bp",
             "measure": "CPI level, still falling"
           },
-          "timing": "Builds from impact to −0.39% per 25bp by h = 8; no reversion within 5 years",
+          "timing": "On impact and roughly flat to h = 8 (−0.39% per 25bp at h = 8); no reversion within 5 years",
           "gdp_per_ppq": 0.2,
           "verdict": "off",
           "verdict_label": "Off, sign right",
-          "reason": "At h = 8 GDP is −1.6% (scaled to 100bp) against the BoE's −0.2% to −0.35% after about a year: 4.6–8× the peak, or 2–4× per pp-quarter once the SVAR's longer rate path is allowed for. It builds to h = 8 and does not revert within 5 years (the rate path has a unit root), against the BoE's fullest effect after about a year.",
+          "reason": "At h = 8 GDP is −1.6% (scaled to 100bp) against the BoE's −0.2% to −0.35% after about a year: 4.6–8× the peak, or 2–4× per pp-quarter once the SVAR's longer rate path is allowed for. The effect is there on impact, is roughly flat to h = 8 and does not revert within 5 years (the rate path has a unit root), against the BoE's fullest effect after about a year. A 6,000-draw run at the pin gives −0.39% per 25bp on impact and −0.42% at h = 8 (macro #293).",
           "draws": "The medians are from the repository's fast test fixture (600 posterior draws, about 50 accepted, unweighted; tests/conftest.py), not the published replication run (10,000 draws, 731 accepted, effective sample size 333.3; results/summary.md at 17f5d82). The sense check on that run gives about the same effect per basis point: a GDP trough of about −0.16% for a surprise of about 10bp (results/sense_check.md at 17f5d82).",
           "issue": "boe-11"
         },
@@ -741,7 +741,7 @@
         }
       ],
       "notes": [
-        "FRB/US's hosted tool cannot run a sustained +1%-of-GDP experiment: the stored run is a one-quarter impulse of about 0.046% of GDP, and the year-1 figure comes from a committed sustained run (macro #212)."
+        "FRB/US's hosted tool cannot run a sustained +1%-of-GDP experiment: the stored run is a one-quarter impulse of about 0.045% of GDP, and the year-1 figure comes from a committed sustained run (macro #212)."
       ],
       "cells": [
         {
@@ -798,8 +798,8 @@
           "short": {
             "tag": "Plausible",
             "why": "0.747 yr 1: inside both ranges",
-            "multiplier": "0.81 on impact; 0.75 year 1",
-            "gdp": "per 0.046% of GDP"
+            "multiplier": "0.83 on impact; 0.75 year 1",
+            "gdp": "per 0.045% of GDP"
           },
           "run": {
             "kind": "hosted",
@@ -817,13 +817,13 @@
             "adapter": "0.2.0",
             "label": "local run at frbus 162cfe6 (October 2026 LONGBASE), 2026-11-18, shocks from 2026Q3 (the first quarter after LONGBASE history)"
           },
-          "experiment": "Federal purchases +1% (about 0.046% of GDP), one quarter",
+          "experiment": "Federal purchases +1% (about 0.045% of GDP), one quarter",
           "gdp": {
             "value": 0.037,
-            "units": "% of GDP, peak, per 0.046% of GDP spent",
+            "units": "% of GDP, peak, per 0.045% of GDP spent",
             "when": "impact"
           },
-          "multiplier": "about 0.81 on impact; 0.747 in year 1 for a committed sustained run from 2026Q1 (inertial rule; us-frb-model results/benchmark_multipliers.md)",
+          "multiplier": "about 0.83 on impact; 0.747 in year 1 for a committed sustained run from 2026Q1 (inertial rule; us-frb-model results/benchmark_multipliers.md)",
           "inflation": {
             "value": 0.0008,
             "units": "pp, annual rate",
@@ -832,7 +832,7 @@
           },
           "verdict": "plausible",
           "verdict_label": "Inside CBO and Ramey ranges",
-          "reason": "Year-1 0.747 sits inside CBO's 0.45–1.82 (CBO's quarterly path converted to a calendar-year ratio) and Ramey's 0.6–1; the impact ratio is 0.81. It is about 0.2 below the 2010 FRB-US line in Coenen et al. (≈0.95, a chart reading for the same no-accommodation regime). The fiscal closure and the expectations mode do not explain that gap (us-frb-model docs/benchmarks.md).",
+          "reason": "Year-1 0.747 sits inside CBO's 0.45–1.82 (CBO's quarterly path converted to a calendar-year ratio) and Ramey's 0.6–1; the impact ratio is 0.83. It is about 0.2 below the 2010 FRB-US line in Coenen et al. (≈0.95, a chart reading for the same no-accommodation regime). The fiscal closure and the expectations mode do not explain that gap (us-frb-model docs/benchmarks.md).",
           "issue": "macro-212",
           "benchmark": null,
           "path": {

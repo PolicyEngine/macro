@@ -2,9 +2,11 @@
 
 One template for the seven models' pages (Overview, Methodology, Validation,
 Code, Paper): icon tile, kind line, name, the page's own lede, and a meta row
-(country, trust status, access, cadence). The trust chip links to the same
-glossary entry the Overview verdict uses, so the status reads identically on
-every tab. Idempotent: re-running replaces the strip in place.
+(country, trust status, access, cadence, pinned code). The trust chip links to
+the same glossary entry the Overview verdict uses, so the status reads
+identically on every tab. The pin chip is read from the ``[models]`` extra in
+``integration/pyproject.toml``, so a re-pin there makes ``--check`` fail until
+the pages are re-stamped. Idempotent: re-running replaces the strip in place.
 
     python3 tools/model_hero.py          # rewrite pages
     python3 tools/model_hero.py --check  # exit 1 if any page is stale
@@ -33,7 +35,47 @@ META_ICONS = {
     "hosted": '<path d="M7 18a4.5 4.5 0 0 1-.5-9 6 6 0 0 1 11.5 1.5A3.8 3.8 0 0 1 17.5 18H7Z"/>',
     "local": '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/>',
     "cadence": site_nav.ICONS["clock"],
+    # Lucide git-commit-horizontal
+    "pin": '<circle cx="12" cy="12" r="3"/><line x1="3" x2="9" y1="12" y2="12"/><line x1="15" x2="21" y1="12" y2="12"/>',
 }
+
+# Model key -> the GitHub repository the integration layer installs it from.
+# Only models pinned by commit in integration/pyproject.toml are listed: the
+# microsimulation is pinned by package version, OG-UK and DEFINE-UK are not
+# installed from that file, and a chip that guessed a version would be worse
+# than none.
+PIN_REPOS = {
+    "obr": "PolicyEngine/obr-macroeconomic-model",
+    "svar": "PolicyEngine/boe-var-model",
+    "frb-us": "PolicyEngine/us-frb-model",
+    "us-hank": "PolicyEngine/us-hank-model",
+}
+PYPROJECT = ROOT / "integration" / "pyproject.toml"
+PIN_RE = re.compile(r"git\+https://github\.com/([\w.-]+/[\w.-]+?)(?:\.git)?@([0-9a-f]{40})\b")
+
+
+def model_pins() -> dict[str, tuple[str, str]]:
+    """Model key -> (repository, 40-character commit) from pyproject.toml.
+
+    The one place a model commit is declared. Raises if a model in PIN_REPOS
+    has no commit pin there, so a move to a branch or a tag cannot leave the
+    pages showing a commit nothing installs.
+    """
+    declared = dict(PIN_RE.findall(PYPROJECT.read_text()))
+    missing = [repo for repo in PIN_REPOS.values() if repo not in declared]
+    if missing:
+        raise ValueError(f"{PYPROJECT.relative_to(ROOT)}: no commit pin for {', '.join(missing)}")
+    return {key: (repo, declared[repo]) for key, repo in PIN_REPOS.items()}
+
+
+def is_model_tab(rel: str) -> bool:
+    """The four tabs of a model, not its paper or report.
+
+    A paper or a report is a dated document built at the commit it names; the
+    pin chip states what this repository installs today, so it goes only on
+    the pages that are kept in step with the pin.
+    """
+    return not rel.startswith(("papers/", "reports/"))
 
 # kind line, country, (trust label, glossary anchor), access, cadence
 MODELS = {
@@ -95,6 +137,17 @@ def hero(rel: str, old: str) -> str:
         f'          <li><a class="mh-chip mh-trust" href="/glossary#{anchor}">{svg(META_ICONS["trust"], 14)}{trust}</a></li>',
         f'          <li class="mh-chip mh-{access}">{svg(META_ICONS[access], 14)}{access_label}</li>',
         f'          <li class="mh-chip">{svg(META_ICONS["cadence"], 14)}{cadence}</li>',
+    ]
+    if key in PIN_REPOS and is_model_tab(rel):
+        repo, commit = model_pins()[key]
+        short = commit[:7]
+        lines.append(
+            f'          <li><a class="mh-chip mh-pin" href="https://github.com/{repo}/tree/{commit}" '
+            f'title="Model code this site is pinned to: {repo.split("/")[1]} at commit {short} '
+            f'(integration/pyproject.toml)" aria-label="Model code pinned at commit {short}">'
+            f'{svg(META_ICONS["pin"], 14)}{short}</a></li>'
+        )
+    lines += [
         '        </ul>',
         '      </div>',
         '    </div>',
