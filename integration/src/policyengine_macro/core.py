@@ -477,6 +477,38 @@ def obr_shock(
     # channel, set for most levers.
     if attrs.get("mechanical_passthrough"):
         result["mechanical_passthrough"] = True
+    # obr #90: a shock to a line of public sector current expenditure whose
+    # imposed total was held is absorbed by the listing's subsidy (or
+    # procurement) residual, so the borrowing figures are not the effect of
+    # the spending change. nominal_consistent_legs names the nominal totals
+    # that moved with the shock instead. Absent on older pins, hence .get.
+    for key in ("subsidy_residual_warning", "procurement_residual_warning"):
+        if attrs.get(key):
+            result[key] = str(attrs[key])
+    if attrs.get("nominal_consistent_legs"):
+        result["nominal_consistent_legs"] = [
+            str(v) for v in attrs["nominal_consistent_legs"]
+        ]
+    # obr #95: which borrowing aggregate a shock moved. la_borrowing_identity
+    # is a bool and False is the informative value (local authority net
+    # borrowing was held on its data path, so LANB and GGNB did not respond),
+    # so it is forwarded whenever the model sets it. investment_total_warning
+    # says a public investment shock ran with the investment total PSNI held;
+    # procurement_offset_* that central government procurement moved to
+    # offset a change in government pay, so the central/local split of
+    # borrowing is the listing's. Absent on older pins, hence .get.
+    if attrs.get("la_borrowing_identity") is not None:
+        result["la_borrowing_identity"] = bool(attrs["la_borrowing_identity"])
+    for key in ("la_borrowing_note", "investment_total_warning",
+                "procurement_offset_note"):
+        if attrs.get(key):
+            result[key] = str(attrs[key])
+    offset = attrs.get("procurement_offset_m")
+    if isinstance(offset, dict) and offset:
+        result["procurement_offset_m"] = {
+            str(name): [round(float(v), 1) for v in list(values)[: len(rows)]]
+            for name, values in offset.items()
+        }
     # Not on an overlay run: the model's VAT note describes the default
     # ("no price channel"), which the overlay's own note supersedes.
     if attrs.get("transmission_note") and not price_passthrough:
@@ -1161,7 +1193,14 @@ HANK_SHOCK_KINDS = [
                  "Taylor rule; the policy rate itself is returned as the "
                  "series i and does not move one for one: about -13bp on "
                  "impact for -0.0025 at persistence 0.61 (pinned in "
-                 "us-hank-model #18), and it depends on the persistence. -0.0025 is a "
+                 "us-hank-model #18), and it depends on the persistence. At the "
+                 "default persistence of 0.9, above the two_asset sign "
+                 "change at about 0.75, a negative size (an easing) RAISES "
+                 "the policy rate on impact (about +25bp a quarter for "
+                 "-0.0025) while the ex-ante real rate falls and output "
+                 "rises; pass persistence of about 0.61 for a falling "
+                 "policy rate in two_asset (us-hank-model #22; one_asset "
+                 "changes sign lower, between 0.55 and 0.6). -0.0025 is a "
                  "25bp-per-quarter intercept shift, about 100bp annualised; "
                  "for a 25bp annualised intercept shift use -0.000625. "
                  "The r and pi responses are quarterly rates too: multiply "
@@ -4871,6 +4910,28 @@ def define_scenario(
                     "lending does not sum to zero), so its deltas are not "
                     "served as results. Re-solve the scenario upstream, or "
                     "pick another scenario from define_list_scenarios."
+                ),
+            }
+        # define-uk-model#36: BaselineParameterMismatch, also a ValueError.
+        # Matched by class name over the MRO, so it needs no adapter that
+        # has the class and still catches a subclass.
+        if any(
+            c.__name__ == "BaselineParameterMismatch" for c in type(e).__mro__
+        ):
+            return {
+                "model": "define-uk",
+                "available": False,
+                "refused": "baseline parameter mismatch",
+                "scenario": name,
+                "error": str(e),
+                "how_to_run": (
+                    f"{name!r} is a listed scenario, but its cached DEFINE-UK "
+                    "parameters differ from the Baseline's outside the policy "
+                    "levers, so its deltas would carry that difference as "
+                    "well as the policy and are not served as results. The "
+                    "cached run has to be redone upstream with a matched "
+                    "Baseline; meanwhile pick another scenario from "
+                    "define_list_scenarios."
                 ),
             }
         if isinstance(e, KeyError):

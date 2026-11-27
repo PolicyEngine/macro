@@ -243,3 +243,48 @@ def test_cli_define_table_prints_units_and_tolerates_gaps(monkeypatch):
     assert out.exit_code == 0, out.output
     assert "units: MtCO2e per QUARTER" in out.output
     assert "n/a" in out.output
+
+
+def test_baseline_parameter_mismatch_is_a_labelled_refusal(monkeypatch):
+    """define-uk-model#36. The class is matched by name, so the fake adapter
+    deliberately does not export it (an adapter pinned before #36 has no such
+    attribute), and a subclass must match as well."""
+    class BaselineParameterMismatch(ValueError):
+        pass
+
+    class Narrower(BaselineParameterMismatch):
+        pass
+
+    for exc in (BaselineParameterMismatch, Narrower):
+        def run(sc, name, exc=exc, **kw):
+            raise exc(
+                f"scenario {name!r}: its cached parameters differ from the "
+                "Baseline's outside the policy levers: alpha_X"
+            )
+
+        sc = _fake_define(monkeypatch, run)
+        assert not hasattr(sc, "BaselineParameterMismatch")
+        res = core.define_scenario("fossil_fuel_ban__no_forward_guidance")
+        assert res["available"] is False
+        assert res["refused"] == "baseline parameter mismatch"
+        assert res["scenario"] == "fossil_fuel_ban__no_forward_guidance"
+        assert "alpha_X" in res["error"]
+        assert "matched Baseline" in res["how_to_run"]
+        # Not the generic branch, whose hint is about a run with no departure.
+        assert "adapter refused" not in res["error"]
+        assert "define_uk.runner.run()" not in res["how_to_run"]
+        inc = core.define_scenario_incidence(
+            "fossil_fuel_ban__no_forward_guidance"
+        )
+        assert inc["refused"] == "baseline parameter mismatch"
+        assert "define_payload" not in inc["how_to_run"]
+
+
+def test_other_value_errors_keep_the_generic_refusal(monkeypatch):
+    def run(sc, name, **kw):
+        raise ValueError("no departure from baseline")
+
+    _fake_define(monkeypatch, run)
+    res = core.define_scenario("fossil_fuel_ban__no_forward_guidance")
+    assert "refused" not in res
+    assert res["error"].startswith("DEFINE-UK adapter refused")
