@@ -422,8 +422,8 @@ def hank_shock(
             QUARTERLY nominal Taylor rule, not in the policy rate: the rule
             also responds to the inflation the shock causes, so the quarterly
             policy rate falls only about 13bp on impact for -0.0025 at
-            persistence 0.61 (us-hank-model #18; not pinned at other
-            persistences, including the default 0.9). -0.0025 is
+            persistence 0.61 (us-hank-model #18) and RISES about 25bp at
+            the default 0.9 (us-hank-model #22; see persistence). -0.0025 is
             a 25bp-per-quarter intercept shift, about 100bp annualised; for a
             25bp annualised intercept shift use -0.000625. fiscal_spending is a level
             change in G (steady-state Y = 1, so 0.01 = 1% of GDP);
@@ -436,6 +436,10 @@ def hank_shock(
             default because the spending multiplier depends on it (impact
             multiplier 0.175 at 0.8, 0.075 at 0.9); quote it with any
             multiplier. Defaults to 0.9 for monetary and productivity.
+            At 0.9, above the two_asset sign change at about 0.75, a
+            negative monetary size (an easing) raises the policy rate i on
+            impact while the ex-ante real rate falls and output rises; use
+            about 0.61 for a falling policy rate (us-hank-model #22).
         horizon: Quarters reported (default 20 = 5 years; max 300).
         variant: 'two_asset' (default — the paper model) or 'one_asset' (fast
             no-capital variant: monetary/productivity only, no investment

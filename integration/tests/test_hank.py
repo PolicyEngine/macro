@@ -330,6 +330,25 @@ def test_monetary_and_tfp_units_are_stated_per_quarter_and_in_tfp_terms():
     assert "annualised" in doc
 
 
+def test_monetary_text_says_the_policy_rate_rises_at_the_default_persistence():
+    """us-hank-model #22: above a persistence of about 0.75 a two_asset
+    easing raises the policy rate on impact. The default is 0.9, so the
+    catalogue and the tool docstring must say so, and must not still call
+    the response at 0.9 unpinned."""
+    from policyengine_macro import mcp_server
+
+    assert core.HANK_DEFAULT_PERSISTENCE == 0.9
+    units = " ".join(core._HANK_KIND_INDEX["monetary"]["units"].split())
+    doc = " ".join(mcp_server.hank_shock.__doc__.split())
+    for text in (units, doc):
+        assert "us-hank-model #22" in text
+        assert "0.75" in text and "0.61" in text
+        assert "ex-ante real rate falls" in text
+    assert "RAISES the policy rate" in units
+    assert "raises the policy rate" in doc
+    assert "not pinned at other" not in doc
+
+
 def test_tfp_units_are_scoped_to_the_variant():
     """Z_ss is 0.468 in two_asset but 1 in one_asset (sequence_jacobian's
     one-asset example calibrates Z = 1), so "0.01 ~ 2.1% TFP" must not be

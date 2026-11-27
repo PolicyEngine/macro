@@ -678,5 +678,47 @@ def test_obr_shock_without_the_new_attrs_adds_no_keys(monkeypatch):
     monkeypatch.setattr(core, "_obr_window_end", lambda periods: "2025Q2")
     out = core.obr_shock("CGG", 1000.0, periods=2)
     for key in ("subsidy_residual_warning", "procurement_residual_warning",
-                "nominal_consistent_legs"):
+                "nominal_consistent_legs", "la_borrowing_identity",
+                "la_borrowing_note", "investment_total_warning",
+                "procurement_offset_note", "procurement_offset_m"):
         assert key not in out
+
+
+def test_obr_shock_forwards_the_borrowing_aggregate_labels(monkeypatch):
+    """obr #95 sets five more attrs saying which borrowing aggregate a shock
+    moved. la_borrowing_identity is a bool whose False is the informative
+    value, so it must travel when the model sets it either way."""
+    from policyengine_macro import core
+
+    frames = iter([
+        _obr_frame({
+            "la_borrowing_identity": True,
+            "la_borrowing_note": "LANB solved from l.526 without KGLAPC",
+            "procurement_offset_note": "CGP offsets pay (l.377)",
+            "procurement_offset_m": {"CGP": [-250.0, -251.04, -252.0],
+                                     "LAWS": [71.0, 71.0, 71.0]},
+        }),
+        _obr_frame({
+            "la_borrowing_identity": False,
+            "la_borrowing_note": "LANB held on its data path",
+            "investment_total_warning": "CGIPS: PSNI held (l.520)",
+        }),
+    ])
+    monkeypatch.setattr(core, "_import_obr", lambda: lambda **kw: next(frames))
+    monkeypatch.setattr(core, "_obr_window_end", lambda periods: "2025Q2")
+
+    nics = core.obr_shock("EMPNIC", 1000.0, periods=2)
+    assert nics["la_borrowing_identity"] is True
+    assert "KGLAPC" in nics["la_borrowing_note"]
+    assert "l.377" in nics["procurement_offset_note"]
+    # Trimmed to the reported rows, like the other per-quarter lists.
+    assert nics["procurement_offset_m"] == {"CGP": [-250.0, -251.0],
+                                            "LAWS": [71.0, 71.0]}
+    assert "investment_total_warning" not in nics
+
+    invest = core.obr_shock("CGIPS", 1000.0, periods=2)
+    assert invest["la_borrowing_identity"] is False
+    assert "data path" in invest["la_borrowing_note"]
+    assert "PSNI" in invest["investment_total_warning"]
+    assert "procurement_offset_note" not in invest
+    assert "procurement_offset_m" not in invest
